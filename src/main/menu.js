@@ -1,6 +1,7 @@
-'use strict';
-const path = require('path');
-const { app, Menu, shell } = require('electron');
+'use strict'
+
+const path = require('path')
+const { app, Menu, shell } = require('electron')
 const {
 	is,
 	appMenu,
@@ -8,12 +9,12 @@ const {
 	openUrlMenuItem,
 	openNewGitHubIssue,
 	debugInfo
-} = require('electron-util');
-const config = require('./config');
+} = require('electron-util')
+const config = require('common/config')
 
 const showPreferences = () => {
 	// Show the app's preferences here
-};
+}
 
 const helpSubmenu = [
 	openUrlMenuItem({
@@ -33,16 +34,16 @@ const helpSubmenu = [
 
 ---
 
-${debugInfo()}`;
+${debugInfo()}`
 
 			openNewGitHubIssue({
 				user: 'szTheory',
 				repo: 'exifcleaner',
 				body
-			});
+			})
 		}
 	}
-];
+]
 
 if (!is.macos) {
 	helpSubmenu.push(
@@ -53,20 +54,20 @@ if (!is.macos) {
 			icon: path.join(__dirname, 'static', 'icon.png'),
 			text: 'Created by szTheory'
 		})
-	);
+	)
 }
 
 const debugSubmenu = [
 	{
 		label: 'Show Settings',
 		click() {
-			config.openInEditor();
+			config.openInEditor()
 		}
 	},
 	{
 		label: 'Show App Data',
 		click() {
-			shell.openItem(app.getPath('userData'));
+			shell.openItem(app.getPath('userData'))
 		}
 	},
 	{
@@ -75,20 +76,20 @@ const debugSubmenu = [
 	{
 		label: 'Delete Settings',
 		click() {
-			config.clear();
-			app.relaunch();
-			app.quit();
+			config.clear()
+			app.relaunch()
+			app.quit()
 		}
 	},
 	{
 		label: 'Delete App Data',
 		click() {
-			shell.moveItemToTrash(app.getPath('userData'));
-			app.relaunch();
-			app.quit();
+			shell.moveItemToTrash(app.getPath('userData'))
+			app.relaunch()
+			app.quit()
 		}
 	}
-];
+]
 
 const macosTemplate = [
 	appMenu([
@@ -96,19 +97,19 @@ const macosTemplate = [
 			label: 'Preferences…',
 			accelerator: 'Command+,',
 			click() {
-				showPreferences();
+				showPreferences()
 			}
 		}
 	]),
 	{
 		role: 'fileMenu',
 		submenu: [
-			{
-				label: 'Custom'
-			},
-			{
-				type: 'separator'
-			},
+			// {
+			// 	label: 'Custom'
+			// },
+			// {
+			// 	type: 'separator'
+			// },
 			{
 				role: 'close'
 			}
@@ -127,7 +128,7 @@ const macosTemplate = [
 		role: 'help',
 		submenu: helpSubmenu
 	}
-];
+]
 
 // Linux and Windows
 const otherTemplate = [
@@ -144,7 +145,7 @@ const otherTemplate = [
 				label: 'Settings',
 				accelerator: 'Control+,',
 				click() {
-					showPreferences();
+					showPreferences()
 				}
 			},
 			{
@@ -165,15 +166,15 @@ const otherTemplate = [
 		role: 'help',
 		submenu: helpSubmenu
 	}
-];
+]
 
-const template = process.platform === 'darwin' ? macosTemplate : otherTemplate;
+const template = process.platform === 'darwin' ? macosTemplate : otherTemplate
 
 if (is.development) {
 	template.push({
 		label: 'Debug',
 		submenu: debugSubmenu
-	});
+	})
 }
 
-module.exports = Menu.buildFromTemplate(template);
+module.exports = Menu.buildFromTemplate(template)

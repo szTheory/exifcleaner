@@ -1,7 +1,7 @@
 {
 	"name": "exifcleaner",
 	"productName": "exifcleaner",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"description": "My kryptonian app",
 	"license": "MIT",
 	"repository": "szTheory/exifcleaner",
@@ -17,7 +17,9 @@
 		"start": "electron .",
 		"pack": "electron-builder --dir",
 		"dist": "electron-builder --macos --linux --windows",
-		"release": "np"
+		"release": "np",
+		"dev": "electron-webpack dev",
+		"compile": "electron-webpack"
 	},
 	"dependencies": {
 		"electron-context-menu": "^0.15.0",
@@ -26,13 +28,17 @@
 		"electron-unhandled": "^3.0.0",
 		"electron-updater": "^4.0.6",
 		"electron-util": "^0.13.0",
+		"source-map-support": "^0.5.16",
 		"spectre.css": "^0.5.8"
 	},
 	"devDependencies": {
 		"electron": "^7.1.1",
 		"electron-builder": "^21.2.0",
 		"np": "^5.0.3",
-		"xo": "^0.25.3"
+		"xo": "^0.25.3",
+		"electron-webpack": "^2.7.4",
+		"webpack": "^4.41.2",
+		"webpack-cli": "^3.3.10"
 	},
 	"xo": {
 		"envs": [

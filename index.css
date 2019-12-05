@@ -1,28 +1,3 @@
-/* html,
-body {
-	padding: 0;
-	margin: 0;
-	background: transparent;
-}
-
-/* Use OS default fonts */
-/* body {
-	font-family: -apple-system,
-		BlinkMacSystemFont,
-		'Segoe UI',
-		Roboto,
-		Oxygen-Sans,
-		Ubuntu,
-		Cantarell,
-		'Helvetica Neue',
-		sans-serif,
-		'Apple Color Emoji',
-		'Segoe UI Emoji',
-		'Segoe UI Symbol';
-	text-rendering: optimizeLegibility;
-	font-feature-settings: 'liga', 'clig', 'kern';
-} */
-
 .empty {
 	border: 1px dashed #3b4351;
 }
