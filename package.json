@@ -34,11 +34,13 @@
 	"devDependencies": {
 		"electron": "^7.1.1",
 		"electron-builder": "^21.2.0",
-		"np": "^5.0.3",
-		"xo": "^0.25.3",
 		"electron-webpack": "^2.7.4",
+		"node-sass": "^4.13.0",
+		"np": "^5.0.3",
+		"sass-loader": "^8.0.0",
 		"webpack": "^4.41.2",
-		"webpack-cli": "^3.3.10"
+		"webpack-cli": "^3.3.10",
+		"xo": "^0.25.3"
 	},
 	"xo": {
 		"envs": [
