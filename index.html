@@ -17,14 +17,14 @@
 		</header>
 
 		<main>
-			<div class="columns">
+			<div class="columns pt-2">
 				<div class="column col-10 col-sm-12 col-mx-auto">
 					<div class="empty">
 						<div class="empty-icon">
 							<i class="icon icon-photo icon-3x"></i>
 						</div>
 						<p class="empty-title h5">No images selected.</p>
-						<p class="empty-subtitle">Drag to the window or click below.</p>
+						<p class="empty-subtitle">Drag and drop them here or click below.</p>
 						<div class="empty-action">
 
 						</div>
@@ -35,7 +35,7 @@
 							<form class="form-horizontal">
 								<div class="form-group">
 									<div class="col-3">
-										<label class="form-label" for="select-images">Files</label>
+										<label class="form-label" for="select-images">File Select</label>
 									</div>
 
 									<div class="col-9">
@@ -51,15 +51,24 @@
 									<div class="col-9">
 										<div class="form-group">
 											<label class="form-switch">
-												<input type="checkbox" checked=""><i class="form-icon"></i> Automatically process
+												<input type="checkbox"><i class="form-icon"></i> Automatically process
 											</label>
 										</div>
 
 										<div class="form-group">
 											<label class="form-switch">
-												<input type="checkbox" checked=""><i class="form-icon"></i> Overwrite original
+												<input type="checkbox"><i class="form-icon"></i> Overwrite original
 											</label>
 										</div>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<div class="col-3">
+										<label class="form-label" for="filename-ending">Filename ending</label>
+									</div>
+									<div class="col-9">
+										<input class="form-input" type="text" id="filename-ending" value="_clean">
 									</div>
 								</div>
 							</form>

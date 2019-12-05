@@ -22,3 +22,7 @@ body {
 	text-rendering: optimizeLegibility;
 	font-feature-settings: 'liga', 'clig', 'kern';
 } */
+
+.empty {
+	border: 1px dashed #3b4351;
+}
