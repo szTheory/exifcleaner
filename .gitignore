@@ -3,6 +3,8 @@ node_modules
 yarn.lock
 /dist
 
+*.tgz
+
 # MORE ELECTRON
 .DS_Store
 .env

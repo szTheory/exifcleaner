@@ -1,18 +1,78 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>exifcleaner</title>
-		<link rel="stylesheet" href="index.css">
-	</head>
-	<body>
-		<div class="container">
-			<header>
-				<h1>exifcleaner</h1>
-				<p></p>
-			</header>
-			<section class="main"></section>
-			<footer></footer>
-		</div>
-	</body>
+
+<head>
+	<meta charset="utf-8">
+	<title>ExifCleaner</title>
+	<link rel="stylesheet" href="index.css">
+	<link rel="stylesheet" href="node_modules/spectre.css/dist/spectre.css">
+	<link rel="stylesheet" href="node_modules/spectre.css/dist/spectre-icons.css">
+	<script type="text/javascript" src="main.js" async defer></script>
+</head>
+
+<body>
+	<div class="container">
+		<header>
+			<!-- <h1>ExifCleaner</h1> -->
+		</header>
+
+		<main>
+			<div class="columns">
+				<div class="column col-10 col-sm-12 col-mx-auto">
+					<div class="empty">
+						<div class="empty-icon">
+							<i class="icon icon-photo icon-3x"></i>
+						</div>
+						<p class="empty-title h5">No images selected.</p>
+						<p class="empty-subtitle">Drag to the window or click below.</p>
+						<div class="empty-action">
+
+						</div>
+					</div>
+
+					<div class="columns">
+						<div class="column col-10 col-sm-12">
+							<form class="form-horizontal">
+								<div class="form-group">
+									<div class="col-3">
+										<label class="form-label" for="select-images">Files</label>
+									</div>
+
+									<div class="col-9">
+										<input class="form-input" id="select-images" type="file" multiple>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<div class="col-3">
+										<label class="form-label">Options</label>
+									</div>
+
+									<div class="col-9">
+										<div class="form-group">
+											<label class="form-switch">
+												<input type="checkbox" checked=""><i class="form-icon"></i> Automatically process
+											</label>
+										</div>
+
+										<div class="form-group">
+											<label class="form-switch">
+												<input type="checkbox" checked=""><i class="form-icon"></i> Overwrite original
+											</label>
+										</div>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<footer>
+
+		</footer>
+	</div>
+</body>
+
 </html>

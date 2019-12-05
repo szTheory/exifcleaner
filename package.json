@@ -25,7 +25,8 @@
 		"electron-store": "^5.1.0",
 		"electron-unhandled": "^3.0.0",
 		"electron-updater": "^4.0.6",
-		"electron-util": "^0.13.0"
+		"electron-util": "^0.13.0",
+		"spectre.css": "^0.5.8"
 	},
 	"devDependencies": {
 		"electron": "^7.1.1",
