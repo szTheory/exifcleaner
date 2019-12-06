@@ -2,7 +2,7 @@
 
 >Cross-platform desktop app to clean image metadata.
 
-![ExifCleaner Logo](static/icon.png | width=250)
+<img src="static/icon.png" height=250 alt="ExifCleaner Logo">
 
 ## Install
 
