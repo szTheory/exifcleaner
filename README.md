@@ -1,10 +1,12 @@
-# ExifCleaner
+# <img src="static/icon.png" height=27 alt="ExifCleaner Logo"> ExifCleaner
 
->Cross-platform desktop app to clean image metadata.
-
-<img src="static/icon.png" height=250 alt="ExifCleaner Logo">
+>Desktop app to clean image metadata.
 
 ## Install
+
+**Windows**
+
+[**Download**](https://github.com/szTheory/exifcleaner/releases/latest) the `.exe` file.
 
 *macOS 10.10+, Linux, and Windows 7+ are supported (64-bit only).*
 
@@ -18,12 +20,6 @@
 
 *The AppImage needs to be [made executable](http://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download.*
 
-**Windows**
-
-[**Download**](https://github.com/szTheory/exifcleaner/releases/latest) the `.exe` file.
-
-
----
 
 ## Links
 
