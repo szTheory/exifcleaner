@@ -1,9 +1,8 @@
 'use strict'
 
-const { addTableRow, updateRowWithExif, updateRowWithCleanerSpinner } = require("common/table")
+const { addTableRow, updateRowWithExif, updateRowWithCleanerSpinner } = require("./table")
 const exiftool = require('node-exiftool')
-const exiftoolBin = require('dist-exiftool')
-// const ep = new exiftool.ExiftoolProcess(exiftoolBin)
+const { exiftoolBinPath } = require('./binaries')
 
 async function addFiles({ files }) {
 	for (const file of files) {
@@ -40,10 +39,10 @@ async function addFile({ file }) {
 }
 
 async function removeExif({ filePath }) {
-	const ep = new exiftool.ExiftoolProcess(exiftoolBin)
+	const ep = new exiftool.ExiftoolProcess(exiftoolBinPath)
 	const exifData = ep
 		.open()
-		.then((pid) => console.log('Started exiftool process %s', pid))
+		// .then((pid) => console.log('Started exiftool process %s', pid))
 		.then(() => {
 			return ep.writeMetadata(filePath, { all: '' }, ['overwrite_original'])
 		}).catch(console.error)
@@ -62,10 +61,10 @@ function cleanExifData(exifHash) {
 }
 
 async function getExif({ filePath }) {
-	const ep = new exiftool.ExiftoolProcess(exiftoolBin)
+	const ep = new exiftool.ExiftoolProcess(exiftoolBinPath)
 	const exifData = ep
 		.open()
-		.then((pid) => console.log('Started exiftool process %s', pid))
+		// .then((pid) => console.log('Started exiftool process %s', pid))
 		.then(() => {
 			return ep.readMetadata(filePath, ['-File:all', '-ExifToolVersion', '-x FileSize', '-x SourceFile']).then((exifData) => {
 				const hash = exifData.data[0]

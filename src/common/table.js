@@ -1,7 +1,7 @@
 'use strict'
 
 const path = require('path')
-const { selectedFilesList } = require("common/selected_files")
+const { selectedFilesList } = require("./selected_files")
 
 function updateRowWithExif({ tdNode, exifData }) {
 	// td

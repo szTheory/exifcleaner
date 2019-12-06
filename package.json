@@ -1,22 +1,23 @@
 {
 	"name": "exifcleaner",
-	"productName": "exifcleaner",
+	"productName": "ExifCleaner",
 	"version": "1.0.0",
-	"description": "My kryptonian app",
+	"description": "Clean exif data from images",
 	"license": "MIT",
 	"repository": "szTheory/exifcleaner",
+	"main": "src/main/index.js",
 	"author": {
 		"name": "szTheory",
 		"email": "szTheory@users.noreply.github.com",
-		"url": "exifcleaner.app"
+		"url": "https://exifcleaner.app"
 	},
 	"scripts": {
 		"postinstall": "electron-builder install-app-deps",
 		"lint": "xo",
-		"test": "npm run lint",
+		"test": "yarn run lint",
 		"start": "electron .",
-		"pack": "electron-builder --dir",
-		"dist": "electron-builder --macos --linux --windows",
+		"pack": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
+		"dist": "yarn run compile && electron-builder --macos --linux --windows",
 		"release": "np",
 		"dev": "electron-webpack dev",
 		"compile": "electron-webpack"
@@ -81,6 +82,22 @@
 				"deb"
 			],
 			"category": "Network;Chat"
-		}
+		},
+		"extraResources": [
+			{
+				"from": ".resources/nix/bin",
+				"to": "bin",
+				"filter": [
+					"**/*"
+				]
+			},
+			{
+				"from": ".resources/win/bin",
+				"to": "bin",
+				"filter": [
+					"**/*"
+				]
+			}
+		]
 	}
 }

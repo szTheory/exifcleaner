@@ -1,8 +1,8 @@
 'use strict'
 
-const { addFiles } = require("common/add_files")
-const { hideEmptyPane } = require("common/empty_pane")
-const { showSelectedFilesPane, eraseSelectedFilesPane } = require("common/selected_files")
+const { addFiles } = require("./add_files")
+const { hideEmptyPane } = require("./empty_pane")
+const { showSelectedFilesPane, eraseSelectedFilesPane } = require("./selected_files")
 
 document.addEventListener('drop', (e) => {
 	e.preventDefault()

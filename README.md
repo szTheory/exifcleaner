@@ -1,4 +1,4 @@
-# exifcleaner
+# ExifCleaner
 
 > My kryptonian app
 
@@ -27,7 +27,7 @@
 
 ## Dev
 
-Built with [Electron](https://electronjs.org).
+Built with [Electron](https://electronjs.org). Uses [node-exiftool](https://www.npmjs.com/package/node-exiftool) as a wrapper for [Exiftool](https://exiftool.org/) binaries.
 
 ### Run
 

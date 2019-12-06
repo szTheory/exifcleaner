@@ -1,9 +1,9 @@
 'use strict';
 
 // electron-webpack HMR
-if (module.hot) {
-	module.hot.accept();
-}
+// if (is.development && module.hot) {
+// 	module.hot.accept();
+// }
 
 const path = require('path')
 const { app, BrowserWindow, Menu } = require('electron');
@@ -12,9 +12,10 @@ const { is } = require('electron-util')
 const unhandled = require('electron-unhandled')
 const debug = require('electron-debug')
 const contextMenu = require('electron-context-menu')
-const config = require('common/config')
+const config = require('../common/config')
 const menu = require('./menu')
 const packageJson = require('../../package.json')
+const url = require("url")
 
 unhandled()
 debug()
@@ -40,8 +41,8 @@ const createMainWindow = async () => {
 	const win = new BrowserWindow({
 		title: app.name,
 		show: false,
-		width: 400,
-		height: 318,
+		width: 580,
+		height: 312,
 		webPreferences: { nodeIntegration: true }
 	})
 
@@ -55,13 +56,10 @@ const createMainWindow = async () => {
 		mainWindow = undefined
 	});
 
-	// await win.loadFile(path.join(__dirname, '../../../.renderer-index-template.html'))
-
 	if (is.development) {
 		win.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`)
-	}
-	else {
-		win.loadURL(formatUrl({
+	} else {
+		win.loadURL(url.format({
 			pathname: path.join(__dirname, 'index.html'),
 			protocol: 'file',
 			slashes: true
