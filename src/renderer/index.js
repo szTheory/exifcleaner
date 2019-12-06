@@ -7,3 +7,4 @@ if (module.hot) {
 
 // const stye
 require('common/index.scss')
+require('common/drag')

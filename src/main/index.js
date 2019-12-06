@@ -40,8 +40,8 @@ const createMainWindow = async () => {
 	const win = new BrowserWindow({
 		title: app.name,
 		show: false,
-		width: 600,
-		height: 400,
+		width: 400,
+		height: 318,
 		webPreferences: { nodeIntegration: true }
 	})
 
@@ -58,7 +58,6 @@ const createMainWindow = async () => {
 	// await win.loadFile(path.join(__dirname, '../../../.renderer-index-template.html'))
 
 	if (is.development) {
-		console.log("+++++ DEV")
 		win.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`)
 	}
 	else {
@@ -100,7 +99,6 @@ app.on('activate', () => {
 });
 
 (async () => {
-	console.log("!!!! OKKKKK")
 	await app.whenReady()
 	Menu.setApplicationMenu(menu)
 	mainWindow = await createMainWindow()

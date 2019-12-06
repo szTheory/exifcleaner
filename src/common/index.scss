@@ -4,3 +4,19 @@
 .empty {
 	border: 1px dashed #3b4351;
 }
+
+#file-list tr td:first-child {
+	max-width: 20em;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#file-list tr td:nth-child(2) > div {
+	width: 100%;
+	height: 100%;
+}
+
+.card-body {
+	text-align: left;
+}
