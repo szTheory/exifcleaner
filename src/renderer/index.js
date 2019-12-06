@@ -6,6 +6,15 @@ if (is.development && module.hot) {
 	module.hot.accept();
 }
 
-// const stye
-require('../common/index.scss')
+// stylesheets
+require('../styles/index.scss')
+
+// app
 require('../common/drag')
+const { listenForDarkModeChanges } = require("./dark_mode")
+
+
+function init() {
+	listenForDarkModeChanges()
+}
+init()

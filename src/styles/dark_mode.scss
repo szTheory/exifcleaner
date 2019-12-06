@@ -1,0 +1,72 @@
+// "The dark theme baseline palette" from
+// https://material.io/design/color/dark-theme.html
+$primary-color: #BB86FC;
+$primary-variant-color: #3700B3;
+$secondary-color: #03DAC6;
+$background-color: #121212;
+$surface-color: #121212;
+$error-color: #CF6679;
+$on-primary-color: #000;
+$on-secondary-color: #000;
+$on-background-color: #FFF;
+$on-surface-color: #FFF;
+$on-error-color: #000;
+
+$text-high-emphasis-opacity: 87%;
+$text-medium-emphasis-opacity: 60%;
+$text-disabled-opacity: 38%;
+
+$outlined-container-disabled-percent-white: 12%;
+$content-disabled-percent-white: 38%;
+$filled-container-disabled-percent-white: 12%;
+
+$card-white-overlay-transparency: 16%;
+
+body.dark-mode {
+	background-color: $surface-color;
+	color: white;
+
+	#empty {
+		background-color: mix($surface-color, white, 100% - $card-white-overlay-transparency);
+		border: none;
+		color: white;
+		opacity: $text-high-emphasis-opacity;
+	}
+
+	table {
+		td, th {
+			border-color: mix($surface-color, white, 100% - $text-disabled-opacity);
+		}
+		th {
+			opacity: 100%;
+			font-weight: lighter;
+		}
+
+		tr:nth-of-type(odd) td {
+			background-color: mix($surface-color, white, 100% - 16%);
+		}
+		tr:nth-of-type(even) td {
+			background-color: mix($surface-color, white, 100% - 8%);
+		}
+
+		td {
+			& > *:not(.popover) {
+				opacity: $text-high-emphasis-opacity;
+				font-weight: lighter;
+			}
+		}
+
+		i {
+			display: none;
+		}
+	}
+
+	.card {
+		color: white;
+		background-color: mix($surface-color, white, 100% - $card-white-overlay-transparency);
+		opacity: $text-high-emphasis-opacity;
+		strong {
+			color: $primary-color;
+		}
+	}
+}

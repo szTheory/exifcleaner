@@ -7,7 +7,7 @@ if (is.development && module.hot) {
 }
 
 const path = require('path')
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 /// const {autoUpdater} = require('electron-updater')
 const unhandled = require('electron-unhandled')
 const debug = require('electron-debug')
@@ -16,6 +16,8 @@ const config = require('../common/config')
 const menu = require('./menu')
 const packageJson = require('../../package.json')
 const url = require("url")
+import { listenForDarkMode, autoSetDarkMode } from './dark_mode'
+import { DARK_MODE_ASK_MESSAGE_NAME } from '../renderer/dark_mode'
 
 unhandled()
 debug()
@@ -47,6 +49,7 @@ const createMainWindow = async () => {
 	})
 
 	win.on('ready-to-show', () => {
+		autoSetDarkMode({ win: win })
 		win.show()
 	});
 
@@ -65,6 +68,13 @@ const createMainWindow = async () => {
 			slashes: true
 		}))
 	}
+
+	ipcMain.on(DARK_MODE_ASK_MESSAGE_NAME, () => {
+		autoSetDarkMode({ win: win })
+	});
+
+	// dark mode
+	listenForDarkMode({ win: win })
 
 	return win
 }

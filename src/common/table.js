@@ -37,7 +37,7 @@ function updateRowWithExif({ tdNode, exifData }) {
 function buildExifString({ exifData }) {
 	let str = ""
 	for (let [key, value] of Object.entries(exifData)) {
-		str += key + ": " + "<strong>" + value + "</strong>" + "<br>"
+		str += key + " " + "<strong>" + value + "</strong>" + "<br>"
 	}
 	return str
 }
