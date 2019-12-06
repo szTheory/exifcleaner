@@ -36,7 +36,7 @@
 	},
 	"devDependencies": {
 		"electron": "^7.1.1",
-		"electron-builder": "^21.2.0",
+		"electron-builder": "^22.2.0",
 		"electron-webpack": "^2.7.4",
 		"node-sass": "^4.13.0",
 		"np": "^5.0.3",
