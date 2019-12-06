@@ -8,40 +8,35 @@ function updateRowWithExif({ tdNode, exifData }) {
 	tdNode.textContent = ""
 
 	// label
-	const label = Object.keys(exifData).length
+	const exifCount = Object.keys(exifData).length
+	const label = exifCount
 
 	// text
 	const textNode = document.createElement("div")
 	textNode.textContent = label
 	textNode.classList.add("popover", "popover-bottom")
 	tdNode.appendChild(textNode)
-	// popover container
-	const popoverContainerNode = document.createElement("div")
-	popoverContainerNode.classList.add("popover-container")
-	textNode.appendChild(popoverContainerNode)
-	// card
-	const cardNode = document.createElement("div")
-	cardNode.classList.add("card")
-	console.log(exifData);
-	popoverContainerNode.appendChild(cardNode)
-	// card body
-	const cardBodyNode = document.createElement("div")
-	cardBodyNode.classList.add("card-body")
-	cardBodyNode.innerHTML = buildExifString({ exifData: exifData })
-	cardNode.appendChild(cardBodyNode)
 
-	return new Promise(function (resolve, reject) {
-		console.log("**2");
-		resolve()
-	})
+	if (exifCount > 0) {
+		// popover container
+		const popoverContainerNode = document.createElement("div")
+		popoverContainerNode.classList.add("popover-container")
+		textNode.appendChild(popoverContainerNode)
+		// card
+		const cardNode = document.createElement("div")
+		cardNode.classList.add("card")
+		popoverContainerNode.appendChild(cardNode)
+		// card body
+		const cardBodyNode = document.createElement("div")
+		cardBodyNode.classList.add("card-body")
+		cardBodyNode.innerHTML = buildExifString({ exifData: exifData })
+		cardNode.appendChild(cardBodyNode)
+	}
 }
 
 function buildExifString({ exifData }) {
 	let str = ""
 	for (let [key, value] of Object.entries(exifData)) {
-		// if (key === "SourceFile") {
-		// 	continue
-		// }
 		str += key + ": " + "<strong>" + value + "</strong>" + "<br>"
 	}
 	return str

@@ -3,21 +3,12 @@
 const { addTableRow, updateRowWithExif, updateRowWithCleanerSpinner } = require("common/table")
 const exiftool = require('node-exiftool')
 const exiftoolBin = require('dist-exiftool')
-const ep = new exiftool.ExiftoolProcess(exiftoolBin)
+// const ep = new exiftool.ExiftoolProcess(exiftoolBin)
 
 async function addFiles({ files }) {
-	await ep
-		.open()
-		.then((pid) => console.log('Started exiftool process %s', pid))
-		.then(() => {
-			for (const file of files) {
-				addFile({ file: file })
-			}
-		}, (err) => {
-			console.error
-		})
-
-	ep.close()
+	for (const file of files) {
+		addFile({ file: file })
+	}
 }
 
 async function showExifBeforeClean({ trNode, filePath }) {
@@ -25,23 +16,14 @@ async function showExifBeforeClean({ trNode, filePath }) {
 	const exifData = await getExif({ filePath: filePath })
 
 	updateRowWithExif({ tdNode: tdBeforeNode, exifData: exifData })
-
-	return new Promise(function (resolve, reject) {
-		console.log("**1");
-		resolve()
-	})
 }
 
 async function showExifAfterClean({ trNode, filePath }) {
 	const tdAfterNode = trNode.querySelector("td:nth-child(3)")
 	const newExifData = await getExif({ filePath: filePath })
-	console.log(newExifData);
-	// updateRowWithExif({ tdNode: tdAfterNode, exifData: newExifData })
 
-	return new Promise(function (resolve, reject) {
-		console.log("**4");
-		resolve()
-	})
+	updateRowWithExif({ tdNode: tdAfterNode, exifData: newExifData })
+	return Promise.resolve()
 }
 
 async function addFile({ file }) {
@@ -51,36 +33,50 @@ async function addFile({ file }) {
 	const trNode = addTableRow({ filePath: filePath })
 
 	showExifBeforeClean({ trNode: trNode, filePath: filePath })
-		.then(() => updateRowWithCleanerSpinner({ trNode: trNode }))
-		.then(() => removeExif({ filePath: filePath }))
-		.then(() => showExifAfterClean({ trNode: trNode, filePath: filePath }))
-}
-
-async function removeExif({ filePath }) {
-	return ep
-		.writeMetadata(filePath, { all: '' }, ['overwrite_original'])
-		.then(console.log, console.error)
-		.then(console.log("**3"))
+		.then(() => { return updateRowWithCleanerSpinner({ trNode: trNode }) })
+		.then(() => { return removeExif({ filePath: filePath }) })
+		.then(() => { return showExifAfterClean({ trNode: trNode, filePath: filePath }) })
 		.catch(console.error)
 }
 
+async function removeExif({ filePath }) {
+	const ep = new exiftool.ExiftoolProcess(exiftoolBin)
+	const exifData = ep
+		.open()
+		.then((pid) => console.log('Started exiftool process %s', pid))
+		.then(() => {
+			return ep.writeMetadata(filePath, { all: '' }, ['overwrite_original'])
+		}).catch(console.error)
+
+	return Promise.resolve(exifData)
+}
+
 function cleanExifData(exifHash) {
-	// sourcefile is part of exiftools output, it's not metadata
+	// remove basic file info that is part of
+	// exiftools output, but not metadata
 	delete exifHash["SourceFile"]
+	delete exifHash["ImageSize"]
+	delete exifHash["Megapixels"]
+
 	return exifHash
 }
 
 async function getExif({ filePath }) {
-	console.log("++++");
-	return ep.readMetadata(filePath, ['-File:all', '-ExifToolVersion', '-x FileSize', '-x SourceFile']).then((exifData) => {
-		console.log("----");
-		console.log(exifData.data);
-		console.log("----");
-		const hash = exifData.data[0]
-		return cleanExifData(hash)
-	}, (err) => {
-		console.error
-	})
+	const ep = new exiftool.ExiftoolProcess(exiftoolBin)
+	const exifData = ep
+		.open()
+		.then((pid) => console.log('Started exiftool process %s', pid))
+		.then(() => {
+			return ep.readMetadata(filePath, ['-File:all', '-ExifToolVersion', '-x FileSize', '-x SourceFile']).then((exifData) => {
+				const hash = exifData.data[0]
+				return cleanExifData(hash)
+			}, (err) => {
+				console.error
+			})
+		})
+		.catch(console.error)
+
+	return Promise.resolve(exifData)
 }
 
 module.exports = {
