@@ -4,17 +4,20 @@
 
 ## Benefits
 
-* Free and open source
-* Windows, Mac, and Linux
 * Fast
-* Batch-processing
+* Drag & Drop
+* Free and open source (MIT)
+* Windows, Mac, and Linux
 * PNG, JPG, and TIFF support
+* Batch-processing
+* Multi-core support
 * Dark mode (automatic)
+* Automatic updates
 
 ## Downsides
 
-* Large executable size
-* Memory hog
+* Large executable size (Electron app)
+* Memory hog (Electron app)
 
 ---
 
