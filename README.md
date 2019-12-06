@@ -1,7 +1,8 @@
 # ExifCleaner
 
-> My kryptonian app
+>Cross-platform desktop app to clean image metadata.
 
+![ExifCleaner Logo](static/icon.png | width=250)
 
 ## Install
 
@@ -24,8 +25,14 @@
 
 ---
 
+## Links
 
-## Dev
+* [Official Website](https://exifcleaner.com)
+* [Issue Tracker](https://github.com/szTheory/exifcleaner/issues)
+
+---
+
+## Development
 
 Built with [Electron](https://electronjs.org). Uses [node-exiftool](https://www.npmjs.com/package/node-exiftool) as a wrapper for [Exiftool](https://exiftool.org/) binaries.
 
