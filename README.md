@@ -2,6 +2,22 @@
 
 >Desktop app to clean image metadata.
 
+## Benefits
+
+* Free and open source
+* Windows, Mac, and Linux
+* Fast
+* Batch-processing
+* PNG, JPG, and TIFF support
+* Dark mode (automatic)
+
+## Downsides
+
+* Large executable size
+* Memory hog
+
+---
+
 ## Install
 
 **Windows**
@@ -24,9 +40,8 @@
 ## Links
 
 * [Official Website](https://exifcleaner.com)
+* [Source Code](https://github.com/szTheory/exifcleaner/issues)
 * [Issue Tracker](https://github.com/szTheory/exifcleaner/issues)
-
----
 
 ## Development
 
