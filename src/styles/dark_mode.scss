@@ -28,7 +28,7 @@ body.dark-mode {
 
 	#empty {
 		background-color: mix($surface-color, white, 100% - $card-white-overlay-transparency);
-		border: none;
+		border: 1px solid mix($surface-color, white, 100% - $card-white-overlay-transparency);
 		color: white;
 		opacity: $text-high-emphasis-opacity;
 	}
