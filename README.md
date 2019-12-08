@@ -61,6 +61,7 @@ $ npm start
 
 ```
 $ npm run release
+$ npm run dist
 ```
 
-After Travis finishes building your app, open the release draft it created and click "Publish".
+Or instead of `npm run dist`, after Travis finishes building your app, open the release draft it created and click "Publish".
