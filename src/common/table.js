@@ -10,7 +10,7 @@ function updateRowWithExif ({ tdNode, exifData }) {
   const label = exifCount
 
   // text
-  const textNode = document.createElement('div')
+  const textNode = document.createElement('span')
   textNode.textContent = label
   textNode.classList.add('popover', 'popover-bottom')
   tdNode.appendChild(textNode)
