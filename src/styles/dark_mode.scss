@@ -50,10 +50,12 @@ body.dark-mode {
 		}
 
 		td {
-			& > span {
+			& > span,
+			& > div {
 				opacity: $text-high-emphasis-opacity;
 			}
-			& > span:not(.popover) {
+			& > span:not(.popover),
+			& > div:not(.popover) {
 				font-weight: lighter;
 			}
 		}
