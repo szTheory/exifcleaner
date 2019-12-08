@@ -4,7 +4,7 @@
 	"version": "1.0.0",
 	"description": "Clean exif data from images",
 	"license": "MIT",
-	"repository": "szTheory/exifcleaner",
+	"repository": "github:szTheory/exifcleaner",
 	"main": "src/main/index.js",
 	"author": {
 		"name": "szTheory",
