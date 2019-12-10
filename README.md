@@ -1,23 +1,23 @@
 # <img src="static/icon.png" height=27 alt="ExifCleaner Logo"> ExifCleaner
 
->Desktop app to clean image metadata.
+> Desktop app to clean image metadata.
 
 ## Benefits
 
-* Fast
-* Drag & Drop
-* Free and open source (MIT)
-* Windows, Mac, and Linux
-* PNG, JPG, and TIFF support
-* Batch-processing
-* Multi-core support
-* Dark mode (automatic)
-* Automatic updates
+- Fast
+- Drag & Drop
+- Free and open source (MIT)
+- Windows, Mac, and Linux
+- PNG, JPG, and TIFF support
+- Batch-processing
+- Multi-core support
+- Dark mode (automatic)
+- Automatic updates
 
 ## Downsides
 
-* Executable size `~190MB` (Electron app)
-* Memory usage `~120MB` (Electron app)
+- Executable size `~190MB` (Electron app)
+- Memory usage `~120MB` (Electron app)
 
 ---
 
@@ -27,7 +27,7 @@
 
 [**Download**](https://github.com/szTheory/exifcleaner/releases/latest) the `.exe` file.
 
-*macOS 10.10+, Linux, and Windows 7+ are supported (64-bit only).*
+_macOS 10.10+, Linux, and Windows 7+ are supported (64-bit only)._
 
 **macOS**
 
@@ -37,14 +37,13 @@
 
 [**Download**](https://github.com/szTheory/exifcleaner/releases/latest) the `.AppImage` or `.deb` file.
 
-*The AppImage needs to be [made executable](http://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download.*
-
+_The AppImage needs to be [made executable](http://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download._
 
 ## Links
 
-* [Official Website](https://exifcleaner.com)
-* [Source Code](https://github.com/szTheory/exifcleaner/issues)
-* [Issue Tracker](https://github.com/szTheory/exifcleaner/issues)
+- [Official Website](https://exifcleaner.com)
+- [Source Code](https://github.com/szTheory/exifcleaner/issues)
+- [Issue Tracker](https://github.com/szTheory/exifcleaner/issues)
 
 ## Development
 

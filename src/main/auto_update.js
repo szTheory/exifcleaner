@@ -5,7 +5,7 @@ import { logger } from "electron-log";
 const FOUR_HOURS = 1000 * 60 * 60 * 4;
 
 function setupLogging() {
-	autoUpdater.logger = logger;
+	autoUpdater.logger = require("electron-log");
 	autoUpdater.logger.transports.file.level = "info";
 }
 
