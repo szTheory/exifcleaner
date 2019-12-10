@@ -1,15 +1,15 @@
 // "The dark theme baseline palette" from
 // https://material.io/design/color/dark-theme.html
-$primary-color: #BB86FC;
-$primary-variant-color: #3700B3;
-$secondary-color: #03DAC6;
+$primary-color: #bb86fc;
+$primary-variant-color: #3700b3;
+$secondary-color: #03dac6;
 $background-color: #121212;
 $surface-color: #121212;
-$error-color: #CF6679;
+$error-color: #cf6679;
 $on-primary-color: #000;
 $on-secondary-color: #000;
-$on-background-color: #FFF;
-$on-surface-color: #FFF;
+$on-background-color: #fff;
+$on-surface-color: #fff;
 $on-error-color: #000;
 
 $text-high-emphasis-opacity: 87%;
@@ -22,19 +22,28 @@ $filled-container-disabled-percent-white: 12%;
 
 $card-white-overlay-transparency: 16%;
 
-body.dark-mode {
-	background-color: $surface-color;
-	color: white;
+// body.dark-mode {
+@media (prefers-color-scheme: dark) {
+	body {
+		background-color: $surface-color;
+		color: white;
+	}
 
 	#empty {
-		background-color: mix($surface-color, white, 100% - $card-white-overlay-transparency);
-		border: 1px solid mix($surface-color, white, 100% - $card-white-overlay-transparency);
+		background-color: mix(
+			$surface-color,
+			white,
+			100% - $card-white-overlay-transparency
+		);
+		border: 1px solid
+			mix($surface-color, white, 100% - $card-white-overlay-transparency);
 		color: white;
 		opacity: $text-high-emphasis-opacity;
 	}
 
 	table {
-		td, th {
+		td,
+		th {
 			border-color: mix($surface-color, white, 100% - $text-disabled-opacity);
 		}
 		th {
@@ -67,7 +76,11 @@ body.dark-mode {
 
 	.card {
 		color: white;
-		background-color: mix($surface-color, white, 100% - $card-white-overlay-transparency);
+		background-color: mix(
+			$surface-color,
+			white,
+			100% - $card-white-overlay-transparency
+		);
 		opacity: $text-high-emphasis-opacity;
 		strong {
 			color: $primary-color;

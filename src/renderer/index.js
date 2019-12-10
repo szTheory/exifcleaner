@@ -11,12 +11,6 @@ require("../styles/index.scss");
 
 // app
 require("../common/drag");
-const { listenForDarkModeChanges } = require("./dark_mode");
 
 // ERROR HANDLING
 unhandled();
-
-function init() {
-	listenForDarkModeChanges();
-}
-init();

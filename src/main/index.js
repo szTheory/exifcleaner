@@ -1,5 +1,5 @@
 // electron-webpack HMR for development
-const { is } = require("electron-util");
+import { is } from "electron-util";
 if (is.development && module.hot) {
 	module.hot.accept();
 }

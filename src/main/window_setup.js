@@ -1,7 +1,5 @@
 import { BrowserWindow, ipcMain, app } from "electron";
 import { is } from "electron-util";
-import { listenForDarkMode, autoSetDarkMode } from "./dark_mode";
-import { DARK_MODE_ASK_MESSAGE_NAME } from "../renderer/dark_mode";
 import { url } from "url";
 import { path } from "path";
 
@@ -16,23 +14,10 @@ function setupMainWindowClose({ win }) {
 	});
 }
 
-function setupMainWindowDarkMode({ win }) {
+function showWindowOnReady({ win }) {
 	win.on("ready-to-show", () => {
-		console.log("ready-to-show !!!");
-		autoSetDarkMode({ win: win });
 		win.show();
 	});
-
-	win.on("show", () => {
-		console.log("show....");
-		autoSetDarkMode({ win: win });
-	});
-
-	ipcMain.on(DARK_MODE_ASK_MESSAGE_NAME, () => {
-		autoSetDarkMode({ win: win });
-	});
-
-	listenForDarkMode({ win: win });
 }
 
 function mainWindowLoadUrl({ win }) {
@@ -58,6 +43,6 @@ export const createMainWindow = async function() {
 
 export const setupMainWindow = function({ win }) {
 	setupMainWindowClose({ win: win });
-	setupMainWindowDarkMode({ win: win });
+	showWindowOnReady({ win: win });
 	mainWindowLoadUrl({ win: win });
 };
