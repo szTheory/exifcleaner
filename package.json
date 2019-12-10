@@ -17,6 +17,7 @@
 		"test": "yarn run lint",
 		"start": "electron .",
 		"pack": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
+		"packmac": "yarn run compile && electron-builder --macos -c.mac.identity=null",
 		"dist": "yarn run compile && electron-builder --macos --linux --windows -p always",
 		"release": "np",
 		"dev": "electron-webpack dev",
