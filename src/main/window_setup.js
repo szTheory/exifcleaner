@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain, app } from "electron";
 import { is } from "electron-util";
-import { url } from "url";
-import { path } from "path";
+import url from "url";
+import path from "path";
 
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;
