@@ -18,5 +18,6 @@ export const listenForDarkMode = function({ win }) {
 };
 
 export const autoSetDarkMode = function({ win }) {
+	console.log("----- autoSetDarkMode");
 	win.webContents.send(DARK_MODE_MESSAGE_NAME, isDarkMode());
 };

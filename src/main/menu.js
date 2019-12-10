@@ -175,4 +175,10 @@ if (is.development) {
 	});
 }
 
-module.exports = Menu.buildFromTemplate(template);
+function buildMenu() {
+	return Menu.buildFromTemplate(template);
+}
+
+export const setupMenu = function() {
+	Menu.setApplicationMenu(buildMenu());
+};

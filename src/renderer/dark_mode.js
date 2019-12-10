@@ -5,6 +5,7 @@ export const DARK_MODE_ASK_MESSAGE_NAME = "ask-dark-mode";
 const DARK_MODE_CLASS_NAME = "dark-mode";
 
 function updateDarkMode({ isDarkMode }) {
+	console.log("++++++++++++ updateDarkMode. isDarkMode: " + isDarkMode);
 	const bodyElem = document.querySelector("body");
 	if (isDarkMode) {
 		bodyElem.classList.add(DARK_MODE_CLASS_NAME);
@@ -14,11 +15,13 @@ function updateDarkMode({ isDarkMode }) {
 }
 
 export const listenForDarkModeChanges = function() {
+	console.log("_________ listenForDarkModeChanges");
 	ipcRenderer.on(DARK_MODE_MESSAGE_NAME, (_event, isDarkMode) => {
+		console.log("ipcRenderer DARK_MODE_MESSAGE_NAME");
 		updateDarkMode({ isDarkMode: isDarkMode });
 	});
 
-	document.addEventListener("DOMContentLoaded", _event => {
-		ipcRenderer.send(DARK_MODE_ASK_MESSAGE_NAME);
-	});
+	// document.addEventListener("DOMContentLoaded", _event => {
+	// 	ipcRenderer.send(DARK_MODE_ASK_MESSAGE_NAME);
+	// });
 };
