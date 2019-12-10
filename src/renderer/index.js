@@ -1,9 +1,9 @@
-'use strict'
+const unhandled = require("electron-unhandled")
 
 // electron-webpack HMR
 const { is } = require('electron-util')
 if (is.development && module.hot) {
-  module.hot.accept()
+	module.hot.accept()
 }
 
 // stylesheets
@@ -13,7 +13,10 @@ require('../styles/index.scss')
 require('../common/drag')
 const { listenForDarkModeChanges } = require('./dark_mode')
 
-function init () {
-  listenForDarkModeChanges()
+// ERROR HANDLING
+unhandled()
+
+function init() {
+	listenForDarkModeChanges()
 }
 init()

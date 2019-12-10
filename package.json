@@ -35,7 +35,7 @@
 		"spectre.css": "^0.5.8"
 	},
 	"devDependencies": {
-		"electron": "^7.1.1",
+		"electron": "^7.1.4",
 		"electron-builder": "^22.2.0",
 		"electron-webpack": "^2.7.4",
 		"node-sass": "^4.13.0",
@@ -57,9 +57,12 @@
 		"releaseDraft": false
 	},
 	"build": {
-		"appId": "com.szTheory.exifcleaner",
+		"publish": {
+			"provider": "github"
+		},
+		"appId": "com.exifcleaner",
 		"mac": {
-			"category": "public.app-category.social-networking",
+			"category": "public.app-category.graphics-and-images",
 			"darkModeSupport": true
 		},
 		"dmg": {
