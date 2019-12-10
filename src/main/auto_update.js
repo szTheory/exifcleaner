@@ -1,17 +1,17 @@
 import { is } from "electron-util";
 import { autoUpdater } from "electron-updater";
+import { logger } from "electron-log";
 
 const FOUR_HOURS = 1000 * 60 * 60 * 4;
 
 function setupLogging() {
-	// LOGGING
-	autoUpdater.logger = require("electron-log");
+	autoUpdater.logger = logger;
 	autoUpdater.logger.transports.file.level = "info";
 }
 
 function checkPeriodically() {
 	setInterval(() => {
-		autoUpdater.checkForUpdates();
+		checkNow();
 	}, FOUR_HOURS);
 }
 
