@@ -1,6 +1,5 @@
 # ELECTRON/NODE
 node_modules
-yarn.lock
 /dist
 .env
 
