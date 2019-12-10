@@ -57,9 +57,14 @@
 		"releaseDraft": false
 	},
 	"build": {
-		"publish": {
-			"provider": "github"
-		},
+		"publish": [
+			{
+				"provider": "github",
+				"owner": "szTheory",
+				"repo": "exifcleaner",
+				"protocol": "https"
+			}
+		],
 		"appId": "com.exifcleaner",
 		"mac": {
 			"category": "public.app-category.graphics-and-images",
