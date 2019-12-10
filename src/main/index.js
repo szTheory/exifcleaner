@@ -12,7 +12,6 @@ const contextMenu = require("electron-context-menu");
 const menu = require("./menu");
 const packageJson = require("../../package.json");
 const url = require("url");
-import { setupAppCallbacks } from "./app_callbacks";
 import { setupAutoUpdate } from "./auto_update";
 import { listenForDarkMode, autoSetDarkMode } from "./dark_mode";
 import { DARK_MODE_ASK_MESSAGE_NAME } from "../renderer/dark_mode";
@@ -82,7 +81,27 @@ if (!app.requestSingleInstanceLock()) {
 	app.quit();
 }
 
-setupAppCallbacks();
+app.on("second-instance", () => {
+	if (mainWindow) {
+		if (mainWindow.isMinimized()) {
+			mainWindow.restore();
+		}
+
+		mainWindow.show();
+	}
+});
+
+app.on("window-all-closed", () => {
+	if (!is.macos) {
+		app.quit();
+	}
+});
+
+app.on("activate", () => {
+	if (!mainWindow) {
+		mainWindow = createMainWindow();
+	}
+});
 
 const setup = async () => {
 	await app.whenReady();

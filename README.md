@@ -42,7 +42,7 @@ _The AppImage needs to be [made executable](http://discourse.appimage.org/t/how-
 ## Links
 
 - [Official Website](https://exifcleaner.com)
-- [Source Code](https://github.com/szTheory/exifcleaner/issues)
+- [Source Code](https://github.com/szTheory/exifcleaner)
 - [Issue Tracker](https://github.com/szTheory/exifcleaner/issues)
 
 ## Development
