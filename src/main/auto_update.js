@@ -1,16 +1,18 @@
-import { is } from 'electron-util'
-import { autoUpdater } from 'electron-updater'
+import { is } from "electron-util";
+import { autoUpdater } from "electron-updater";
 
-const FOUR_HOURS = 1000 * 60 * 60 * 4
+const FOUR_HOURS = 1000 * 60 * 60 * 4;
 
-export const setupAutoUpdate = function () {
-	if (is.development) { return }
+export const setupAutoUpdate = function() {
+	if (is.development) {
+		return;
+	}
 
 	// periodically check
 	setInterval(() => {
-		autoUpdater.checkForUpdates()
-	}, FOUR_HOURS)
+		autoUpdater.checkForUpdates();
+	}, FOUR_HOURS);
 
 	// check now
-	autoUpdater.checkForUpdates()
-}
+	autoUpdater.checkForUpdates();
+};

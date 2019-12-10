@@ -13,7 +13,7 @@
 	},
 	"scripts": {
 		"postinstall": "electron-builder install-app-deps",
-		"lint": "standard",
+		"lint": "prettier --check 'src/**/*.js'",
 		"test": "yarn run lint",
 		"start": "electron .",
 		"pack": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
@@ -40,8 +40,8 @@
 		"electron-webpack": "^2.7.4",
 		"node-sass": "^4.13.0",
 		"np": "^5.0.3",
+		"prettier": "1.19.1",
 		"sass-loader": "^8.0.0",
-		"standard": "^14.3.1",
 		"webpack": "^4.41.2",
 		"webpack-cli": "^3.3.10",
 		"xo": "^0.25.3"
