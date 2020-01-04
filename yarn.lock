@@ -3223,10 +3223,10 @@ electron-webpack@^2.7.4:
     webpack-merge "^4.2.1"
     yargs "^13.2.4"
 
-electron@^7.1:
-  version "7.1.4"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-7.1.4.tgz#ea10b4b61a2456e893e7ad34d62705bbaca150c9"
-  integrity sha512-OcihtthS/C4aNKiQtVm7gAVGMgwYzAmqN6U8jdsGvpE2EXqX8tdcN6q150GDCmcUr6v2+PSoLQP181NuZUzxuA==
+electron@7.1.2:
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-7.1.2.tgz#d1726b9e50b29e97f5f12b52feb225ba87e0640f"
+  integrity sha512-7hjONYt2GlQfKuKgQrhhUL1P9lbGWLBfMUq+2QFU3yeLtCvM0ROfPJCRP4OF5pVp3KDyfFp4DtmhuVzAnxV3jA==
   dependencies:
     "@electron/get" "^1.0.1"
     "@types/node" "^12.0.12"
