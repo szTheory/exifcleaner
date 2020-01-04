@@ -2,6 +2,8 @@
 
 > Desktop app to clean image metadata.
 
+![ExifCleaner demo](https://user-images.githubusercontent.com/28652/71770980-f04e8b80-2f2b-11ea-90f1-4393ec57adc0.gif)
+
 ## Benefits
 
 - Fast
