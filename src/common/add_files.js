@@ -46,6 +46,29 @@ async function addFile({ file }) {
 		.catch(console.error);
 }
 
+// The heart of the app, removing exif data from the image.
+// This uses the Perl binary "exiftool" from .resources
+// TODO: ensure process is close after we're done working
+// with it. I ran into some issues with auto-cleanup when
+// I first built the app (when parallelizing for multiple image
+// drag and drop, I think), so just got it working to start.
+// But it should be easy enough to fix. Here's the relevant
+// section from node-exiftool docs, from
+// https://www.npmjs.com/package/node-exiftool
+//
+// Opening and Closing
+//
+// After creating an instance of ExiftoolProcess, it must be opened. When finished working with it, it should be closed, when -stay_open False will be written to its stdin to exit the process.
+//
+// const exiftool = require('node-exiftool')
+// const ep = new exiftool.ExiftoolProcess()
+//
+// ep
+//   .open()
+//   // read and write metadata operations
+//   .then(() => ep.close())
+//   .then(() => console.log('Closed exiftool'))
+//   .catch(console.error)
 async function removeExif({ filePath }) {
 	const ep = new exiftool.ExiftoolProcess(exiftoolBinPath);
 	const exifData = ep
