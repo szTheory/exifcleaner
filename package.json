@@ -34,6 +34,7 @@
 		"electron-util": "^0.13.0",
 		"js-yaml": "^3.13.1",
 		"node-exiftool": "^2.3.0",
+		"serialize-javascript": "^2.1.1",
 		"source-map-support": "^0.5.16",
 		"spectre.css": "^0.5.8"
 	},
