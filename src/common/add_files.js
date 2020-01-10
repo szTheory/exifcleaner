@@ -46,6 +46,16 @@ async function addFile({ file }) {
 		.catch(console.error);
 }
 
+function cleanExifData(exifHash) {
+	// remove basic file info that is part of
+	// exiftools output, but not metadata
+	delete exifHash.SourceFile;
+	delete exifHash.ImageSize;
+	delete exifHash.Megapixels;
+
+	return exifHash;
+}
+
 // The heart of the app, removing exif data from the image.
 // This uses the Perl binary "exiftool" from .resources
 // TODO: ensure process is close after we're done working
@@ -82,16 +92,8 @@ async function removeExif({ filePath }) {
 	return Promise.resolve(exifData);
 }
 
-function cleanExifData(exifHash) {
-	// remove basic file info that is part of
-	// exiftools output, but not metadata
-	delete exifHash.SourceFile;
-	delete exifHash.ImageSize;
-	delete exifHash.Megapixels;
-
-	return exifHash;
-}
-
+// Read the exif data using the exiftool bin.
+// This should also have the perl processes cleaned up after.
 async function getExif({ filePath }) {
 	const ep = new exiftool.ExiftoolProcess(exiftoolBinPath);
 	const exifData = ep
