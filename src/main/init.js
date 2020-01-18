@@ -28,7 +28,9 @@ const init = function({ win }) {
 	setupDevTools();
 	setupContextMenu();
 	setupUserModelId();
-	setupAutoUpdate();
+	// Disable auto update for now. Code signing is a pain in
+	// the butt and I don't want to pay Microsoft and Apple for it.
+	// setupAutoUpdate();
 	setupApp({ win: win });
 };
 
