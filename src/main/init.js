@@ -3,7 +3,7 @@ const unhandled = require("electron-unhandled");
 const debug = require("electron-debug");
 const contextMenu = require("electron-context-menu");
 const packageJson = require("../../package.json");
-const { setupAutoUpdate } = require("./auto_update");
+// const { setupAutoUpdate } = require("./auto_update");
 const { setupApp } = require("./app_setup");
 
 function setupErrorHandling() {

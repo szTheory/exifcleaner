@@ -12,16 +12,30 @@ async function addFiles({ files }) {
 	}
 }
 
+function newExifToolProcess() {
+	return new exiftool.ExiftoolProcess(exiftoolBinPath);
+}
+
 async function showExifBeforeClean({ trNode, filePath }) {
 	const tdBeforeNode = trNode.querySelector("td:nth-child(2)");
-	const exifData = await getExif({ filePath: filePath });
+	const ep = newExifToolProcess();
+	const exifData = await getExif({ ep: ep, filePath: filePath }).then(val => {
+		ep.close();
+		return val;
+	});
 
 	updateRowWithExif({ tdNode: tdBeforeNode, exifData: exifData });
 }
 
 async function showExifAfterClean({ trNode, filePath }) {
 	const tdAfterNode = trNode.querySelector("td:nth-child(3)");
-	const newExifData = await getExif({ filePath: filePath });
+	const ep = newExifToolProcess();
+	const newExifData = await getExif({ ep: ep, filePath: filePath }).then(
+		val => {
+			ep.close();
+			return val;
+		}
+	);
 
 	updateRowWithExif({ tdNode: tdAfterNode, exifData: newExifData });
 	return Promise.resolve();
@@ -38,7 +52,11 @@ async function addFile({ file }) {
 			return updateRowWithCleanerSpinner({ trNode: trNode });
 		})
 		.then(() => {
-			return removeExif({ filePath: filePath });
+			const ep = newExifToolProcess();
+			return removeExif({ ep: ep, filePath: filePath }).then(val => {
+				ep.close();
+				return val;
+			});
 		})
 		.then(() => {
 			return showExifAfterClean({ trNode: trNode, filePath: filePath });
@@ -68,7 +86,9 @@ function cleanExifData(exifHash) {
 //
 // Opening and Closing
 //
-// After creating an instance of ExiftoolProcess, it must be opened. When finished working with it, it should be closed, when -stay_open False will be written to its stdin to exit the process.
+// After creating an instance of ExiftoolProcess, it must be opened.
+// When finished working with it, it should be closed,
+// when -stay_open False will be written to its stdin to exit the process.
 //
 // const exiftool = require('node-exiftool')
 // const ep = new exiftool.ExiftoolProcess()
@@ -79,8 +99,7 @@ function cleanExifData(exifHash) {
 //   .then(() => ep.close())
 //   .then(() => console.log('Closed exiftool'))
 //   .catch(console.error)
-async function removeExif({ filePath }) {
-	const ep = new exiftool.ExiftoolProcess(exiftoolBinPath);
+async function removeExif({ ep, filePath }) {
 	const exifData = ep
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))
@@ -89,13 +108,12 @@ async function removeExif({ filePath }) {
 		})
 		.catch(console.error);
 
-	return Promise.resolve(exifData);
+	return exifData;
 }
 
 // Read the exif data using the exiftool bin.
 // This should also have the perl processes cleaned up after.
-async function getExif({ filePath }) {
-	const ep = new exiftool.ExiftoolProcess(exiftoolBinPath);
+async function getExif({ ep, filePath }) {
 	const exifData = ep
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))
@@ -119,7 +137,7 @@ async function getExif({ filePath }) {
 		})
 		.catch(console.error);
 
-	return Promise.resolve(exifData);
+	return exifData;
 }
 
 module.exports = {
