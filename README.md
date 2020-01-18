@@ -14,7 +14,6 @@
 - Batch-processing
 - Multi-core support
 - Dark mode (automatic)
-- Automatic updates
 
 ## Downsides
 
