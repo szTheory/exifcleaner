@@ -55,7 +55,7 @@ Built with [Electron](https://electronjs.org). Uses [node-exiftool](https://www.
 
 ```
 $ npm install
-$ npm start
+$ npm run dev #this command is set up to give you HMR in dev
 ```
 
 ### Publish

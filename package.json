@@ -5,8 +5,7 @@
 	"description": "Clean exif data from images",
 	"license": "MIT",
 	"repository": "github:szTheory/exifcleaner",
-	"type": "module",
-	"main": "src/main/entrypoint.js",
+	"main": "src/main/index.js",
 	"author": {
 		"name": "szTheory",
 		"email": "szTheory@users.noreply.github.com",
@@ -33,7 +32,6 @@
 		"electron-unhandled": "^3.0.0",
 		"electron-updater": "^4.2.0",
 		"electron-util": "^0.13.0",
-		"esm": "^3.2.25",
 		"js-yaml": "^3.13.1",
 		"node-exiftool": "^2.3.0",
 		"serialize-javascript": "^2.1.1",
@@ -41,7 +39,7 @@
 		"spectre.css": "^0.5.8"
 	},
 	"devDependencies": {
-		"electron": "7.1.8",
+		"electron": "7.1.9",
 		"electron-builder": "^22.2.0",
 		"electron-webpack": "^2.7.4",
 		"node-sass": "^4.13.0",

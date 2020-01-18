@@ -1,6 +1,6 @@
-import { app } from "electron";
-import { is } from "electron-util";
-import { createMainWindow } from "./window_setup";
+const { app } = require("electron");
+const { is } = require("electron-util");
+const { createMainWindow } = require("./window_setup");
 
 function preventMultipleAppInstances() {
 	if (!app.requestSingleInstanceLock()) {
@@ -35,9 +35,13 @@ function createWindowOnActivate({ win }) {
 	});
 }
 
-export const setupApp = function({ win }) {
+const setupApp = function({ win }) {
 	preventMultipleAppInstances();
 	openMinimizedIfAlreadyExists({ win: win });
 	quitOnWindowsAllClosed();
 	createWindowOnActivate({ win: win });
+};
+
+module.exports = {
+	setupApp
 };

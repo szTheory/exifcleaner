@@ -1,6 +1,6 @@
-import { is } from "electron-util";
-import { autoUpdater } from "electron-updater";
-import logger from "electron-log";
+const { is } = require("electron-util");
+const { autoUpdater } = require("electron-updater");
+const logger = require("electron-log");
 
 const FOUR_HOURS = 1000 * 60 * 60 * 4;
 
@@ -19,7 +19,7 @@ function checkNow() {
 	autoUpdater.checkForUpdates();
 }
 
-export const setupAutoUpdate = function() {
+const setupAutoUpdate = function() {
 	if (is.development) {
 		return;
 	}
@@ -27,4 +27,8 @@ export const setupAutoUpdate = function() {
 	setupLogging();
 	checkPeriodically();
 	checkNow();
+};
+
+module.exports = {
+	setupAutoUpdate
 };

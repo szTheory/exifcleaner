@@ -1,10 +1,10 @@
-import { app } from "electron";
+const { app } = require("electron");
 const unhandled = require("electron-unhandled");
 const debug = require("electron-debug");
 const contextMenu = require("electron-context-menu");
 const packageJson = require("../../package.json");
-import { setupAutoUpdate } from "./auto_update";
-import { setupApp } from "./app_setup";
+const { setupAutoUpdate } = require("./auto_update");
+const { setupApp } = require("./app_setup");
 
 function setupErrorHandling() {
 	unhandled();
@@ -23,11 +23,15 @@ function setupUserModelId() {
 	app.setAppUserModelId(packageJson.build.appId);
 }
 
-export const init = function({ win }) {
+const init = function({ win }) {
 	setupErrorHandling();
 	setupDevTools();
 	setupContextMenu();
 	setupUserModelId();
 	setupAutoUpdate();
 	setupApp({ win: win });
+};
+
+module.exports = {
+	init
 };

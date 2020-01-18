@@ -180,6 +180,10 @@ function buildMenu() {
 	return Menu.buildFromTemplate(template);
 }
 
-export const setupMenu = function() {
+const setupMenu = function() {
 	Menu.setApplicationMenu(buildMenu());
+};
+
+module.exports = {
+	setupMenu
 };
