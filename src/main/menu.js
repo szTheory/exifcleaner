@@ -17,7 +17,7 @@ const showPreferences = () => {
 const helpSubmenu = [
 	openUrlMenuItem({
 		label: "Website",
-		url: "https://github.com/szTheory/exifcleaner"
+		url: "https://exifcleaner.com"
 	}),
 	openUrlMenuItem({
 		label: "Source Code",
@@ -91,13 +91,14 @@ const debugSubmenu = [
 
 const macosTemplate = [
 	appMenu([
-		{
-			label: "Preferences…",
-			accelerator: "Command+,",
-			click() {
-				showPreferences();
-			}
-		}
+		// No preferences menu for now
+		// {
+		// 	label: "Preferences…",
+		// 	accelerator: "Command+,",
+		// 	click() {
+		// 		showPreferences();
+		// 	}
+		// }
 	]),
 	{
 		role: "fileMenu",
@@ -133,22 +134,22 @@ const otherTemplate = [
 	{
 		role: "fileMenu",
 		submenu: [
-			{
-				label: "Custom"
-			},
-			{
-				type: "separator"
-			},
-			{
-				label: "Settings",
-				accelerator: "Control+,",
-				click() {
-					showPreferences();
-				}
-			},
-			{
-				type: "separator"
-			},
+			// {
+			// 	label: "Custom"
+			// },
+			// {
+			// 	type: "separator"
+			// },
+			// {
+			// 	label: "Settings",
+			// 	accelerator: "Control+,",
+			// 	click() {
+			// 		showPreferences();
+			// 	}
+			// },
+			// {
+			// 	type: "separator"
+			// },
 			{
 				role: "quit"
 			}
