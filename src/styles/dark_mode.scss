@@ -59,6 +59,12 @@ $card-white-overlay-transparency: 16%;
 		}
 
 		td {
+			i {
+				font-weight: lighter;
+				opacity: 40%;
+				// display: none !important;
+			}
+
 			& > span,
 			& > div {
 				opacity: $text-high-emphasis-opacity;
@@ -67,10 +73,6 @@ $card-white-overlay-transparency: 16%;
 			& > div:not(.popover) {
 				// font-weight: lighter;
 			}
-		}
-
-		i {
-			display: none;
 		}
 	}
 
