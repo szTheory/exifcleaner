@@ -21,9 +21,7 @@ function openMinimizedIfAlreadyExists({ win }) {
 
 function quitOnWindowsAllClosed() {
 	app.on("window-all-closed", () => {
-		if (!is.macos) {
-			app.quit();
-		}
+		app.quit();
 	});
 }
 
