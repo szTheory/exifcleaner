@@ -1,7 +1,7 @@
 {
 	"name": "exifcleaner",
 	"productName": "ExifCleaner",
-	"version": "3.0.0",
+	"version": "3.1.0",
 	"description": "Clean exif data from images",
 	"license": "MIT",
 	"repository": "github:szTheory/exifcleaner",
