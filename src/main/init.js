@@ -25,7 +25,7 @@ function setupUserModelId() {
 
 const init = function({ win }) {
 	setupErrorHandling();
-	setupDevTools();
+	// setupDevTools();
 	setupContextMenu();
 	setupUserModelId();
 	// Disable auto update for now. Code signing is a pain in

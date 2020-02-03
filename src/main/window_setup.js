@@ -48,7 +48,9 @@ const createMainWindow = async function() {
 		title: app.name,
 		show: false,
 		width: DEFAULT_WINDOW_WIDTH,
-		height: DEFAULT_WINDOW_HEIGHT,
+		height: DEFAULT_WINDOW_HEIGHT + 25,
+		minWidth: DEFAULT_WINDOW_WIDTH,
+		minHeight: DEFAULT_WINDOW_HEIGHT + 25,
 		webPreferences: { nodeIntegration: true }
 	});
 };
