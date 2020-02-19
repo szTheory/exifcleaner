@@ -11,6 +11,7 @@
 - Free and open source (MIT)
 - Windows, Mac, and Linux
 - PNG, JPG, and TIFF support
+- Also works for video files such as MP4
 - Batch-processing
 - Multi-core support
 - Dark mode (automatic)
