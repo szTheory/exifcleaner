@@ -1,6 +1,6 @@
 # <img src="static/icon.png" height=27 alt="ExifCleaner Logo"> ExifCleaner
 
-> Desktop app to clean image and video metadata.
+> Desktop app to clean metadata from images, videos, PDFs, and other files.
 
 ![ExifCleaner demo](https://user-images.githubusercontent.com/28652/71770980-f04e8b80-2f2b-11ea-90f1-4393ec57adc0.gif)
 
@@ -10,8 +10,9 @@
 - Drag & Drop
 - Free and open source (MIT)
 - Windows, Mac, and Linux
-- PNG, JPG, and TIFF support
-- Also works for video files such as MP4
+- Supports popular image formats such as PNG, JPG, and GIF
+- Supports popular video formats such as M4A, MOV, and MP4
+- Supports PDF documents
 - Batch-processing
 - Multi-core support
 - Dark mode (automatic)
