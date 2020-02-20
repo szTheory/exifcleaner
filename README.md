@@ -10,7 +10,7 @@
 - Drag & Drop
 - Free and open source (MIT)
 - Windows, Mac, and Linux
-- Supports popular image formats such as PNG, JPG, and GIF
+- Supports popular image formats such as PNG, JPG, GIF, and TIFF
 - Supports popular video formats such as M4A, MOV, and MP4
 - Supports PDF documents
 - Batch-processing
