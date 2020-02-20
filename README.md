@@ -1,6 +1,6 @@
 # <img src="static/icon.png" height=27 alt="ExifCleaner Logo"> ExifCleaner
 
-> Desktop app to clean image metadata.
+> Desktop app to clean image and video metadata.
 
 ![ExifCleaner demo](https://user-images.githubusercontent.com/28652/71770980-f04e8b80-2f2b-11ea-90f1-4393ec57adc0.gif)
 
