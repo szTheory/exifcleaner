@@ -1,4 +1,5 @@
 # <img src="static/icon.png" height=27 alt="ExifCleaner Logo"> ExifCleaner
+![Version](https://img.shields.io/github/v/release/szTheory/exifcleaner) ![Total Downloads](https://img.shields.io/github/downloads/szTheory/exifcleaner/total)
 
 > Desktop app to clean metadata from images, videos, PDFs, and other files.
 
