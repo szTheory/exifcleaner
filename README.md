@@ -111,7 +111,7 @@ Below is a full list of supported file types that ExifCleaner will remove metada
 
 Built with [Electron](https://electronjs.org). Uses [node-exiftool](https://www.npmjs.com/package/node-exiftool) as a wrapper for [Exiftool](https://exiftool.org/) binaries.
 
-### Run in dev mode
+### Run the app in dev mode
 
 Clone the repository and cd into the directory.
 
@@ -136,7 +136,9 @@ $ npm run dev
 
 This app is mostly feature complete. I want to keep it simple and not add a bunch of bloat to it. And I want to avoid release churn. That said, there are a couple small features that might be worth adding. And there are a few minor bugs or points of cleanup that would be worth polishing. If you'd like to help check out the [Issue Tracker](https://github.com/szTheory/exifcleaner/issues) which contains an exhaustive list of known issues. Just pick one and submit a Pull Request or leave a comment and I can provide guidance or help if you need it. Make sure to test the app out to see if it still works though. There isn't much going on this app so it should be easy enough to do. I might add some automated tests later on to help with this. For now it's just been me working on the app so manual testing has worked out fine.
 
-### Publish a new release
+### Publishing a new release
+
+This section is really for my own reference when publishing a new release.
 
 ```
 $ npm run release
