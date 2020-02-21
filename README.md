@@ -17,31 +17,22 @@
 - Batch-processing
 - Multi-core support
 - Dark mode (automatic)
+- No automatic updates or network traffic
 
 ## Downsides
 
 - Executable size `~190MB` (Electron app)
 - Memory usage `~120MB` (Electron app)
 
----
-
 ## Install
 
-**Windows**
+Linux, macOS 10.10+, and Windows 7+ are supported (64-bit only).
 
-[**Download**](https://github.com/szTheory/exifcleaner/releases/latest) the `.exe` file.
+* **Linux**: [Download the .AppImage or .deb file](https://github.com/szTheory/exifcleaner/releases/latest)
+* **Windows**: [Download the .exe file](https://github.com/szTheory/exifcleaner/releases/latest)
+* **macOS**: [Download the .dmg file](https://github.com/szTheory/exifcleaner/releases/latest)
 
-_macOS 10.10+, Linux, and Windows 7+ are supported (64-bit only)._
-
-**macOS**
-
-[**Download**](https://github.com/szTheory/exifcleaner/releases/latest) the `.dmg` file.
-
-**Linux**
-
-[**Download**](https://github.com/szTheory/exifcleaner/releases/latest) the `.AppImage` or `.deb` file.
-
-_The AppImage needs to be [made executable](http://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download._
+For Linux, The AppImage needs to be [made executable](http://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download.
 
 ## Links
 
