@@ -17,6 +17,8 @@
 		"test": "yarn run lint",
 		"start": "electron .",
 		"pack": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
+		"packwin": "yarn run compile && electron-builder --windows",
+		"packlinux": "yarn run compile && electron-builder --linux",
 		"packmac": "yarn run compile && electron-builder --macos -c.mac.identity=null",
 		"dist": "yarn run compile && electron-builder --macos --linux --windows -p always",
 		"release": "np",
@@ -24,7 +26,6 @@
 		"compile": "electron-webpack"
 	},
 	"dependencies": {
-		"dist-exiftool": "^10.53.0",
 		"electron-context-menu": "^0.15.0",
 		"electron-debug": "^3.0.0",
 		"electron-log": "^4.0.0",
@@ -42,7 +43,7 @@
 		"electron": "7.1.9",
 		"electron-builder": "^22.2.0",
 		"electron-webpack": "^2.7.4",
-		"node-sass": "^4.13.0",
+		"node-sass": "^4.13.1",
 		"np": "^5.0.3",
 		"prettier": "1.19.1",
 		"sass-loader": "^8.0.0",
