@@ -107,6 +107,12 @@ Below is a full list of supported file types that ExifCleaner will remove metada
 * **X3F** – Sigma/Foveon RAW
 * **XMP** – Extensible Metadata Platform sidecar file
 
+## Known Issues
+
+>Some antivirus software has been known to cause problems for the Windows version of ExifTool. Norton Antivirus may delete ExifTool when it is run, Windows Defender may slow down launching of ExifTool or hang it altogether, and Bitdefender Antivirus may block ExifTool from writing files. Presumably this is due to the way the ExifTool package for Windows works -- it unpacks executable files into a temporary directory and runs from there, which apparently may be seen as a threat by antivirus software. A work-around is to add ExifTool to the exclusion list of the antivirus software.
+
+Source: "Known Issues" section from the [official ExifTools website](https://exiftool.org/)
+
 ## Development
 
 Built with [Electron](https://electronjs.org). Uses [node-exiftool](https://www.npmjs.com/package/node-exiftool) as a wrapper for [Exiftool](https://exiftool.org/) binaries.

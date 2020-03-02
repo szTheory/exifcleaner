@@ -104,7 +104,10 @@ async function removeExif({ ep, filePath }) {
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))
 		.then(() => {
-			return ep.writeMetadata(filePath, { all: "" }, ["overwrite_original"]);
+			return ep.writeMetadata(filePath, { all: "" }, [
+				"-charset filename=UTF8",
+				"overwrite_original"
+			]);
 		})
 		.catch(console.error);
 
@@ -120,6 +123,7 @@ async function getExif({ ep, filePath }) {
 		.then(() => {
 			return ep
 				.readMetadata(filePath, [
+					"-charset filename=UTF8",
 					"-File:all",
 					"-ExifToolVersion",
 					"-x FileSize",
