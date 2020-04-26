@@ -13,7 +13,6 @@ function getDevBinariesPath() {
 function getProdBinariesPath() {
 	const platform = getPlatform();
 
-	console.log(`platform: ${platform}`);
 	switch (platform) {
 		case WIN:
 		case MAC:
