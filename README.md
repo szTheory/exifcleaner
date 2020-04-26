@@ -123,13 +123,13 @@ $ cd exifcleaner
 Next, install the NPM package dependencies.
 
 ```bash
-$ npm install
+$ yarn install
 ```
 
 Finally, launch the application. This supports Hot Module Reload (HMR) so you will automatically see your changes every time you save a file.
 
 ```bash
-$ npm run dev
+$ yarn run dev
 ```
 
 ### Contributing
@@ -141,8 +141,8 @@ This app is mostly feature complete. I want to keep it simple and not add a bunc
 This section is really for my own reference when publishing a new release.
 
 ```
-$ npm run release
-$ npm run dist
+$ yarn run release
+$ yarn run dist
 ```
 
-Or instead of `npm run dist`, after Travis finishes building your app, open the release draft it created and click "Publish".
+Or instead of `yarn run dist`, after Travis finishes building your app, open the release draft it created and click "Publish".

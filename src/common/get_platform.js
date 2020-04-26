@@ -1,17 +1,23 @@
 import { platform } from "os";
 
-export default () => {
-	switch (platform()) {
+export const NIX = "nix";
+export const MAC = "mac";
+export const WIN = "win";
+
+export function getPlatform() {
+	const currentPlatform = platform();
+
+	switch (currentPlatform) {
 		case "aix":
 		case "freebsd":
 		case "linux":
 		case "openbsd":
 		case "android":
-			return "nix";
-		case "darwin":
 		case "sunos":
-			return "nix";
+			return NIX;
+		case "darwin":
+			return MAC;
 		case "win32":
-			return "win";
+			return WIN;
 	}
-};
+}
