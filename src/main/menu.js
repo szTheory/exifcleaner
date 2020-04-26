@@ -14,7 +14,7 @@ const showPreferences = () => {
 	// Show the app's preferences here
 };
 
-const helpSubmenu = [
+let helpSubmenu = [
 	openUrlMenuItem({
 		label: "Website",
 		url: "https://exifcleaner.com"
@@ -43,14 +43,23 @@ ${debugInfo()}`;
 	}
 ];
 
+function aboutMenuIconPath() {
+	if (is.linux) {
+		return path.join(__dirname, "../../exifcleaner.png");
+	} else {
+		return path.join(__dirname, "static", "icon.png");
+	}
+}
+
 if (!is.macos) {
 	helpSubmenu.push(
 		{
 			type: "separator"
 		},
 		aboutMenuItem({
-			icon: path.join(__dirname, "static", "icon.png"),
-			text: "Created by szTheory"
+			website: "https://exifcleaner.com",
+			icon: aboutMenuIconPath(),
+			copyright: "Copyright © szTheory"
 		})
 	);
 }

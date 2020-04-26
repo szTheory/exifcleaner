@@ -3063,10 +3063,15 @@ electron-is-accelerator@^0.1.0:
   resolved "https://registry.yarnpkg.com/electron-is-accelerator/-/electron-is-accelerator-0.1.2.tgz#509e510c26a56b55e17f863a4b04e111846ab27b"
   integrity sha1-UJ5RDCala1Xhf4Y6SwThEYRqsns=
 
-electron-is-dev@^1.0.1, electron-is-dev@^1.1.0:
+electron-is-dev@^1.0.1:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-1.1.0.tgz#b15a2a600bdc48a51a857d460e05f15b19a2522c"
   integrity sha512-Z1qA/1oHNowGtSBIcWk0pcLEqYT/j+13xUw/MYOrBUOL4X7VN0i0KCTf5SqyvMPmW5pSPKbo28wkxMxzZ20YnQ==
+
+electron-is-dev@^1.1.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-1.2.0.tgz#2e5cea0a1b3ccf1c86f577cee77363ef55deb05e"
+  integrity sha512-R1oD5gMBPS7PVU8gJwH6CtT0e6VSoD0+SzSnYpNm+dBkcijgA+K7VAMHDfnRq/lkKPZArpzplTW6jfiMYosdzw==
 
 electron-localshortcut@^3.1.0:
   version "3.2.1"
@@ -3132,10 +3137,10 @@ electron-unhandled@^3.0.0:
     ensure-error "^2.0.0"
     lodash.debounce "^4.0.8"
 
-electron-util@^0.13.0:
-  version "0.13.0"
-  resolved "https://registry.yarnpkg.com/electron-util/-/electron-util-0.13.0.tgz#bce9032ab07cab3bc3448451f2a48a766ef51cce"
-  integrity sha512-3jpvw72quwKMI5fBSE+9oQvtcBmjLZZq5wlOuUujEbV6gRD2Vzrfqmiu0PSwO7+ki7E6xsnrWHg85vMJ/rL/GA==
+electron-util@^0.14.0:
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/electron-util/-/electron-util-0.14.1.tgz#047095c9ac76582612e7e496b0b9c70b73e9ca6c"
+  integrity sha512-MvwYywBZ+8P3pSILIEuWHVcykxsaRZOE3iSfHZibfDem/lEK5L1V9UfykmCJJBVL2voJM0o+LdjfuKxtH5kjOQ==
   dependencies:
     electron-is-dev "^1.1.0"
     new-github-issue-url "^0.2.1"

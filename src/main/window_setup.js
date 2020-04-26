@@ -44,7 +44,7 @@ function mainWindowLoadUrl({ win }) {
 }
 
 const createMainWindow = async function() {
-	return new BrowserWindow({
+	let options = {
 		title: app.name,
 		show: false,
 		width: DEFAULT_WINDOW_WIDTH,
@@ -52,7 +52,15 @@ const createMainWindow = async function() {
 		minWidth: DEFAULT_WINDOW_WIDTH,
 		minHeight: DEFAULT_WINDOW_HEIGHT + 25,
 		webPreferences: { nodeIntegration: true }
-	});
+	};
+
+	if (is.linux) {
+		options = Object.assign({}, options, {
+			icon: path.join(__dirname, "../../exifcleaner.png")
+		});
+	}
+
+	return new BrowserWindow(options);
 };
 
 const setupMainWindow = function({ win }) {
