@@ -11,7 +11,7 @@ const { createMainWindow, setupMainWindow } = require("./window_setup");
 
 // Maintain reference to window to
 // prevent it from being garbage collected
-var win;
+var win = null;
 
 async function setup() {
 	init({ win: win });

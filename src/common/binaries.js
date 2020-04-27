@@ -3,11 +3,29 @@ import { remote } from "electron";
 import { getPlatform, NIX, MAC, WIN } from "./get_platform";
 
 const IS_PROD = process.env.NODE_ENV === "production";
-const root = process.cwd();
 const { isPackaged, getAppPath } = remote.app;
 
+function devBinaryPlatformSubpath() {
+	const platform = getPlatform();
+
+	switch (platform) {
+		case WIN:
+			return "win";
+		case WIN:
+		case MAC:
+			return "nix";
+		default:
+			throw `Could not determine dev Exiftool binary subpath for platform ${platform}`;
+	}
+}
+
 function getDevBinariesPath() {
-	path.join(root, "./.resources", getPlatform(), "./bin");
+	return path.join(
+		process.cwd(),
+		"./.resources",
+		devBinaryPlatformSubpath(),
+		"./bin"
+	);
 }
 
 function getProdBinariesPath() {
