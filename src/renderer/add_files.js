@@ -4,11 +4,11 @@ const {
 	updateRowWithCleanerSpinner
 } = require("./table");
 const exiftool = require("node-exiftool");
-const { exiftoolBinPath } = require("./binaries");
+const { exiftoolBinPath } = require("../common/binaries");
 
-async function addFiles({ files }) {
-	for (const file of files) {
-		addFile({ file: file });
+async function addFiles({ filePaths }) {
+	for (const filePath of filePaths) {
+		addFile({ filePath: filePath });
 	}
 }
 
@@ -41,9 +41,7 @@ async function showExifAfterClean({ trNode, filePath }) {
 	return Promise.resolve();
 }
 
-async function addFile({ file }) {
-	const filePath = file.path;
-
+async function addFile({ filePath }) {
 	// add row
 	const trNode = addTableRow({ filePath: filePath });
 

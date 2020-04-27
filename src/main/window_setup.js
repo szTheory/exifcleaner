@@ -1,4 +1,4 @@
-const { BrowserWindow, ipcMain, app } = require("electron");
+const { BrowserWindow, app } = require("electron");
 const { is } = require("electron-util");
 const url = require("url");
 const path = require("path");
@@ -11,6 +11,10 @@ function setupMainWindowClose({ win }) {
 		// Dereference the window
 		// For multiple windows store them in an array
 		win = null;
+
+		// Close application on window quit
+		// (for Mac File -> Close Window)
+		app.quit();
 	});
 }
 

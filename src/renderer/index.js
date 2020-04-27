@@ -10,7 +10,8 @@ if (is.development && module.hot) {
 require("../styles/index.scss");
 
 // app
-require("../common/drag");
+require("../renderer/drag");
+require("../renderer/menu_select_files");
 
 // ERROR HANDLING
 unhandled();

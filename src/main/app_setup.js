@@ -1,5 +1,4 @@
 const { app } = require("electron");
-const { is } = require("electron-util");
 const { createMainWindow } = require("./window_setup");
 
 function preventMultipleAppInstances() {
