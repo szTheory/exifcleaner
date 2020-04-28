@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": true,
-		"noImplicitAny": false,
+		// "noImplicitAny": false,
 		"outDir": "./dist/",
 		"resolveJsonModule": true
 	},

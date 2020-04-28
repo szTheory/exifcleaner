@@ -1,4 +1,4 @@
-const { app } = require("electron");
+import { app, BrowserWindow } from "electron";
 const unhandled = require("electron-unhandled");
 const contextMenu = require("electron-context-menu");
 const packageJson = require("../../package.json");
@@ -17,13 +17,9 @@ function setupUserModelId() {
 	app.setAppUserModelId(packageJson.build.appId);
 }
 
-const init = function({ win }) {
+export function init({ win }: { win: BrowserWindow }) {
 	setupErrorHandling();
 	setupContextMenu();
 	setupUserModelId();
 	setupApp({ win: win });
-};
-
-module.exports = {
-	init
-};
+}

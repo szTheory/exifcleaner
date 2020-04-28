@@ -1,3 +1,5 @@
+import { BrowserWindow } from "electron";
+
 const { app } = require("electron");
 const { createMainWindow } = require("./window_setup");
 
@@ -7,7 +9,7 @@ function preventMultipleAppInstances() {
 	}
 }
 
-function openMinimizedIfAlreadyExists({ win }) {
+function openMinimizedIfAlreadyExists({ win }: { win: BrowserWindow }) {
 	app.on("second-instance", () => {
 		if (win) {
 			if (win.isMinimized()) {
@@ -24,7 +26,7 @@ function quitOnWindowsAllClosed() {
 	});
 }
 
-function createWindowOnActivate({ win }) {
+function createWindowOnActivate({ win }: { win: BrowserWindow }) {
 	app.on("activate", () => {
 		if (!win) {
 			win = createMainWindow();
@@ -32,13 +34,9 @@ function createWindowOnActivate({ win }) {
 	});
 }
 
-const setupApp = function({ win }) {
+export function setupApp({ win }: { win: BrowserWindow }) {
 	preventMultipleAppInstances();
 	openMinimizedIfAlreadyExists({ win: win });
 	quitOnWindowsAllClosed();
 	createWindowOnActivate({ win: win });
-};
-
-module.exports = {
-	setupApp
-};
+}

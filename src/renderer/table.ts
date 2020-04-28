@@ -1,7 +1,13 @@
 const path = require("path");
 const { selectedFilesList } = require("./selected_files");
 
-function updateRowWithExif({ tdNode, exifData }) {
+export function updateRowWithExif({
+	tdNode,
+	exifData
+}: {
+	tdNode: HTMLTableDataCellElement;
+	exifData: any;
+}) {
 	// td
 	tdNode.textContent = "";
 
@@ -32,7 +38,7 @@ function updateRowWithExif({ tdNode, exifData }) {
 	}
 }
 
-function buildExifString({ exifData }) {
+function buildExifString({ exifData }: { exifData: any }) {
 	let str = "";
 	for (const [key, value] of Object.entries(exifData)) {
 		str += key + " " + "<strong>" + value + "</strong>" + "<br>";
@@ -40,16 +46,24 @@ function buildExifString({ exifData }) {
 	return str;
 }
 
-function updateRowWithCleanerSpinner({ trNode }) {
+export function updateRowWithCleanerSpinner({
+	trNode
+}: {
+	trNode: HTMLTableRowElement;
+}) {
 	// td
 	const tdNode = trNode.querySelector("td:nth-child(3)");
+	if (!tdNode) {
+		throw `Could not find table data cell element for row ${trNode}`;
+	}
+
 	// spinner
 	const spinnerNode = document.createElement("div");
 	spinnerNode.classList.add("loading");
 	tdNode.appendChild(spinnerNode);
 }
 
-function addTableRow({ filePath }) {
+export function addTableRow({ filePath }: { filePath: any }) {
 	const label = path.basename(filePath);
 
 	// tr node
@@ -94,9 +108,3 @@ function addTableRow({ filePath }) {
 
 	return trNode;
 }
-
-module.exports = {
-	addTableRow,
-	updateRowWithExif,
-	updateRowWithCleanerSpinner
-};

@@ -13,15 +13,7 @@ const GITHUB_PROJECTNAME = "exifcleaner";
 const SOURCE_CODE_URL = `https://github.com/${GITHUB_USERNAME}/${GITHUB_PROJECTNAME}`;
 const COPYRIGHT_TEXT = `Copyright © ${GITHUB_USERNAME}`;
 
-function aboutMenuIconPath() {
-	if (is.linux) {
-		return path.join(__dirname, "../../exifcleaner.png");
-	} else {
-		return path.join(__dirname, "static", "icon.png");
-	}
-}
-
-function buildHelpSubmenu() {
+export function buildHelpSubmenu() {
 	let submenu = [
 		openUrlMenuItem({
 			label: "Website",
@@ -67,6 +59,10 @@ function buildHelpSubmenu() {
 	return submenu;
 }
 
-module.exports = {
-	buildHelpSubmenu
-};
+function aboutMenuIconPath() {
+	if (is.linux) {
+		return path.join(__dirname, "../../exifcleaner.png");
+	} else {
+		return path.join(__dirname, "static", "icon.png");
+	}
+}

@@ -1,6 +1,6 @@
 const Store = require("electron-store");
 
-module.exports = new Store({
+export const store = new Store({
 	defaults: {
 		favoriteAnimal: "🦄"
 	}

@@ -18,7 +18,7 @@ document.addEventListener("dragover", event => {
 	event.stopPropagation();
 });
 
-function filePaths({ fileList }) {
+function filePaths({ fileList }: { fileList: FileList }) {
 	let paths = [];
 	for (const file of fileList) {
 		paths.push(file.path);

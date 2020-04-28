@@ -1,7 +1,7 @@
-// electron-webpack HMR for development
-// const is = require("electron-util");
 import { is } from "electron-util";
+import { BrowserWindow } from "electron";
 
+// electron-webpack HMR for development
 if (is.development && module.hot) {
 	module.hot.accept();
 }
@@ -13,7 +13,7 @@ const { createMainWindow, setupMainWindow } = require("./window_setup");
 
 // Maintain reference to window to
 // prevent it from being garbage collected
-var win = null;
+var win: BrowserWindow;
 
 async function setup() {
 	init({ win: win });

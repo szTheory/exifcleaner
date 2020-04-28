@@ -1,4 +1,4 @@
-const { BrowserWindow, app } = require("electron");
+import { BrowserWindow, app } from "electron";
 const { is } = require("electron-util");
 const url = require("url");
 const path = require("path");
@@ -6,19 +6,15 @@ const path = require("path");
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;
 
-function setupMainWindowClose({ win }) {
+function setupMainWindowClose({ win }: { win: BrowserWindow }) {
 	win.on("closed", () => {
-		// Dereference the window
-		// For multiple windows store them in an array
-		win = null;
-
 		// Close application on window quit
 		// (for Mac File -> Close Window)
 		app.quit();
 	});
 }
 
-function showWindowOnReady({ win }) {
+function showWindowOnReady({ win }: { win: BrowserWindow }) {
 	win.once("ready-to-show", () => {
 		win.show();
 	});
@@ -41,13 +37,13 @@ function urlForLoad() {
 	}
 }
 
-function mainWindowLoadUrl({ win }) {
+function mainWindowLoadUrl({ win }: { win: BrowserWindow }) {
 	const url = urlForLoad();
 
 	win.loadURL(url);
 }
 
-const createMainWindow = async function() {
+export async function createMainWindow() {
 	let options = {
 		title: app.name,
 		show: false,
@@ -65,15 +61,10 @@ const createMainWindow = async function() {
 	}
 
 	return new BrowserWindow(options);
-};
+}
 
-const setupMainWindow = function({ win }) {
+export function setupMainWindow({ win }: { win: BrowserWindow }) {
 	setupMainWindowClose({ win: win });
 	showWindowOnReady({ win: win });
 	mainWindowLoadUrl({ win: win });
-};
-
-module.exports = {
-	createMainWindow,
-	setupMainWindow
-};
+}

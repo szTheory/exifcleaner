@@ -5,7 +5,7 @@ const {
 	eraseSelectedFilesPane
 } = require("./selected_files");
 
-export function selectFiles({ filePaths }) {
+export function selectFiles({ filePaths }: { filePaths: string[] }) {
 	if (filePaths.length > 0) {
 		hideEmptyPane();
 		eraseSelectedFilesPane();

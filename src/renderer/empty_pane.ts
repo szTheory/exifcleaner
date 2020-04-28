@@ -1,4 +1,4 @@
-function hideEmptyPane() {
+export function hideEmptyPane() {
 	const pane = emptyPane();
 	if (!pane) {
 		throw "Could not find empty pane to hide";
@@ -10,7 +10,3 @@ function hideEmptyPane() {
 function emptyPane() {
 	return document.getElementById("empty");
 }
-
-module.exports = {
-	hideEmptyPane
-};

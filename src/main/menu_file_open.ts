@@ -1,8 +1,12 @@
-const { dialog } = require("electron");
+import { dialog, BrowserWindow, WebContents } from "electron";
 
-const EVENT_FILE_OPEN_ADD_FILES = "file-open-add-files";
+export const EVENT_FILE_OPEN_ADD_FILES = "file-open-add-files";
 
-function fileOpenClick(event, focusedWindow, focusedWebContents) {
+export function fileOpenClick(
+	event: KeyboardEvent,
+	focusedWindow: BrowserWindow,
+	focusedWebContents: WebContents
+) {
 	dialog
 		.showOpenDialog(focusedWindow, {
 			properties: ["openFile", "multiSelections"]
@@ -17,16 +21,10 @@ function fileOpenClick(event, focusedWindow, focusedWebContents) {
 		});
 }
 
-function fileMenuOpenItem() {
+export function fileMenuOpenItem() {
 	return {
 		label: "Open…",
 		accelerator: "CmdOrCtrl+O",
 		click: fileOpenClick
 	};
 }
-
-module.exports = {
-	fileOpenClick,
-	fileMenuOpenItem,
-	EVENT_FILE_OPEN_ADD_FILES
-};
