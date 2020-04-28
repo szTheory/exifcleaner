@@ -33,7 +33,7 @@ Linux, macOS 10.10+, and Windows 7+ are supported (64-bit only).
 - **macOS**: [Download the .dmg file](https://github.com/szTheory/exifcleaner/releases/latest)
 - **Windows**: [Download the .exe file](https://github.com/szTheory/exifcleaner/releases/latest)
 
-For Linux, The AppImage needs to be [made executable](http://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download.
+For Linux, The AppImage needs to be [made executable](https://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download.
 
 ## Links
 
