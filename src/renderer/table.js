@@ -11,7 +11,7 @@ function updateRowWithExif({ tdNode, exifData }) {
 
 	// text
 	const textNode = document.createElement("div");
-	textNode.textContent = label;
+	textNode.textContent = label.toString();
 	textNode.classList.add("popover", "popover-bottom");
 	tdNode.appendChild(textNode);
 
@@ -86,7 +86,11 @@ function addTableRow({ filePath }) {
 	trNode.appendChild(tdNumExifAfterNode);
 
 	// add tr to list
-	selectedFilesList().appendChild(trNode);
+	const list = selectedFilesList();
+	if (!list) {
+		throw "Error while retrieving selected files list element";
+	}
+	list.appendChild(trNode);
 
 	return trNode;
 }

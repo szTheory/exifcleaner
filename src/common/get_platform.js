@@ -19,5 +19,7 @@ export function getPlatform() {
 			return MAC;
 		case "win32":
 			return WIN;
+		default:
+			throw `Did not recognize platform ${currentPlatform}`;
 	}
 }

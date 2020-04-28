@@ -2,7 +2,7 @@ const { buildHelpSubmenu } = require("./menu_help");
 const { fileMenuOpenItem } = require("./menu_file_open");
 
 // Linux and Windows
-function buildDefaultOsTemplate() {
+export function buildDefaultOsTemplate() {
 	return [
 		{
 			role: "fileMenu",
@@ -28,7 +28,3 @@ function buildDefaultOsTemplate() {
 		}
 	];
 }
-
-module.exports = {
-	buildDefaultOsTemplate
-};

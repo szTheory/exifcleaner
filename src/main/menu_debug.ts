@@ -1,6 +1,7 @@
 const { app, shell } = require("electron");
+const config = require("../common/config");
 
-function buildDebugSubmenu() {
+export function buildDebugSubmenu() {
 	return [
 		{
 			label: "Show Settings",
@@ -35,7 +36,3 @@ function buildDebugSubmenu() {
 		}
 	];
 }
-
-module.exports = {
-	buildDebugSubmenu
-};

@@ -7,7 +7,7 @@ if (is.development && module.hot) {
 }
 
 // stylesheets
-require("../styles/index.scss");
+import "../styles/index.scss";
 
 // app
 require("../renderer/drag");

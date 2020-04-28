@@ -1,32 +1,31 @@
 const { Menu } = require("electron");
 const { is } = require("electron-util");
-const { buildDebugSubmenu } = require("./menu_debug");
-const { buildDefaultOsTemplate } = require("./menu_default");
-const { buildMacOsTemplate } = require("./menu_mac");
+import { buildDebugSubmenu } from "./menu_debug";
+import { buildDefaultOsTemplate } from "./menu_default";
+import { buildMacOsTemplate } from "./menu_mac";
 
-function buildTemplate() {
-	return process.platform === "darwin"
-		? buildMacOsTemplate()
-		: buildDefaultOsTemplate();
-}
-
-function buildMenu() {
-	let template = buildTemplate();
+function buildMenuTemplate() {
+	let menuTemplate =
+		process.platform === "darwin"
+			? buildMacOsTemplate()
+			: buildDefaultOsTemplate();
 
 	if (is.development) {
-		template.push({
+		menuTemplate.push({
 			label: "Debug",
 			submenu: buildDebugSubmenu()
 		});
 	}
 
-	return Menu.buildFromTemplate(template);
+	return menuTemplate;
 }
 
-const setupMenu = function() {
-	Menu.setApplicationMenu(buildMenu());
-};
+function buildMenu() {
+	const menuTemplate = buildMenuTemplate();
 
-module.exports = {
-	setupMenu
-};
+	return Menu.buildFromTemplate(menuTemplate);
+}
+
+export function setupMenu() {
+	Menu.setApplicationMenu(buildMenu());
+}

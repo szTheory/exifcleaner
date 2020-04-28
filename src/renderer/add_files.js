@@ -73,14 +73,7 @@ function cleanExifData(exifHash) {
 }
 
 // The heart of the app, removing exif data from the image.
-// This uses the Perl binary "exiftool" from .resources
-// TODO: ensure process is close after we're done working
-// with it. I ran into some issues with auto-cleanup when
-// I first built the app (when parallelizing for multiple image
-// drag and drop, I think), so just got it working to start.
-// But it should be easy enough to fix. Here's the relevant
-// section from node-exiftool docs, from
-// https://www.npmjs.com/package/node-exiftool
+// This uses the Perl binary "exiftool" from .resources with it.
 //
 // Opening and Closing
 //

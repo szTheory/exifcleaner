@@ -2,7 +2,7 @@ const { buildHelpSubmenu } = require("./menu_help");
 const { appMenu } = require("electron-util");
 const { fileMenuOpenItem } = require("./menu_file_open");
 
-function buildMacOsTemplate() {
+export function buildMacOsTemplate() {
 	return [
 		appMenu([
 			// No preferences menu for now
@@ -41,7 +41,3 @@ function buildMacOsTemplate() {
 		}
 	];
 }
-
-module.exports = {
-	buildMacOsTemplate
-};
