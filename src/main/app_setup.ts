@@ -7,7 +7,11 @@ function preventMultipleAppInstances(): void {
 	}
 }
 
-function openMinimizedIfAlreadyExists({ win }: { win: BrowserWindow }): void {
+function openMinimizedIfAlreadyExists({
+	win
+}: {
+	win: BrowserWindow | null;
+}): void {
 	app.on("second-instance", () => {
 		if (win) {
 			if (win.isMinimized()) {
@@ -24,7 +28,7 @@ function quitOnWindowsAllClosed(): void {
 	});
 }
 
-function createWindowOnActivate({ win }: { win: BrowserWindow }): void {
+function createWindowOnActivate({ win }: { win: BrowserWindow | null }): void {
 	app.on("activate", () => {
 		if (!win) {
 			win = createMainWindow();
@@ -32,7 +36,7 @@ function createWindowOnActivate({ win }: { win: BrowserWindow }): void {
 	});
 }
 
-export function setupApp({ win }: { win: BrowserWindow }): void {
+export function setupApp({ win }: { win: BrowserWindow | null }): void {
 	preventMultipleAppInstances();
 	openMinimizedIfAlreadyExists({ win: win });
 	quitOnWindowsAllClosed();

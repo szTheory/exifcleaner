@@ -17,7 +17,7 @@ function setupUserModelId(): void {
 	app.setAppUserModelId(packageJson.build.appId);
 }
 
-export function init({ win }: { win: BrowserWindow }): void {
+export function init({ win }: { win: BrowserWindow | null }): void {
 	setupErrorHandling();
 	setupContextMenu();
 	setupUserModelId();

@@ -6,10 +6,10 @@ if (is.development && module.hot) {
 	module.hot.accept();
 }
 
-const { app } = require("electron");
-const { setupMenu } = require("./menu");
-const { init } = require("./init");
-const { createMainWindow, setupMainWindow } = require("./window_setup");
+import { app } from "electron";
+import { setupMenu } from "./menu";
+import { init } from "./init";
+import { createMainWindow, setupMainWindow } from "./window_setup";
 
 // Maintain reference to window to
 // prevent it from being garbage collected

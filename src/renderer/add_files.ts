@@ -115,7 +115,7 @@ function cleanExifData(exifHash: any): any {
 // When finished working with it, it should be closed,
 // when -stay_open False will be written to its stdin to exit the process.
 //
-// const exiftool = require('node-exiftool')
+// import exiftool from "node-exiftool"
 // const ep = new exiftool.ExiftoolProcess()
 //
 // ep

@@ -1,7 +1,7 @@
 import { BrowserWindow, app } from "electron";
-const { is } = require("electron-util");
-const url = require("url");
-const path = require("path");
+import { is } from "electron-util";
+import url from "url";
+import path from "path";
 
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;
