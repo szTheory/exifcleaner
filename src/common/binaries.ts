@@ -1,19 +1,24 @@
 import path from "path";
 import { remote } from "electron";
-import { getPlatform, NIX, MAC, WIN } from "./get_platform";
+import { getPlatform, Platform } from "./get_platform";
 
 const IS_PROD = process.env.NODE_ENV === "production";
 const { isPackaged, getAppPath } = remote.app;
 
-function devBinaryPlatformSubpath() {
+enum PlatformSubpath {
+	Win = "win",
+	Nix = "nix"
+}
+
+function devBinaryPlatformSubpath(): PlatformSubpath {
 	const platform = getPlatform();
 
 	switch (platform) {
-		case WIN:
-			return "win";
-		case WIN:
-		case MAC:
-			return "nix";
+		case Platform.WIN:
+			return PlatformSubpath.Win;
+		case Platform.NIX:
+		case Platform.MAC:
+			return PlatformSubpath.Nix;
 		default:
 			throw `Could not determine dev Exiftool binary subpath for platform ${platform}`;
 	}
@@ -28,54 +33,60 @@ function getDevBinariesPath() {
 	);
 }
 
+enum ProdBinaryResourcesDirName {
+	WinMac = "Resources",
+	Linux = "resources"
+}
+
 function getProdBinariesPath() {
 	const platform = getPlatform();
+	const appPath = getAppPath();
+	const appDir = path.dirname(appPath);
 
+	let resourcesDirName;
 	switch (platform) {
-		case WIN:
-		case MAC:
-			return path.join(
-				path.dirname(getAppPath()),
-				"..",
-				"./Resources",
-				"./bin"
-			);
-		case NIX:
-			return path.join(
-				path.dirname(getAppPath()),
-				"..",
-				"./resources",
-				"./bin"
-			);
+		case Platform.WIN:
+			resourcesDirName = ProdBinaryResourcesDirName.WinMac;
+			break;
+		case Platform.MAC:
+			resourcesDirName = ProdBinaryResourcesDirName.WinMac;
+			break;
+		case Platform.NIX:
+			resourcesDirName = ProdBinaryResourcesDirName.Linux;
+			break;
 		default:
 			throw `Could not determine the production binary path for ExifTool on platform ${platform}`;
 	}
+
+	return path.join(appDir, "..", resourcesDirName, "bin");
 }
 
 function getBinariesPath() {
 	return IS_PROD && isPackaged ? getProdBinariesPath() : getDevBinariesPath();
 }
 
-const binariesPath = getBinariesPath();
+enum BinFilename {
+	Win = "exiftool.exe",
+	Nix = "exiftool"
+}
 
-const BIN_FILENAME_WIN = "exiftool.exe";
-const BIN_FILENAME_NIX_MAC = "exiftool";
-
-function getBinFilename() {
+function getBinFilename(): string {
 	const platform = getPlatform();
 
 	switch (platform) {
-		case WIN:
-			return BIN_FILENAME_WIN;
-		case NIX:
-		case MAC:
-			return BIN_FILENAME_NIX_MAC;
+		case Platform.WIN:
+			return BinFilename.Win;
+		case Platform.NIX:
+		case Platform.MAC:
+			return BinFilename.Nix;
 		default:
 			throw `Could not determine the ExifTool binary path for platform ${platform}`;
 	}
 }
 
 const binFilename = getBinFilename();
-export const exiftoolBinPath = path.resolve(
-	path.join(binariesPath, binFilename)
-);
+export function exiftoolBinPath() {
+	const binariesPath = getBinariesPath();
+
+	return path.resolve(binariesPath, binFilename);
+}

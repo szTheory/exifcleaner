@@ -13,7 +13,9 @@ export async function addFiles({ filePaths }: { filePaths: string[] }) {
 }
 
 function newExifToolProcess() {
-	return new exiftool.ExiftoolProcess(exiftoolBinPath);
+	const binPath = exiftoolBinPath();
+
+	return new exiftool.ExiftoolProcess(binPath);
 }
 
 async function showExifBeforeClean({
@@ -137,7 +139,6 @@ async function getExif({
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))
 		.then(() => {
-			// readMetadata(ep, filePath);
 			return exiftoolProcess
 				.readMetadata(filePath, [
 					"-File:all",

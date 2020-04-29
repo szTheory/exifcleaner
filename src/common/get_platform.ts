@@ -1,10 +1,12 @@
 import { platform } from "os";
 
-export const NIX = "nix";
-export const MAC = "mac";
-export const WIN = "win";
+export enum Platform {
+	NIX,
+	WIN,
+	MAC
+}
 
-export function getPlatform() {
+export function getPlatform(): Platform {
 	const currentPlatform = platform();
 
 	switch (currentPlatform) {
@@ -14,11 +16,11 @@ export function getPlatform() {
 		case "openbsd":
 		case "android":
 		case "sunos":
-			return NIX;
+			return Platform.NIX;
 		case "darwin":
-			return MAC;
+			return Platform.MAC;
 		case "win32":
-			return WIN;
+			return Platform.WIN;
 		default:
 			throw `Did not recognize platform ${currentPlatform}`;
 	}

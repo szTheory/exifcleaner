@@ -63,7 +63,7 @@ export function updateRowWithCleanerSpinner({
 	tdNode.appendChild(spinnerNode);
 }
 
-export function addTableRow({ filePath }: { filePath: any }) {
+export function addTableRow({ filePath }: { filePath: string }) {
 	const label = path.basename(filePath);
 
 	// tr node
