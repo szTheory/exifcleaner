@@ -1,5 +1,5 @@
-const path = require("path");
-const { selectedFilesList } = require("./selected_files");
+import path from "path";
+import { selectedFilesList } from "./selected_files";
 
 export function updateRowWithExif({
 	tdNode,
@@ -7,7 +7,7 @@ export function updateRowWithExif({
 }: {
 	tdNode: HTMLTableDataCellElement;
 	exifData: any;
-}) {
+}): void {
 	// td
 	tdNode.textContent = "";
 
@@ -38,7 +38,7 @@ export function updateRowWithExif({
 	}
 }
 
-function buildExifString({ exifData }: { exifData: any }) {
+function buildExifString({ exifData }: { exifData: any }): string {
 	let str = "";
 	for (const [key, value] of Object.entries(exifData)) {
 		str += key + " " + "<strong>" + value + "</strong>" + "<br>";
@@ -50,7 +50,7 @@ export function updateRowWithCleanerSpinner({
 	trNode
 }: {
 	trNode: HTMLTableRowElement;
-}) {
+}): void {
 	// td
 	const tdNode = trNode.querySelector("td:nth-child(3)");
 	if (!tdNode) {
@@ -63,7 +63,11 @@ export function updateRowWithCleanerSpinner({
 	tdNode.appendChild(spinnerNode);
 }
 
-export function addTableRow({ filePath }: { filePath: string }) {
+export function addTableRow({
+	filePath
+}: {
+	filePath: string;
+}): HTMLTableRowElement {
 	const label = path.basename(filePath);
 
 	// tr node

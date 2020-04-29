@@ -1,19 +1,25 @@
-import { dialog, BrowserWindow, WebContents } from "electron";
+import {
+	dialog,
+	BrowserWindow,
+	MenuItemConstructorOptions,
+	MenuItem,
+	KeyboardEvent
+} from "electron";
 
 export const EVENT_FILE_OPEN_ADD_FILES = "file-open-add-files";
 
 export function fileOpenClick(
-	event: KeyboardEvent,
-	focusedWindow: BrowserWindow,
-	focusedWebContents: WebContents
-) {
+	menuItem: MenuItem,
+	browserWindow: BrowserWindow,
+	event: KeyboardEvent
+): void {
 	dialog
-		.showOpenDialog(focusedWindow, {
+		.showOpenDialog(browserWindow, {
 			properties: ["openFile", "multiSelections"]
 		})
 		.then(result => {
 			if (result.filePaths) {
-				focusedWindow.webContents.send(
+				browserWindow.webContents.send(
 					EVENT_FILE_OPEN_ADD_FILES,
 					result.filePaths
 				);
@@ -21,7 +27,7 @@ export function fileOpenClick(
 		});
 }
 
-export function fileMenuOpenItem() {
+export function fileMenuOpenItem(): MenuItemConstructorOptions {
 	return {
 		label: "Open…",
 		accelerator: "CmdOrCtrl+O",

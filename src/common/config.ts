@@ -1,7 +1,11 @@
-const Store = require("electron-store");
+import Store from "electron-store";
 
-export const store = new Store({
-	defaults: {
-		favoriteAnimal: "🦄"
-	}
-});
+function defaultStore(): Store {
+	return new Store({
+		defaults: {
+			favoriteAnimal: "🦄"
+		}
+	});
+}
+
+export const configStore = defaultStore();

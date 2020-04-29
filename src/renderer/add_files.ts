@@ -1,8 +1,8 @@
-const {
+import {
 	addTableRow,
 	updateRowWithExif,
 	updateRowWithCleanerSpinner
-} = require("./table");
+} from "./table";
 import exiftool, { ExiftoolProcess } from "node-exiftool";
 import { exiftoolBinPath } from "../common/binaries";
 
@@ -12,7 +12,7 @@ export async function addFiles({ filePaths }: { filePaths: string[] }) {
 	}
 }
 
-function newExifToolProcess() {
+function newExifToolProcess(): exiftool.ExiftoolProcess {
 	const binPath = exiftoolBinPath();
 
 	return new exiftool.ExiftoolProcess(binPath);
@@ -24,8 +24,13 @@ async function showExifBeforeClean({
 }: {
 	trNode: HTMLTableRowElement;
 	filePath: string;
-}) {
+}): Promise<any> {
 	const tdBeforeNode = trNode.querySelector("td:nth-child(2)");
+	if (!(tdBeforeNode instanceof HTMLTableCellElement)) {
+		console.log(tdBeforeNode);
+		throw new Error("Expected table data cell element");
+	}
+
 	const ep = newExifToolProcess();
 	const exifData = await getExif({
 		exiftoolProcess: ep,
@@ -44,8 +49,13 @@ async function showExifAfterClean({
 }: {
 	trNode: HTMLTableRowElement;
 	filePath: string;
-}) {
+}): Promise<any> {
 	const tdAfterNode = trNode.querySelector("td:nth-child(3)");
+	if (!(tdAfterNode instanceof HTMLTableCellElement)) {
+		console.log(tdAfterNode);
+		throw new Error("Expected table data cell element");
+	}
+
 	const ep = newExifToolProcess();
 	const newExifData = await getExif({
 		exiftoolProcess: ep,
@@ -59,7 +69,7 @@ async function showExifAfterClean({
 	return Promise.resolve();
 }
 
-async function addFile({ filePath }: { filePath: string }) {
+async function addFile({ filePath }: { filePath: string }): Promise<any> {
 	// add row
 	const trNode = addTableRow({ filePath: filePath });
 
@@ -80,7 +90,7 @@ async function addFile({ filePath }: { filePath: string }) {
 		.catch(console.error);
 }
 
-function cleanExifData(exifHash: any) {
+function cleanExifData(exifHash: any): any {
 	// remove basic file info that is part of
 	// exiftools output, but not metadata
 	if (exifHash.SourceFile) {
@@ -114,7 +124,13 @@ function cleanExifData(exifHash: any) {
 //   .then(() => ep.close())
 //   .then(() => console.log('Closed exiftool'))
 //   .catch(console.error)
-async function removeExif({ ep, filePath }: { ep: any; filePath: string }) {
+async function removeExif({
+	ep,
+	filePath
+}: {
+	ep: any;
+	filePath: string;
+}): Promise<object> {
 	const exifData = ep
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))
@@ -134,7 +150,7 @@ async function getExif({
 }: {
 	exiftoolProcess: ExiftoolProcess;
 	filePath: string;
-}) {
+}): Promise<object> {
 	const exifData = exiftoolProcess
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))

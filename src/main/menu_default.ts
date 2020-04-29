@@ -1,8 +1,9 @@
-const { buildHelpSubmenu } = require("./menu_help");
-const { fileMenuOpenItem } = require("./menu_file_open");
+import { buildHelpSubmenu } from "./menu_help";
+import { fileMenuOpenItem } from "./menu_file_open";
+import { MenuItemConstructorOptions } from "electron";
 
 // Linux and Windows
-export function buildDefaultOsTemplate() {
+export function buildDefaultOsTemplate(): MenuItemConstructorOptions[] {
 	return [
 		{
 			role: "fileMenu",

@@ -1,31 +1,42 @@
-const { Menu } = require("electron");
-const { is } = require("electron-util");
+import { is } from "electron-util";
 import { buildDebugSubmenu } from "./menu_debug";
 import { buildDefaultOsTemplate } from "./menu_default";
 import { buildMacOsTemplate } from "./menu_mac";
+import { Menu, MenuItemConstructorOptions } from "electron";
 
-function buildMenuTemplate() {
-	let menuTemplate =
-		process.platform === "darwin"
-			? buildMacOsTemplate()
-			: buildDefaultOsTemplate();
+const PLATFORM_MAC = "darwin";
+function isMac(): boolean {
+	return process.platform === PLATFORM_MAC;
+}
+
+function buildDebugMenu(): MenuItemConstructorOptions {
+	return {
+		label: "Debug",
+		type: "submenu",
+		submenu: buildDebugSubmenu()
+	};
+}
+
+function buildMenuTemplate(): MenuItemConstructorOptions[] {
+	let menuTemplate = isMac() ? buildMacOsTemplate() : buildDefaultOsTemplate();
 
 	if (is.development) {
-		menuTemplate.push({
-			label: "Debug",
-			submenu: buildDebugSubmenu()
-		});
+		const debugMenu = buildDebugMenu();
+
+		menuTemplate.push(debugMenu);
 	}
 
 	return menuTemplate;
 }
 
-function buildMenu() {
+function buildMenu(): Menu {
 	const menuTemplate = buildMenuTemplate();
 
 	return Menu.buildFromTemplate(menuTemplate);
 }
 
-export function setupMenu() {
-	Menu.setApplicationMenu(buildMenu());
+export function setupMenu(): void {
+	const menu = buildMenu();
+
+	Menu.setApplicationMenu(menu);
 }

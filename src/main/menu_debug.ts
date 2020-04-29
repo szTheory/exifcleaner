@@ -1,12 +1,12 @@
-const { app, shell } = require("electron");
-const config = require("../common/config");
+import { app, shell, MenuItemConstructorOptions } from "electron";
+import { configStore } from "../common/config";
 
-export function buildDebugSubmenu() {
+export function buildDebugSubmenu(): MenuItemConstructorOptions[] {
 	return [
 		{
 			label: "Show Settings",
 			click() {
-				config.openInEditor();
+				configStore.openInEditor();
 			}
 		},
 		{
@@ -21,7 +21,7 @@ export function buildDebugSubmenu() {
 		{
 			label: "Delete Settings",
 			click() {
-				config.clear();
+				configStore.clear();
 				app.relaunch();
 				app.quit();
 			}

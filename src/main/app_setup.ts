@@ -1,15 +1,13 @@
-import { BrowserWindow } from "electron";
+import { app, BrowserWindow } from "electron";
+import { createMainWindow } from "./window_setup";
 
-const { app } = require("electron");
-const { createMainWindow } = require("./window_setup");
-
-function preventMultipleAppInstances() {
+function preventMultipleAppInstances(): void {
 	if (!app.requestSingleInstanceLock()) {
 		app.quit();
 	}
 }
 
-function openMinimizedIfAlreadyExists({ win }: { win: BrowserWindow }) {
+function openMinimizedIfAlreadyExists({ win }: { win: BrowserWindow }): void {
 	app.on("second-instance", () => {
 		if (win) {
 			if (win.isMinimized()) {
@@ -20,13 +18,13 @@ function openMinimizedIfAlreadyExists({ win }: { win: BrowserWindow }) {
 	});
 }
 
-function quitOnWindowsAllClosed() {
+function quitOnWindowsAllClosed(): void {
 	app.on("window-all-closed", () => {
 		app.quit();
 	});
 }
 
-function createWindowOnActivate({ win }: { win: BrowserWindow }) {
+function createWindowOnActivate({ win }: { win: BrowserWindow }): void {
 	app.on("activate", () => {
 		if (!win) {
 			win = createMainWindow();
@@ -34,7 +32,7 @@ function createWindowOnActivate({ win }: { win: BrowserWindow }) {
 	});
 }
 
-export function setupApp({ win }: { win: BrowserWindow }) {
+export function setupApp({ win }: { win: BrowserWindow }): void {
 	preventMultipleAppInstances();
 	openMinimizedIfAlreadyExists({ win: win });
 	quitOnWindowsAllClosed();

@@ -1,6 +1,6 @@
 import { selectFiles } from "./select_files";
 
-document.addEventListener("drop", event => {
+function respondToDropEvent(event: DragEvent): void {
 	event.preventDefault();
 	event.stopPropagation();
 	const dataTransfer = event.dataTransfer;
@@ -11,14 +11,22 @@ document.addEventListener("drop", event => {
 	const paths = filePaths({ fileList: files });
 
 	selectFiles({ filePaths: paths });
+}
+
+function respondToDragOverEvent(event: DragEvent): void {
+	event.preventDefault();
+	event.stopPropagation();
+}
+
+document.addEventListener("drop", event => {
+	respondToDropEvent(event);
 });
 
 document.addEventListener("dragover", event => {
-	event.preventDefault();
-	event.stopPropagation();
+	respondToDragOverEvent(event);
 });
 
-function filePaths({ fileList }: { fileList: FileList }) {
+function filePaths({ fileList }: { fileList: FileList }): string[] {
 	let paths = [];
 	for (const file of fileList) {
 		paths.push(file.path);

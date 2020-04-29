@@ -1,23 +1,23 @@
 import { app, BrowserWindow } from "electron";
-const unhandled = require("electron-unhandled");
-const contextMenu = require("electron-context-menu");
-const packageJson = require("../../package.json");
-const { setupApp } = require("./app_setup");
+import unhandled from "electron-unhandled";
+import contextMenu from "electron-context-menu";
+import packageJson from "../../package.json";
+import { setupApp } from "./app_setup";
 
-function setupErrorHandling() {
+function setupErrorHandling(): void {
 	unhandled();
 }
 
 // context menu (copy/paste/etc)
-function setupContextMenu() {
+function setupContextMenu(): void {
 	contextMenu();
 }
 
-function setupUserModelId() {
+function setupUserModelId(): void {
 	app.setAppUserModelId(packageJson.build.appId);
 }
 
-export function init({ win }: { win: BrowserWindow }) {
+export function init({ win }: { win: BrowserWindow }): void {
 	setupErrorHandling();
 	setupContextMenu();
 	setupUserModelId();

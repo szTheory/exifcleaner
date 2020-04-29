@@ -24,7 +24,7 @@ function devBinaryPlatformSubpath(): PlatformSubpath {
 	}
 }
 
-function getDevBinariesPath() {
+function getDevBinariesPath(): string {
 	return path.join(
 		process.cwd(),
 		"./.resources",
@@ -38,7 +38,7 @@ enum ProdBinaryResourcesDirName {
 	Linux = "resources"
 }
 
-function getProdBinariesPath() {
+function getProdBinariesPath(): string {
 	const platform = getPlatform();
 	const appPath = getAppPath();
 	const appDir = path.dirname(appPath);
@@ -61,7 +61,7 @@ function getProdBinariesPath() {
 	return path.join(appDir, "..", resourcesDirName, "bin");
 }
 
-function getBinariesPath() {
+function getBinariesPath(): string {
 	return IS_PROD && isPackaged ? getProdBinariesPath() : getDevBinariesPath();
 }
 
@@ -85,7 +85,7 @@ function getBinFilename(): string {
 }
 
 const binFilename = getBinFilename();
-export function exiftoolBinPath() {
+export function exiftoolBinPath(): string {
 	const binariesPath = getBinariesPath();
 
 	return path.resolve(binariesPath, binFilename);

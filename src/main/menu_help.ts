@@ -1,11 +1,12 @@
-const path = require("path");
-const {
+import path from "path";
+import {
 	is,
 	aboutMenuItem,
 	openUrlMenuItem,
 	openNewGitHubIssue,
 	debugInfo
-} = require("electron-util");
+} from "electron-util";
+import { MenuItemConstructorOptions } from "electron";
 
 const WEBSITE_URL = "https://exifcleaner.com";
 const GITHUB_USERNAME = "szTheory";
@@ -13,7 +14,7 @@ const GITHUB_PROJECTNAME = "exifcleaner";
 const SOURCE_CODE_URL = `https://github.com/${GITHUB_USERNAME}/${GITHUB_PROJECTNAME}`;
 const COPYRIGHT_TEXT = `Copyright © ${GITHUB_USERNAME}`;
 
-export function buildHelpSubmenu() {
+export function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 	let submenu = [
 		openUrlMenuItem({
 			label: "Website",
@@ -59,9 +60,9 @@ export function buildHelpSubmenu() {
 	return submenu;
 }
 
-function aboutMenuIconPath() {
+function aboutMenuIconPath(): string {
 	if (is.linux) {
-		return path.join(__dirname, "../../exifcleaner.png");
+		return path.join(__dirname, "..", "..", "exifcleaner.png");
 	} else {
 		return path.join(__dirname, "static", "icon.png");
 	}

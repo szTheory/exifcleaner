@@ -1,11 +1,11 @@
-const { addFiles } = require("./add_files");
-const { hideEmptyPane } = require("./empty_pane");
-const {
+import { addFiles } from "./add_files";
+import { hideEmptyPane } from "./empty_pane";
+import {
 	showSelectedFilesPane,
 	eraseSelectedFilesPane
-} = require("./selected_files");
+} from "./selected_files";
 
-export function selectFiles({ filePaths }: { filePaths: string[] }) {
+export function selectFiles({ filePaths }: { filePaths: string[] }): void {
 	if (filePaths.length > 0) {
 		hideEmptyPane();
 		eraseSelectedFilesPane();

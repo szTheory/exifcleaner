@@ -1,8 +1,9 @@
-const { buildHelpSubmenu } = require("./menu_help");
-const { appMenu } = require("electron-util");
-const { fileMenuOpenItem } = require("./menu_file_open");
+import { buildHelpSubmenu } from "./menu_help";
+import { appMenu } from "electron-util";
+import { fileMenuOpenItem } from "./menu_file_open";
+import { MenuItemConstructorOptions } from "electron";
 
-export function buildMacOsTemplate() {
+export function buildMacOsTemplate(): MenuItemConstructorOptions[] {
 	return [
 		appMenu([
 			// No preferences menu for now
@@ -16,6 +17,7 @@ export function buildMacOsTemplate() {
 		]),
 		{
 			role: "fileMenu",
+			type: "submenu",
 			submenu: [
 				fileMenuOpenItem(),
 				{

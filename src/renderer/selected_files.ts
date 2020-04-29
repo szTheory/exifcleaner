@@ -1,4 +1,4 @@
-export function selectedFilesList() {
+export function selectedFilesList(): HTMLTableSectionElement | null {
 	const pane = selectedFilesPane();
 	if (!pane) {
 		throw "Could not find file list pane element for selected files list";
@@ -7,7 +7,7 @@ export function selectedFilesList() {
 	return pane.querySelector("tbody");
 }
 
-export function showSelectedFilesPane() {
+export function showSelectedFilesPane(): void {
 	const pane = selectedFilesPane();
 	if (!pane) {
 		throw "Could not find file list pane element to show";
@@ -16,7 +16,7 @@ export function showSelectedFilesPane() {
 	pane.classList.remove("d-none");
 }
 
-export function eraseSelectedFilesPane() {
+export function eraseSelectedFilesPane(): void {
 	const filesListElement = selectedFilesList();
 	if (!filesListElement) {
 		throw "Could not find file list element to erase";
@@ -27,6 +27,6 @@ export function eraseSelectedFilesPane() {
 	}
 }
 
-function selectedFilesPane() {
+function selectedFilesPane(): HTMLElement | null {
 	return document.getElementById("file-list");
 }

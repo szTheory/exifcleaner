@@ -13,9 +13,9 @@ const { createMainWindow, setupMainWindow } = require("./window_setup");
 
 // Maintain reference to window to
 // prevent it from being garbage collected
-var win: BrowserWindow;
+var win = null as BrowserWindow | null;
 
-async function setup() {
+async function setup(): Promise<void> {
 	init({ win: win });
 	await app.whenReady();
 	setupMenu();

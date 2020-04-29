@@ -43,7 +43,7 @@ function mainWindowLoadUrl({ win }: { win: BrowserWindow }) {
 	win.loadURL(url);
 }
 
-export async function createMainWindow() {
+export function createMainWindow(): BrowserWindow {
 	let options = {
 		title: app.name,
 		show: false,
@@ -56,14 +56,14 @@ export async function createMainWindow() {
 
 	if (is.linux) {
 		options = Object.assign({}, options, {
-			icon: path.join(__dirname, "../../exifcleaner.png")
+			icon: path.join(__dirname, "..", "..", "exifcleaner.png")
 		});
 	}
 
 	return new BrowserWindow(options);
 }
 
-export function setupMainWindow({ win }: { win: BrowserWindow }) {
+export function setupMainWindow({ win }: { win: BrowserWindow }): void {
 	setupMainWindowClose({ win: win });
 	showWindowOnReady({ win: win });
 	mainWindowLoadUrl({ win: win });

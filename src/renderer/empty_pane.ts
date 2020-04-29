@@ -7,6 +7,6 @@ export function hideEmptyPane() {
 	pane.classList.add("d-none");
 }
 
-function emptyPane() {
+function emptyPane(): HTMLElement | null {
 	return document.getElementById("empty");
 }
