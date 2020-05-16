@@ -8,15 +8,21 @@ const DEFAULT_WINDOW_HEIGHT = 312;
 
 function setupMainWindowClose({ win }: { win: BrowserWindow }) {
 	win.on("closed", () => {
-		// Close application on window quit
-		// (for Mac File -> Close Window)
-		app.quit();
+		// on Mac, the convention is to leave the app
+		// open even when all windows are closed. so that for
+		// example they can relaunch the app from the dock
+		// or still use the drag to dock features
+		if (!is.macos) {
+			// quit application on window close
+			app.quit();
+		}
 	});
 }
 
 function showWindowOnReady({ win }: { win: BrowserWindow }) {
 	win.once("ready-to-show", () => {
 		win.show();
+		win.focus();
 	});
 }
 
@@ -43,6 +49,8 @@ function mainWindowLoadUrl({ win }: { win: BrowserWindow }) {
 	win.loadURL(url);
 }
 
+const WINDOW_BACKGROUND_COLOR = "#F5F6F8";
+
 export function createMainWindow(): BrowserWindow {
 	let options = {
 		title: app.name,
@@ -51,7 +59,9 @@ export function createMainWindow(): BrowserWindow {
 		height: DEFAULT_WINDOW_HEIGHT + 25,
 		minWidth: DEFAULT_WINDOW_WIDTH,
 		minHeight: DEFAULT_WINDOW_HEIGHT + 25,
-		webPreferences: { nodeIntegration: true }
+		webPreferences: { nodeIntegration: true },
+		//set specific background color eliminate white flicker on content load
+		backgroundColor: WINDOW_BACKGROUND_COLOR
 	};
 
 	if (is.linux) {
@@ -65,6 +75,7 @@ export function createMainWindow(): BrowserWindow {
 
 export function setupMainWindow({ win }: { win: BrowserWindow }): void {
 	setupMainWindowClose({ win: win });
-	showWindowOnReady({ win: win });
+	// load URL before showing the window to avoid flash of unloaded content
 	mainWindowLoadUrl({ win: win });
+	showWindowOnReady({ win: win });
 }

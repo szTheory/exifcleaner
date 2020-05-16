@@ -1,11 +1,12 @@
 {
 	"extends": "./node_modules/electron-webpack/tsconfig-base.json",
 	"compilerOptions": {
-		"allowJs": true,
-		"checkJs": true,
-		// "noImplicitAny": false,
+		"target": "es2019",
 		"outDir": "./dist/",
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"forceConsistentCasingInFileNames": true,
+		"importHelpers": true,
+		"removeComments": true
 	},
-	"include": ["./src/**/*.js", "./src/**/*.ts"],
+	"include": ["./src/**/*.ts"]
 }
