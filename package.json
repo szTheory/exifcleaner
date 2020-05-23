@@ -40,7 +40,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "12",
-		"electron": "^8",
+		"electron": "^9",
 		"electron-builder": "^22.2.0",
 		"electron-webpack": "^2.7.4",
 		"electron-webpack-ts": "^4.0.1",
