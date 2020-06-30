@@ -12,6 +12,7 @@ function setupErrorHandling(): void {
 
 // context menu (copy/paste/etc)
 function setupContextMenu(): void {
+	// TODO: manually build this out and remove electron-context-menu
   contextMenu();
 }
 
