@@ -13,5 +13,5 @@ import "../styles/index.scss";
 require("../renderer/drag");
 require("../renderer/menu_select_files");
 
-// ERROR HANDLING
+// SETUP ERROR HANDLING
 unhandled();
