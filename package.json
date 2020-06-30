@@ -28,7 +28,7 @@
 	"dependencies": {
 		"electron-context-menu": "^0.15.0",
 		"electron-unhandled": "^3.0.0",
-		"js-yaml": "^3.13.1",
+		"electron-util": "^0.14.2",
 		"node-exiftool": "^2.3.0",
 		"serialize-javascript": "^2.1.1",
 		"spectre.css": "^0.5.8"
