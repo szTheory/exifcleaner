@@ -28,7 +28,6 @@
 	"dependencies": {
 		"electron-context-menu": "^0.15.0",
 		"electron-unhandled": "^3.0.0",
-		"electron-util": "^0.14.0",
 		"js-yaml": "^3.13.1",
 		"node-exiftool": "^2.3.0",
 		"serialize-javascript": "^2.1.1",

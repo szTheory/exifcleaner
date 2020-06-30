@@ -1,8 +1,8 @@
 import unhandled from "electron-unhandled";
+import { isDev } from "../common/is_dev";
 
 // electron-webpack HMR
-import { is } from "electron-util";
-if (is.development && module.hot) {
+if (isDev && module.hot) {
 	module.hot.accept();
 }
 

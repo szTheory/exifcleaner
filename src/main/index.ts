@@ -1,8 +1,8 @@
-import { is } from "electron-util";
 import { BrowserWindow } from "electron";
+import { isDev } from "../common/is_dev";
 
 // electron-webpack HMR for development
-if (is.development && module.hot) {
+if (isDev && module.hot) {
 	module.hot.accept();
 }
 

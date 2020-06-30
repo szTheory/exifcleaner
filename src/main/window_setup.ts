@@ -1,7 +1,8 @@
 import { BrowserWindow, app } from "electron";
-import { is } from "electron-util";
 import url from "url";
 import path from "path";
+import { isMac, isLinux } from "../common/platform";
+import { isDev } from "../common/is_dev";
 
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;
@@ -12,7 +13,7 @@ function setupMainWindowClose({ win }: { win: BrowserWindow }) {
 		// open even when all windows are closed. so that for
 		// example they can relaunch the app from the dock
 		// or still use the drag to dock features
-		if (!is.macos) {
+		if (!isMac()) {
 			// quit application on window close
 			app.quit();
 		}
@@ -27,7 +28,7 @@ function showWindowOnReady({ win }: { win: BrowserWindow }) {
 }
 
 function urlForLoad() {
-	if (is.development) {
+	if (isDev) {
 		const port = process.env.ELECTRON_WEBPACK_WDS_PORT;
 		if (!port) {
 			throw "No Electron webpack WDS port set for dev. Try running `yarn run dev` instead for development mode.";
@@ -64,7 +65,7 @@ export function createMainWindow(): BrowserWindow {
 		backgroundColor: WINDOW_BACKGROUND_COLOR
 	};
 
-	if (is.linux) {
+	if (isLinux()) {
 		options = Object.assign({}, options, {
 			icon: path.join(__dirname, "..", "..", "exifcleaner.png")
 		});

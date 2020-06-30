@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from "electron";
 import { createMainWindow } from "./window_setup";
-import { is } from "electron-util";
+import { isMac } from "../common/platform";
 
 function preventMultipleAppInstances(): void {
 	if (!app.requestSingleInstanceLock()) {
@@ -30,7 +30,7 @@ function quitOnWindowsAllClosed(): void {
 		// open even when all windows are closed. so that for
 		// example they can relaunch the app from the dock
 		// or still use the drag to dock features
-		if (!is.macos) {
+		if (!isMac()) {
 			app.quit();
 		}
 	});

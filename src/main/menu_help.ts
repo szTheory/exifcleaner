@@ -1,12 +1,12 @@
 import path from "path";
 import {
-	is,
 	aboutMenuItem,
 	openUrlMenuItem,
 	openNewGitHubIssue,
 	debugInfo
 } from "electron-util";
 import { MenuItemConstructorOptions } from "electron";
+import { isMac, isLinux } from "../common/platform";
 
 const WEBSITE_URL = "https://exifcleaner.com";
 const GITHUB_USERNAME = "szTheory";
@@ -44,7 +44,7 @@ export function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 		}
 	];
 
-	if (!is.macos) {
+	if (!isMac()) {
 		submenu.push(
 			{
 				type: "separator"
@@ -61,7 +61,7 @@ export function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 }
 
 function aboutMenuIconPath(): string {
-	if (is.linux) {
+	if (isLinux()) {
 		return path.join(__dirname, "..", "..", "exifcleaner.png");
 	} else {
 		return path.join(__dirname, "static", "icon.png");

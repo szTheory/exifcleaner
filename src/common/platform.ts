@@ -6,6 +6,16 @@ export enum Platform {
 	MAC
 }
 
+export function isMac() {
+	return getPlatform() == Platform.MAC;
+}
+export function isWindows() {
+	return getPlatform() == Platform.WIN;
+}
+export function isLinux() {
+	return getPlatform() == Platform.NIX;
+}
+
 export function getPlatform(): Platform {
 	const currentPlatform = platform();
 

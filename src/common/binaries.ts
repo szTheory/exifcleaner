@@ -1,6 +1,6 @@
 import path from "path";
 import { remote } from "electron";
-import { getPlatform, Platform } from "./get_platform";
+import { getPlatform, Platform } from "./platform";
 
 const IS_PROD = process.env.NODE_ENV === "production";
 const { isPackaged, getAppPath } = remote.app;
