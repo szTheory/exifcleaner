@@ -19,6 +19,7 @@
 - Multi-core support
 - Dark mode (automatic)
 - No automatic updates or network traffic
+- Relatively few NPM dependencies (no JS frameworks)
 
 ## Downsides
 
