@@ -28,9 +28,8 @@
 	"dependencies": {
 		"electron-context-menu": "^0.15.0",
 		"electron-unhandled": "^3.0.0",
-		"electron-util": "^0.14.2",
 		"node-exiftool": "^2.3.0",
-		"serialize-javascript": "^2.1.1",
+		"source-map-support": "^0.5.19",
 		"spectre.css": "^0.5.8"
 	},
 	"devDependencies": {
@@ -43,7 +42,6 @@
 		"np": "^5.0.3",
 		"prettier": "1.19.1",
 		"sass-loader": "^8.0.0",
-		"source-map-support": "^0.5.19",
 		"typescript": "^3.8.3",
 		"webpack": "^4.41.2",
 		"webpack-cli": "^3.3.10",

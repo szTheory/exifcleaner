@@ -1,20 +1,41 @@
 import { buildHelpSubmenu } from "./menu_help";
-import { appMenu } from "electron-util";
 import { fileMenuOpenItem } from "./menu_file_open";
-import { MenuItemConstructorOptions } from "electron";
+import { MenuItemConstructorOptions, app } from "electron";
 
 export function buildMacOsTemplate(): MenuItemConstructorOptions[] {
 	return [
-		appMenu([
-			// No preferences menu for now
-			// {
-			// 	label: "Preferences…",
-			// 	accelerator: "Command+,",
-			// 	click() {
-			// 		showPreferences();
-			// 	}
-			// }
-		]),
+		{
+			label: app.getName(),
+			submenu: [
+				{
+					role: "about"
+				},
+				{
+					type: "separator"
+				},
+				{
+					role: "services"
+				},
+				{
+					type: "separator"
+				},
+				{
+					role: "hide"
+				},
+				{
+					role: "hideOthers"
+				},
+				{
+					role: "unhide"
+				},
+				{
+					type: "separator"
+				},
+				{
+					role: "quit"
+				}
+			]
+		},
 		{
 			role: "fileMenu",
 			type: "submenu",

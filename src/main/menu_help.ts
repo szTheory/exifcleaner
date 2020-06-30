@@ -1,45 +1,27 @@
-import path from "path";
-import {
-	aboutMenuItem,
-	openUrlMenuItem,
-	openNewGitHubIssue,
-	debugInfo
-} from "electron-util";
-import { MenuItemConstructorOptions } from "electron";
-import { isMac, isLinux } from "../common/platform";
+import { shell, app, MenuItemConstructorOptions } from "electron";
+import os from "os";
+import { isMac } from "../common/platform";
+import { showAboutWindow } from "./menu_about_window";
+import { openUrlMenuItem } from "./menu_item_open_url";
 
 const WEBSITE_URL = "https://exifcleaner.com";
 const GITHUB_USERNAME = "szTheory";
 const GITHUB_PROJECTNAME = "exifcleaner";
 const SOURCE_CODE_URL = `https://github.com/${GITHUB_USERNAME}/${GITHUB_PROJECTNAME}`;
-const COPYRIGHT_TEXT = `Copyright © ${GITHUB_USERNAME}`;
 
 export function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 	let submenu = [
-		openUrlMenuItem({
-			label: "Website",
-			url: WEBSITE_URL
-		}),
-		openUrlMenuItem({
-			label: "Source Code",
-			url: SOURCE_CODE_URL
-		}),
+		openUrlMenuItem("Website", WEBSITE_URL),
+		openUrlMenuItem("Source Code", SOURCE_CODE_URL),
 		{
 			label: "Report an Issue…",
 			click() {
-				const body = `
-	<!-- Please succinctly describe your issue and steps to reproduce it. -->
-
-
-	---
-
-	${debugInfo()}`;
-
-				openNewGitHubIssue({
-					user: GITHUB_USERNAME,
-					repo: GITHUB_PROJECTNAME,
-					body
-				});
+				const url = newGithubIssueUrl(
+					GITHUB_USERNAME,
+					GITHUB_PROJECTNAME,
+					newGithubIssueBody()
+				);
+				shell.openExternal(url);
 			}
 		}
 	];
@@ -49,21 +31,40 @@ export function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 			{
 				type: "separator"
 			},
-			aboutMenuItem({
-				website: WEBSITE_URL,
-				icon: aboutMenuIconPath(),
-				copyright: COPYRIGHT_TEXT
-			})
+			{
+				label: `About ${app.getName()}`,
+				click() {
+					showAboutWindow(GITHUB_USERNAME, WEBSITE_URL);
+				}
+			}
 		);
 	}
 
 	return submenu;
 }
 
-function aboutMenuIconPath(): string {
-	if (isLinux()) {
-		return path.join(__dirname, "..", "..", "exifcleaner.png");
-	} else {
-		return path.join(__dirname, "static", "icon.png");
-	}
+function newGithubIssueUrl(user: string, repo: string, body: string): string {
+	const url = new URL(`https://github.com/${user}/${repo}/issues/new`);
+	url.searchParams.set("body", body);
+
+	return url.toString();
+}
+
+function newGithubIssueBody(): string {
+	return `
+<!-- Please succinctly describe your issue and steps to reproduce it. -->
+
+
+---
+
+${debugInfo()}`;
+}
+
+function debugInfo(): string {
+	return `
+${app.getName()} ${app.getVersion()}
+Electron ${process.versions.electron}
+${process.platform} ${os.release()}
+Locale: ${app.getLocale()}
+`.trim();
 }
