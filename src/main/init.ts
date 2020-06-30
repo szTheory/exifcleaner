@@ -1,28 +1,28 @@
-import {app, BrowserWindow} from 'electron';
-import contextMenu from 'electron-context-menu';
-import unhandled from 'electron-unhandled';
+import { app, BrowserWindow } from "electron";
+import contextMenu from "electron-context-menu";
+import unhandled from "electron-unhandled";
 
-import packageJson from '../../package.json';
+import packageJson from "../../package.json";
 
-import {setupApp} from './app_setup';
+import { setupApp } from "./app_setup";
 
 function setupErrorHandling(): void {
-  unhandled();
+	unhandled();
 }
 
 // context menu (copy/paste/etc)
 function setupContextMenu(): void {
 	// TODO: manually build this out and remove electron-context-menu
-  contextMenu();
+	contextMenu();
 }
 
 function setupUserModelId(): void {
-  app.setAppUserModelId(packageJson.build.appId);
+	app.setAppUserModelId(packageJson.build.appId);
 }
 
-export function init({win}: {win: BrowserWindow|null}): void {
-  setupErrorHandling();
-  setupContextMenu();
-  setupUserModelId();
-  setupApp({win: win});
+export function init({ win }: { win: BrowserWindow | null }): void {
+	setupErrorHandling();
+	setupContextMenu();
+	setupUserModelId();
+	setupApp({ win: win });
 }
