@@ -18,14 +18,6 @@ function respondToDragOverEvent(event: DragEvent): void {
 	event.stopPropagation();
 }
 
-document.addEventListener("drop", event => {
-	respondToDropEvent(event);
-});
-
-document.addEventListener("dragover", event => {
-	respondToDragOverEvent(event);
-});
-
 function filePaths({ fileList }: { fileList: FileList }): string[] {
 	let paths = [];
 	for (const file of fileList) {
@@ -33,4 +25,14 @@ function filePaths({ fileList }: { fileList: FileList }): string[] {
 	}
 
 	return paths;
+}
+
+export function setupDragAndDrop() {
+	document.addEventListener("drop", event => {
+		respondToDropEvent(event);
+	});
+
+	document.addEventListener("dragover", event => {
+		respondToDragOverEvent(event);
+	});
 }

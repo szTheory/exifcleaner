@@ -10,8 +10,16 @@ if (isDev && module.hot) {
 import "../styles/index.scss";
 
 // app
-require("../renderer/drag");
-require("../renderer/menu_select_files");
+import { setupDragAndDrop } from "./drag";
+import { setupSelectFilesMenu } from "./menu_select_files";
 
-// SETUP ERROR HANDLING
-unhandled();
+function setup() {
+	// setup app
+	setupDragAndDrop();
+	setupSelectFilesMenu();
+
+	// report unhandled errors
+	unhandled();
+}
+
+setup();
