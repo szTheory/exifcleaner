@@ -5,7 +5,6 @@ import {
 } from "./table";
 import exiftool, { ExiftoolProcess } from "node-exiftool";
 import { exiftoolBinPath } from "../common/binaries";
-import { withArgsTempFile } from "../common/args_file";
 
 export async function addFiles({ filePaths }: { filePaths: string[] }) {
 	for (const filePath of filePaths) {
@@ -136,13 +135,9 @@ async function removeExif({
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))
 		.then(() => {
-			const args = ["-charset filename=UTF8", "overwrite_original"];
+			const args = ["charset filename=UTF8", "overwrite_original"];
 
-			return withArgsTempFile(args, argsTempFilePath => {
-				return ep.writeMetadata(filePath, { all: "" }, [
-					`-@ ${argsTempFilePath}`
-				]);
-			});
+			return ep.writeMetadata(filePath, { all: "" }, args);
 		})
 		.catch(console.error);
 
@@ -162,31 +157,21 @@ async function getExif({
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))
 		.then(() => {
-			const args = [
-				"-charset filename=UTF8",
-				"-File:all",
-				"-ExifToolVersion",
-				"-x FileSize",
-				"-x SourceFile"
-			];
+			const args = ["charset filename=UTF8", "-File:all", "-ExifToolVersion"];
 
-			return withArgsTempFile(args, argsTempFilePath => {
-				return exiftoolProcess
-					.readMetadata(filePath, [`-@ ${argsTempFilePath}`])
-					.then(
-						exifData => {
-							if (exifData.data === null) {
-								return {};
-							}
+			return exiftoolProcess.readMetadata(filePath, args).then(
+				exifData => {
+					if (exifData.data === null) {
+						return {};
+					}
 
-							const hash = exifData.data[0];
-							return cleanExifData(hash);
-						},
-						err => {
-							console.error(err);
-						}
-					);
-			});
+					const hash = exifData.data[0];
+					return cleanExifData(hash);
+				},
+				err => {
+					console.error(err);
+				}
+			);
 		})
 		.catch(console.error);
 
