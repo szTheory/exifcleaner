@@ -107,7 +107,7 @@ function cleanExifData(exifHash: any): any {
 }
 
 // The heart of the app, removing exif data from the image.
-// This uses the Perl binary "exiftool" from .resources with it.
+// This uses the Perl binary "exiftool" the app's `.resources` dir
 //
 // Opening and Closing
 //
@@ -135,7 +135,9 @@ async function removeExif({
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))
 		.then(() => {
-			return ep.writeMetadata(filePath, { all: "" }, ["overwrite_original"]);
+			const args = ["charset filename=UTF8", "overwrite_original"];
+
+			return ep.writeMetadata(filePath, { all: "" }, args);
 		})
 		.catch(console.error);
 
@@ -155,26 +157,21 @@ async function getExif({
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))
 		.then(() => {
-			return exiftoolProcess
-				.readMetadata(filePath, [
-					"-File:all",
-					"-ExifToolVersion",
-					"-x FileSize",
-					"-x SourceFile"
-				])
-				.then(
-					exifData => {
-						if (exifData.data === null) {
-							return {};
-						}
+			const args = ["charset filename=UTF8", "-File:all", "-ExifToolVersion"];
 
-						const hash = exifData.data[0];
-						return cleanExifData(hash);
-					},
-					err => {
-						console.error(err);
+			return exiftoolProcess.readMetadata(filePath, args).then(
+				exifData => {
+					if (exifData.data === null) {
+						return {};
 					}
-				);
+
+					const hash = exifData.data[0];
+					return cleanExifData(hash);
+				},
+				err => {
+					console.error(err);
+				}
+			);
 		})
 		.catch(console.error);
 
