@@ -5,6 +5,7 @@ import {
 } from "./table";
 import exiftool, { ExiftoolProcess } from "node-exiftool";
 import { exiftoolBinPath } from "../common/binaries";
+import { withArgsTempFile } from "../common/args_file";
 
 export async function addFiles({ filePaths }: { filePaths: string[] }) {
 	for (const filePath of filePaths) {
@@ -107,7 +108,7 @@ function cleanExifData(exifHash: any): any {
 }
 
 // The heart of the app, removing exif data from the image.
-// This uses the Perl binary "exiftool" from .resources with it.
+// This uses the Perl binary "exiftool" the app's `.resources` dir
 //
 // Opening and Closing
 //
@@ -135,7 +136,13 @@ async function removeExif({
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))
 		.then(() => {
-			return ep.writeMetadata(filePath, { all: "" }, ["overwrite_original"]);
+			const args = ["-charset filename=UTF8", "overwrite_original"];
+
+			return withArgsTempFile(args, argsTempFilePath => {
+				return ep.writeMetadata(filePath, { all: "" }, [
+					`-@ ${argsTempFilePath}`
+				]);
+			});
 		})
 		.catch(console.error);
 
@@ -155,26 +162,31 @@ async function getExif({
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))
 		.then(() => {
-			return exiftoolProcess
-				.readMetadata(filePath, [
-					"-File:all",
-					"-ExifToolVersion",
-					"-x FileSize",
-					"-x SourceFile"
-				])
-				.then(
-					exifData => {
-						if (exifData.data === null) {
-							return {};
-						}
+			const args = [
+				"-charset filename=UTF8",
+				"-File:all",
+				"-ExifToolVersion",
+				"-x FileSize",
+				"-x SourceFile"
+			];
 
-						const hash = exifData.data[0];
-						return cleanExifData(hash);
-					},
-					err => {
-						console.error(err);
-					}
-				);
+			return withArgsTempFile(args, argsTempFilePath => {
+				return exiftoolProcess
+					.readMetadata(filePath, [`-@ ${argsTempFilePath}`])
+					.then(
+						exifData => {
+							if (exifData.data === null) {
+								return {};
+							}
+
+							const hash = exifData.data[0];
+							return cleanExifData(hash);
+						},
+						err => {
+							console.error(err);
+						}
+					);
+			});
 		})
 		.catch(console.error);
 
