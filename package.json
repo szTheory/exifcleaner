@@ -39,7 +39,6 @@
 		"electron-webpack": "^2.7.4",
 		"electron-webpack-ts": "^4.0.1",
 		"node-sass": "^4.13.1",
-		"np": "^5.0.3",
 		"prettier": "1.19.1",
 		"sass-loader": "^8.0.0",
 		"typescript": "^3.8.3",
