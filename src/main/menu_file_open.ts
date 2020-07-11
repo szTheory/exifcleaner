@@ -9,10 +9,16 @@ import {
 export const EVENT_FILE_OPEN_ADD_FILES = "file-open-add-files";
 
 export function fileOpenClick(
-	menuItem: MenuItem,
-	browserWindow: BrowserWindow,
-	event: KeyboardEvent
+	_menuItem: MenuItem,
+	browserWindow: BrowserWindow | undefined,
+	_event: KeyboardEvent
 ): void {
+	if (!browserWindow) {
+		throw new Error(
+			"Could not load file open menu because browser window was not initialized."
+		);
+	}
+
 	dialog
 		.showOpenDialog(browserWindow, {
 			properties: ["openFile", "multiSelections"]
