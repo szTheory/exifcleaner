@@ -144,9 +144,17 @@ TypeScript code is formatted using Prettier.
 
 This section is really for my own reference when publishing a new release.
 
+First, build the app and test it out on all platforms. To build:
+
+```bash
+yarn run build
+```
+
+Then bump the version with `release`, and publish.
+
 ```bash
 yarn run release
-yarn run dist
+yarn run publish
 ```
 
 Or instead of `yarn run dist`, after Travis finishes building your app, open the release draft it created and click "Publish".

@@ -20,7 +20,8 @@
 		"packwin": "yarn run compile && electron-builder --windows",
 		"packlinux": "yarn run compile && electron-builder --linux",
 		"packmac": "yarn run compile && electron-builder --macos -c.mac.identity=null",
-		"dist": "yarn run compile && electron-builder --macos --linux --windows -p always",
+		"build": "yarn run compile && electron-builder --macos --linux --windows",
+		"publish": "yarn run compile && electron-builder --macos --linux --windows -p always",
 		"release": "np",
 		"dev": "electron-webpack dev",
 		"compile": "electron-webpack"
