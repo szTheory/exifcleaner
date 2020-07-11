@@ -9,7 +9,7 @@ function menu(canCopy: boolean): Menu {
 				label: "Copy",
 				role: "copy",
 				visible: canCopy,
-				enabled: canCopy
+				enabled: canCopy,
 			})
 		);
 	}

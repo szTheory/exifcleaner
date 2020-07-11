@@ -7,7 +7,7 @@ const { isPackaged, getAppPath } = remote.app;
 
 enum PlatformSubpath {
 	Win = "win",
-	Nix = "nix"
+	Nix = "nix",
 }
 
 function devBinaryPlatformSubpath(): PlatformSubpath {
@@ -35,7 +35,7 @@ function getDevBinariesPath(): string {
 
 enum ProdBinaryResourcesDirName {
 	WinMac = "Resources",
-	Linux = "resources"
+	Linux = "resources",
 }
 
 function getProdBinariesPath(): string {
@@ -67,7 +67,7 @@ function getBinariesPath(): string {
 
 enum BinFilename {
 	Win = "exiftool.exe",
-	Nix = "exiftool"
+	Nix = "exiftool",
 }
 
 function getBinFilename(): string {

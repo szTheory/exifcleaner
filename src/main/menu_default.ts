@@ -10,22 +10,22 @@ export function buildDefaultOsTemplate(): MenuItemConstructorOptions[] {
 			submenu: [
 				fileMenuOpenItem(),
 				{
-					type: "separator"
+					type: "separator",
 				},
 				{
-					role: "quit"
-				}
-			]
+					role: "quit",
+				},
+			],
 		},
 		{
-			role: "editMenu"
+			role: "editMenu",
 		},
 		{
-			role: "viewMenu"
+			role: "viewMenu",
 		},
 		{
 			role: "help",
-			submenu: buildHelpSubmenu()
-		}
+			submenu: buildHelpSubmenu(),
+		},
 	];
 }

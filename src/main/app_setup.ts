@@ -9,7 +9,7 @@ function preventMultipleAppInstances(): void {
 }
 
 function openMinimizedIfAlreadyExists({
-	win
+	win,
 }: {
 	win: BrowserWindow | null;
 }): void {

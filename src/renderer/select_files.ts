@@ -2,7 +2,7 @@ import { addFiles } from "./add_files";
 import { hideEmptyPane } from "./empty_pane";
 import {
 	showSelectedFilesPane,
-	eraseSelectedFilesPane
+	eraseSelectedFilesPane,
 } from "./selected_files";
 
 export function selectFiles({ filePaths }: { filePaths: string[] }): void {

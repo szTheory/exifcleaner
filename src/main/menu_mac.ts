@@ -8,33 +8,33 @@ export function buildMacOsTemplate(): MenuItemConstructorOptions[] {
 			label: app.getName(),
 			submenu: [
 				{
-					role: "about"
+					role: "about",
 				},
 				{
-					type: "separator"
+					type: "separator",
 				},
 				{
-					role: "services"
+					role: "services",
 				},
 				{
-					type: "separator"
+					type: "separator",
 				},
 				{
-					role: "hide"
+					role: "hide",
 				},
 				{
-					role: "hideOthers"
+					role: "hideOthers",
 				},
 				{
-					role: "unhide"
+					role: "unhide",
 				},
 				{
-					type: "separator"
+					type: "separator",
 				},
 				{
-					role: "quit"
-				}
-			]
+					role: "quit",
+				},
+			],
 		},
 		{
 			role: "fileMenu",
@@ -42,25 +42,25 @@ export function buildMacOsTemplate(): MenuItemConstructorOptions[] {
 			submenu: [
 				fileMenuOpenItem(),
 				{
-					type: "separator"
+					type: "separator",
 				},
 				{
-					role: "close"
-				}
-			]
+					role: "close",
+				},
+			],
 		},
 		{
-			role: "editMenu"
+			role: "editMenu",
 		},
 		{
-			role: "viewMenu"
+			role: "viewMenu",
 		},
 		{
-			role: "windowMenu"
+			role: "windowMenu",
 		},
 		{
 			role: "help",
-			submenu: buildHelpSubmenu()
-		}
+			submenu: buildHelpSubmenu(),
+		},
 	];
 }

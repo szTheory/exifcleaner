@@ -39,7 +39,7 @@ function urlForLoad() {
 		return url.format({
 			pathname: path.join(__dirname, "index.html"),
 			protocol: "file",
-			slashes: true
+			slashes: true,
 		});
 	}
 }
@@ -62,12 +62,12 @@ export function createMainWindow(): BrowserWindow {
 		minHeight: DEFAULT_WINDOW_HEIGHT + 25,
 		webPreferences: { nodeIntegration: true },
 		//set specific background color eliminate white flicker on content load
-		backgroundColor: WINDOW_BACKGROUND_COLOR
+		backgroundColor: WINDOW_BACKGROUND_COLOR,
 	};
 
 	if (isLinux()) {
 		options = Object.assign({}, options, {
-			icon: path.join(__dirname, "..", "..", "exifcleaner.png")
+			icon: path.join(__dirname, "..", "..", "exifcleaner.png"),
 		});
 	}
 

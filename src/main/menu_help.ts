@@ -22,20 +22,20 @@ export function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 					newGithubIssueBody()
 				);
 				shell.openExternal(url);
-			}
-		}
+			},
+		},
 	];
 
 	if (!isMac()) {
 		submenu.push(
 			{
-				type: "separator"
+				type: "separator",
 			},
 			{
 				label: `About ${app.getName()}`,
 				click() {
 					showAboutWindow(GITHUB_USERNAME, WEBSITE_URL);
-				}
+				},
 			}
 		);
 	}

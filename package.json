@@ -13,6 +13,7 @@
 	},
 	"scripts": {
 		"postinstall": "electron-builder install-app-deps",
+		"format": "yarn prettier --write 'src/**/*.ts'",
 		"lint": "prettier --check 'src/**/*.ts'",
 		"test": "yarn run lint",
 		"start": "electron .",
@@ -39,11 +40,10 @@
 		"electron-webpack": "^2.7.4",
 		"electron-webpack-ts": "^4.0.1",
 		"node-sass": "^4.13.1",
-		"prettier": "1.19.1",
+		"prettier": "2.0.5",
 		"sass-loader": "^8.0.0",
 		"typescript": "^3.8.3",
-		"webpack": "^4.41.2",
-		"webpack-cli": "^3.3.10"
+		"webpack": "^4.41.2"
 	},
 	"np": {
 		"publish": false,

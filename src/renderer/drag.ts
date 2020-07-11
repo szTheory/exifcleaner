@@ -28,11 +28,11 @@ function filePaths({ fileList }: { fileList: FileList }): string[] {
 }
 
 export function setupDragAndDrop() {
-	document.addEventListener("drop", event => {
+	document.addEventListener("drop", (event) => {
 		respondToDropEvent(event);
 	});
 
-	document.addEventListener("dragover", event => {
+	document.addEventListener("dragover", (event) => {
 		respondToDragOverEvent(event);
 	});
 }

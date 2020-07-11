@@ -6,8 +6,8 @@ export function openUrlMenuItem(
 ): MenuItemConstructorOptions {
 	return {
 		label: label,
-		click: function() {
+		click: function () {
 			shell.openExternal(url);
-		}
+		},
 	};
 }

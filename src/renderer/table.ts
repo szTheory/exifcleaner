@@ -3,7 +3,7 @@ import { selectedFilesList } from "./selected_files";
 
 export function updateRowWithExif({
 	tdNode,
-	exifData
+	exifData,
 }: {
 	tdNode: HTMLTableDataCellElement;
 	exifData: any;
@@ -47,7 +47,7 @@ function buildExifString({ exifData }: { exifData: any }): string {
 }
 
 export function updateRowWithCleanerSpinner({
-	trNode
+	trNode,
 }: {
 	trNode: HTMLTableRowElement;
 }): void {
@@ -64,7 +64,7 @@ export function updateRowWithCleanerSpinner({
 }
 
 export function addTableRow({
-	filePath
+	filePath,
 }: {
 	filePath: string;
 }): HTMLTableRowElement {

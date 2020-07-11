@@ -3,7 +3,7 @@ import {
 	BrowserWindow,
 	MenuItemConstructorOptions,
 	MenuItem,
-	KeyboardEvent
+	KeyboardEvent,
 } from "electron";
 
 export const EVENT_FILE_OPEN_ADD_FILES = "file-open-add-files";
@@ -21,9 +21,9 @@ export function fileOpenClick(
 
 	dialog
 		.showOpenDialog(browserWindow, {
-			properties: ["openFile", "multiSelections"]
+			properties: ["openFile", "multiSelections"],
 		})
-		.then(result => {
+		.then((result) => {
 			if (result.filePaths) {
 				browserWindow.webContents.send(
 					EVENT_FILE_OPEN_ADD_FILES,
@@ -37,6 +37,6 @@ export function fileMenuOpenItem(): MenuItemConstructorOptions {
 	return {
 		label: "Open…",
 		accelerator: "CmdOrCtrl+O",
-		click: fileOpenClick
+		click: fileOpenClick,
 	};
 }

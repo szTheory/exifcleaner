@@ -3,7 +3,7 @@ import { platform } from "os";
 export enum Platform {
 	NIX,
 	WIN,
-	MAC
+	MAC,
 }
 
 export function isMac() {

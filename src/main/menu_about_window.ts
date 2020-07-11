@@ -11,7 +11,7 @@ export function showAboutWindow(author: string, websiteUrl: string): void {
 		// credits: author, //optional
 		// authors: [author], //optional
 		website: websiteUrl,
-		iconPath: iconPath()
+		iconPath: iconPath(),
 	};
 
 	app.setAboutPanelOptions(aboutPanelOptions);

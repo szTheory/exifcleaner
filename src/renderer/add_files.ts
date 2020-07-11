@@ -1,7 +1,7 @@
 import {
 	addTableRow,
 	updateRowWithExif,
-	updateRowWithCleanerSpinner
+	updateRowWithCleanerSpinner,
 } from "./table";
 import exiftool, { ExiftoolProcess } from "node-exiftool";
 import { exiftoolBinPath } from "../common/binaries";
@@ -20,7 +20,7 @@ function newExifToolProcess(): exiftool.ExiftoolProcess {
 
 async function showExifBeforeClean({
 	trNode,
-	filePath
+	filePath,
 }: {
 	trNode: HTMLTableRowElement;
 	filePath: string;
@@ -34,8 +34,8 @@ async function showExifBeforeClean({
 	const ep = newExifToolProcess();
 	const exifData = await getExif({
 		exiftoolProcess: ep,
-		filePath: filePath
-	}).then(val => {
+		filePath: filePath,
+	}).then((val) => {
 		ep.close();
 		return val;
 	});
@@ -45,7 +45,7 @@ async function showExifBeforeClean({
 
 async function showExifAfterClean({
 	trNode,
-	filePath
+	filePath,
 }: {
 	trNode: HTMLTableRowElement;
 	filePath: string;
@@ -59,8 +59,8 @@ async function showExifAfterClean({
 	const ep = newExifToolProcess();
 	const newExifData = await getExif({
 		exiftoolProcess: ep,
-		filePath: filePath
-	}).then(val => {
+		filePath: filePath,
+	}).then((val) => {
 		ep.close();
 		return val;
 	});
@@ -79,7 +79,7 @@ async function addFile({ filePath }: { filePath: string }): Promise<any> {
 		})
 		.then(() => {
 			const ep = newExifToolProcess();
-			return removeExif({ ep: ep, filePath: filePath }).then(val => {
+			return removeExif({ ep: ep, filePath: filePath }).then((val) => {
 				ep.close();
 				return val;
 			});
@@ -126,7 +126,7 @@ function cleanExifData(exifHash: any): any {
 //   .catch(console.error)
 async function removeExif({
 	ep,
-	filePath
+	filePath,
 }: {
 	ep: any;
 	filePath: string;
@@ -148,7 +148,7 @@ async function removeExif({
 // This should also have the perl processes cleaned up after.
 async function getExif({
 	exiftoolProcess,
-	filePath
+	filePath,
 }: {
 	exiftoolProcess: ExiftoolProcess;
 	filePath: string;
@@ -160,7 +160,7 @@ async function getExif({
 			const args = ["charset filename=UTF8", "-File:all", "-ExifToolVersion"];
 
 			return exiftoolProcess.readMetadata(filePath, args).then(
-				exifData => {
+				(exifData) => {
 					if (exifData.data === null) {
 						return {};
 					}
@@ -168,7 +168,7 @@ async function getExif({
 					const hash = exifData.data[0];
 					return cleanExifData(hash);
 				},
-				err => {
+				(err) => {
 					console.error(err);
 				}
 			);
