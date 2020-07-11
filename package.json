@@ -13,7 +13,7 @@
 	},
 	"scripts": {
 		"postinstall": "electron-builder install-app-deps",
-		"lint": "prettier --check 'src/**/*.js'",
+		"lint": "prettier --check 'src/**/*.ts'",
 		"test": "yarn run lint",
 		"start": "electron .",
 		"pack": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
