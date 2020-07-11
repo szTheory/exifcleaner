@@ -23,7 +23,7 @@
 
 ## Downsides
 
-- Executable size `~190MB` (Electron app)
+- Executable size `~200MB` (Electron app)
 - Memory usage `~120MB` (Electron app)
 
 ## Install
