@@ -2,7 +2,7 @@
 	"name": "exifcleaner",
 	"productName": "ExifCleaner",
 	"version": "3.3.1",
-	"description": "Clean exif data from images",
+	"description": "Clean exif metadata from images, videos, and PDF documents",
 	"license": "MIT",
 	"repository": "github:szTheory/exifcleaner",
 	"main": "src/main/index.js",

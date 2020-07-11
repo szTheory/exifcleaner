@@ -111,7 +111,11 @@ Below is a full list of supported file types that ExifCleaner will remove metada
 
 ## Development
 
-Built with [Electron](https://electronjs.org). Uses [node-exiftool](https://www.npmjs.com/package/node-exiftool) as a wrapper for [Exiftool](https://exiftool.org/) binaries.
+Built with [Electron](https://electronjs.org). Uses [node-exiftool](https://www.npmjs.com/package/node-exiftool) as a wrapper for [Exiftool](https://exiftool.org/) binaries. To see the current list of NPM dependencies, run:
+
+```bash
+yarn list --production
+```
 
 ### Run the app in dev mode
 
