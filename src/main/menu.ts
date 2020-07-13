@@ -1,26 +1,22 @@
-import { buildDefaultOsTemplate } from "./menu_default";
-import { buildMacOsTemplate } from "./menu_mac";
-import { Menu, MenuItemConstructorOptions } from "electron";
+import { buildDefaultOsTemplate as defaultOsMenuTemplate } from "./menu_default";
+import { macOsMenuTemplate } from "./menu_mac";
+import { isMac } from "../common/platform";
+import { app, Menu, MenuItemConstructorOptions } from "electron";
+import { dockMenuTemplate } from "./menu_dock";
 
-const PLATFORM_MAC = "darwin";
-function isMac(): boolean {
-	return process.platform === PLATFORM_MAC;
+function menuTemplate(): MenuItemConstructorOptions[] {
+	return isMac() ? macOsMenuTemplate() : defaultOsMenuTemplate();
 }
 
-function buildMenuTemplate(): MenuItemConstructorOptions[] {
-	let menuTemplate = isMac() ? buildMacOsTemplate() : buildDefaultOsTemplate();
-
-	return menuTemplate;
+function menu(): Menu {
+	return Menu.buildFromTemplate(menuTemplate());
 }
 
-function buildMenu(): Menu {
-	const menuTemplate = buildMenuTemplate();
-
-	return Menu.buildFromTemplate(menuTemplate);
+function dockMenu(): Menu {
+	return Menu.buildFromTemplate(dockMenuTemplate());
 }
 
 export function setupMenu(): void {
-	const menu = buildMenu();
-
-	Menu.setApplicationMenu(menu);
+	Menu.setApplicationMenu(menu());
+	app.dock.setMenu(dockMenu());
 }

@@ -2,7 +2,7 @@ import { buildHelpSubmenu } from "./menu_help";
 import { fileMenuOpenItem } from "./menu_file_open";
 import { MenuItemConstructorOptions, app } from "electron";
 
-export function buildMacOsTemplate(): MenuItemConstructorOptions[] {
+export function macOsMenuTemplate(): MenuItemConstructorOptions[] {
 	return [
 		{
 			label: app.getName(),

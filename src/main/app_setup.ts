@@ -1,6 +1,5 @@
 import { app, BrowserWindow } from "electron";
 import { createMainWindow } from "./window_setup";
-import { isMac } from "../common/platform";
 
 function preventMultipleAppInstances(): void {
 	if (!app.requestSingleInstanceLock()) {
@@ -26,13 +25,7 @@ function openMinimizedIfAlreadyExists({
 
 function quitOnWindowsAllClosed(): void {
 	app.on("window-all-closed", () => {
-		// on Mac, the convention is to leave the app
-		// open even when all windows are closed. so that for
-		// example they can relaunch the app from the dock
-		// or still use the drag to dock features
-		if (!isMac()) {
-			app.quit();
-		}
+		app.quit();
 	});
 }
 
