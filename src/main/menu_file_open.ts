@@ -37,8 +37,11 @@ function fileOpenClick(
 	browserWindow: BrowserWindow | undefined,
 	_event: KeyboardEvent
 ): void {
+	browserWindow = defaultBrowserWindow(browserWindow);
+	browserWindow.show();
+
 	dialog
-		.showOpenDialog(defaultBrowserWindow(browserWindow), {
+		.showOpenDialog(browserWindow, {
 			properties: ["openFile", "multiSelections"],
 		})
 		.then((result) => {
