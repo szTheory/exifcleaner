@@ -12,6 +12,7 @@
 		"url": "https://exifcleaner.com"
 	},
 	"scripts": {
+		"update-exiftool": "bash -c ./update_exiftool.sh",
 		"postinstall": "electron-builder install-app-deps",
 		"format": "yarn prettier --write 'src/**/*.ts'",
 		"lint": "prettier --check 'src/**/*.ts'",
