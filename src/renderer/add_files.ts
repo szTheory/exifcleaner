@@ -5,8 +5,11 @@ import {
 } from "./table";
 import exiftool, { ExiftoolProcess } from "node-exiftool";
 import { exiftoolBinPath } from "../common/binaries";
+import { ipcRenderer } from "electron";
 
 export async function addFiles({ filePaths }: { filePaths: string[] }) {
+	ipcRenderer.send("files-added", filePaths.length.toString());
+
 	for (const filePath of filePaths) {
 		addFile({ filePath: filePath });
 	}
@@ -27,7 +30,6 @@ async function showExifBeforeClean({
 }): Promise<any> {
 	const tdBeforeNode = trNode.querySelector("td:nth-child(2)");
 	if (!(tdBeforeNode instanceof HTMLTableCellElement)) {
-		console.log(tdBeforeNode);
 		throw new Error("Expected table data cell element");
 	}
 
@@ -52,7 +54,6 @@ async function showExifAfterClean({
 }): Promise<any> {
 	const tdAfterNode = trNode.querySelector("td:nth-child(3)");
 	if (!(tdAfterNode instanceof HTMLTableCellElement)) {
-		console.log(tdAfterNode);
 		throw new Error("Expected table data cell element");
 	}
 
@@ -86,6 +87,12 @@ async function addFile({ filePath }: { filePath: string }): Promise<any> {
 		})
 		.then(() => {
 			return showExifAfterClean({ trNode: trNode, filePath: filePath });
+		})
+		.then(() => {
+			return new Promise(function (resolve) {
+				ipcRenderer.send("file-processed");
+				resolve();
+			});
 		})
 		.catch(console.error);
 }

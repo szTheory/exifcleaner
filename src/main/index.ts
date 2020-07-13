@@ -10,6 +10,7 @@ import { app } from "electron";
 import { setupMenu } from "./menu";
 import { init } from "./init";
 import { createMainWindow, setupMainWindow } from "./window_setup";
+import { currentBrowserWindow } from "../common/browser_window";
 
 // Maintain reference to window to
 // prevent it from being garbage collected
@@ -20,7 +21,10 @@ async function setup(): Promise<void> {
 	await app.whenReady();
 	setupMenu();
 	// keep reference to main window to prevent losing it on GC
-	win = await createMainWindow();
+	win = currentBrowserWindow(win);
+	if (!win) {
+		win = await createMainWindow();
+	}
 	setupMainWindow({ win: win });
 }
 

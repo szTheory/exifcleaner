@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from "electron";
 import { createMainWindow } from "./window_setup";
+import { currentBrowserWindow } from "../common/browser_window";
 
 function preventMultipleAppInstances(): void {
 	if (!app.requestSingleInstanceLock()) {
@@ -31,6 +32,7 @@ function quitOnWindowsAllClosed(): void {
 
 function createWindowOnActivate({ win }: { win: BrowserWindow | null }): void {
 	app.on("activate", () => {
+		win = currentBrowserWindow(win);
 		if (!win) {
 			win = createMainWindow();
 		}

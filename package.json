@@ -18,7 +18,7 @@
 		"lint": "prettier --check 'src/**/*.ts'",
 		"test": "yarn run lint",
 		"start": "electron .",
-		"pack": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
+		"packmactest": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
 		"packwin": "yarn run compile && electron-builder --windows",
 		"packlinux": "yarn run compile && electron-builder --linux",
 		"packmac": "yarn run compile && electron-builder --macos -c.mac.identity=null",

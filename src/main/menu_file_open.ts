@@ -5,6 +5,7 @@ import {
 	MenuItem,
 	KeyboardEvent,
 } from "electron";
+import { defaultBrowserWindow } from "../common/browser_window";
 
 export const EVENT_FILE_OPEN_ADD_FILES = "file-open-add-files";
 
@@ -16,29 +17,17 @@ export function fileMenuOpenItem(): MenuItemConstructorOptions {
 	};
 }
 
-function defaultBrowserWindow(
-	browserWindow: BrowserWindow | undefined
-): BrowserWindow {
-	if (!browserWindow) {
-		const firstBrowserWindow = BrowserWindow.getAllWindows()[0];
-		if (!firstBrowserWindow) {
-			throw new Error(
-				"Could not load file open menu because browser window was not initialized."
-			);
-		}
-		browserWindow = firstBrowserWindow;
-	}
-
-	return browserWindow;
-}
-
 function fileOpenClick(
 	_menuItem: MenuItem,
 	browserWindow: BrowserWindow | undefined,
 	_event: KeyboardEvent
 ): void {
 	browserWindow = defaultBrowserWindow(browserWindow);
+	if (browserWindow.isMinimized()) {
+		browserWindow.restore();
+	}
 	browserWindow.show();
+	browserWindow.focus();
 
 	dialog
 		.showOpenDialog(browserWindow, {
