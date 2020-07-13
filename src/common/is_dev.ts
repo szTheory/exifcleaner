@@ -1,4 +1,4 @@
-const electron = require("electron");
+import electron from "electron";
 
 if (typeof electron === "string") {
 	throw new TypeError("Not running in an Electron environment!");

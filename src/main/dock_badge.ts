@@ -1,7 +1,6 @@
 import { BrowserWindow, app } from "electron";
 import { isMac } from "../common/platform";
-
-const { ipcMain } = require("electron");
+import { ipcMain } from "electron";
 
 export function setupDockBadge() {
 	ipcMain.on("files-added", (_event, arg) => {
