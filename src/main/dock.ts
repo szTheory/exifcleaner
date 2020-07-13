@@ -5,31 +5,10 @@ import { ipcMain } from "electron";
 export const EVENT_FILES_ADDED = "files-added";
 export const EVENT_FILE_PROCESSED = "file-processed";
 
-function updateDockFilesAdded(filesCount: number): void {
-	if (!app.dock) {
-		throw new Error("Could not get a handle on the Mac Dock");
-	}
-	app.dock.setBadge(filesCount.toString());
-}
-
-function updateDockRemovedFile(): void {
-	if (!app.dock) {
-		throw new Error("Could not get a handle on the Mac Dock");
-	}
-	const fileCount = parseInt(app.dock.getBadge());
-	const newFileCount = fileCount - 1;
-	const displayFileCount = newFileCount > 0 ? newFileCount.toString() : "";
-
-	if (newFileCount <= 0 && !BrowserWindow.getFocusedWindow()) {
-		app.dock.bounce("critical");
-	}
-	app.dock.setBadge(displayFileCount);
-}
-
-export function setupDockBadge() {
-	ipcMain.on("files-added", (_event, arg) => {
+export function setupDockEventHandlers() {
+	ipcMain.on("files-added", (_event, filesCount) => {
 		if (isMac()) {
-			updateDockFilesAdded(arg);
+			updateDockFilesAdded(filesCount);
 		}
 	});
 
@@ -38,4 +17,31 @@ export function setupDockBadge() {
 			updateDockRemovedFile();
 		}
 	});
+}
+
+function updateDockFilesAdded(filesCount: number): void {
+	if (!app.dock) {
+		throw new Error("Could not get a handle on the Mac Dock");
+	}
+
+	// update badge count
+	app.dock.setBadge(filesCount.toString());
+}
+
+function updateDockRemovedFile(): void {
+	if (!app.dock) {
+		throw new Error("Could not get a handle on the Mac Dock");
+	}
+
+	const fileCount = parseInt(app.dock.getBadge());
+	const newFileCount = fileCount - 1;
+	const displayFileCount = newFileCount > 0 ? newFileCount.toString() : "";
+
+	// update badge count
+	app.dock.setBadge(displayFileCount);
+
+	// bounce if done
+	if (newFileCount <= 0 && !BrowserWindow.getFocusedWindow()) {
+		app.dock.bounce("critical");
+	}
 }

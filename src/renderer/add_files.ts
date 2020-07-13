@@ -6,8 +6,7 @@ import {
 import exiftool, { ExiftoolProcess } from "node-exiftool";
 import { exiftoolBinPath } from "../common/binaries";
 import { ipcRenderer } from "electron";
-import { EVENT_FILES_ADDED } from "../main/dock_badge";
-import { EVENT_FILE_PROCESSED } from "../main/dock_badge";
+import { EVENT_FILE_PROCESSED, EVENT_FILES_ADDED } from "../main/dock";
 
 export async function addFiles({ filePaths }: { filePaths: string[] }) {
 	ipcRenderer.send(EVENT_FILES_ADDED, filePaths.length.toString());

@@ -3,7 +3,7 @@ import packageJson from "../../package.json";
 import { app, BrowserWindow } from "electron";
 import { setupContextMenu } from "./context_menu";
 import { setupApp } from "./app_setup";
-import { setupDockBadge } from "./dock_badge";
+import { setupDockEventHandlers } from "./dock";
 
 function setupErrorHandling(): void {
 	unhandled();
@@ -16,7 +16,7 @@ function setupUserModelId(): void {
 export function init({ win }: { win: BrowserWindow | null }): void {
 	setupErrorHandling();
 	setupContextMenu();
-	setupDockBadge();
+	setupDockEventHandlers();
 	setupUserModelId();
 	setupApp({ win: win });
 }
