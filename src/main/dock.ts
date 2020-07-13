@@ -6,17 +6,17 @@ export const EVENT_FILES_ADDED = "files-added";
 export const EVENT_FILE_PROCESSED = "file-processed";
 
 export function setupDockEventHandlers() {
-	ipcMain.on("files-added", (_event, filesCount) => {
-		if (isMac()) {
+	if (isMac()) {
+		ipcMain.on(EVENT_FILES_ADDED, (_event, filesCount) => {
 			updateDockFilesAdded(filesCount);
-		}
-	});
+		});
+	}
 
-	ipcMain.on("file-processed", (_event, _arg) => {
-		if (isMac()) {
+	if (isMac()) {
+		ipcMain.on(EVENT_FILE_PROCESSED, (_event, _arg) => {
 			updateDockRemovedFile();
-		}
-	});
+		});
+	}
 }
 
 function updateDockFilesAdded(filesCount: number): void {
