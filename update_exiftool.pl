@@ -26,6 +26,8 @@ use constant BIN_DIR_UNIX          => RESOURCES_DIR . '/nix/bin';
 use constant BIN_DIR_WINDOWS       => RESOURCES_DIR . '/win/bin';
 use constant COMMAND_PRINT_SIGNAL  => '------> ';
 use constant COMMAND_SIGNAL_COLOR  => 'bright_green';
+use constant COMMAND_SUCCESS_COLOR => 'bright_green';
+use constant COMMAND_ERROR_COLOR   => 'bright_red';
 use constant COMMAND_OUTPUT_COLOR  => 'bold blue';
 use constant BANNER_OUTPUT_COLOR   => 'bold cyan';
 
@@ -45,7 +47,17 @@ sub print_output {
 sub print_success {
   my $text = shift;
 
-  print color(COMMAND_SIGNAL_COLOR);
+  print color(COMMAND_SUCCESS_COLOR);
+  print "$text\n";
+  print color('reset');
+
+  return;
+}
+
+sub print_error {
+  my $text = shift;
+
+  print color(COMMAND_ERROR_COLOR);
   print "$text\n";
   print color('reset');
 
@@ -257,6 +269,10 @@ sub verify_successful_install {
   if ($version) {
     print "\n";
     print_success("Success! Updated to ExifTool $version\n");
+  }
+  else {
+    print_error(
+      "Error while attempting to verify ExifTool install with $command\n");
   }
 
   return;
