@@ -251,6 +251,17 @@ sub move_unix_binary {
   return;
 }
 
+sub verify_successful_install {
+  my $command = BIN_DIR_UNIX . '/exiftool -ver';
+  my $version = qx($command);
+  if ($version) {
+    print "\n";
+    print_success("Success! Updated to ExifTool $version\n");
+  }
+
+  return;
+}
+
 # The Windows ExifTool binary is just an .exe file. We have to
 # rename it from `exiftool(-k).exe` to `exiftool.exe` and move
 # it to the ExifCleaner Windows bin dir.
@@ -305,5 +316,6 @@ sub run {
 }
 
 run();
+verify_successful_install();
 
 1;
