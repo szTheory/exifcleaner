@@ -132,6 +132,12 @@ Next, install the NPM package dependencies.
 yarn install
 ```
 
+Pull down the latest ExifTool binaries:
+
+```bash
+perl update_exiftool.pl
+```
+
 Finally, launch the application. This supports Hot Module Reload (HMR) so you will automatically see your changes every time you save a file.
 
 ```bash

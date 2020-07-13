@@ -24,6 +24,44 @@ use constant DOWNLOADS_WORKING_DIR => 'exiftool_downloads';
 use constant RESOURCES_DIR         => '.resources';
 use constant BIN_DIR_UNIX          => RESOURCES_DIR . '/nix/bin';
 use constant BIN_DIR_WINDOWS       => RESOURCES_DIR . '/win/bin';
+use constant COMMAND_PRINT_SIGNAL  => '------> ';
+
+use File::Path qw(make_path remove_tree);
+
+sub print_command {
+  my @command = @_;
+
+  print COMMAND_PRINT_SIGNAL . join( ' ', @command ) . "\n";
+
+  return;
+}
+
+sub run_command {
+  my @command = @_;
+
+  print_command(@command);
+  system(@command) == 0 or die "system @command failed: $?";
+
+  return;
+}
+
+sub make_dir {
+  my $dir_path = shift;
+
+  print COMMAND_PRINT_SIGNAL;
+  make_path( $dir_path, { verbose => 1 } );
+
+  return;
+}
+
+sub remove_dir {
+  my $dir_path = shift;
+
+  print COMMAND_PRINT_SIGNAL . 'remove_tree(' . $dir_path . ")\n";
+  remove_tree($dir_path);
+
+  return;
+}
 
 # Example checksum file output:
 #
@@ -36,6 +74,7 @@ use constant BIN_DIR_WINDOWS       => RESOURCES_DIR . '/win/bin';
 sub get_checksum_file_text {
   my $command = 'curl ' . CHECKSUMS_URL;
 
+  print_command($command);
   return qx($command);
 }
 
@@ -57,15 +96,6 @@ sub get_windows_exe_info {
   return ( $filename, $sha1 );
 }
 
-sub make_downloads_working_dir {
-  unless ( -d DOWNLOADS_WORKING_DIR ) {
-    my @command = ( 'mkdir', DOWNLOADS_WORKING_DIR );
-    system(@command) == 0 or die "system @command failed: $?";
-  }
-
-  return;
-}
-
 sub download_file {
   my $filename = shift;
 
@@ -73,7 +103,7 @@ sub download_file {
   my @command = (
     'wget', '--no-clobber', '--directory-prefix', DOWNLOADS_WORKING_DIR, $url
   );
-  system(@command) == 0 or die "system @command failed: $?";
+  run_command(@command);
 
   return;
 }
@@ -81,8 +111,9 @@ sub download_file {
 sub verify_checksum {
   my ( $filename, $sha1 ) = @_;
 
-  my $command           = 'shasum ' . DOWNLOADS_WORKING_DIR . "/$filename";
-  my $output            = qx($command);
+  my $command = 'shasum ' . DOWNLOADS_WORKING_DIR . "/$filename";
+  print_command($command);
+  my $output = qx($command);
   my ($calculated_sha1) = split( ' ', $output );
 
   print "$filename - $calculated_sha1";
@@ -106,7 +137,7 @@ sub extract_source_code {
     'tar', '--cd', DOWNLOADS_WORKING_DIR, '-xzf',
     DOWNLOADS_WORKING_DIR . "/$gzip_filename"
   );
-  system(@command) == 0 or die "system @command failed: $?";
+  run_command(@command);
 
   return;
 }
@@ -118,7 +149,35 @@ sub extract_windows_exe {
     'unzip', '-d', DOWNLOADS_WORKING_DIR, '-o',
     DOWNLOADS_WORKING_DIR . "/$zip_filename"
   );
-  system(@command) == 0 or die "system @command failed: $?";
+  run_command(@command);
+
+  return;
+}
+
+sub remove_old_binaries {
+
+  # remove old Unix lib dir
+  remove_dir( BIN_DIR_UNIX . '/lib' );
+
+  # remove old Unix `exiftool` bin
+  my $remove_path_bin_unix = BIN_DIR_UNIX . '/exiftool';
+  if ( -e $remove_path_bin_unix ) {
+    my @command = ( 'rm', $remove_path_bin_unix );
+    run_command(@command);
+  }
+  else {
+    print "No pre-existing Unix binary to remove\n";
+  }
+
+  # remove old Windows `exiftool.exe`
+  my $remove_path_bin_win = BIN_DIR_WINDOWS . '/exiftool.exe';
+  if ( -e $remove_path_bin_win ) {
+    my @command = ( 'rm', $remove_path_bin_win );
+    run_command(@command);
+  }
+  else {
+    print "No pre-existing Windows binary to remove\n";
+  }
 
   return;
 }
@@ -130,18 +189,15 @@ sub move_unix_binary {
   my $code_archive_filename = shift;
 
   my ($code_dir_name) = $code_archive_filename =~ /^(.+)[.]tar[.]gz$/;
-
   my $from_dir = DOWNLOADS_WORKING_DIR . "/$code_dir_name";
 
   # move lib dir
   my @command = ( 'mv', "$from_dir/lib", BIN_DIR_UNIX );
-  print join( ' ', @command ) . "\n";
-  system(@command) == 0 or die "system @command failed: $?";
+  run_command(@command);
 
   # move `exiftool` base Perl file
   @command = ( 'mv', "$from_dir/exiftool", BIN_DIR_UNIX );
-  print join( ' ', @command ) . "\n";
-  system(@command) == 0 or die "system @command failed: $?";
+  run_command(@command);
 
   return;
 }
@@ -154,7 +210,7 @@ sub move_windows_binary {
   my $to_path   = BIN_DIR_WINDOWS . '/exiftool.exe';
 
   my @command = ( 'mv', $from_path, $to_path );
-  system(@command) == 0 or die "system @command failed: $?";
+  run_command(@command);
 
   return;
 }
@@ -176,8 +232,11 @@ sub run {
   print "$code_filename - $code_sha1\n";
   print "$windows_filename - $windows_sha1\n";
 
-  # create working dir
-  make_downloads_working_dir();
+  print "\n";
+  print "----------------------------\n";
+  print "Create downloads working dir\n";
+  print "----------------------------\n";
+  make_dir(DOWNLOADS_WORKING_DIR);
 
   # download files
   print "\n";
@@ -202,11 +261,23 @@ sub run {
   extract_windows_exe($windows_filename);
 
   print "\n";
-  print "---------------\n";
-  print "Moving binaries\n";
-  print "---------------\n";
+  print "---------------------\n";
+  print "Removing old binaries\n";
+  print "---------------------\n";
+  remove_old_binaries();
+
+  print "\n";
+  print "---------------------\n";
+  print "Moving fresh binaries\n";
+  print "---------------------\n";
   move_unix_binary($code_filename);
   move_windows_binary();
+
+  print "\n";
+  print "------------------\n";
+  print "Clean up downloads\n";
+  print "------------------\n";
+  remove_dir(DOWNLOADS_WORKING_DIR);
 
   return;
 }
