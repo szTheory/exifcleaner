@@ -15,7 +15,7 @@ export async function addFiles({ filePaths }: { filePaths: string[] }) {
 }
 
 async function addFile({ filePath }: { filePath: string }): Promise<any> {
-	// add row
+	// add table row
 	const trNode = addTableRow({ filePath: filePath });
 
 	displayExifBeforeClean({ trNode: trNode, filePath: filePath })

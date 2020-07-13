@@ -1,38 +1,39 @@
 import { selectFiles } from "./select_files";
 
-function respondToDropEvent(event: DragEvent): void {
+export function setupDragAndDrop() {
+	document.addEventListener("drop", (event) => {
+		handleDropEvent(event);
+	});
+
+	document.addEventListener("dragover", (event) => {
+		handleDragOverEvent(event);
+	});
+}
+
+function handleDropEvent(event: DragEvent): void {
 	event.preventDefault();
 	event.stopPropagation();
+
 	const dataTransfer = event.dataTransfer;
 	if (!dataTransfer) {
 		throw "Error getting data transfer for drop event";
 	}
-	const files = dataTransfer.files;
-	const paths = filePaths({ fileList: files });
+	const fileList = dataTransfer.files;
+	const paths = filePaths(fileList);
 
-	selectFiles({ filePaths: paths });
+	selectFiles(paths);
 }
 
-function respondToDragOverEvent(event: DragEvent): void {
+function handleDragOverEvent(event: DragEvent): void {
 	event.preventDefault();
 	event.stopPropagation();
 }
 
-function filePaths({ fileList }: { fileList: FileList }): string[] {
+function filePaths(fileList: FileList): string[] {
 	let paths = [];
 	for (const file of fileList) {
 		paths.push(file.path);
 	}
 
 	return paths;
-}
-
-export function setupDragAndDrop() {
-	document.addEventListener("drop", (event) => {
-		respondToDropEvent(event);
-	});
-
-	document.addEventListener("dragover", (event) => {
-		respondToDragOverEvent(event);
-	});
 }
