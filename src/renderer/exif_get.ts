@@ -1,5 +1,11 @@
 import { ExiftoolProcess } from "node-exiftool";
 
+const EXIFTOOL_ARGS_GET_EXIF = [
+	"charset filename=UTF8",
+	"-File:all",
+	"-ExifToolVersion",
+];
+
 // Read exif data using the ExifTool binary
 // and clean up after the process when done
 export async function getExif({
@@ -13,23 +19,23 @@ export async function getExif({
 		.open()
 		// .then((pid) => console.log('Started exiftool process %s', pid))
 		.then(() => {
-			const args = ["charset filename=UTF8", "-File:all", "-ExifToolVersion"];
+			return exiftoolProcess
+				.readMetadata(filePath, EXIFTOOL_ARGS_GET_EXIF)
+				.then(
+					(exifData) => {
+						if (exifData.data === null) {
+							return {};
+						}
 
-			return exiftoolProcess.readMetadata(filePath, args).then(
-				(exifData) => {
-					if (exifData.data === null) {
-						return {};
+						const hash = exifData.data[0];
+						return cleanExifDataOutput(hash);
 					}
-
-					const hash = exifData.data[0];
-					return cleanExifDataOutput(hash);
-				},
-				(err) => {
-					console.error(err);
-				}
-			);
-		})
-		.catch(console.error);
+					// (err) => {
+					// 	console.error(err);
+					// }
+				);
+		});
+	// .catch(console.error);
 
 	return exifData;
 }
