@@ -8,18 +8,16 @@ function preventMultipleAppInstances(): void {
 	}
 }
 
-function openMinimizedIfAlreadyExists({
-	win,
-}: {
-	win: BrowserWindow | null;
-}): void {
+function openMinimizedIfAlreadyExists(
+	browserWindow: BrowserWindow | null
+): void {
 	app.on("second-instance", () => {
-		if (win) {
-			if (win.isMinimized()) {
-				win.restore();
+		if (browserWindow) {
+			if (browserWindow.isMinimized()) {
+				browserWindow.restore();
 			}
-			win.show();
-			win.focus();
+			browserWindow.show();
+			browserWindow.focus();
 		}
 	});
 }
@@ -30,18 +28,18 @@ function quitOnWindowsAllClosed(): void {
 	});
 }
 
-function createWindowOnActivate({ win }: { win: BrowserWindow | null }): void {
+function createWindowOnActivate(browserWindow: BrowserWindow | null): void {
 	app.on("activate", () => {
-		win = currentBrowserWindow(win);
-		if (!win) {
-			win = createMainWindow();
+		browserWindow = currentBrowserWindow(browserWindow);
+		if (!browserWindow) {
+			browserWindow = createMainWindow();
 		}
 	});
 }
 
-export function setupApp({ win }: { win: BrowserWindow | null }): void {
+export function setupApp(browserWindow: BrowserWindow | null): void {
 	preventMultipleAppInstances();
-	openMinimizedIfAlreadyExists({ win: win });
+	openMinimizedIfAlreadyExists(browserWindow);
 	quitOnWindowsAllClosed();
-	createWindowOnActivate({ win: win });
+	createWindowOnActivate(browserWindow);
 }

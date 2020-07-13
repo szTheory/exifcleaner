@@ -7,8 +7,8 @@ import { isDev } from "../common/is_dev";
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;
 
-function setupMainWindowClose({ win }: { win: BrowserWindow }) {
-	win.on("closed", () => {
+function setupMainWindowClose(browserWindow: BrowserWindow) {
+	browserWindow.on("closed", () => {
 		// on Mac, the convention is to leave the app
 		// open even when all windows are closed. so that for
 		// example they can relaunch the app from the dock
@@ -20,10 +20,10 @@ function setupMainWindowClose({ win }: { win: BrowserWindow }) {
 	});
 }
 
-function showWindowOnReady({ win }: { win: BrowserWindow }) {
-	win.once("ready-to-show", () => {
-		win.show();
-		win.focus();
+function showWindowOnReady(browserWindow: BrowserWindow) {
+	browserWindow.once("ready-to-show", () => {
+		browserWindow.show();
+		browserWindow.focus();
 	});
 }
 
@@ -44,10 +44,10 @@ function urlForLoad() {
 	}
 }
 
-function mainWindowLoadUrl({ win }: { win: BrowserWindow }) {
+function mainWindowLoadUrl(browserWindow: BrowserWindow) {
 	const url = urlForLoad();
 
-	win.loadURL(url);
+	browserWindow.loadURL(url);
 }
 
 const WINDOW_BACKGROUND_COLOR = "#F5F6F8";
@@ -74,9 +74,9 @@ export function createMainWindow(): BrowserWindow {
 	return new BrowserWindow(options);
 }
 
-export function setupMainWindow({ win }: { win: BrowserWindow }): void {
-	setupMainWindowClose({ win: win });
+export function setupMainWindow(browserWindow: BrowserWindow): void {
+	setupMainWindowClose(browserWindow);
 	// load URL before showing the window to avoid flash of unloaded content
-	mainWindowLoadUrl({ win: win });
-	showWindowOnReady({ win: win });
+	mainWindowLoadUrl(browserWindow);
+	showWindowOnReady(browserWindow);
 }

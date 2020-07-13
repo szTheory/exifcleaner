@@ -18,13 +18,16 @@ function menu(canCopy: boolean): Menu {
 }
 
 export function setupContextMenu(): void {
-	app.on("browser-window-created", (event: Event, win: BrowserWindow) => {
-		win.webContents.on(
-			"context-menu",
-			(_event: Event, params: Electron.ContextMenuParams) => {
-				const isTextSelected = params.selectionText.trim().length > 0;
-				menu(params.editFlags.canCopy && isTextSelected).popup();
-			}
-		);
-	});
+	app.on(
+		"browser-window-created",
+		(event: Event, browserWindow: BrowserWindow) => {
+			browserWindow.webContents.on(
+				"context-menu",
+				(_event: Event, params: Electron.ContextMenuParams) => {
+					const isTextSelected = params.selectionText.trim().length > 0;
+					menu(params.editFlags.canCopy && isTextSelected).popup();
+				}
+			);
+		}
+	);
 }

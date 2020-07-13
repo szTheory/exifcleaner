@@ -14,18 +14,18 @@ import { currentBrowserWindow } from "../common/browser_window";
 
 // Maintain reference to window to
 // prevent it from being garbage collected
-var win = null as BrowserWindow | null;
+var browserWindow = null as BrowserWindow | null;
 
 async function setup(): Promise<void> {
-	init({ win: win });
+	init(browserWindow);
 	await app.whenReady();
 	setupMenu();
 	// keep reference to main window to prevent losing it on GC
-	win = currentBrowserWindow(win);
-	if (!win) {
-		win = await createMainWindow();
+	browserWindow = currentBrowserWindow(browserWindow);
+	if (!browserWindow) {
+		browserWindow = await createMainWindow();
 	}
-	setupMainWindow({ win: win });
+	setupMainWindow(browserWindow);
 }
 
 setup();

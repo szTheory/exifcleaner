@@ -13,10 +13,10 @@ function setupUserModelId(): void {
 	app.setAppUserModelId(packageJson.build.appId);
 }
 
-export function init({ win }: { win: BrowserWindow | null }): void {
+export function init(browserWindow: BrowserWindow | null): void {
 	setupErrorHandling();
 	setupContextMenu();
 	setupDockEventHandlers();
 	setupUserModelId();
-	setupApp({ win: win });
+	setupApp(browserWindow);
 }

@@ -5,7 +5,7 @@ import { ipcMain } from "electron";
 export const EVENT_FILES_ADDED = "files-added";
 export const EVENT_FILE_PROCESSED = "file-processed";
 
-export function setupDockEventHandlers() {
+export function setupDockEventHandlers(): void {
 	if (isMac()) {
 		ipcMain.on(EVENT_FILES_ADDED, (_event, filesCount) => {
 			updateDockFilesAdded(filesCount);
