@@ -6,13 +6,13 @@ export enum Platform {
 	MAC,
 }
 
-export function isMac() {
+export function isMac(): boolean {
 	return getPlatform() == Platform.MAC;
 }
-export function isWindows() {
+export function isWindows(): boolean {
 	return getPlatform() == Platform.WIN;
 }
-export function isLinux() {
+export function isLinux(): boolean {
 	return getPlatform() == Platform.NIX;
 }
 
