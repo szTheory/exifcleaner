@@ -6,9 +6,11 @@ import {
 import exiftool, { ExiftoolProcess } from "node-exiftool";
 import { exiftoolBinPath } from "../common/binaries";
 import { ipcRenderer } from "electron";
+import { EVENT_FILES_ADDED } from "../main/dock_badge";
+import { EVENT_FILE_PROCESSED } from "../main/dock_badge";
 
 export async function addFiles({ filePaths }: { filePaths: string[] }) {
-	ipcRenderer.send("files-added", filePaths.length.toString());
+	ipcRenderer.send(EVENT_FILES_ADDED, filePaths.length.toString());
 
 	for (const filePath of filePaths) {
 		addFile({ filePath: filePath });
@@ -90,7 +92,7 @@ async function addFile({ filePath }: { filePath: string }): Promise<any> {
 		})
 		.then(() => {
 			return new Promise(function (resolve) {
-				ipcRenderer.send("file-processed");
+				ipcRenderer.send(EVENT_FILE_PROCESSED);
 				resolve();
 			});
 		})
