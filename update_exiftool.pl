@@ -25,13 +25,61 @@ use constant RESOURCES_DIR         => '.resources';
 use constant BIN_DIR_UNIX          => RESOURCES_DIR . '/nix/bin';
 use constant BIN_DIR_WINDOWS       => RESOURCES_DIR . '/win/bin';
 use constant COMMAND_PRINT_SIGNAL  => '------> ';
+use constant COMMAND_SIGNAL_COLOR  => 'bright_green';
+use constant COMMAND_OUTPUT_COLOR  => 'bold blue';
+use constant BANNER_OUTPUT_COLOR   => 'bold cyan';
 
 use File::Path qw(make_path remove_tree);
+use Term::ANSIColor;
+
+sub print_output {
+  my $output = shift;
+
+  print color(COMMAND_OUTPUT_COLOR);
+  print "$output";
+  print color('reset');
+
+  return;
+}
+
+sub print_success {
+  my $text = shift;
+
+  print color(COMMAND_SIGNAL_COLOR);
+  print "$text\n";
+  print color('reset');
+
+  return;
+}
+
+sub header {
+  my $text = shift;
+
+  my $banner = q{-} x length($text);
+
+  print "\n";
+  print color(BANNER_OUTPUT_COLOR);
+  print "$banner\n";
+  print "$text\n";
+  print "$banner\n";
+  print color('reset');
+
+  return;
+}
+
+sub print_command_signal {
+  print color(COMMAND_SIGNAL_COLOR);
+  print COMMAND_PRINT_SIGNAL;
+  print color('reset');
+
+  return;
+}
 
 sub print_command {
   my @command = @_;
 
-  print COMMAND_PRINT_SIGNAL . join( ' ', @command ) . "\n";
+  print_command_signal();
+  print_output( join( ' ', @command ) . "\n" );
 
   return;
 }
@@ -48,8 +96,10 @@ sub run_command {
 sub make_dir {
   my $dir_path = shift;
 
-  print COMMAND_PRINT_SIGNAL;
+  print_command_signal();
+  print color(COMMAND_OUTPUT_COLOR);
   make_path( $dir_path, { verbose => 1 } );
+  print color('reset');
 
   return;
 }
@@ -57,7 +107,7 @@ sub make_dir {
 sub remove_dir {
   my $dir_path = shift;
 
-  print COMMAND_PRINT_SIGNAL . 'remove_tree(' . $dir_path . ")\n";
+  print_command( 'remove_tree(' . $dir_path . ')' );
   remove_tree($dir_path);
 
   return;
@@ -116,11 +166,11 @@ sub verify_checksum {
   my $output = qx($command);
   my ($calculated_sha1) = split( ' ', $output );
 
-  print "$filename - $calculated_sha1";
+  print $calculated_sha1;
   my $is_match = $sha1 eq $calculated_sha1;
 
   if ( $sha1 eq $calculated_sha1 ) {
-    print "... Match!\n";
+    print_success(" ... Match!\n");
   }
   else {
     die "\n!!! Did NOT match SHA1 from ExifTool website: $sha1 !!!\n";
@@ -132,7 +182,6 @@ sub verify_checksum {
 sub extract_source_code {
   my $gzip_filename = shift;
 
-  print "Extracting source code archive: $gzip_filename\n";
   my @command = (
     'tar', '--cd', DOWNLOADS_WORKING_DIR, '-xzf',
     DOWNLOADS_WORKING_DIR . "/$gzip_filename"
@@ -166,7 +215,7 @@ sub remove_old_binaries {
     run_command(@command);
   }
   else {
-    print "No pre-existing Unix binary to remove\n";
+    print_output("No pre-existing Unix binary to remove\n");
   }
 
   # remove old Windows `exiftool.exe`
@@ -176,7 +225,7 @@ sub remove_old_binaries {
     run_command(@command);
   }
   else {
-    print "No pre-existing Windows binary to remove\n";
+    print_output("No pre-existing Windows binary to remove\n");
   }
 
   return;
@@ -216,67 +265,40 @@ sub move_windows_binary {
 }
 
 sub run {
-  print "\n";
-  print "---------------------------------------------\n";
-  print "Fetching ExifTool SHA1 checksums from website\n";
-  print "---------------------------------------------\n";
+  header('Fetching ExifTool SHA1 checksums from website');
   my $checksum_file_text = get_checksum_file_text();
   my ( $code_filename, $code_sha1 ) = get_code_zip_info($checksum_file_text);
   my ( $windows_filename, $windows_sha1 ) =
     get_windows_exe_info($checksum_file_text);
+  print_output("$code_filename - $code_sha1\n");
+  print_output("$windows_filename - $windows_sha1\n");
 
-  print "\n";
-  print "------------------------------------\n";
-  print "ExifTool SHA1 checksums from website\n";
-  print "------------------------------------\n";
-  print "$code_filename - $code_sha1\n";
-  print "$windows_filename - $windows_sha1\n";
-
-  print "\n";
-  print "----------------------------\n";
-  print "Create downloads working dir\n";
-  print "----------------------------\n";
+  header('Recreate downloads working directory');
+  remove_dir(DOWNLOADS_WORKING_DIR);
   make_dir(DOWNLOADS_WORKING_DIR);
 
   # download files
-  print "\n";
-  print "-----------------\n";
-  print "Downloading files\n";
-  print "-----------------\n";
+  header('Downloading files');
   download_file($code_filename);
   download_file($windows_filename);
 
   # verify checksums
-  print "-----------------------\n";
-  print "Verifying SHA1 checksums\n";
-  print "-----------------------\n";
+  header('Verifying SHA1 checksums');
   verify_checksum( $code_filename,    $code_sha1 );
   verify_checksum( $windows_filename, $windows_sha1 );
 
-  print "\n";
-  print "-------------------\n";
-  print "Extracting archives\n";
-  print "-------------------\n";
+  header('Extracting archives');
   extract_source_code($code_filename);
   extract_windows_exe($windows_filename);
 
-  print "\n";
-  print "---------------------\n";
-  print "Removing old binaries\n";
-  print "---------------------\n";
+  header('Removing old binaries');
   remove_old_binaries();
 
-  print "\n";
-  print "---------------------\n";
-  print "Moving fresh binaries\n";
-  print "---------------------\n";
+  header('Moving fresh binaries');
   move_unix_binary($code_filename);
   move_windows_binary();
 
-  print "\n";
-  print "------------------\n";
-  print "Clean up downloads\n";
-  print "------------------\n";
+  header('Clean up downloads working directory');
   remove_dir(DOWNLOADS_WORKING_DIR);
 
   return;
