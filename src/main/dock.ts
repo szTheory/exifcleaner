@@ -10,9 +10,7 @@ export function setupDockEventHandlers() {
 		ipcMain.on(EVENT_FILES_ADDED, (_event, filesCount) => {
 			updateDockFilesAdded(filesCount);
 		});
-	}
 
-	if (isMac()) {
 		ipcMain.on(EVENT_FILE_PROCESSED, (_event, _arg) => {
 			updateDockRemovedFile();
 		});
