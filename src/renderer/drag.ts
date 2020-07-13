@@ -1,6 +1,6 @@
 import { selectFiles } from "./select_files";
 
-export function setupDragAndDrop() {
+export function setupDragAndDrop(): void {
 	document.addEventListener("drop", (event) => {
 		handleDropEvent(event);
 	});

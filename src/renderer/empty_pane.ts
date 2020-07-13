@@ -1,4 +1,4 @@
-export function hideEmptyPane() {
+export function hideEmptyPane(): void {
 	const pane = emptyPane();
 	if (!pane) {
 		throw "Could not find empty pane to hide";
