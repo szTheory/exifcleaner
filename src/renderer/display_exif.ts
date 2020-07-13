@@ -1,5 +1,5 @@
 import { getExif } from "./exif_get";
-import { updateRowWithExif } from "./table";
+import { updateRowWithExif } from "./table_update_row";
 import { newExifToolProcess } from "./new_process";
 
 export async function displayExifBeforeClean({

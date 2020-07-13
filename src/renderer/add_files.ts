@@ -1,11 +1,9 @@
-import { addTableRow, updateRowWithCleanerSpinner } from "./table";
+import { updateRowWithCleanerSpinner } from "./table_update_row";
+import { addTableRow } from "./table_add_row";
 import { ipcRenderer } from "electron";
 import { EVENT_FILE_PROCESSED, EVENT_FILES_ADDED } from "../main/dock";
 import { removeExif } from "./exif_remove";
-import {
-	displayExifBeforeClean,
-	displayExifAfterClean,
-} from "./display_exif_row";
+import { displayExifBeforeClean, displayExifAfterClean } from "./display_exif";
 import { newExifToolProcess } from "./new_process";
 
 export async function addFiles({ filePaths }: { filePaths: string[] }) {
