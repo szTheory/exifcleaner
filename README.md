@@ -135,7 +135,7 @@ yarn install
 Pull down the latest ExifTool binaries:
 
 ```bash
-perl update_exiftool.pl
+yarn run update-exiftool
 ```
 
 Finally, launch the application. This supports Hot Module Reload (HMR) so you will automatically see your changes every time you save a file.
