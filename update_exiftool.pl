@@ -304,12 +304,10 @@ sub run {
   remove_dir(DOWNLOADS_WORKING_DIR);
   make_dir(DOWNLOADS_WORKING_DIR);
 
-  # download files
   header('Downloading files');
   download_file($code_filename);
   download_file($windows_filename);
 
-  # verify checksums
   header('Verifying SHA1 checksums');
   verify_checksum( $code_filename,    $code_sha1 );
   verify_checksum( $windows_filename, $windows_sha1 );
