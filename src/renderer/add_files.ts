@@ -58,15 +58,14 @@ async function addFile(
 	const tableRow = addTableRow(filePath);
 
 	return displayExifBeforeClean(exifToolProcess, tableRow, filePath)
-		.then((exifData) => {
-			console.log(exifData);
+		.then((_exifData) => {
 			updateRowWithCleanerSpinner(tableRow);
-		})
-		.then(() => {
+
 			return removeExif(exifToolProcess, filePath);
 		})
-		.then(() => {
+		.then((_stdOutErrOutput) => {
 			ipcRenderer.send(EVENT_FILE_PROCESSED);
+
 			return displayExifAfterClean(exifToolProcess, tableRow, filePath);
 		});
 }
