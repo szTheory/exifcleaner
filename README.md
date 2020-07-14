@@ -21,7 +21,7 @@
 - No automatic updates or network traffic
 - Relatively few NPM dependencies (no JS frameworks)
 
-## Downsides
+## Drawbacks
 
 - Executable size `~200MB` (Electron app)
 - Memory usage `~120MB` (Electron app)
