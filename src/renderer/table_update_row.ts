@@ -1,10 +1,7 @@
-export function updateRowWithExif({
-	tdNode,
-	exifData,
-}: {
-	tdNode: HTMLTableDataCellElement;
-	exifData: any;
-}): void {
+export function updateRowWithExif(
+	tdNode: HTMLTableDataCellElement,
+	exifData: any
+): void {
 	// td
 	tdNode.textContent = "";
 
@@ -43,11 +40,7 @@ function buildExifString({ exifData }: { exifData: any }): string {
 	return str;
 }
 
-export function updateRowWithCleanerSpinner({
-	trNode,
-}: {
-	trNode: HTMLTableRowElement;
-}): void {
+export function updateRowWithCleanerSpinner(trNode: HTMLTableRowElement): void {
 	// td
 	const tdNode = trNode.querySelector("td:nth-child(3)");
 	if (!tdNode) {
