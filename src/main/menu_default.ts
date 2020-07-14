@@ -1,6 +1,6 @@
-import { buildHelpSubmenu } from "./menu_help";
-import { fileMenuOpenItem } from "./menu_file_open";
 import { MenuItemConstructorOptions } from "electron";
+import { fileMenuOpenItem } from "./menu_file_open";
+import { buildHelpSubmenu } from "./menu_help";
 
 // Linux and Windows
 export function buildDefaultOsTemplate(): MenuItemConstructorOptions[] {

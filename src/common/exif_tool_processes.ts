@@ -1,6 +1,6 @@
+import os from "os";
 import { ExiftoolProcess } from "node-exiftool";
 import { exiftoolBinPath } from "../common/binaries";
-import os from "os";
 
 export function spawnExifToolProcesses(
 	maxNumProcesses: number

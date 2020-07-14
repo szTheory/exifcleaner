@@ -1,12 +1,12 @@
+import { ipcRenderer } from "electron";
 import { spawnExifToolProcesses } from "../common/exif_tool_processes";
+import { EVENT_FILE_PROCESSED } from "../main/dock";
 import { addFiles } from "./add_files";
 import { hideEmptyPane } from "./empty_pane";
 import {
 	showSelectedFilesPane,
 	eraseSelectedFilesPane,
 } from "./selected_files";
-import { ipcRenderer } from "electron";
-import { EVENT_FILE_PROCESSED } from "../main/dock";
 
 export function selectFiles(filePaths: string[]): void {
 	if (filePaths.length == 0) {

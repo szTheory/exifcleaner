@@ -1,8 +1,8 @@
 import { BrowserWindow, app } from "electron";
 import url from "url";
 import path from "path";
-import { isMac, isLinux } from "../common/platform";
 import { isDev } from "../common/is_dev";
+import { isMac, isLinux } from "../common/platform";
 
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;

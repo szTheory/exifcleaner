@@ -1,6 +1,6 @@
+import { ExiftoolProcess } from "node-exiftool";
 import { getExif } from "./exif_get";
 import { updateRowWithExif } from "./table_update_row";
-import { ExiftoolProcess } from "node-exiftool";
 
 export async function displayExifBeforeClean(
 	exifToolProcess: ExiftoolProcess,

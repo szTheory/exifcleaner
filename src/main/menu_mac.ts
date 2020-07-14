@@ -1,6 +1,6 @@
-import { buildHelpSubmenu } from "./menu_help";
-import { fileMenuOpenItem } from "./menu_file_open";
 import { MenuItemConstructorOptions, app } from "electron";
+import { fileMenuOpenItem } from "./menu_file_open";
+import { buildHelpSubmenu } from "./menu_help";
 
 export function macOsMenuTemplate(): MenuItemConstructorOptions[] {
 	return [

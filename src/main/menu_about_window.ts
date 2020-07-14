@@ -1,6 +1,6 @@
 import { app } from "electron";
-import { isLinux } from "../common/platform";
 import path from "path";
+import { isLinux } from "../common/platform";
 
 export function showAboutWindow(author: string, websiteUrl: string): void {
 	let aboutPanelOptions = {

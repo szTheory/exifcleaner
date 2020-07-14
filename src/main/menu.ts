@@ -1,8 +1,8 @@
-import { buildDefaultOsTemplate as defaultOsMenuTemplate } from "./menu_default";
-import { macOsMenuTemplate } from "./menu_mac";
-import { isMac } from "../common/platform";
 import { app, Menu, MenuItemConstructorOptions } from "electron";
+import { isMac } from "../common/platform";
+import { buildDefaultOsTemplate as defaultOsMenuTemplate } from "./menu_default";
 import { dockMenuTemplate } from "./menu_dock";
+import { macOsMenuTemplate } from "./menu_mac";
 
 function menuTemplate(): MenuItemConstructorOptions[] {
 	return isMac() ? macOsMenuTemplate() : defaultOsMenuTemplate();

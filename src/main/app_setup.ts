@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from "electron";
-import { createMainWindow } from "./window_setup";
 import { currentBrowserWindow } from "../common/browser_window";
+import { createMainWindow } from "./window_setup";
 
 function preventMultipleAppInstances(): void {
 	if (!app.requestSingleInstanceLock()) {

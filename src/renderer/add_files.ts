@@ -1,10 +1,10 @@
-import { ExiftoolProcess } from "node-exiftool";
 import { ipcRenderer } from "electron";
+import { ExiftoolProcess } from "node-exiftool";
 import { EVENT_FILE_PROCESSED, EVENT_FILES_ADDED } from "../main/dock";
-import { updateRowWithCleanerSpinner } from "./table_update_row";
-import { addTableRow } from "./table_add_row";
-import { removeExif } from "./exif_remove";
 import { displayExifBeforeClean, displayExifAfterClean } from "./display_exif";
+import { removeExif } from "./exif_remove";
+import { addTableRow } from "./table_add_row";
+import { updateRowWithCleanerSpinner } from "./table_update_row";
 
 export async function addFiles(
 	filePaths: string[],

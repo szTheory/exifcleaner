@@ -1,6 +1,5 @@
-import { app } from "electron";
+import { app, ipcMain } from "electron";
 import { isMac } from "../common/platform";
-import { ipcMain } from "electron";
 
 export const EVENT_FILES_ADDED = "files-added";
 export const EVENT_FILE_PROCESSED = "file-processed";
