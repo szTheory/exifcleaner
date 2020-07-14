@@ -1,0 +1,22 @@
+{
+	"empty.title": {
+		"en": "No files selected",
+		"fr": "Aucun fichier sélectionné"
+	},
+	"empty.subtitle": {
+		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
+		"fr": "Faites glisser et déposez des images, des vidéos ou des fichiers PDF pour supprimer automatiquement les métadonnées."
+	},
+	"table.header.filename": {
+		"en": "Selected files",
+		"fr": "Fichiers sélectionnés"
+	},
+	"table.header.exif-before": {
+		"en": "# Exif Before",
+		"fr": "# Exif Avant"
+	},
+	"table.header.exif-after": {
+		"en": "# Exif After",
+		"fr": "# Exif Après"
+	}
+}

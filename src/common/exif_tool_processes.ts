@@ -13,5 +13,5 @@ export function spawnExifToolProcesses(
 }
 
 function newExifToolProcess(): ExiftoolProcess {
-	return new ExiftoolProcess(exiftoolBinPath());
+	return new ExiftoolProcess(exiftoolBinPath);
 }
