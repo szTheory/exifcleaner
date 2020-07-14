@@ -26,11 +26,7 @@ type I18nStringsDictionary = {
 
 let strings: I18nStringsDictionary | null = null;
 
-export function i18n(
-	key: string,
-	locale: string,
-	fallbackLocale: string
-): string {
+export function i18n(key: string, locale: string): string {
 	if (!strings) {
 		throw new Error("i18n strings file not loaded");
 	}
@@ -39,7 +35,7 @@ export function i18n(
 	// prefer locale, then fallback locale, then default to English
 	const text =
 		i18nString[locale] ||
-		i18nString[fallbackLocale] ||
+		i18nString[fallbackLocale(locale)] ||
 		i18nString[Locale.English];
 	if (!text) {
 		throw new Error(`Could not find interface text for ${key}`);
@@ -54,6 +50,41 @@ export function preloadI18nStrings(): void {
 	}
 
 	strings = JSON.parse(stringsFile());
+}
+
+// Select a fallback for each "dialect" if it doesn't already
+// have its own translation more specific than the main entry
+export function fallbackLocale(locale: string): string {
+	switch (locale) {
+		case "zh-CN": //Chinese (Simplified)
+		case "zh-TW": //Chinese (Traditional)
+			return Locale.Chinese;
+
+		case "fr-CA": //French (Canada)
+		case "fr-CH": //French (Switzerland)
+		case "fr-FR": //French (France)
+			return Locale.French;
+
+		case "de-AT": //German (Austria)
+		case "de-CH": //German (Switzerland)
+		case "de-DE": //German (Germany)
+			return Locale.German;
+
+		case "pt-BR": //Portuguese (Brazil)
+		case "pt-PT": //Portuguese (Portugal)
+			return Locale.Portuguese;
+
+		case "it-CH": //Italian (Switzerland)
+		case "it-IT": //Italian (Italy)
+			return Locale.Italian;
+
+		case "es-419": //Spanish (Latin America)
+			return Locale.Spanish;
+
+		default:
+			//default to English
+			return Locale.English;
+	}
 }
 
 function stringsFile() {

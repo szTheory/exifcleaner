@@ -1,6 +1,5 @@
 import path from "path";
-import { remote } from "electron";
-const { getAppPath } = remote.app;
+import { app } from "electron";
 import { getPlatform, Platform } from "./platform";
 
 export enum ProdResourcesDirName {
@@ -11,7 +10,7 @@ export const DevResourcesDirName = ".resources";
 
 export function prodResourcesPath(): string {
 	const platform = getPlatform();
-	const appPath = getAppPath();
+	const appPath = app.getAppPath();
 	const appDir = path.dirname(appPath);
 
 	let resourcesDirName;
