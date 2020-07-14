@@ -1,4 +1,4 @@
-# <img src="static/icon.png" height=27 alt="ExifCleaner Logo"> ExifCleaner
+# <img src="static/icon.svg" height=22> ExifCleaner
 
 ![Version](https://img.shields.io/github/v/release/szTheory/exifcleaner) ![Total Downloads](https://img.shields.io/github/downloads/szTheory/exifcleaner/total)
 
