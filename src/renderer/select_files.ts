@@ -1,6 +1,6 @@
 import { ipcRenderer } from "electron";
 import { spawnExifToolProcesses } from "../common/exif_tool_processes";
-import { EVENT_FILE_PROCESSED } from "../main/dock";
+import { EVENT_ALL_FILES_PROCESSED } from "../main/dock";
 import { addFiles } from "./add_files";
 import { hideEmptyPane } from "./empty_pane";
 import {
@@ -25,6 +25,6 @@ async function processFiles(filePaths: string[]): Promise<void> {
 	const exifToolProcesses = spawnExifToolProcesses(filePaths.length);
 
 	addFiles(filePaths, exifToolProcesses).finally(() => {
-		ipcRenderer.send(EVENT_FILE_PROCESSED);
+		ipcRenderer.send(EVENT_ALL_FILES_PROCESSED);
 	});
 }

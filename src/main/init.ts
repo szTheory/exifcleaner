@@ -16,7 +16,7 @@ function setupUserModelId(): void {
 export function init(browserWindow: BrowserWindow | null): void {
 	setupErrorHandling();
 	setupContextMenu();
-	setupDockEventHandlers();
+	setupDockEventHandlers(browserWindow);
 	setupUserModelId();
 	setupApp(browserWindow);
 }
