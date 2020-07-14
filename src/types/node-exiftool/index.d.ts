@@ -3,7 +3,9 @@
 // for used methods from the public interface
 
 declare module "node-exiftool" {
-	import { Readable } from "stream";
+	import { Readable, Writable } from "stream";
+
+	type ExifToolPid = number;
 
 	export class ExiftoolProcess {
 		constructor(bin: string);
@@ -12,11 +14,18 @@ declare module "node-exiftool" {
 
 		close(): Promise<{ success: any; error: Error }>;
 
-		open(encoding?: string, options?: object): Promise<number>;
+		open(encoding?: string, options?: object): Promise<ExifToolPid>;
 
 		readMetadata(
 			file: string | Readable,
 			args: string[]
+		): Promise<{ data: object[] | null; error: string | null }>;
+
+		writeMetadata(
+			file: string | Writable,
+			metadata: object,
+			extraArgs: string[],
+			debug: boolean
 		): Promise<{ data: object[] | null; error: string | null }>;
 
 		// 	writeMetadata(...args: any[]): void;

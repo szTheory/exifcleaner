@@ -8,34 +8,20 @@ const EXIFTOOL_ARGS_GET_EXIF = [
 
 // Read exif data using the ExifTool binary
 // and clean up after the process when done
-export async function getExif({
-	exiftoolProcess,
-	filePath,
-}: {
-	exiftoolProcess: ExiftoolProcess;
-	filePath: string;
-}): Promise<object> {
+export async function getExif(
+	exiftoolProcess: ExiftoolProcess,
+	filePath: string
+): Promise<object> {
 	const exifData = exiftoolProcess
-		.open()
-		// .then((pid) => console.log('Started exiftool process %s', pid))
-		.then(() => {
-			return exiftoolProcess
-				.readMetadata(filePath, EXIFTOOL_ARGS_GET_EXIF)
-				.then(
-					(exifData) => {
-						if (exifData.data === null) {
-							return {};
-						}
+		.readMetadata(filePath, EXIFTOOL_ARGS_GET_EXIF)
+		.then((exifData) => {
+			if (exifData.data === null) {
+				return {};
+			}
 
-						const hash = exifData.data[0];
-						return cleanExifDataOutput(hash);
-					}
-					// (err) => {
-					// 	console.error(err);
-					// }
-				);
+			const hash = exifData.data[0];
+			return cleanExifDataOutput(hash);
 		});
-	// .catch(console.error);
 
 	return exifData;
 }
