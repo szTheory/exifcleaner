@@ -19,7 +19,9 @@ export async function addFiles(
 			filePathsIterator,
 			exifToolProcess,
 			exifToolProcess.open()
-		);
+		).catch(() => {
+			exifToolProcess.close();
+		});
 	});
 
 	return Promise.all(promises);
