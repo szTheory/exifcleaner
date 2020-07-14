@@ -1,34 +1,53 @@
 import electron from "electron";
 import { preloadI18nStrings, i18n } from "../common/i18n";
+import { Locale } from "../common/i18n";
 
 const ATTRIBUTE_I18N = "i18n";
 
 export function setupI18n(): void {
 	preloadI18nStrings();
 	const locale = electron.remote.app.getLocale();
-	// console.log(`Locale: ${locale}`);
+
 	translateHtml(locale);
 }
 
-function fallbackLocale(locale: string) {
+// Select a fallback for each "dialect" if it doesn't already
+// have its own translation more specific than the main entry
+function getFallbackLocale(locale: string): string {
 	switch (locale) {
-		case "fr": //French
+		case "zh-CN": //Chinese (Simplified)
+		case "zh-TW": //Chinese (Traditional)
+			return Locale.Chinese;
+
 		case "fr-CA": //French (Canada)
 		case "fr-CH": //French (Switzerland)
 		case "fr-FR": //French (France)
-			return "fr";
+			return Locale.French;
 
-		case "es": //Spanish
+		case "de-AT": //German (Austria)
+		case "de-CH": //German (Switzerland)
+		case "de-DE": //German (Germany)
+			return Locale.German;
+
+		case "pt-BR": //Portuguese (Brazil)
+		case "pt-PT": //Portuguese (Portugal)
+			return Locale.Portuguese;
+
+		case "it-CH": //Italian (Switzerland)
+		case "it-IT": //Italian (Italy)
+			return Locale.Italian;
+
 		case "es-419": //Spanish (Latin America)
-			return "es";
+			return Locale.Spanish;
 
 		default:
-			return "en";
+			//default to English
+			return Locale.English;
 	}
 }
 
 function translateHtml(locale: string) {
-	locale = fallbackLocale(locale);
+	const fallbackLocale = getFallbackLocale(locale);
 
 	const elements = document.querySelectorAll(`[${ATTRIBUTE_I18N}]`);
 	elements.forEach((element) => {
@@ -40,10 +59,7 @@ function translateHtml(locale: string) {
 		if (!key) {
 			throw new Error(`Could not find an HTML element to localize for: ${key}`);
 		}
-		console.log("key: " + key);
-		const text = i18n(key, locale);
-		console.log("text: " + text);
 
-		element.innerText = text;
+		element.innerText = i18n(key, locale, fallbackLocale);
 	});
 }
