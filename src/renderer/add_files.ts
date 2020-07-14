@@ -32,7 +32,7 @@ async function processFile(
 	exifToolProcess: ExiftoolProcess,
 	exifToolPromise: Promise<any>
 ): Promise<any> {
-	exifToolPromise.then(() => {
+	return exifToolPromise.then(() => {
 		const iteratorResult = filePathsIterator.next();
 		if (iteratorResult.done) {
 			return exifToolProcess.close();

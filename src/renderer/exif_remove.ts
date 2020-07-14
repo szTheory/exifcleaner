@@ -11,12 +11,10 @@ export async function removeExif(
 	exifToolProcess: ExiftoolProcess,
 	filePath: string
 ): Promise<object> {
-	const exifData = exifToolProcess.writeMetadata(
+	return exifToolProcess.writeMetadata(
 		filePath,
 		{ all: "" },
 		EXIFTOOL_ARGS_REMOVE_EXIF,
 		false
 	);
-
-	return exifData;
 }
