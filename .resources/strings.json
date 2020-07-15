@@ -27,6 +27,66 @@
 	},
 	"contextmenu.select-all": {
 		"en": "Select All",
-		"fr": "Selectionner Tout"
+		"fr": "Sélectionner Tout"
+	},
+
+	"menu.app.about": {
+		"en": "About ",
+		"fr": "À propos d'"
+	},
+	"menu.app.services": {
+		"en": "Services",
+		"fr": "Services"
+	},
+	"menu.app.hide": {
+		"en": "Hide",
+		"fr": "Masquer"
+	},
+	"menu.app.hide-others": {
+		"en": "Hide Others",
+		"fr": "Masquer les autres"
+	},
+	"menu.app.show-all": {
+		"en": "Show All",
+		"fr": "Tout afficher"
+	},
+	"menu.app.quit": {
+		"en": "Quit",
+		"fr": "Quitter"
+	},
+
+	"menu.file.open": {
+		"en": "Open",
+		"fr": "Ouvrir"
+	},
+	"menu.file.close": {
+		"en": "Close",
+		"fr": "Fermer"
+	},
+	"menu.file.quit": {
+		"en": "Quit",
+		"fr": "Quitter"
+	},
+
+	"menu.help.website": {
+		"en": "Website",
+		"fr": "Site Web"
+	},
+	"menu.help.source-code": {
+		"en": "Source Code",
+		"fr": "Code Source"
+	},
+	"menu.help.report-issue": {
+		"en": "Report an Issue",
+		"fr": "Dénoncer un Problème"
+	},
+	"menu.help.about": {
+		"en": "About ",
+		"fr": "À propos d'"
+	},
+
+	"aboutwindow:copyright": {
+		"en": "Copyright",
+		"fr": "Droit d'auteur"
 	}
 }

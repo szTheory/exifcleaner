@@ -3,6 +3,7 @@ import os from "os";
 import { isMac } from "../common/platform";
 import { showAboutWindow } from "./menu_about_window";
 import { openUrlMenuItem } from "./menu_item_open_url";
+import { i18n } from "./i18n";
 
 const WEBSITE_URL = "https://exifcleaner.com";
 const GITHUB_USERNAME = "szTheory";
@@ -11,10 +12,10 @@ const SOURCE_CODE_URL = `https://github.com/${GITHUB_USERNAME}/${GITHUB_PROJECTN
 
 export function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 	let submenu = [
-		openUrlMenuItem("Website", WEBSITE_URL),
-		openUrlMenuItem("Source Code", SOURCE_CODE_URL),
+		openUrlMenuItem(i18n("menu.help.website"), WEBSITE_URL),
+		openUrlMenuItem(i18n("menu.help.source-code"), SOURCE_CODE_URL),
 		{
-			label: "Report an Issue…",
+			label: `${i18n("menu.help.report-issue")}…`,
 			click() {
 				const url = newGithubIssueUrl(
 					GITHUB_USERNAME,
@@ -32,7 +33,7 @@ export function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 				type: "separator",
 			},
 			{
-				label: `About ${app.getName()}`,
+				label: `${i18n("menu.help.about")}${app.getName()}`,
 				click() {
 					showAboutWindow(GITHUB_USERNAME, WEBSITE_URL);
 				},
