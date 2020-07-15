@@ -7,6 +7,7 @@ import { fileMenuTemplate } from "./menu_file";
 import { helpMenuTemplate } from "./menu_help";
 import { viewMenuTemplate } from "./menu_view";
 import { windowMenuTemplate } from "./menu_window";
+import { i18n } from "./i18n";
 
 const APP_ARG_WINDOWS_TASK_OPEN_FILE = "--open-file";
 
@@ -52,8 +53,8 @@ function setupUserTasksMenu(): void {
 			arguments: APP_ARG_WINDOWS_TASK_OPEN_FILE,
 			iconPath: process.execPath,
 			iconIndex: 0,
-			title: "Open file(s)…",
-			description: "Remove metadata from selected files",
+			title: i18n("usertasks:open-file.label"),
+			description: i18n("usertasks:open-file.description"),
 		},
 	]);
 }

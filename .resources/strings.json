@@ -265,5 +265,12 @@
 		"fr": "Droit d'auteur",
 		"pl": "Copyright",
 		"ja": "著作"
+	},
+
+	"usertasks:open-file.label": {
+		"en": "Open files"
+	},
+	"usertasks:open-file.description": {
+		"en": "Remove metadata from selected files"
 	}
 }
