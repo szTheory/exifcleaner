@@ -1,0 +1,183 @@
+{
+	"empty.title": {
+		"en": "No files selected",
+		"fr": "Aucun fichier sélectionné"
+	},
+	"empty.subtitle": {
+		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
+		"fr": "Faites glisser et déposez des images, des vidéos ou des fichiers PDF pour supprimer automatiquement les métadonnées."
+	},
+
+	"table.header.filename": {
+		"en": "Selected files",
+		"fr": "Fichiers sélectionnés"
+	},
+	"table.header.exif-before": {
+		"en": "# Exif Before",
+		"fr": "# Exif Avant"
+	},
+	"table.header.exif-after": {
+		"en": "# Exif After",
+		"fr": "# Exif Après"
+	},
+
+	"contextmenu.copy": {
+		"en": "Copy",
+		"fr": "Copier"
+	},
+	"contextmenu.select-all": {
+		"en": "Select All",
+		"fr": "Tout sélectionner"
+	},
+
+	"menu.app.about": {
+		"en": "About ",
+		"fr": "À propos d'"
+	},
+	"menu.app.services": {
+		"en": "Services",
+		"fr": "Services"
+	},
+	"menu.app.hide": {
+		"en": "Hide",
+		"fr": "Masquer"
+	},
+	"menu.app.hide-others": {
+		"en": "Hide Others",
+		"fr": "Masquer les autres"
+	},
+	"menu.app.show-all": {
+		"en": "Show All",
+		"fr": "Tout afficher"
+	},
+	"menu.app.quit": {
+		"en": "Quit",
+		"fr": "Quitter"
+	},
+
+	"menu.file.name": {
+		"en": "File",
+		"fr": "Fichier"
+	},
+	"menu.file.open": {
+		"en": "Open",
+		"fr": "Ouvrir"
+	},
+	"menu.file.close": {
+		"en": "Close",
+		"fr": "Fermer"
+	},
+	"menu.file.quit": {
+		"en": "Quit",
+		"fr": "Quitter"
+	},
+
+	"menu.edit.name": {
+		"en": "Edit",
+		"fr": "Édition"
+	},
+	"menu.edit.copy": {
+		"en": "Copy",
+		"fr": "Copier"
+	},
+	"menu.edit.select-all": {
+		"en": "Select All",
+		"fr": "Tout sélectionner"
+	},
+	"menu.edit.speech": {
+		"en": "Speech",
+		"fr": "Dictée"
+	},
+	"menu.edit.speech.start-speaking": {
+		"en": "Start Speaking",
+		"fr": "Commencer dictée"
+	},
+	"menu.edit.speech.stop-speaking": {
+		"en": "Stop Speaking",
+		"fr": "Arrêter dictée"
+	},
+
+	"menu.view.name": {
+		"en": "View",
+		"fr": "Présentation"
+	},
+	"menu.view.toggle-dev-tools": {
+		"en": "Toggle Developer Tools",
+		"fr": "Outils de développment"
+	},
+	"menu.view.zoom-reset": {
+		"en": "Actual Size",
+		"fr": "Rétablir la taille normale du text"
+	},
+	"menu.view.zoom-in": {
+		"en": "Zoom In",
+		"fr": "Zoom avant"
+	},
+	"menu.view.zoom-out": {
+		"en": "Zoom Out",
+		"fr": "Zoom arrière"
+	},
+	"menu.view.toggle-full-screen": {
+		"en": "Toggle Full Screen",
+		"fr": "Activer le mode plein écran"
+	},
+
+	"menu.window.name": {
+		"en": "Window",
+		"fr": "Fenêtre"
+	},
+	"menu.window.minimize-mac": {
+		"en": "Minimize",
+		"fr": "Placer dan le Dock"
+	},
+	"menu.window.minimize": {
+		"en": "Minimize",
+		"fr": "Réduire"
+	},
+	"menu.window.zoom-mac": {
+		"en": "Zoom",
+		"fr": "Réduire/agrandir"
+	},
+	"menu.window.zoom": {
+		"en": "Zoom",
+		"fr": "Agrandir"
+	},
+	"menu.window.front": {
+		"en": "Brint All to Front",
+		"fr": "Tour ramener au premier plan"
+	},
+	"menu.window.window": {
+		"en": "Window",
+		"fr": "Fenêtre"
+	},
+	"menu.window.close": {
+		"en": "Close",
+		"fr": "Fermer"
+	},
+
+	"menu.help.name": {
+		"en": "Help",
+		"fr": "Aide"
+	},
+	"menu.help.website": {
+		"en": "Website",
+		"fr": "Site web"
+	},
+	"menu.help.source-code": {
+		"en": "Source Code",
+		"fr": "Code source"
+	},
+	"menu.help.report-issue": {
+		"en": "Report an Issue",
+		"fr": "Dénoncer un problème"
+	},
+	"menu.help.about": {
+		"en": "About ",
+		"fr": "À propos d'"
+	},
+
+	"aboutwindow:copyright": {
+		"en": "Copyright",
+		"fr": "Droit d'auteur"
+	}
+}

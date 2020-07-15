@@ -4,9 +4,10 @@ import packageJson from "../../package.json";
 import { setupApp } from "./app_setup";
 import { setupContextMenu } from "./context_menu";
 import { setupDockEventHandlers } from "./dock";
+import { preloadI18nStrings } from "../common/i18n";
 
 function setupErrorHandling(): void {
-	unhandled();
+	unhandled(); //handle "unhandled" exceptions
 }
 
 function setupUserModelId(): void {
@@ -14,6 +15,7 @@ function setupUserModelId(): void {
 }
 
 export function init(browserWindow: BrowserWindow | null): void {
+	preloadI18nStrings();
 	setupErrorHandling();
 	setupContextMenu();
 	setupDockEventHandlers(browserWindow);
