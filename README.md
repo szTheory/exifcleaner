@@ -155,14 +155,14 @@ TypeScript code is formatted using Prettier.
 
 Thanks to all the people who submitted bug reports and fixes. I've tried to include everyone, so if I've missed you it was by accident, let me know and I'll add you. Also see the [Translations list](https://github.com/szTheory/exifcleaner#translations) for more credits.
 
-@m1chu - Polish translation, fix for Mac dock bug on non-Mac platforms, help debugging Unicode filename bug
-@LukasThyWalls - help debugging Unicode filename bug, feature suggestions
-@AKKED - Japanese translation, help debugging Unicode filename bug
-@TomasGutierrez0 - help auditing ExifTool dependency
-@5a384507-18ce-417c-bb55-d4dfcc8883fe - help debugging initial Linux version
-@totoroot - help debugging Linux AppImage installer, usability feedback, feature suggestions
-@Scopuli - help debugging Linux AppImage installer
-@Tox86 - found broken Settings menu item bug
+- @m1chu - Polish translation, fix for Mac dock bug on non-Mac platforms, help debugging Unicode filename bug
+- @LukasThyWalls - help debugging Unicode filename bug, feature suggestions
+- @AKKED - Japanese translation, help debugging Unicode filename bug
+- @TomasGutierrez0 - help auditing ExifTool dependency
+- @5a384507-18ce-417c-bb55-d4dfcc8883fe - help debugging initial Linux version
+- @totoroot - help debugging Linux AppImage installer, usability feedback, feature suggestions
+- @Scopuli - help debugging Linux AppImage installer
+- @Tox86 - found broken Settings menu item bug
 
 ### Publishing a new release
 
