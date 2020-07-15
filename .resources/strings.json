@@ -27,7 +27,7 @@
 	},
 	"contextmenu.select-all": {
 		"en": "Select All",
-		"fr": "Sélectionner Tout"
+		"fr": "Tout sélectionner"
 	},
 
 	"menu.app.about": {
@@ -55,6 +55,10 @@
 		"fr": "Quitter"
 	},
 
+	"menu.file.name": {
+		"en": "File",
+		"fr": "Fichier"
+	},
 	"menu.file.open": {
 		"en": "Open",
 		"fr": "Ouvrir"
@@ -68,6 +72,73 @@
 		"fr": "Quitter"
 	},
 
+	"menu.edit.name": {
+		"en": "Edit",
+		"fr": "Édition"
+	},
+	"menu.edit.copy": {
+		"en": "Copy",
+		"fr": "Copier"
+	},
+	"menu.edit.select-all": {
+		"en": "Select All",
+		"fr": "Tout sélectionner"
+	},
+	"menu.edit.speech": {
+		"en": "Speech",
+		"fr": "Dictée"
+	},
+	"menu.edit.speech.start-speaking": {
+		"en": "Start Speaking",
+		"fr": "Commencer dictée"
+	},
+	"menu.edit.speech.stop-speaking": {
+		"en": "Stop Speaking",
+		"fr": "Arrêter dictée"
+	},
+
+	"menu.view.name": {
+		"en": "View",
+		"fr": "Présentation"
+	},
+
+	"menu.window.name": {
+		"en": "Window",
+		"fr": "Fenêtre"
+	},
+	"menu.window.minimize-mac": {
+		"en": "Minimize",
+		"fr": "Placer dan le Dock"
+	},
+	"menu.window.minimize": {
+		"en": "Minimize",
+		"fr": "Réduire"
+	},
+	"menu.window.zoom-mac": {
+		"en": "Zoom",
+		"fr": "Réduire/agrandir"
+	},
+	"menu.window.zoom": {
+		"en": "Zoom",
+		"fr": "Agrandir"
+	},
+	"menu.window.front": {
+		"en": "Brint All to Front",
+		"fr": "Tour ramener au premier plan"
+	},
+	"menu.window.window": {
+		"en": "Window",
+		"fr": "Fenêtre"
+	},
+	"menu.window.close": {
+		"en": "Close",
+		"fr": "Fermer"
+	},
+
+	"menu.help.name": {
+		"en": "Help",
+		"fr": "Aide"
+	},
 	"menu.help.website": {
 		"en": "Website",
 		"fr": "Site Web"

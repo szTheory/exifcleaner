@@ -32,6 +32,11 @@ export function i18n(key: string, locale: string): string {
 	}
 
 	const i18nString = strings[key];
+	if (!i18nString) {
+		throw new Error(
+			`Could not find localization strings while reading text for ${key}`
+		);
+	}
 	// prefer locale, then fallback locale, then default to English
 	const text =
 		i18nString[locale] ||
@@ -54,6 +59,7 @@ export function preloadI18nStrings(): void {
 
 // Select a fallback for each "dialect" if it doesn't already
 // have its own translation more specific than the main entry
+// Locales list: https://www.electronjs.org/docs/api/locales
 export function fallbackLocale(locale: string): string {
 	switch (locale) {
 		case "zh-CN": //Chinese (Simplified)

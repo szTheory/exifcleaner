@@ -10,7 +10,15 @@ const GITHUB_USERNAME = "szTheory";
 const GITHUB_PROJECTNAME = "exifcleaner";
 const SOURCE_CODE_URL = `https://github.com/${GITHUB_USERNAME}/${GITHUB_PROJECTNAME}`;
 
-export function buildHelpSubmenu(): MenuItemConstructorOptions[] {
+export function helpMenuTemplate(): MenuItemConstructorOptions {
+	return {
+		label: i18n("menu.help.name"),
+		role: "help",
+		submenu: buildHelpSubmenu(),
+	};
+}
+
+function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 	let submenu = [
 		openUrlMenuItem(i18n("menu.help.website"), WEBSITE_URL),
 		openUrlMenuItem(i18n("menu.help.source-code"), SOURCE_CODE_URL),
