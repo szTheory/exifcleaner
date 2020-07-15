@@ -1,11 +1,22 @@
 import { app, Menu, MenuItemConstructorOptions } from "electron";
 import { isMac } from "../common/platform";
-import { buildDefaultOsTemplate as defaultOsMenuTemplate } from "./menu_default";
 import { dockMenuTemplate } from "./menu_dock";
-import { macOsMenuTemplate } from "./menu_mac";
+import { viewMenuTemplate } from "./menu_view";
+import { editMenuTemplate } from "./menu_edit";
+import { helpMenuTemplate } from "./menu_help";
+import { windowMenuTemplate } from "./menu_window";
+import { fileMenuTemplate } from "./menu_file";
+import { appMenuTemplate } from "./menu_app";
 
 function menuTemplate(): MenuItemConstructorOptions[] {
-	return isMac() ? macOsMenuTemplate() : defaultOsMenuTemplate();
+	return [
+		...(isMac() ? [appMenuTemplate()] : []),
+		fileMenuTemplate(),
+		editMenuTemplate(),
+		viewMenuTemplate(),
+		windowMenuTemplate(),
+		helpMenuTemplate(),
+	];
 }
 
 function menu(): Menu {

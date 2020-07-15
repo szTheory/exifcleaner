@@ -1,12 +1,13 @@
 import { app } from "electron";
 import path from "path";
 import { isLinux } from "../common/platform";
+import { i18n } from "./i18n";
 
 export function showAboutWindow(author: string, websiteUrl: string): void {
 	let aboutPanelOptions = {
 		applicationName: app.getName(),
 		applicationVersion: app.getVersion(),
-		copyright: `Copyright © ${author}`,
+		copyright: `${i18n("aboutwindow:copyright")} © ${author}`,
 		version: app.getVersion(),
 		// credits: author, //optional
 		// authors: [author], //optional

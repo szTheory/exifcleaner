@@ -1,4 +1,5 @@
 import { app, Menu, MenuItem, BrowserWindow } from "electron";
+import { i18n } from "./i18n";
 
 function menu(canCopy: boolean): Menu {
 	const menu = new Menu();
@@ -6,14 +7,16 @@ function menu(canCopy: boolean): Menu {
 	if (canCopy) {
 		menu.append(
 			new MenuItem({
-				label: "Copy",
+				label: i18n("contextmenu.copy"),
 				role: "copy",
 				visible: canCopy,
 				enabled: canCopy,
 			})
 		);
 	}
-	menu.append(new MenuItem({ label: "Select All", role: "selectAll" }));
+	menu.append(
+		new MenuItem({ label: i18n("contextmenu.select-all"), role: "selectAll" })
+	);
 	return menu;
 }
 

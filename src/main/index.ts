@@ -1,5 +1,5 @@
 import { BrowserWindow } from "electron";
-import { isDev } from "../common/is_dev";
+import { isDev } from "../common/env";
 
 // electron-webpack HMR for development
 if (isDev && module.hot) {
@@ -20,6 +20,7 @@ async function setup(): Promise<void> {
 	init(browserWindow);
 	await app.whenReady();
 	setupMenu();
+
 	// keep reference to main window to prevent losing it on GC
 	browserWindow = currentBrowserWindow(browserWindow);
 	if (!browserWindow) {

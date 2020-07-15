@@ -6,12 +6,13 @@ import {
 	KeyboardEvent,
 } from "electron";
 import { defaultBrowserWindow } from "../common/browser_window";
+import { i18n } from "./i18n";
 
 export const EVENT_FILE_OPEN_ADD_FILES = "file-open-add-files";
 
 export function fileMenuOpenItem(): MenuItemConstructorOptions {
 	return {
-		label: "Open…",
+		label: `${i18n("menu.file.open")}…`,
 		accelerator: "CmdOrCtrl+O",
 		click: fileOpenClick,
 	};
