@@ -2,7 +2,7 @@ import { BrowserWindow, app } from "electron";
 import url from "url";
 import path from "path";
 import { isDev } from "../common/env";
-import { isMac, isLinux } from "../common/platform";
+import { isMac, isLinux, isWindows } from "../common/platform";
 
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;
@@ -25,6 +25,16 @@ function showWindowOnReady(browserWindow: BrowserWindow) {
 		browserWindow.show();
 		browserWindow.focus();
 	});
+}
+
+// On Windows, stop flashing the frame once the window comes into focus.
+// More: https://www.electronjs.org/docs/tutorial/windows-taskbar#flash-frame
+function windowsStopFlashingFrameOnFocus(browserWindow: BrowserWindow) {
+	if (isWindows()) {
+		return;
+	}
+
+	browserWindow.once("focus", () => browserWindow.flashFrame(false));
 }
 
 function urlForLoad() {
@@ -79,4 +89,5 @@ export function setupMainWindow(browserWindow: BrowserWindow): void {
 	// load URL before showing the window to avoid flash of unloaded content
 	mainWindowLoadUrl(browserWindow);
 	showWindowOnReady(browserWindow);
+	windowsStopFlashingFrameOnFocus(browserWindow);
 }
