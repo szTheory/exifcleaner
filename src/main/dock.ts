@@ -72,5 +72,9 @@ function updateProgressBar(browserWindow: BrowserWindow | null): void {
 }
 
 function updateDockBounce(): void {
-	if (isMac()) app.dock.bounce("critical");
+	if (!isMac()) {
+		return;
+	}
+
+	app.dock.bounce("critical");
 }
