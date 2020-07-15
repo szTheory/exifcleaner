@@ -30,7 +30,7 @@ function showWindowOnReady(browserWindow: BrowserWindow) {
 // On Windows, stop flashing the frame once the window comes into focus.
 // More: https://www.electronjs.org/docs/tutorial/windows-taskbar#flash-frame
 function windowsStopFlashingFrameOnFocus(browserWindow: BrowserWindow) {
-	if (isWindows()) {
+	if (!isWindows()) {
 		return;
 	}
 

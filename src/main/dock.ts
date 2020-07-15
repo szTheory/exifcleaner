@@ -1,6 +1,6 @@
 import { app, ipcMain, BrowserWindow } from "electron";
 import { defaultBrowserWindow } from "../common/browser_window";
-import { isMac } from "../common/platform";
+import { isMac, isWindows } from "../common/platform";
 
 export const EVENT_FILES_ADDED = "files-added";
 export const EVENT_FILE_PROCESSED = "file-processed";
@@ -89,7 +89,7 @@ function updateDockBounce(browserWindow: BrowserWindow | null): void {
 // attention but that it does not currently have the keyboard focus.
 // https://www.electronjs.org/docs/tutorial/windows-taskbar#flash-frame
 function windowsFlashFrame(browserWindow: BrowserWindow | null): void {
-	if (!isMac()) {
+	if (!isWindows()) {
 		return;
 	}
 	browserWindow = defaultBrowserWindow(null);
