@@ -1,4 +1,5 @@
-import { app, ipcMain, BrowserWindow } from "electron";
+import { app, ipcMain, BrowserWindow, nativeImage } from "electron";
+import path from "path";
 import { defaultBrowserWindow } from "../common/browser_window";
 import { isMac, isWindows } from "../common/platform";
 
@@ -16,6 +17,7 @@ export function setupDockEventHandlers(
 		storeBatchCount(filesCount);
 
 		updateDockAndProgressBar(browserWindow);
+		windowsOverlayIcon(browserWindow, false);
 	});
 
 	ipcMain.on(EVENT_FILE_PROCESSED, (_event, _arg) => {
@@ -34,6 +36,7 @@ export function setupDockEventHandlers(
 		updateDockAndProgressBar(browserWindow);
 		updateDockBounce(browserWindow);
 		windowsFlashFrame(browserWindow);
+		windowsOverlayIcon(browserWindow, true);
 	});
 }
 
@@ -92,11 +95,31 @@ function windowsFlashFrame(browserWindow: BrowserWindow | null): void {
 	if (!isWindows()) {
 		return;
 	}
-	browserWindow = defaultBrowserWindow(null);
+	browserWindow = defaultBrowserWindow(browserWindow);
 	if (browserWindow.isFocused()) {
 		// don't bother if the window is already focused
 		return;
 	}
 
 	browserWindow.flashFrame(true);
+}
+
+function windowsOverlayIcon(
+	browserWindow: BrowserWindow | null,
+	enabled: boolean
+): void {
+	if (!isWindows()) {
+		return;
+	}
+	browserWindow = defaultBrowserWindow(browserWindow);
+
+	const icon = enabled
+		? nativeImage.createFromPath(windowsOverlayIconPath())
+		: null;
+
+	browserWindow.setOverlayIcon(icon, "Finished processing all files");
+}
+
+function windowsOverlayIconPath(): string {
+	return path.join(__dirname, "static", "check.png");
 }

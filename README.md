@@ -186,7 +186,7 @@ Once you're happy with the release and want to finalize it, remove the draft fla
 
 Here is the status of all translations:
 
-- French ❌ needs review
+- French ❌ needs full review
 - Japanese ✅ by @AKKED
 - Polish ✅ by @m1chu
 
