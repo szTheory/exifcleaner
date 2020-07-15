@@ -110,6 +110,14 @@ Below is a full list of supported file types that ExifCleaner will remove metada
 - **X3F** – Sigma/Foveon RAW
 - **XMP** – Extensible Metadata Platform sidecar file
 
+## Translations
+
+New translations and corrections to existing translations are welcome! See the [Adding a Translation](https://github.com/szTheory/exifcleaner/#adding-a-translation) section. Here is the status of current translations:
+
+- French ❌ needs full review
+- Japanese ✅ by @AKKED
+- Polish ✅ by @m1chu
+
 ## Development
 
 Built with [Electron](https://electronjs.org). Uses [node-exiftool](https://www.npmjs.com/package/node-exiftool) as a wrapper for [Exiftool](https://exiftool.org/) binaries. To see the current list of NPM dependencies, run:
@@ -151,47 +159,6 @@ This app is mostly feature complete. I want to keep it simple and not add a bunc
 
 TypeScript code is formatted using Prettier.
 
-### Contributors
-
-Thanks to all the people who submitted bug reports and fixes. I've tried to include everyone, so if I've missed you it was by accident, let me know and I'll add you. Also see the [Translations list](https://github.com/szTheory/exifcleaner#translations) for more credits.
-
-- @m1chu - Polish translation, fix for Mac dock bug on non-Mac platforms, help debugging Unicode filename bug
-- @LukasThyWalls - help debugging Unicode filename bug, feature suggestions
-- @AKKED - Japanese translation, help debugging Unicode filename bug
-- @TomasGutierrez0 - help auditing ExifTool dependency
-- @5a384507-18ce-417c-bb55-d4dfcc8883fe - help debugging initial Linux version
-- @totoroot - help debugging Linux AppImage installer, usability feedback, feature suggestions
-- @Scopuli - help debugging Linux AppImage installer
-- @Tox86 - found broken Settings menu item bug
-
-### Publishing a new release
-
-This section is really for my own reference when publishing a new release.
-
-Bump the version with `release`:
-
-```bash
-yarn run release
-```
-
-When the Github release page comes up, mark it as draft. Then run the publish command:
-
-```bash
-yarn run publish
-```
-
-Once you're happy with the release and want to finalize it, remove the draft flag on the Github releases page.
-
-## Translations
-
-Here is the status of all translations:
-
-- French ❌ needs full review
-- Japanese ✅ by @AKKED
-- Polish ✅ by @m1chu
-
-New translations and corrections to existing translations are welcome! See the instructions below.
-
 ### Adding a Translation
 
 Adding a translation is easy. All you have to do is go to [the translation list](https://github.com/szTheory/exifcleaner/blob/master/.resources/strings.json), click on "Edit this file", and add an entry for the new language underneath the other ones. So for example if you wanted to add a Spanish translation, where it says:
@@ -226,3 +193,34 @@ yarn run dev --lang=pl
 ```
 
 Let me know if you run into any issues, I can guide you through the process if you get stuck.
+
+### Publishing a new release
+
+This section is really for my own reference when publishing a new release.
+
+Bump the version with `release`:
+
+```bash
+yarn run release
+```
+
+When the Github release page comes up, mark it as draft. Then run the publish command:
+
+```bash
+yarn run publish
+```
+
+Once you're happy with the release and want to finalize it, remove the draft flag on the Github releases page.
+
+### Contributors
+
+Thanks to all the people who submitted bug reports and fixes. I've tried to include everyone so if I've missed you it was by accident, just let me know and I'll add you.
+
+- @m1chu - Polish translation, fix for Mac dock bug on non-Mac platforms, help debugging Unicode filename bug
+- @LukasThyWalls - help debugging Unicode filename bug, feature suggestions
+- @AKKED - Japanese translation, help debugging Unicode filename bug
+- @TomasGutierrez0 - help auditing ExifTool dependency
+- @5a384507-18ce-417c-bb55-d4dfcc8883fe - help debugging initial Linux version
+- @totoroot - help debugging Linux AppImage installer, usability feedback, feature suggestions
+- @Scopuli - help debugging Linux AppImage installer
+- @Tox86 - found broken Settings menu item bug
