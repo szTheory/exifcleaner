@@ -155,7 +155,7 @@ Adding a translation is easy. All you have to do is go to https://github.com/szT
 },
 ```
 
-You just add a line for `"es"` underneath the other ones:
+You just add a line for `"es"` (list of language codes [here](https://www.electronjs.org/docs/api/locales)) underneath the other ones:
 
 ```json
 "empty.title": {

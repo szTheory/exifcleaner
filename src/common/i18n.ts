@@ -3,6 +3,7 @@ import path from "path";
 import { isProd } from "./env";
 import { prodResourcesPath, devResourcesPath } from "./resources";
 
+// Locales list: https://www.electronjs.org/docs/api/locales
 export enum Locale {
 	Chinese = "zh",
 	English = "en",
