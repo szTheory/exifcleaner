@@ -161,15 +161,15 @@
 	},
 	"menu.help.website": {
 		"en": "Website",
-		"fr": "Site Web"
+		"fr": "Site web"
 	},
 	"menu.help.source-code": {
 		"en": "Source Code",
-		"fr": "Code Source"
+		"fr": "Code source"
 	},
 	"menu.help.report-issue": {
 		"en": "Report an Issue",
-		"fr": "Dénoncer un Problème"
+		"fr": "Dénoncer un problème"
 	},
 	"menu.help.about": {
 		"en": "About ",
