@@ -27,7 +27,19 @@ function dockMenu(): Menu {
 	return Menu.buildFromTemplate(dockMenuTemplate());
 }
 
-export function setupMenu(): void {
+function setupMainMenu(): void {
 	Menu.setApplicationMenu(menu());
+}
+
+function setupDockMenu(): void {
+	if (!isMac()) {
+		return;
+	}
+
 	app.dock.setMenu(dockMenu());
+}
+
+export function setupMenus(): void {
+	setupMainMenu();
+	setupDockMenu();
 }
