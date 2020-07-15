@@ -4,8 +4,8 @@
 # and verify their checksums.
 #
 # The Unix version is taken from the source archive, removes
-# extra help files to reduce filesize, and squashed down into a single
-# Perl file.
+# extra help files to reduce filesize, and squashes it down into
+# a single Perl file.
 #
 # The Windows version is a prepacked EXE that is simply extracted
 # from the zip archive.
