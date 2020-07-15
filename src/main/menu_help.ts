@@ -1,7 +1,7 @@
 import { shell, app, MenuItemConstructorOptions } from "electron";
 import os from "os";
 import { isMac } from "../common/platform";
-import { showAboutWindow } from "./menu_about_window";
+import { showAboutWindow } from "./menu_app_about";
 import { openUrlMenuItem } from "./menu_item_open_url";
 import { i18n } from "./i18n";
 
