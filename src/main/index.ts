@@ -7,7 +7,7 @@ if (isDev && module.hot) {
 }
 
 import { app } from "electron";
-import { setupMenu } from "./menu";
+import { setupMenus } from "./menu";
 import { init } from "./init";
 import { createMainWindow, setupMainWindow } from "./window_setup";
 import { currentBrowserWindow } from "../common/browser_window";
@@ -19,7 +19,7 @@ var browserWindow = null as BrowserWindow | null;
 async function setup(): Promise<void> {
 	init(browserWindow);
 	await app.whenReady();
-	setupMenu();
+	setupMenus();
 
 	// keep reference to main window to prevent losing it on GC
 	browserWindow = currentBrowserWindow(browserWindow);
