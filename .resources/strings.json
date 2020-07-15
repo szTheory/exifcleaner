@@ -16,7 +16,7 @@
 		"en": "Selected files",
 		"fr": "Fichiers sélectionnés",
 		"pl": "Wybrane pliki",
-		"ja": "選択されたファイル",
+		"ja": "選択されたファイル"
 	},
 	"table.header.exif-before": {
 		"en": "# Exif Before",
@@ -122,7 +122,7 @@
 		"en": "Select All",
 		"fr": "Tout sélectionner",
 		"pl": "Zaznacz wszystko",
-		"ja": "全て選択",
+		"ja": "全て選択"
 	},
 	"menu.edit.speech": {
 		"en": "Speech",
@@ -207,17 +207,13 @@
 	"menu.window.zoom": {
 		"en": "Zoom",
 		"fr": "Agrandir",
-		"pl": "Zoom"
-	},
-	"menu.window.front": {
-		"en": "Bring All to Front",
-		"fr": "Tour ramener au premier plan",
-		"pl": "Umieść wszystko na wierzchu",
+		"pl": "Zoom",
 		"ja": "ズーム"
 	},
 	"menu.window.front": {
 		"en": "Brint All to Front",
-		"fr": "Tour ramener au premier plan",
+		"fr": "Tout ramener au premier plan",
+		"pl": "Umieść wszystko na wierzchu",
 		"ja": "全てを前面に表示"
 	},
 	"menu.window.window": {
