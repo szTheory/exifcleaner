@@ -29,5 +29,5 @@ function dockMenu(): Menu {
 
 export function setupMenu(): void {
 	Menu.setApplicationMenu(menu());
-	app.dock.setMenu(dockMenu());
+	if (isMac()) app.dock.setMenu(dockMenu());
 }
