@@ -24,3 +24,14 @@ export function defaultBrowserWindow(
 
 	return browserWindow;
 }
+
+export function restoreWindowAndFocus(
+	browserWindow: BrowserWindow | null | undefined
+): void {
+	browserWindow = defaultBrowserWindow(browserWindow);
+	if (browserWindow.isMinimized()) {
+		browserWindow.restore();
+	}
+	browserWindow.show();
+	browserWindow.focus();
+}

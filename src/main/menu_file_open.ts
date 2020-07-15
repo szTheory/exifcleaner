@@ -1,14 +1,11 @@
 import {
-	dialog,
 	BrowserWindow,
 	MenuItemConstructorOptions,
 	MenuItem,
 	KeyboardEvent,
 } from "electron";
-import { defaultBrowserWindow } from "../common/browser_window";
 import { i18n } from "./i18n";
-
-export const EVENT_FILE_OPEN_ADD_FILES = "file-open-add-files";
+import { fileOpen } from "./file_open";
 
 export function fileMenuOpenItem(): MenuItemConstructorOptions {
 	return {
@@ -23,23 +20,5 @@ function fileOpenClick(
 	browserWindow: BrowserWindow | undefined,
 	_event: KeyboardEvent
 ): void {
-	browserWindow = defaultBrowserWindow(browserWindow);
-	if (browserWindow.isMinimized()) {
-		browserWindow.restore();
-	}
-	browserWindow.show();
-	browserWindow.focus();
-
-	dialog
-		.showOpenDialog(browserWindow, {
-			properties: ["openFile", "multiSelections"],
-		})
-		.then((result) => {
-			if (result.filePaths) {
-				defaultBrowserWindow(browserWindow).webContents.send(
-					EVENT_FILE_OPEN_ADD_FILES,
-					result.filePaths
-				);
-			}
-		});
+	fileOpen(browserWindow);
 }

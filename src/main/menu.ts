@@ -1,12 +1,14 @@
 import { app, Menu, MenuItemConstructorOptions } from "electron";
-import { isMac } from "../common/platform";
-import { dockMenuTemplate } from "./menu_dock";
-import { viewMenuTemplate } from "./menu_view";
-import { editMenuTemplate } from "./menu_edit";
-import { helpMenuTemplate } from "./menu_help";
-import { windowMenuTemplate } from "./menu_window";
-import { fileMenuTemplate } from "./menu_file";
+import { isMac, isWindows } from "../common/platform";
 import { appMenuTemplate } from "./menu_app";
+import { dockMenuTemplate } from "./menu_dock";
+import { editMenuTemplate } from "./menu_edit";
+import { fileMenuTemplate } from "./menu_file";
+import { helpMenuTemplate } from "./menu_help";
+import { viewMenuTemplate } from "./menu_view";
+import { windowMenuTemplate } from "./menu_window";
+
+const APP_ARG_WINDOWS_TASK_OPEN_FILE = "--open-file";
 
 function menuTemplate(): MenuItemConstructorOptions[] {
 	return [
@@ -39,7 +41,25 @@ function setupDockMenu(): void {
 	app.dock.setMenu(dockMenu());
 }
 
+function setupUserTasksMenu(): void {
+	if (!isWindows()) {
+		return;
+	}
+
+	app.setUserTasks([
+		{
+			program: process.execPath,
+			arguments: APP_ARG_WINDOWS_TASK_OPEN_FILE,
+			iconPath: process.execPath,
+			iconIndex: 0,
+			title: "Open file(s)…",
+			description: "Remove metadata from selected files",
+		},
+	]);
+}
+
 export function setupMenus(): void {
 	setupMainMenu();
 	setupDockMenu();
+	setupUserTasksMenu();
 }
