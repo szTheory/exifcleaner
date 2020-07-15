@@ -1,6 +1,6 @@
 import { app, ipcMain, BrowserWindow } from "electron";
 import { defaultBrowserWindow } from "../common/browser_window";
-import { isMac } from "../common/platform";
+import { isMac, isWindows } from "../common/platform";
 
 export const EVENT_FILES_ADDED = "files-added";
 export const EVENT_FILE_PROCESSED = "file-processed";
@@ -32,7 +32,8 @@ export function setupDockEventHandlers(
 		storeBatchCount(0);
 
 		updateDockAndProgressBar(browserWindow);
-		updateDockBounce();
+		updateDockBounce(browserWindow);
+		windowsFlashFrame(browserWindow);
 	});
 }
 
@@ -71,10 +72,31 @@ function updateProgressBar(browserWindow: BrowserWindow | null): void {
 	browserWindow.setProgressBar(ratio);
 }
 
-function updateDockBounce(): void {
+function updateDockBounce(browserWindow: BrowserWindow | null): void {
 	if (!isMac()) {
+		return;
+	}
+	browserWindow = defaultBrowserWindow(null);
+	if (browserWindow.isFocused()) {
+		// don't bother if the window is already focused
 		return;
 	}
 
 	app.dock.bounce("critical");
+}
+
+// Window is flashed to inform the user that the window requires
+// attention but that it does not currently have the keyboard focus.
+// https://www.electronjs.org/docs/tutorial/windows-taskbar#flash-frame
+function windowsFlashFrame(browserWindow: BrowserWindow | null): void {
+	if (!isWindows()) {
+		return;
+	}
+	browserWindow = defaultBrowserWindow(null);
+	if (browserWindow.isFocused()) {
+		// don't bother if the window is already focused
+		return;
+	}
+
+	browserWindow.flashFrame(true);
 }
