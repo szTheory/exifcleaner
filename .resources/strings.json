@@ -3,268 +3,311 @@
 		"en": "No files selected",
 		"fr": "Aucun fichier sélectionné",
 		"pl": "Nie wybrano plików",
-		"ja": "ファイルが選択されていません"
+		"ja": "ファイルが選択されていません",
+		"es": "No hay archivos seleccionados"
 	},
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
 		"fr": "Faites glisser et déposez des images, des vidéos ou des fichiers PDF pour supprimer automatiquement les métadonnées.",
 		"pl": "Przeciągnij i upuść zdjęcia, filmy lub pliki PDF, aby automatycznie usunąć z nich metadane.",
-		"ja": "画像、動画、PDF をドラッグ＆ドロップすると、メタデータが自動的に削除されます。"
+		"ja": "画像、動画、PDF をドラッグ＆ドロップすると、メタデータが自動的に削除されます。",
+		"es": "Arrastre y suelte imágenes, videos, o documentos PDF para automáticamente eliminar metadatos."
 	},
 
 	"table.header.filename": {
 		"en": "Selected files",
 		"fr": "Fichiers sélectionnés",
 		"pl": "Wybrane pliki",
-		"ja": "選択されたファイル"
+		"ja": "選択されたファイル",
+		"es": "Archivos seleccionados"
 	},
 	"table.header.exif-before": {
 		"en": "# Exif Before",
 		"fr": "# Exif Avant",
 		"pl": "# Exif przed",
-		"ja": "# 処理前の Exif"
+		"ja": "# 処理前の Exif",
+		"es": "Exif antes"
 	},
 	"table.header.exif-after": {
 		"en": "# Exif After",
 		"fr": "# Exif Après",
 		"pl": "# Exif po",
-		"ja": "# 処理後の Exif"
+		"ja": "# 処理後の Exif",
+		"es": "Exif después"
 	},
 
 	"contextmenu.copy": {
 		"en": "Copy",
 		"fr": "Copier",
 		"pl": "Kopiuj",
-		"ja": "コピー"
+		"ja": "コピー",
+		"es": "Copiar"
 	},
 	"contextmenu.select-all": {
 		"en": "Select All",
 		"fr": "Tout sélectionner",
 		"pl": "Zaznacz wszystko",
-		"ja": "全て選択"
+		"ja": "全て選択",
+		"es": "Seleccionar todos"
 	},
 
 	"menu.app.about": {
 		"en": "About ",
 		"fr": "À propos d'",
 		"pl": "O programie ",
-		"ja": "概要 "
+		"ja": "概要 ",
+		"es": "Acerca de "
 	},
 	"menu.app.services": {
 		"en": "Services",
 		"fr": "Services",
 		"pl": "Usługi",
-		"ja": "サービス"
+		"ja": "サービス",
+		"es": "Servicios"
 	},
 	"menu.app.hide": {
 		"en": "Hide",
 		"fr": "Masquer",
 		"pl": "Ukryj",
-		"ja": "最小化"
+		"ja": "最小化",
+		"es": "Ocultar"
 	},
 	"menu.app.hide-others": {
 		"en": "Hide Others",
 		"fr": "Masquer les autres",
 		"pl": "Ukryj pozostałe",
-		"ja": "他のウィンドウを最小化"
+		"ja": "他のウィンドウを最小化",
+		"es": "Ocultar otros"
 	},
 	"menu.app.show-all": {
 		"en": "Show All",
 		"fr": "Tout afficher",
 		"pl": "Pokaż wszystkie",
-		"ja": "全て表示"
+		"ja": "全て表示",
+		"es": "Mostrar todos"
 	},
 	"menu.app.quit": {
 		"en": "Quit",
 		"fr": "Quitter",
 		"pl": "Zakończ",
-		"ja": "終了"
+		"ja": "終了",
+		"es": "Salir de "
 	},
 
 	"menu.file.name": {
 		"en": "File",
 		"fr": "Fichier",
 		"pl": "Plik",
-		"ja": "ファイル"
+		"ja": "ファイル",
+		"es": "Archivo"
 	},
 	"menu.file.open": {
 		"en": "Open",
 		"fr": "Ouvrir",
 		"pl": "Otwórz",
-		"ja": "開く"
+		"ja": "開く",
+		"es": "Abrir"
 	},
 	"menu.file.close": {
 		"en": "Close",
 		"fr": "Fermer",
 		"pl": "Zamknij",
-		"ja": "閉じる"
+		"ja": "閉じる",
+		"es": "Cerrar"
 	},
 	"menu.file.quit": {
 		"en": "Quit",
 		"fr": "Quitter",
 		"pl": "Zakończ",
-		"ja": "終了"
+		"ja": "終了",
+		"es": "Salir"
 	},
 
 	"menu.edit.name": {
 		"en": "Edit",
 		"fr": "Édition",
 		"pl": "Edytuj",
-		"ja": "編集"
+		"ja": "編集",
+		"es": "Editar"
 	},
 	"menu.edit.copy": {
 		"en": "Copy",
 		"fr": "Copier",
 		"pl": "Kopiuj",
-		"ja": "コピー"
+		"ja": "コピー",
+		"es": "Copiar"
 	},
 	"menu.edit.select-all": {
 		"en": "Select All",
 		"fr": "Tout sélectionner",
 		"pl": "Zaznacz wszystko",
-		"ja": "全て選択"
+		"ja": "全て選択",
+		"es": "Seleccionar todos"
 	},
 	"menu.edit.speech": {
 		"en": "Speech",
 		"fr": "Dictée",
 		"pl": "Mowa",
-		"ja": "スピーチ"
+		"ja": "スピーチ",
+		"es": "Dictado"
 	},
 	"menu.edit.speech.start-speaking": {
 		"en": "Start Speaking",
 		"fr": "Commencer dictée",
 		"pl": "Rozpocznij mówienie",
-		"ja": "話し始める"
+		"ja": "話し始める",
+		"es": "Comience a hablar"
 	},
 	"menu.edit.speech.stop-speaking": {
 		"en": "Stop Speaking",
 		"fr": "Arrêter dictée",
 		"pl": "Zakończ mówienie",
-		"ja": "話し終わる"
+		"ja": "話し終わる",
+		"es": "Pare de hablar"
 	},
 
 	"menu.view.name": {
 		"en": "View",
 		"fr": "Présentation",
 		"pl": "Widok",
-		"ja": "表示"
+		"ja": "表示",
+		"es": "Vista"
 	},
 	"menu.view.toggle-dev-tools": {
 		"en": "Toggle Developer Tools",
 		"fr": "Outils de développment",
 		"pl": "Przełącz narzędzia developerskie",
-		"ja": "開発者ツールの切り替え"
+		"ja": "開発者ツールの切り替え",
+		"es": "Habilitar herramientas de desarrollador"
 	},
 	"menu.view.zoom-reset": {
 		"en": "Actual Size",
 		"fr": "Rétablir la taille normale du text",
 		"pl": "Domyślny rozmiar",
-		"ja": "実サイズ"
+		"ja": "実サイズ",
+		"es": "Tamaño actual"
 	},
 	"menu.view.zoom-in": {
 		"en": "Zoom In",
 		"fr": "Zoom avant",
 		"pl": "Powiększ",
-		"ja": "ズームイン"
+		"ja": "ズームイン",
+		"es": "Acercar"
 	},
 	"menu.view.zoom-out": {
 		"en": "Zoom Out",
 		"fr": "Zoom arrière",
 		"pl": "Pomniejsz",
-		"ja": "ズームアウト"
+		"ja": "ズームアウト",
+		"es": "Alejar"
 	},
 	"menu.view.toggle-full-screen": {
 		"en": "Toggle Full Screen",
 		"fr": "Activer le mode plein écran",
 		"pl": "Przełącz tryb pełnoekranowy",
-		"ja": "フルスクリーンの切り替え"
+		"ja": "フルスクリーンの切り替え",
+		"es": "Activar el modo pantalla completa"
 	},
 
 	"menu.window.name": {
 		"en": "Window",
 		"fr": "Fenêtre",
 		"pl": "Okno",
-		"ja": "ウィンドウ"
+		"ja": "ウィンドウ",
+		"es": "Ventana"
 	},
 	"menu.window.minimize-mac": {
 		"en": "Minimize",
 		"fr": "Placer dan le Dock",
 		"pl": "Minimalizuj",
-		"ja": "最小化"
+		"ja": "最小化",
+		"es": "Minimizar"
 	},
 	"menu.window.minimize": {
 		"en": "Minimize",
 		"fr": "Réduire",
 		"pl": "Minimalizuj",
-		"ja": "最小化"
+		"ja": "最小化",
+		"es": "Minimizar"
 	},
 	"menu.window.zoom-mac": {
 		"en": "Zoom",
 		"fr": "Réduire/agrandir",
 		"pl": "Zoom",
-		"ja": "ズーム"
+		"ja": "ズーム",
+		"es": "Maximizar"
 	},
 	"menu.window.zoom": {
 		"en": "Zoom",
 		"fr": "Agrandir",
 		"pl": "Zoom",
-		"ja": "ズーム"
+		"ja": "ズーム",
+		"es": "Maximizar"
 	},
 	"menu.window.front": {
 		"en": "Brint All to Front",
 		"fr": "Tout ramener au premier plan",
 		"pl": "Umieść wszystko na wierzchu",
-		"ja": "全てを前面に表示"
+		"ja": "全てを前面に表示",
+		"es": "Traer al frente"
 	},
 	"menu.window.window": {
 		"en": "Window",
 		"fr": "Fenêtre",
 		"pl": "Okno",
-		"ja": "ウィンドウ"
+		"ja": "ウィンドウ",
+		"es": "Ventana"
 	},
 	"menu.window.close": {
 		"en": "Close",
 		"fr": "Fermer",
 		"pl": "Zamknij",
-		"ja": "閉じる"
+		"ja": "閉じる",
+		"es": "Cerrar"
 	},
 
 	"menu.help.name": {
 		"en": "Help",
 		"fr": "Aide",
 		"pl": "Pomoc",
-		"ja": "ヘルプ"
+		"ja": "ヘルプ",
+		"es": "Ayuda"
 	},
 	"menu.help.website": {
 		"en": "Website",
 		"fr": "Site web",
 		"pl": "Przejdź do strony internetowej",
-		"ja": "ウェブサイト"
+		"ja": "ウェブサイト",
+		"es": "Sitio Web"
 	},
 	"menu.help.source-code": {
 		"en": "Source Code",
 		"fr": "Code source",
 		"pl": "Przejdź do źródeł programu",
-		"ja": "ソースコード"
+		"ja": "ソースコード",
+		"es": "Código fuente"
 	},
 	"menu.help.report-issue": {
 		"en": "Report an Issue",
 		"fr": "Dénoncer un problème",
 		"pl": "Zgłoś problem",
-		"ja": "バグを報告"
+		"ja": "バグを報告",
+		"es": "Reportar un problema"
 	},
 	"menu.help.about": {
 		"en": "About ",
 		"fr": "À propos d'",
 		"pl": "O programie ",
-		"ja": "概要 "
+		"ja": "概要 ",
+		"es": "Acerca de "
 	},
 
 	"aboutwindow:copyright": {
 		"en": "Copyright",
 		"fr": "Droit d'auteur",
 		"pl": "Copyright",
-		"ja": "著作"
+		"ja": "著作",
+		"es": "Derechos de Autor"
 	},
 
 	"usertasks:open-file.label": {
