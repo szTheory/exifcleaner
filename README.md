@@ -117,6 +117,7 @@ New translations and corrections to existing translations are welcome! See the [
 - French ❌ needs full review
 - Japanese ✅ by @AKKED
 - Polish ✅ by @m1chu
+- Spanish ✅ by @ff-ss (Francisco)
 
 ## Development
 
@@ -224,3 +225,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @totoroot - help debugging Linux AppImage installer, usability feedback, feature suggestions
 - @Scopuli - help debugging Linux AppImage installer
 - @Tox86 - found broken Settings menu item bug
+- @ff-ss (Francisco) - Spanish translation
