@@ -1,5 +1,6 @@
 import { MenuItemConstructorOptions, app } from "electron";
 import { i18n } from "./i18n";
+import { isMac } from "../common/platform";
 
 export function appMenuTemplate(): MenuItemConstructorOptions {
 	return {
@@ -35,7 +36,9 @@ export function appMenuTemplate(): MenuItemConstructorOptions {
 				type: "separator",
 			},
 			{
-				label: i18n("menu.app.quit"),
+				label: isMac()
+					? `${i18n("menu.app.quit")} ${app.getName()}`
+					: i18n("menu.app.quit"),
 				role: "quit",
 			},
 		],
