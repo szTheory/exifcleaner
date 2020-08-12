@@ -60,7 +60,16 @@
 		"appId": "com.exifcleaner",
 		"mac": {
 			"category": "public.app-category.graphics-and-images",
-			"darkModeSupport": true
+			"darkModeSupport": true,
+			"extraResources": [
+				{
+					"from": ".resources/nix/bin",
+					"to": "bin",
+					"filter": [
+						"**/*"
+					]
+				}
+			]
 		},
 		"dmg": {
 			"iconSize": 160,
@@ -82,21 +91,34 @@
 				"AppImage",
 				"deb"
 			],
-			"category": "Network;Chat"
+			"category": "Network;Chat",
+			"extraResources": [
+				{
+					"from": ".resources/nix/bin",
+					"to": "bin",
+					"filter": [
+						"**/*"
+					]
+				}
+			]
+		},
+		"win": {
+			"extraResources": [
+				{
+					"from": ".resources/win/bin",
+					"to": "bin",
+					"filter": [
+						"**/*"
+					]
+				}
+			]
 		},
 		"extraResources": [
 			{
-				"from": ".resources/nix/bin",
-				"to": "bin",
+				"from": ".resources/",
+				"to": "",
 				"filter": [
-					"**/*"
-				]
-			},
-			{
-				"from": ".resources/win/bin",
-				"to": "bin",
-				"filter": [
-					"**/*"
+					"strings.json"
 				]
 			}
 		]
