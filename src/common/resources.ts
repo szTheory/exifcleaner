@@ -1,6 +1,6 @@
 import path from "path";
-import { app } from "electron";
 import { getPlatform, Platform } from "./platform";
+import { currentAppPath } from "./app";
 
 export enum ProdResourcesDirName {
 	WinMac = "Resources",
@@ -10,7 +10,7 @@ export const DevResourcesDirName = ".resources";
 
 export function prodResourcesPath(): string {
 	const platform = getPlatform();
-	const appPath = app.getAppPath();
+	const appPath = currentAppPath();
 	const appDir = path.dirname(appPath);
 
 	let resourcesDirName;
