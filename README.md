@@ -112,11 +112,14 @@ Below is a full list of supported file types that ExifCleaner will remove metada
 
 ## Translations
 
-New translations and corrections to existing translations are welcome! See the [Adding a Translation](https://github.com/szTheory/exifcleaner/#adding-a-translation) section. Here is the status of current translations:
+New translations and corrections to existing translations are welcome! See the [Adding a Translation](https://github.com/szTheory/exifcleaner/#adding-a-translation) section. Here is the current translations status:
 
-- French ❌ needs full review
+- French ✅
+- German ❌ needs translation
+- Italian ❌ needs translation
 - Japanese ✅ by @AKKED
 - Polish ✅ by @m1chu
+- Russian ❌ needs translation
 - Spanish ✅ by @ff-ss (Francisco)
 
 ## Development
