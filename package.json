@@ -87,12 +87,13 @@
 			]
 		},
 		"linux": {
-			"icon": "./build/icon.icns",
 			"target": [
-				"AppImage",
-				"deb"
+				"appImage",
+				"snap",
+				"deb",
+				"rpm"
 			],
-			"category": "Network;Chat",
+			"category": "Images",
 			"extraResources": [
 				{
 					"from": ".resources/nix/bin",
