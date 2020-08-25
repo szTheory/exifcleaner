@@ -37,7 +37,7 @@
 	"devDependencies": {
 		"@types/node": "^12",
 		"electron": "^9",
-		"electron-builder": "^22.2.0",
+		"electron-builder": "^22.8.0",
 		"electron-webpack": "^2.8.2",
 		"electron-webpack-ts": "^4.0.1",
 		"node-sass": "^4.13.1",
@@ -87,6 +87,7 @@
 			]
 		},
 		"linux": {
+			"icon": "./build/icon.icns",
 			"target": [
 				"AppImage",
 				"deb"
