@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { isProd } from "./env";
-import { prodResourcesPath, devResourcesPath } from "./resources";
+import { envResourcesPath } from "./resources";
 
 // Locales list: https://www.electronjs.org/docs/api/locales
 export enum Locale {
@@ -99,8 +98,5 @@ function stringsFile() {
 }
 
 function stringsFilePath(): string {
-	return path.join(
-		isProd() ? prodResourcesPath() : devResourcesPath(),
-		"strings.json"
-	);
+	return path.join(envResourcesPath(), "strings.json");
 }

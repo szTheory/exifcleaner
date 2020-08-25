@@ -1,6 +1,10 @@
 import path from "path";
 import { getPlatform, Platform } from "./platform";
 import { currentAppPath } from "./app";
+import { isProd } from "./env";
+
+const ICON_FILENAME = "icon.png";
+const CHECKMARK_FILENAME = "check.png";
 
 export enum ProdResourcesDirName {
 	WinMac = "Resources",
@@ -33,4 +37,16 @@ export function prodResourcesPath(): string {
 
 export function devResourcesPath(): string {
 	return path.join(process.cwd(), ".resources");
+}
+
+export function envResourcesPath(): string {
+	return isProd() ? prodResourcesPath() : devResourcesPath();
+}
+
+export function iconPath(): string {
+	return path.join(envResourcesPath(), ICON_FILENAME);
+}
+
+export function checkmarkPath(): string {
+	return path.join(envResourcesPath(), CHECKMARK_FILENAME);
 }

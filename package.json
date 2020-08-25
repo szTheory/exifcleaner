@@ -38,7 +38,7 @@
 		"@types/node": "^12",
 		"electron": "^9",
 		"electron-builder": "^22.2.0",
-		"electron-webpack": "^2.7.4",
+		"electron-webpack": "^2.8.2",
 		"electron-webpack-ts": "^4.0.1",
 		"node-sass": "^4.13.1",
 		"prettier": "2.0.5",
@@ -118,7 +118,8 @@
 				"from": ".resources/",
 				"to": "",
 				"filter": [
-					"strings.json"
+					"strings.json",
+					"*.png"
 				]
 			}
 		]

@@ -2,7 +2,8 @@ import { BrowserWindow, app } from "electron";
 import url from "url";
 import path from "path";
 import { isDev } from "../common/env";
-import { isMac, isLinux, isWindows } from "../common/platform";
+import { isMac, isWindows } from "../common/platform";
+import { iconPath } from "../common/resources";
 
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;
@@ -55,9 +56,7 @@ function urlForLoad() {
 }
 
 function mainWindowLoadUrl(browserWindow: BrowserWindow) {
-	const url = urlForLoad();
-
-	browserWindow.loadURL(url);
+	browserWindow.loadURL(urlForLoad());
 }
 
 const WINDOW_BACKGROUND_COLOR = "#F5F6F8";
@@ -73,13 +72,8 @@ export function createMainWindow(): BrowserWindow {
 		webPreferences: { nodeIntegration: true },
 		//set specific background color eliminate white flicker on content load
 		backgroundColor: WINDOW_BACKGROUND_COLOR,
+		icon: iconPath(),
 	};
-
-	if (isLinux()) {
-		options = Object.assign({}, options, {
-			icon: path.join(__dirname, "..", "..", "exifcleaner.png"),
-		});
-	}
 
 	return new BrowserWindow(options);
 }

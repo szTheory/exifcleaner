@@ -24,7 +24,7 @@ async function setup(): Promise<void> {
 	// keep reference to main window to prevent losing it on GC
 	browserWindow = currentBrowserWindow(browserWindow);
 	if (!browserWindow) {
-		browserWindow = await createMainWindow();
+		browserWindow = createMainWindow();
 	}
 	setupMainWindow(browserWindow);
 }

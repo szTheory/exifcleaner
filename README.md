@@ -198,6 +198,32 @@ yarn run dev --lang=pl
 
 Let me know if you run into any issues, I can guide you through the process if you get stuck.
 
+### Linux AppImage Notes
+
+To mount the AppImage and inspect it's contents:
+
+```bash
+./ExifCleaner-x.y.z.AppImage --appimage-mount
+```
+
+Where `x.y.z` is the release version number
+
+### Smoke test checklist for new releases
+
+On all platforms:
+
+- Linux
+- Windows
+- Mac
+
+Perform the following manual tests before a release:
+
+- Drag and drop hundreds of files
+- File -> Open dialog
+- Switch locale to each language and check translations
+- Switch between light and dark mode
+- Open "About" dialog
+
 ### Publishing a new release
 
 This section is really for my own reference when publishing a new release.

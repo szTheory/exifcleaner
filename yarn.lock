@@ -2820,7 +2820,7 @@ electron-webpack-ts@^4.0.1:
     fork-ts-checker-webpack-plugin "^4.1.2"
     ts-loader "^6.2.2"
 
-electron-webpack@^2.7.4:
+electron-webpack@^2.8.2:
   version "2.8.2"
   resolved "https://registry.yarnpkg.com/electron-webpack/-/electron-webpack-2.8.2.tgz#5a0357ce8f7d147e5f559294a08bb072d1092b0a"
   integrity sha512-rR7hxoOlZIcJf6R08mVl/4TBtFY+HW6sv4Z28TdMWETvcM4ZBIBdGNGylxF0gNwB8gkTgo8UkkDbXGX48K4Vow==
@@ -7142,9 +7142,9 @@ typedarray@^0.0.6:
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
 typescript@^3.8.3:
-  version "3.9.6"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.6.tgz#8f3e0198a34c3ae17091b35571d3afd31999365a"
-  integrity sha512-Pspx3oKAPJtjNwE92YS05HQoY7z2SFyOpHo9MqJor3BXAGNaPUs83CuVp9VISFkSjyRfiTpmKuAYGJB7S7hOxw==
+  version "3.9.7"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.7.tgz#98d600a5ebdc38f40cb277522f12dc800e9e25fa"
+  integrity sha512-BLbiRkiBzAwsjut4x/dsibSTB6yWpwT5qWmC2OfuCg3GgVQCSgMs4vEctYPhsaGtd0AeuuHMkjZ2h2WG8MSzRw==
 
 unicode-canonical-property-names-ecmascript@^1.0.4:
   version "1.0.4"
@@ -7405,7 +7405,7 @@ wbuf@^1.1.0, wbuf@^1.7.3:
   dependencies:
     minimalistic-assert "^1.0.0"
 
-webpack-cli@^3.3.10, webpack-cli@^3.3.11:
+webpack-cli@^3.3.11:
   version "3.3.12"
   resolved "https://registry.yarnpkg.com/webpack-cli/-/webpack-cli-3.3.12.tgz#94e9ada081453cd0aa609c99e500012fd3ad2d4a"
   integrity sha512-NVWBaz9k839ZH/sinurM+HcDvJOTXwSjYp1ku+5XKeOC03z8v5QitnK/x+lAxGXFyhdayoIf/GOpv85z3/xPag==

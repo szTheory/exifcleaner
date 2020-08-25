@@ -1,7 +1,7 @@
 import { app, ipcMain, BrowserWindow, nativeImage } from "electron";
-import path from "path";
 import { defaultBrowserWindow } from "../common/browser_window";
 import { isMac, isWindows } from "../common/platform";
+import { checkmarkPath } from "../common/resources";
 
 export const EVENT_FILES_ADDED = "files-added";
 export const EVENT_FILE_PROCESSED = "file-processed";
@@ -113,13 +113,7 @@ function windowsOverlayIcon(
 	}
 	browserWindow = defaultBrowserWindow(browserWindow);
 
-	const icon = enabled
-		? nativeImage.createFromPath(windowsOverlayIconPath())
-		: null;
+	const icon = enabled ? nativeImage.createFromPath(checkmarkPath()) : null;
 
 	browserWindow.setOverlayIcon(icon, "Finished processing all files");
-}
-
-function windowsOverlayIconPath(): string {
-	return path.join(__dirname, "static", "check.png");
 }

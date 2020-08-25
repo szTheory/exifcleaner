@@ -1,6 +1,5 @@
 import { app } from "electron";
-import path from "path";
-import { isLinux } from "../common/platform";
+import { iconPath } from "../common/resources";
 import { i18n } from "./i18n";
 
 export function showAboutWindow(author: string, websiteUrl: string): void {
@@ -9,20 +8,12 @@ export function showAboutWindow(author: string, websiteUrl: string): void {
 		applicationVersion: app.getVersion(),
 		copyright: `${i18n("aboutwindow:copyright")} © ${author}`,
 		version: app.getVersion(),
-		// credits: author, //optional
-		// authors: [author], //optional
+		credits: author,
+		authors: [author],
 		website: websiteUrl,
 		iconPath: iconPath(),
 	};
 
 	app.setAboutPanelOptions(aboutPanelOptions);
 	app.showAboutPanel();
-}
-
-function iconPath(): string {
-	if (isLinux()) {
-		return path.join(__dirname, "..", "..", "exifcleaner.png");
-	} else {
-		return path.join(__dirname, "static", "icon.png");
-	}
 }
