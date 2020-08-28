@@ -36,7 +36,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "^12",
-		"electron": "^9",
+		"electron": "^10",
 		"electron-builder": "^22.8.0",
 		"electron-webpack": "^2.8.2",
 		"electron-webpack-ts": "^4.0.1",
