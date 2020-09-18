@@ -290,3 +290,5 @@ gitignore
 exiftool_downloads
 .resources/nix/bin/**
 .resources/win/bin/**
+
+yarn-error.log
