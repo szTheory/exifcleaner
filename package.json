@@ -29,7 +29,6 @@
 		"compile": "electron-webpack"
 	},
 	"dependencies": {
-		"electron-unhandled": "^3.0.0",
 		"node-exiftool": "^2.3.0",
 		"source-map-support": "^0.5.19",
 		"spectre.css": "^0.5.8"

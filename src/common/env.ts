@@ -10,8 +10,12 @@ export function isProd(): boolean {
 	return process.env.NODE_ENV === "production" && app().isPackaged;
 }
 
+// function app(): electron.App {
+// 	return electron.app || electron.remote.app;
+// }
+
 function app(): electron.App {
-	return electron.app || electron.remote.app;
+	return electron.app;
 }
 
 function isEnvSet(): boolean {
