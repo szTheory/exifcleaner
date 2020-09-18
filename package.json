@@ -35,8 +35,8 @@
 		"spectre.css": "^0.5.8"
 	},
 	"devDependencies": {
-		"@types/node": "^12",
-		"electron": "^10",
+		"@types/node": "^12.0.0",
+		"electron": "^10.0.0",
 		"electron-builder": "^22.8.0",
 		"electron-webpack": "^2.8.2",
 		"electron-webpack-ts": "^4.0.1",
