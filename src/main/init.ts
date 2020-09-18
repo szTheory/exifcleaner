@@ -1,14 +1,10 @@
 import { app, BrowserWindow } from "electron";
-import unhandled from "electron-unhandled";
 import packageJson from "../../package.json";
 import { setupApp } from "./app_setup";
 import { setupContextMenu } from "./context_menu";
 import { setupDockEventHandlers } from "./dock";
 import { preloadI18nStrings } from "../common/i18n";
-
-function setupErrorHandling(): void {
-	unhandled(); //handle "unhandled" exceptions
-}
+import { setupI18nHandlers } from "../main/i18n";
 
 function setupUserModelId(): void {
 	app.setAppUserModelId(packageJson.build.appId);
@@ -16,7 +12,7 @@ function setupUserModelId(): void {
 
 export function init(browserWindow: BrowserWindow | null): void {
 	preloadI18nStrings();
-	setupErrorHandling();
+	setupI18nHandlers();
 	setupContextMenu();
 	setupDockEventHandlers(browserWindow);
 	setupUserModelId();

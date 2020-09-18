@@ -39,7 +39,7 @@ function windowsStopFlashingFrameOnFocus(browserWindow: BrowserWindow) {
 }
 
 function urlForLoad() {
-	if (isDev) {
+	if (isDev()) {
 		const port = process.env.ELECTRON_WEBPACK_WDS_PORT;
 		if (!port) {
 			throw "No Electron webpack WDS port set for dev. Try running `yarn run dev` instead for development mode.";

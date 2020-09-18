@@ -1,17 +1,18 @@
-import electron from "electron";
+import { ipcRenderer } from "electron";
 import { preloadI18nStrings, i18n } from "../common/i18n";
+import { IPC_EVENT_NAME_GET_LOCALE } from "../main/i18n";
 
 const ATTRIBUTE_I18N = "i18n";
 
 export function setupI18n(): void {
 	preloadI18nStrings();
-	const locale = electron.remote.app.getLocale();
-
-	translateHtml(locale);
+	translateHtml();
 }
 
-function translateHtml(locale: string) {
+async function translateHtml() {
+	const locale = await getLocale();
 	const elements = document.querySelectorAll(`[${ATTRIBUTE_I18N}]`);
+
 	elements.forEach((element) => {
 		if (!(element instanceof HTMLElement)) {
 			throw new Error("Tried to localize a non-HTML element");
@@ -24,4 +25,8 @@ function translateHtml(locale: string) {
 
 		element.innerText = i18n(key, locale);
 	});
+}
+
+async function getLocale() {
+	return await ipcRenderer.invoke(IPC_EVENT_NAME_GET_LOCALE);
 }
