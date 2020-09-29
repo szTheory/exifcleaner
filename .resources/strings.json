@@ -168,21 +168,24 @@
 		"fr": "Dictée",
 		"pl": "Mowa",
 		"ja": "スピーチ",
-		"es": "Dictado"
+		"es": "Dictado",
+		"de": "Sprachausgabe"
 	},
 	"menu.edit.speech.start-speaking": {
 		"en": "Start Speaking",
 		"fr": "Commencer dictée",
 		"pl": "Rozpocznij mówienie",
 		"ja": "話し始める",
-		"es": "Comience a hablar"
+		"es": "Comience a hablar",
+		"de": "Sprachausgabe starten"
 	},
 	"menu.edit.speech.stop-speaking": {
 		"en": "Stop Speaking",
 		"fr": "Arrêter dictée",
 		"pl": "Zakończ mówienie",
 		"ja": "話し終わる",
-		"es": "Pare de hablar"
+		"es": "Pare de hablar",
+		"de": "Sprachausgabe stoppen"
 	},
 
 	"menu.view.name": {
