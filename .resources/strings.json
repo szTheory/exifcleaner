@@ -29,7 +29,7 @@
 		"pl": "# Exif przed",
 		"ja": "# 処理前の Exif",
 		"es": "Exif antes",
-		"de": "# Exif bevor"
+		"de": "# Exif vorher"
 	},
 	"table.header.exif-after": {
 		"en": "# Exif After",
@@ -37,7 +37,7 @@
 		"pl": "# Exif po",
 		"ja": "# 処理後の Exif",
 		"es": "Exif después",
-		"de": "# Exif danach"
+		"de": "# Exif nachher"
 	},
 
 	"contextmenu.copy": {
