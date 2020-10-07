@@ -228,7 +228,7 @@ Perform the following manual tests before a release:
 
 This section is really for my own reference when publishing a new release.
 
-Bump the version with `release`:
+Bump the version with `release` (choose a "pre" release so people can test it before the official release):
 
 ```bash
 yarn run release
