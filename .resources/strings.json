@@ -358,6 +358,6 @@
 	},
 	"usertasks:open-file.description": {
 		"en": "Remove metadata from selected files",
-		"de": "Entferne Metadaten von ausgewählten Dateien",
+		"de": "Entferne Metadaten von ausgewählten Dateien"
 	}
 }
