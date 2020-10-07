@@ -257,3 +257,6 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @ff-ss (Francisco) - Spanish translation
 - @tayfuuun - German translation
 - @philippsandhaus - German translation fixes
+- @airvue - Help debugging Ubuntu .deb package error
+- @Goblin80 - Help debugging Ubuntu .deb package error
+- @zahroc - Help diagnosing error when adding bulk directories
