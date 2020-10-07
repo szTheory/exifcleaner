@@ -23,7 +23,7 @@
 		"packlinux": "yarn run compile && electron-builder --linux",
 		"packmac": "yarn run compile && electron-builder --macos -c.mac.identity=null",
 		"build": "yarn run compile && electron-builder --macos --linux --windows",
-		"publish": "yarn run compile && electron-builder --macos --linux --windows -p onTagOrDraft",
+		"publish": "yarn run compile && electron-builder --macos --linux --windows -p always",
 		"release": "np",
 		"dev": "electron-webpack dev",
 		"compile": "electron-webpack"
@@ -87,7 +87,6 @@
 		"linux": {
 			"target": [
 				"appImage",
-				"snap",
 				"deb",
 				"rpm"
 			],
