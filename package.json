@@ -30,6 +30,7 @@
 	},
 	"dependencies": {
 		"node-exiftool": "^2.3.0",
+		"source-map-support": "^0.5.19",
 		"spectre.css": "^0.5.8"
 	},
 	"devDependencies": {
