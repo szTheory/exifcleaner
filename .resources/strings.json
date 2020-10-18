@@ -14,6 +14,7 @@
 		"pl": "Przeciągnij i upuść zdjęcia, filmy lub pliki PDF, aby automatycznie usunąć z nich metadane.",
 		"ja": "画像、動画、PDF をドラッグ＆ドロップすると、メタデータが自動的に削除されます。",
 		"es": "Arrastre y suelte imágenes, videos, o documentos PDF para automáticamente eliminar metadatos.",
+		"de": "Ziehen Sie Bilder, Videos oder PDF-Dateien per Drag & Drop, um Metadaten automatisch zu entfernen.",
 		"pt-BR": "Arraste e solte imagens, vídeos ou arquivos PDF para remover metadados automaticamente."
 	},
 
@@ -70,7 +71,7 @@
 		"pl": "O programie ",
 		"ja": "概要 ",
 		"es": "Acerca de ",
-		"de": "Über",
+		"de": "Über ",
 		"pt-BR": "Sobre "
 	},
 	"menu.app.services": {
