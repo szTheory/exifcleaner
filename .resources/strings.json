@@ -335,13 +335,8 @@
 		"pl": "Zamknij",
 		"ja": "閉じる",
 		"es": "Cerrar",
-<<<<<<< HEAD
 		"en": "Schließen",
 		"pt-BR": "Fechar"
-=======
-		"de": "Schließen"
->>>>>>> 29c2f93c44b35ef0b78c7640229e011ebd14b966
-	},
 
 	"menu.help.name": {
 		"en": "Help",
