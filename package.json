@@ -63,7 +63,7 @@
 			"extraResources": [
 				{
 					"from": ".resources/nix/bin",
-					"to": "bin",
+					"to": "nix/bin",
 					"filter": [
 						"**/*"
 					]
