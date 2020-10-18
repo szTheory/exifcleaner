@@ -114,14 +114,18 @@ Below is a full list of supported file types that ExifCleaner will remove metada
 
 New translations and corrections to existing translations are welcome! See the [Adding a Translation](https://github.com/szTheory/exifcleaner/#adding-a-translation) section if there is a language you would like to add. Here is the current translations status:
 
-- French ✅
+- Chinese (Mandarin) ❌ needs translation
+- French (France) ✅ 
+- French (Quebec) ❌ needs translation if France version is not sufficient
 - German ✅ by @tayfuuun, with updates by @philippsandhaus
 - Italian ❌ needs translation
 - Japanese ✅ by @AKKED
 - Polish ✅ by @m1chu
-- Portuguese ❌ needs translation
+- Portuguese (Brazil) ✅ by @iraamaro
+- Portuguese (Portugal) ❌ needs translation if Brazil version is not sufficient
 - Russian ❌ needs translation
-- Spanish ✅ by @ff-ss (Francisco)
+- Spanish (Spain) ✅ by @ff-ss (Francisco)
+- Spanish (Latin America) ❌ needs translation if Spain version is not sufficient
 
 ## Development
 
@@ -266,4 +270,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @airvue - Help debugging Ubuntu .deb package error
 - @Goblin80 - Help debugging Ubuntu .deb package error
 - @zahroc - Help diagnosing error when adding bulk directories
-- @iraamaro - Fix for update_exiftool.pl when building from source on Debian and Slackware
+- @iraamaro - Portuguese (Brazil) translation. Fix for update_exiftool.pl when building from source on Debian and Slackware
