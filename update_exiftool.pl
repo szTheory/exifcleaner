@@ -195,8 +195,8 @@ sub extract_source_code {
   my $gzip_filename = shift;
 
   my @command = (
-    'tar', '--cd', DOWNLOADS_WORKING_DIR, '-xzf',
-    DOWNLOADS_WORKING_DIR . "/$gzip_filename"
+    'tar', '-xvf', DOWNLOADS_WORKING_DIR . "/$gzip_filename",
+    '-C',  DOWNLOADS_WORKING_DIR
   );
   run_command(@command);
 

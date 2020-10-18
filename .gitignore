@@ -281,11 +281,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Explicitly include the exiftool binaries
-# that were being hit by the .gitignore rule .*
-!.resources
-!.keep
-
 # git repo for ExifTool, used to pull down latest binary
 gitignore
 exiftool_downloads
@@ -293,3 +288,11 @@ exiftool_downloads
 .resources/win/bin/**
 
 yarn-error.log
+
+
+# Explicitly include the exiftool binaries
+# that were being hit by the .gitignore rule .*
+!.resources
+!.resources/nix/bin/.keep
+!.resources/win/bin/.keep
+
