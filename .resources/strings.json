@@ -6,7 +6,7 @@
 		"ja": "ファイルが選択されていません",
 		"es": "No hay archivos seleccionados",
 		"de": "Keine Datei ausgewählt",
-		"pt-BR": "Sem arquivos selecionados",
+		"pt-BR": "Sem arquivos selecionados"
 	},
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
@@ -79,7 +79,7 @@
 		"pl": "Usługi",
 		"ja": "サービス",
 		"es": "Servicios",
-		"de": "Services"
+		"de": "Services",
 		"pt-BR": "Serviços"
 	},
 	"menu.app.hide": {
@@ -217,7 +217,7 @@
 		"pl": "Widok",
 		"ja": "表示",
 		"es": "Vista",
-		"de": "Anzeigen"
+		"de": "Anzeigen",
 		"pt-BR": "Ver"
 	},
 	"menu.view.toggle-dev-tools": {
@@ -335,8 +335,9 @@
 		"pl": "Zamknij",
 		"ja": "閉じる",
 		"es": "Cerrar",
-		"en": "Schließen",
+		"de": "Schließen",
 		"pt-BR": "Fechar"
+	},
 
 	"menu.help.name": {
 		"en": "Help",
