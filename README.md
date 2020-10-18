@@ -31,7 +31,7 @@
 
 Linux, macOS 10.10+, and Windows 7+ are supported (64-bit only).
 
-- **Linux**: [Download the .AppImage or .deb file](https://github.com/szTheory/exifcleaner/releases/latest)
+- **Linux**: [Download the .AppImage, .deb, or .rpm file](https://github.com/szTheory/exifcleaner/releases/latest)
 - **macOS**: [Download the .dmg file](https://github.com/szTheory/exifcleaner/releases/latest)
 - **Windows**: [Download the .exe file](https://github.com/szTheory/exifcleaner/releases/latest)
 
