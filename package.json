@@ -95,7 +95,7 @@
 			"extraResources": [
 				{
 					"from": ".resources/nix/bin",
-					"to": "bin",
+					"to": "nix/bin",
 					"filter": [
 						"**/*"
 					]
@@ -106,7 +106,7 @@
 			"extraResources": [
 				{
 					"from": ".resources/win/bin",
-					"to": "bin",
+					"to": "win/bin",
 					"filter": [
 						"**/*"
 					]

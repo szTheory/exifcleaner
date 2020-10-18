@@ -8,7 +8,7 @@ export function i18n(key: string): string {
 }
 
 export function setupI18nHandlers() {
-	ipcMain.handle(IPC_EVENT_NAME_GET_LOCALE, async (_event, path) => {
+	ipcMain.handle(IPC_EVENT_NAME_GET_LOCALE, async (_event, _path) => {
 		return locale();
 	});
 }

@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { envResourcesPath } from "./resources";
+import { resourcesPath } from "./resources";
 
 // Locales list: https://www.electronjs.org/docs/api/locales
 export enum Locale {
@@ -98,5 +98,5 @@ function stringsFile() {
 }
 
 function stringsFilePath(): string {
-	return path.join(envResourcesPath(), "strings.json");
+	return path.join(resourcesPath(), "strings.json");
 }
