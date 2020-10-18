@@ -260,3 +260,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @airvue - Help debugging Ubuntu .deb package error
 - @Goblin80 - Help debugging Ubuntu .deb package error
 - @zahroc - Help diagnosing error when adding bulk directories
+- @iraamaro - Fix for update_exiftool.pl when building from source on Debian and Slackware
