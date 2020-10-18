@@ -284,6 +284,7 @@ Temporary Items
 # Explicitly include the exiftool binaries
 # that were being hit by the .gitignore rule .*
 !.resources
+!.keep
 
 # git repo for ExifTool, used to pull down latest binary
 gitignore
