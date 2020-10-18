@@ -71,7 +71,7 @@
 		"ja": "概要 ",
 		"es": "Acerca de ",
 		"de": "Über",
-		"pt-BR": "Sobre"
+		"pt-BR": "Sobre "
 	},
 	"menu.app.services": {
 		"en": "Services",
@@ -382,7 +382,7 @@
 		"ja": "概要 ",
 		"es": "Acerca de ",
 		"de": "Über ",
-		"pt-BR": "Sobre"
+		"pt-BR": "Sobre "
 	},
 
 	"aboutwindow:copyright": {
