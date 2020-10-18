@@ -13,7 +13,11 @@ export function resourcesPath(): string {
 }
 
 export function iconPath(): string {
-	return path.join(resourcesPath(), ICON_FILENAME);
+	const basePath = path.join(resourcesPath(), ICON_FILENAME);
+	// Fix for Linux
+	const pathFixed = basePath.replace(/\\/g, "\\\\");
+
+	return pathFixed;
 }
 
 export function checkmarkPath(): string {
