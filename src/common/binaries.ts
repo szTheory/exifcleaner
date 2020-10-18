@@ -1,6 +1,5 @@
 import path from "path";
 import { getPlatform, Platform } from "./platform";
-import { isProd } from "./env";
 import { resourcesPath } from "./resources";
 
 enum BinaryPlatformSubpath {
@@ -14,18 +13,10 @@ enum BinFilename {
 }
 
 function binariesPath(): string {
-	return isProd() ? binariesPathProd() : binariesPathDev();
+	return path.join(resourcesPath(), binaryPlatformSubpath(), "bin");
 }
 
-function binariesPathProd(): string {
-	return path.join(resourcesPath(), "bin");
-}
-
-function binariesPathDev(): string {
-	return path.join(resourcesPath(), devBinaryPlatformSubpath(), "bin");
-}
-
-function devBinaryPlatformSubpath(): BinaryPlatformSubpath {
+function binaryPlatformSubpath(): BinaryPlatformSubpath {
 	const platform = getPlatform();
 
 	switch (getPlatform()) {
@@ -39,7 +30,7 @@ function devBinaryPlatformSubpath(): BinaryPlatformSubpath {
 	}
 }
 
-function getBinFilename(): string {
+function binaryFilename(): string {
 	const platform = getPlatform();
 
 	switch (platform) {
@@ -54,7 +45,7 @@ function getBinFilename(): string {
 }
 
 function getExifToolBinPath(): string {
-	return path.resolve(binariesPath(), getBinFilename());
+	return path.resolve(binariesPath(), binaryFilename());
 }
 
 export const exiftoolBinPath = getExifToolBinPath();
