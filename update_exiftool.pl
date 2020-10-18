@@ -195,8 +195,8 @@ sub extract_source_code {
   my $gzip_filename = shift;
 
   my @command = (
-    'tar', '--cd', DOWNLOADS_WORKING_DIR, '-xzf',
-    DOWNLOADS_WORKING_DIR . "/$gzip_filename"
+    'tar', '-xvf', DOWNLOADS_WORKING_DIR . "/$gzip_filename",
+    '-C', DOWNLOADS_WORKING_DIR
   );
   run_command(@command);
 
@@ -243,6 +243,14 @@ sub remove_old_binaries {
   return;
 }
 
+# nix dir setup 
+sub dir_unix {
+  my @command = ( 'mkdir', '-p', BIN_DIR_UNIX );
+  run_command(@command);
+
+  return;
+}
+
 # The Unix version of ExifTool only needs `exiftool` and the `lib` dir.
 # In order to keep package size down we only copy these over to the
 # ExifCleaner bin dir.
@@ -277,6 +285,18 @@ sub verify_successful_install {
 
   return;
 }
+
+# win dir setup
+sub dir_windows {
+  # my $from_path = DOWNLOADS_WORKING_DIR . '/exiftool(-k).exe';
+  # my $to_path   = BIN_DIR_WINDOWS . '/exiftool.exe';
+
+  my @command = ( 'mkdir', '-p', BIN_DIR_WINDOWS );
+  run_command(@command);
+
+  return;
+}
+
 
 # The Windows ExifTool binary is just an .exe file. We have to
 # rename it from `exiftool(-k).exe` to `exiftool.exe` and move
@@ -320,7 +340,9 @@ sub run {
   remove_old_binaries();
 
   header('Moving fresh binaries');
+  dir_unix();
   move_unix_binary($code_filename);
+  dir_windows();
   move_windows_binary();
 
   header('Clean up downloads working directory');
