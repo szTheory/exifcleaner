@@ -91,6 +91,7 @@
 				"deb",
 				"rpm"
 			],
+			"icon": "build/icon.icns",
 			"category": "Images",
 			"extraResources": [
 				{
