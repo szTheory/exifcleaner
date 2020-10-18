@@ -119,6 +119,7 @@ New translations and corrections to existing translations are welcome! See the [
 - Italian ❌ needs translation
 - Japanese ✅ by @AKKED
 - Polish ✅ by @m1chu
+- Portuguese ❌ needs translation
 - Russian ❌ needs translation
 - Spanish ✅ by @ff-ss (Francisco)
 
