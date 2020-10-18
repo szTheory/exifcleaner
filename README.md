@@ -190,10 +190,15 @@ and repeat that pattern for each of the entries. That's probably the easiest way
 2. Follow the directions [here](https://github.com/szTheory/exifcleaner#run-the-app-in-dev-mode) to get ExifCleaner running in development mode on your computer
 3. Then update the `strings.json` file as mentioned above, and quit the program and relaunch it to see your changes. When you're finished, commit your changes from the command line with for example `git commit -am "Finished adding translations"`. Then run `git push origin master`, and go to the project URL your forked it to (for example https://github.com/myusernamehere/exifcleaner) and click the button to open a new Pull Request.
 
-If you want to run the app with a specific locale without changing your system preferences, use the following command. In this example ExifCleaner will start in Polish.
+If you want to run the app with a specific locale without changing your system preferences, use one of the following commands with the correct language code.
 
 ```bash
-yarn run dev --lang=pl
+yarn run dev --lang=en #English
+yarn run dev --lang=fr #French
+yarn run dev --lang=pl #Polish
+yarn run dev --lang=ja #Japanese
+yarn run dev --lang=es #Spanish
+yarn run dev --lang=de #German
 ```
 
 Let me know if you run into any issues, I can guide you through the process if you get stuck.
