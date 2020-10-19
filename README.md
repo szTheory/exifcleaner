@@ -40,6 +40,7 @@ For Linux, The AppImage needs to be [made executable](https://discourse.appimage
 ## Links
 
 - [Official Website](https://exifcleaner.com)
+- [Download](https://github.com/szTheory/exifcleaner/releases)
 - [Source Code](https://github.com/szTheory/exifcleaner)
 - [Issue Tracker](https://github.com/szTheory/exifcleaner/issues)
 - [Translations file](https://github.com/szTheory/exifcleaner/blob/master/.resources/strings.json)
