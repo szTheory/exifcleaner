@@ -27,7 +27,7 @@
 - Executable size `~200MB` (Electron app)
 - Memory usage `~120MB` (Electron app)
 
-## Install
+## Download and Install
 
 Linux, macOS 10.10+, and Windows 7+ are supported (64-bit only).
 
