@@ -6,7 +6,8 @@
 		"ja": "ファイルが選択されていません",
 		"es": "No hay archivos seleccionados",
 		"de": "Keine Datei ausgewählt",
-		"pt-BR": "Sem arquivos selecionados"
+		"pt-BR": "Sem arquivos selecionados",
+		"sk": "Nie sú vybraté žiadne súbory"
 	},
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
@@ -15,7 +16,8 @@
 		"ja": "画像、動画、PDF をドラッグ＆ドロップすると、メタデータが自動的に削除されます。",
 		"es": "Arrastre y suelte imágenes, videos, o documentos PDF para automáticamente eliminar metadatos.",
 		"de": "Ziehen Sie Bilder, Videos oder PDF-Dateien per Drag & Drop, um Metadaten automatisch zu entfernen.",
-		"pt-BR": "Arraste e solte imagens, vídeos ou arquivos PDF para remover metadados automaticamente."
+		"pt-BR": "Arraste e solte imagens, vídeos ou arquivos PDF para remover metadados automaticamente.",
+		"sk": "Presuňte a pustite fotografie, videá alebo PDF súbory sem a automaticky z nich odstránia metadáta."
 	},
 
 	"table.header.filename": {
@@ -25,7 +27,8 @@
 		"ja": "選択されたファイル",
 		"es": "Archivos seleccionados",
 		"de": "Ausgewählte Dateien",
-		"pt-BR": "Arquivos selecionados"
+		"pt-BR": "Arquivos selecionados",
+		"sk": "Vybrané súbory"
 	},
 	"table.header.exif-before": {
 		"en": "# Exif Before",
@@ -34,7 +37,8 @@
 		"ja": "# 処理前の Exif",
 		"es": "Exif antes",
 		"de": "# Exif vorher",
-		"pt-BR": "# Exif antes"
+		"pt-BR": "# Exif antes",
+		"sk": "# Exif predtým"
 	},
 	"table.header.exif-after": {
 		"en": "# Exif After",
@@ -43,7 +47,8 @@
 		"ja": "# 処理後の Exif",
 		"es": "Exif después",
 		"de": "# Exif nachher",
-		"pt-BR": "# Exif depois"
+		"pt-BR": "# Exif depois",
+		"sk": "# Exif po"
 	},
 
 	"contextmenu.copy": {
@@ -53,7 +58,8 @@
 		"ja": "コピー",
 		"es": "Copiar",
 		"de": "Kopie",
-		"pt-BR": "Copiar"
+		"pt-BR": "Copiar",
+		"sk": "Kopírovať"
 	},
 	"contextmenu.select-all": {
 		"en": "Select All",
@@ -62,7 +68,8 @@
 		"ja": "全て選択",
 		"es": "Seleccionar todos",
 		"de": "Alle markieren",
-		"pt-BR": "Selecionar todos"
+		"pt-BR": "Selecionar todos",
+		"sk": "Vybrať všetko"
 	},
 
 	"menu.app.about": {
@@ -72,7 +79,8 @@
 		"ja": "概要 ",
 		"es": "Acerca de ",
 		"de": "Über ",
-		"pt-BR": "Sobre "
+		"pt-BR": "Sobre ",
+		"sk": "O aplikácii"
 	},
 	"menu.app.services": {
 		"en": "Services",
@@ -81,7 +89,8 @@
 		"ja": "サービス",
 		"es": "Servicios",
 		"de": "Services",
-		"pt-BR": "Serviços"
+		"pt-BR": "Serviços",
+		"sk": "Služby"
 	},
 	"menu.app.hide": {
 		"en": "Hide",
@@ -90,7 +99,8 @@
 		"ja": "最小化",
 		"es": "Ocultar",
 		"de": "Ausblenden",
-		"pt-BR": "Ocultar"
+		"pt-BR": "Ocultar",
+		"sk": "Skryť"
 	},
 	"menu.app.hide-others": {
 		"en": "Hide Others",
@@ -99,7 +109,8 @@
 		"ja": "他のウィンドウを最小化",
 		"es": "Ocultar otros",
 		"de": "Andere ausblenden",
-		"pt-BR": "Ocultar outros"
+		"pt-BR": "Ocultar outros",
+		"sk": "Skryť ostatné"
 	},
 	"menu.app.show-all": {
 		"en": "Show All",
@@ -108,7 +119,8 @@
 		"ja": "全て表示",
 		"es": "Mostrar todos",
 		"de": "Alle anzeigen",
-		"pt-BR": "Mostrar todos"
+		"pt-BR": "Mostrar todos",
+		"sk": "Ukázať všetko"
 	},
 	"menu.app.quit": {
 		"en": "Quit",
@@ -117,7 +129,8 @@
 		"ja": "終了",
 		"es": "Salir de",
 		"de": "Beenden",
-		"pt-BR": "Sair"
+		"pt-BR": "Sair",
+		"sk": "Ukončiť"
 	},
 
 	"menu.file.name": {
@@ -127,7 +140,8 @@
 		"ja": "ファイル",
 		"es": "Archivo",
 		"de": "Datei",
-		"pt-BR": "Arquivo"
+		"pt-BR": "Arquivo",
+		"sk": "Súbor"
 	},
 	"menu.file.open": {
 		"en": "Open",
@@ -136,7 +150,8 @@
 		"ja": "開く",
 		"es": "Abrir",
 		"de": "Öffnen",
-		"pt-BR": "Abrir arquivo"
+		"pt-BR": "Abrir arquivo",
+		"sk": "Otvoriť"
 	},
 	"menu.file.close": {
 		"en": "Close",
@@ -145,7 +160,8 @@
 		"ja": "閉じる",
 		"es": "Cerrar",
 		"de": "Schliesen",
-		"pt-BR": "Fechar"
+		"pt-BR": "Fechar",
+		"sk": "Zavrieť"
 	},
 	"menu.file.quit": {
 		"en": "Quit",
@@ -154,7 +170,8 @@
 		"ja": "終了",
 		"es": "Salir",
 		"de": "Beenden",
-		"pt-BR": "Sair"
+		"pt-BR": "Sair",
+		"sk": "Ukončiť"
 	},
 
 	"menu.edit.name": {
@@ -164,7 +181,8 @@
 		"ja": "編集",
 		"es": "Editar",
 		"de": "Editieren",
-		"pt-BR": "Editar nome"
+		"pt-BR": "Editar nome",
+		"sk": "Upraviť"
 	},
 	"menu.edit.copy": {
 		"en": "Copy",
@@ -173,7 +191,8 @@
 		"ja": "コピー",
 		"es": "Copiar",
 		"de": "Kopieren",
-		"pt-BR": "Copiar"
+		"pt-BR": "Copiar",
+		"sk": "Kopírovať"
 	},
 	"menu.edit.select-all": {
 		"en": "Select All",
@@ -182,7 +201,8 @@
 		"ja": "全て選択",
 		"es": "Seleccionar todos",
 		"de": "Alle markieren",
-		"pt-BR": "Selecionar todos"
+		"pt-BR": "Selecionar todos",
+		"sk": "Vybrať všetko"
 	},
 	"menu.edit.speech": {
 		"en": "Speech",
@@ -191,7 +211,8 @@
 		"ja": "スピーチ",
 		"es": "Dictado",
 		"de": "Sprachausgabe",
-		"pt-BR": "Discurso"
+		"pt-BR": "Discurso",
+		"sk": "Reč"
 	},
 	"menu.edit.speech.start-speaking": {
 		"en": "Start Speaking",
@@ -200,7 +221,8 @@
 		"ja": "話し始める",
 		"es": "Comience a hablar",
 		"de": "Sprachausgabe starten",
-		"pt-BR": "Comece a falar"
+		"pt-BR": "Comece a falar",
+		"sk": "Začnite rozprávať"
 	},
 	"menu.edit.speech.stop-speaking": {
 		"en": "Stop Speaking",
@@ -209,7 +231,8 @@
 		"ja": "話し終わる",
 		"es": "Pare de hablar",
 		"de": "Sprachausgabe stoppen",
-		"pt-BR": "Parar de falar"
+		"pt-BR": "Parar de falar",
+		"sk": "Prestaňte hovoriť"
 	},
 
 	"menu.view.name": {
@@ -219,7 +242,8 @@
 		"ja": "表示",
 		"es": "Vista",
 		"de": "Anzeigen",
-		"pt-BR": "Ver"
+		"pt-BR": "Ver",
+		"sk": "Zobrazenie"
 	},
 	"menu.view.toggle-dev-tools": {
 		"en": "Toggle Developer Tools",
@@ -228,7 +252,8 @@
 		"ja": "開発者ツールの切り替え",
 		"es": "Habilitar herramientas de desarrollador",
 		"de": "Entwicklertools aktivieren",
-		"pt-BR": "Habilitar ferramentas de desenvolvedor"
+		"pt-BR": "Habilitar ferramentas de desenvolvedor",
+		"sk": "Prepnúť vývojárske nástroje"
 	},
 	"menu.view.zoom-reset": {
 		"en": "Actual Size",
@@ -237,7 +262,8 @@
 		"ja": "実サイズ",
 		"es": "Tamaño actual",
 		"de": "Originalgröße",
-		"pt-BR": "Tamanho atual"
+		"pt-BR": "Tamanho atual",
+		"sk": "Predvolená veľkosť"
 	},
 	"menu.view.zoom-in": {
 		"en": "Zoom In",
@@ -246,7 +272,8 @@
 		"ja": "ズームイン",
 		"es": "Acercar",
 		"de": "Vergrößern",
-		"pt-BR": "Ampliar"
+		"pt-BR": "Ampliar",
+		"sk": "Priblížiť"
 	},
 	"menu.view.zoom-out": {
 		"en": "Zoom Out",
@@ -255,7 +282,8 @@
 		"ja": "ズームアウト",
 		"es": "Alejar",
 		"de": "Verkleinern",
-		"pt-BR": "Reduzir"
+		"pt-BR": "Reduzir",
+		"sk": "Oddialiť"
 	},
 	"menu.view.toggle-full-screen": {
 		"en": "Toggle Full Screen",
@@ -264,7 +292,8 @@
 		"ja": "フルスクリーンの切り替え",
 		"es": "Activar el modo pantalla completa",
 		"de": "Vollbildmodus",
-		"pt-BR": "Tela cheia"
+		"pt-BR": "Tela cheia",
+		"sk": "Prepnúť režim celej obrazovky"
 	},
 
 	"menu.window.name": {
@@ -274,7 +303,8 @@
 		"ja": "ウィンドウ",
 		"es": "Ventana",
 		"de": "Fenster",
-		"pt-BR": "Janela"
+		"pt-BR": "Janela",
+		"sk": "Okno"
 	},
 	"menu.window.minimize-mac": {
 		"en": "Minimize",
@@ -283,7 +313,8 @@
 		"ja": "最小化",
 		"es": "Minimizar",
 		"de": "Im Dock ablegen",
-		"pt-BR": "Minimizar"
+		"pt-BR": "Minimizar",
+		"sk": "Minimalizovať"
 	},
 	"menu.window.minimize": {
 		"en": "Minimize",
@@ -292,7 +323,8 @@
 		"ja": "最小化",
 		"es": "Minimizar",
 		"de": "Minimieren",
-		"pt-BR": "Minimizar"
+		"pt-BR": "Minimizar",
+		"sk": "Minimalizovať"
 	},
 	"menu.window.zoom-mac": {
 		"en": "Zoom",
@@ -301,7 +333,8 @@
 		"ja": "ズーム",
 		"es": "Maximizar",
 		"de": "Zoomen",
-		"pt-BR": "Ampliar"
+		"pt-BR": "Ampliar",
+		"sk": "Zväčšiť"
 	},
 	"menu.window.zoom": {
 		"en": "Zoom",
@@ -310,7 +343,8 @@
 		"ja": "ズーム",
 		"es": "Maximizar",
 		"de": "Zoomen",
-		"pt-BR": "Ampliar"
+		"pt-BR": "Ampliar",
+		"sk": "Zväčšiť"
 	},
 	"menu.window.front": {
 		"en": "Bring All to Front",
@@ -319,7 +353,8 @@
 		"ja": "全てを前面に表示",
 		"es": "Traer al frente",
 		"de": "Alle nach vorn bringen",
-		"pt-BR": "Trazer tudo para frente"
+		"pt-BR": "Trazer tudo para frente",
+		"sk": "Presunúť všetko do popredia"
 	},
 	"menu.window.window": {
 		"en": "Window",
@@ -328,7 +363,8 @@
 		"ja": "ウィンドウ",
 		"es": "Ventana",
 		"de": "Fenster",
-		"pt-BR": "Janela"
+		"pt-BR": "Janela",
+		"sk": "Okno"
 	},
 	"menu.window.close": {
 		"en": "Close",
@@ -337,7 +373,8 @@
 		"ja": "閉じる",
 		"es": "Cerrar",
 		"de": "Schließen",
-		"pt-BR": "Fechar"
+		"pt-BR": "Fechar",
+		"sk": "Zavrieť"
 	},
 
 	"menu.help.name": {
@@ -347,7 +384,8 @@
 		"ja": "ヘルプ",
 		"es": "Ayuda",
 		"de": "Hilfe",
-		"pt-BR": "Ajuda"
+		"pt-BR": "Ajuda",
+		"sk": "Pomoc"
 	},
 	"menu.help.website": {
 		"en": "Website",
@@ -356,7 +394,8 @@
 		"ja": "ウェブサイト",
 		"es": "Sitio Web",
 		"de": "Webseite",
-		"pt-BR": "Website"
+		"pt-BR": "Website",
+		"sk": "Webová stránka"
 	},
 	"menu.help.source-code": {
 		"en": "Source Code",
@@ -365,7 +404,8 @@
 		"ja": "ソースコード",
 		"es": "Código fuente",
 		"de": "Quelltext",
-		"pt-BR": "Código fonte"
+		"pt-BR": "Código fonte",
+		"sk": "Zdrojový kód"
 	},
 	"menu.help.report-issue": {
 		"en": "Report an Issue",
@@ -374,7 +414,8 @@
 		"ja": "バグを報告",
 		"es": "Reportar un problema",
 		"de": "Problem melden",
-		"pt-BR": "Reportar um problema"
+		"pt-BR": "Reportar um problema",
+		"sk": "Nahlásiť problém"
 	},
 	"menu.help.about": {
 		"en": "About ",
@@ -383,7 +424,8 @@
 		"ja": "概要 ",
 		"es": "Acerca de ",
 		"de": "Über ",
-		"pt-BR": "Sobre "
+		"pt-BR": "Sobre ",
+		"sk": "O programe "
 	},
 
 	"aboutwindow:copyright": {
@@ -393,17 +435,20 @@
 		"ja": "著作",
 		"es": "Derechos de Autor",
 		"de": "Urheberrecht",
-		"pt-BR": "Direitos autorais"
+		"pt-BR": "Direitos autorais",
+		"sk": "Autorské práva"
 	},
 
 	"usertasks:open-file.label": {
 		"en": "Open files",
 		"de": "Öffne Dateien",
-		"pt-BR": "Abri arquivos"
+		"pt-BR": "Abri arquivos",
+		"sk": "Otvoriť súbory"
 	},
 	"usertasks:open-file.description": {
 		"en": "Remove metadata from selected files",
 		"de": "Entferne Metadaten von ausgewählten Dateien",
-		"pt-BR": "Remover metadados dos arquivos selecionados"
+		"pt-BR": "Remover metadados dos arquivos selecionados",
+		"sk": "Odstrániť metadáta z vybraných súborov"
 	}
 }
