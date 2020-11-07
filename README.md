@@ -112,6 +112,24 @@ Below is a full list of supported file types that ExifCleaner will remove metada
 - **X3F** – Sigma/Foveon RAW
 - **XMP** – Extensible Metadata Platform sidecar file
 
+## File writer limitations
+
+ExifCleaner has the same writer limitations as the underlying `exiftool` it depends on. Taken from the [official website](https://exiftool.org/#limitations):
+
+
+- ExifTool will not rewrite a file if it detects a significant problem with the file format.
+- ExifTool has been tested with a wide range of different images, but since it is not possible to test it with every known image type, there is the possibility that it will corrupt some files. Be sure to keep backups of your files.
+- Even though ExifTool does some validation of the information written, it is still possible to write illegal values which may cause problems when reading the images with other software. So take care to validate the information you are writing.
+- ExifTool is not guaranteed to remove metadata completely from a file when attempting to delete all metadata. For JPEG images, all APP segments (except Adobe APP14, which is not removed by default) and trailers are removed which effectively removes all metadata, but for other formats the results are less complete:
+  - JPEG - APP segments (except Adobe APP14) and trailers are removed.
+  - TIFF - XMP, IPTC, ICC_Profile and the ExifIFD are removed, but some EXIF may remain in IFD0. (The CommonIFD0 Shortcut tag is provided to simplify removal of common metadata tags from IFD0.)
+  - PNG - Only XMP, EXIF, ICC_Profile and native PNG textual data chunks are removed.
+  - PDF - The original metadata is never actually removed.
+  - PS - Only XMP and some native PostScript tags may be deleted.
+  - MOV/MP4 - Most top-level metadata is removed.
+  - RAW formats - It is not recommended to remove all metadata from RAW images because this will likely remove some proprietary information that is necessary for proper rendering of the image.
+
+
 ## Translations
 
 New translations and corrections to existing translations are welcome! See the [Adding a Translation](https://github.com/szTheory/exifcleaner/#adding-a-translation) section if there is a language you would like to add. Here is the current translations status:
