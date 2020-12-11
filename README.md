@@ -143,10 +143,11 @@ New translations and corrections to existing translations are welcome! See the [
 - Polish ✅ by @m1chu
 - Portuguese (Brazil) ✅ by @iraamaro
 - Portuguese (Portugal) ❌ needs translation if Brazil version is not sufficient
-- Russian ❌ needs translation
+- Russian ✅ by @likhner
 - Spanish (Spain) ✅ by @ff-ss (Francisco)
 - Spanish (Latin America) ❌ needs translation if Spain version is not sufficient
 - Slovak ✅ by @LiJu09
+- Ukranian ✅ by @hugonote (Alexander Berger)
 
 ## Development
 
@@ -293,3 +294,5 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @zahroc - Help diagnosing error when adding bulk directories
 - @iraamaro - Portuguese (Brazil) translation. Fix for update_exiftool.pl when building from source on Debian and Slackware
 - @LiJu09 - Slovak translation
+- @likhner - Russian translation
+- @hugonote (Alexander Berger) - Ukranian translation
