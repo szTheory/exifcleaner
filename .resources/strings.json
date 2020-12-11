@@ -8,7 +8,8 @@
 		"de": "Keine Datei ausgewählt",
 		"pt-BR": "Sem arquivos selecionados",
 		"sk": "Nie sú vybraté žiadne súbory",
-		"ru": "Нет выбранных файлов"
+		"ru": "Нет выбранных файлов",
+		"uk": "Немає вибраних файлів"
 	},
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
@@ -19,7 +20,8 @@
 		"de": "Ziehen Sie Bilder, Videos oder PDF-Dateien per Drag & Drop, um Metadaten automatisch zu entfernen.",
 		"pt-BR": "Arraste e solte imagens, vídeos ou arquivos PDF para remover metadados automaticamente.",
 		"sk": "Presuňte a pustite fotografie, videá alebo PDF súbory sem a automaticky z nich odstránia metadáta.",
-		"ru": "Перетащите изображения, видео или PDF-файлы для автоматического удаления метаданных."
+		"ru": "Перетащите изображения, видео или PDF-файлы для автоматического удаления метаданных.",
+		"uk": "Перетягніть зображення, відео або PDF-файли для автоматичного видалення метаданих."
 	},
 
 	"table.header.filename": {
@@ -31,7 +33,8 @@
 		"de": "Ausgewählte Dateien",
 		"pt-BR": "Arquivos selecionados",
 		"sk": "Vybrané súbory",
-		"ru": "Выбранные файлы"
+		"ru": "Выбранные файлы",
+		"uk": "Вибрані файли"
 	},
 	"table.header.exif-before": {
 		"en": "# Exif Before",
@@ -42,7 +45,8 @@
 		"de": "# Exif vorher",
 		"pt-BR": "# Exif antes",
 		"sk": "# Exif predtým",
-		"ru": "# Exif до"
+		"ru": "# Exif до",
+		"uk": "# Exif до"
 	},
 	"table.header.exif-after": {
 		"en": "# Exif After",
@@ -53,7 +57,8 @@
 		"de": "# Exif nachher",
 		"pt-BR": "# Exif depois",
 		"sk": "# Exif po",
-		"ru": "# Exif после"
+		"ru": "# Exif после",
+		"uk": "# Exif після"
 	},
 
 	"contextmenu.copy": {
@@ -65,7 +70,8 @@
 		"de": "Kopie",
 		"pt-BR": "Copiar",
 		"sk": "Kopírovať",
-		"ru": "Скопировать"
+		"ru": "Скопировать",
+		"uk": "Скопіювати"
 	},
 	"contextmenu.select-all": {
 		"en": "Select All",
@@ -76,7 +82,8 @@
 		"de": "Alle markieren",
 		"pt-BR": "Selecionar todos",
 		"sk": "Vybrať všetko",
-		"ru": "Выделить всё"
+		"ru": "Выделить всё",
+		"uk": "Виділити все"
 	},
 
 	"menu.app.about": {
@@ -88,7 +95,8 @@
 		"de": "Über ",
 		"pt-BR": "Sobre ",
 		"sk": "O aplikácii ",
-		"ru": "О программе "
+		"ru": "О программе ",
+		"uk": "Про програму "
 	},
 	"menu.app.services": {
 		"en": "Services",
@@ -99,7 +107,8 @@
 		"de": "Services",
 		"pt-BR": "Serviços",
 		"sk": "Služby",
-		"ru": "Службы"
+		"ru": "Службы",
+		"uk": "Служби"
 	},
 	"menu.app.hide": {
 		"en": "Hide",
@@ -110,7 +119,8 @@
 		"de": "Ausblenden",
 		"pt-BR": "Ocultar",
 		"sk": "Skryť",
-		"ru": "Скрыть"
+		"ru": "Скрыть",
+		"uk": "Сховати"
 	},
 	"menu.app.hide-others": {
 		"en": "Hide Others",
@@ -121,7 +131,8 @@
 		"de": "Andere ausblenden",
 		"pt-BR": "Ocultar outros",
 		"sk": "Skryť ostatné",
-		"ru": "Скрыть остальные"
+		"ru": "Скрыть остальные",
+		"uk": "Сховати решту"
 	},
 	"menu.app.show-all": {
 		"en": "Show All",
@@ -132,7 +143,8 @@
 		"de": "Alle anzeigen",
 		"pt-BR": "Mostrar todos",
 		"sk": "Ukázať všetko",
-		"ru": "Показать все"
+		"ru": "Показать все",
+		"uk": "Показати все"
 	},
 	"menu.app.quit": {
 		"en": "Quit",
@@ -143,7 +155,8 @@
 		"de": "Beenden",
 		"pt-BR": "Sair",
 		"sk": "Ukončiť",
-		"ru": "Завершить"
+		"ru": "Завершить",
+		"uk": "Завершити"
 	},
 
 	"menu.file.name": {
@@ -155,7 +168,8 @@
 		"de": "Datei",
 		"pt-BR": "Arquivo",
 		"sk": "Súbor",
-		"ru": "Файл"
+		"ru": "Файл",
+		"uk": "Файл"
 	},
 	"menu.file.open": {
 		"en": "Open",
@@ -166,7 +180,8 @@
 		"de": "Öffnen",
 		"pt-BR": "Abrir arquivo",
 		"sk": "Otvoriť",
-		"ru": "Открыть"
+		"ru": "Открыть",
+		"uk": "Відкрити"
 	},
 	"menu.file.close": {
 		"en": "Close",
@@ -177,7 +192,8 @@
 		"de": "Schliesen",
 		"pt-BR": "Fechar",
 		"sk": "Zavrieť",
-		"ru": "Закрыть"
+		"ru": "Закрыть",
+		"uk": "Закрити"
 	},
 	"menu.file.quit": {
 		"en": "Quit",
@@ -188,7 +204,8 @@
 		"de": "Beenden",
 		"pt-BR": "Sair",
 		"sk": "Ukončiť",
-		"ru": "Завершить"
+		"ru": "Завершить",
+		"uk": "Вийти"
 	},
 
 	"menu.edit.name": {
@@ -200,7 +217,8 @@
 		"de": "Editieren",
 		"pt-BR": "Editar nome",
 		"sk": "Upraviť",
-		"ru": "Правка"
+		"ru": "Правка",
+		"uk": "Редагування"
 	},
 	"menu.edit.copy": {
 		"en": "Copy",
@@ -211,7 +229,8 @@
 		"de": "Kopieren",
 		"pt-BR": "Copiar",
 		"sk": "Kopírovať",
-		"ru": "Скопировать"
+		"ru": "Скопировать",
+		"uk": "Скопіювати"
 	},
 	"menu.edit.select-all": {
 		"en": "Select All",
@@ -222,7 +241,8 @@
 		"de": "Alle markieren",
 		"pt-BR": "Selecionar todos",
 		"sk": "Vybrať všetko",
-		"ru": "Выбрать все"
+		"ru": "Выбрать все",
+		"uk": "Вибрати все"
 	},
 	"menu.edit.speech": {
 		"en": "Speech",
@@ -233,7 +253,8 @@
 		"de": "Sprachausgabe",
 		"pt-BR": "Discurso",
 		"sk": "Reč",
-		"ru": "Проговаривание текста"
+		"ru": "Проговаривание текста",
+		"uk": "Читання вголос"
 	},
 	"menu.edit.speech.start-speaking": {
 		"en": "Start Speaking",
@@ -244,7 +265,8 @@
 		"de": "Sprachausgabe starten",
 		"pt-BR": "Comece a falar",
 		"sk": "Začnite rozprávať",
-		"ru": "Начать"
+		"ru": "Начать",
+		"uk": "Розпочати читання"
 	},
 	"menu.edit.speech.stop-speaking": {
 		"en": "Stop Speaking",
@@ -255,7 +277,8 @@
 		"de": "Sprachausgabe stoppen",
 		"pt-BR": "Parar de falar",
 		"sk": "Prestaňte hovoriť",
-		"ru": "Остановить"
+		"ru": "Остановить",
+		"uk": "Зупинити читання"
 	},
 
 	"menu.view.name": {
@@ -267,7 +290,8 @@
 		"de": "Anzeigen",
 		"pt-BR": "Ver",
 		"sk": "Zobrazenie",
-		"ru": "Вид"
+		"ru": "Вид",
+		"uk": "Перегляд"
 	},
 	"menu.view.toggle-dev-tools": {
 		"en": "Toggle Developer Tools",
@@ -278,7 +302,8 @@
 		"de": "Entwicklertools aktivieren",
 		"pt-BR": "Habilitar ferramentas de desenvolvedor",
 		"sk": "Prepnúť vývojárske nástroje",
-		"ru": "Переключить инструменты разработчика"
+		"ru": "Переключить инструменты разработчика",
+		"uk": "Переключити інструменти розробника"
 	},
 	"menu.view.zoom-reset": {
 		"en": "Actual Size",
@@ -289,7 +314,8 @@
 		"de": "Originalgröße",
 		"pt-BR": "Tamanho atual",
 		"sk": "Predvolená veľkosť",
-		"ru": "Исходный размер"
+		"ru": "Исходный размер",
+		"uk": "Справжній розмір"
 	},
 	"menu.view.zoom-in": {
 		"en": "Zoom In",
@@ -300,7 +326,8 @@
 		"de": "Vergrößern",
 		"pt-BR": "Ampliar",
 		"sk": "Priblížiť",
-		"ru": "Увеличить масштаб"
+		"ru": "Увеличить масштаб",
+		"uk": "Збільшити"
 	},
 	"menu.view.zoom-out": {
 		"en": "Zoom Out",
@@ -311,7 +338,8 @@
 		"de": "Verkleinern",
 		"pt-BR": "Reduzir",
 		"sk": "Oddialiť",
-		"ru": "Уменьшить масштаб"
+		"ru": "Уменьшить масштаб",
+		"uk": "Зменьшити"
 	},
 	"menu.view.toggle-full-screen": {
 		"en": "Toggle Full Screen",
@@ -322,7 +350,8 @@
 		"de": "Vollbildmodus",
 		"pt-BR": "Tela cheia",
 		"sk": "Prepnúť režim celej obrazovky",
-		"ru": "Перейти в полноэкранный режим"
+		"ru": "Перейти в полноэкранный режим",
+		"uk": "Увійти до повноекранного режиму"
 	},
 
 	"menu.window.name": {
@@ -334,7 +363,8 @@
 		"de": "Fenster",
 		"pt-BR": "Janela",
 		"sk": "Okno",
-		"ru": "Окно"
+		"ru": "Окно",
+		"uk": "Вікно"
 	},
 	"menu.window.minimize-mac": {
 		"en": "Minimize",
@@ -345,7 +375,8 @@
 		"de": "Im Dock ablegen",
 		"pt-BR": "Minimizar",
 		"sk": "Minimalizovať",
-		"ru": "Убрать в Dock"
+		"ru": "Убрать в Dock",
+		"uk": "Згорнути"
 	},
 	"menu.window.minimize": {
 		"en": "Minimize",
@@ -356,7 +387,8 @@
 		"de": "Minimieren",
 		"pt-BR": "Minimizar",
 		"sk": "Minimalizovať",
-		"ru": "Свернуть"
+		"ru": "Свернуть",
+		"uk": "Згорнути"
 	},
 	"menu.window.zoom-mac": {
 		"en": "Zoom",
@@ -367,7 +399,8 @@
 		"de": "Zoomen",
 		"pt-BR": "Ampliar",
 		"sk": "Zväčšiť",
-		"ru": "Изменить масштаб"
+		"ru": "Изменить масштаб",
+		"uk": "Змінити масштаб"
 	},
 	"menu.window.zoom": {
 		"en": "Zoom",
@@ -378,7 +411,8 @@
 		"de": "Zoomen",
 		"pt-BR": "Ampliar",
 		"sk": "Zväčšiť",
-		"ru": "Развернуть"
+		"ru": "Развернуть",
+		"uk": "Розгорнути"
 	},
 	"menu.window.front": {
 		"en": "Bring All to Front",
@@ -389,7 +423,8 @@
 		"de": "Alle nach vorn bringen",
 		"pt-BR": "Trazer tudo para frente",
 		"sk": "Presunúť všetko do popredia",
-		"ru": "Все окна — на передний план"
+		"ru": "Все окна — на передний план",
+		"uk": "Усі вікна наперед"
 	},
 	"menu.window.window": {
 		"en": "Window",
@@ -400,7 +435,8 @@
 		"de": "Fenster",
 		"pt-BR": "Janela",
 		"sk": "Okno",
-		"ru": "Окно"
+		"ru": "Окно",
+		"uk": "Вікно"
 	},
 	"menu.window.close": {
 		"en": "Close",
@@ -411,7 +447,8 @@
 		"de": "Schließen",
 		"pt-BR": "Fechar",
 		"sk": "Zavrieť",
-		"ru": "Закрыть"
+		"ru": "Закрыть",
+		"uk": "Вийти"
 	},
 
 	"menu.help.name": {
@@ -423,7 +460,8 @@
 		"de": "Hilfe",
 		"pt-BR": "Ajuda",
 		"sk": "Pomoc",
-		"ru": "Справка"
+		"ru": "Справка",
+		"uk": "Довідка"
 	},
 	"menu.help.website": {
 		"en": "Website",
@@ -434,7 +472,8 @@
 		"de": "Webseite",
 		"pt-BR": "Website",
 		"sk": "Webová stránka",
-		"ru": "Сайт"
+		"ru": "Сайт",
+		"uk": "Сайт"
 	},
 	"menu.help.source-code": {
 		"en": "Source Code",
@@ -445,7 +484,8 @@
 		"de": "Quelltext",
 		"pt-BR": "Código fonte",
 		"sk": "Zdrojový kód",
-		"ru": "Исходный код"
+		"ru": "Исходный код",
+		"uk": "Програмний код"
 	},
 	"menu.help.report-issue": {
 		"en": "Report an Issue",
@@ -456,7 +496,8 @@
 		"de": "Problem melden",
 		"pt-BR": "Reportar um problema",
 		"sk": "Nahlásiť problém",
-		"ru": "Сообщить о проблеме"
+		"ru": "Сообщить о проблеме",
+		"uk": "Повідомити про проблему"
 	},
 	"menu.help.about": {
 		"en": "About ",
@@ -467,7 +508,8 @@
 		"de": "Über ",
 		"pt-BR": "Sobre ",
 		"sk": "O programe ",
-		"ru": "О "
+		"ru": "О ",
+		"uk": "Про "
 	},
 
 	"aboutwindow:copyright": {
@@ -479,7 +521,8 @@
 		"de": "Urheberrecht",
 		"pt-BR": "Direitos autorais",
 		"sk": "Autorské práva",
-		"ru": "Авторские права"
+		"ru": "Авторские права",
+		"uk": "Авторське право"
 	},
 
 	"usertasks:open-file.label": {
@@ -487,13 +530,15 @@
 		"de": "Öffne Dateien",
 		"pt-BR": "Abri arquivos",
 		"sk": "Otvoriť súbory",
-		"ru": "Открыть файлы"
+		"ru": "Открыть файлы",
+		"uk": "Відкрити файли"
 	},
 	"usertasks:open-file.description": {
 		"en": "Remove metadata from selected files",
 		"de": "Entferne Metadaten von ausgewählten Dateien",
 		"pt-BR": "Remover metadados dos arquivos selecionados",
 		"sk": "Odstrániť metadáta z vybraných súborov",
-		"ru": "Удалить метаданные из выбранных файлов"
+		"ru": "Удалить метаданные из выбранных файлов",
+		"uk": "Видалити метадані з вибранних файлів"
 	}
 }
