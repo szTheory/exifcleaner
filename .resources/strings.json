@@ -6,7 +6,7 @@
 		"ja": "ファイルが選択されていません",
 		"es": "No hay archivos seleccionados",
 		"de": "Keine Datei ausgewählt",
-		"pt-BR": "Sem arquivos selecionados",
+		"pt-BR": "Nenhum arquivo selecionado",
 		"sk": "Nie sú vybraté žiadne súbory",
 		"ru": "Нет выбранных файлов",
 		"uk": "Немає вибраних файлів"
@@ -300,7 +300,7 @@
 		"ja": "開発者ツールの切り替え",
 		"es": "Habilitar herramientas de desarrollador",
 		"de": "Entwicklertools aktivieren",
-		"pt-BR": "Habilitar ferramentas de desenvolvedor",
+		"pt-BR": "Ativar modo do desenvolvedor",
 		"sk": "Prepnúť vývojárske nástroje",
 		"ru": "Переключить инструменты разработчика",
 		"uk": "Переключити інструменти розробника"
@@ -482,7 +482,7 @@
 		"ja": "ソースコード",
 		"es": "Código fuente",
 		"de": "Quelltext",
-		"pt-BR": "Código fonte",
+		"pt-BR": "Código-fonte",
 		"sk": "Zdrojový kód",
 		"ru": "Исходный код",
 		"uk": "Програмний код"
@@ -494,7 +494,7 @@
 		"ja": "バグを報告",
 		"es": "Reportar un problema",
 		"de": "Problem melden",
-		"pt-BR": "Reportar um problema",
+		"pt-BR": "Informar um problema",
 		"sk": "Nahlásiť problém",
 		"ru": "Сообщить о проблеме",
 		"uk": "Повідомити про проблему"
@@ -528,7 +528,7 @@
 	"usertasks:open-file.label": {
 		"en": "Open files",
 		"de": "Öffne Dateien",
-		"pt-BR": "Abri arquivos",
+		"pt-BR": "Abrir arquivos",
 		"sk": "Otvoriť súbory",
 		"ru": "Открыть файлы",
 		"uk": "Відкрити файли"
