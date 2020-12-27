@@ -116,7 +116,6 @@ Below is a full list of supported file types that ExifCleaner will remove metada
 
 ExifCleaner has the same writer limitations as the underlying `exiftool` it depends on. Taken from the [official website](https://exiftool.org/#limitations):
 
-
 - ExifTool will not rewrite a file if it detects a significant problem with the file format.
 - ExifTool has been tested with a wide range of different images, but since it is not possible to test it with every known image type, there is the possibility that it will corrupt some files. Be sure to keep backups of your files.
 - Even though ExifTool does some validation of the information written, it is still possible to write illegal values which may cause problems when reading the images with other software. So take care to validate the information you are writing.
@@ -129,19 +128,18 @@ ExifCleaner has the same writer limitations as the underlying `exiftool` it depe
   - MOV/MP4 - Most top-level metadata is removed.
   - RAW formats - It is not recommended to remove all metadata from RAW images because this will likely remove some proprietary information that is necessary for proper rendering of the image.
 
-
 ## Translations
 
 New translations and corrections to existing translations are welcome! See the [Adding a Translation](https://github.com/szTheory/exifcleaner/#adding-a-translation) section if there is a language you would like to add. Here is the current translations status:
 
 - Chinese (Mandarin) ❌ needs translation
-- French (France) ✅ 
+- French (France) ✅
 - French (Quebec) ❌ needs translation if France version is not sufficient
 - German ✅ by @tayfuuun, with updates by @philippsandhaus
 - Italian ❌ needs translation
 - Japanese ✅ by @AKKED
 - Polish ✅ by @m1chu
-- Portuguese (Brazil) ✅ by @iraamaro
+- Portuguese (Brazil) ✅ by @iraamaro, with updates by @dadodollabela
 - Portuguese (Portugal) ❌ needs translation if Brazil version is not sufficient
 - Russian ✅ by @likhner (Arthur Likhner)
 - Spanish (Spain) ✅ by @ff-ss (Francisco)
@@ -296,3 +294,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @LiJu09 - Slovak translation
 - @likhner (Arthur Likhner) - Russian translation
 - @hugonote (Alexander Berger) - Ukranian translation
+- @dadodollabela - Portuguese (Brazil) translation fixes
