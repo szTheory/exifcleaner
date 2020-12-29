@@ -14,7 +14,7 @@
 - Windows, Mac, and Linux
 - Supports popular image formats such as PNG, JPG, GIF, and TIFF
 - Supports popular video formats such as M4A, MOV, and MP4
-- Supports PDF documents
+- Supports PDF documents* (partial, [see discussion](https://github.com/szTheory/exifcleaner/issues/111))
 - Batch-processing
 - Multi-core support
 - Dark mode (automatic)
@@ -26,6 +26,8 @@
 
 - Executable size `~200MB` (Electron app)
 - Memory usage `~120MB` (Electron app)
+- PDF metadata removal is only partial ([see discussion](https://github.com/szTheory/exifcleaner/issues/111))
+- Does not remove extended filesystem attributes ([see discussion](https://github.com/szTheory/exifcleaner/issues/86))
 
 ## Download and Install
 
