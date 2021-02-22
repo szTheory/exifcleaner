@@ -14,7 +14,7 @@
 - Windows, Mac, and Linux
 - Supports popular image formats such as PNG, JPG, GIF, and TIFF
 - Supports popular video formats such as M4A, MOV, and MP4
-- Supports PDF documents* (partial, [see discussion](https://github.com/szTheory/exifcleaner/issues/111))
+- Supports PDF documents\* (partial, [see discussion](https://github.com/szTheory/exifcleaner/issues/111))
 - Batch-processing
 - Multi-core support
 - Dark mode (automatic)
@@ -134,8 +134,10 @@ ExifCleaner has the same writer limitations as the underlying `exiftool` it depe
 
 New translations and corrections to existing translations are welcome! See the [Adding a Translation](https://github.com/szTheory/exifcleaner/#adding-a-translation) section if there is a language you would like to add. Here is the current translations status:
 
+- Arabic ✅ by @ZER0-X
 - Chinese (Mandarin) ❌ needs translation
 - Danish ✅ by @zlatco
+- Dutch ✅ by @rvl-code
 - French (France) ✅
 - French (Quebec) ❌ needs translation if France version is not sufficient
 - German ✅ by @tayfuuun, with updates by @philippsandhaus
@@ -299,3 +301,5 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @hugonote (Alexander Berger) - Ukranian translation
 - @dadodollabela - Portuguese (Brazil) translation fixes
 - @zlatco - Danish translation
+- @ZER0-X - Arabic translation
+- @rvl-code - Dutch translation
