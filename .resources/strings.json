@@ -11,7 +11,7 @@
 		"sk": "Nie sú vybraté žiadne súbory",
 		"ru": "Нет выбранных файлов",
 		"uk": "Немає вибраних файлів",
-		"ar": "لا تُوجَّدُ أيُّ ملفَّاتٍ مُحدَّدة",
+		"ar": "لا تُوجَدُ أيُّ ملفَّاتٍ مُحدَّدة",
 		"nl": "Geen bestanden geselecteerd"
 	},
 	"empty.subtitle": {
@@ -26,7 +26,7 @@
 		"sk": "Presuňte a pustite fotografie, videá alebo PDF súbory sem a automaticky z nich odstránia metadáta.",
 		"ru": "Перетащите изображения, видео или PDF-файлы для автоматического удаления метаданных.",
 		"uk": "Перетягніть зображення, відео або PDF-файли для автоматичного видалення метаданих.",
-		"ar": "اسحب وارمِ الصُّور، الفيديوهات أو ملفَّات البي-دي-اف لإزالة البيانات الوصفيَّة بشكل تلقائيّ.",
+		"ar": "اِسحب وارمِ الصُّور، المقاطع المرئية أو ملفَّات البي-دي-اف لإزالة البيانات الوصفيَّة بشكل تلقائيّ.",
 		"nl": "Sleep en plaats afbeeldingen, video's of PDF-bestanden om metagegevens automatisch te verwijderen."
 	},
 
@@ -103,7 +103,7 @@
 		"sk": "Vybrať všetko",
 		"ru": "Выделить всё",
 		"uk": "Виділити все",
-		"ar": "تحدِّيد الكُل",
+		"ar": "تحديدُ الكُل",
 		"nl": "Alles Selecteren"
 	},
 
@@ -301,7 +301,7 @@
 		"sk": "Vybrať všetko",
 		"ru": "Выбрать все",
 		"uk": "Вибрати все",
-		"ar": "تحدِّيد الكُل",
+		"ar": "تحديدُ الكُل",
 		"nl": "Alles Selecteren"
 	},
 	"menu.edit.speech": {
@@ -331,7 +331,7 @@
 		"sk": "Začnite rozprávať",
 		"ru": "Начать",
 		"uk": "Розпочати читання",
-		"ar": "إبدأ النُّطق",
+		"ar": "اِبدأ النُّطق",
 		"nl": "Start Spraakuitvoer"
 	},
 	"menu.edit.speech.stop-speaking": {
