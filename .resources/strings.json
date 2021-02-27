@@ -10,7 +10,10 @@
 		"pt-BR": "Nenhum arquivo selecionado",
 		"sk": "Nie sú vybraté žiadne súbory",
 		"ru": "Нет выбранных файлов",
-		"uk": "Немає вибраних файлів"
+		"uk": "Немає вибраних файлів",
+		"ar": "لا تُوجَدُ أيُّ ملفَّاتٍ مُحدَّدة",
+		"nl": "Geen bestanden geselecteerd",
+		"it": ""
 	},
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
@@ -23,7 +26,10 @@
 		"pt-BR": "Arraste e solte imagens, vídeos ou arquivos PDF para remover metadados automaticamente.",
 		"sk": "Presuňte a pustite fotografie, videá alebo PDF súbory sem a automaticky z nich odstránia metadáta.",
 		"ru": "Перетащите изображения, видео или PDF-файлы для автоматического удаления метаданных.",
-		"uk": "Перетягніть зображення, відео або PDF-файли для автоматичного видалення метаданих."
+		"uk": "Перетягніть зображення, відео або PDF-файли для автоматичного видалення метаданих.",
+		"ar": "اِسحب وارمِ الصُّور، المقاطع المرئية أو ملفَّات البي-دي-اف لإزالة البيانات الوصفيَّة بشكل تلقائيّ.",
+		"nl": "Sleep en plaats afbeeldingen, video's of PDF-bestanden om metagegevens automatisch te verwijderen.",
+		"it": ""
 	},
 
 	"table.header.filename": {
@@ -37,7 +43,10 @@
 		"pt-BR": "Arquivos selecionados",
 		"sk": "Vybrané súbory",
 		"ru": "Выбранные файлы",
-		"uk": "Вибрані файли"
+		"uk": "Вибрані файли",
+		"ar": "الملفَّات المُحدَّدة",
+		"nl": "Geselecteerde bestanden",
+		"it": ""
 	},
 	"table.header.exif-before": {
 		"en": "# Exif Before",
@@ -50,7 +59,10 @@
 		"pt-BR": "# Exif antes",
 		"sk": "# Exif predtým",
 		"ru": "# Exif до",
-		"uk": "# Exif до"
+		"uk": "# Exif до",
+		"ar": "# قَبل Exif",
+		"nl": "# Exif Voor",
+		"it": ""
 	},
 	"table.header.exif-after": {
 		"en": "# Exif After",
@@ -63,7 +75,10 @@
 		"pt-BR": "# Exif depois",
 		"sk": "# Exif po",
 		"ru": "# Exif после",
-		"uk": "# Exif після"
+		"uk": "# Exif після",
+		"ar": "# بَعد Exif",
+		"nl": "# Exif Na",
+		"it": ""
 	},
 
 	"contextmenu.copy": {
@@ -77,7 +92,10 @@
 		"pt-BR": "Copiar",
 		"sk": "Kopírovať",
 		"ru": "Скопировать",
-		"uk": "Скопіювати"
+		"uk": "Скопіювати",
+		"ar": "نَسخ",
+		"nl": "Kopieer",
+		"it": ""
 	},
 	"contextmenu.select-all": {
 		"en": "Select All",
@@ -90,7 +108,10 @@
 		"pt-BR": "Selecionar todos",
 		"sk": "Vybrať všetko",
 		"ru": "Выделить всё",
-		"uk": "Виділити все"
+		"uk": "Виділити все",
+		"ar": "تحديدُ الكُل",
+		"nl": "Alles Selecteren",
+		"it": ""
 	},
 
 	"menu.app.about": {
@@ -104,7 +125,10 @@
 		"pt-BR": "Sobre ",
 		"sk": "O aplikácii ",
 		"ru": "О программе ",
-		"uk": "Про програму "
+		"uk": "Про програму ",
+		"ar": " حَول ",
+		"nl": "Over ",
+		"it": ""
 	},
 	"menu.app.services": {
 		"en": "Services",
@@ -117,7 +141,10 @@
 		"pt-BR": "Serviços",
 		"sk": "Služby",
 		"ru": "Службы",
-		"uk": "Служби"
+		"uk": "Служби",
+		"ar": "الخدمات",
+		"nl": "Services",
+		"it": ""
 	},
 	"menu.app.hide": {
 		"en": "Hide",
@@ -130,7 +157,10 @@
 		"pt-BR": "Ocultar",
 		"sk": "Skryť",
 		"ru": "Скрыть",
-		"uk": "Сховати"
+		"uk": "Сховати",
+		"ar": "إخفاء",
+		"nl": "Verbergen",
+		"it": ""
 	},
 	"menu.app.hide-others": {
 		"en": "Hide Others",
@@ -143,7 +173,10 @@
 		"pt-BR": "Ocultar outros",
 		"sk": "Skryť ostatné",
 		"ru": "Скрыть остальные",
-		"uk": "Сховати решту"
+		"uk": "Сховати решту",
+		"ar": "إخفاء البقيَّة",
+		"nl": "Verbergen Andere",
+		"it": ""
 	},
 	"menu.app.show-all": {
 		"en": "Show All",
@@ -156,7 +189,10 @@
 		"pt-BR": "Mostrar todos",
 		"sk": "Ukázať všetko",
 		"ru": "Показать все",
-		"uk": "Показати все"
+		"uk": "Показати все",
+		"ar": "إظهار الكُل",
+		"nl": "Toon Alles",
+		"it": ""
 	},
 	"menu.app.quit": {
 		"en": "Quit",
@@ -169,7 +205,10 @@
 		"pt-BR": "Sair",
 		"sk": "Ukončiť",
 		"ru": "Завершить",
-		"uk": "Завершити"
+		"uk": "Завершити",
+		"ar": "خُروج",
+		"nl": "Afsluiten",
+		"it": ""
 	},
 
 	"menu.file.name": {
@@ -183,7 +222,10 @@
 		"pt-BR": "Arquivo",
 		"sk": "Súbor",
 		"ru": "Файл",
-		"uk": "Файл"
+		"uk": "Файл",
+		"ar": "اسم الملفّ",
+		"nl": "Bestand",
+		"it": ""
 	},
 	"menu.file.open": {
 		"en": "Open",
@@ -196,7 +238,10 @@
 		"pt-BR": "Abrir arquivo",
 		"sk": "Otvoriť",
 		"ru": "Открыть",
-		"uk": "Відкрити"
+		"uk": "Відкрити",
+		"ar": "فَتح",
+		"nl": "Openen",
+		"it": ""
 	},
 	"menu.file.close": {
 		"en": "Close",
@@ -209,7 +254,10 @@
 		"pt-BR": "Fechar",
 		"sk": "Zavrieť",
 		"ru": "Закрыть",
-		"uk": "Закрити"
+		"uk": "Закрити",
+		"ar": "إغلاق",
+		"nl": "Sluiten",
+		"it": ""
 	},
 	"menu.file.quit": {
 		"en": "Quit",
@@ -222,7 +270,10 @@
 		"pt-BR": "Sair",
 		"sk": "Ukončiť",
 		"ru": "Завершить",
-		"uk": "Вийти"
+		"uk": "Вийти",
+		"ar": "خُروج",
+		"nl": "Afsluiten",
+		"it": ""
 	},
 
 	"menu.edit.name": {
@@ -236,7 +287,10 @@
 		"pt-BR": "Editar nome",
 		"sk": "Upraviť",
 		"ru": "Правка",
-		"uk": "Редагування"
+		"uk": "Редагування",
+		"ar": "تحرير",
+		"nl": "Bewerken",
+		"it": ""
 	},
 	"menu.edit.copy": {
 		"en": "Copy",
@@ -249,7 +303,10 @@
 		"pt-BR": "Copiar",
 		"sk": "Kopírovať",
 		"ru": "Скопировать",
-		"uk": "Скопіювати"
+		"uk": "Скопіювати",
+		"ar": "نَسخ",
+		"nl": "Kopiëren",
+		"it": ""
 	},
 	"menu.edit.select-all": {
 		"en": "Select All",
@@ -262,7 +319,10 @@
 		"pt-BR": "Selecionar todos",
 		"sk": "Vybrať všetko",
 		"ru": "Выбрать все",
-		"uk": "Вибрати все"
+		"uk": "Вибрати все",
+		"ar": "تحديدُ الكُل",
+		"nl": "Alles Selecteren",
+		"it": ""
 	},
 	"menu.edit.speech": {
 		"en": "Speech",
@@ -275,7 +335,10 @@
 		"pt-BR": "Discurso",
 		"sk": "Reč",
 		"ru": "Проговаривание текста",
-		"uk": "Читання вголос"
+		"uk": "Читання вголос",
+		"ar": "النُّطق",
+		"nl": "Spraak",
+		"it": ""
 	},
 	"menu.edit.speech.start-speaking": {
 		"en": "Start Speaking",
@@ -288,7 +351,10 @@
 		"pt-BR": "Comece a falar",
 		"sk": "Začnite rozprávať",
 		"ru": "Начать",
-		"uk": "Розпочати читання"
+		"uk": "Розпочати читання",
+		"ar": "اِبدأ النُّطق",
+		"nl": "Start Spraakuitvoer",
+		"it": ""
 	},
 	"menu.edit.speech.stop-speaking": {
 		"en": "Stop Speaking",
@@ -301,7 +367,10 @@
 		"pt-BR": "Parar de falar",
 		"sk": "Prestaňte hovoriť",
 		"ru": "Остановить",
-		"uk": "Зупинити читання"
+		"uk": "Зупинити читання",
+		"ar": "إيقاف النُّطق",
+		"nl": "Stop Spraakuitvoer",
+		"it": ""
 	},
 
 	"menu.view.name": {
@@ -315,7 +384,10 @@
 		"pt-BR": "Ver",
 		"sk": "Zobrazenie",
 		"ru": "Вид",
-		"uk": "Перегляд"
+		"uk": "Перегляд",
+		"ar": "العَرض",
+		"nl": "Beeld",
+		"it": ""
 	},
 	"menu.view.toggle-dev-tools": {
 		"en": "Toggle Developer Tools",
@@ -328,7 +400,10 @@
 		"pt-BR": "Ativar modo do desenvolvedor",
 		"sk": "Prepnúť vývojárske nástroje",
 		"ru": "Переключить инструменты разработчика",
-		"uk": "Переключити інструменти розробника"
+		"uk": "Переключити інструменти розробника",
+		"ar": "تبديل أدوات المُطورين",
+		"nl": "Open Developer Tools",
+		"it": ""
 	},
 	"menu.view.zoom-reset": {
 		"en": "Actual Size",
@@ -341,7 +416,10 @@
 		"pt-BR": "Tamanho atual",
 		"sk": "Predvolená veľkosť",
 		"ru": "Исходный размер",
-		"uk": "Справжній розмір"
+		"uk": "Справжній розмір",
+		"ar": "الحجم الأصلي",
+		"nl": "Originele grootte",
+		"it": ""
 	},
 	"menu.view.zoom-in": {
 		"en": "Zoom In",
@@ -354,7 +432,10 @@
 		"pt-BR": "Ampliar",
 		"sk": "Priblížiť",
 		"ru": "Увеличить масштаб",
-		"uk": "Збільшити"
+		"uk": "Збільшити",
+		"ar": "تكبير",
+		"nl": "Inzoomen",
+		"it": ""
 	},
 	"menu.view.zoom-out": {
 		"en": "Zoom Out",
@@ -367,7 +448,10 @@
 		"pt-BR": "Reduzir",
 		"sk": "Oddialiť",
 		"ru": "Уменьшить масштаб",
-		"uk": "Зменьшити"
+		"uk": "Зменьшити",
+		"ar": "تصغير",
+		"nl": "Uitzoomen",
+		"it": ""
 	},
 	"menu.view.toggle-full-screen": {
 		"en": "Toggle Full Screen",
@@ -380,7 +464,10 @@
 		"pt-BR": "Tela cheia",
 		"sk": "Prepnúť režim celej obrazovky",
 		"ru": "Перейти в полноэкранный режим",
-		"uk": "Увійти до повноекранного режиму"
+		"uk": "Увійти до повноекранного режиму",
+		"ar": "تبديل ملء الشَّاشة",
+		"nl": "Volledig Scherm",
+		"it": ""
 	},
 
 	"menu.window.name": {
@@ -394,7 +481,10 @@
 		"pt-BR": "Janela",
 		"sk": "Okno",
 		"ru": "Окно",
-		"uk": "Вікно"
+		"uk": "Вікно",
+		"ar": "النَّافِذة",
+		"nl": "Venster",
+		"it": ""
 	},
 	"menu.window.minimize-mac": {
 		"en": "Minimize",
@@ -407,7 +497,10 @@
 		"pt-BR": "Minimizar",
 		"sk": "Minimalizovať",
 		"ru": "Убрать в Dock",
-		"uk": "Згорнути"
+		"uk": "Згорнути",
+		"ar": "تقليص",
+		"nl": "Minimaliseren",
+		"it": ""
 	},
 	"menu.window.minimize": {
 		"en": "Minimize",
@@ -420,7 +513,10 @@
 		"pt-BR": "Minimizar",
 		"sk": "Minimalizovať",
 		"ru": "Свернуть",
-		"uk": "Згорнути"
+		"uk": "Згорнути",
+		"ar": "تقليص",
+		"nl": "Minimaliseren",
+		"it": ""
 	},
 	"menu.window.zoom-mac": {
 		"en": "Zoom",
@@ -433,7 +529,10 @@
 		"pt-BR": "Ampliar",
 		"sk": "Zväčšiť",
 		"ru": "Изменить масштаб",
-		"uk": "Змінити масштаб"
+		"uk": "Змінити масштаб",
+		"ar": "تكبير",
+		"nl": "Zoomen",
+		"it": ""
 	},
 	"menu.window.zoom": {
 		"en": "Zoom",
@@ -446,7 +545,10 @@
 		"pt-BR": "Ampliar",
 		"sk": "Zväčšiť",
 		"ru": "Развернуть",
-		"uk": "Розгорнути"
+		"uk": "Розгорнути",
+		"ar": "تكبير",
+		"nl": "Zoomen",
+		"it": ""
 	},
 	"menu.window.front": {
 		"en": "Bring All to Front",
@@ -459,7 +561,10 @@
 		"pt-BR": "Trazer tudo para frente",
 		"sk": "Presunúť všetko do popredia",
 		"ru": "Все окна — на передний план",
-		"uk": "Усі вікна наперед"
+		"uk": "Усі вікна наперед",
+		"ar": "إحضار الكُل إلى المُقدِّمة",
+		"nl": "Breng alles naar de voorgrond",
+		"it": ""
 	},
 	"menu.window.window": {
 		"en": "Window",
@@ -472,7 +577,10 @@
 		"pt-BR": "Janela",
 		"sk": "Okno",
 		"ru": "Окно",
-		"uk": "Вікно"
+		"uk": "Вікно",
+		"ar": "نافِذة",
+		"nl": "Venster",
+		"it": ""
 	},
 	"menu.window.close": {
 		"en": "Close",
@@ -485,7 +593,10 @@
 		"pt-BR": "Fechar",
 		"sk": "Zavrieť",
 		"ru": "Закрыть",
-		"uk": "Вийти"
+		"uk": "Вийти",
+		"ar": "إغلاق",
+		"nl": "Sluiten",
+		"it": ""
 	},
 
 	"menu.help.name": {
@@ -499,7 +610,10 @@
 		"pt-BR": "Ajuda",
 		"sk": "Pomoc",
 		"ru": "Справка",
-		"uk": "Довідка"
+		"uk": "Довідка",
+		"ar": "المُساعدة",
+		"nl": "Help",
+		"it": ""
 	},
 	"menu.help.website": {
 		"en": "Website",
@@ -512,7 +626,10 @@
 		"pt-BR": "Website",
 		"sk": "Webová stránka",
 		"ru": "Сайт",
-		"uk": "Сайт"
+		"uk": "Сайт",
+		"ar": "المُساعدة",
+		"nl": "Website",
+		"it": ""
 	},
 	"menu.help.source-code": {
 		"en": "Source Code",
@@ -525,7 +642,10 @@
 		"pt-BR": "Código-fonte",
 		"sk": "Zdrojový kód",
 		"ru": "Исходный код",
-		"uk": "Програмний код"
+		"uk": "Програмний код",
+		"ar": "كود المَصدر",
+		"nl": "Broncode",
+		"it": ""
 	},
 	"menu.help.report-issue": {
 		"en": "Report an Issue",
@@ -538,7 +658,10 @@
 		"pt-BR": "Informar um problema",
 		"sk": "Nahlásiť problém",
 		"ru": "Сообщить о проблеме",
-		"uk": "Повідомити про проблему"
+		"uk": "Повідомити про проблему",
+		"ar": "الإبلاغ عن خطأ",
+		"nl": "Meld een Probleem",
+		"it": ""
 	},
 	"menu.help.about": {
 		"en": "About ",
@@ -551,7 +674,10 @@
 		"pt-BR": "Sobre ",
 		"sk": "O programe ",
 		"ru": "О ",
-		"uk": "Про "
+		"uk": "Про ",
+		"ar": "حَول",
+		"nl": "Over ",
+		"it": ""
 	},
 
 	"aboutwindow:copyright": {
@@ -565,7 +691,10 @@
 		"pt-BR": "Direitos autorais",
 		"sk": "Autorské práva",
 		"ru": "Авторские права",
-		"uk": "Авторське право"
+		"uk": "Авторське право",
+		"ar": "حقوق النَّشر",
+		"nl": "Copyright",
+		"it": ""
 	},
 
 	"usertasks:open-file.label": {
@@ -575,8 +704,12 @@
 		"pt-BR": "Abrir arquivos",
 		"sk": "Otvoriť súbory",
 		"ru": "Открыть файлы",
-		"uk": "Відкрити файли"
+		"uk": "Відкрити файли",
+		"ar": "الملفَّات المفتوحة",
+		"nl": "Bestanden openen",
+		"it": ""
 	},
+
 	"usertasks:open-file.description": {
 		"en": "Remove metadata from selected files",
 		"da": "Fjern metadata fra valgte filer",
@@ -584,6 +717,9 @@
 		"pt-BR": "Remover metadados dos arquivos selecionados",
 		"sk": "Odstrániť metadáta z vybraných súborov",
 		"ru": "Удалить метаданные из выбранных файлов",
-		"uk": "Видалити метадані з вибранних файлів"
+		"uk": "Видалити метадані з вибранних файлів",
+		"ar": "إزالة البيانات الوصفيَّة من الملفَّات المُحدَّدة",
+		"nl": "Verwijder metagegevens van de geselecteerde bestanden",
+		"it": ""
 	}
 }
