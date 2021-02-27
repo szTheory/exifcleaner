@@ -709,7 +709,6 @@
 		"nl": "Bestanden openen",
 		"it": "Apri files"
 	},
-
 	"usertasks:open-file.description": {
 		"en": "Remove metadata from selected files",
 		"da": "Fjern metadata fra valgte filer",
