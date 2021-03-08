@@ -18,7 +18,7 @@
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
 		"da": "Træk og slip billeder, videoer eller PDF filer for automatisk at fjerne metadata",
-		"fr": "Faites glisser et déposez des images, des vidéos ou des fichiers PDF pour supprimer automatiquement les métadonnées.",
+		"fr": "Faites glisser-déposer des images, des vidéos ou des fichiers PDF pour supprimer automatiquement les métadonnées.",
 		"pl": "Przeciągnij i upuść zdjęcia, filmy lub pliki PDF, aby automatycznie usunąć z nich metadane.",
 		"ja": "画像、動画、PDF をドラッグ＆ドロップすると、メタデータが自動的に削除されます。",
 		"es": "Arrastre y suelte imágenes, videos, o documentos PDF para automáticamente eliminar metadatos.",
@@ -343,7 +343,7 @@
 	"menu.edit.speech.start-speaking": {
 		"en": "Start Speaking",
 		"da": "Start Diktéring",
-		"fr": "Commencer dictée",
+		"fr": "Commencer la dictée",
 		"pl": "Rozpocznij mówienie",
 		"ja": "話し始める",
 		"es": "Comience a hablar",
@@ -359,7 +359,7 @@
 	"menu.edit.speech.stop-speaking": {
 		"en": "Stop Speaking",
 		"da": "Stop Diktéring",
-		"fr": "Arrêter dictée",
+		"fr": "Arrêter la dictée",
 		"pl": "Zakończ mówienie",
 		"ja": "話し終わる",
 		"es": "Pare de hablar",
@@ -376,7 +376,7 @@
 	"menu.view.name": {
 		"en": "View",
 		"da": "Vis",
-		"fr": "Présentation",
+		"fr": "Affichage",
 		"pl": "Widok",
 		"ja": "表示",
 		"es": "Vista",
@@ -408,7 +408,7 @@
 	"menu.view.zoom-reset": {
 		"en": "Actual Size",
 		"da": "Virkelig Størrelse",
-		"fr": "Rétablir la taille normale du text",
+		"fr": "Zoom par défaut",
 		"pl": "Domyślny rozmiar",
 		"ja": "実サイズ",
 		"es": "Tamaño actual",
@@ -489,7 +489,7 @@
 	"menu.window.minimize-mac": {
 		"en": "Minimize",
 		"da": "Minimér",
-		"fr": "Placer dan le Dock",
+		"fr": "Réduire",
 		"pl": "Minimalizuj",
 		"ja": "最小化",
 		"es": "Minimizar",
@@ -521,7 +521,7 @@
 	"menu.window.zoom-mac": {
 		"en": "Zoom",
 		"da": "Zoom",
-		"fr": "Réduire/agrandir",
+		"fr": "Réduire/Agrandir",
 		"pl": "Zoom",
 		"ja": "ズーム",
 		"es": "Maximizar",
@@ -618,7 +618,7 @@
 	"menu.help.website": {
 		"en": "Website",
 		"da": "Webside",
-		"fr": "Site web",
+		"fr": "Site Web",
 		"pl": "Przejdź do strony internetowej",
 		"ja": "ウェブサイト",
 		"es": "Sitio Web",
@@ -650,7 +650,7 @@
 	"menu.help.report-issue": {
 		"en": "Report an Issue",
 		"da": "Rapportér et problem ",
-		"fr": "Dénoncer un problème",
+		"fr": "Signaler un problème",
 		"pl": "Zgłoś problem",
 		"ja": "バグを報告",
 		"es": "Reportar un problema",
@@ -683,7 +683,7 @@
 	"aboutwindow:copyright": {
 		"en": "Copyright",
 		"da": "Copyright",
-		"fr": "Droit d'auteur",
+		"fr": "Copyright",
 		"pl": "Copyright",
 		"ja": "著作",
 		"es": "Derechos de Autor",
@@ -701,6 +701,7 @@
 		"en": "Open files",
 		"da": "Åbn filer",
 		"de": "Öffne Dateien",
+		"fr": "Ouvrir les fichiers",
 		"pt-BR": "Abrir arquivos",
 		"sk": "Otvoriť súbory",
 		"ru": "Открыть файлы",
@@ -713,6 +714,7 @@
 		"en": "Remove metadata from selected files",
 		"da": "Fjern metadata fra valgte filer",
 		"de": "Entferne Metadaten von ausgewählten Dateien",
+		"fr": "Supprimer les métadonnées des fichiers sélectionnés",
 		"pt-BR": "Remover metadados dos arquivos selecionados",
 		"sk": "Odstrániť metadáta z vybraných súborov",
 		"ru": "Удалить метаданные из выбранных файлов",
