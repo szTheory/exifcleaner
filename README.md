@@ -138,7 +138,7 @@ New translations and corrections to existing translations are welcome! See the [
 - Chinese (Mandarin) ❌ needs translation
 - Danish ✅ by @zlatco
 - Dutch ✅ by @rvl-code
-- French (France) ✅ needs proofreading
+- French (France) ✅ by @NathanBnm (Nathan Bonnemains)
 - French (Quebec) ❌ needs translation if France version is not sufficient
 - German ✅ by @tayfuuun, with updates by @philippsandhaus
 - Italian ✅ by @blackcat-917
@@ -304,3 +304,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @ZER0-X - Arabic translation
 - @rvl-code - Dutch translation
 - @blackcat-917 - Italian translation
+- @NathanBnm (Nathan Bonnemains) - French translation
