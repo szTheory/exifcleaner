@@ -92,7 +92,7 @@
 				"rpm"
 			],
 			"icon": "build/icon.icns",
-			"category": "Images",
+			"category": "Graphics",
 			"extraResources": [
 				{
 					"from": ".resources/nix/bin",
