@@ -135,7 +135,7 @@ ExifCleaner has the same writer limitations as the underlying `exiftool` it depe
 New translations and corrections to existing translations are welcome! See the [Adding a Translation](https://github.com/szTheory/exifcleaner/#adding-a-translation) section if there is a language you would like to add. Here is the current translations status:
 
 - Arabic ✅ by @ZER0-X
-- Chinese (Mandarin) ❌ needs translation
+- Chinese (Mandarin) ✅ by MarcusPierce
 - Danish ✅ by @zlatco
 - Dutch ✅ by @rvl-code
 - French (France) ✅ by @NathanBnm (Nathan Bonnemains)
@@ -306,3 +306,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @blackcat-917 - Italian translation
 - @NathanBnm (Nathan Bonnemains) - French translation
 - @Dyrimon - Linux AppImage error notification fix
+- @MarcusPierce - Chinese (Mandarin) translation
