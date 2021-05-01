@@ -6,6 +6,10 @@
 
 ![ExifCleaner demo](https://user-images.githubusercontent.com/28652/71770980-f04e8b80-2f2b-11ea-90f1-4393ec57adc0.gif)
 
+## !!!!! NOTE - UPGRADE TO 3.5.0 ASAP !!!!!
+
+If you are running 3.4.0 or earlier of ExifCleaner, update immediately! A security vulnerability was found in exiftool, the command-line application that powers ExifCleaner under the hood, and this was updated in ExifCleaner 3.5.0.
+
 ## Benefits
 
 - Fast
@@ -307,4 +311,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @NathanBnm (Nathan Bonnemains) - French translation
 - @Dyrimon - Linux AppImage error notification fix
 - @MarcusPierce - Chinese (Mandarin) translation
-- @brandonlou - Heads up on updating exiftool to 12.24+ to mitigate CVE-2021-22204 arbitrary code execution
+- @brandonlou - Heads up on updating exiftool to 12.24+ to mitigate [CVE-2021-22204 arbitrary code execution](https://twitter.com/wcbowling/status/1385803927321415687)
