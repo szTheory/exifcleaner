@@ -13,7 +13,7 @@
 		"uk": "Немає вибраних файлів",
 		"ar": "لا تُوجَدُ أيُّ ملفَّاتٍ مُحدَّدة",
 		"nl": "Geen bestanden geselecteerd",
-		"it": "Nessun file selezionato"
+		"it": "Nessun file selezionato",
 		"zh": "未选择文件"
 	},
 	"empty.subtitle": {
@@ -30,7 +30,7 @@
 		"uk": "Перетягніть зображення, відео або PDF-файли для автоматичного видалення метаданих.",
 		"ar": "اِسحب وارمِ الصُّور، المقاطع المرئية أو ملفَّات البي-دي-اف لإزالة البيانات الوصفيَّة بشكل تلقائيّ.",
 		"nl": "Sleep en plaats afbeeldingen, video's of PDF-bestanden om metagegevens automatisch te verwijderen.",
-		"it": "Trascina e rilascia immagini, video o file PDF qui per rimuovere automaticamente i metadati."
+		"it": "Trascina e rilascia immagini, video o file PDF qui per rimuovere automaticamente i metadati.",
 		"zh": "拖放图像，视频或PDF文件以自动删除元数据。"
 	},
 
@@ -48,7 +48,7 @@
 		"uk": "Вибрані файли",
 		"ar": "الملفَّات المُحدَّدة",
 		"nl": "Geselecteerde bestanden",
-		"it": "File selezionati"
+		"it": "File selezionati",
 		"zh": "选中的文件"
 	},
 	"table.header.exif-before": {
@@ -65,7 +65,7 @@
 		"uk": "# Exif до",
 		"ar": "# قَبل Exif",
 		"nl": "# Exif Voor",
-		"it": "Nº di dati Exif prima"
+		"it": "Nº di dati Exif prima",
 		"zh": "# Exif 处理前"
 	},
 	"table.header.exif-after": {
@@ -82,7 +82,7 @@
 		"uk": "# Exif після",
 		"ar": "# بَعد Exif",
 		"nl": "# Exif Na",
-		"it": "Nº di dati Exif dopo"
+		"it": "Nº di dati Exif dopo",
 		"zh": "# Exif 处理后"
 	},
 
@@ -100,7 +100,7 @@
 		"uk": "Скопіювати",
 		"ar": "نَسخ",
 		"nl": "Kopieer",
-		"it": "Copia"
+		"it": "Copia",
 		"zh": "拷贝"
 	},
 	"contextmenu.select-all": {
@@ -117,7 +117,7 @@
 		"uk": "Виділити все",
 		"ar": "تحديدُ الكُل",
 		"nl": "Alles Selecteren",
-		"it": "Seleziona tutto"
+		"it": "Seleziona tutto",
 		"zh": "全选"
 	},
 
@@ -135,7 +135,7 @@
 		"uk": "Про програму ",
 		"ar": " حَول ",
 		"nl": "Over ",
-		"it": "Chi siamo"
+		"it": "Chi siamo",
 		"zh": "关于"
 	},
 	"menu.app.services": {
@@ -152,7 +152,7 @@
 		"uk": "Служби",
 		"ar": "الخدمات",
 		"nl": "Services",
-		"it": "Servizi"
+		"it": "Servizi",
 		"zh": "服务"
 	},
 	"menu.app.hide": {
@@ -169,7 +169,7 @@
 		"uk": "Сховати",
 		"ar": "إخفاء",
 		"nl": "Verbergen",
-		"it": "Nascondi"
+		"it": "Nascondi",
 		"zh": "最小化"
 	},
 	"menu.app.hide-others": {
@@ -186,7 +186,7 @@
 		"uk": "Сховати решту",
 		"ar": "إخفاء البقيَّة",
 		"nl": "Verbergen Andere",
-		"it": "Nascondi tutto il resto"
+		"it": "Nascondi tutto il resto",
 		"zh": "隐藏其他"
 	},
 	"menu.app.show-all": {
@@ -203,7 +203,7 @@
 		"uk": "Показати все",
 		"ar": "إظهار الكُل",
 		"nl": "Toon Alles",
-		"it": "Mostra tutti"
+		"it": "Mostra tutti",
 		"zh": "全部显示"
 	},
 	"menu.app.quit": {
@@ -220,7 +220,7 @@
 		"uk": "Завершити",
 		"ar": "خُروج",
 		"nl": "Afsluiten",
-		"it": "Esci"
+		"it": "Esci",
 		"zh": "退出"
 	},
 
@@ -238,7 +238,7 @@
 		"uk": "Файл",
 		"ar": "اسم الملفّ",
 		"nl": "Bestand",
-		"it": "File"
+		"it": "File",
 		"zh": "文件"
 	},
 	"menu.file.open": {
@@ -255,7 +255,7 @@
 		"uk": "Відкрити",
 		"ar": "فَتح",
 		"nl": "Openen",
-		"it": "Apri"
+		"it": "Apri",
 		"zh": "打开"
 	},
 	"menu.file.close": {
@@ -272,7 +272,7 @@
 		"uk": "Закрити",
 		"ar": "إغلاق",
 		"nl": "Sluiten",
-		"it": "Chiudi"
+		"it": "Chiudi",
 		"zh": "关闭"
 	},
 	"menu.file.quit": {
@@ -289,7 +289,7 @@
 		"uk": "Вийти",
 		"ar": "خُروج",
 		"nl": "Afsluiten",
-		"it": "Esci"
+		"it": "Esci",
 		"zh": "退出"
 	},
 
@@ -307,7 +307,7 @@
 		"uk": "Редагування",
 		"ar": "تحرير",
 		"nl": "Bewerken",
-		"it": "Modifica"
+		"it": "Modifica",
 		"zh": "编辑"
 	},
 	"menu.edit.copy": {
@@ -324,7 +324,7 @@
 		"uk": "Скопіювати",
 		"ar": "نَسخ",
 		"nl": "Kopiëren",
-		"it": "Copia"
+		"it": "Copia",
 		"zh": "拷贝"
 	},
 	"menu.edit.select-all": {
@@ -341,7 +341,7 @@
 		"uk": "Вибрати все",
 		"ar": "تحديدُ الكُل",
 		"nl": "Alles Selecteren",
-		"it": "Seleziona tutto"
+		"it": "Seleziona tutto",
 		"zh": "全选"
 	},
 	"menu.edit.speech": {
@@ -358,7 +358,7 @@
 		"uk": "Читання вголос",
 		"ar": "النُّطق",
 		"nl": "Spraak",
-		"it": "Pronuncia"
+		"it": "Pronuncia",
 		"zh": "语音"
 	},
 	"menu.edit.speech.start-speaking": {
@@ -375,7 +375,7 @@
 		"uk": "Розпочати читання",
 		"ar": "اِبدأ النُّطق",
 		"nl": "Start Spraakuitvoer",
-		"it": "Inizia a parlare"
+		"it": "Inizia a parlare",
 		"zh": "开始说话"
 	},
 	"menu.edit.speech.stop-speaking": {
@@ -392,7 +392,7 @@
 		"uk": "Зупинити читання",
 		"ar": "إيقاف النُّطق",
 		"nl": "Stop Spraakuitvoer",
-		"it": "Smetti di parlare"
+		"it": "Smetti di parlare",
 		"zh": "停止说话"
 	},
 
@@ -410,7 +410,7 @@
 		"uk": "Перегляд",
 		"ar": "العَرض",
 		"nl": "Beeld",
-		"it": "Visualizza"
+		"it": "Visualizza",
 		"zh": "视图"
 	},
 	"menu.view.toggle-dev-tools": {
@@ -427,7 +427,7 @@
 		"uk": "Переключити інструменти розробника",
 		"ar": "تبديل أدوات المُطورين",
 		"nl": "Open Developer Tools",
-		"it": "Apri/chiudi gli strumenti per sviluppatori"
+		"it": "Apri/chiudi gli strumenti per sviluppatori",
 		"zh": "启动开发者工具"
 	},
 	"menu.view.zoom-reset": {
@@ -444,7 +444,7 @@
 		"uk": "Справжній розмір",
 		"ar": "الحجم الأصلي",
 		"nl": "Originele grootte",
-		"it": "Reimposta la dimensione originale"
+		"it": "Reimposta la dimensione originale",
 		"zh": "实际大小"
 	},
 	"menu.view.zoom-in": {
@@ -461,7 +461,7 @@
 		"uk": "Збільшити",
 		"ar": "تكبير",
 		"nl": "Inzoomen",
-		"it": "Aumenta zoom"
+		"it": "Aumenta zoom",
 		"zh": "放大"
 	},
 	"menu.view.zoom-out": {
@@ -478,7 +478,7 @@
 		"uk": "Зменьшити",
 		"ar": "تصغير",
 		"nl": "Uitzoomen",
-		"it": "Diminuisci zoom"
+		"it": "Diminuisci zoom",
 		"zh": "缩小"
 	},
 	"menu.view.toggle-full-screen": {
@@ -495,7 +495,7 @@
 		"uk": "Увійти до повноекранного режиму",
 		"ar": "تبديل ملء الشَّاشة",
 		"nl": "Volledig Scherm",
-		"it": "Attiva/disattiva la modalità a schermo intero"
+		"it": "Attiva/disattiva la modalità a schermo intero",
 		"zh": "进入全屏幕"
 	},
 
@@ -513,7 +513,7 @@
 		"uk": "Вікно",
 		"ar": "النَّافِذة",
 		"nl": "Venster",
-		"it": "Finestra"
+		"it": "Finestra",
 		"zh": "窗口"
 	},
 	"menu.window.minimize-mac": {
@@ -530,7 +530,7 @@
 		"uk": "Згорнути",
 		"ar": "تقليص",
 		"nl": "Minimaliseren",
-		"it": "Minimizza"
+		"it": "Minimizza",
 		"zh": "最小化"
 	},
 	"menu.window.minimize": {
@@ -547,7 +547,7 @@
 		"uk": "Згорнути",
 		"ar": "تقليص",
 		"nl": "Minimaliseren",
-		"it": "Minimizza"
+		"it": "Minimizza",
 		"zh": "最小化"
 	},
 	"menu.window.zoom-mac": {
@@ -564,7 +564,7 @@
 		"uk": "Змінити масштаб",
 		"ar": "تكبير",
 		"nl": "Zoomen",
-		"it": "Riduci/Ingrandisci"
+		"it": "Riduci/Ingrandisci",
 		"zh": "缩放"
 	},
 	"menu.window.zoom": {
@@ -581,7 +581,7 @@
 		"uk": "Розгорнути",
 		"ar": "تكبير",
 		"nl": "Zoomen",
-		"it": "Massimizza"
+		"it": "Massimizza",
 		"zh": "缩放"
 	},
 	"menu.window.front": {
@@ -598,7 +598,7 @@
 		"uk": "Усі вікна наперед",
 		"ar": "إحضار الكُل إلى المُقدِّمة",
 		"nl": "Breng alles naar de voorgrond",
-		"it": "Porta tutte le finestre in primo piano"
+		"it": "Porta tutte le finestre in primo piano",
 		"zh": "全部置于顶层"
 	},
 	"menu.window.window": {
@@ -615,7 +615,7 @@
 		"uk": "Вікно",
 		"ar": "نافِذة",
 		"nl": "Venster",
-		"it": "Finestra"
+		"it": "Finestra",
 		"zh": "窗口"
 	},
 	"menu.window.close": {
@@ -632,7 +632,7 @@
 		"uk": "Вийти",
 		"ar": "إغلاق",
 		"nl": "Sluiten",
-		"it": "Chiudi"
+		"it": "Chiudi",
 		"zh": "关闭"
 	},
 
@@ -650,7 +650,7 @@
 		"uk": "Довідка",
 		"ar": "المُساعدة",
 		"nl": "Help",
-		"it": "Aiuto"
+		"it": "Aiuto",
 		"zh": "帮助"
 	},
 	"menu.help.website": {
@@ -667,7 +667,7 @@
 		"uk": "Сайт",
 		"ar": "المُساعدة",
 		"nl": "Website",
-		"it": "Sito web"
+		"it": "Sito web",
 		"zh": "转到网站"
 	},
 	"menu.help.source-code": {
@@ -684,7 +684,7 @@
 		"uk": "Програмний код",
 		"ar": "كود المَصدر",
 		"nl": "Broncode",
-		"it": "Codice sorgente"
+		"it": "Codice sorgente",
 		"zh": "源码"
 	},
 	"menu.help.report-issue": {
@@ -701,7 +701,7 @@
 		"uk": "Повідомити про проблему",
 		"ar": "الإبلاغ عن خطأ",
 		"nl": "Meld een Probleem",
-		"it": "Segnala un problema"
+		"it": "Segnala un problema",
 		"zh": "报告错误"
 	},
 	"menu.help.about": {
@@ -718,7 +718,7 @@
 		"uk": "Про ",
 		"ar": "حَول",
 		"nl": "Over ",
-		"it": "Informazioni su "
+		"it": "Informazioni su ",
 		"zh": "关于"
 	},
 
@@ -736,7 +736,7 @@
 		"uk": "Авторське право",
 		"ar": "حقوق النَّشر",
 		"nl": "Copyright",
-		"it": "Copyright"
+		"it": "Copyright",
 		"zh": "版权"
 	},
 
@@ -751,7 +751,7 @@
 		"uk": "Відкрити файли",
 		"ar": "الملفَّات المفتوحة",
 		"nl": "Bestanden openen",
-		"it": "Apri files"
+		"it": "Apri files",
 		"zh": "打开文件"
 	},
 	"usertasks:open-file.description": {
@@ -765,7 +765,7 @@
 		"uk": "Видалити метадані з вибранних файлів",
 		"ar": "إزالة البيانات الوصفيَّة من الملفَّات المُحدَّدة",
 		"nl": "Verwijder metagegevens van de geselecteerde bestanden",
-		"it": "Rimuovi i metadati dai file selezionati"
+		"it": "Rimuovi i metadati dai file selezionati",
 		"zh": "从所选文件中删除元数据"
 	}
 }
