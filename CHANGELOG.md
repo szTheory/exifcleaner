@@ -11,6 +11,7 @@ If you are running a previous version of ExifCleaner, update immediately due to 
 ### Features
 
 - Add translations for Slovak, Russian, Ukranian, Danish, Arabic, Italian, Chinese (Mandarin)
+- Add support for the new Mac M1 ARM processors
 
 ### Infrastructure
 
