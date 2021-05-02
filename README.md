@@ -156,6 +156,18 @@ New translations and corrections to existing translations are welcome! See the [
 - Slovak ✅ by @LiJu09
 - Ukranian ✅ by @hugonote (Alexander Berger)
 
+## Verifying checksum of downloads from the Github releases page
+
+Download the `latest.yml` (Windows), `latest-mac.yml` (Mac), or `latest-linux.yml` (Linux) file from the release page that corresponds to your operating system. Then run the following command to generate a sha checksum. ExifCleaner 3.5.0 is used here as an example.
+
+On Mac, Linux, and on Windows using the Linux Subsystem for Windows:
+
+```bash
+sha512sum ExifCleaner-Setup-3.5.0.exe | cut -f1 -d\ | xxd -r -p | base64
+```
+
+The output should match the sha512 value in the latest.yml file for the version you downloaded. As of now there is no checksum generated for the Linux RPM version (appears to be an electron-build issue, see [Github issue here](https://github.com/szTheory/exifcleaner/issues/141)).
+
 ## Development
 
 Built with [Electron](https://electronjs.org). Uses [node-exiftool](https://www.npmjs.com/package/node-exiftool) as a wrapper for [Exiftool](https://exiftool.org/) binaries. To see the current list of NPM dependencies, run:
@@ -312,3 +324,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @Dyrimon - Linux AppImage error notification fix
 - @MarcusPierce - Chinese (Mandarin) translation
 - @brandonlou - Heads up on updating exiftool to 12.24+ to mitigate [CVE-2021-22204 arbitrary code execution](https://twitter.com/wcbowling/status/1385803927321415687)
+- @v4k0nd (Szabó Krisztián) - Help building instructions on verifying release checksums
