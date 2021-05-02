@@ -325,3 +325,5 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @MarcusPierce - Chinese (Mandarin) translation
 - @brandonlou - Heads up on updating exiftool to 12.24+ to mitigate [CVE-2021-22204 arbitrary code execution](https://twitter.com/wcbowling/status/1385803927321415687)
 - @v4k0nd (Szabó Krisztián) - Help building instructions on verifying release checksums
+- @papb - Help setting up Windows portable build
+- @Bellisario - Help setting up Windows portable build
