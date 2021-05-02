@@ -42,10 +42,11 @@ Linux, macOS 10.10+, and Windows 7+ are supported (64-bit only).
 - **Windows**: [Download the .exe file](https://github.com/szTheory/exifcleaner/releases/latest)
 
 For Linux, The AppImage needs to be [made executable](https://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download.
+
 Arch Linux users can install the app from the AUR using an AUR helper (such as `yay` or `paru`):
 
 ```bash
-  paru -S exifcleaner-bin
+paru -S exifcleaner-bin
 ```
 
 ## Links
@@ -324,7 +325,7 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @zlatco - Danish translation
 - @ZER0-X - Arabic translation
 - @rvl-code - Dutch translation
-- @blackcat-917 - Italian translation
+- @blackcat-917 - Italian translation, Arch Linux distribution maintainer
 - @NathanBnm (Nathan Bonnemains) - French translation
 - @Dyrimon - Linux AppImage error notification fix
 - @MarcusPierce - Chinese (Mandarin) translation
