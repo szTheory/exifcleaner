@@ -179,7 +179,7 @@ Next, install the NPM package dependencies.
 yarn install
 ```
 
-Pull down the latest ExifTool binaries:
+Pull down the latest ExifTool binaries (in Windows, run this within the Linux Subsystem for Windows):
 
 ```bash
 yarn run update-exiftool
@@ -273,7 +273,7 @@ Bump the version with `release` (choose a "pre" release for point releases for t
 yarn run release
 ```
 
-When the Github release page comes up, mark it as draft. Then run the publish command:
+Check the [Github release page](https://github.com/szTheory/exifcleaner/releases) and confirm a new draft release was created. Then run the publish command:
 
 ```bash
 yarn run publish
