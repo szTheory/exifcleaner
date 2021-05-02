@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.5.1 - WIP
+
+## Infrastructure
+
+- Add support for Windows "portable" releases that don't require installation
+
 ## 3.5.0 - 5 May 2021
 
 If you are running a previous version of ExifCleaner, update immediately due to a security vulnerability found in exiftool (the command-line tool that ExifCleaner uses under the hood). Thank you to all contributors for this release. As always, credits are listed in the README.
