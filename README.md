@@ -42,6 +42,11 @@ Linux, macOS 10.10+, and Windows 7+ are supported (64-bit only).
 - **Windows**: [Download the .exe file](https://github.com/szTheory/exifcleaner/releases/latest)
 
 For Linux, The AppImage needs to be [made executable](https://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download.
+Arch Linux users can install the app from the AUR using an AUR helper (such as `yay` or `paru`):
+
+```bash
+  paru -S exifcleaner-bin
+```
 
 ## Links
 
@@ -234,7 +239,7 @@ and repeat that pattern for each of the entries. That's probably the easiest way
 
 1. Fork the project on Github
 2. Follow the directions [here](https://github.com/szTheory/exifcleaner#run-the-app-in-dev-mode) to get ExifCleaner running in development mode on your computer
-3. Then update the `strings.json` file as mentioned above, and quit the program and relaunch it to see your changes. When you're finished, commit your changes from the command line with for example `git commit -am "Finished adding translations"`. Then run `git push origin master`, and go to the project URL your forked it to (for example https://github.com/myusernamehere/exifcleaner) and click the button to open a new Pull Request.
+3. Then update the `strings.json` file as mentioned above, and quit the program and relaunch it to see your changes. When you're finished, commit your changes from the command line with for example `git commit -am "Finished adding translations"`. Then run `git push origin master`, and go to the project URL your forked it to (for example <https://github.com/myusernamehere/exifcleaner>) and click the button to open a new Pull Request.
 
 If you want to run the app with a specific locale without changing your system preferences, use one of the following commands with the correct language code. If you don't see your language listed below, just follow the pattern and plug in your own language code [from this list](https://www.electronjs.org/docs/api/locales).
 
