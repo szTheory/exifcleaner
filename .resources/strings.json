@@ -743,8 +743,9 @@
 	"usertasks:open-file.label": {
 		"en": "Open files",
 		"da": "Åbn filer",
-		"de": "Öffne Dateien",
 		"fr": "Ouvrir les fichiers",
+		"pl": "Otwórz pliki",
+		"de": "Öffne Dateien",
 		"pt-BR": "Abrir arquivos",
 		"sk": "Otvoriť súbory",
 		"ru": "Открыть файлы",
@@ -757,8 +758,9 @@
 	"usertasks:open-file.description": {
 		"en": "Remove metadata from selected files",
 		"da": "Fjern metadata fra valgte filer",
-		"de": "Entferne Metadaten von ausgewählten Dateien",
 		"fr": "Supprimer les métadonnées des fichiers sélectionnés",
+		"pl": "Usuń metadane z wybranych plików",
+		"de": "Entferne Metadaten von ausgewählten Dateien",
 		"pt-BR": "Remover metadados dos arquivos selecionados",
 		"sk": "Odstrániť metadáta z vybraných súborov",
 		"ru": "Удалить метаданные из выбранных файлов",
