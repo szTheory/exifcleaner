@@ -1,3 +1,5 @@
+import { sanitizeHTML } from "./sanitize";
+
 export function updateRowWithExif(
 	tdNode: HTMLTableDataCellElement,
 	exifData: any
@@ -34,9 +36,14 @@ export function updateRowWithExif(
 
 function buildExifString({ exifData }: { exifData: any }): string {
 	let str = "";
+
 	for (const [key, value] of Object.entries(exifData)) {
-		str += key + " " + "<strong>" + value + "</strong>" + "<br>";
+		if (typeof value !== "string") {
+			continue;
+		}
+		str += key + " " + "<strong>" + sanitizeHTML(value) + "</strong>" + "<br>";
 	}
+
 	return str;
 }
 

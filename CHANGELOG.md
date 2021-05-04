@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.6.0 - 4 May 2021
+
+### Security
+
+- Fix for XSS and Electron reverse shell vulnerabilities by sanitizing `exiftool` HTML output in the UI. To take advantage of this, an attacker would have had to write image metadata containing malicious script code to a file that you then download and run through ExifCleaner. Proofs of concept:
+
+XSS:
+
+```bash
+exiftool -Comment='<img src=x onerror=alert("ok") /><b>OverJT</b>' -PixelUnits='meters' image.png
+```
+
+Electron reverse shell:
+
+```bash
+exiftool -Comment='<img src=x onerror=window.require("child_process").exec("/usr/bin/firefox") /><b>OverJT</b>' -PixelUnits='meters' image.png
+```
+
 ## 3.5.1 - 1 May 2021
 
 ## Infrastructure

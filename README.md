@@ -6,9 +6,9 @@
 
 ![ExifCleaner demo](https://user-images.githubusercontent.com/28652/71770980-f04e8b80-2f2b-11ea-90f1-4393ec57adc0.gif)
 
-## !!!!! NOTE - UPGRADE TO 3.5.0 OR GREATER ASAP !!!!!
+## !!!!! NOTE - UPGRADE TO 3.6.0+ ASAP !!!!!
 
-If you are running 3.4.0 or earlier of ExifCleaner, update immediately! A security vulnerability was found in exiftool, the command-line application that powers ExifCleaner under the hood, and this was updated in ExifCleaner 3.5.0.
+If you are running a version of ExifCleaner before 3.6.0, upgrade immediately! A security vulnerability was found in exiftool, the command-line application that powers ExifCleaner under the hood, and this was updated in ExifCleaner 3.5.0. There was also an XSS and Electron remote shell vulnerability due to unsanitized HTML output that was fixed in ExifCleaner 3.6.0.
 
 ## Benefits
 
