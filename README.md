@@ -160,6 +160,7 @@ New translations and corrections to existing translations are welcome! See the [
 - Spanish (Spain) ✅ by @ff-ss (Francisco)
 - Spanish (Latin America) ❌ needs translation if Spain version is not sufficient
 - Slovak ✅ by @LiJu09
+- Turkish ✅ by @bsonmez (Burak Sonmez)
 - Ukranian ✅ by @hugonote (Alexander Berger)
 
 ## Verifying checksum of downloads from the Github releases page
@@ -334,3 +335,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @papb - Help setting up Windows portable build
 - @Bellisario - Help setting up Windows portable build
 - @overjt (Jonathan Toledo) - Proof of concept for XSS and Electron remote shell vulnerability
+- @bsonmez (Burak Sonmez) - Turkish translation
