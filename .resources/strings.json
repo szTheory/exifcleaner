@@ -14,7 +14,8 @@
 		"ar": "لا تُوجَدُ أيُّ ملفَّاتٍ مُحدَّدة",
 		"nl": "Geen bestanden geselecteerd",
 		"it": "Nessun file selezionato",
-		"zh": "未选择文件"
+		"zh": "未选择文件",
+		"tr": "Henüz dosya seçilmedi"
 	},
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
@@ -31,7 +32,8 @@
 		"ar": "اِسحب وارمِ الصُّور، المقاطع المرئية أو ملفَّات البي-دي-اف لإزالة البيانات الوصفيَّة بشكل تلقائيّ.",
 		"nl": "Sleep en plaats afbeeldingen, video's of PDF-bestanden om metagegevens automatisch te verwijderen.",
 		"it": "Trascina e rilascia immagini, video o file PDF qui per rimuovere automaticamente i metadati.",
-		"zh": "拖放图像，视频或PDF文件以自动删除元数据。"
+		"zh": "拖放图像，视频或PDF文件以自动删除元数据。",
+		"tr": "Meta verileri otomatik olarak kaldırmak için görüntü, video veya PDF dosyalarını sürükleyip bırakabilirsin."
 	},
 
 	"table.header.filename": {
@@ -49,7 +51,8 @@
 		"ar": "الملفَّات المُحدَّدة",
 		"nl": "Geselecteerde bestanden",
 		"it": "File selezionati",
-		"zh": "选中的文件"
+		"zh": "选中的文件",
+		"tr": "Seçilen dosyalar"
 	},
 	"table.header.exif-before": {
 		"en": "# Exif Before",
@@ -66,7 +69,8 @@
 		"ar": "# قَبل Exif",
 		"nl": "# Exif Voor",
 		"it": "Nº di dati Exif prima",
-		"zh": "# Exif 处理前"
+		"zh": "# Exif 处理前",
+		"tr": "# Exif'den önce"
 	},
 	"table.header.exif-after": {
 		"en": "# Exif After",
@@ -83,7 +87,8 @@
 		"ar": "# بَعد Exif",
 		"nl": "# Exif Na",
 		"it": "Nº di dati Exif dopo",
-		"zh": "# Exif 处理后"
+		"zh": "# Exif 处理后",
+		"tr": "# Exif'den Sonra"
 	},
 
 	"contextmenu.copy": {
@@ -101,7 +106,8 @@
 		"ar": "نَسخ",
 		"nl": "Kopieer",
 		"it": "Copia",
-		"zh": "拷贝"
+		"zh": "拷贝",
+		"tr": "Kopyala"
 	},
 	"contextmenu.select-all": {
 		"en": "Select All",
@@ -118,7 +124,8 @@
 		"ar": "تحديدُ الكُل",
 		"nl": "Alles Selecteren",
 		"it": "Seleziona tutto",
-		"zh": "全选"
+		"zh": "全选",
+		"tr": "Hepsini seç"
 	},
 
 	"menu.app.about": {
@@ -136,7 +143,8 @@
 		"ar": " حَول ",
 		"nl": "Over ",
 		"it": "Chi siamo",
-		"zh": "关于"
+		"zh": "关于",
+		"tr": "Hakkında"
 	},
 	"menu.app.services": {
 		"en": "Services",
@@ -153,7 +161,8 @@
 		"ar": "الخدمات",
 		"nl": "Services",
 		"it": "Servizi",
-		"zh": "服务"
+		"zh": "服务",
+		"tr": "Servisler"
 	},
 	"menu.app.hide": {
 		"en": "Hide",
@@ -170,7 +179,8 @@
 		"ar": "إخفاء",
 		"nl": "Verbergen",
 		"it": "Nascondi",
-		"zh": "最小化"
+		"zh": "最小化",
+		"tr": "Gizle"
 	},
 	"menu.app.hide-others": {
 		"en": "Hide Others",
@@ -187,7 +197,8 @@
 		"ar": "إخفاء البقيَّة",
 		"nl": "Verbergen Andere",
 		"it": "Nascondi tutto il resto",
-		"zh": "隐藏其他"
+		"zh": "隐藏其他",
+		"tr": "Diğerlerini gizle"
 	},
 	"menu.app.show-all": {
 		"en": "Show All",
@@ -204,7 +215,8 @@
 		"ar": "إظهار الكُل",
 		"nl": "Toon Alles",
 		"it": "Mostra tutti",
-		"zh": "全部显示"
+		"zh": "全部显示",
+		"tr": "Hepsini göster"
 	},
 	"menu.app.quit": {
 		"en": "Quit",
@@ -221,7 +233,8 @@
 		"ar": "خُروج",
 		"nl": "Afsluiten",
 		"it": "Esci",
-		"zh": "退出"
+		"zh": "退出",
+		"tr": "Çık"
 	},
 
 	"menu.file.name": {
@@ -239,7 +252,8 @@
 		"ar": "اسم الملفّ",
 		"nl": "Bestand",
 		"it": "File",
-		"zh": "文件"
+		"zh": "文件",
+		"tr": "Dosya"
 	},
 	"menu.file.open": {
 		"en": "Open",
@@ -256,7 +270,8 @@
 		"ar": "فَتح",
 		"nl": "Openen",
 		"it": "Apri",
-		"zh": "打开"
+		"zh": "打开",
+		"tr": "Aç"
 	},
 	"menu.file.close": {
 		"en": "Close",
@@ -273,7 +288,8 @@
 		"ar": "إغلاق",
 		"nl": "Sluiten",
 		"it": "Chiudi",
-		"zh": "关闭"
+		"zh": "关闭",
+		"tr": "Kapat"
 	},
 	"menu.file.quit": {
 		"en": "Quit",
@@ -290,7 +306,8 @@
 		"ar": "خُروج",
 		"nl": "Afsluiten",
 		"it": "Esci",
-		"zh": "退出"
+		"zh": "退出",
+		"tr": "Çık"
 	},
 
 	"menu.edit.name": {
@@ -308,7 +325,8 @@
 		"ar": "تحرير",
 		"nl": "Bewerken",
 		"it": "Modifica",
-		"zh": "编辑"
+		"zh": "编辑",
+		"tr": "Düzenle"
 	},
 	"menu.edit.copy": {
 		"en": "Copy",
@@ -325,7 +343,8 @@
 		"ar": "نَسخ",
 		"nl": "Kopiëren",
 		"it": "Copia",
-		"zh": "拷贝"
+		"zh": "拷贝",
+		"tr": "Kopyala"
 	},
 	"menu.edit.select-all": {
 		"en": "Select All",
@@ -342,7 +361,8 @@
 		"ar": "تحديدُ الكُل",
 		"nl": "Alles Selecteren",
 		"it": "Seleziona tutto",
-		"zh": "全选"
+		"zh": "全选",
+		"tr": "Hepsini seç"
 	},
 	"menu.edit.speech": {
 		"en": "Speech",
@@ -359,7 +379,8 @@
 		"ar": "النُّطق",
 		"nl": "Spraak",
 		"it": "Pronuncia",
-		"zh": "语音"
+		"zh": "语音",
+		"tr": "Konuş"
 	},
 	"menu.edit.speech.start-speaking": {
 		"en": "Start Speaking",
@@ -376,7 +397,8 @@
 		"ar": "اِبدأ النُّطق",
 		"nl": "Start Spraakuitvoer",
 		"it": "Inizia a parlare",
-		"zh": "开始说话"
+		"zh": "开始说话",
+		"tr": "Konuşmaya Başla"
 	},
 	"menu.edit.speech.stop-speaking": {
 		"en": "Stop Speaking",
@@ -393,7 +415,8 @@
 		"ar": "إيقاف النُّطق",
 		"nl": "Stop Spraakuitvoer",
 		"it": "Smetti di parlare",
-		"zh": "停止说话"
+		"zh": "停止说话",
+		"tr": "Konuşmayı Bitir"
 	},
 
 	"menu.view.name": {
@@ -411,7 +434,8 @@
 		"ar": "العَرض",
 		"nl": "Beeld",
 		"it": "Visualizza",
-		"zh": "视图"
+		"zh": "视图",
+		"tr": "Görünüm"
 	},
 	"menu.view.toggle-dev-tools": {
 		"en": "Toggle Developer Tools",
@@ -428,7 +452,8 @@
 		"ar": "تبديل أدوات المُطورين",
 		"nl": "Open Developer Tools",
 		"it": "Apri/chiudi gli strumenti per sviluppatori",
-		"zh": "启动开发者工具"
+		"zh": "启动开发者工具",
+		"tr": "Geliştirici Araçlarını Aç/Kapat"
 	},
 	"menu.view.zoom-reset": {
 		"en": "Actual Size",
@@ -445,7 +470,8 @@
 		"ar": "الحجم الأصلي",
 		"nl": "Originele grootte",
 		"it": "Reimposta la dimensione originale",
-		"zh": "实际大小"
+		"zh": "实际大小",
+		"tr": "Gerçek boyut"
 	},
 	"menu.view.zoom-in": {
 		"en": "Zoom In",
@@ -462,7 +488,8 @@
 		"ar": "تكبير",
 		"nl": "Inzoomen",
 		"it": "Aumenta zoom",
-		"zh": "放大"
+		"zh": "放大",
+		"tr": "Yakınlaştır"
 	},
 	"menu.view.zoom-out": {
 		"en": "Zoom Out",
@@ -479,7 +506,8 @@
 		"ar": "تصغير",
 		"nl": "Uitzoomen",
 		"it": "Diminuisci zoom",
-		"zh": "缩小"
+		"zh": "缩小",
+		"tr": "Uzaklaştır"
 	},
 	"menu.view.toggle-full-screen": {
 		"en": "Toggle Full Screen",
@@ -496,7 +524,8 @@
 		"ar": "تبديل ملء الشَّاشة",
 		"nl": "Volledig Scherm",
 		"it": "Attiva/disattiva la modalità a schermo intero",
-		"zh": "进入全屏幕"
+		"zh": "进入全屏幕",
+		"tr": "Tam ekran Aç/Kapa"
 	},
 
 	"menu.window.name": {
@@ -514,7 +543,8 @@
 		"ar": "النَّافِذة",
 		"nl": "Venster",
 		"it": "Finestra",
-		"zh": "窗口"
+		"zh": "窗口",
+		"tr": "Pencere"
 	},
 	"menu.window.minimize-mac": {
 		"en": "Minimize",
@@ -531,7 +561,8 @@
 		"ar": "تقليص",
 		"nl": "Minimaliseren",
 		"it": "Minimizza",
-		"zh": "最小化"
+		"zh": "最小化",
+		"tr": "Küçült"
 	},
 	"menu.window.minimize": {
 		"en": "Minimize",
@@ -548,7 +579,8 @@
 		"ar": "تقليص",
 		"nl": "Minimaliseren",
 		"it": "Minimizza",
-		"zh": "最小化"
+		"zh": "最小化",
+		"tr": "Küçült"
 	},
 	"menu.window.zoom-mac": {
 		"en": "Zoom",
@@ -565,7 +597,8 @@
 		"ar": "تكبير",
 		"nl": "Zoomen",
 		"it": "Riduci/Ingrandisci",
-		"zh": "缩放"
+		"zh": "缩放",
+		"tr": "Yakınlaştır"
 	},
 	"menu.window.zoom": {
 		"en": "Zoom",
@@ -582,7 +615,8 @@
 		"ar": "تكبير",
 		"nl": "Zoomen",
 		"it": "Massimizza",
-		"zh": "缩放"
+		"zh": "缩放",
+		"tr": "Yakınlaştır"
 	},
 	"menu.window.front": {
 		"en": "Bring All to Front",
@@ -599,7 +633,8 @@
 		"ar": "إحضار الكُل إلى المُقدِّمة",
 		"nl": "Breng alles naar de voorgrond",
 		"it": "Porta tutte le finestre in primo piano",
-		"zh": "全部置于顶层"
+		"zh": "全部置于顶层",
+		"tr": "Öne Çıkart"
 	},
 	"menu.window.window": {
 		"en": "Window",
@@ -616,7 +651,8 @@
 		"ar": "نافِذة",
 		"nl": "Venster",
 		"it": "Finestra",
-		"zh": "窗口"
+		"zh": "窗口",
+		"tr": "Pencere"
 	},
 	"menu.window.close": {
 		"en": "Close",
@@ -633,7 +669,8 @@
 		"ar": "إغلاق",
 		"nl": "Sluiten",
 		"it": "Chiudi",
-		"zh": "关闭"
+		"zh": "关闭",
+		"tr": "Kapat"
 	},
 
 	"menu.help.name": {
@@ -651,7 +688,8 @@
 		"ar": "المُساعدة",
 		"nl": "Help",
 		"it": "Aiuto",
-		"zh": "帮助"
+		"zh": "帮助",
+		"tr": "Yardım"
 	},
 	"menu.help.website": {
 		"en": "Website",
@@ -668,7 +706,8 @@
 		"ar": "المُساعدة",
 		"nl": "Website",
 		"it": "Sito web",
-		"zh": "转到网站"
+		"zh": "转到网站",
+		"tr": "Website"
 	},
 	"menu.help.source-code": {
 		"en": "Source Code",
@@ -685,7 +724,8 @@
 		"ar": "كود المَصدر",
 		"nl": "Broncode",
 		"it": "Codice sorgente",
-		"zh": "源码"
+		"zh": "源码",
+		"tr": "Kaynak Kod"
 	},
 	"menu.help.report-issue": {
 		"en": "Report an Issue",
@@ -702,7 +742,8 @@
 		"ar": "الإبلاغ عن خطأ",
 		"nl": "Meld een Probleem",
 		"it": "Segnala un problema",
-		"zh": "报告错误"
+		"zh": "报告错误",
+		"tr": "Sorun bildir"
 	},
 	"menu.help.about": {
 		"en": "About ",
@@ -719,7 +760,8 @@
 		"ar": "حَول",
 		"nl": "Over ",
 		"it": "Informazioni su ",
-		"zh": "关于"
+		"zh": "关于",
+		"tr": "Hakkında"
 	},
 
 	"aboutwindow:copyright": {
@@ -737,7 +779,8 @@
 		"ar": "حقوق النَّشر",
 		"nl": "Copyright",
 		"it": "Copyright",
-		"zh": "版权"
+		"zh": "版权",
+		"tr": "Telif hakkı"
 	},
 
 	"usertasks:open-file.label": {
@@ -753,7 +796,8 @@
 		"ar": "الملفَّات المفتوحة",
 		"nl": "Bestanden openen",
 		"it": "Apri files",
-		"zh": "打开文件"
+		"zh": "打开文件",
+		"tr": "Dosyaları aç"
 	},
 	"usertasks:open-file.description": {
 		"en": "Remove metadata from selected files",
@@ -768,6 +812,7 @@
 		"ar": "إزالة البيانات الوصفيَّة من الملفَّات المُحدَّدة",
 		"nl": "Verwijder metagegevens van de geselecteerde bestanden",
 		"it": "Rimuovi i metadati dai file selezionati",
-		"zh": "从所选文件中删除元数据"
+		"zh": "从所选文件中删除元数据",
+		"tr": "Seçili dosyalardan meta verileri kaldır"
 	}
 }
