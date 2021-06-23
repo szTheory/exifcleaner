@@ -16,6 +16,7 @@
 		"it": "Nessun file selezionato",
 		"zh": "未选择文件",
 		"tr": "Henüz dosya seçilmedi"
+		"hr": "Nijedna datoteka nije odabrana"
 	},
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
@@ -34,6 +35,7 @@
 		"it": "Trascina e rilascia immagini, video o file PDF qui per rimuovere automaticamente i metadati.",
 		"zh": "拖放图像，视频或PDF文件以自动删除元数据。",
 		"tr": "Meta verileri otomatik olarak kaldırmak için görüntü, video veya PDF dosyalarını sürükleyip bırakabilirsin."
+		"hr": "Povuci i ispusti slike, videa ili PDF datoteke za automatsko uklanjanje metapodataka."
 	},
 
 	"table.header.filename": {
@@ -53,6 +55,7 @@
 		"it": "File selezionati",
 		"zh": "选中的文件",
 		"tr": "Seçilen dosyalar"
+		"hr": "Odabrane datoteke"
 	},
 	"table.header.exif-before": {
 		"en": "# Exif Before",
@@ -71,6 +74,7 @@
 		"it": "Nº di dati Exif prima",
 		"zh": "# Exif 处理前",
 		"tr": "# Exif'den önce"
+		"hr": "Broj Exifa prije"
 	},
 	"table.header.exif-after": {
 		"en": "# Exif After",
@@ -89,6 +93,7 @@
 		"it": "Nº di dati Exif dopo",
 		"zh": "# Exif 处理后",
 		"tr": "# Exif'den Sonra"
+		"hr": "Broj Exifa poslije"
 	},
 
 	"contextmenu.copy": {
@@ -108,6 +113,7 @@
 		"it": "Copia",
 		"zh": "拷贝",
 		"tr": "Kopyala"
+		"hr": "Kopiraj"
 	},
 	"contextmenu.select-all": {
 		"en": "Select All",
@@ -126,6 +132,7 @@
 		"it": "Seleziona tutto",
 		"zh": "全选",
 		"tr": "Hepsini seç"
+		"hr": "Odaberi sve"
 	},
 
 	"menu.app.about": {
@@ -145,6 +152,7 @@
 		"it": "Chi siamo",
 		"zh": "关于",
 		"tr": "Hakkında"
+		"hr": "Informacije"
 	},
 	"menu.app.services": {
 		"en": "Services",
@@ -163,6 +171,7 @@
 		"it": "Servizi",
 		"zh": "服务",
 		"tr": "Servisler"
+		"hr": "Usluge"
 	},
 	"menu.app.hide": {
 		"en": "Hide",
@@ -181,6 +190,7 @@
 		"it": "Nascondi",
 		"zh": "最小化",
 		"tr": "Gizle"
+		"hr": "Sakrij"
 	},
 	"menu.app.hide-others": {
 		"en": "Hide Others",
@@ -199,6 +209,7 @@
 		"it": "Nascondi tutto il resto",
 		"zh": "隐藏其他",
 		"tr": "Diğerlerini gizle"
+		"hr": "Sakrij ostalo"
 	},
 	"menu.app.show-all": {
 		"en": "Show All",
@@ -217,6 +228,7 @@
 		"it": "Mostra tutti",
 		"zh": "全部显示",
 		"tr": "Hepsini göster"
+		"hr": "Pokaži sve"
 	},
 	"menu.app.quit": {
 		"en": "Quit",
@@ -235,6 +247,7 @@
 		"it": "Esci",
 		"zh": "退出",
 		"tr": "Çık"
+		"hr": "Zatvori program"
 	},
 
 	"menu.file.name": {
@@ -254,6 +267,7 @@
 		"it": "File",
 		"zh": "文件",
 		"tr": "Dosya"
+		"hr": "Datoteka"
 	},
 	"menu.file.open": {
 		"en": "Open",
@@ -272,6 +286,7 @@
 		"it": "Apri",
 		"zh": "打开",
 		"tr": "Aç"
+		"hr": "Otvori"
 	},
 	"menu.file.close": {
 		"en": "Close",
@@ -290,6 +305,7 @@
 		"it": "Chiudi",
 		"zh": "关闭",
 		"tr": "Kapat"
+		"hr": "Zatvori"
 	},
 	"menu.file.quit": {
 		"en": "Quit",
@@ -308,6 +324,7 @@
 		"it": "Esci",
 		"zh": "退出",
 		"tr": "Çık"
+		"hr": "Zatvori program"
 	},
 
 	"menu.edit.name": {
@@ -327,6 +344,7 @@
 		"it": "Modifica",
 		"zh": "编辑",
 		"tr": "Düzenle"
+		"hr": "Uredi"
 	},
 	"menu.edit.copy": {
 		"en": "Copy",
@@ -345,6 +363,7 @@
 		"it": "Copia",
 		"zh": "拷贝",
 		"tr": "Kopyala"
+		"hr": "Kopiraj"
 	},
 	"menu.edit.select-all": {
 		"en": "Select All",
@@ -363,6 +382,7 @@
 		"it": "Seleziona tutto",
 		"zh": "全选",
 		"tr": "Hepsini seç"
+		"hr": "Odaberi sve"
 	},
 	"menu.edit.speech": {
 		"en": "Speech",
@@ -381,6 +401,7 @@
 		"it": "Pronuncia",
 		"zh": "语音",
 		"tr": "Konuş"
+		"hr": "Govor"
 	},
 	"menu.edit.speech.start-speaking": {
 		"en": "Start Speaking",
@@ -399,6 +420,7 @@
 		"it": "Inizia a parlare",
 		"zh": "开始说话",
 		"tr": "Konuşmaya Başla"
+		"hr": "Pokreni govor"
 	},
 	"menu.edit.speech.stop-speaking": {
 		"en": "Stop Speaking",
@@ -417,6 +439,7 @@
 		"it": "Smetti di parlare",
 		"zh": "停止说话",
 		"tr": "Konuşmayı Bitir"
+		"hr": "Prekini govor"
 	},
 
 	"menu.view.name": {
@@ -436,6 +459,7 @@
 		"it": "Visualizza",
 		"zh": "视图",
 		"tr": "Görünüm"
+		"hr": "Prikaz"
 	},
 	"menu.view.toggle-dev-tools": {
 		"en": "Toggle Developer Tools",
@@ -454,6 +478,7 @@
 		"it": "Apri/chiudi gli strumenti per sviluppatori",
 		"zh": "启动开发者工具",
 		"tr": "Geliştirici Araçlarını Aç/Kapat"
+		"hr": "Uklj/Isklj programerske alate"
 	},
 	"menu.view.zoom-reset": {
 		"en": "Actual Size",
@@ -472,6 +497,7 @@
 		"it": "Reimposta la dimensione originale",
 		"zh": "实际大小",
 		"tr": "Gerçek boyut"
+		"hr": "Stvarna veličina"
 	},
 	"menu.view.zoom-in": {
 		"en": "Zoom In",
@@ -490,6 +516,7 @@
 		"it": "Aumenta zoom",
 		"zh": "放大",
 		"tr": "Yakınlaştır"
+		"hr": "Povećaj"
 	},
 	"menu.view.zoom-out": {
 		"en": "Zoom Out",
@@ -508,6 +535,7 @@
 		"it": "Diminuisci zoom",
 		"zh": "缩小",
 		"tr": "Uzaklaştır"
+		"hr": "Smanji"
 	},
 	"menu.view.toggle-full-screen": {
 		"en": "Toggle Full Screen",
@@ -526,6 +554,7 @@
 		"it": "Attiva/disattiva la modalità a schermo intero",
 		"zh": "进入全屏幕",
 		"tr": "Tam ekran Aç/Kapa"
+		"hr": "Uklj/Isklj prikaz preko cijelog ekrana"
 	},
 
 	"menu.window.name": {
@@ -545,6 +574,7 @@
 		"it": "Finestra",
 		"zh": "窗口",
 		"tr": "Pencere"
+		"hr": "Prozor"
 	},
 	"menu.window.minimize-mac": {
 		"en": "Minimize",
@@ -563,6 +593,7 @@
 		"it": "Minimizza",
 		"zh": "最小化",
 		"tr": "Küçült"
+		"hr": "Smanji"
 	},
 	"menu.window.minimize": {
 		"en": "Minimize",
@@ -581,6 +612,7 @@
 		"it": "Minimizza",
 		"zh": "最小化",
 		"tr": "Küçült"
+		"hr": "Smanji"
 	},
 	"menu.window.zoom-mac": {
 		"en": "Zoom",
@@ -599,6 +631,7 @@
 		"it": "Riduci/Ingrandisci",
 		"zh": "缩放",
 		"tr": "Yakınlaştır"
+		"hr": "Zumiraj"
 	},
 	"menu.window.zoom": {
 		"en": "Zoom",
@@ -617,6 +650,7 @@
 		"it": "Massimizza",
 		"zh": "缩放",
 		"tr": "Yakınlaştır"
+		"hr": "Zumiraj"
 	},
 	"menu.window.front": {
 		"en": "Bring All to Front",
@@ -635,6 +669,7 @@
 		"it": "Porta tutte le finestre in primo piano",
 		"zh": "全部置于顶层",
 		"tr": "Öne Çıkart"
+		"hr": "Postavi sve naprijed"
 	},
 	"menu.window.window": {
 		"en": "Window",
@@ -653,6 +688,7 @@
 		"it": "Finestra",
 		"zh": "窗口",
 		"tr": "Pencere"
+		"hr": "Prozor"
 	},
 	"menu.window.close": {
 		"en": "Close",
@@ -671,6 +707,7 @@
 		"it": "Chiudi",
 		"zh": "关闭",
 		"tr": "Kapat"
+		"hr": "Zatvori"
 	},
 
 	"menu.help.name": {
@@ -690,6 +727,7 @@
 		"it": "Aiuto",
 		"zh": "帮助",
 		"tr": "Yardım"
+		"hr": "Pomoć"
 	},
 	"menu.help.website": {
 		"en": "Website",
@@ -708,6 +746,7 @@
 		"it": "Sito web",
 		"zh": "转到网站",
 		"tr": "Website"
+		"hr": "Web stranica"
 	},
 	"menu.help.source-code": {
 		"en": "Source Code",
@@ -726,6 +765,7 @@
 		"it": "Codice sorgente",
 		"zh": "源码",
 		"tr": "Kaynak Kod"
+		"hr": "Izvorni kod"
 	},
 	"menu.help.report-issue": {
 		"en": "Report an Issue",
@@ -744,6 +784,7 @@
 		"it": "Segnala un problema",
 		"zh": "报告错误",
 		"tr": "Sorun bildir"
+		"hr": "Prijavi problem"
 	},
 	"menu.help.about": {
 		"en": "About ",
@@ -762,6 +803,7 @@
 		"it": "Informazioni su ",
 		"zh": "关于",
 		"tr": "Hakkında"
+		"hr": "Informacije"
 	},
 
 	"aboutwindow:copyright": {
@@ -781,6 +823,7 @@
 		"it": "Copyright",
 		"zh": "版权",
 		"tr": "Telif hakkı"
+		"hr": "Autorska prava"
 	},
 
 	"usertasks:open-file.label": {
@@ -798,6 +841,7 @@
 		"it": "Apri files",
 		"zh": "打开文件",
 		"tr": "Dosyaları aç"
+		"hr": "Otvori datoteke"
 	},
 	"usertasks:open-file.description": {
 		"en": "Remove metadata from selected files",
@@ -814,5 +858,6 @@
 		"it": "Rimuovi i metadati dai file selezionati",
 		"zh": "从所选文件中删除元数据",
 		"tr": "Seçili dosyalardan meta verileri kaldır"
+		"hr": "Ukloni metapodatke iz odabranih datoteka"
 	}
 }
