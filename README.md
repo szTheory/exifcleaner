@@ -146,6 +146,7 @@ New translations and corrections to existing translations are welcome! See the [
 
 - Arabic ✅ by @ZER0-X
 - Chinese (Mandarin) ✅ by MarcusPierce
+- Croatian ✅ by @milotype
 - Danish ✅ by @zlatco
 - Dutch ✅ by @rvl-code
 - French (France) ✅ by @NathanBnm (Nathan Bonnemains)
@@ -336,3 +337,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - @Bellisario - Help setting up Windows portable build
 - @overjt (Jonathan Toledo) - Proof of concept for XSS and Electron remote shell vulnerability
 - @bsonmez (Burak Sonmez) - Turkish translation
+- @milotype - Croatian translation
