@@ -1,0 +1,60 @@
+:root {
+	/* colors */
+	--dark-color: #303742;
+	--bg-color: #f7f8f9;
+	--bg-color-light: var(--light-color);
+	--bg-color-dark: #eef0f3;
+	--gray-color-dark: #66758c;
+	--light-color: #fff;
+	--body-bg: var(--bg-color-light);
+	--body-font-color: #3b4351;
+
+	/* units */
+	--unit-o: 0.05rem;
+	--unit-h: 0.1rem;
+	--unit-1: 0.2rem;
+	--unit-2: 0.4rem;
+	--unit-3: 0.6rem;
+	--unit-4: 0.8rem;
+	--unit-8: 1.6rem;
+	--unit-16: 3.2rem;
+	--size: var(--unit-2);
+
+	/* layout */
+	--layout-spacing: var(--unit-2);
+	--layout-spacing-lg: var(--unit-4);
+
+	/* typography */
+	--body-font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
+		Roboto;
+	--line-height: 1.2rem;
+	--html-font-size: 20px;
+	--html-line-height: 1.5;
+	--font-size: 0.8rem;
+
+	/* border */
+	--border-radius: var(--$unit-h);
+	--border-width: var(--unit-o);
+	--border-width-lg: var(--unit-h);
+	--border-color: rgb(218, 222, 228);
+
+	/* empty */
+	--empty-border-color: #3b4351;
+	--empty-border-width: 1px;
+	--empty-border-radius: var(--border-radius);
+
+	/* controls */
+	--control-width-sm: 320px;
+
+	/* popover shadow */
+	--popover-shadow-color: rgba(48, 55, 66, 0.3);
+
+	/* table */
+	--table-header-font-weight: 700;
+	--table-row-bg-color: var(--bg-color);
+	--table-row-hover-bg-color: var(--bg-color-dark);
+	--table-icon-color: var(--gray-color-dark);
+
+	/* z-index */
+	--zindex-3: 300;
+}

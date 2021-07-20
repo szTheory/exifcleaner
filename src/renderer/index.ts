@@ -8,7 +8,20 @@ if (isDev() && module.hot) {
 }
 
 // stylesheets
-import "../styles/index.scss";
+// vars first
+import "../styles/vars.css";
+
+// app
+import "../styles/base.css";
+import "../styles/card.css";
+import "../styles/display.css";
+import "../styles/empty.css";
+import "../styles/file_list.css";
+import "../styles/icon.css";
+import "../styles/popover.css";
+import "../styles/dark_mode.css";
+import "../styles/tables.css";
+import "../styles/typography.css";
 
 // app
 import { setupDragAndDrop } from "./drag";

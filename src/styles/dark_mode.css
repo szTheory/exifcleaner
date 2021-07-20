@@ -1,0 +1,23 @@
+@media (prefers-color-scheme: dark) {
+	:root {
+		/* colors */
+		--dark-color: #303742;
+		--bg-color: #383838;
+		--bg-color-light: var(--light-color);
+		--bg-color-dark: #303742;
+		--gray-color-dark: #eef0f3;
+		--light-color: #121212;
+		--body-bg: var(--bg-color-light);
+		--body-font-color: #eef0f3;
+
+		/* empty */
+		--empty-border-width: 0;
+		--empty-border-radius: 2px;
+
+		/* table */
+		--table-header-font-weight: 200;
+		--table-row-bg-color: #323232;
+		--table-row-hover-bg-color: #585858;
+		--table-icon-color: #818181;
+	}
+}

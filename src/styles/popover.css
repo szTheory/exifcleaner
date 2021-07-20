@@ -1,0 +1,38 @@
+.popover {
+	display: inline-block;
+	position: relative;
+}
+
+.popover-container {
+	left: 50%;
+	opacity: 0;
+	padding: var(--layout-spacing);
+	position: absolute;
+	top: 0;
+	transform: translate(-50%, -50%) scale(0);
+	transition: transform 0.2s;
+	width: var(--control-width-sm);
+	z-index: var(--zindex-3);
+}
+
+.popover *:focus + .popover-container,
+.popover:hover .popover-container {
+	display: block;
+	opacity: 1;
+	transform: translate(-50%, -100%) scale(1);
+}
+
+.popover-bottom .popover-container {
+	left: 50%;
+	top: 100%;
+}
+
+.popover-bottom *:focus + .popover-container,
+.popover-bottom:hover .popover-container {
+	transform: translate(-50%, 0) scale(1);
+}
+
+.popover .card {
+	box-shadow: 0 0.2rem 0.5rem var(--popover-shadow-color);
+	border: 0;
+}

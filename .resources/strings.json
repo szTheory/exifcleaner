@@ -15,7 +15,7 @@
 		"nl": "Geen bestanden geselecteerd",
 		"it": "Nessun file selezionato",
 		"zh": "未选择文件",
-		"tr": "Henüz dosya seçilmedi"
+		"tr": "Henüz dosya seçilmedi",
 		"hr": "Nijedna datoteka nije odabrana"
 	},
 	"empty.subtitle": {
@@ -34,7 +34,7 @@
 		"nl": "Sleep en plaats afbeeldingen, video's of PDF-bestanden om metagegevens automatisch te verwijderen.",
 		"it": "Trascina e rilascia immagini, video o file PDF qui per rimuovere automaticamente i metadati.",
 		"zh": "拖放图像，视频或PDF文件以自动删除元数据。",
-		"tr": "Meta verileri otomatik olarak kaldırmak için görüntü, video veya PDF dosyalarını sürükleyip bırakabilirsin."
+		"tr": "Meta verileri otomatik olarak kaldırmak için görüntü, video veya PDF dosyalarını sürükleyip bırakabilirsin.",
 		"hr": "Povuci i ispusti slike, videa ili PDF datoteke za automatsko uklanjanje metapodataka."
 	},
 
@@ -54,7 +54,7 @@
 		"nl": "Geselecteerde bestanden",
 		"it": "File selezionati",
 		"zh": "选中的文件",
-		"tr": "Seçilen dosyalar"
+		"tr": "Seçilen dosyalar",
 		"hr": "Odabrane datoteke"
 	},
 	"table.header.exif-before": {
@@ -73,7 +73,7 @@
 		"nl": "# Exif Voor",
 		"it": "Nº di dati Exif prima",
 		"zh": "# Exif 处理前",
-		"tr": "# Exif'den önce"
+		"tr": "# Exif'den önce",
 		"hr": "Broj Exifa prije"
 	},
 	"table.header.exif-after": {
@@ -92,7 +92,7 @@
 		"nl": "# Exif Na",
 		"it": "Nº di dati Exif dopo",
 		"zh": "# Exif 处理后",
-		"tr": "# Exif'den Sonra"
+		"tr": "# Exif'den Sonra",
 		"hr": "Broj Exifa poslije"
 	},
 
@@ -112,7 +112,7 @@
 		"nl": "Kopieer",
 		"it": "Copia",
 		"zh": "拷贝",
-		"tr": "Kopyala"
+		"tr": "Kopyala",
 		"hr": "Kopiraj"
 	},
 	"contextmenu.select-all": {
@@ -131,7 +131,7 @@
 		"nl": "Alles Selecteren",
 		"it": "Seleziona tutto",
 		"zh": "全选",
-		"tr": "Hepsini seç"
+		"tr": "Hepsini seç",
 		"hr": "Odaberi sve"
 	},
 
@@ -151,7 +151,7 @@
 		"nl": "Over ",
 		"it": "Chi siamo",
 		"zh": "关于",
-		"tr": "Hakkında"
+		"tr": "Hakkında",
 		"hr": "Informacije"
 	},
 	"menu.app.services": {
@@ -170,7 +170,7 @@
 		"nl": "Services",
 		"it": "Servizi",
 		"zh": "服务",
-		"tr": "Servisler"
+		"tr": "Servisler",
 		"hr": "Usluge"
 	},
 	"menu.app.hide": {
@@ -189,7 +189,7 @@
 		"nl": "Verbergen",
 		"it": "Nascondi",
 		"zh": "最小化",
-		"tr": "Gizle"
+		"tr": "Gizle",
 		"hr": "Sakrij"
 	},
 	"menu.app.hide-others": {
@@ -208,7 +208,7 @@
 		"nl": "Verbergen Andere",
 		"it": "Nascondi tutto il resto",
 		"zh": "隐藏其他",
-		"tr": "Diğerlerini gizle"
+		"tr": "Diğerlerini gizle",
 		"hr": "Sakrij ostalo"
 	},
 	"menu.app.show-all": {
@@ -227,7 +227,7 @@
 		"nl": "Toon Alles",
 		"it": "Mostra tutti",
 		"zh": "全部显示",
-		"tr": "Hepsini göster"
+		"tr": "Hepsini göster",
 		"hr": "Pokaži sve"
 	},
 	"menu.app.quit": {
@@ -246,7 +246,7 @@
 		"nl": "Afsluiten",
 		"it": "Esci",
 		"zh": "退出",
-		"tr": "Çık"
+		"tr": "Çık",
 		"hr": "Zatvori program"
 	},
 
@@ -266,7 +266,7 @@
 		"nl": "Bestand",
 		"it": "File",
 		"zh": "文件",
-		"tr": "Dosya"
+		"tr": "Dosya",
 		"hr": "Datoteka"
 	},
 	"menu.file.open": {
@@ -285,7 +285,7 @@
 		"nl": "Openen",
 		"it": "Apri",
 		"zh": "打开",
-		"tr": "Aç"
+		"tr": "Aç",
 		"hr": "Otvori"
 	},
 	"menu.file.close": {
@@ -304,7 +304,7 @@
 		"nl": "Sluiten",
 		"it": "Chiudi",
 		"zh": "关闭",
-		"tr": "Kapat"
+		"tr": "Kapat",
 		"hr": "Zatvori"
 	},
 	"menu.file.quit": {
@@ -323,7 +323,7 @@
 		"nl": "Afsluiten",
 		"it": "Esci",
 		"zh": "退出",
-		"tr": "Çık"
+		"tr": "Çık",
 		"hr": "Zatvori program"
 	},
 
@@ -343,7 +343,7 @@
 		"nl": "Bewerken",
 		"it": "Modifica",
 		"zh": "编辑",
-		"tr": "Düzenle"
+		"tr": "Düzenle",
 		"hr": "Uredi"
 	},
 	"menu.edit.copy": {
@@ -362,7 +362,7 @@
 		"nl": "Kopiëren",
 		"it": "Copia",
 		"zh": "拷贝",
-		"tr": "Kopyala"
+		"tr": "Kopyala",
 		"hr": "Kopiraj"
 	},
 	"menu.edit.select-all": {
@@ -381,7 +381,7 @@
 		"nl": "Alles Selecteren",
 		"it": "Seleziona tutto",
 		"zh": "全选",
-		"tr": "Hepsini seç"
+		"tr": "Hepsini seç",
 		"hr": "Odaberi sve"
 	},
 	"menu.edit.speech": {
@@ -400,7 +400,7 @@
 		"nl": "Spraak",
 		"it": "Pronuncia",
 		"zh": "语音",
-		"tr": "Konuş"
+		"tr": "Konuş",
 		"hr": "Govor"
 	},
 	"menu.edit.speech.start-speaking": {
@@ -419,7 +419,7 @@
 		"nl": "Start Spraakuitvoer",
 		"it": "Inizia a parlare",
 		"zh": "开始说话",
-		"tr": "Konuşmaya Başla"
+		"tr": "Konuşmaya Başla",
 		"hr": "Pokreni govor"
 	},
 	"menu.edit.speech.stop-speaking": {
@@ -438,7 +438,7 @@
 		"nl": "Stop Spraakuitvoer",
 		"it": "Smetti di parlare",
 		"zh": "停止说话",
-		"tr": "Konuşmayı Bitir"
+		"tr": "Konuşmayı Bitir",
 		"hr": "Prekini govor"
 	},
 
@@ -458,7 +458,7 @@
 		"nl": "Beeld",
 		"it": "Visualizza",
 		"zh": "视图",
-		"tr": "Görünüm"
+		"tr": "Görünüm",
 		"hr": "Prikaz"
 	},
 	"menu.view.toggle-dev-tools": {
@@ -477,7 +477,7 @@
 		"nl": "Open Developer Tools",
 		"it": "Apri/chiudi gli strumenti per sviluppatori",
 		"zh": "启动开发者工具",
-		"tr": "Geliştirici Araçlarını Aç/Kapat"
+		"tr": "Geliştirici Araçlarını Aç/Kapat",
 		"hr": "Uklj/Isklj programerske alate"
 	},
 	"menu.view.zoom-reset": {
@@ -496,7 +496,7 @@
 		"nl": "Originele grootte",
 		"it": "Reimposta la dimensione originale",
 		"zh": "实际大小",
-		"tr": "Gerçek boyut"
+		"tr": "Gerçek boyut",
 		"hr": "Stvarna veličina"
 	},
 	"menu.view.zoom-in": {
@@ -515,7 +515,7 @@
 		"nl": "Inzoomen",
 		"it": "Aumenta zoom",
 		"zh": "放大",
-		"tr": "Yakınlaştır"
+		"tr": "Yakınlaştır",
 		"hr": "Povećaj"
 	},
 	"menu.view.zoom-out": {
@@ -534,7 +534,7 @@
 		"nl": "Uitzoomen",
 		"it": "Diminuisci zoom",
 		"zh": "缩小",
-		"tr": "Uzaklaştır"
+		"tr": "Uzaklaştır",
 		"hr": "Smanji"
 	},
 	"menu.view.toggle-full-screen": {
@@ -553,7 +553,7 @@
 		"nl": "Volledig Scherm",
 		"it": "Attiva/disattiva la modalità a schermo intero",
 		"zh": "进入全屏幕",
-		"tr": "Tam ekran Aç/Kapa"
+		"tr": "Tam ekran Aç/Kapa",
 		"hr": "Uklj/Isklj prikaz preko cijelog ekrana"
 	},
 
@@ -573,7 +573,7 @@
 		"nl": "Venster",
 		"it": "Finestra",
 		"zh": "窗口",
-		"tr": "Pencere"
+		"tr": "Pencere",
 		"hr": "Prozor"
 	},
 	"menu.window.minimize-mac": {
@@ -592,7 +592,7 @@
 		"nl": "Minimaliseren",
 		"it": "Minimizza",
 		"zh": "最小化",
-		"tr": "Küçült"
+		"tr": "Küçült",
 		"hr": "Smanji"
 	},
 	"menu.window.minimize": {
@@ -611,7 +611,7 @@
 		"nl": "Minimaliseren",
 		"it": "Minimizza",
 		"zh": "最小化",
-		"tr": "Küçült"
+		"tr": "Küçült",
 		"hr": "Smanji"
 	},
 	"menu.window.zoom-mac": {
@@ -630,7 +630,7 @@
 		"nl": "Zoomen",
 		"it": "Riduci/Ingrandisci",
 		"zh": "缩放",
-		"tr": "Yakınlaştır"
+		"tr": "Yakınlaştır",
 		"hr": "Zumiraj"
 	},
 	"menu.window.zoom": {
@@ -649,7 +649,7 @@
 		"nl": "Zoomen",
 		"it": "Massimizza",
 		"zh": "缩放",
-		"tr": "Yakınlaştır"
+		"tr": "Yakınlaştır",
 		"hr": "Zumiraj"
 	},
 	"menu.window.front": {
@@ -668,7 +668,7 @@
 		"nl": "Breng alles naar de voorgrond",
 		"it": "Porta tutte le finestre in primo piano",
 		"zh": "全部置于顶层",
-		"tr": "Öne Çıkart"
+		"tr": "Öne Çıkart",
 		"hr": "Postavi sve naprijed"
 	},
 	"menu.window.window": {
@@ -687,7 +687,7 @@
 		"nl": "Venster",
 		"it": "Finestra",
 		"zh": "窗口",
-		"tr": "Pencere"
+		"tr": "Pencere",
 		"hr": "Prozor"
 	},
 	"menu.window.close": {
@@ -706,7 +706,7 @@
 		"nl": "Sluiten",
 		"it": "Chiudi",
 		"zh": "关闭",
-		"tr": "Kapat"
+		"tr": "Kapat",
 		"hr": "Zatvori"
 	},
 
@@ -726,7 +726,7 @@
 		"nl": "Help",
 		"it": "Aiuto",
 		"zh": "帮助",
-		"tr": "Yardım"
+		"tr": "Yardım",
 		"hr": "Pomoć"
 	},
 	"menu.help.website": {
@@ -745,7 +745,7 @@
 		"nl": "Website",
 		"it": "Sito web",
 		"zh": "转到网站",
-		"tr": "Website"
+		"tr": "Website",
 		"hr": "Web stranica"
 	},
 	"menu.help.source-code": {
@@ -764,7 +764,7 @@
 		"nl": "Broncode",
 		"it": "Codice sorgente",
 		"zh": "源码",
-		"tr": "Kaynak Kod"
+		"tr": "Kaynak Kod",
 		"hr": "Izvorni kod"
 	},
 	"menu.help.report-issue": {
@@ -783,7 +783,7 @@
 		"nl": "Meld een Probleem",
 		"it": "Segnala un problema",
 		"zh": "报告错误",
-		"tr": "Sorun bildir"
+		"tr": "Sorun bildir",
 		"hr": "Prijavi problem"
 	},
 	"menu.help.about": {
@@ -802,7 +802,7 @@
 		"nl": "Over ",
 		"it": "Informazioni su ",
 		"zh": "关于",
-		"tr": "Hakkında"
+		"tr": "Hakkında",
 		"hr": "Informacije"
 	},
 
@@ -822,7 +822,7 @@
 		"nl": "Copyright",
 		"it": "Copyright",
 		"zh": "版权",
-		"tr": "Telif hakkı"
+		"tr": "Telif hakkı",
 		"hr": "Autorska prava"
 	},
 
@@ -840,7 +840,7 @@
 		"nl": "Bestanden openen",
 		"it": "Apri files",
 		"zh": "打开文件",
-		"tr": "Dosyaları aç"
+		"tr": "Dosyaları aç",
 		"hr": "Otvori datoteke"
 	},
 	"usertasks:open-file.description": {
@@ -857,7 +857,7 @@
 		"nl": "Verwijder metagegevens van de geselecteerde bestanden",
 		"it": "Rimuovi i metadati dai file selezionati",
 		"zh": "从所选文件中删除元数据",
-		"tr": "Seçili dosyalardan meta verileri kaldır"
+		"tr": "Seçili dosyalardan meta verileri kaldır",
 		"hr": "Ukloni metapodatke iz odabranih datoteka"
 	}
 }

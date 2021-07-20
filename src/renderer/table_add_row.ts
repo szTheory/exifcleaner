@@ -13,8 +13,14 @@ export function addTableRow(filePath: string): HTMLTableRowElement {
 	trNode.appendChild(tdNode);
 
 	// td icon
-	const iconNode = document.createElement("i");
-	iconNode.classList.add("icon", "icon-photo");
+	const useNode = document.createElementNS("http://www.w3.org/2000/svg", "use");
+	useNode.setAttribute("href", "#icon-images");
+	const iconNode = document.createElementNS(
+		"http://www.w3.org/2000/svg",
+		"svg"
+	);
+	iconNode.appendChild(useNode);
+	iconNode.classList.add("icon");
 	tdNode.appendChild(iconNode);
 
 	// td text
