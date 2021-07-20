@@ -7,7 +7,7 @@ export function spawnExifToolProcesses(
 ): ExiftoolProcess[] {
 	const numProcesses = Math.min(os.cpus().length, maxNumProcesses);
 
-	return [...Array(numProcesses)].map((n) => {
+	return [...Array(numProcesses)].map((_n) => {
 		return newExifToolProcess();
 	});
 }

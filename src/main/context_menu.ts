@@ -23,7 +23,7 @@ function buildMenu(canCopy: boolean): Menu {
 export function setupContextMenu(): void {
 	app.on(
 		"browser-window-created",
-		(event: Event, browserWindow: BrowserWindow) => {
+		(_event: Event, browserWindow: BrowserWindow) => {
 			browserWindow.webContents.on(
 				"context-menu",
 				(_event: Event, params: Electron.ContextMenuParams) => {

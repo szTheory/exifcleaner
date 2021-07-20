@@ -186,14 +186,14 @@ yarn list --production
 
 ### Run the app in dev mode
 
-Clone the repository and cd into the directory.
+Clone the repository and cd into the directory:
 
 ```bash
 git clone https://github.com/szTheory/exifcleaner.git
 cd exifcleaner
 ```
 
-Next, install the NPM package dependencies.
+Next, install the NPM package dependencies:
 
 ```bash
 yarn install
@@ -205,10 +205,22 @@ Pull down the latest ExifTool binaries (in Windows, run this within the Linux Su
 yarn run update-exiftool
 ```
 
-Finally, launch the application. This supports Hot Module Reload (HMR) so you will automatically see your changes every time you save a file.
+Compile the TypeScript to JavaScript:
 
 ```bash
-yarn run dev
+yarn run compile
+```
+
+Or if you want to automatically recompile the TS to JS every time you make changes:
+
+```bash
+yarn run watch
+```
+
+Finally, launch the application:
+
+```bash
+yarn run start
 ```
 
 ### Contributing

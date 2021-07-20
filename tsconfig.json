@@ -1,12 +1,28 @@
 {
-	"extends": "./node_modules/electron-webpack/tsconfig-base.json",
 	"compilerOptions": {
-		"target": "es2019",
-		"outDir": "./dist/",
+		"target": "ES2020",
+		"module": "CommonJS",
+		"moduleResolution": "Node",
+		"esModuleInterop": true,
 		"resolveJsonModule": true,
+		"strict": true,
+		"sourceMap": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitReturns": true,
+		"inlineSources": true,
+		"allowUnreachableCode": false,
+		"allowUnusedLabels": false,
+		"noPropertyAccessFromIndexSignature": true,
+		// "noUncheckedIndexedAccess": true,
+		"allowSyntheticDefaultImports": true,
+		"noImplicitOverride": true,
 		"forceConsistentCasingInFileNames": true,
-		"importHelpers": true,
-		"removeComments": true
+		"importHelpers": false,
+		"removeComments": true,
+		"noEmitOnError": true,
+		"outDir": "./dist/"
 	},
 	"include": ["./src/**/*.ts"]
 }

@@ -1,10 +1,4 @@
 import { BrowserWindow } from "electron";
-import { isDev } from "../common/env";
-
-// electron-webpack HMR for development
-if (isDev() && module.hot) {
-	module.hot.accept();
-}
 
 import { app } from "electron";
 import { setupMenus } from "./menu";

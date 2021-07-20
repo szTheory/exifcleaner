@@ -1,9 +1,8 @@
 import { BrowserWindow, app } from "electron";
 import url from "url";
 import path from "path";
-import { isDev } from "../common/env";
 import { isMac, isWindows } from "../common/platform";
-import { iconPath } from "../common/resources";
+import { iconPath, resourcesPath } from "../common/resources";
 
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;
@@ -39,20 +38,12 @@ function windowsStopFlashingFrameOnFocus(browserWindow: BrowserWindow) {
 }
 
 function urlForLoad() {
-	if (isDev()) {
-		const port = process.env.ELECTRON_WEBPACK_WDS_PORT;
-		if (!port) {
-			throw "No Electron webpack WDS port set for dev. Try running `yarn run dev` instead for development mode.";
-		}
-
-		return `http://localhost:${port}`;
-	} else {
-		return url.format({
-			pathname: path.join(__dirname, "index.html"),
-			protocol: "file",
-			slashes: true,
-		});
-	}
+	// TODO: replace the deprecated url.format in favor of the WHATWG URL API
+	return url.format({
+		pathname: path.join(resourcesPath(), "index.html"),
+		protocol: "file",
+		slashes: true,
+	});
 }
 
 function mainWindowLoadUrl(browserWindow: BrowserWindow) {
@@ -73,7 +64,7 @@ export function createMainWindow(): BrowserWindow {
 			nodeIntegration: true,
 			// TODO: need to get this working with "true" to upgrade to Electron 12,
 			// but electron-webpack depends on it being "false" and it's been abandonded
-			// contextIsolation: true,
+			contextIsolation: true,
 		},
 		//set specific background color eliminate white flicker on content load
 		backgroundColor: WINDOW_BACKGROUND_COLOR,
