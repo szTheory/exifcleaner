@@ -1,5 +1,17 @@
 # Changelog
 
+## Next release (WIP)
+
+### Features
+
+- Improved dark mode styling and start screen icon
+- Add translations for Croatian and Turkish
+
+### Infrastructure
+
+- Remove node-sass and sass-loader dev dependencies
+- Remove Spectre Sass framework dependency and replace it with plain CSS using CSS variables
+
 ## 3.6.0 - 4 May 2021
 
 ### Security

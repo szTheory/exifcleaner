@@ -69,7 +69,12 @@ export function createMainWindow(): BrowserWindow {
 		height: DEFAULT_WINDOW_HEIGHT + 25,
 		minWidth: DEFAULT_WINDOW_WIDTH,
 		minHeight: DEFAULT_WINDOW_HEIGHT + 25,
-		webPreferences: { nodeIntegration: true },
+		webPreferences: {
+			nodeIntegration: true,
+			// TODO: need to get this working with "true" to upgrade to Electron 12,
+			// but electron-webpack depends on it being "false" and it's been abandonded
+			// contextIsolation: true,
+		},
 		//set specific background color eliminate white flicker on content load
 		backgroundColor: WINDOW_BACKGROUND_COLOR,
 		icon: iconPath(),
