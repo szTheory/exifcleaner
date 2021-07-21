@@ -7,12 +7,18 @@
 - Improved dark mode styling and start screen icon
 - Add translations for Croatian and Turkish
 
+### Security
+
+- Disable [nodeIntegration](https://www.electronjs.org/docs/api/browser-window) for increased security
+- Enable [contextIsolation](https://www.electronjs.org/docs/tutorial/context-isolation) as part of the Electron 13 upgrade for increased security
+
 ### Infrastructure
 
 - Remove node-sass and sass-loader dev dependencies
 - Remove Spectre Sass framework dependency and replace it with plain CSS using CSS variables
 - Remove electron-webpack dependency
-- Upgrade to Electron 13, which uses Node 14.17.0, V8 9.1, and Chromium 91
+- Upgrade to [TypeScript 4.3](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-3.html)
+- Upgrade to [Electron 13](https://www.electronjs.org/releases/stable?version=13), which uses Node 14.17.0, V8 9.1, and Chromium 91
 
 ## 3.6.0 - 4 May 2021
 

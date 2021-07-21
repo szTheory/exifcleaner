@@ -1,13 +1,13 @@
 import { app, Menu, MenuItemConstructorOptions } from "electron";
-import { isMac, isWindows } from "../common/platform";
-import { appMenuTemplate } from "./menu_app";
-import { dockMenuTemplate } from "./menu_dock";
-import { editMenuTemplate } from "./menu_edit";
-import { fileMenuTemplate } from "./menu_file";
-import { helpMenuTemplate } from "./menu_help";
-import { viewMenuTemplate } from "./menu_view";
-import { windowMenuTemplate } from "./menu_window";
-import { i18n } from "./i18n";
+import { isMac, isWindows } from "../common/platform.js";
+import { appMenuTemplate } from "./menu_app.js";
+import { dockMenuTemplate } from "./menu_dock.js";
+import { editMenuTemplate } from "./menu_edit.js";
+import { fileMenuTemplate } from "./menu_file.js";
+import { helpMenuTemplate } from "./menu_help.js";
+import { viewMenuTemplate } from "./menu_view.js";
+import { windowMenuTemplate } from "./menu_window.js";
+import { i18n } from "./i18n.js";
 
 const APP_ARG_WINDOWS_TASK_OPEN_FILE = "--open-file";
 

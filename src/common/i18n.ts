@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { resourcesPath } from "./resources";
+import { resourcesPath } from "./resources.js";
 
 // Locales list: https://www.electronjs.org/docs/api/locales
 export enum Locale {

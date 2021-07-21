@@ -2,10 +2,10 @@ import { app, BrowserWindow } from "electron";
 import {
 	currentBrowserWindow,
 	restoreWindowAndFocus,
-} from "../common/browser_window";
-import { createMainWindow } from "./window_setup";
-import { isWindows } from "../common/platform";
-import { fileOpen } from "./file_open";
+} from "../common/browser_window.js";
+import { createMainWindow } from "./window_setup.js";
+import { isWindows } from "../common/platform.js";
+import { fileOpen } from "./file_open.js";
 
 function preventMultipleAppInstances(): void {
 	if (!app.requestSingleInstanceLock()) {

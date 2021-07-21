@@ -1,6 +1,6 @@
 import { MenuItemConstructorOptions, app } from "electron";
-import { i18n } from "./i18n";
-import { isMac } from "../common/platform";
+import { i18n } from "./i18n.js";
+import { isMac } from "../common/platform.js";
 
 export function appMenuTemplate(): MenuItemConstructorOptions {
 	return {

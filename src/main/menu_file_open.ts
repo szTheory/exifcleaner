@@ -4,8 +4,8 @@ import {
 	MenuItem,
 	KeyboardEvent,
 } from "electron";
-import { i18n } from "./i18n";
-import { fileOpen } from "./file_open";
+import { i18n } from "./i18n.js";
+import { fileOpen } from "./file_open.js";
 
 export function fileMenuOpenItem(): MenuItemConstructorOptions {
 	return {

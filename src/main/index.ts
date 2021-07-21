@@ -1,10 +1,9 @@
-import { BrowserWindow } from "electron";
+import { BrowserWindow, app } from "electron";
 
-import { app } from "electron";
-import { setupMenus } from "./menu";
-import { init } from "./init";
-import { createMainWindow, setupMainWindow } from "./window_setup";
-import { currentBrowserWindow } from "../common/browser_window";
+import { setupMenus } from "./menu.js";
+import { init } from "./init.js";
+import { createMainWindow, setupMainWindow } from "./window_setup.js";
+import { currentBrowserWindow } from "../common/browser_window.js";
 
 // Maintain reference to window to
 // prevent it from being garbage collected

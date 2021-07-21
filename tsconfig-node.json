@@ -1,0 +1,11 @@
+{
+	"extends": "./tsconfig-base.json",
+	"compilerOptions": {
+		"module": "CommonJS"
+	},
+	"include": [
+		"./src/common/**/*.ts",
+		"./src/main/**/*.ts",
+		"./src/renderer_main_world/**/*.ts"
+	]
+}

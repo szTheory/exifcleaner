@@ -1,6 +1,6 @@
 import path from "path";
-import { getPlatform, Platform } from "./platform";
-import { resourcesPath } from "./resources";
+import { getPlatform, Platform } from "./platform.js";
+import { resourcesPath } from "./resources.js";
 
 enum BinaryPlatformSubpath {
 	Win = "win",

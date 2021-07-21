@@ -1,4 +1,4 @@
-import { selectFiles } from "./select_files";
+import { selectFiles } from "./select_files.js";
 
 export function setupDragAndDrop(): void {
 	document.addEventListener("drop", (event) => {

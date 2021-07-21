@@ -1,5 +1,5 @@
 import path from "path";
-import { selectedFilesList } from "./selected_files";
+import { selectedFilesList } from "./selected_files.js";
 
 export function addTableRow(filePath: string): HTMLTableRowElement {
 	const label = path.basename(filePath);

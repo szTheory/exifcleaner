@@ -1,4 +1,4 @@
-import { sanitizeHTML } from "./sanitize";
+import { sanitizeHTML } from "./sanitize.js";
 
 export function updateRowWithExif(
 	tdNode: HTMLTableDataCellElement,
