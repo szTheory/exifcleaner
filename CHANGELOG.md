@@ -2,6 +2,8 @@
 
 ## Next release (WIP)
 
+- Add CI pipeline with Travis CI
+
 ### Features
 
 - Improved dark mode styling and start screen icon
