@@ -296,3 +296,6 @@ yarn-error.log
 !.resources/nix/bin/.keep
 !.resources/win/bin/.keep
 
+# Explicitly include Travis CI configuration 
+# that were being hit by the .gitignore rule .*
+!.travis.yml

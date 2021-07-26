@@ -16,7 +16,6 @@
 		"postinstall": "electron-builder install-app-deps",
 		"format": "yarn prettier --write 'src/**/*.ts'",
 		"lint": "prettier --check 'src/**/*.ts'",
-		"test": "yarn run lint",
 		"start": "electron .",
 		"packmactest": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
 		"packwin": "yarn run compile && electron-builder --windows",
