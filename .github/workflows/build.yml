@@ -23,7 +23,7 @@ jobs:
               run: yarn packmac
 
             - name: Upload artifacts to GitHub
-            - uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v2
               with:
                   name: Gitify-dist-mac
                   path: dist/*.dmg
