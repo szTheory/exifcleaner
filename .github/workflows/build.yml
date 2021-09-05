@@ -1,0 +1,80 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+    build-macos:
+        runs-on: macos-latest
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Restore yarn cache
+            - uses: actions/setup-node@v2
+              with:
+                  cache: "yarn"
+
+            - name: Install Dependencies
+              run: yarn install
+            - name: Update ExifTool
+              run: yarn update-exiftool
+
+            - name: Build
+              run: yarn packmac
+
+            - name: Upload artifacts to GitHub
+            - uses: actions/upload-artifact@v2
+              with:
+                  name: Gitify-dist-mac
+                  path: dist/*.dmg
+
+    build-windows:
+        runs-on: windows-latest
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Restore yarn cache
+            - uses: actions/setup-node@v2
+              with:
+                  cache: "yarn"
+
+            - name: Install Dependencies
+              run: yarn install
+            - name: Update ExifTool
+              run: yarn update-exiftool
+
+            - name: Build
+              run: yarn packwin
+
+            - name: Upload artifacts to GitHub
+            - uses: actions/upload-artifact@v2
+              with:
+                  path: dist/*.exe
+
+    build-linux:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Restore yarn cache
+            - uses: actions/setup-node@v2
+              with:
+                  cache: "yarn"
+
+            - name: Install Dependencies
+              run: yarn install
+            - name: Update ExifTool
+              run: yarn update-exiftool
+
+            - name: Build
+              run: yarn packlinux
+
+            - name: Upload artifacts to GitHub
+            - uses: actions/upload-artifact@v2
+              with:
+                  path: |
+                      dist/*.AppImage
+                      dist/*.deb
+                      dist/*.rpm
