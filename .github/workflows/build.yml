@@ -25,7 +25,7 @@ jobs:
             - name: Upload artifacts to GitHub
               uses: actions/upload-artifact@v2
               with:
-                  name: Gitify-dist-mac
+                  name: Gitify-dist-Mac
                   path: dist/*.dmg
 
     build-windows:
@@ -49,6 +49,7 @@ jobs:
 
             - name: Upload artifacts to GitHub
               uses: actions/upload-artifact@v2
+              name: Gitify-dist-Win
               with:
                   path: dist/*.exe
 
@@ -74,6 +75,7 @@ jobs:
             - name: Upload artifacts to GitHub
               uses: actions/upload-artifact@v2
               with:
+                  name: Gitify-dist-Linux
                   path: |
                       dist/*.AppImage
                       dist/*.deb
