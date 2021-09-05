@@ -20,7 +20,7 @@ jobs:
               run: yarn update-exiftool
 
             - name: Build
-              run: yarn packmac
+              run: yarn packmac --publish never
 
             - name: Upload artifacts to GitHub
               uses: actions/upload-artifact@v2
@@ -45,7 +45,7 @@ jobs:
               run: yarn update-exiftool
 
             - name: Build
-              run: yarn packwin
+              run: yarn packwin --publish never
 
             - name: Upload artifacts to GitHub
               uses: actions/upload-artifact@v2
@@ -69,7 +69,7 @@ jobs:
               run: yarn update-exiftool
 
             - name: Build
-              run: yarn packlinux
+              run: yarn packlinux --publish never
 
             - name: Upload artifacts to GitHub
               uses: actions/upload-artifact@v2
