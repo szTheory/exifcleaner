@@ -49,8 +49,8 @@ jobs:
 
             - name: Upload artifacts to GitHub
               uses: actions/upload-artifact@v2
-              name: Gitify-dist-Win
               with:
+                  name: Gitify-dist-Win
                   path: dist/*.exe
 
     build-linux:
