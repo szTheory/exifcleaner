@@ -104,6 +104,10 @@
 				"nsis",
 				"portable"
 			],
+			"arch": [
+				"x64",
+				"ia32"
+			],
 			"extraResources": [
 				{
 					"from": ".resources/win/bin",
