@@ -301,5 +301,5 @@ yarn-error.log
 !.travis.yml
 
 # Explicitly include Prettier configuration 
-# that were being hit by the .gitignore rule .*
+# that was being hit by the .gitignore rule .*
 !.prettierrc
