@@ -144,25 +144,25 @@ ExifCleaner has the same writer limitations as the underlying `exiftool` it depe
 
 New translations and corrections to existing translations are welcome! See the [Adding a Translation](https://github.com/szTheory/exifcleaner/#adding-a-translation) section if there is a language you would like to add. Here is the current translations status:
 
-- Arabic ✅ by @ZER0-X
-- Chinese (Mandarin) ✅ by MarcusPierce
-- Croatian ✅ by @milotype
-- Danish ✅ by @zlatco
-- Dutch ✅ by @rvl-code
-- French (France) ✅ by @NathanBnm (Nathan Bonnemains)
+- Arabic ✅ by [@ZER0-X](https://github.com/ZER0-X)
+- Chinese (Mandarin) ✅ by [MarcusPierce](https://github.com/MarcusPierce)
+- Croatian ✅ by [@milotype](https://github.com/milotype)
+- Danish ✅ by [@zlatco](https://github.com/zlatco)
+- Dutch ✅ by [@rvl-code](https://github.com/rvl-code)
+- French (France) ✅ by [@NathanBnm](https://github.com/NathanBnm) (Nathan Bonnemains)
 - French (Quebec) ❌ needs translation if France version is not sufficient
-- German ✅ by @tayfuuun, with updates by @philippsandhaus
-- Italian ✅ by @blackcat-917
+- German ✅ by [@tayfuuun](https://github.com/tayfuuun), with updates by [@philippsandhaus](https://github.com/philippsandhaus)
+- Italian ✅ by [@PolpOnline](https://github.com/PolpOnline)
 - Japanese ✅ by @AKKED
-- Polish ✅ by @m1chu
-- Portuguese (Brazil) ✅ by @iraamaro, with updates by @dadodollabela
+- Polish ✅ by [@m1chu](https://github.com/m1chu)
+- Portuguese (Brazil) ✅ by [@iraamaro](https://github.com/iraamaro), with updates by @dadodollabela
 - Portuguese (Portugal) ❌ needs translation if Brazil version is not sufficient
-- Russian ✅ by @likhner (Arthur Likhner)
-- Spanish (Spain) ✅ by @ff-ss (Francisco)
+- Russian ✅ by [@likhner](https://github.com/likhner) (Arthur Likhner)
+- Spanish (Spain) ✅ by [@ff-ss](https://github.com/ff-ss) (Francisco)
 - Spanish (Latin America) ❌ needs translation if Spain version is not sufficient
-- Slovak ✅ by @LiJu09
-- Turkish ✅ by @bsonmez (Burak Sonmez)
-- Ukranian ✅ by @hugonote (Alexander Berger)
+- Slovak ✅ by [@LiJu09](https://github.com/LiJu09)
+- Turkish ✅ by [@bsonmez](https://github.com/bsonmez) (Burak Sonmez)
+- Ukranian ✅ by [@hugonote](https://github.com/hugonote) (Alexander Berger)
 
 ## Verifying checksum of downloads from the Github releases page
 
@@ -305,36 +305,36 @@ Once you're happy with the release and want to finalize it, remove the draft fla
 
 Thanks to all the people who submitted bug reports and fixes. I've tried to include everyone so if I've missed you it was by accident, just let me know and I'll add you.
 
-- @m1chu - Polish translation, fix for Mac dock bug on non-Mac platforms, help debugging Unicode filename bug
-- @LukasThyWalls - help debugging Unicode filename bug, feature suggestions
+- [@m1chu](https://github.com/m1chu) - Polish translation, fix for Mac dock bug on non-Mac platforms, help debugging Unicode filename bug
+- [@LukasThyWalls](https://github.com/LukasThyWalls) - help debugging Unicode filename bug, feature suggestions
 - @AKKED - Japanese translation, help debugging Unicode filename bug
-- @TomasGutierrez0 - help auditing ExifTool dependency
-- @5a384507-18ce-417c-bb55-d4dfcc8883fe - help debugging initial Linux version
-- @totoroot - help debugging Linux AppImage installer, usability feedback, feature suggestions
-- @Scopuli - help debugging Linux AppImage installer
-- @Tox86 - found broken Settings menu item bug
-- @ff-ss (Francisco) - Spanish translation
-- @tayfuuun - German translation
-- @philippsandhaus - German translation fixes
-- @airvue - Help debugging Ubuntu .deb package error
-- @Goblin80 - Help debugging Ubuntu .deb package error
-- @zahroc - Help diagnosing error when adding bulk directories
-- @iraamaro - Portuguese (Brazil) translation. Fix for update_exiftool.pl when building from source on Debian and Slackware
-- @LiJu09 - Slovak translation
-- @likhner (Arthur Likhner) - Russian translation
-- @hugonote (Alexander Berger) - Ukranian translation
+- [@TomasGutierrez0](https://github.com/TomasGutierrez0) - help auditing ExifTool dependency
+- [@5a384507-18ce-417c-bb55-d4dfcc8883fe](https://github.com/5a384507-18ce-417c-bb55-d4dfcc8883fe) - help debugging initial Linux version
+- [@totoroot](https://github.com/totoroot) - help debugging Linux AppImage installer, usability feedback, feature suggestions
+- [@Scopuli](https://github.com/Scopuli) - help debugging Linux AppImage installer
+- [@Tox86](https://github.com/Tox86) - found broken Settings menu item bug
+- [@ff-ss](https://github.com/ff-ss) (Francisco) - Spanish translation
+- [@tayfuuun](https://github.com/tayfuuun) - German translation
+- [@philippsandhaus](https://github.com/philippsandhaus) - German translation fixes
+- [@airvue](https://github.com/airvue) - Help debugging Ubuntu .deb package error
+- [@Goblin80](https://github.com/Goblin80) - Help debugging Ubuntu .deb package error
+- [@zahroc](https://github.com/zahroc) - Help diagnosing error when adding bulk directories
+- [@iraamaro](https://github.com/iraamaro) - Portuguese (Brazil) translation. Fix for update_exiftool.pl when building from source on Debian and Slackware
+- [@LiJu09](https://github.com/LiJu09) - Slovak translation
+- [@likhner](https://github.com/likhner) (Arthur Likhner) - Russian translation
+- [@hugonote](https://github.com/hugonote) (Alexander Berger) - Ukranian translation
 - @dadodollabela - Portuguese (Brazil) translation fixes
-- @zlatco - Danish translation
-- @ZER0-X - Arabic translation
-- @rvl-code - Dutch translation
-- @blackcat-917 - Italian translation, Arch Linux distribution maintainer
-- @NathanBnm (Nathan Bonnemains) - French translation
-- @Dyrimon - Linux AppImage error notification fix
-- @MarcusPierce - Chinese (Mandarin) translation
-- @brandonlou - Heads up on updating exiftool to 12.24+ to mitigate [CVE-2021-22204 arbitrary code execution](https://twitter.com/wcbowling/status/1385803927321415687)
-- @v4k0nd (Szabó Krisztián) - Help building instructions on verifying release checksums
-- @papb - Help setting up Windows portable build
-- @Bellisario - Help setting up Windows portable build
-- @overjt (Jonathan Toledo) - Proof of concept for XSS and Electron remote shell vulnerability
-- @bsonmez (Burak Sonmez) - Turkish translation
-- @milotype - Croatian translation
+- [@zlatco](https://github.com/zlatco) - Danish translation
+- [@ZER0-X](https://github.com/ZER0-X) - Arabic translation
+- [@rvl-code](https://github.com/rvl-code) - Dutch translation
+- [@PolpOnline](https://github.com/PolpOnline) - Italian translation, Arch Linux distribution maintainer
+- [@NathanBnm](https://github.com/NathanBnm) (Nathan Bonnemains) - French translation
+- [@Dyrimon](https://github.com/Dyrimon) - Linux AppImage error notification fix
+- [@MarcusPierce](https://github.com/MarcusPierce) - Chinese (Mandarin) translation
+- [@brandonlou](https://github.com/brandonlou) - Heads up on updating exiftool to 12.24+ to mitigate [CVE-2021-22204 arbitrary code execution](https://twitter.com/wcbowling/status/1385803927321415687)
+- [@v4k0nd](https://github.com/v4k0nd) (Szabó Krisztián) - Help building instructions on verifying release checksums
+- [@papb](https://github.com/papb) - Help setting up Windows portable build
+- [@Bellisario](https://github.com/Bellisario) - Help setting up Windows portable build
+- [@overjt](https://github.com/overjt) (Jonathan Toledo) - Proof of concept for XSS and Electron remote shell vulnerability
+- [@bsonmez](https://github.com/bsonmez) (Burak Sonmez) - Turkish translation
+- [@milotype](https://github.com/milotype) - Croatian translation
