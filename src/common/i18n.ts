@@ -14,6 +14,7 @@ export enum Locale {
 	Portuguese = "pt",
 	Russian = "ru",
 	Spanish = "es",
+	Hungarian = "hu",
 }
 
 type I18nStringSet = {
