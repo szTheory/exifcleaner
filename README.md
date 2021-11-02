@@ -152,6 +152,7 @@ New translations and corrections to existing translations are welcome! See the [
 - French (France) ✅ by [@NathanBnm](https://github.com/NathanBnm) (Nathan Bonnemains)
 - French (Quebec) ❌ needs translation if France version is not sufficient
 - German ✅ by [@tayfuuun](https://github.com/tayfuuun), with updates by [@philippsandhaus](https://github.com/philippsandhaus)
+- Hungarian ✅ by [@icetee](https://github.com/icetee) (Tamás András Horváth)
 - Italian ✅ by [@PolpOnline](https://github.com/PolpOnline)
 - Japanese ✅ by @AKKED
 - Polish ✅ by [@m1chu](https://github.com/m1chu)
@@ -338,3 +339,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - [@overjt](https://github.com/overjt) (Jonathan Toledo) - Proof of concept for XSS and Electron remote shell vulnerability
 - [@bsonmez](https://github.com/bsonmez) (Burak Sonmez) - Turkish translation
 - [@milotype](https://github.com/milotype) - Croatian translation
+- [@icetee](https://github.com/icetee) - Hungarian translation
