@@ -17,8 +17,8 @@
 		"zh": "未选择文件",
 		"tr": "Henüz dosya seçilmedi",
 		"hr": "Nijedna datoteka nije odabrana",
-		"hu": "Nincs kiválasztva fájl"
-		"sv": "Inga Filer Valda"
+		"hu": "Nincs kiválasztva fájl",
+		"sv": "Inga filer valda"
 	},
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
@@ -38,7 +38,8 @@
 		"zh": "拖放图像，视频或PDF文件以自动删除元数据。",
 		"tr": "Meta verileri otomatik olarak kaldırmak için görüntü, video veya PDF dosyalarını sürükleyip bırakabilirsin.",
 		"hr": "Povuci i ispusti slike, videa ili PDF datoteke za automatsko uklanjanje metapodataka.",
-		"hu": "Húzd át a képeket, videókat vagy PDF fájlokat a metaadatatok automatikus eltávolításához."
+		"hu": "Húzd át a képeket, videókat vagy PDF fájlokat a metaadatatok automatikus eltávolításához.",
+		"sv": "Dra och släpp bilder, videor eller PDF filer för att ta bort metadata automatiskt"
 	},
 
 	"table.header.filename": {
@@ -59,7 +60,8 @@
 		"zh": "选中的文件",
 		"tr": "Seçilen dosyalar",
 		"hr": "Odabrane datoteke",
-		"hu": "Kiválasztott fájlok"
+		"hu": "Kiválasztott fájlok",
+		"sv": "valda filer"
 	},
 	"table.header.exif-before": {
 		"en": "# Exif Before",
@@ -79,7 +81,8 @@
 		"zh": "# Exif 处理前",
 		"tr": "# Exif'den önce",
 		"hr": "Broj Exifa prije",
-		"hu": "# Exif előtt"
+		"hu": "# Exif előtt",
+		"sv": "# Exif Innan"
 	},
 	"table.header.exif-after": {
 		"en": "# Exif After",
@@ -99,7 +102,8 @@
 		"zh": "# Exif 处理后",
 		"tr": "# Exif'den Sonra",
 		"hr": "Broj Exifa poslije",
-		"hu": "# Exif után"
+		"hu": "# Exif után",
+		"sv": "# Exif Efter"
 	},
 
 	"contextmenu.copy": {
@@ -120,7 +124,8 @@
 		"zh": "拷贝",
 		"tr": "Kopyala",
 		"hr": "Kopiraj",
-		"hu": "Másolat"
+		"hu": "Másolat",
+		"sv": "Kopiera"
 	},
 	"contextmenu.select-all": {
 		"en": "Select All",
@@ -140,7 +145,8 @@
 		"zh": "全选",
 		"tr": "Hepsini seç",
 		"hr": "Odaberi sve",
-		"hu": "Összes kijelölés"
+		"hu": "Összes kijelölés",
+		"sv": "Välj Alla"
 	},
 
 	"menu.app.about": {
@@ -161,7 +167,8 @@
 		"zh": "关于",
 		"tr": "Hakkında",
 		"hr": "Informacije",
-		"hu": "Névjegy"
+		"hu": "Névjegy",
+		"sv": "Om"
 	},
 	"menu.app.services": {
 		"en": "Services",
@@ -181,7 +188,8 @@
 		"zh": "服务",
 		"tr": "Servisler",
 		"hr": "Usluge",
-		"hu": "Szolgáltatások"
+		"hu": "Szolgáltatások",
+		"sv": "Tjänster"
 	},
 	"menu.app.hide": {
 		"en": "Hide",
@@ -201,7 +209,8 @@
 		"zh": "最小化",
 		"tr": "Gizle",
 		"hr": "Sakrij",
-		"hu": "Elrejt"
+		"hu": "Elrejt",
+		"sv": "Göm"
 	},
 	"menu.app.hide-others": {
 		"en": "Hide Others",
@@ -221,7 +230,8 @@
 		"zh": "隐藏其他",
 		"tr": "Diğerlerini gizle",
 		"hr": "Sakrij ostalo",
-		"hu": "Többi elrejtése"
+		"hu": "Többi elrejtése",
+		"sv": "Göm Andra"
 	},
 	"menu.app.show-all": {
 		"en": "Show All",
@@ -241,7 +251,8 @@
 		"zh": "全部显示",
 		"tr": "Hepsini göster",
 		"hr": "Pokaži sve",
-		"hu": "Összes mutatása"
+		"hu": "Összes mutatása",
+		"sv": "Visa Alla"
 	},
 	"menu.app.quit": {
 		"en": "Quit",
@@ -261,7 +272,8 @@
 		"zh": "退出",
 		"tr": "Çık",
 		"hr": "Zatvori program",
-		"hu": "Kilépés"
+		"hu": "Kilépés",
+		"sv": "Avsluta"
 	},
 
 	"menu.file.name": {
@@ -282,7 +294,8 @@
 		"zh": "文件",
 		"tr": "Dosya",
 		"hr": "Datoteka",
-		"hu": "Fájl"
+		"hu": "Fájl",
+		"sv": "Fil"
 	},
 	"menu.file.open": {
 		"en": "Open",
@@ -302,7 +315,8 @@
 		"zh": "打开",
 		"tr": "Aç",
 		"hr": "Otvori",
-		"hu": "Megnyitás"
+		"hu": "Megnyitás",
+		"sv": "Öppna"
 	},
 	"menu.file.close": {
 		"en": "Close",
@@ -322,7 +336,8 @@
 		"zh": "关闭",
 		"tr": "Kapat",
 		"hr": "Zatvori",
-		"hu": "Bezárás"
+		"hu": "Bezárás",
+		"sv": "Stäng"
 	},
 	"menu.file.quit": {
 		"en": "Quit",
@@ -342,7 +357,8 @@
 		"zh": "退出",
 		"tr": "Çık",
 		"hr": "Zatvori program",
-		"hu": "Kilépés"
+		"hu": "Kilépés",
+		"sv": "Avsluta"
 	},
 
 	"menu.edit.name": {
@@ -363,7 +379,8 @@
 		"zh": "编辑",
 		"tr": "Düzenle",
 		"hr": "Uredi",
-		"hu": "Szerkesztés"
+		"hu": "Szerkesztés",
+		"sv": "Redigera"
 	},
 	"menu.edit.copy": {
 		"en": "Copy",
@@ -383,7 +400,8 @@
 		"zh": "拷贝",
 		"tr": "Kopyala",
 		"hr": "Kopiraj",
-		"hu": "Másolás"
+		"hu": "Másolás",
+		"sv": "Kopiera"
 	},
 	"menu.edit.select-all": {
 		"en": "Select All",
@@ -403,7 +421,8 @@
 		"zh": "全选",
 		"tr": "Hepsini seç",
 		"hr": "Odaberi sve",
-		"hu": "Összes kijelölés"
+		"hu": "Összes kijelölés",
+		"sv": "Välj Alla"
 	},
 	"menu.edit.speech": {
 		"en": "Speech",
@@ -423,7 +442,8 @@
 		"zh": "语音",
 		"tr": "Konuş",
 		"hr": "Govor",
-		"hu": "Beszéd"
+		"hu": "Beszéd",
+		"sv": "Diktera"
 	},
 	"menu.edit.speech.start-speaking": {
 		"en": "Start Speaking",
@@ -443,7 +463,8 @@
 		"zh": "开始说话",
 		"tr": "Konuşmaya Başla",
 		"hr": "Pokreni govor",
-		"hu": "Beszéd elkezdése"
+		"hu": "Beszéd elkezdése",
+		"sv": "Börja Prata"
 	},
 	"menu.edit.speech.stop-speaking": {
 		"en": "Stop Speaking",
@@ -463,7 +484,8 @@
 		"zh": "停止说话",
 		"tr": "Konuşmayı Bitir",
 		"hr": "Prekini govor",
-		"hu": "Beszéd befejezése"
+		"hu": "Beszéd befejezése",
+		"sv": "Sluta Prata"
 	},
 
 	"menu.view.name": {
@@ -484,7 +506,8 @@
 		"zh": "视图",
 		"tr": "Görünüm",
 		"hr": "Prikaz",
-		"hu": "Nézet"
+		"hu": "Nézet",
+		"sv": "Visa"
 	},
 	"menu.view.toggle-dev-tools": {
 		"en": "Toggle Developer Tools",
@@ -504,7 +527,8 @@
 		"zh": "启动开发者工具",
 		"tr": "Geliştirici Araçlarını Aç/Kapat",
 		"hr": "Uklj/Isklj programerske alate",
-		"hu": "Fejlesztői eszközök"
+		"hu": "Fejlesztői eszközök",
+		"sv": "Växla utvecklarverktyg"
 	},
 	"menu.view.zoom-reset": {
 		"en": "Actual Size",
@@ -524,7 +548,8 @@
 		"zh": "实际大小",
 		"tr": "Gerçek boyut",
 		"hr": "Stvarna veličina",
-		"hu": "Valódi méret"
+		"hu": "Valódi méret",
+		"sv": "Riktig Storlek"
 	},
 	"menu.view.zoom-in": {
 		"en": "Zoom In",
@@ -544,7 +569,8 @@
 		"zh": "放大",
 		"tr": "Yakınlaştır",
 		"hr": "Povećaj",
-		"hu": "Nagyítás"
+		"hu": "Nagyítás",
+		"sv": "Zooma in"
 	},
 	"menu.view.zoom-out": {
 		"en": "Zoom Out",
@@ -564,7 +590,8 @@
 		"zh": "缩小",
 		"tr": "Uzaklaştır",
 		"hr": "Smanji",
-		"hu": "Kicsinyítés"
+		"hu": "Kicsinyítés",
+		"sv": "Zooma ut"
 	},
 	"menu.view.toggle-full-screen": {
 		"en": "Toggle Full Screen",
@@ -584,7 +611,8 @@
 		"zh": "进入全屏幕",
 		"tr": "Tam ekran Aç/Kapa",
 		"hr": "Uklj/Isklj prikaz preko cijelog ekrana",
-		"hu": "Váltás teljes képernyőre"
+		"hu": "Váltás teljes képernyőre",
+		"sv": "Växla Fullskärm"
 	},
 
 	"menu.window.name": {
@@ -605,7 +633,8 @@
 		"zh": "窗口",
 		"tr": "Pencere",
 		"hr": "Prozor",
-		"hu": "Ablak"
+		"hu": "Ablak",
+		"sv": "Fönster"
 	},
 	"menu.window.minimize-mac": {
 		"en": "Minimize",
@@ -625,7 +654,8 @@
 		"zh": "最小化",
 		"tr": "Küçült",
 		"hr": "Smanji",
-		"hu": "Minimalizálás"
+		"hu": "Minimalizálás",
+		"sv": "Förringa"
 	},
 	"menu.window.minimize": {
 		"en": "Minimize",
@@ -645,7 +675,8 @@
 		"zh": "最小化",
 		"tr": "Küçült",
 		"hr": "Smanji",
-		"hu": "Minimalizálás"
+		"hu": "Minimalizálás",
+		"sv": "Förringa"
 	},
 	"menu.window.zoom-mac": {
 		"en": "Zoom",
@@ -665,7 +696,8 @@
 		"zh": "缩放",
 		"tr": "Yakınlaştır",
 		"hr": "Zumiraj",
-		"hu": "Zoomolás"
+		"hu": "Zoomolás",
+		"sv": "Zooma"
 	},
 	"menu.window.zoom": {
 		"en": "Zoom",
@@ -685,7 +717,8 @@
 		"zh": "缩放",
 		"tr": "Yakınlaştır",
 		"hr": "Zumiraj",
-		"hu": "Zoomolás"
+		"hu": "Zoomolás",
+		"sv": "Zooma"
 	},
 	"menu.window.front": {
 		"en": "Bring All to Front",
@@ -705,7 +738,8 @@
 		"zh": "全部置于顶层",
 		"tr": "Öne Çıkart",
 		"hr": "Postavi sve naprijed",
-		"hu": "Hozz mindent előre"
+		"hu": "Hozz mindent előre",
+		"sv": "Ta alla fram"
 	},
 	"menu.window.window": {
 		"en": "Window",
@@ -725,7 +759,8 @@
 		"zh": "窗口",
 		"tr": "Pencere",
 		"hr": "Prozor",
-		"hu": "Ablak"
+		"hu": "Ablak",
+		"sv": "Fönster"
 	},
 	"menu.window.close": {
 		"en": "Close",
@@ -745,7 +780,8 @@
 		"zh": "关闭",
 		"tr": "Kapat",
 		"hr": "Zatvori",
-		"hu": "Bezárás"
+		"hu": "Bezárás",
+		"sv": "Stäng"
 	},
 
 	"menu.help.name": {
@@ -766,7 +802,8 @@
 		"zh": "帮助",
 		"tr": "Yardım",
 		"hr": "Pomoć",
-		"hu": "Súgó"
+		"hu": "Súgó",
+		"sv": "Hjälp"
 	},
 	"menu.help.website": {
 		"en": "Website",
@@ -786,7 +823,8 @@
 		"zh": "转到网站",
 		"tr": "Website",
 		"hr": "Web stranica",
-		"hu": "Weboldal"
+		"hu": "Weboldal",
+		"sv": "Hemsida"
 	},
 	"menu.help.source-code": {
 		"en": "Source Code",
@@ -806,7 +844,8 @@
 		"zh": "源码",
 		"tr": "Kaynak Kod",
 		"hr": "Izvorni kod",
-		"hu": "Forráskód"
+		"hu": "Forráskód",
+		"sv": "Källkod"
 	},
 	"menu.help.report-issue": {
 		"en": "Report an Issue",
@@ -826,7 +865,8 @@
 		"zh": "报告错误",
 		"tr": "Sorun bildir",
 		"hr": "Prijavi problem",
-		"hu": "Hiba jelentése"
+		"hu": "Hiba jelentése",
+		"sv": "Rappotera Ett Problem"
 	},
 	"menu.help.about": {
 		"en": "About ",
@@ -846,7 +886,8 @@
 		"zh": "关于",
 		"tr": "Hakkında",
 		"hr": "Informacije",
-		"hu": "Névjegy"
+		"hu": "Névjegy",
+		"sv": "Om"
 	},
 
 	"aboutwindow:copyright": {
@@ -867,7 +908,8 @@
 		"zh": "版权",
 		"tr": "Telif hakkı",
 		"hr": "Autorska prava",
-		"hu": "Szerzői jog"
+		"hu": "Szerzői jog",
+		"sv": "Copyright"
 	},
 
 	"usertasks:open-file.label": {
@@ -886,7 +928,8 @@
 		"zh": "打开文件",
 		"tr": "Dosyaları aç",
 		"hr": "Otvori datoteke",
-		"hu": "Fájlok megnyitása"
+		"hu": "Fájlok megnyitása",
+		"sv": "Öppna Filer"
 	},
 	"usertasks:open-file.description": {
 		"en": "Remove metadata from selected files",
@@ -904,6 +947,7 @@
 		"zh": "从所选文件中删除元数据",
 		"tr": "Seçili dosyalardan meta verileri kaldır",
 		"hr": "Ukloni metapodatke iz odabranih datoteka",
-		"hu": "Metaadatok eltávolítása a kijelölt fájlokból"
+		"hu": "Metaadatok eltávolítása a kijelölt fájlokból",
+		"sv": "Ta bort metadata från valda filer"
 	}
 }
