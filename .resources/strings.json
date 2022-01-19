@@ -18,6 +18,7 @@
 		"tr": "Henüz dosya seçilmedi",
 		"hr": "Nijedna datoteka nije odabrana",
 		"hu": "Nincs kiválasztva fájl"
+		"sv": "Inga Filer Valda"
 	},
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
