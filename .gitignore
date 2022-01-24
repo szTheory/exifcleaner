@@ -303,3 +303,7 @@ yarn-error.log
 # Explicitly include GitHub configuration 
 # that were being hit by the .gitignore rule .*
 !.github/
+
+# Explicitly include Prettier configuration 
+# that was being hit by the .gitignore rule .*
+!.prettierrc
