@@ -161,6 +161,7 @@ New translations and corrections to existing translations are welcome! See the [
 - Russian ✅ by [@likhner](https://github.com/likhner) (Arthur Likhner)
 - Spanish (Spain) ✅ by [@ff-ss](https://github.com/ff-ss) (Francisco)
 - Spanish (Latin America) ❌ needs translation if Spain version is not sufficient
+- Swedish ✅ by [@sastofficial](https://github.com/sastofficial)
 - Slovak ✅ by [@LiJu09](https://github.com/LiJu09)
 - Turkish ✅ by [@bsonmez](https://github.com/bsonmez) (Burak Sonmez)
 - Ukranian ✅ by [@hugonote](https://github.com/hugonote) (Alexander Berger)
@@ -340,3 +341,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - [@bsonmez](https://github.com/bsonmez) (Burak Sonmez) - Turkish translation
 - [@milotype](https://github.com/milotype) - Croatian translation
 - [@icetee](https://github.com/icetee) - Hungarian translation
+- [@sastofficial](https://github.com/sastofficial) - Swedish translation
