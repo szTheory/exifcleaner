@@ -246,18 +246,18 @@ sub remove_old_binaries {
 # The Unix version of ExifTool only needs `exiftool` and the `lib` dir.
 # In order to keep package size down we only copy these over to the
 # ExifCleaner bin dir.
-sub move_unix_binary {
+sub copy_unix_binary {
   my $code_archive_filename = shift;
 
   my ($code_dir_name) = $code_archive_filename =~ /^(.+)[.]tar[.]gz$/;
   my $from_dir = DOWNLOADS_WORKING_DIR . "/$code_dir_name";
 
   # move lib dir
-  my @command = ( 'mv', "$from_dir/lib", BIN_DIR_UNIX );
+  my @command = ( 'cp', '-R', "$from_dir/lib", BIN_DIR_UNIX );
   run_command(@command);
 
   # move `exiftool` base Perl file
-  @command = ( 'mv', "$from_dir/exiftool", BIN_DIR_UNIX );
+  @command = ( 'cp', "$from_dir/exiftool", BIN_DIR_UNIX );
   run_command(@command);
 
   return;
@@ -281,55 +281,102 @@ sub verify_successful_install {
 # The Windows ExifTool binary is just an .exe file. We have to
 # rename it from `exiftool(-k).exe` to `exiftool.exe` and move
 # it to the ExifCleaner Windows bin dir.
-sub move_windows_binary {
+sub copy_windows_binary {
   my $from_path = DOWNLOADS_WORKING_DIR . '/exiftool(-k).exe';
   my $to_path   = BIN_DIR_WINDOWS . '/exiftool.exe';
 
-  my @command = ( 'mv', $from_path, $to_path );
+  my @command = ( 'cp', $from_path, $to_path );
   run_command(@command);
 
   return;
 }
 
+sub is_exiftool_already_downloaded {
+  my ( $code_filename, $windows_version_filename ) = @_;
+
+  my $code_path    = DOWNLOADS_WORKING_DIR . "/$code_filename";
+  my $windows_path = DOWNLOADS_WORKING_DIR . "/$windows_version_filename";
+
+  my $download_folder_exists     = -d DOWNLOADS_WORKING_DIR;
+  my $code_downloaded            = -e $code_path;
+  my $windows_version_downloaded = -e $windows_path;
+
+  return
+       $download_folder_exists
+    && $code_downloaded
+    && $windows_version_downloaded;
+}
+
 sub run {
+  my $cache_downloads_working_dir = shift;
+
   header('Fetching ExifTool SHA1 checksums from website');
   my $checksum_file_text = get_checksum_file_text();
   my ( $code_filename, $code_sha1 ) = get_code_zip_info($checksum_file_text);
-  my ( $windows_filename, $windows_sha1 ) =
+  my ( $windows_version_filename, $windows_sha1 ) =
     get_windows_exe_info($checksum_file_text);
+  my $exiftool_already_downloaded =
+    is_exiftool_already_downloaded( $code_filename, $windows_version_filename );
   print_output("$code_filename - $code_sha1\n");
-  print_output("$windows_filename - $windows_sha1\n");
+  print_output("$windows_version_filename - $windows_sha1\n");
 
   header('Recreate downloads working directory');
-  remove_dir(DOWNLOADS_WORKING_DIR);
-  make_dir(DOWNLOADS_WORKING_DIR);
+  if ( $cache_downloads_working_dir && $exiftool_already_downloaded ) {
+    print_command(
+"Keeping existing downloads working directory since download caching is enabled"
+    );
+  }
+  else {
+    remove_dir(DOWNLOADS_WORKING_DIR);
+    make_dir(DOWNLOADS_WORKING_DIR);
+  }
 
   header('Downloading files');
-  download_file($code_filename);
-  download_file($windows_filename);
+
+  if ( $cache_downloads_working_dir && $exiftool_already_downloaded ) {
+    print_command( "Skipping download since the downloads working directory '"
+        . DOWNLOADS_WORKING_DIR
+        . "' already exists and download caching is enabled" );
+  }
+  else {
+    download_file($code_filename);
+    download_file($windows_version_filename);
+  }
 
   header('Verifying SHA1 checksums');
-  verify_checksum( $code_filename,    $code_sha1 );
-  verify_checksum( $windows_filename, $windows_sha1 );
+  verify_checksum( $code_filename,            $code_sha1 );
+  verify_checksum( $windows_version_filename, $windows_sha1 );
 
   header('Extracting archives');
   extract_source_code($code_filename);
-  extract_windows_exe($windows_filename);
+  extract_windows_exe($windows_version_filename);
 
   header('Removing old binaries');
   remove_old_binaries();
 
   header('Moving fresh binaries');
-  move_unix_binary($code_filename);
-  move_windows_binary();
+  copy_unix_binary($code_filename);
+  copy_windows_binary();
 
   header('Clean up downloads working directory');
-  remove_dir(DOWNLOADS_WORKING_DIR);
+  if ($cache_downloads_working_dir) {
+    print_command(
+      "Keeping downloads working directory since caching is enabled.");
+  }
+  else {
+    remove_dir(DOWNLOADS_WORKING_DIR);
+  }
 
   return;
 }
 
-run();
+# Pass the command line argument --cache-downloads-working-dir
+# to cache the downloads working directory to avoid repeated
+# downloads from the exiftool server. Useful for CI
+my $cache_downloads_working_dir = $ARGV[0] eq "--cache-downloads-working-dir";
+
+run($cache_downloads_working_dir);
 verify_successful_install();
 
 1;
+
