@@ -14,10 +14,17 @@ jobs:
               with:
                   cache: "yarn"
 
+            - name: Restore ExifTool cache
+              uses: actions/cache@v2
+              with:
+                key: exiftool-${{ hashFiles('**/exiftool_downloads/exiftool-*.zip', 'Image-ExifTool-*.tar.gz') }}
+                path: |
+                  exiftool-downloads
+
             - name: Install Dependencies
               run: yarn install
             - name: Update ExifTool
-              run: yarn update-exiftool
+              run: yarn update-exiftool --cache-downloads-working-dir
 
             - name: Build
               run: yarn packmac --publish never
@@ -25,7 +32,7 @@ jobs:
             - name: Upload artifacts to GitHub
               uses: actions/upload-artifact@v2
               with:
-                  name: Gitify-dist-Mac
+                  name: ExifCleaner-dist-Mac
                   path: dist/*.dmg
 
     build-windows:
@@ -39,10 +46,17 @@ jobs:
               with:
                   cache: "yarn"
 
+            - name: Restore ExifTool cache
+              uses: actions/cache@v2
+              with:
+                key: exiftool-${{ hashFiles('**/exiftool_downloads/exiftool-*.zip', 'Image-ExifTool-*.tar.gz') }}
+                path: |
+                  exiftool-downloads
+
             - name: Install Dependencies
               run: yarn install
             - name: Update ExifTool
-              run: yarn update-exiftool
+              run: yarn update-exiftool --cache-downloads-working-dir
 
             - name: Build
               run: yarn packwin --publish never
@@ -50,7 +64,7 @@ jobs:
             - name: Upload artifacts to GitHub
               uses: actions/upload-artifact@v2
               with:
-                  name: Gitify-dist-Win
+                  name: ExifCleaner-dist-Win
                   path: dist/*.exe
 
     build-linux:
@@ -64,10 +78,17 @@ jobs:
               with:
                   cache: "yarn"
 
+            - name: Restore ExifTool cache
+              uses: actions/cache@v2
+              with:
+                key: exiftool-${{ hashFiles('**/exiftool_downloads/exiftool-*.zip', 'Image-ExifTool-*.tar.gz') }}
+                path: |
+                  exiftool-downloads
+                
             - name: Install Dependencies
               run: yarn install
             - name: Update ExifTool
-              run: yarn update-exiftool
+              run: yarn update-exiftool --cache-downloads-working-dir
 
             - name: Build
               run: yarn packlinux --publish never
@@ -75,7 +96,7 @@ jobs:
             - name: Upload artifacts to GitHub
               uses: actions/upload-artifact@v2
               with:
-                  name: Gitify-dist-Linux
+                  name: ExifCleaner-dist-Linux
                   path: |
                       dist/*.AppImage
                       dist/*.deb
