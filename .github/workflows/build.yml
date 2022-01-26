@@ -19,7 +19,7 @@ jobs:
         with:
           key: exiftool-${{ runner.os }}-${{ hashFiles('**/exiftool_downloads/exiftool-*.zip', 'Image-ExifTool-*.tar.gz') }}
           path: |
-            exiftool-downloads/**
+            ./exiftool_downloads
 
       - name: Install Dependencies
         run: yarn install
@@ -51,7 +51,7 @@ jobs:
         with:
           key: exiftool-${{ runner.os }}-${{ hashFiles('**/exiftool_downloads/exiftool-*.zip', 'Image-ExifTool-*.tar.gz') }}
           path: |
-            exiftool-downloads
+            ./exiftool_downloads
 
       - name: Install Dependencies
         run: yarn install
@@ -83,7 +83,7 @@ jobs:
         with:
           key:  exiftool-${{ runner.os }}-${{ hashFiles('**/exiftool_downloads/exiftool-*.zip', 'Image-ExifTool-*.tar.gz') }}
           path: |
-            exiftool-downloads
+            ./exiftool_downloads
 
       - name: Install Dependencies
         run: yarn install
