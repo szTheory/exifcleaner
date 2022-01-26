@@ -17,7 +17,7 @@ jobs:
       - name: Restore ExifTool cache
         uses: actions/cache@v2
         with:
-          key: exiftool-${{ runner.os }}-${{ hashFiles('**/exiftool_downloads/exiftool-*.zip', 'Image-ExifTool-*.tar.gz') }}
+          key: exiftool-${{ runner.os }}-${{ hashFiles('./exiftool_downloads/exiftool-*.zip', './exiftool_downloads/Image-ExifTool-*.tar.gz') }}
           path: |
             ./exiftool_downloads
 
@@ -49,7 +49,7 @@ jobs:
       - name: Restore ExifTool cache
         uses: actions/cache@v2
         with:
-          key: exiftool-${{ runner.os }}-${{ hashFiles('**/exiftool_downloads/exiftool-*.zip', 'Image-ExifTool-*.tar.gz') }}
+          key: exiftool-${{ runner.os }}-${{ hashFiles('./exiftool_downloads/exiftool-*.zip', './exiftool_downloads/Image-ExifTool-*.tar.gz') }}
           path: |
             ./exiftool_downloads
 
@@ -81,7 +81,7 @@ jobs:
       - name: Restore ExifTool cache
         uses: actions/cache@v2
         with:
-          key:  exiftool-${{ runner.os }}-${{ hashFiles('**/exiftool_downloads/exiftool-*.zip', 'Image-ExifTool-*.tar.gz') }}
+          key:  exiftool-${{ runner.os }}-${{ hashFiles('./exiftool_downloads/exiftool-*.zip', './exiftool_downloads/Image-ExifTool-*.tar.gz') }}
           path: |
             ./exiftool_downloads
 
