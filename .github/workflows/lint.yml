@@ -16,8 +16,6 @@ jobs:
 
       - name: Install Dependencies
         run: yarn install
-      - name: Update ExifTool
-        run: yarn update-exiftool
 
       - name: Lint
         run: yarn lint
