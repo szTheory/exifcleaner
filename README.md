@@ -155,6 +155,7 @@ New translations and corrections to existing translations are welcome! See the [
 - Hungarian ✅ by [@icetee](https://github.com/icetee) (Tamás András Horváth)
 - Italian ✅ by [@PolpOnline](https://github.com/PolpOnline)
 - Japanese ✅ by @AKKED
+- Malayalam by ✅ by [@theunknownKiran](https://github.com/theunknownKiran)
 - Polish ✅ by [@m1chu](https://github.com/m1chu)
 - Portuguese (Brazil) ✅ by [@iraamaro](https://github.com/iraamaro), with updates by @dadodollabela
 - Portuguese (Portugal) ❌ needs translation if Brazil version is not sufficient
@@ -342,3 +343,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - [@milotype](https://github.com/milotype) - Croatian translation
 - [@icetee](https://github.com/icetee) - Hungarian translation
 - [@sastofficial](https://github.com/sastofficial) - Swedish translation
+- [@theunknownKiran](https://github.com/theunknownKiran) - Malayalam translation
