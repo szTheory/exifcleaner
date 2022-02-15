@@ -18,7 +18,8 @@
 		"tr": "Henüz dosya seçilmedi",
 		"hr": "Nijedna datoteka nije odabrana",
 		"hu": "Nincs kiválasztva fájl",
-		"sv": "Inga filer valda"
+		"sv": "Inga filer valda",
+		"ml": "ഫയലുകളൊന്നും തിരഞ്ഞെടുത്തിട്ടില്ല"
 	},
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
@@ -39,7 +40,8 @@
 		"tr": "Meta verileri otomatik olarak kaldırmak için görüntü, video veya PDF dosyalarını sürükleyip bırakabilirsin.",
 		"hr": "Povuci i ispusti slike, videa ili PDF datoteke za automatsko uklanjanje metapodataka.",
 		"hu": "Húzd át a képeket, videókat vagy PDF fájlokat a metaadatatok automatikus eltávolításához.",
-		"sv": "Dra och släpp bilder, videor eller PDF filer för att ta bort metadata automatiskt"
+		"sv": "Dra och släpp bilder, videor eller PDF filer för att ta bort metadata automatiskt",
+		"ml": "മെറ്റാഡാറ്റ സ്വയമേവ നീക്കം ചെയ്യാൻ ചിത്രങ്ങൾ, വീഡിയോകൾ അല്ലെങ്കിൽ PDF ഫയലുകൾ വലിച്ചിടുക."
 	},
 
 	"table.header.filename": {
@@ -61,7 +63,8 @@
 		"tr": "Seçilen dosyalar",
 		"hr": "Odabrane datoteke",
 		"hu": "Kiválasztott fájlok",
-		"sv": "valda filer"
+		"sv": "valda filer",
+		"ml": "തിരഞ്ഞെടുത്ത ഫയലുകൾ"
 	},
 	"table.header.exif-before": {
 		"en": "# Exif Before",
@@ -82,7 +85,8 @@
 		"tr": "# Exif'den önce",
 		"hr": "Broj Exifa prije",
 		"hu": "# Exif előtt",
-		"sv": "# Exif Innan"
+		"sv": "# Exif Innan",
+		"ml": "എക്സിഫ് മുമ്പ്"
 	},
 	"table.header.exif-after": {
 		"en": "# Exif After",
@@ -103,7 +107,8 @@
 		"tr": "# Exif'den Sonra",
 		"hr": "Broj Exifa poslije",
 		"hu": "# Exif után",
-		"sv": "# Exif Efter"
+		"sv": "# Exif Efter",
+		"ml": "എക്സിഫ് പിന്നീട്"
 	},
 
 	"contextmenu.copy": {
@@ -125,7 +130,8 @@
 		"tr": "Kopyala",
 		"hr": "Kopiraj",
 		"hu": "Másolat",
-		"sv": "Kopiera"
+		"sv": "Kopiera",
+		"ml": "പകർത്തുക"
 	},
 	"contextmenu.select-all": {
 		"en": "Select All",
@@ -146,7 +152,8 @@
 		"tr": "Hepsini seç",
 		"hr": "Odaberi sve",
 		"hu": "Összes kijelölés",
-		"sv": "Välj Alla"
+		"sv": "Välj Alla",
+		"ml": "എല്ലാം തിരഞ്ഞെടുക്കൂ"
 	},
 
 	"menu.app.about": {
@@ -168,7 +175,8 @@
 		"tr": "Hakkında",
 		"hr": "Informacije",
 		"hu": "Névjegy",
-		"sv": "Om"
+		"sv": "Om",
+		"ml": "കുറിച്ച്"
 	},
 	"menu.app.services": {
 		"en": "Services",
@@ -189,7 +197,8 @@
 		"tr": "Servisler",
 		"hr": "Usluge",
 		"hu": "Szolgáltatások",
-		"sv": "Tjänster"
+		"sv": "Tjänster",
+		"ml": "സർവീസുകൾ"
 	},
 	"menu.app.hide": {
 		"en": "Hide",
@@ -210,7 +219,8 @@
 		"tr": "Gizle",
 		"hr": "Sakrij",
 		"hu": "Elrejt",
-		"sv": "Göm"
+		"sv": "Göm",
+		"ml": "മറയ്ക്കുക"
 	},
 	"menu.app.hide-others": {
 		"en": "Hide Others",
@@ -231,7 +241,8 @@
 		"tr": "Diğerlerini gizle",
 		"hr": "Sakrij ostalo",
 		"hu": "Többi elrejtése",
-		"sv": "Göm Andra"
+		"sv": "Göm Andra",
+		"ml": "മറ്റ് ഇനങ്ങൾ മറയ്ക്കുക"
 	},
 	"menu.app.show-all": {
 		"en": "Show All",
@@ -252,7 +263,8 @@
 		"tr": "Hepsini göster",
 		"hr": "Pokaži sve",
 		"hu": "Összes mutatása",
-		"sv": "Visa Alla"
+		"sv": "Visa Alla",
+		"ml": "എല്ലാം കാണിക്കൂ"
 	},
 	"menu.app.quit": {
 		"en": "Quit",
@@ -273,7 +285,8 @@
 		"tr": "Çık",
 		"hr": "Zatvori program",
 		"hu": "Kilépés",
-		"sv": "Avsluta"
+		"sv": "Avsluta",
+		"ml": "അടയ്ക്കുക"
 	},
 
 	"menu.file.name": {
@@ -295,7 +308,8 @@
 		"tr": "Dosya",
 		"hr": "Datoteka",
 		"hu": "Fájl",
-		"sv": "Fil"
+		"sv": "Fil",
+		"ml": "ഫയൽ"
 	},
 	"menu.file.open": {
 		"en": "Open",
@@ -316,7 +330,8 @@
 		"tr": "Aç",
 		"hr": "Otvori",
 		"hu": "Megnyitás",
-		"sv": "Öppna"
+		"sv": "Öppna",
+		"ml": "തുറക്കുക"
 	},
 	"menu.file.close": {
 		"en": "Close",
@@ -337,7 +352,8 @@
 		"tr": "Kapat",
 		"hr": "Zatvori",
 		"hu": "Bezárás",
-		"sv": "Stäng"
+		"sv": "Stäng",
+		"ml": "അടയ്ക്കുക"
 	},
 	"menu.file.quit": {
 		"en": "Quit",
@@ -358,7 +374,8 @@
 		"tr": "Çık",
 		"hr": "Zatvori program",
 		"hu": "Kilépés",
-		"sv": "Avsluta"
+		"sv": "Avsluta",
+		"ml": "അടയ്ക്കുക"
 	},
 
 	"menu.edit.name": {
@@ -380,7 +397,8 @@
 		"tr": "Düzenle",
 		"hr": "Uredi",
 		"hu": "Szerkesztés",
-		"sv": "Redigera"
+		"sv": "Redigera",
+		"ml": "തിരുത്തുക"
 	},
 	"menu.edit.copy": {
 		"en": "Copy",
@@ -401,7 +419,8 @@
 		"tr": "Kopyala",
 		"hr": "Kopiraj",
 		"hu": "Másolás",
-		"sv": "Kopiera"
+		"sv": "Kopiera",
+		"ml": "പകർത്തുക"
 	},
 	"menu.edit.select-all": {
 		"en": "Select All",
@@ -422,7 +441,8 @@
 		"tr": "Hepsini seç",
 		"hr": "Odaberi sve",
 		"hu": "Összes kijelölés",
-		"sv": "Välj Alla"
+		"sv": "Välj Alla",
+		"ml": "എല്ലാം തിരഞ്ഞെടുക്കൂ"
 	},
 	"menu.edit.speech": {
 		"en": "Speech",
@@ -443,7 +463,8 @@
 		"tr": "Konuş",
 		"hr": "Govor",
 		"hu": "Beszéd",
-		"sv": "Diktera"
+		"sv": "Diktera",
+		"ml": "വാചകം"
 	},
 	"menu.edit.speech.start-speaking": {
 		"en": "Start Speaking",
@@ -464,7 +485,8 @@
 		"tr": "Konuşmaya Başla",
 		"hr": "Pokreni govor",
 		"hu": "Beszéd elkezdése",
-		"sv": "Börja Prata"
+		"sv": "Börja Prata",
+		"ml": "വാചകം തുടങ്ങുക"
 	},
 	"menu.edit.speech.stop-speaking": {
 		"en": "Stop Speaking",
@@ -485,7 +507,8 @@
 		"tr": "Konuşmayı Bitir",
 		"hr": "Prekini govor",
 		"hu": "Beszéd befejezése",
-		"sv": "Sluta Prata"
+		"sv": "Sluta Prata",
+		"ml": "വാചകം നിർത്തുക"
 	},
 
 	"menu.view.name": {
@@ -507,7 +530,8 @@
 		"tr": "Görünüm",
 		"hr": "Prikaz",
 		"hu": "Nézet",
-		"sv": "Visa"
+		"sv": "Visa",
+		"ml": "ദൃശ്യത"
 	},
 	"menu.view.toggle-dev-tools": {
 		"en": "Toggle Developer Tools",
@@ -528,7 +552,8 @@
 		"tr": "Geliştirici Araçlarını Aç/Kapat",
 		"hr": "Uklj/Isklj programerske alate",
 		"hu": "Fejlesztői eszközök",
-		"sv": "Växla utvecklarverktyg"
+		"sv": "Växla utvecklarverktyg",
+		"ml": "ഡെവലപ്പർ ടൂളുകൾ മാറ്റുക"
 	},
 	"menu.view.zoom-reset": {
 		"en": "Actual Size",
@@ -549,7 +574,8 @@
 		"tr": "Gerçek boyut",
 		"hr": "Stvarna veličina",
 		"hu": "Valódi méret",
-		"sv": "Riktig Storlek"
+		"sv": "Riktig Storlek",
+		"ml": "യഥാർത്ഥ വലുപ്പം"
 	},
 	"menu.view.zoom-in": {
 		"en": "Zoom In",
@@ -570,7 +596,8 @@
 		"tr": "Yakınlaştır",
 		"hr": "Povećaj",
 		"hu": "Nagyítás",
-		"sv": "Zooma in"
+		"sv": "Zooma in",
+		"ml": "വലുതാക്കുക"
 	},
 	"menu.view.zoom-out": {
 		"en": "Zoom Out",
@@ -591,7 +618,8 @@
 		"tr": "Uzaklaştır",
 		"hr": "Smanji",
 		"hu": "Kicsinyítés",
-		"sv": "Zooma ut"
+		"sv": "Zooma ut",
+		"ml": "ചെറുതാക്കുക"
 	},
 	"menu.view.toggle-full-screen": {
 		"en": "Toggle Full Screen",
@@ -612,7 +640,8 @@
 		"tr": "Tam ekran Aç/Kapa",
 		"hr": "Uklj/Isklj prikaz preko cijelog ekrana",
 		"hu": "Váltás teljes képernyőre",
-		"sv": "Växla Fullskärm"
+		"sv": "Växla Fullskärm",
+		"ml": "ഫുൾ സ്ക്രീൻ മാറ്റുക"
 	},
 
 	"menu.window.name": {
@@ -634,7 +663,8 @@
 		"tr": "Pencere",
 		"hr": "Prozor",
 		"hu": "Ablak",
-		"sv": "Fönster"
+		"sv": "Fönster",
+		"ml": "ജാലകം"
 	},
 	"menu.window.minimize-mac": {
 		"en": "Minimize",
@@ -655,7 +685,8 @@
 		"tr": "Küçült",
 		"hr": "Smanji",
 		"hu": "Minimalizálás",
-		"sv": "Förringa"
+		"sv": "Förringa",
+		"ml": "മിനിമൈസ്"
 	},
 	"menu.window.minimize": {
 		"en": "Minimize",
@@ -676,7 +707,8 @@
 		"tr": "Küçült",
 		"hr": "Smanji",
 		"hu": "Minimalizálás",
-		"sv": "Förringa"
+		"sv": "Förringa",
+		"ml": "മിനിമൈസ്"
 	},
 	"menu.window.zoom-mac": {
 		"en": "Zoom",
@@ -697,7 +729,8 @@
 		"tr": "Yakınlaştır",
 		"hr": "Zumiraj",
 		"hu": "Zoomolás",
-		"sv": "Zooma"
+		"sv": "Zooma",
+		"ml": "സൂം ചെയ്യുക"
 	},
 	"menu.window.zoom": {
 		"en": "Zoom",
@@ -718,7 +751,8 @@
 		"tr": "Yakınlaştır",
 		"hr": "Zumiraj",
 		"hu": "Zoomolás",
-		"sv": "Zooma"
+		"sv": "Zooma",
+		"ml": "സൂം ചെയ്യുക"
 	},
 	"menu.window.front": {
 		"en": "Bring All to Front",
@@ -739,7 +773,8 @@
 		"tr": "Öne Çıkart",
 		"hr": "Postavi sve naprijed",
 		"hu": "Hozz mindent előre",
-		"sv": "Ta alla fram"
+		"sv": "Ta alla fram",
+		"ml": "എല്ലാത്തിനെയും മുന്നിലേക്ക് കൊണ്ടുവരിക"
 	},
 	"menu.window.window": {
 		"en": "Window",
@@ -760,7 +795,8 @@
 		"tr": "Pencere",
 		"hr": "Prozor",
 		"hu": "Ablak",
-		"sv": "Fönster"
+		"sv": "Fönster",
+		"ml": "വിന്ഡോ"
 	},
 	"menu.window.close": {
 		"en": "Close",
@@ -781,7 +817,8 @@
 		"tr": "Kapat",
 		"hr": "Zatvori",
 		"hu": "Bezárás",
-		"sv": "Stäng"
+		"sv": "Stäng",
+		"ml": "അടയ്ക്കുക"
 	},
 
 	"menu.help.name": {
@@ -803,7 +840,8 @@
 		"tr": "Yardım",
 		"hr": "Pomoć",
 		"hu": "Súgó",
-		"sv": "Hjälp"
+		"sv": "Hjälp",
+		"ml": "സഹായം"
 	},
 	"menu.help.website": {
 		"en": "Website",
@@ -824,7 +862,8 @@
 		"tr": "Website",
 		"hr": "Web stranica",
 		"hu": "Weboldal",
-		"sv": "Hemsida"
+		"sv": "Hemsida",
+		"ml": "വെബ്സൈറ്റ്"
 	},
 	"menu.help.source-code": {
 		"en": "Source Code",
@@ -845,7 +884,8 @@
 		"tr": "Kaynak Kod",
 		"hr": "Izvorni kod",
 		"hu": "Forráskód",
-		"sv": "Källkod"
+		"sv": "Källkod",
+		"ml": "സോഴ്സ് കോഡ്"
 	},
 	"menu.help.report-issue": {
 		"en": "Report an Issue",
@@ -866,7 +906,8 @@
 		"tr": "Sorun bildir",
 		"hr": "Prijavi problem",
 		"hu": "Hiba jelentése",
-		"sv": "Rappotera Ett Problem"
+		"sv": "Rappotera Ett Problem",
+		"ml": "ഒരു പ്രശ്നം രേഖപ്പെടുത്തുക"
 	},
 	"menu.help.about": {
 		"en": "About ",
@@ -887,7 +928,8 @@
 		"tr": "Hakkında",
 		"hr": "Informacije",
 		"hu": "Névjegy",
-		"sv": "Om"
+		"sv": "Om",
+		"ml": "കുറിച്ച്"
 	},
 
 	"aboutwindow:copyright": {
@@ -909,7 +951,8 @@
 		"tr": "Telif hakkı",
 		"hr": "Autorska prava",
 		"hu": "Szerzői jog",
-		"sv": "Copyright"
+		"sv": "Copyright",
+		"ml": "പകർപ്പവകാശം"
 	},
 
 	"usertasks:open-file.label": {
@@ -929,7 +972,8 @@
 		"tr": "Dosyaları aç",
 		"hr": "Otvori datoteke",
 		"hu": "Fájlok megnyitása",
-		"sv": "Öppna Filer"
+		"sv": "Öppna Filer",
+		"ml": "ഫയലുകൾ തുറക്കുക"
 	},
 	"usertasks:open-file.description": {
 		"en": "Remove metadata from selected files",
@@ -948,6 +992,7 @@
 		"tr": "Seçili dosyalardan meta verileri kaldır",
 		"hr": "Ukloni metapodatke iz odabranih datoteka",
 		"hu": "Metaadatok eltávolítása a kijelölt fájlokból",
-		"sv": "Ta bort metadata från valda filer"
+		"sv": "Ta bort metadata från valda filer",
+		"ml": "തിരഞ്ഞെടുത്ത ഫയലുകളിൽ നിന്ന് മെറ്റാഡാറ്റ ഇല്ലാതാക്കുക"
 	}
 }
