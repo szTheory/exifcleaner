@@ -147,6 +147,7 @@ New translations and corrections to existing translations are welcome! See the [
 - Arabic ✅ by [@ZER0-X](https://github.com/ZER0-X)
 - Chinese (Mandarin) ✅ by [MarcusPierce](https://github.com/MarcusPierce)
 - Croatian ✅ by [@milotype](https://github.com/milotype)
+- Czech ✅ by [@t0mzSK](https://github.com/t0mzSK)
 - Danish ✅ by [@zlatco](https://github.com/zlatco)
 - Dutch ✅ by [@rvl-code](https://github.com/rvl-code)
 - French (France) ✅ by [@NathanBnm](https://github.com/NathanBnm) (Nathan Bonnemains)
@@ -344,3 +345,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - [@icetee](https://github.com/icetee) - Hungarian translation
 - [@sastofficial](https://github.com/sastofficial) - Swedish translation
 - [@theunknownKiran](https://github.com/theunknownKiran) - Malayalam translation
+- [@t0mzSK](https://github.com/t0mzSK) - Czech translation
