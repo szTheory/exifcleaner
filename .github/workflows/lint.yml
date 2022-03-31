@@ -1,0 +1,21 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Restore yarn cache
+        uses: actions/setup-node@v2
+        with:
+          cache: "yarn"
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Lint
+        run: yarn lint
