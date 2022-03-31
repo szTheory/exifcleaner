@@ -94,7 +94,7 @@
 		"sv": "# Exif Innan",
 		"ml": "എക്സിഫ് മുമ്പ്",
 		"cs": "Exif předtím",
-		"vn": "# Trước Exif"
+		"vn": "#Trước Exif"
 	},
 	"table.header.exif-after": {
 		"en": "# Exif After",
@@ -118,7 +118,7 @@
 		"sv": "# Exif Efter",
 		"ml": "എക്സിഫ് പിന്നീട്",
 		"cs": "Exif poté",
-		"vn": "Sau Exif"
+		"vn": "#Sau Exif"
 	},
 
 	"contextmenu.copy": {
