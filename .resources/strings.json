@@ -21,7 +21,7 @@
 		"sv": "Inga filer valda",
 		"ml": "ഫയലുകളൊന്നും തിരഞ്ഞെടുത്തിട്ടില്ല",
 		"cs": "Nejsou vybrány žádné soubory",
-		"vn": "Không có tập tin nào được chọn",
+		"vn": "Không có tập tin nào được chọn"
 	},
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
@@ -868,7 +868,7 @@
 		"sv": "Fönster",
 		"ml": "വിന്ഡോ",
 		"cs": "Okno",
-                "vn": "Màn cửa sổ"
+		"vn": "Màn cửa sổ"
 	},
 	"menu.window.close": {
 		"en": "Close",
@@ -941,7 +941,7 @@
 		"sv": "Hemsida",
 		"ml": "വെബ്സൈറ്റ്",
 		"cs": "Webová stránka",
-                "vn": "Dịa chỉ web của chúng tôi"
+		"vn": "Dịa chỉ web của chúng tôi"
 	},
 	"menu.help.source-code": {
 		"en": "Source Code",

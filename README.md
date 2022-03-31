@@ -167,6 +167,7 @@ New translations and corrections to existing translations are welcome! See the [
 - Slovak ✅ by [@LiJu09](https://github.com/LiJu09)
 - Turkish ✅ by [@bsonmez](https://github.com/bsonmez) (Burak Sonmez)
 - Ukranian ✅ by [@hugonote](https://github.com/hugonote) (Alexander Berger)
+- Vietnamese ✅ by [@tensingnightco](https://github.com/tensingnightco)
 
 ## Verifying checksum of downloads from the Github releases page
 
@@ -346,3 +347,4 @@ Thanks to all the people who submitted bug reports and fixes. I've tried to incl
 - [@sastofficial](https://github.com/sastofficial) - Swedish translation
 - [@theunknownKiran](https://github.com/theunknownKiran) - Malayalam translation
 - [@t0mzSK](https://github.com/t0mzSK) - Czech translation
+- [@tensingnightco](https://github.com/tensingnightco) - Vietnamese translation
