@@ -1,9 +1,9 @@
 import { shell, app, MenuItemConstructorOptions } from "electron";
 import os from "os";
-import { isMac } from "../common/platform";
-import { showAboutWindow } from "./menu_app_about";
-import { openUrlMenuItem } from "./menu_item_open_url";
-import { i18n } from "./i18n";
+import { isMac } from "../common/platform.js";
+import { showAboutWindow } from "./menu_app_about.js";
+import { openUrlMenuItem } from "./menu_item_open_url.js";
+import { i18n } from "./i18n.js";
 
 const WEBSITE_URL = "https://exifcleaner.com";
 const GITHUB_USERNAME = "szTheory";

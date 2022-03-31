@@ -1,9 +1,8 @@
-import { BrowserWindow, app } from "electron";
+import { BrowserWindow, app, BrowserWindowConstructorOptions } from "electron";
 import url from "url";
 import path from "path";
-import { isDev } from "../common/env";
-import { isMac, isWindows } from "../common/platform";
-import { iconPath } from "../common/resources";
+import { isMac, isWindows } from "../common/platform.js";
+import { iconPath } from "../common/resources.js";
 
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;
@@ -39,20 +38,12 @@ function windowsStopFlashingFrameOnFocus(browserWindow: BrowserWindow) {
 }
 
 function urlForLoad() {
-	if (isDev()) {
-		const port = process.env.ELECTRON_WEBPACK_WDS_PORT;
-		if (!port) {
-			throw "No Electron webpack WDS port set for dev. Try running `yarn run dev` instead for development mode.";
-		}
-
-		return `http://localhost:${port}`;
-	} else {
-		return url.format({
-			pathname: path.join(__dirname, "index.html"),
-			protocol: "file",
-			slashes: true,
-		});
-	}
+	// TODO: replace the deprecated url.format in favor of the WHATWG URL API
+	return url.format({
+		pathname: path.join(__dirname, "..", "..", "..", "index.html"),
+		protocol: "file",
+		slashes: true,
+	});
 }
 
 function mainWindowLoadUrl(browserWindow: BrowserWindow) {
@@ -62,7 +53,7 @@ function mainWindowLoadUrl(browserWindow: BrowserWindow) {
 const WINDOW_BACKGROUND_COLOR = "#F5F6F8";
 
 export function createMainWindow(): BrowserWindow {
-	let options = {
+	let options: BrowserWindowConstructorOptions = {
 		title: app.name,
 		show: false,
 		width: DEFAULT_WINDOW_WIDTH,
@@ -70,10 +61,14 @@ export function createMainWindow(): BrowserWindow {
 		minWidth: DEFAULT_WINDOW_WIDTH,
 		minHeight: DEFAULT_WINDOW_HEIGHT + 25,
 		webPreferences: {
-			nodeIntegration: true,
+			// TODO: disable this
+			// nodeIntegration: false,
 			// TODO: need to get this working with "true" to upgrade to Electron 12,
 			// but electron-webpack depends on it being "false" and it's been abandonded
 			// contextIsolation: true,
+			// contextIsolation: true,
+			// preload: path.join(__dirname, "..", "renderer", "index.js"),
+			preload: path.join(__dirname, "..", "renderer_main_world", "preload.js"),
 		},
 		//set specific background color eliminate white flicker on content load
 		backgroundColor: WINDOW_BACKGROUND_COLOR,

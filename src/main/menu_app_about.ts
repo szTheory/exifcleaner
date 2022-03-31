@@ -1,6 +1,6 @@
 import { app } from "electron";
-import { iconPath } from "../common/resources";
-import { i18n } from "./i18n";
+import { iconPath } from "../common/resources.js";
+import { i18n } from "./i18n.js";
 
 export function showAboutWindow(author: string, websiteUrl: string): void {
 	let aboutPanelOptions = {

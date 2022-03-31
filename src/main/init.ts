@@ -1,10 +1,10 @@
 import { app, BrowserWindow } from "electron";
 import packageJson from "../../package.json";
-import { setupApp } from "./app_setup";
-import { setupContextMenu } from "./context_menu";
-import { setupDockEventHandlers } from "./dock";
-import { preloadI18nStrings } from "../common/i18n";
-import { setupI18nHandlers } from "../main/i18n";
+import { setupApp } from "./app_setup.js";
+import { setupContextMenu } from "./context_menu.js";
+import { setupDockEventHandlers } from "./dock.js";
+import { preloadI18nStrings } from "../common/i18n.js";
+import { setupI18nHandlers } from "../main/i18n.js";
 
 function setupUserModelId(): void {
 	app.setAppUserModelId(packageJson.build.appId);

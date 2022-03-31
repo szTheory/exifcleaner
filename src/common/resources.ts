@@ -1,5 +1,5 @@
 import path from "path";
-import { isProd } from "./env";
+import { isProd } from "./env.js";
 
 const ICON_FILENAME = "icon.png";
 const CHECKMARK_FILENAME = "check.png";

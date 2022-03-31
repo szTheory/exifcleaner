@@ -1,7 +1,7 @@
 import { MenuItemConstructorOptions } from "electron";
-import { i18n } from "./i18n";
-import { fileMenuOpenItem } from "./menu_file_open";
-import { isMac } from "../common/platform";
+import { i18n } from "./i18n.js";
+import { fileMenuOpenItem } from "./menu_file_open.js";
+import { isMac } from "../common/platform.js";
 
 export function fileMenuTemplate(): MenuItemConstructorOptions {
 	return {

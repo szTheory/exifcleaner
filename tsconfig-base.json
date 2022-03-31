@@ -1,12 +1,10 @@
 {
 	"compilerOptions": {
 		"target": "ES2020",
-		"module": "ES2020",
+		"module": "CommonJS",
 		"moduleResolution": "Node",
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
-		"allowSyntheticDefaultImports": true,
-		"lib": ["ES2020", "DOM", "DOM.Iterable"],
 		"strict": true,
 		"sourceMap": true,
 		"noUnusedLocals": true,
@@ -18,6 +16,7 @@
 		"allowUnusedLabels": false,
 		"noPropertyAccessFromIndexSignature": true,
 		// "noUncheckedIndexedAccess": true,
+		"allowSyntheticDefaultImports": true,
 		"noImplicitOverride": true,
 		"forceConsistentCasingInFileNames": true,
 		"importHelpers": false,
@@ -25,12 +24,5 @@
 		// "noEmitOnError": true,
 		"noEmitOnError": false,
 		"outDir": "./dist/"
-	},
-	"include": [
-		"./src/common/**/*.ts",
-		"./src/main/**/*.ts",
-		"./src/renderer_isolated_world/**/*.ts",
-		"./src/renderer_main_world/**/*.ts",
-		"./src/types/**/*.ts"
-	]
+	}
 }

@@ -1,0 +1,7 @@
+{
+	"extends": "./tsconfig-base.json",
+	"compilerOptions": {
+		"module": "ES2020"
+	},
+	"include": ["./src/renderer_isolated_world/**/*.ts"]
+}

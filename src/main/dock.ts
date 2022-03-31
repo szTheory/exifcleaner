@@ -1,7 +1,7 @@
 import { app, ipcMain, BrowserWindow, nativeImage } from "electron";
-import { defaultBrowserWindow } from "../common/browser_window";
-import { isMac, isWindows } from "../common/platform";
-import { checkmarkPath } from "../common/resources";
+import { defaultBrowserWindow } from "../common/browser_window.js";
+import { isMac, isWindows } from "../common/platform.js";
+import { checkmarkPath } from "../common/resources.js";
 
 export const EVENT_FILES_ADDED = "files-added";
 export const EVENT_FILE_PROCESSED = "file-processed";

@@ -1,5 +1,5 @@
 import { app, ipcMain } from "electron";
-import { i18n as i18nCommon } from "../common/i18n";
+import { i18n as i18nCommon } from "../common/i18n.js";
 
 export const IPC_EVENT_NAME_GET_LOCALE = "get-locale";
 
