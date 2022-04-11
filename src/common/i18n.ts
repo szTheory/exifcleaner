@@ -15,6 +15,7 @@ export enum Locale {
 	Russian = "ru",
 	Spanish = "es",
 	Hungarian = "hu",
+	Croatian = "hr",
 }
 
 type I18nStringSet = {
@@ -76,6 +77,9 @@ export function fallbackLocale(locale: string): string {
 		case "de-CH": //German (Switzerland)
 		case "de-DE": //German (Germany)
 			return Locale.German;
+
+		case "hr_HR": //Croatian (Croatia)
+			return Locale.Croatian;
 
 		case "pt-BR": //Portuguese (Brazil)
 		case "pt-PT": //Portuguese (Portugal)
