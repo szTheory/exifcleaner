@@ -21,7 +21,8 @@
 		"sv": "Inga filer valda",
 		"ml": "ഫയലുകളൊന്നും തിരഞ്ഞെടുത്തിട്ടില്ല",
 		"cs": "Nejsou vybrány žádné soubory",
-		"vn": "Không có tập tin nào được chọn"
+		"vn": "Không có tập tin nào được chọn",
+		"ca": "No s'han seleccionat fitxers"
 	},
 	"empty.subtitle": {
 		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
@@ -45,7 +46,8 @@
 		"sv": "Dra och släpp bilder, videor eller PDF filer för att ta bort metadata automatiskt",
 		"ml": "മെറ്റാഡാറ്റ സ്വയമേവ നീക്കം ചെയ്യാൻ ചിത്രങ്ങൾ, വീഡിയോകൾ അല്ലെങ്കിൽ PDF ഫയലുകൾ വലിച്ചിടുക.",
 		"cs": "Přetáhněte sem fotografie, videa nebo soubory PDF a automaticky z nich odstraníte metadata.",
-		"vn": "Kéo và thả tập tin hình ảnh, video hoặc PDF để tự động xóa siêu dữ liệu."
+		"vn": "Kéo và thả tập tin hình ảnh, video hoặc PDF để tự động xóa siêu dữ liệu.",
+		"ca": "Arrossegueu i deixeu anar imatges, vídeos, o documents PDF per a eliminar metadades automàticament."
 	},
 
 	"table.header.filename": {
@@ -70,7 +72,8 @@
 		"sv": "valda filer",
 		"ml": "തിരഞ്ഞെടുത്ത ഫയലുകൾ",
 		"cs": "Vybrané soubory",
-		"vn": "Những tập tin đã được chọn"
+		"vn": "Những tập tin đã được chọn",
+		"ca": "Fitxers seleccionats"
 	},
 	"table.header.exif-before": {
 		"en": "# Exif Before",
@@ -94,7 +97,8 @@
 		"sv": "# Exif Innan",
 		"ml": "എക്സിഫ് മുമ്പ്",
 		"cs": "Exif předtím",
-		"vn": "#Trước Exif"
+		"vn": "#Trước Exif",
+		"ca": "# Exif anterior"
 	},
 	"table.header.exif-after": {
 		"en": "# Exif After",
@@ -118,7 +122,8 @@
 		"sv": "# Exif Efter",
 		"ml": "എക്സിഫ് പിന്നീട്",
 		"cs": "Exif poté",
-		"vn": "#Sau Exif"
+		"vn": "#Sau Exif",
+		"ca": "Exif següent"
 	},
 
 	"contextmenu.copy": {
@@ -143,7 +148,8 @@
 		"sv": "Kopiera",
 		"ml": "പകർത്തുക",
 		"cs": "Kopírovat",
-		"vn": "Sao chép"
+		"vn": "Sao chép",
+		"ca": "Copiar"
 	},
 	"contextmenu.select-all": {
 		"en": "Select All",
@@ -167,7 +173,8 @@
 		"sv": "Välj Alla",
 		"ml": "എല്ലാം തിരഞ്ഞെടുക്കൂ",
 		"cs": "Vybrat vše",
-		"vn": "Chọn tất cả"
+		"vn": "Chọn tất cả",
+		"ca": "Seleccionar-ho tot"
 	},
 
 	"menu.app.about": {
@@ -192,7 +199,8 @@
 		"sv": "Om",
 		"ml": "കുറിച്ച്",
 		"cs": "O aplikaci ",
-		"vn": "Giới thiệu"
+		"vn": "Giới thiệu",
+		"ca": "Quant a "
 	},
 	"menu.app.services": {
 		"en": "Services",
@@ -216,7 +224,8 @@
 		"sv": "Tjänster",
 		"ml": "സർവീസുകൾ",
 		"cs": "Služby",
-		"vn": "Dịch vụ"
+		"vn": "Dịch vụ",
+		"ca": "Serveis"
 	},
 	"menu.app.hide": {
 		"en": "Hide",
@@ -240,7 +249,8 @@
 		"sv": "Göm",
 		"ml": "മറയ്ക്കുക",
 		"cs": "Skrýt",
-		"vn": "Ẩn"
+		"vn": "Ẩn",
+		"ca": "Ocultar"
 	},
 	"menu.app.hide-others": {
 		"en": "Hide Others",
@@ -264,7 +274,8 @@
 		"sv": "Göm Andra",
 		"ml": "മറ്റ് ഇനങ്ങൾ മറയ്ക്കുക",
 		"cs": "Skrýt ostatní",
-		"vn": "Ẩn những tập tin khác"
+		"vn": "Ẩn những tập tin khác",
+		"ca": "Amagar els altres"
 	},
 	"menu.app.show-all": {
 		"en": "Show All",
@@ -288,7 +299,8 @@
 		"sv": "Visa Alla",
 		"ml": "എല്ലാം കാണിക്കൂ",
 		"cs": "Zobrazit vše",
-		"vn": "Hiện tất cả"
+		"vn": "Hiện tất cả",
+		"ca": "Mostrar-ho tot"
 	},
 	"menu.app.quit": {
 		"en": "Quit",
@@ -312,7 +324,8 @@
 		"sv": "Avsluta",
 		"ml": "അടയ്ക്കുക",
 		"cs": "Ukončit",
-		"vn": "Thoát"
+		"vn": "Thoát",
+		"ca": "Sortir"
 	},
 
 	"menu.file.name": {
@@ -337,7 +350,8 @@
 		"sv": "Fil",
 		"ml": "ഫയൽ",
 		"cs": "Soubor",
-		"vn": "Tập tin"
+		"vn": "Tập tin",
+		"ca": "Fitxer"
 	},
 	"menu.file.open": {
 		"en": "Open",
@@ -361,7 +375,8 @@
 		"sv": "Öppna",
 		"ml": "തുറക്കുക",
 		"cs": "Otevřít",
-		"vn": "Mở để chọn file"
+		"vn": "Mở để chọn file",
+		"ca": "Obrir"
 	},
 	"menu.file.close": {
 		"en": "Close",
@@ -385,7 +400,8 @@
 		"sv": "Stäng",
 		"ml": "അടയ്ക്കുക",
 		"cs": "Zavřít",
-		"vn": "Đóng"
+		"vn": "Đóng",
+		"ca": "Tancar"
 	},
 	"menu.file.quit": {
 		"en": "Quit",
@@ -409,7 +425,8 @@
 		"sv": "Avsluta",
 		"ml": "അടയ്ക്കുക",
 		"cs": "Ukončit",
-		"vn": "Thoát"
+		"vn": "Thoát",
+		"ca": "Sortir"
 	},
 
 	"menu.edit.name": {
@@ -434,7 +451,8 @@
 		"sv": "Redigera",
 		"ml": "തിരുത്തുക",
 		"cs": "Upravit",
-		"vn": "Chỉnh sửa"
+		"vn": "Chỉnh sửa",
+		"ca": "Editar"
 	},
 	"menu.edit.copy": {
 		"en": "Copy",
@@ -458,7 +476,8 @@
 		"sv": "Kopiera",
 		"ml": "പകർത്തുക",
 		"cs": "Kopírovat",
-		"vn": "Sao chép"
+		"vn": "Sao chép",
+		"ca": "Copiar"
 	},
 	"menu.edit.select-all": {
 		"en": "Select All",
@@ -482,7 +501,8 @@
 		"sv": "Välj Alla",
 		"ml": "എല്ലാം തിരഞ്ഞെടുക്കൂ",
 		"cs": "Vybrat vše",
-		"vn": "Chọn tất cả"
+		"vn": "Chọn tất cả",
+		"ca": "Seleccionar-ho tot"
 	},
 	"menu.edit.speech": {
 		"en": "Speech",
@@ -506,7 +526,8 @@
 		"sv": "Diktera",
 		"ml": "വാചകം",
 		"cs": "Řeč",
-		"vn": "Ngôn ngữ"
+		"vn": "Ngôn ngữ",
+		"ca": "Veu"
 	},
 	"menu.edit.speech.start-speaking": {
 		"en": "Start Speaking",
@@ -530,7 +551,8 @@
 		"sv": "Börja Prata",
 		"ml": "വാചകം തുടങ്ങുക",
 		"cs": "Začněte mluvit",
-		"vn": "Bắt đầu nói"
+		"vn": "Bắt đầu nói",
+		"ca": "Començar a parlar"
 	},
 	"menu.edit.speech.stop-speaking": {
 		"en": "Stop Speaking",
@@ -554,7 +576,8 @@
 		"sv": "Sluta Prata",
 		"ml": "വാചകം നിർത്തുക",
 		"cs": "Přestaňte mluvit",
-		"vn": "Ngừng nói"
+		"vn": "Ngừng nói",
+		"ca": "Parar de parlar"
 	},
 
 	"menu.view.name": {
@@ -579,7 +602,8 @@
 		"sv": "Visa",
 		"ml": "ദൃശ്യത",
 		"cs": "Zobrazení",
-		"vn": "Xem thêm"
+		"vn": "Xem thêm",
+		"ca": "Visualització"
 	},
 	"menu.view.toggle-dev-tools": {
 		"en": "Toggle Developer Tools",
@@ -603,7 +627,8 @@
 		"sv": "Växla utvecklarverktyg",
 		"ml": "ഡെവലപ്പർ ടൂളുകൾ മാറ്റുക",
 		"cs": "Přepnout vývojářské nástroje",
-		"vn": "Bật/Tắt công cụ dành cho nhà phát triển"
+		"vn": "Bật/Tắt công cụ dành cho nhà phát triển",
+		"ca": "Habilitar eines per a desenvolupadors"
 	},
 	"menu.view.zoom-reset": {
 		"en": "Actual Size",
@@ -627,7 +652,8 @@
 		"sv": "Riktig Storlek",
 		"ml": "യഥാർത്ഥ വലുപ്പം",
 		"cs": "Výchozí velikost",
-		"vn": "Kích cỡ thực sự"
+		"vn": "Kích cỡ thực sự",
+		"ca": "Mida real"
 	},
 	"menu.view.zoom-in": {
 		"en": "Zoom In",
@@ -651,7 +677,8 @@
 		"sv": "Zooma in",
 		"ml": "വലുതാക്കുക",
 		"cs": "Přiblížit",
-		"vn": "Phóng to màn hình chính"
+		"vn": "Phóng to màn hình chính",
+		"ca": "Ampliar"
 	},
 	"menu.view.zoom-out": {
 		"en": "Zoom Out",
@@ -675,7 +702,8 @@
 		"sv": "Zooma ut",
 		"ml": "ചെറുതാക്കുക",
 		"cs": "Oddálit",
-		"vn": "Thu nhỏ màn hình chính"
+		"vn": "Thu nhỏ màn hình chính",
+		"ca": "Allunyar"
 	},
 	"menu.view.toggle-full-screen": {
 		"en": "Toggle Full Screen",
@@ -699,7 +727,8 @@
 		"sv": "Växla Fullskärm",
 		"ml": "ഫുൾ സ്ക്രീൻ മാറ്റുക",
 		"cs": "Přepnout režim celé obrazovky",
-		"vn": "Toàn màn hình"
+		"vn": "Toàn màn hình",
+		"ca": "Habilitar pantalla completa"
 	},
 
 	"menu.window.name": {
@@ -724,7 +753,8 @@
 		"sv": "Fönster",
 		"ml": "ജാലകം",
 		"cs": "Okno",
-		"vn": "Màn cửa sổ"
+		"vn": "Màn cửa sổ",
+		"ca": "Finestra"
 	},
 	"menu.window.minimize-mac": {
 		"en": "Minimize",
@@ -748,7 +778,8 @@
 		"sv": "Förringa",
 		"ml": "മിനിമൈസ്",
 		"cs": "Minimalizovat",
-		"vn": "Thu nhỏ"
+		"vn": "Thu nhỏ",
+		"ca": "Minimitzar"
 	},
 	"menu.window.minimize": {
 		"en": "Minimize",
@@ -772,7 +803,8 @@
 		"sv": "Förringa",
 		"ml": "മിനിമൈസ്",
 		"cs": "Minimalizovat",
-		"vn": "Thu nhỏ"
+		"vn": "Thu nhỏ",
+		"ca": "Minimitzar"
 	},
 	"menu.window.zoom-mac": {
 		"en": "Zoom",
@@ -796,7 +828,8 @@
 		"sv": "Zooma",
 		"ml": "സൂം ചെയ്യുക",
 		"cs": "Zvětšit",
-		"vn": "Phóng to"
+		"vn": "Phóng to",
+		"ca": "Ampliar"
 	},
 	"menu.window.zoom": {
 		"en": "Zoom",
@@ -820,7 +853,8 @@
 		"sv": "Zooma",
 		"ml": "സൂം ചെയ്യുക",
 		"cs": "Zvětšit",
-		"vn": "Phóng to"
+		"vn": "Phóng to",
+		"ca": "Ampliar"
 	},
 	"menu.window.front": {
 		"en": "Bring All to Front",
@@ -844,7 +878,8 @@
 		"sv": "Ta alla fram",
 		"ml": "എല്ലാത്തിനെയും മുന്നിലേക്ക് കൊണ്ടുവരിക",
 		"cs": "Přesunout vše do popředí",
-		"vn": "Mang tất cả tập tin lên trước"
+		"vn": "Mang tất cả tập tin lên trước",
+		"ca": "Portar-ho tot al davant"
 	},
 	"menu.window.window": {
 		"en": "Window",
@@ -868,7 +903,8 @@
 		"sv": "Fönster",
 		"ml": "വിന്ഡോ",
 		"cs": "Okno",
-		"vn": "Màn cửa sổ"
+		"vn": "Màn cửa sổ",
+		"ca": "Finestra"
 	},
 	"menu.window.close": {
 		"en": "Close",
@@ -892,7 +928,8 @@
 		"sv": "Stäng",
 		"ml": "അടയ്ക്കുക",
 		"cs": "Zavřít",
-		"vn": "Đóng"
+		"vn": "Đóng",
+		"ca": "Tancar"
 	},
 
 	"menu.help.name": {
@@ -917,7 +954,8 @@
 		"sv": "Hjälp",
 		"ml": "സഹായം",
 		"cs": "Pomoc",
-		"vn": "Hỗ trợ"
+		"vn": "Hỗ trợ",
+		"ca": "Ajuda"
 	},
 	"menu.help.website": {
 		"en": "Website",
@@ -941,7 +979,8 @@
 		"sv": "Hemsida",
 		"ml": "വെബ്സൈറ്റ്",
 		"cs": "Webová stránka",
-		"vn": "Dịa chỉ web của chúng tôi"
+		"vn": "Dịa chỉ web của chúng tôi",
+		"ca": "Lloc web"
 	},
 	"menu.help.source-code": {
 		"en": "Source Code",
@@ -965,10 +1004,11 @@
 		"sv": "Källkod",
 		"ml": "സോഴ്സ് കോഡ്",
 		"cs": "Zdrojový kód",
-		"vn": "Mã nguồn của Exif Cleaner"
+		"vn": "Mã nguồn của Exif Cleaner",
+		"ca": "Codi font"
 	},
 	"menu.help.report-issue": {
-		"en": "Report an Issue",
+		"en": "Informa d'un problema",
 		"da": "Rapportér et problem ",
 		"fr": "Signaler un problème",
 		"pl": "Zgłoś problem",
@@ -989,8 +1029,10 @@
 		"sv": "Rappotera Ett Problem",
 		"ml": "ഒരു പ്രശ്നം രേഖപ്പെടുത്തുക",
 		"cs": "Nahlásit problém",
-		"vn": "Báo cáo lỗi"
+		"vn": "Báo cáo lỗi",
+		"ca": "Informar d'un problema"		
 	},
+	
 	"menu.help.about": {
 		"en": "About ",
 		"da": "Om",
@@ -1013,7 +1055,8 @@
 		"sv": "Om",
 		"ml": "കുറിച്ച്",
 		"cs": "O programu",
-		"vn": "Về phần mềm"
+		"vn": "Về phần mềm",
+		"ca": "Quant a "
 	},
 
 	"aboutwindow:copyright": {
@@ -1038,7 +1081,8 @@
 		"sv": "Copyright",
 		"ml": "പകർപ്പവകാശം",
 		"cs": "Autorská práva",
-		"vn": "Bản quyền"
+		"vn": "Bản quyền",
+		"ca": "Copyright"
 	},
 
 	"usertasks:open-file.label": {
@@ -1061,7 +1105,8 @@
 		"sv": "Öppna Filer",
 		"ml": "ഫയലുകൾ തുറക്കുക",
 		"cs": "Otevřít soubory",
-		"vn": "Mở tập tin"
+		"vn": "Mở tập tin",
+		"ca": "Obrir fitxers"
 	},
 	"usertasks:open-file.description": {
 		"en": "Remove metadata from selected files",
@@ -1083,6 +1128,7 @@
 		"sv": "Ta bort metadata från valda filer",
 		"ml": "തിരഞ്ഞെടുത്ത ഫയലുകളിൽ നിന്ന് മെറ്റാഡാറ്റ ഇല്ലാതാക്കുക",
 		"cs": "Odstranit metadata z vybraných souborů",
-		"vn": "Xóa siêu dữ liệu từ tập tin được chọn"
+		"vn": "Xóa siêu dữ liệu từ tập tin được chọn",
+		"ca": "Eliminar metadades dels fitxers seleccionats"
 	}
 }
