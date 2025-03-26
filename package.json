@@ -1,0 +1,136 @@
+{
+	"name": "exifcleaner",
+	"productName": "ExifCleaner",
+	"version": "3.6.0",
+	"description": "Clean exif metadata from images, videos, and PDF documents",
+	"license": "MIT",
+	"repository": "github:szTheory/exifcleaner",
+	"main": "src/main/index.js",
+	"author": {
+		"name": "szTheory",
+		"email": "szTheory@users.noreply.github.com",
+		"url": "https://exifcleaner.com"
+	},
+	"scripts": {
+		"update-exiftool": "./update_exiftool.pl",
+		"postinstall": "electron-builder install-app-deps",
+		"format": "yarn prettier --write 'src/**/*.ts'",
+		"lint": "prettier --check 'src/**/*.ts'",
+		"start": "electron .",
+		"packmactest": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
+		"packwin": "yarn run compile && electron-builder --windows",
+		"packlinux": "yarn run compile && electron-builder --linux",
+		"packmac": "yarn run compile && electron-builder --macos -c.mac.identity=null",
+		"build": "yarn run compile && electron-builder --macos --linux --windows",
+		"publish": "yarn run compile && electron-builder --macos --linux --windows -p always",
+		"release": "np",
+		"dev": "electron-webpack dev",
+		"compile": "electron-webpack"
+	},
+	"dependencies": {
+		"node-exiftool": "2.3.0",
+		"source-map-support": "^0.5"
+	},
+	"devDependencies": {
+		"@types/node": "^12.0",
+		"electron": "^11.0",
+		"electron-builder": "^22.8",
+		"electron-webpack": "^2.8",
+		"electron-webpack-ts": "^4.0",
+		"prettier": "2.1",
+		"typescript": "^3.8",
+		"webpack": "^4.41"
+	},
+	"np": {
+		"publish": false,
+		"releaseDraft": false
+	},
+	"build": {
+		"publish": {
+			"provider": "github",
+			"owner": "szTheory",
+			"repo": "exifcleaner",
+			"protocol": "https"
+		},
+		"appId": "com.exifcleaner",
+		"mac": {
+			"category": "public.app-category.graphics-and-images",
+			"darkModeSupport": true,
+			"extraResources": [
+				{
+					"from": ".resources/nix/bin",
+					"to": "nix/bin",
+					"filter": [
+						"**/*"
+					]
+				}
+			]
+		},
+		"dmg": {
+			"iconSize": 160,
+			"contents": [
+				{
+					"x": 180,
+					"y": 170
+				},
+				{
+					"x": 480,
+					"y": 170,
+					"type": "link",
+					"path": "/Applications"
+				}
+			]
+		},
+		"linux": {
+			"target": [
+				"appImage",
+				"deb",
+				"rpm"
+			],
+			"icon": "build/icon.icns",
+			"category": "Graphics",
+			"extraResources": [
+				{
+					"from": ".resources/nix/bin",
+					"to": "nix/bin",
+					"filter": [
+						"**/*"
+					]
+				}
+			]
+		},
+		"win": {
+			"target": [
+				{
+					"target": "nsis",
+					"arch": [
+						"x64",
+						"ia32"
+					]
+				},
+				{
+					"target": "portable"
+				}
+			],
+			"extraResources": [
+				{
+					"from": ".resources/win/bin",
+					"to": "win/bin",
+					"filter": [
+						"**/*"
+					]
+				}
+			]
+		},
+		"extraResources": [
+			{
+				"from": ".resources/",
+				"to": "",
+				"filter": [
+					"strings.json",
+					"*.png"
+				]
+			}
+		]
+	}
+}

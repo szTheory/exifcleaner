@@ -1,0 +1,32 @@
+.table {
+	border-collapse: collapse;
+	border-spacing: 0;
+	width: 100%;
+	text-align: left;
+}
+
+.table tbody tr:nth-of-type(odd) {
+	background: var(--table-row-bg-color);
+}
+
+.table tbody tr.active,
+.table tbody tr:hover {
+	background: var(--table-row-hover-bg-color);
+}
+
+.table td,
+.table th {
+	border-bottom: var(--border-width) solid var(--border-color);
+	padding: var(--unit-3) var(--unit-2);
+}
+.table th {
+	border-bottom-width: var(--border-width-lg);
+	font-weight: var(--table-header-font-weight);
+}
+
+.table .icon {
+	position: relative;
+	top: 4px;
+	margin-right: 2px;
+	fill: var(--table-icon-color);
+}

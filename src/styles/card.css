@@ -1,0 +1,17 @@
+.card {
+	background: var(--bg-color-light);
+	border: var(--border-width) solid var(--border-color);
+	border-radius: var(--border-radius);
+	display: flex;
+	flex-direction: column;
+}
+
+.card-body {
+	padding: var(--layout-spacing-lg);
+	padding-bottom: 0;
+	flex: 1 1 auto;
+}
+
+.card-body:last-child {
+	padding-bottom: var(--layout-spacing-lg);
+}

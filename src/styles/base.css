@@ -1,0 +1,26 @@
+*,
+*::before,
+*::after {
+	box-sizing: inherit;
+}
+
+html {
+	box-sizing: border-box;
+	font-size: var(--html-font-size);
+	line-height: var(--html-line-height);
+	-webkit-tap-highlight-color: transparent;
+}
+
+body {
+	background: var(--body-bg);
+	color: var(--body-font-color);
+	font-family: var(--body-font-family);
+	font-size: var(--font-size);
+	overflow-x: hidden;
+	text-rendering: optimizeLegibility;
+	margin: 0;
+}
+
+main {
+	padding-top: var(--size);
+}
