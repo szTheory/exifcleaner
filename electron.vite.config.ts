@@ -8,7 +8,15 @@ export default defineConfig({
 			},
 		},
 	},
-	preload: {},
+	preload: {
+		build: {
+			rollupOptions: {
+				output: {
+					format: "cjs",
+				},
+			},
+		},
+	},
 	renderer: {
 		build: {
 			rollupOptions: {
