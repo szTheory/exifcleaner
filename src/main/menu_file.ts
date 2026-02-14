@@ -1,4 +1,4 @@
-import { MenuItemConstructorOptions } from "electron";
+import type { MenuItemConstructorOptions } from "electron";
 import { i18n } from "./i18n";
 import { fileMenuOpenItem } from "./menu_file_open";
 import { isMac } from "../common/platform";

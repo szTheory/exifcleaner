@@ -58,7 +58,7 @@ export function createMainWindow(): BrowserWindow {
 			nodeIntegration: false,
 			contextIsolation: true,
 			sandbox: true,
-			preload: path.join(__dirname, "../preload/index.js"),
+			preload: path.join(__dirname, "../preload/index.mjs"),
 		},
 		//set specific background color eliminate white flicker on content load
 		backgroundColor: WINDOW_BACKGROUND_COLOR,

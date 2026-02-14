@@ -1,9 +1,9 @@
 import {
-	BaseWindow,
+	type BaseWindow,
 	BrowserWindow,
-	MenuItemConstructorOptions,
-	MenuItem,
-	KeyboardEvent,
+	type MenuItemConstructorOptions,
+	type MenuItem,
+	type KeyboardEvent,
 } from "electron";
 import { i18n } from "./i18n";
 import { fileOpen } from "./file_open";

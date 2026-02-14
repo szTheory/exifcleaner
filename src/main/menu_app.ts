@@ -1,4 +1,4 @@
-import { MenuItemConstructorOptions, app } from "electron";
+import { type MenuItemConstructorOptions, app } from "electron";
 import { i18n } from "./i18n";
 import { isMac } from "../common/platform";
 

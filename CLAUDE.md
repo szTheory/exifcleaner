@@ -5,7 +5,7 @@ Cross-platform Electron desktop app to strip EXIF/metadata from images, videos, 
 ## Tech Stack
 
 - **Runtime**: Electron 35 (Chromium + Node 22) with contextIsolation + sandbox
-- **Language**: TypeScript 5.7 with `strict: true` (type-check only, electron-vite/esbuild compiles)
+- **Language**: TypeScript 5.7 with `strict: true` + `verbatimModuleSyntax: true` (type-check only, electron-vite/esbuild compiles)
 - **Build**: electron-vite 5.x + Vite 7.x + esbuild (3 targets: main, preload, renderer)
 - **Packaging**: electron-builder 22.8 (produces .dmg, .AppImage, .deb, .rpm, .exe, portable)
 - **UI**: Vanilla HTML/CSS/TypeScript — no frameworks (React, Vue, etc.)
@@ -129,7 +129,7 @@ src/
   types/             1 file — node-exiftool type definitions
 ```
 
-Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `electron.vite.config.ts` (build config for main + preload + renderer), `tsconfig.json` (strict, ES2021 target, bundler moduleResolution), `update_exiftool.pl` (Perl, downloads+verifies exiftool binaries).
+Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `electron.vite.config.ts` (build config for main + preload + renderer), `tsconfig.json` (strict, verbatimModuleSyntax, ES2021 target, bundler moduleResolution), `update_exiftool.pl` (Perl, downloads+verifies exiftool binaries).
 
 ## Build & Release Procedures
 
@@ -142,7 +142,7 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 `yarn compile` → `electron-vite build` → outputs to `out/`:
 
 - `out/main/index.js` — main process bundle (~20 kB)
-- `out/preload/index.js` — preload script (~1 kB)
+- `out/preload/index.mjs` — preload script (~1 kB, ESM)
 - `out/renderer/index.html` + `assets/index-*.js` + `assets/index-*.css` — renderer bundle (~8 kB)
 
 ### Packaging
@@ -176,7 +176,7 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 - **DOM**: Pure native API — `createElement()`, `querySelector()`, `querySelectorAll('[i18n]')`, `classList.add/remove`, `appendChild`
 - **IPC convention**: Event constants in `common/ipc_events.ts`. Renderer accesses IPC only through `window.api.*` (contextBridge). `ipcMain.handle`/`ipcRenderer.invoke` for request-response, `ipcMain.on`/`ipcRenderer.send` for fire-and-forget
 - **Platform guards**: Early-return pattern — `if (!isMac()) return;`
-- **TypeScript**: `strict: true` — strong null checks, no implicit any. Explicit `any` kept only for truly dynamic exiftool metadata. Custom `.d.ts` for `node-exiftool` with named result interfaces
+- **TypeScript**: `strict: true` + `verbatimModuleSyntax: true` — strong null checks, no implicit any, type-only imports enforced (`import type` or inline `type` keyword). Explicit `any` kept only for truly dynamic exiftool metadata. Custom `.d.ts` for `node-exiftool` with named result interfaces
 - **CSS**: Custom properties in `vars.css` (spacing scale `--unit-1` through `--unit-16`, color tokens), flat class names currently — migrating to BEM in design overhaul (Phase 9), dark mode via `@media (prefers-color-scheme: dark)`, pure CSS popovers/animations (no JS animation libs)
 - **i18n**: HTML `i18n` attribute + `strings.json` dictionary → renderer `setupI18n()` fetches strings from main via IPC, caches locally, queries all `[i18n]` elements → locale fallback chain: regional (e.g. `zh-CN`) → base (`zh`) → English
 - **Resource paths**: `resourcesPath()` returns `.resources/` in dev, `process.resourcesPath` in production — used by `binaries.ts` and `i18n.ts`
@@ -206,7 +206,7 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 
 - **Formatting**: Prettier with tabs (not spaces), configured in `.prettierrc`
 - **No frameworks**: Pure vanilla DOM manipulation, no React/Vue/Angular
-- **Module style**: ESNext modules via electron-vite/esbuild (full ESM deferred to Chunk 4)
+- **Module style**: Full ESM — `"type": "module"` in package.json, `verbatimModuleSyntax` enforced, build output is ESM for all targets
 - **Naming**: snake_case for filenames, camelCase for functions/variables
 - **CSS naming**: Currently flat classes; migrating to BEM in Phase 9 (e.g. `.file-list__row--processing`)
 - **Fonts**: System font stack only — no external font loading, no bundled fonts
@@ -225,7 +225,7 @@ Config is in `package.json` under `"build"`. App ID: `com.exifcleaner`.
 - **Windows**: NSIS installer (x64 + ia32) + portable. ExifTool binaries from `.resources/win/bin/`
 - **All platforms**: `strings.json` and `.png` icons copied via `extraResources`
 
-TypeScript config: standalone `tsconfig.json` with `strict: true`, target ES2021, `moduleResolution: "bundler"`. tsc is type-check only (`--noEmit`); electron-vite/esbuild handles compilation.
+TypeScript config: standalone `tsconfig.json` with `strict: true`, `verbatimModuleSyntax: true`, target ES2021, `moduleResolution: "bundler"`. tsc is type-check only (`--noEmit`); electron-vite/esbuild handles compilation.
 
 ### Future: Docker for Packaging
 
@@ -252,8 +252,8 @@ A `.travis.yml` exists but is minimal (lint + `tsc` on Node 14/16, no builds, ma
 - 64 open issues, 8 open PRs
 - No CI/CD pipeline
 - No automated tests
-- **Completed**: Chunk 1 (electron-webpack → electron-vite), Chunk 2 (TypeScript 5.7 + strict + Prettier 3.x), Chunk 3 (Electron 11 → 35 + contextIsolation + preload)
-- **Next**: Chunk 4 (ESM), Chunk 5 (ExifTool update), Chunk 6 (dep cleanup)
+- **Completed**: Chunk 1 (electron-webpack → electron-vite), Chunk 2 (TypeScript 5.7 + strict + Prettier 3.x), Chunk 3 (Electron 11 → 35 + contextIsolation + preload), Chunk 4 (ESM modules — verbatimModuleSyntax + type: module)
+- **Next**: Chunk 5 (ExifTool update), Chunk 6 (dep cleanup)
 - See `devplans/` for detailed upgrade plans
 - See `.claude/rules/modernization-roadmap.md` for the master roadmap
 - See `.claude/rules/github-context.md` for community issues summary

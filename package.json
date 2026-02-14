@@ -5,6 +5,7 @@
 	"description": "Clean exif metadata from images, videos, and PDF documents",
 	"license": "MIT",
 	"repository": "github:szTheory/exifcleaner",
+	"type": "module",
 	"main": "./out/main/index.js",
 	"author": {
 		"name": "szTheory",

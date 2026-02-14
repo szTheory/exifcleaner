@@ -11,7 +11,8 @@
 		"removeComments": true,
 		"sourceMap": true,
 		"skipLibCheck": true,
-		"strict": true
+		"strict": true,
+		"verbatimModuleSyntax": true
 	},
 	"include": ["./src/**/*.ts"]
 }

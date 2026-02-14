@@ -1,4 +1,4 @@
-import { shell, app, MenuItemConstructorOptions } from "electron";
+import { shell, app, type MenuItemConstructorOptions } from "electron";
 import os from "os";
 import { isMac } from "../common/platform";
 import { showAboutWindow } from "./menu_app_about";
