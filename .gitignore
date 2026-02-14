@@ -302,3 +302,5 @@ yarn-error.log
 # Explicitly include Prettier configuration
 # that was being hit by the .gitignore rule .*
 !.prettierrc
+
+devplans

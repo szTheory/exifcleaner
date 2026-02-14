@@ -84,12 +84,15 @@ This is the sequenced plan for modernizing ExifCleaner. Phases are ordered by de
 
 ## Phase 7: Dependency Cleanup
 
+**Philosophy**: Hand-roll what you can. Prefer zero-dependency solutions. Only keep packages that provide genuine value that would be unreasonable to replicate. The goal is minimal production dependencies.
+
 **Tasks**:
 
-- Evaluate `source-map-support` — modern Node.js has built-in source map support, this dep may be removable
-- Audit `node-exiftool` — check if there's a more maintained alternative, or if a thin custom wrapper around exiftool CLI would be simpler
+- **Replace `node-exiftool`** with a thin hand-rolled wrapper around exiftool CLI — the current wrapper (2.3.0) is unmaintained and adds unnecessary abstraction over what is essentially `spawn` + JSON parsing
+- **Remove `source-map-support`** — modern Node.js (18+) has built-in `--enable-source-maps`, this dep is no longer needed
 - Run `npm audit` / `yarn audit` and resolve vulnerabilities
 - Remove any unused transitive dependencies introduced by old toolchain
+- Target: zero production dependencies (exiftool wrapper becomes internal code)
 
 ## Phase 8: Community Issues (High Priority)
 
@@ -102,11 +105,35 @@ After the infrastructure is modernized, address the most-requested features:
 - **Folder recursion** (issues #171, #231) — process all files inside a dropped folder
 - **Save as new file** (issues #218, #124) — option to output cleaned files separately instead of overwriting
 
+## Phase 9: UI/UX Design Overhaul
+
+**Why**: The current UI is functional but visually dated. After infrastructure is modernized, give the app a polished, sleek design pass that feels native on every platform.
+
+**Design Principles**:
+
+- **System-native feel** — match platform design language, respect OS-level preferences (dark mode, accent colors, reduced motion)
+- **Focused utility** — this is a single-purpose tool, keep the interface minimal and elegant, don't add visual clutter
+- **Zero frameworks** — everything is vanilla CSS + TypeScript, hand-rolled
+
+**Tasks**:
+
+- **System font stack**: replace any custom/generic fonts with `system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`
+- **BEM CSS methodology**: migrate from current flat class names (`.card`, `.empty-title`, `.popover`) to BEM naming (`.file-list__row`, `.file-list__row--processing`, `.empty-state__icon`) — rename all classes and update HTML/TS references
+- **Micro-animations**: subtle CSS transitions for file processing states, drag-drop feedback, completion checkmarks, hover states — CSS `transition`/`@keyframes` only, no JS animation libraries
+- **Respect `prefers-reduced-motion`**: wrap animations in `@media (prefers-reduced-motion: no-preference)` so users who disable motion aren't affected
+- **Drag-drop polish**: visual feedback for drag-over state, file landing animation
+- **Processing states**: progress indicators per file, success/error state styling
+- **Dark mode refinement**: ensure dark mode looks intentionally designed, not just inverted colors
+- **Spacing and layout**: refine the CSS custom property scale, ensure consistent visual rhythm
+
 ## Key Constraints
 
 - Keep the app simple — this is a focused tool, avoid feature bloat
-- Minimize runtime dependencies (currently only 2 production deps)
+- **Minimize dependencies** — prefer hand-rolling over npm packages; target zero production deps
 - No JS frameworks — vanilla TypeScript/CSS is a deliberate design choice
+- **BEM CSS naming** — all new CSS must use BEM convention (Phase 9 migrates existing)
+- **System fonts only** — no web font downloads, no bundled fonts
+- **Respect motion preferences** — wrap animations in `prefers-reduced-motion` media query
 - Support Windows, macOS, and Linux
 - Maintain backward compatibility for existing translation contributors
 - ExifTool binaries must be bundled (no runtime download requirement)

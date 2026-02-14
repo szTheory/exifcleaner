@@ -163,7 +163,7 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 - **IPC convention**: Event constants exported from the module that sets up the listener (e.g., `EVENT_FILES_ADDED` from `dock.ts`). `ipcMain.handle`/`ipcRenderer.invoke` for request-response, `ipcMain.on`/`ipcRenderer.send` for fire-and-forget
 - **Platform guards**: Early-return pattern — `if (!isMac()) return;`
 - **TypeScript**: Permissive — heavy `any` for exiftool metadata, explicit return types on public functions, custom `.d.ts` for `node-exiftool`, no strict null checks
-- **CSS**: Custom properties in `vars.css` (spacing scale `--unit-1` through `--unit-16`, color tokens), flat class names (no BEM), dark mode via `@media (prefers-color-scheme: dark)`, pure CSS popovers with transitions
+- **CSS**: Custom properties in `vars.css` (spacing scale `--unit-1` through `--unit-16`, color tokens), flat class names currently — migrating to BEM in design overhaul (Phase 9), dark mode via `@media (prefers-color-scheme: dark)`, pure CSS popovers/animations (no JS animation libs)
 - **i18n**: HTML `i18n` attribute + `strings.json` dictionary → renderer calls `setupI18n()` which queries all `[i18n]` elements → locale fallback chain: regional (e.g. `zh-CN`) → base (`zh`) → English
 - **Resource paths**: `resourcesPath()` returns `.resources/` in dev, `process.resourcesPath` in production — used by `binaries.ts` and `i18n.ts`
 
@@ -195,6 +195,9 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 - **No frameworks**: Pure vanilla DOM manipulation, no React/Vue/Angular
 - **Module style**: CommonJS via webpack (ESM blocked until Electron upgrade)
 - **Naming**: snake_case for filenames, camelCase for functions/variables
+- **CSS naming**: Currently flat classes; migrating to BEM in Phase 9 (e.g. `.file-list__row--processing`)
+- **Fonts**: System font stack only — no external font loading, no bundled fonts
+- **Dependencies**: Prefer hand-rolling over adding npm packages — target zero production deps
 - **Error handling**: throw strings in renderer, throw Error objects in main
 - **Platform code**: guard with `isMac()` / `isWindows()` / `isLinux()` from `common/platform.ts`
 - **Security**: always use `sanitize()` from `renderer/sanitize.ts` for exiftool output (XSS prevention)
