@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
-		"target": "ES2019",
-		"module": "CommonJS",
-		"moduleResolution": "node",
+		"target": "ES2021",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
 		"outDir": "./out/",
 		"resolveJsonModule": true,
 		"forceConsistentCasingInFileNames": true,
@@ -10,7 +10,8 @@
 		"allowSyntheticDefaultImports": true,
 		"removeComments": true,
 		"sourceMap": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"strict": true
 	},
 	"include": ["./src/**/*.ts"]
 }

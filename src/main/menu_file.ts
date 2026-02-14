@@ -23,9 +23,9 @@ function fileQuitTemplate(): MenuItemConstructorOptions {
 		? {
 				label: i18n("menu.file.close"),
 				role: "close",
-		  }
+			}
 		: {
 				label: i18n("menu.file.quit"),
 				role: "quit",
-		  };
+			};
 }

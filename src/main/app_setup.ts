@@ -14,7 +14,7 @@ function preventMultipleAppInstances(): void {
 }
 
 function openMinimizedIfAlreadyExists(
-	browserWindow: BrowserWindow | null
+	browserWindow: BrowserWindow | null,
 ): void {
 	app.on(
 		"second-instance",
@@ -26,7 +26,7 @@ function openMinimizedIfAlreadyExists(
 			}
 
 			restoreWindowAndFocus(browserWindow);
-		}
+		},
 	);
 }
 

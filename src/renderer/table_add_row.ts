@@ -17,7 +17,7 @@ export function addTableRow(filePath: string): HTMLTableRowElement {
 	useNode.setAttribute("href", "#icon-images");
 	const iconNode = document.createElementNS(
 		"http://www.w3.org/2000/svg",
-		"svg"
+		"svg",
 	);
 	iconNode.appendChild(useNode);
 	iconNode.classList.add("icon");

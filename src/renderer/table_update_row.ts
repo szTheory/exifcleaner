@@ -2,7 +2,7 @@ import { sanitizeHTML } from "./sanitize";
 
 export function updateRowWithExif(
 	tdNode: HTMLTableDataCellElement,
-	exifData: any
+	exifData: any,
 ): void {
 	// td
 	tdNode.textContent = "";

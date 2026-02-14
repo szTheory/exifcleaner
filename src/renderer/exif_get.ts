@@ -10,7 +10,7 @@ const EXIFTOOL_ARGS_GET_EXIF = [
 // and clean up after the process when done
 export async function getExif(
 	exiftoolProcess: ExiftoolProcess,
-	filePath: string
+	filePath: string,
 ): Promise<object> {
 	const exifData = exiftoolProcess
 		.readMetadata(filePath, EXIFTOOL_ARGS_GET_EXIF)

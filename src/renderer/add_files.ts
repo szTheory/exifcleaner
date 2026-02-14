@@ -8,7 +8,7 @@ import { updateRowWithCleanerSpinner } from "./table_update_row";
 
 export async function addFiles(
 	filePaths: string[],
-	exifToolProcesses: ExiftoolProcess[]
+	exifToolProcesses: ExiftoolProcess[],
 ): Promise<any[]> {
 	ipcRenderer.send(EVENT_FILES_ADDED, filePaths.length);
 
@@ -18,7 +18,7 @@ export async function addFiles(
 		return processFile(
 			filePathsIterator,
 			exifToolProcess,
-			exifToolProcess.open()
+			exifToolProcess.open(),
 		).catch(() => {
 			exifToolProcess.close();
 		});
@@ -30,7 +30,7 @@ export async function addFiles(
 async function processFile(
 	filePathsIterator: Generator<string, void, unknown>,
 	exifToolProcess: ExiftoolProcess,
-	exifToolPromise: Promise<any>
+	exifToolPromise: Promise<any>,
 ): Promise<any> {
 	return exifToolPromise.then(() => {
 		const iteratorResult = filePathsIterator.next();
@@ -53,7 +53,7 @@ function* filePath(filePaths: string[]): Generator<string, any, unknown> {
 
 async function addFile(
 	filePath: string,
-	exifToolProcess: ExiftoolProcess
+	exifToolProcess: ExiftoolProcess,
 ): Promise<void> {
 	const tableRow = addTableRow(filePath);
 

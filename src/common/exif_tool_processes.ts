@@ -3,7 +3,7 @@ import { ExiftoolProcess } from "node-exiftool";
 import { exiftoolBinPath } from "../common/binaries";
 
 export function spawnExifToolProcesses(
-	maxNumProcesses: number
+	maxNumProcesses: number,
 ): ExiftoolProcess[] {
 	const numProcesses = Math.min(os.cpus().length, maxNumProcesses);
 

@@ -1,7 +1,7 @@
 import { BrowserWindow } from "electron";
 
 export function currentBrowserWindow(
-	browserWindow: BrowserWindow | null | undefined
+	browserWindow: BrowserWindow | null | undefined,
 ): BrowserWindow | null {
 	if (!browserWindow) {
 		browserWindow = BrowserWindow.getAllWindows()[0];
@@ -11,13 +11,13 @@ export function currentBrowserWindow(
 }
 
 export function defaultBrowserWindow(
-	browserWindow: BrowserWindow | null | undefined
+	browserWindow: BrowserWindow | null | undefined,
 ): BrowserWindow {
 	if (!browserWindow) {
 		browserWindow = currentBrowserWindow(browserWindow);
 		if (!browserWindow) {
 			throw new Error(
-				"Could not load file open menu because browser window was not initialized."
+				"Could not load file open menu because browser window was not initialized.",
 			);
 		}
 	}
@@ -26,7 +26,7 @@ export function defaultBrowserWindow(
 }
 
 export function restoreWindowAndFocus(
-	browserWindow: BrowserWindow | null | undefined
+	browserWindow: BrowserWindow | null | undefined,
 ): void {
 	browserWindow = defaultBrowserWindow(browserWindow);
 	if (browserWindow.isMinimized()) {

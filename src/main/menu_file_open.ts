@@ -18,7 +18,7 @@ export function fileMenuOpenItem(): MenuItemConstructorOptions {
 function fileOpenClick(
 	_menuItem: MenuItem,
 	browserWindow: BrowserWindow | undefined,
-	_event: KeyboardEvent
+	_event: KeyboardEvent,
 ): void {
 	fileOpen(browserWindow);
 }

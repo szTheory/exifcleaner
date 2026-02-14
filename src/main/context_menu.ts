@@ -11,11 +11,11 @@ function buildMenu(canCopy: boolean): Menu {
 				role: "copy",
 				visible: canCopy,
 				enabled: canCopy,
-			})
+			}),
 		);
 	}
 	menu.append(
-		new MenuItem({ label: i18n("contextmenu.select-all"), role: "selectAll" })
+		new MenuItem({ label: i18n("contextmenu.select-all"), role: "selectAll" }),
 	);
 	return menu;
 }
@@ -29,8 +29,8 @@ export function setupContextMenu(): void {
 				(_event: Event, params: Electron.ContextMenuParams) => {
 					const isTextSelected = params.selectionText.trim().length > 0;
 					buildMenu(params.editFlags.canCopy && isTextSelected).popup();
-				}
+				},
 			);
-		}
+		},
 	);
 }

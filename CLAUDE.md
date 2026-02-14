@@ -5,18 +5,18 @@ Cross-platform Electron desktop app to strip EXIF/metadata from images, videos, 
 ## Tech Stack
 
 - **Runtime**: Electron 11 (Chromium + Node.js)
-- **Language**: TypeScript 3.8 (compiled via electron-webpack)
-- **Build**: electron-webpack 2.8 + webpack 4 (both outdated/abandoned)
+- **Language**: TypeScript 5.7 with `strict: true` (type-check only, electron-vite/esbuild compiles)
+- **Build**: electron-vite 5.x + Vite 7.x + esbuild
 - **Packaging**: electron-builder 22.8 (produces .dmg, .AppImage, .deb, .rpm, .exe, portable)
 - **UI**: Vanilla HTML/CSS/TypeScript — no frameworks (React, Vue, etc.)
 - **Core dep**: `node-exiftool` 2.3.0 wrapping bundled exiftool Perl binaries
-- **Formatting**: Prettier 2.1 with tabs
+- **Formatting**: Prettier 3.x with tabs
 
 ## Commands
 
 ```bash
-yarn dev              # Dev mode with HMR (electron-webpack dev server)
-yarn compile          # TypeScript compilation (electron-webpack)
+yarn dev              # Dev mode with HMR (electron-vite dev server)
+yarn compile          # Build with electron-vite (esbuild)
 yarn format           # Format code with Prettier
 yarn lint             # Check formatting with Prettier
 
@@ -116,20 +116,20 @@ src/
   types/             1 file — node-exiftool type definitions
 ```
 
-Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `electron-webpack.json` (renderer template path), `tsconfig.json` (extends electron-webpack base, target ES2019), `update_exiftool.pl` (Perl, downloads+verifies exiftool binaries).
+Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `electron.vite.config.ts` (build config for main + renderer), `tsconfig.json` (strict, ES2021 target, bundler moduleResolution), `update_exiftool.pl` (Perl, downloads+verifies exiftool binaries).
 
 ## Build & Release Procedures
 
 ### Dev Workflow
 
-`yarn dev` → `electron-webpack dev` → starts webpack dev server on dynamic port → sets `ELECTRON_WEBPACK_WDS_PORT` → main process loads `http://localhost:{port}`. Both processes support HMR via `module.hot.accept()`.
+`yarn dev` → `electron-vite dev` → starts Vite dev server on port 5173 → main process loads renderer via localhost. Prefixed with `ELECTRON_RUN_AS_NODE=` to prevent Cursor IDE env contamination.
 
 ### Compilation
 
-`yarn compile` → `electron-webpack` → outputs to `dist/`:
+`yarn compile` → `electron-vite build` → outputs to `out/`:
 
-- `dist/main/index.js` — main process bundle
-- `dist/renderer/index.js` + `index.html` — renderer bundle
+- `out/main/index.js` — main process bundle (~18 kB)
+- `out/renderer/index.html` + `assets/index-*.js` + `assets/index-*.css` — renderer bundle
 
 ### Packaging
 
@@ -162,7 +162,7 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 - **DOM**: Pure native API — `createElement()`, `querySelector()`, `querySelectorAll('[i18n]')`, `classList.add/remove`, `appendChild`
 - **IPC convention**: Event constants exported from the module that sets up the listener (e.g., `EVENT_FILES_ADDED` from `dock.ts`). `ipcMain.handle`/`ipcRenderer.invoke` for request-response, `ipcMain.on`/`ipcRenderer.send` for fire-and-forget
 - **Platform guards**: Early-return pattern — `if (!isMac()) return;`
-- **TypeScript**: Permissive — heavy `any` for exiftool metadata, explicit return types on public functions, custom `.d.ts` for `node-exiftool`, no strict null checks
+- **TypeScript**: `strict: true` — strong null checks, no implicit any. Explicit `any` kept only for truly dynamic exiftool metadata. Custom `.d.ts` for `node-exiftool` with named result interfaces
 - **CSS**: Custom properties in `vars.css` (spacing scale `--unit-1` through `--unit-16`, color tokens), flat class names currently — migrating to BEM in design overhaul (Phase 9), dark mode via `@media (prefers-color-scheme: dark)`, pure CSS popovers/animations (no JS animation libs)
 - **i18n**: HTML `i18n` attribute + `strings.json` dictionary → renderer calls `setupI18n()` which queries all `[i18n]` elements → locale fallback chain: regional (e.g. `zh-CN`) → base (`zh`) → English
 - **Resource paths**: `resourcesPath()` returns `.resources/` in dev, `process.resourcesPath` in production — used by `binaries.ts` and `i18n.ts`
@@ -182,18 +182,17 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 | --- | --- | --- | --- |
 | `electron` | ^11.0 | App framework | Severely outdated (current: 35+) |
 | `electron-builder` | ^22.8 | Packaging/distribution | Works but outdated |
-| `electron-webpack` | ^2.8 | Build system | **Abandoned**, blocks all upgrades |
-| `electron-webpack-ts` | ^4.0 | TS support for electron-webpack | **Abandoned**, depends on electron-webpack |
-| `typescript` | ^3.8 | Language compiler | Outdated (current: 5.x) |
-| `webpack` | ^4.41 | Module bundler | Outdated, dependency of electron-webpack |
-| `@types/node` | ^12.0 | Node.js type defs | Outdated |
-| `prettier` | 2.1 | Code formatter | Outdated (current: 3.x) |
+| `electron-vite` | ^5.0.0 | Build system | Vite-based, replaces electron-webpack |
+| `vite` | ^7.3.1 | Module bundler/dev server | Powers electron-vite |
+| `typescript` | ~5.7.0 | Language compiler | `strict: true` enabled |
+| `@types/node` | ^12.0 | Node.js type defs | Matches Electron 11's Node 12.18 — upgrade with Electron in Chunk 3 |
+| `prettier` | ^3.0 | Code formatter | Trailing commas default to "all" |
 
 ## Code Conventions
 
 - **Formatting**: Prettier with tabs (not spaces), configured in `.prettierrc`
 - **No frameworks**: Pure vanilla DOM manipulation, no React/Vue/Angular
-- **Module style**: CommonJS via webpack (ESM blocked until Electron upgrade)
+- **Module style**: ESNext modules via electron-vite/esbuild (full ESM deferred to Chunk 4)
 - **Naming**: snake_case for filenames, camelCase for functions/variables
 - **CSS naming**: Currently flat classes; migrating to BEM in Phase 9 (e.g. `.file-list__row--processing`)
 - **Fonts**: System font stack only — no external font loading, no bundled fonts
@@ -212,7 +211,7 @@ Config is in `package.json` under `"build"`. App ID: `com.exifcleaner`.
 - **Windows**: NSIS installer (x64 + ia32) + portable. ExifTool binaries from `.resources/win/bin/`
 - **All platforms**: `strings.json` and `.png` icons copied via `extraResources`
 
-TypeScript config extends `electron-webpack/tsconfig-base.json`. Target: ES2019. See `tsconfig.json`.
+TypeScript config: standalone `tsconfig.json` with `strict: true`, target ES2021, `moduleResolution: "bundler"`. tsc is type-check only (`--noEmit`); electron-vite/esbuild handles compilation.
 
 ### Future: Docker for Packaging
 
@@ -233,13 +232,14 @@ Cross-platform packaging will eventually be containerized with Docker for reprod
 
 A `.travis.yml` exists but is minimal (lint + `tsc` on Node 14/16, no builds, macOS disabled). No GitHub Actions. Replace with GitHub Actions as part of modernization.
 
-## Current State (as of Feb 2025)
+## Current State (as of Feb 2026)
 
-- Last commit: March 2022 (translations)
 - Last release: v3.6.0 (May 2021)
 - 64 open issues, 8 open PRs
 - No CI/CD pipeline
 - No automated tests
-- Build toolchain (electron-webpack) is abandoned and blocks modernization
-- See `.claude/rules/modernization-roadmap.md` for the upgrade plan
+- **Completed**: Chunk 1 (electron-webpack → electron-vite), Chunk 2 (TypeScript 5.7 + strict + Prettier 3.x)
+- **Next**: Chunk 3 (Electron 11 → 35+), Chunk 4 (ESM), Chunk 5 (ExifTool update), Chunk 6 (dep cleanup)
+- See `devplans/` for detailed upgrade plans
+- See `.claude/rules/modernization-roadmap.md` for the master roadmap
 - See `.claude/rules/github-context.md` for community issues summary

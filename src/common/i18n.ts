@@ -35,7 +35,7 @@ export function i18n(key: string, locale: string): string {
 	const i18nString = strings[key];
 	if (!i18nString) {
 		throw new Error(
-			`Could not find localization strings while reading text for ${key}`
+			`Could not find localization strings while reading text for ${key}`,
 		);
 	}
 	// prefer locale, then fallback locale, then default to English

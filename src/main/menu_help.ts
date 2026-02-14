@@ -28,7 +28,7 @@ function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 				const url = newGithubIssueUrl(
 					GITHUB_USERNAME,
 					GITHUB_PROJECTNAME,
-					newGithubIssueBody()
+					newGithubIssueBody(),
 				);
 				shell.openExternal(url);
 			},
@@ -45,7 +45,7 @@ function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 				click() {
 					showAboutWindow(GITHUB_USERNAME, WEBSITE_URL);
 				},
-			}
+			},
 		);
 	}
 

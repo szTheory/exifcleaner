@@ -5,7 +5,7 @@ import { updateRowWithExif } from "./table_update_row";
 export async function displayExifBeforeClean(
 	exifToolProcess: ExiftoolProcess,
 	trNode: HTMLTableRowElement,
-	filePath: string
+	filePath: string,
 ): Promise<any> {
 	const tdBeforeNode = trNode.querySelector("td:nth-child(2)");
 	if (!(tdBeforeNode instanceof HTMLTableCellElement)) {
@@ -22,7 +22,7 @@ export async function displayExifBeforeClean(
 export async function displayExifAfterClean(
 	exifToolProcess: ExiftoolProcess,
 	trNode: HTMLTableRowElement,
-	filePath: string
+	filePath: string,
 ): Promise<any> {
 	const tdAfterNode = trNode.querySelector("td:nth-child(3)");
 	if (!(tdAfterNode instanceof HTMLTableCellElement)) {

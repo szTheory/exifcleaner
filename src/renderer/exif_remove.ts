@@ -9,12 +9,12 @@ const EXIFTOOL_ARGS_REMOVE_EXIF = [
 // This uses the Perl binary "exiftool" the app's `.resources` dir
 export async function removeExif(
 	exifToolProcess: ExiftoolProcess,
-	filePath: string
+	filePath: string,
 ): Promise<object> {
 	return exifToolProcess.writeMetadata(
 		filePath,
 		{ all: "" },
 		EXIFTOOL_ARGS_REMOVE_EXIF,
-		false
+		false,
 	);
 }

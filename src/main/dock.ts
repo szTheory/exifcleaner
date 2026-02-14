@@ -14,7 +14,7 @@ let batchCount = 0;
 let remainingCount = 0;
 
 export function setupDockEventHandlers(
-	browserWindow: BrowserWindow | null
+	browserWindow: BrowserWindow | null,
 ): void {
 	ipcMain.on(EVENT_FILES_ADDED, (_event, filesCount) => {
 		storeBatchCount(filesCount);
@@ -109,7 +109,7 @@ function windowsFlashFrame(browserWindow: BrowserWindow | null): void {
 
 function windowsOverlayIcon(
 	browserWindow: BrowserWindow | null,
-	enabled: boolean
+	enabled: boolean,
 ): void {
 	if (!isWindows()) {
 		return;
