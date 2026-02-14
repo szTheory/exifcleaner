@@ -127,6 +127,25 @@ After the infrastructure is modernized, address the most-requested features:
 - **Dark mode refinement**: ensure dark mode looks intentionally designed, not just inverted colors
 - **Spacing and layout**: refine the CSS custom property scale, ensure consistent visual rhythm
 
+## Phase 10: Playwright E2E Tests
+
+Deterministic, non-flakey, fast end-to-end tests using Playwright + Electron. Quality gate for all future changes. Tests cover drag-and-drop, file picker, UI states, i18n, dark mode. Target: < 30 seconds for full suite, zero flakey tests.
+
+## Phase 11: DDD Architecture Refactor
+
+Clean/hexagonal/DDD-style architecture with clear layer boundaries:
+
+- **Application layer**: Commands (strip metadata, etc.) and Queries (read metadata, etc.)
+- **Domain layer**: Core types, value objects, pure business logic services
+- **Infrastructure layer**: ExifTool binary wrapper, file I/O, Electron APIs
+- **Presentation layer**: Renderer DOM, preload bridge
+
+Principles: SRP classes + dependency injection, functional programming for business logic, strong type system design (branded types, discriminated unions, `Result<T,E>`), no `any`.
+
+## Phase 12: CI Releases (No Auto-Update)
+
+GitHub Actions CI for automated builds and testing. Releases are **never** auto-published — maintainer explicitly triggers them. **No auto-update** in the app (users are privacy-conscious, zero network traffic is a feature). SHASUMS256.txt for every release.
+
 ## Key Constraints
 
 - Keep the app simple — this is a focused tool, avoid feature bloat
@@ -138,3 +157,5 @@ After the infrastructure is modernized, address the most-requested features:
 - Support Windows, macOS, and Linux
 - Maintain backward compatibility for existing translation contributors
 - ExifTool binaries must be bundled (no runtime download requirement)
+- **NEVER auto-publish releases** — CI builds artifacts, maintainer publishes manually
+- **NEVER enable auto-update** — no network traffic in production, ever
