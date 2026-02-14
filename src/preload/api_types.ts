@@ -18,6 +18,7 @@ export interface I18nApi {
 
 export interface FilesApi {
 	basename: (filePath: string) => string;
+	getPathForFile: (file: File) => string;
 	notifyFilesAdded: (count: number) => void;
 	notifyFileProcessed: () => void;
 	notifyAllFilesProcessed: () => void;

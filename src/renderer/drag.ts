@@ -32,7 +32,8 @@ function handleDragOverEvent(event: DragEvent): void {
 function filePaths(fileList: FileList): string[] {
 	let paths = [];
 	for (const file of fileList) {
-		paths.push(file.path);
+		const path = window.api.files.getPathForFile(file);
+		paths.push(path);
 	}
 
 	return paths;

@@ -1,5 +1,5 @@
-import { contextBridge, ipcRenderer } from "electron";
-import type { ElectronApi } from "./api_types";
+import { contextBridge, ipcRenderer, webUtils } from "electron";
+import type { ElectronApi} from "./api_types";
 
 function basename(filePath: string): string {
 	const normalized = filePath.replace(/\\/g, "/");
@@ -22,6 +22,7 @@ const api: ElectronApi = {
 
 	files: {
 		basename,
+		getPathForFile: (file: File) => webUtils.getPathForFile(file),
 		notifyFilesAdded: (count: number) =>
 			ipcRenderer.send("files-added", count),
 		notifyFileProcessed: () => ipcRenderer.send("file-processed"),
