@@ -86,7 +86,6 @@ ts-gen
 #
 # Normal rules (sorted alphabetically)
 #
-.*
 *.a
 *.asn1.[ch]
 *.bin
@@ -300,6 +299,6 @@ yarn-error.log
 # that were being hit by the .gitignore rule .*
 !.travis.yml
 
-# Explicitly include Prettier configuration 
+# Explicitly include Prettier configuration
 # that was being hit by the .gitignore rule .*
 !.prettierrc
