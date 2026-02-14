@@ -19,8 +19,8 @@ import { setupDragAndDrop } from "./drag";
 import { setupSelectFilesMenu } from "./menu_select_files";
 import { setupI18n } from "./i18n";
 
-function setup(): void {
-	setupI18n();
+async function setup(): Promise<void> {
+	await setupI18n();
 	setupDragAndDrop();
 	setupSelectFilesMenu();
 }

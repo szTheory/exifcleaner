@@ -1,4 +1,5 @@
 import {
+	BaseWindow,
 	BrowserWindow,
 	MenuItemConstructorOptions,
 	MenuItem,
@@ -17,8 +18,8 @@ export function fileMenuOpenItem(): MenuItemConstructorOptions {
 
 function fileOpenClick(
 	_menuItem: MenuItem,
-	browserWindow: BrowserWindow | undefined,
+	browserWindow: BaseWindow | undefined,
 	_event: KeyboardEvent,
 ): void {
-	fileOpen(browserWindow);
+	fileOpen(browserWindow instanceof BrowserWindow ? browserWindow : undefined);
 }

@@ -1,16 +1,16 @@
-import { ipcRenderer } from "electron";
-import { preloadI18nStrings, i18n } from "../common/i18n";
-import { IPC_EVENT_NAME_GET_LOCALE } from "../common/ipc_events";
+import { i18nLookup } from "../common/i18n_lookup";
+import type { I18nStringsDictionary } from "../common/i18n_lookup";
 
 const ATTRIBUTE_I18N = "i18n";
+let cachedStrings: I18nStringsDictionary | null = null;
 
-export function setupI18n(): void {
-	preloadI18nStrings();
-	translateHtml();
+export async function setupI18n(): Promise<void> {
+	cachedStrings = await window.api.i18n.getStrings();
+	await translateHtml();
 }
 
 async function translateHtml() {
-	const locale = await getLocale();
+	const locale = await window.api.i18n.getLocale();
 	const elements = document.querySelectorAll(`[${ATTRIBUTE_I18N}]`);
 
 	elements.forEach((element) => {
@@ -27,6 +27,7 @@ async function translateHtml() {
 	});
 }
 
-async function getLocale() {
-	return await ipcRenderer.invoke(IPC_EVENT_NAME_GET_LOCALE);
+function i18n(key: string, locale: string): string {
+	if (!cachedStrings) throw new Error("i18n strings not loaded");
+	return i18nLookup(cachedStrings, key, locale);
 }

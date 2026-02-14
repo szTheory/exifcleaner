@@ -1,4 +1,4 @@
-import { app, Menu, MenuItem, BrowserWindow } from "electron";
+import { app, Menu, MenuItem } from "electron";
 import { i18n } from "./i18n";
 
 function buildMenu(canCopy: boolean): Menu {
@@ -23,10 +23,10 @@ function buildMenu(canCopy: boolean): Menu {
 export function setupContextMenu(): void {
 	app.on(
 		"browser-window-created",
-		(event: Event, browserWindow: BrowserWindow) => {
+		(_event, browserWindow) => {
 			browserWindow.webContents.on(
 				"context-menu",
-				(_event: Event, params: Electron.ContextMenuParams) => {
+				(_event, params) => {
 					const isTextSelected = params.selectionText.trim().length > 0;
 					buildMenu(params.editFlags.canCopy && isTextSelected).popup();
 				},

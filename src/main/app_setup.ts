@@ -4,6 +4,7 @@ import {
 	restoreWindowAndFocus,
 } from "../common/browser_window";
 import { createMainWindow } from "./window_setup";
+import { closeExifProcess } from "./exif_handlers";
 import { isWindows } from "../common/platform";
 import { fileOpen } from "./file_open";
 
@@ -18,7 +19,7 @@ function openMinimizedIfAlreadyExists(
 ): void {
 	app.on(
 		"second-instance",
-		(_event: Event, argv: string[], _workingDirectory: string) => {
+		(_event, argv) => {
 			console.log(argv);
 			if (isWindows() && argv.length > 0 && argv.includes("--open-file")) {
 				fileOpen(browserWindow);
@@ -45,9 +46,16 @@ function createWindowOnActivate(browserWindow: BrowserWindow | null): void {
 	});
 }
 
+function closeExifOnQuit(): void {
+	app.on("will-quit", () => {
+		closeExifProcess();
+	});
+}
+
 export function setupApp(browserWindow: BrowserWindow | null): void {
 	preventMultipleAppInstances();
 	openMinimizedIfAlreadyExists(browserWindow);
 	quitOnWindowsAllClosed();
 	createWindowOnActivate(browserWindow);
+	closeExifOnQuit();
 }

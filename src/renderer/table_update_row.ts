@@ -1,7 +1,7 @@
 import { sanitizeHTML } from "./sanitize";
 
 export function updateRowWithExif(
-	tdNode: HTMLTableDataCellElement,
+	tdNode: HTMLTableCellElement,
 	exifData: any,
 ): void {
 	// td

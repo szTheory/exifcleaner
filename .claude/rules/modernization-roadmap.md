@@ -19,20 +19,17 @@ This is the sequenced plan for modernizing ExifCleaner. Phases are ordered by de
 - Ensure CSS imports continue to work (currently imported in `renderer/index.ts`)
 - Update all `package.json` scripts (`dev`, `compile`, `start`)
 
-## Phase 2: Upgrade Core Dependencies
+## Phase 2: Upgrade Core Dependencies ✅ DONE
 
-**Tasks**:
+**Completed**:
 
-- Upgrade Electron 11 → latest (currently 35+)
-  - Review and fix breaking API changes across major versions
-  - Enable `contextIsolation: true` and `nodeIntegration: false` (Electron security best practices)
-  - Set up `preload.ts` script for IPC bridge (replaces direct `ipcRenderer` usage in renderer)
-  - Update `BrowserWindow` options in `window_setup.ts`
-- Upgrade TypeScript 3.8 → 5.x
-  - Update `@types/node` to match Electron's Node version
-  - Fix any type errors from stricter checking
-- Upgrade Prettier 2.1 → 3.x
-- Upgrade `electron-builder` to latest
+- ✅ TypeScript 3.8 → 5.7 with `strict: true`
+- ✅ Prettier 2.1 → 3.x
+- ✅ Electron 11 → 35 with contextIsolation + sandbox + preload
+- ✅ @types/node ^12 → ^22
+- ✅ Renderer fully sandboxed — no Node.js, no Electron imports
+- ✅ Preload script with contextBridge API (exif, i18n, files namespaces)
+- ✅ Exiftool operations moved from renderer to main process (single long-lived process)
 
 ## Phase 3: Update ExifTool Binaries
 

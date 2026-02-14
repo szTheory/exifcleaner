@@ -4,9 +4,9 @@ Cross-platform Electron desktop app to strip EXIF/metadata from images, videos, 
 
 ## Tech Stack
 
-- **Runtime**: Electron 11 (Chromium + Node.js)
+- **Runtime**: Electron 35 (Chromium + Node 22) with contextIsolation + sandbox
 - **Language**: TypeScript 5.7 with `strict: true` (type-check only, electron-vite/esbuild compiles)
-- **Build**: electron-vite 5.x + Vite 7.x + esbuild
+- **Build**: electron-vite 5.x + Vite 7.x + esbuild (3 targets: main, preload, renderer)
 - **Packaging**: electron-builder 22.8 (produces .dmg, .AppImage, .deb, .rpm, .exe, portable)
 - **UI**: Vanilla HTML/CSS/TypeScript — no frameworks (React, Vue, etc.)
 - **Core dep**: `node-exiftool` 2.3.0 wrapping bundled exiftool Perl binaries
@@ -31,52 +31,64 @@ yarn run update-exiftool  # Update exiftool binaries (requires Perl, Linux/Mac o
 
 ## Architecture
 
-Standard Electron two-process model with a shared `common/` layer.
+Three-process Electron model: main, preload (contextBridge), renderer (sandboxed browser). Shared `common/` layer.
 
 ### Main Process (`src/main/`)
 
-Entry: `index.ts` → `init.ts` (i18n, context menu, dock, app handlers) → `window_setup.ts` (BrowserWindow creation)
+Entry: `index.ts` → `init.ts` (i18n, exif handlers, context menu, dock, app handlers) → `window_setup.ts` (BrowserWindow creation)
 
-- `app_setup.ts` — single instance lock, lifecycle events
+- `app_setup.ts` — single instance lock, lifecycle events, exiftool cleanup on quit
 - `dock.ts` — IPC handlers for progress tracking, Mac dock badge, Windows taskbar flash
+- `exif_handlers.ts` — exiftool IPC handlers (`exif:read`, `exif:remove`), single long-lived exiftool process
 - `file_open.ts` — native file dialog
 - `menu*.ts` — menu bar templates (app, file, edit, view, window, help, dock)
-- `i18n.ts` — main process i18n, exposes locale via IPC
+- `i18n.ts` — main process i18n, exposes locale and strings via IPC
+
+### Preload Script (`src/preload/`)
+
+Bridge between isolated renderer and Node.js. Only file that uses `contextBridge`.
+
+- `index.ts` — exposes `window.api` with exif, i18n, and files namespaces
+- `api_types.ts` — TypeScript interfaces for the contextBridge API
 
 ### Renderer Process (`src/renderer/`)
 
-Entry: `index.ts` → sets up drag-drop, i18n, file selection menu
+Entry: `index.ts` → async setup (i18n, drag-drop, file selection menu). **Fully sandboxed** — no Node.js, no Electron imports. All external access through `window.api.*`.
 
-- `drag.ts` — drag-and-drop event listeners on `document`
+- `drag.ts` — drag-and-drop event listeners on `document` (file.path is an Electron extension that persists with contextIsolation)
 - `select_files.ts` → `add_files.ts` — core processing pipeline:
-  1. Spawns ExifTool processes (1 per CPU core)
-  2. Distributes files across processes via generators
-  3. For each file: add row → read EXIF → remove EXIF → read EXIF after → update row
-- `exif_remove.ts` — calls `exiftoolProcess.writeMetadata(path, {all: ""})` to strip all metadata
-- `exif_get.ts` — reads metadata via `exiftoolProcess.readMetadata()`
-- `display_exif.ts` — coordinates before/after EXIF display
+  1. For each file: add row → `window.api.exif.readMetadata()` → `window.api.exif.removeMetadata()` → read after → update row
+  2. Notifies main process via `window.api.files.notify*()` for dock badge / progress bar
+- `display_exif.ts` — coordinates before/after EXIF display via `window.api.exif`
 - `table_add_row.ts` / `table_update_row.ts` — DOM table manipulation
 - `sanitize.ts` — XSS prevention: uses `innerText` not `innerHTML` for exiftool output
 - `selected_files.ts` / `empty_pane.ts` — UI state management
+- `i18n.ts` — fetches strings via `window.api.i18n`, caches locally, uses pure `i18nLookup()` from common
+- `env.d.ts` — ambient `window.api` type declaration
 
 ### Common (`src/common/`)
 
-Shared between main and renderer processes:
+Shared between processes (main imports Node-dependent files, renderer imports pure files only):
 
-- `exif_tool_processes.ts` — spawns ExifTool process pool (1 per CPU core, capped by file count)
-- `binaries.ts` — resolves platform-specific exiftool binary path
-- `i18n.ts` — loads `.resources/strings.json`, locale fallback logic
+- `binaries.ts` — resolves platform-specific exiftool binary path (main only)
+- `i18n.ts` — loads `.resources/strings.json`, delegates to `i18n_lookup.ts` (main only)
+- `i18n_lookup.ts` — pure i18n lookup: Locale enum, fallback logic, no Node.js deps (safe everywhere)
 - `platform.ts` — `isMac()`, `isWindows()`, `isLinux()` helpers
 - `browser_window.ts` — safe BrowserWindow reference helpers
 - `resources.ts` — resource path resolution (dev vs production)
 - `env.ts` — `isDev()` detection
+- `ipc_events.ts` — IPC channel name constants
 
-### IPC Events
+### IPC Channels (8 total)
 
-- `EVENT_FILES_ADDED` (`"files-added"`) — renderer → main: batch started
-- `EVENT_FILE_PROCESSED` (`"file-processed"`) — renderer → main: one file done
-- `EVENT_ALL_FILES_PROCESSED` (`"all-files-processed"`) — renderer → main: batch complete
-- `IPC_EVENT_NAME_GET_LOCALE` (`"get-locale"`) — renderer → main: get system locale
+- `"files-added"` — renderer → main (send): batch started with count
+- `"file-processed"` — renderer → main (send): one file done
+- `"all-files-processed"` — renderer → main (send): batch complete
+- `"file-open-add-files"` — main → renderer (send): paths from file dialog
+- `"get-locale"` — renderer → main (invoke): get system locale string
+- `"get-i18n-strings"` — renderer → main (invoke): get full i18n dictionary
+- `"exif:read"` — renderer → main (invoke): read metadata for one file
+- `"exif:remove"` — renderer → main (invoke): strip metadata from one file
 
 ### Styles (`src/styles/`)
 
@@ -109,14 +121,15 @@ static/              Source assets
   icon.svg           1024x1024 vector logo (source for all icon formats)
 
 src/
-  main/              15 files — Electron main process
-  renderer/          14 TS files + index.html — UI logic
-  common/            8 files — shared between processes
+  main/              16 files — Electron main process (incl. exif_handlers.ts)
+  preload/           2 files — contextBridge API (index.ts + api_types.ts)
+  renderer/          12 TS files + index.html + env.d.ts — sandboxed UI
+  common/            8 files — shared (i18n_lookup.ts is pure, others Node-dependent)
   styles/            11 CSS files — theming and layout
   types/             1 file — node-exiftool type definitions
 ```
 
-Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `electron.vite.config.ts` (build config for main + renderer), `tsconfig.json` (strict, ES2021 target, bundler moduleResolution), `update_exiftool.pl` (Perl, downloads+verifies exiftool binaries).
+Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `electron.vite.config.ts` (build config for main + preload + renderer), `tsconfig.json` (strict, ES2021 target, bundler moduleResolution), `update_exiftool.pl` (Perl, downloads+verifies exiftool binaries).
 
 ## Build & Release Procedures
 
@@ -128,8 +141,9 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 
 `yarn compile` → `electron-vite build` → outputs to `out/`:
 
-- `out/main/index.js` — main process bundle (~18 kB)
-- `out/renderer/index.html` + `assets/index-*.js` + `assets/index-*.css` — renderer bundle
+- `out/main/index.js` — main process bundle (~20 kB)
+- `out/preload/index.js` — preload script (~1 kB)
+- `out/renderer/index.html` + `assets/index-*.js` + `assets/index-*.css` — renderer bundle (~8 kB)
 
 ### Packaging
 
@@ -157,14 +171,14 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 ## Code Patterns
 
 - **Exports**: Named exports only — no default exports anywhere in codebase
-- **Async**: Promise `.then()` chains preferred over async/await; `.finally()` for cleanup; `.catch()` often swallows errors silently
-- **File processing**: Generator function `filePath()` yields paths, consumed by recursive `processFile()` that distributes work across ExifTool process pool
+- **Async**: `async`/`await` in renderer, `.finally()` for cleanup
+- **File processing**: `addFiles()` maps file paths to `Promise.all()`, each file processed sequentially (read → remove → read after) via IPC to main process exiftool
 - **DOM**: Pure native API — `createElement()`, `querySelector()`, `querySelectorAll('[i18n]')`, `classList.add/remove`, `appendChild`
-- **IPC convention**: Event constants exported from the module that sets up the listener (e.g., `EVENT_FILES_ADDED` from `dock.ts`). `ipcMain.handle`/`ipcRenderer.invoke` for request-response, `ipcMain.on`/`ipcRenderer.send` for fire-and-forget
+- **IPC convention**: Event constants in `common/ipc_events.ts`. Renderer accesses IPC only through `window.api.*` (contextBridge). `ipcMain.handle`/`ipcRenderer.invoke` for request-response, `ipcMain.on`/`ipcRenderer.send` for fire-and-forget
 - **Platform guards**: Early-return pattern — `if (!isMac()) return;`
 - **TypeScript**: `strict: true` — strong null checks, no implicit any. Explicit `any` kept only for truly dynamic exiftool metadata. Custom `.d.ts` for `node-exiftool` with named result interfaces
 - **CSS**: Custom properties in `vars.css` (spacing scale `--unit-1` through `--unit-16`, color tokens), flat class names currently — migrating to BEM in design overhaul (Phase 9), dark mode via `@media (prefers-color-scheme: dark)`, pure CSS popovers/animations (no JS animation libs)
-- **i18n**: HTML `i18n` attribute + `strings.json` dictionary → renderer calls `setupI18n()` which queries all `[i18n]` elements → locale fallback chain: regional (e.g. `zh-CN`) → base (`zh`) → English
+- **i18n**: HTML `i18n` attribute + `strings.json` dictionary → renderer `setupI18n()` fetches strings from main via IPC, caches locally, queries all `[i18n]` elements → locale fallback chain: regional (e.g. `zh-CN`) → base (`zh`) → English
 - **Resource paths**: `resourcesPath()` returns `.resources/` in dev, `process.resourcesPath` in production — used by `binaries.ts` and `i18n.ts`
 
 ## Dependencies
@@ -180,12 +194,12 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 
 | Package | Version | Purpose | Notes |
 | --- | --- | --- | --- |
-| `electron` | ^11.0 | App framework | Severely outdated (current: 35+) |
+| `electron` | ^35.0 | App framework | contextIsolation + sandbox enabled |
 | `electron-builder` | ^22.8 | Packaging/distribution | Works but outdated |
 | `electron-vite` | ^5.0.0 | Build system | Vite-based, replaces electron-webpack |
 | `vite` | ^7.3.1 | Module bundler/dev server | Powers electron-vite |
 | `typescript` | ~5.7.0 | Language compiler | `strict: true` enabled |
-| `@types/node` | ^12.0 | Node.js type defs | Matches Electron 11's Node 12.18 — upgrade with Electron in Chunk 3 |
+| `@types/node` | ^22.0 | Node.js type defs | Matches Electron 35's Node 22 |
 | `prettier` | ^3.0 | Code formatter | Trailing commas default to "all" |
 
 ## Code Conventions
@@ -238,8 +252,8 @@ A `.travis.yml` exists but is minimal (lint + `tsc` on Node 14/16, no builds, ma
 - 64 open issues, 8 open PRs
 - No CI/CD pipeline
 - No automated tests
-- **Completed**: Chunk 1 (electron-webpack → electron-vite), Chunk 2 (TypeScript 5.7 + strict + Prettier 3.x)
-- **Next**: Chunk 3 (Electron 11 → 35+), Chunk 4 (ESM), Chunk 5 (ExifTool update), Chunk 6 (dep cleanup)
+- **Completed**: Chunk 1 (electron-webpack → electron-vite), Chunk 2 (TypeScript 5.7 + strict + Prettier 3.x), Chunk 3 (Electron 11 → 35 + contextIsolation + preload)
+- **Next**: Chunk 4 (ESM), Chunk 5 (ExifTool update), Chunk 6 (dep cleanup)
 - See `devplans/` for detailed upgrade plans
 - See `.claude/rules/modernization-roadmap.md` for the master roadmap
 - See `.claude/rules/github-context.md` for community issues summary

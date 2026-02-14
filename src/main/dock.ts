@@ -88,7 +88,7 @@ function updateDockBounce(browserWindow: BrowserWindow | null): void {
 		return;
 	}
 
-	app.dock.bounce("critical");
+	app.dock?.bounce("critical");
 }
 
 // Window is flashed to inform the user that the window requires

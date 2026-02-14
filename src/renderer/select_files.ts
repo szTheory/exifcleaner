@@ -1,6 +1,3 @@
-import { ipcRenderer } from "electron";
-import { spawnExifToolProcesses } from "../common/exif_tool_processes";
-import { EVENT_ALL_FILES_PROCESSED } from "../common/ipc_events";
 import { addFiles } from "./add_files";
 import { hideEmptyPane } from "./empty_pane";
 import {
@@ -9,11 +6,10 @@ import {
 } from "./selected_files";
 
 export function selectFiles(filePaths: string[]): void {
-	if (filePaths.length == 0) {
+	if (filePaths.length === 0) {
 		return;
 	}
 
-	// show selected files display panel
 	hideEmptyPane();
 	eraseSelectedFilesPane();
 	showSelectedFilesPane();
@@ -22,9 +18,7 @@ export function selectFiles(filePaths: string[]): void {
 }
 
 async function processFiles(filePaths: string[]): Promise<void> {
-	const exifToolProcesses = spawnExifToolProcesses(filePaths.length);
-
-	addFiles(filePaths, exifToolProcesses).finally(() => {
-		ipcRenderer.send(EVENT_ALL_FILES_PROCESSED);
+	addFiles(filePaths).finally(() => {
+		window.api.files.notifyAllFilesProcessed();
 	});
 }

@@ -3,6 +3,7 @@ import packageJson from "../../package.json";
 import { setupApp } from "./app_setup";
 import { setupContextMenu } from "./context_menu";
 import { setupDockEventHandlers } from "./dock";
+import { setupExifHandlers } from "./exif_handlers";
 import { preloadI18nStrings } from "../common/i18n";
 import { setupI18nHandlers } from "../main/i18n";
 
@@ -13,6 +14,7 @@ function setupUserModelId(): void {
 export function init(browserWindow: BrowserWindow | null): void {
 	preloadI18nStrings();
 	setupI18nHandlers();
+	setupExifHandlers();
 	setupContextMenu();
 	setupDockEventHandlers(browserWindow);
 	setupUserModelId();

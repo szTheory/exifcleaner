@@ -39,7 +39,7 @@ function setupDockMenu(): void {
 		return;
 	}
 
-	app.dock.setMenu(dockMenu());
+	app.dock?.setMenu(dockMenu());
 }
 
 function setupUserTasksMenu(): void {
