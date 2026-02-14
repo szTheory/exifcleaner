@@ -1,6 +1,6 @@
 import { ipcRenderer } from "electron";
 import { spawnExifToolProcesses } from "../common/exif_tool_processes";
-import { EVENT_ALL_FILES_PROCESSED } from "../main/dock";
+import { EVENT_ALL_FILES_PROCESSED } from "../common/ipc_events";
 import { addFiles } from "./add_files";
 import { hideEmptyPane } from "./empty_pane";
 import {

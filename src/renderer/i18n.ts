@@ -1,6 +1,6 @@
 import { ipcRenderer } from "electron";
 import { preloadI18nStrings, i18n } from "../common/i18n";
-import { IPC_EVENT_NAME_GET_LOCALE } from "../main/i18n";
+import { IPC_EVENT_NAME_GET_LOCALE } from "../common/ipc_events";
 
 const ATTRIBUTE_I18N = "i18n";
 

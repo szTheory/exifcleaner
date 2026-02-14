@@ -214,6 +214,14 @@ Config is in `package.json` under `"build"`. App ID: `com.exifcleaner`.
 
 TypeScript config extends `electron-webpack/tsconfig-base.json`. Target: ES2019. See `tsconfig.json`.
 
+### Future: Docker for Packaging
+
+Cross-platform packaging will eventually be containerized with Docker for reproducible CI builds across all target platforms. Tracked as a future improvement after the build system migration.
+
+## Safety Rules
+
+- **NEVER push releases or publish packages to GitHub/npm.** All releases will be handled via CI in the future. Do not run `yarn publish`, `npm publish`, `gh release create`, or any command that pushes artifacts to GitHub releases.
+
 ## Security
 
 - v3.6.0 fixed XSS via crafted EXIF metadata (use `sanitize.ts` pattern for any exiftool output)

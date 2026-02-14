@@ -1,12 +1,3 @@
-import { isDev } from "../common/env";
-
-// electron-webpack HMR (Hot Module Reload)
-// to automatically reload code on save when
-// in development mode
-if (isDev() && module.hot) {
-	module.hot.accept();
-}
-
 // stylesheets
 // vars first
 import "../styles/vars.css";

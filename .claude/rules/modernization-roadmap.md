@@ -69,6 +69,7 @@ This is the sequenced plan for modernizing ExifCleaner. Phases are ordered by de
   - Cache exiftool downloads using `--cache-downloads-working-dir` flag (already supported by `update_exiftool.pl`)
   - Build artifacts for each platform
 - Consider adding automated smoke tests (currently only manual testing per README)
+- **Future improvement**: Containerize cross-platform packaging with Docker for reproducible builds. Eliminates need for native toolchains on dev machines and simplifies CI.
 
 ## Phase 6: Apple Silicon & Code Signing
 

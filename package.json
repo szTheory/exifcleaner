@@ -5,7 +5,7 @@
 	"description": "Clean exif metadata from images, videos, and PDF documents",
 	"license": "MIT",
 	"repository": "github:szTheory/exifcleaner",
-	"main": "src/main/index.js",
+	"main": "./out/main/index.js",
 	"author": {
 		"name": "szTheory",
 		"email": "szTheory@users.noreply.github.com",
@@ -16,7 +16,7 @@
 		"postinstall": "electron-builder install-app-deps",
 		"format": "yarn prettier --write 'src/**/*.ts'",
 		"lint": "prettier --check 'src/**/*.ts'",
-		"start": "electron .",
+		"start": "ELECTRON_RUN_AS_NODE= electron-vite preview",
 		"packmactest": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
 		"packwin": "yarn run compile && electron-builder --windows",
 		"packlinux": "yarn run compile && electron-builder --linux",
@@ -24,8 +24,8 @@
 		"build": "yarn run compile && electron-builder --macos --linux --windows",
 		"publish": "yarn run compile && electron-builder --macos --linux --windows -p always",
 		"release": "np",
-		"dev": "electron-webpack dev",
-		"compile": "electron-webpack"
+		"dev": "ELECTRON_RUN_AS_NODE= electron-vite dev",
+		"compile": "electron-vite build"
 	},
 	"dependencies": {
 		"node-exiftool": "2.3.0",
@@ -35,11 +35,10 @@
 		"@types/node": "^12.0",
 		"electron": "^11.0",
 		"electron-builder": "^22.8",
-		"electron-webpack": "^2.8",
-		"electron-webpack-ts": "^4.0",
+		"electron-vite": "^5.0.0",
 		"prettier": "2.1",
 		"typescript": "^3.8",
-		"webpack": "^4.41"
+		"vite": "^7.3.1"
 	},
 	"np": {
 		"publish": false,

@@ -3,9 +3,12 @@ import { defaultBrowserWindow } from "../common/browser_window";
 import { isMac, isWindows } from "../common/platform";
 import { checkmarkPath } from "../common/resources";
 
-export const EVENT_FILES_ADDED = "files-added";
-export const EVENT_FILE_PROCESSED = "file-processed";
-export const EVENT_ALL_FILES_PROCESSED = "all-files-processed";
+import {
+	EVENT_FILES_ADDED,
+	EVENT_FILE_PROCESSED,
+	EVENT_ALL_FILES_PROCESSED,
+} from "../common/ipc_events";
+export { EVENT_FILES_ADDED, EVENT_FILE_PROCESSED, EVENT_ALL_FILES_PROCESSED };
 
 let batchCount = 0;
 let remainingCount = 0;

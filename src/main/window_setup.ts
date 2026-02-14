@@ -1,7 +1,5 @@
 import { BrowserWindow, app } from "electron";
-import url from "url";
 import path from "path";
-import { isDev } from "../common/env";
 import { isMac, isWindows } from "../common/platform";
 import { iconPath } from "../common/resources";
 
@@ -38,25 +36,12 @@ function windowsStopFlashingFrameOnFocus(browserWindow: BrowserWindow) {
 	browserWindow.once("focus", () => browserWindow.flashFrame(false));
 }
 
-function urlForLoad() {
-	if (isDev()) {
-		const port = process.env.ELECTRON_WEBPACK_WDS_PORT;
-		if (!port) {
-			throw "No Electron webpack WDS port set for dev. Try running `yarn run dev` instead for development mode.";
-		}
-
-		return `http://localhost:${port}`;
-	} else {
-		return url.format({
-			pathname: path.join(__dirname, "index.html"),
-			protocol: "file",
-			slashes: true,
-		});
-	}
-}
-
 function mainWindowLoadUrl(browserWindow: BrowserWindow) {
-	browserWindow.loadURL(urlForLoad());
+	if (!app.isPackaged && process.env["ELECTRON_RENDERER_URL"]) {
+		browserWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
+	} else {
+		browserWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
+	}
 }
 
 const WINDOW_BACKGROUND_COLOR = "#F5F6F8";

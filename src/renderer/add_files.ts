@@ -1,6 +1,6 @@
 import { ipcRenderer } from "electron";
 import { ExiftoolProcess } from "node-exiftool";
-import { EVENT_FILE_PROCESSED, EVENT_FILES_ADDED } from "../main/dock";
+import { EVENT_FILE_PROCESSED, EVENT_FILES_ADDED } from "../common/ipc_events";
 import { displayExifBeforeClean, displayExifAfterClean } from "./display_exif";
 import { removeExif } from "./exif_remove";
 import { addTableRow } from "./table_add_row";
@@ -38,7 +38,7 @@ async function processFile(
 			return exifToolProcess.close();
 		}
 
-		const filePath = iteratorResult.value;
+		const filePath = iteratorResult.value as string;
 		const promise = addFile(filePath, exifToolProcess);
 
 		return processFile(filePathsIterator, exifToolProcess, promise);

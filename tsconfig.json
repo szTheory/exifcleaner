@@ -1,12 +1,16 @@
 {
-	"extends": "./node_modules/electron-webpack/tsconfig-base.json",
 	"compilerOptions": {
-		"target": "es2019",
-		"outDir": "./dist/",
+		"target": "ES2019",
+		"module": "CommonJS",
+		"moduleResolution": "node",
+		"outDir": "./out/",
 		"resolveJsonModule": true,
 		"forceConsistentCasingInFileNames": true,
-		"importHelpers": true,
-		"removeComments": true
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"removeComments": true,
+		"sourceMap": true,
+		"skipLibCheck": true
 	},
 	"include": ["./src/**/*.ts"]
 }

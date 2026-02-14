@@ -4,7 +4,8 @@ import {
 	restoreWindowAndFocus,
 } from "../common/browser_window";
 
-export const EVENT_FILE_OPEN_ADD_FILES = "file-open-add-files";
+import { EVENT_FILE_OPEN_ADD_FILES } from "../common/ipc_events";
+export { EVENT_FILE_OPEN_ADD_FILES };
 
 export function fileOpen(
 	browserWindow: BrowserWindow | undefined | null
