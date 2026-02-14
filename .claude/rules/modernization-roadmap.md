@@ -1,29 +1,21 @@
 # Modernization Roadmap
 
-This is the sequenced plan for modernizing ExifCleaner. Phases are ordered by dependency — each phase unblocks subsequent ones.
+This is the sequenced plan for modernizing ExifCleaner. Phases are ordered by the maintainer's priorities: **local app quality first, release infrastructure later**.
 
-## Phase 1: Replace Build System
+---
 
-**Why first**: `electron-webpack` and `electron-webpack-ts` are abandoned packages that pin us to Electron 11, TypeScript 3.8, and webpack 4. Nothing else can be upgraded until these are removed.
+## Phase 1: Replace Build System ✅ DONE
 
-**Context**: PR #160 attempted to upgrade to Electron 13 and remove electron-webpack but was blocked by ESM module loading issues. Electron 28+ now supports ESM natively, so this blocker is resolved.
-
-**Tasks**:
-
-- Remove `electron-webpack`, `electron-webpack-ts`, and `webpack` from devDependencies
-- Remove `electron-webpack.json` config file
-- Remove `tsconfig.json` extension of `electron-webpack/tsconfig-base.json`
-- Choose replacement: `electron-vite` (Vite-based, minimal config, good Electron support) is the recommended option
-- Configure separate entry points for main process and renderer process
-- Preserve HMR for dev mode
-- Ensure CSS imports continue to work (currently imported in `renderer/index.ts`)
-- Update all `package.json` scripts (`dev`, `compile`, `start`)
+- ✅ Removed `electron-webpack`, `electron-webpack-ts`, and `webpack`
+- ✅ Replaced with `electron-vite` 5.x + Vite 7.x + esbuild
+- ✅ Configured 3 build targets: main, preload, renderer
+- ✅ HMR preserved for dev mode
+- ✅ CSS imports work (imported in `renderer/index.ts`)
+- ✅ All `package.json` scripts updated (`dev`, `compile`, `start`)
 
 ## Phase 2: Upgrade Core Dependencies ✅ DONE
 
-**Completed**:
-
-- ✅ TypeScript 3.8 → 5.7 with `strict: true`
+- ✅ TypeScript 3.8 → 5.7 with `strict: true` + `verbatimModuleSyntax: true`
 - ✅ Prettier 2.1 → 3.x
 - ✅ Electron 11 → 35 with contextIsolation + sandbox + preload
 - ✅ @types/node ^12 → ^22
@@ -31,81 +23,80 @@ This is the sequenced plan for modernizing ExifCleaner. Phases are ordered by de
 - ✅ Preload script with contextBridge API (exif, i18n, files namespaces)
 - ✅ Exiftool operations moved from renderer to main process (single long-lived process)
 
-## Phase 3: Update ExifTool Binaries
+## Phase 3: ESM Module Support ✅ DONE
 
-**Why**: Issue #236. Current bundled exiftool is v12.25 (from May 2021). Security-critical — exiftool CVEs have been found before (CVE-2021-22204).
+- ✅ Added `"type": "module"` to package.json
+- ✅ Enabled `verbatimModuleSyntax: true` — enforces `import type` for type-only imports
+- ✅ Build output is ESM for all targets (main, preload, renderer)
+- ✅ `node-exiftool` CJS module works through esbuild's interop layer
 
-**Tasks**:
+---
 
-- Run `update_exiftool.pl` to pull latest binaries (requires Perl, Linux/macOS)
-- Verify checksums match official exiftool site
-- Test that metadata removal still works for all supported file types
-- Consider whether `node-exiftool` 2.3.0 wrapper still works with latest exiftool or needs updating
+## Phase 4: Verify + Cleanup
 
-## Phase 4: ESM Module Support
-
-**Why**: Issue #247. Modern Node/Electron support ESM. This enables using modern npm packages that are ESM-only.
+**Why**: Four chunks of infrastructure changes with zero automated tests. Before building anything new, confirm what works and clean up dead weight.
 
 **Tasks**:
 
-- Add `"type": "module"` to package.json (or use `.mts` extensions)
-- Convert `require()` calls to `import` statements (most already use `import` syntax thanks to TypeScript)
-- Ensure electron-vite handles ESM correctly for both processes
-- Test that `node-exiftool` works in ESM context
+- Manual walkthrough of every code path (drag-drop, File > Open, context menu, dark mode, packaged app)
+- **Remove `source-map-support`** from `dependencies` — never imported anywhere in source, dead weight. Modern Node 22 has built-in `--enable-source-maps`
+- **Delete `.travis.yml`** — tests Node 14/16, runs only lint + tsc, macOS disabled. Obsolete
+- Document any bugs found during walkthrough
 
-## Phase 5: GitHub Actions CI
+## Phase 5: Playwright E2E Tests
 
-**Why**: No CI exists. PR #174 has a community-contributed GitHub Actions config that was never merged.
-
-**Tasks**:
-
-- Review PR #174 for useful patterns
-- Set up GitHub Actions workflow:
-  - Build on all 3 platforms (macOS, Windows, Linux)
-  - Run Prettier lint check
-  - Cache exiftool downloads using `--cache-downloads-working-dir` flag (already supported by `update_exiftool.pl`)
-  - Build artifacts for each platform
-- Consider adding automated smoke tests (currently only manual testing per README)
-- **Future improvement**: Containerize cross-platform packaging with Docker for reproducible builds. Eliminates need for native toolchains on dev machines and simplifies CI.
-
-## Phase 6: Apple Silicon & Code Signing
-
-**Why**: Issue #198. macOS users on M1/M2/M3 need a universal binary. Currently x64 only.
+**Why**: Safety net BEFORE any refactoring or feature work. The DDD refactor will be gradual — every file move should pass the test suite. Every new feature should get a test.
 
 **Tasks**:
 
-- Configure electron-builder for universal macOS builds (`target: "universal"`)
-- Set up code signing for macOS (requires Apple Developer certificate)
-- Set up code signing for Windows (optional but reduces false positives — issue #262 reports VirusTotal flags)
-- Ensure GitHub Actions CI produces signed artifacts
-- Generate and publish checksums for all release artifacts (issue #141 — Linux RPM checksum missing)
+- Add `@playwright/test` as devDependency
+- Create test fixtures (small JPEG with EXIF, PNG without EXIF, PDF, MP4)
+- Write core tests:
+  - App launches, shows empty state with i18n text
+  - Files process via IPC path (simulating drag-and-drop via `file-open-add-files`)
+  - Before-count > 0, after-count = 0, correct filename displayed
+  - Multiple files process and all complete
+  - Dark mode CSS applies with `prefers-color-scheme: dark`
+  - All `[i18n]` elements have non-empty text
+- Add `"test:e2e"` script to `package.json`
+- Target: < 30 seconds for full suite, zero flakey tests
 
-## Phase 7: Dependency Cleanup
+## Phase 6: DDD Architecture Refactor
 
-**Philosophy**: Hand-roll what you can. Prefer zero-dependency solutions. Only keep packages that provide genuine value that would be unreasonable to replicate. The goal is minimal production dependencies.
+**Why**: Clean layer boundaries make the codebase easier to extend and maintain. Gradual, not all-at-once — each step is a file-move PR that passes all E2E tests.
 
-**Tasks**:
+**Architecture**:
 
-- **Replace `node-exiftool`** with a thin hand-rolled wrapper around exiftool CLI — the current wrapper (2.3.0) is unmaintained and adds unnecessary abstraction over what is essentially `spawn` + JSON parsing
-- **Remove `source-map-support`** — modern Node.js (18+) has built-in `--enable-source-maps`, this dep is no longer needed
-- Run `npm audit` / `yarn audit` and resolve vulnerabilities
-- Remove any unused transitive dependencies introduced by old toolchain
-- Target: zero production dependencies (exiftool wrapper becomes internal code)
+- **Domain layer**: Core types, value objects, pure business logic (i18n lookup is already pure)
+- **Application layer**: Commands (strip metadata) and Queries (read metadata)
+- **Infrastructure layer**: ExifTool binary wrapper, file I/O, Electron APIs
+- **Presentation layer**: Renderer DOM, preload bridge
 
-## Phase 8: Community Issues (High Priority)
+**Principles**: SRP classes + dependency injection, functional programming for business logic, strong type system design (branded types, discriminated unions, `Result<T,E>`), no `any`.
 
-After the infrastructure is modernized, address the most-requested features:
+**Suggested sequence**:
 
-- **Language switching from menu** (issue #244, labeled high priority) — allow users to change language without changing system locale
-- **Preserve rotation/orientation metadata** (issues #209, #234) — option to keep EXIF orientation tag so images don't flip
-- **Extended filesystem attributes** (issue #86, labeled high priority) — remove macOS xattr/mdls metadata
+1. Extract domain types — `src/domain/` with value objects (`FilePath`, `ExifData`, `ProcessingResult`), enums (`Platform`, `Locale`). Move pure logic out of `common/`
+2. Extract infrastructure layer — exif handlers → `src/infrastructure/exiftool/`, file dialog → `src/infrastructure/electron/`, resources/binaries → `src/infrastructure/filesystem/`
+3. Extract application layer — command/query objects: `StripMetadataCommand`, `ReadMetadataQuery`, `ExpandFolderQuery`
+4. Extract presentation layer — renderer → `src/presentation/renderer/`, preload → `src/presentation/preload/`
+
+## Phase 7: Community Features (High Priority)
+
+**Why**: After architecture is cleaner, ship the most-requested user features. Each feature gets a Playwright test.
+
+**Features**:
+
+- **Preserve rotation/orientation metadata** (issues #209, #234) — option to keep EXIF orientation tag so images don't flip. Highest user demand.
+- **Folder recursion** (issues #171, #231) — process all files inside a dropped folder. Requires new IPC channel (renderer is sandboxed, main process does `fs.readdirSync(path, { recursive: true })`)
+- **Language switching from menu** (issue #244, labeled high priority) — allow users to change language without changing system locale. Store preference, override `app.getLocale()`
+- **Extended filesystem attributes** (issue #86, labeled high priority) — remove macOS xattr/mdls metadata. Post-processing step: `xattr -cr <filepath>` guarded by `isMac()`
 - **WebP support verification** (issue #264) — WebP should already be supported via exiftool, may just need docs/testing
-- **Folder recursion** (issues #171, #231) — process all files inside a dropped folder
 - **Save as new file** (issues #218, #124) — option to output cleaned files separately instead of overwriting
 
-## Phase 9: UI/UX Design Overhaul
+## Phase 8: UI/UX Design Overhaul
 
-**Why**: The current UI is functional but visually dated. After infrastructure is modernized, give the app a polished, sleek design pass that feels native on every platform.
+**Why**: The current UI is functional but visually dated. After DDD separates the presentation layer cleanly and community features add new UI surface, do a single coherent visual design pass.
 
 **Design Principles**:
 
@@ -124,31 +115,69 @@ After the infrastructure is modernized, address the most-requested features:
 - **Dark mode refinement**: ensure dark mode looks intentionally designed, not just inverted colors
 - **Spacing and layout**: refine the CSS custom property scale, ensure consistent visual rhythm
 
-## Phase 10: Playwright E2E Tests
+---
 
-Deterministic, non-flakey, fast end-to-end tests using Playwright + Electron. Quality gate for all future changes. Tests cover drag-and-drop, file picker, UI states, i18n, dark mode. Target: < 30 seconds for full suite, zero flakey tests.
+## Phase 9: GitHub Actions CI
 
-## Phase 11: DDD Architecture Refactor
+**Why**: No CI exists. PR #174 has a community-contributed GitHub Actions config that was never merged. Now that E2E tests exist (Phase 5), CI has tests to run.
 
-Clean/hexagonal/DDD-style architecture with clear layer boundaries:
+**Tasks**:
 
-- **Application layer**: Commands (strip metadata, etc.) and Queries (read metadata, etc.)
-- **Domain layer**: Core types, value objects, pure business logic services
-- **Infrastructure layer**: ExifTool binary wrapper, file I/O, Electron APIs
-- **Presentation layer**: Renderer DOM, preload bridge
+- Review PR #174 for useful patterns
+- Set up GitHub Actions workflow:
+  - Build on all 3 platforms (macOS, Windows, Linux)
+  - Run Prettier lint check, typecheck, E2E tests
+  - Cache exiftool downloads using `--cache-downloads-working-dir` flag (already supported by `update_exiftool.pl`)
+  - Build artifacts for each platform
+- **Future improvement**: Containerize cross-platform packaging with Docker for reproducible builds
 
-Principles: SRP classes + dependency injection, functional programming for business logic, strong type system design (branded types, discriminated unions, `Result<T,E>`), no `any`.
+## Phase 10: Dependency Cleanup
 
-## Phase 12: CI Releases (No Auto-Update)
+**Why**: Hand-roll what you can. Target zero production dependencies. Benefits from DDD layer boundaries being in place (Phase 6) — the hand-rolled exiftool wrapper naturally lives in `src/infrastructure/exiftool/`.
 
-GitHub Actions CI for automated builds and testing. Releases are **never** auto-published — maintainer explicitly triggers them. **No auto-update** in the app (users are privacy-conscious, zero network traffic is a feature). SHASUMS256.txt for every release.
+**Tasks**:
+
+- **Replace `node-exiftool`** with a thin hand-rolled wrapper around exiftool CLI — the current wrapper (2.3.0) is unmaintained CJS and adds unnecessary abstraction over what is essentially `spawn` + JSON parsing
+- Run `npm audit` / `yarn audit` and resolve vulnerabilities
+- Remove any unused transitive dependencies
+- Target: zero production dependencies (exiftool wrapper becomes internal code)
+
+## Phase 11: ExifTool Binary Update
+
+**Why**: Issue #236. Current bundled exiftool is v12.25 (from May 2021). Security-critical — exiftool CVEs have been found before (CVE-2021-22204). Deferred until CI + tests are in place to catch regressions.
+
+**Tasks**:
+
+- Run `update_exiftool.pl` to pull latest binaries (requires Perl, Linux/macOS)
+- Verify checksums match official exiftool site
+- Run E2E tests — confirm all pass
+- Run CI — confirm builds on all platforms
+- Test that metadata removal still works for all supported file types
+
+## Phase 12: Apple Silicon & Code Signing
+
+**Why**: Issue #198. macOS users on M1/M2/M3 need a universal binary. Currently x64 only. Requires CI (Phase 9) and Apple Developer certificate.
+
+**Tasks**:
+
+- Configure electron-builder for universal macOS builds (`target: "universal"`)
+- Set up code signing for macOS (requires Apple Developer certificate)
+- Set up code signing for Windows (optional but reduces false positives — issue #262 reports VirusTotal flags)
+- Ensure GitHub Actions CI produces signed artifacts
+- Generate and publish checksums for all release artifacts (issue #141 — Linux RPM checksum missing)
+
+## Phase 13: CI Releases (No Auto-Update)
+
+**Why**: The final "ship it" phase. Everything else must be done first. Releases are **never** auto-published — maintainer explicitly triggers them. **No auto-update** in the app (users are privacy-conscious, zero network traffic is a feature). SHASUMS256.txt for every release.
+
+---
 
 ## Key Constraints
 
 - Keep the app simple — this is a focused tool, avoid feature bloat
 - **Minimize dependencies** — prefer hand-rolling over npm packages; target zero production deps
 - No JS frameworks — vanilla TypeScript/CSS is a deliberate design choice
-- **BEM CSS naming** — all new CSS must use BEM convention (Phase 9 migrates existing)
+- **BEM CSS naming** — all new CSS must use BEM convention (Phase 8 migrates existing)
 - **System fonts only** — no web font downloads, no bundled fonts
 - **Respect motion preferences** — wrap animations in `prefers-reduced-motion` media query
 - Support Windows, macOS, and Linux
