@@ -29,10 +29,7 @@
 		"dev:debug": "ELECTRON_RUN_AS_NODE= electron-vite dev --remote-debugging-port=9222",
 		"compile": "electron-vite build"
 	},
-	"dependencies": {
-		"node-exiftool": "2.3.0",
-		"source-map-support": "^0.5"
-	},
+	"dependencies": {},
 	"devDependencies": {
 		"@types/node": "^22",
 		"electron": "^35",

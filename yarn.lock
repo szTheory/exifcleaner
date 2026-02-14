@@ -1047,11 +1047,6 @@ caniuse-lite@^1.0.30001759:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001769.tgz#1ad91594fad7dc233777c2781879ab5409f7d9c2"
   integrity sha512-BCfFL1sHijQlBGWBMuJyhZUhzo7wer5sVj9hqekB/7xn0Ypy+pER/edCYQm4exbXj4WiySGp40P8UuTh6w1srg==
 
-catchment@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/catchment/-/catchment-1.0.0.tgz#3061f71be0102710be84328d2f94363a165f8c4b"
-  integrity sha1-MGH3G+AQJxC+hDKNL5Q2OhZfjEs=
-
 chalk@^2.4.2:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.2.tgz#cd42541677a54333cf541a49108c1432b44c9424"
@@ -1815,11 +1810,6 @@ is-path-inside@^3.0.2:
   resolved "https://registry.yarnpkg.com/is-path-inside/-/is-path-inside-3.0.3.tgz#d231362e53a07ff2b0e0ea7fed049161ffd16283"
   integrity sha512-Fd4gABb+ycGAmKou8eMftCupSir5lRxqf4aD/vd0cD2qc4HL07OjCeuHMr8Ro4CoMaeCKDB0/ECBOVWjTwUvPQ==
 
-is-stream@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/is-stream/-/is-stream-1.1.0.tgz#12d4a3dd4e68e0b79ceb8dbc84173ae80d91ca44"
-  integrity sha1-EtSj3U5o4Lec6428hBc66A2RykQ=
-
 is-typedarray@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-typedarray/-/is-typedarray-1.0.0.tgz#e479c80858df0c1b11ddda6940f96011fcda4a9a"
@@ -1984,11 +1974,6 @@ make-dir@^3.0.0:
   dependencies:
     semver "^6.0.0"
 
-makepromise@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/makepromise/-/makepromise-1.0.0.tgz#bc6bb6a3e06fd706df51c2923b6936fabd70aa7f"
-  integrity sha1-vGu2o+Bv1wbfUcKSO2k2+r1wqn8=
-
 matcher@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/matcher/-/matcher-3.0.0.tgz#bd9060f4c5b70aa8041ccc6f80368760994f30ca"
@@ -2037,15 +2022,6 @@ node-addon-api@^1.6.3:
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-1.7.2.tgz#3df30b95720b53c24e59948b49532b662444f54d"
   integrity sha512-ibPK3iA+vaY1eEjESkQkM0BbCqFOaZMiXRTtdB0u7b4djtY6JnsjvPdUHVMg6xQt3B8fpTTWHI9A+ADjM9frzg==
-
-node-exiftool@2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/node-exiftool/-/node-exiftool-2.3.0.tgz#d5142d34de6f1683b4655198b648e7e3ee6e80ac"
-  integrity sha1-1RQtNN5vFoO0ZVGYtkjn4+5ugKw=
-  dependencies:
-    is-stream "1.1.0"
-    restream "1.2.0"
-    wrote "0.6.1"
 
 node-releases@^2.0.27:
   version "2.0.27"
@@ -2236,11 +2212,6 @@ responselike@^2.0.0:
   dependencies:
     lowercase-keys "^2.0.0"
 
-restream@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/restream/-/restream-1.2.0.tgz#fd13b031a54e80cc65d1878c43149f1b3a40efbb"
-  integrity sha1-/ROwMaVOgMxl0YeMQxSfGzpA77s=
-
 rimraf@^3.0.0:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-3.0.2.tgz#f1a5402ba6220ad52cc1282bac1ae3aa49fd061a"
@@ -2381,7 +2352,7 @@ source-map-js@^1.2.1:
   resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.2.1.tgz#1ce5650fddd87abc099eda37dcff024c2667ae46"
   integrity sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==
 
-source-map-support@^0.5, source-map-support@^0.5.19:
+source-map-support@^0.5.19:
   version "0.5.19"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.19.tgz#a98b62f86dcaf4f67399648c085291ab9e8fed61"
   integrity sha512-Wonm7zOCIJzBGQdB+thsPar0kYuCIzYvxZwlBa87yi/Mdjv7Tip2cyVbLj5o0cFPN4EVkuTwb3GDDyUx2DGnGw==
@@ -2670,14 +2641,6 @@ write-file-atomic@^3.0.0:
     is-typedarray "^1.0.0"
     signal-exit "^3.0.2"
     typedarray-to-buffer "^3.1.5"
-
-wrote@0.6.1:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/wrote/-/wrote-0.6.1.tgz#eff11efdd6f18424a70baea2df4322af375b8fbe"
-  integrity sha1-7/Ee/dbxhCSnC66i30Mirzdbj74=
-  dependencies:
-    catchment "1.0.0"
-    makepromise "1.0.0"
 
 xdg-basedir@^4.0.0:
   version "4.0.0"

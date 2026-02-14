@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import { ExiftoolProcess } from "node-exiftool";
+import { ExiftoolProcess } from "../infrastructure/exiftool/ExiftoolProcess";
 import { exiftoolBinPath } from "../common/binaries";
 
 const EXIFTOOL_ARGS_GET = [
