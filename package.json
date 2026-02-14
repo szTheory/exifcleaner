@@ -26,6 +26,7 @@
 		"publish": "yarn run compile && electron-builder --macos --linux --windows -p always",
 		"release": "np",
 		"dev": "ELECTRON_RUN_AS_NODE= electron-vite dev",
+		"dev:debug": "ELECTRON_RUN_AS_NODE= electron-vite dev --remote-debugging-port=9222",
 		"compile": "electron-vite build"
 	},
 	"dependencies": {
@@ -132,5 +133,6 @@
 				]
 			}
 		]
-	}
+	},
+	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

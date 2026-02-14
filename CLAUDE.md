@@ -16,6 +16,7 @@ Cross-platform Electron desktop app to strip EXIF/metadata from images, videos, 
 
 ```bash
 yarn dev              # Dev mode with HMR (electron-vite dev server)
+yarn dev:debug        # Dev mode + Chrome DevTools Protocol on port 9222 (for MCP)
 yarn compile          # Build with electron-vite (esbuild)
 yarn format           # Format code with Prettier
 yarn lint             # Check formatting with Prettier
@@ -28,6 +29,15 @@ yarn publish          # Build all + publish to GitHub releases
 
 yarn run update-exiftool  # Update exiftool binaries (requires Perl, Linux/Mac only)
 ```
+
+## Debugging
+
+Chrome DevTools MCP is configured for AI-assisted debugging of the Electron app:
+
+1. Run `yarn dev:debug` (launches app with `--remote-debugging-port=9222`)
+2. Claude Code connects via the `chrome-devtools` MCP server to read console logs, take screenshots, evaluate JS
+
+MCP config is in `.claude.json` (project-scoped). The server uses `chrome-devtools-mcp` npm package with `--browser-url=http://127.0.0.1:9222`.
 
 ## Architecture
 
@@ -142,7 +152,7 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 `yarn compile` → `electron-vite build` → outputs to `out/`:
 
 - `out/main/index.js` — main process bundle (~20 kB)
-- `out/preload/index.mjs` — preload script (~1 kB, ESM)
+- `out/preload/index.cjs` — preload script (~1 kB, CJS — Electron sandbox requires CJS)
 - `out/renderer/index.html` + `assets/index-*.js` + `assets/index-*.css` — renderer bundle (~8 kB)
 
 ### Packaging
@@ -206,7 +216,7 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 
 - **Formatting**: Prettier with tabs (not spaces), configured in `.prettierrc`
 - **No frameworks**: Pure vanilla DOM manipulation, no React/Vue/Angular
-- **Module style**: Full ESM — `"type": "module"` in package.json, `verbatimModuleSyntax` enforced, build output is ESM for all targets
+- **Module style**: Full ESM — `"type": "module"` in package.json, `verbatimModuleSyntax` enforced, build output is ESM for main + renderer, CJS for preload (Electron sandbox requires CJS)
 - **Naming**: snake_case for filenames, camelCase for functions/variables
 - **CSS naming**: Currently flat classes; migrating to BEM in Phase 9 (e.g. `.file-list__row--processing`)
 - **Fonts**: System font stack only — no external font loading, no bundled fonts
@@ -253,7 +263,7 @@ A `.travis.yml` exists but is minimal (lint + `tsc` on Node 14/16, no builds, ma
 - No CI/CD pipeline
 - No automated tests
 - **Completed**: Chunk 1 (electron-webpack → electron-vite), Chunk 2 (TypeScript 5.7 + strict + Prettier 3.x), Chunk 3 (Electron 11 → 35 + contextIsolation + preload), Chunk 4 (ESM modules — verbatimModuleSyntax + type: module)
-- **Next**: Chunk 5 (ExifTool update), Chunk 6 (dep cleanup)
+- **Next**: Phase 4 (Verify + Cleanup), then Phase 5 (Playwright tests) — see `.claude/rules/modernization-roadmap.md`
 - See `devplans/` for detailed upgrade plans
 - See `.claude/rules/modernization-roadmap.md` for the master roadmap
 - See `.claude/rules/github-context.md` for community issues summary
