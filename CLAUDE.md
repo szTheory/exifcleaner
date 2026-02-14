@@ -85,9 +85,87 @@ Shared between main and renderer processes:
 ### Resources (`.resources/`)
 
 - `strings.json` — i18n translations (24 languages)
-- `nix/bin/exiftool` — macOS/Linux exiftool binary
-- `win/bin/exiftool.exe` — Windows exiftool binary
-- `icon.png`, `check.png` — app icons
+- `nix/bin/exiftool` — macOS/Linux exiftool binary (NOT in git — `.keep` placeholder only, run `update_exiftool.pl` to download)
+- `win/bin/exiftool.exe` — Windows exiftool binary (same — `.keep` placeholder only)
+- `icon.png` (15KB), `check.png` (133B) — app and checkmark icons
+
+## Directory Reference
+
+```text
+.resources/          Runtime resources bundled into app
+  strings.json       i18n dictionary (30KB, 24 languages)
+  icon.png           App icon (15KB PNG)
+  check.png          Checkmark icon (133B PNG)
+  nix/bin/.keep      Placeholder for Unix exiftool binary
+  win/bin/.keep      Placeholder for Windows exiftool.exe
+
+build/               electron-builder packaging assets
+  icon.icns          macOS app icon (256KB)
+  icon.png           Generic icon (15KB)
+  background.png     DMG installer background
+  background@2x.png  DMG installer background (Retina)
+
+static/              Source assets
+  icon.svg           1024x1024 vector logo (source for all icon formats)
+
+src/
+  main/              15 files — Electron main process
+  renderer/          14 TS files + index.html — UI logic
+  common/            8 files — shared between processes
+  styles/            11 CSS files — theming and layout
+  types/             1 file — node-exiftool type definitions
+```
+
+Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `electron-webpack.json` (renderer template path), `tsconfig.json` (extends electron-webpack base, target ES2019), `update_exiftool.pl` (Perl, downloads+verifies exiftool binaries).
+
+## Build & Release Procedures
+
+### Dev Workflow
+
+`yarn dev` → `electron-webpack dev` → starts webpack dev server on dynamic port → sets `ELECTRON_WEBPACK_WDS_PORT` → main process loads `http://localhost:{port}`. Both processes support HMR via `module.hot.accept()`.
+
+### Compilation
+
+`yarn compile` → `electron-webpack` → outputs to `dist/`:
+
+- `dist/main/index.js` — main process bundle
+- `dist/renderer/index.js` + `index.html` — renderer bundle
+
+### Packaging
+
+`yarn pack{mac,win,linux}` = `yarn compile && electron-builder --{platform}`. Mac pack adds `-c.mac.identity=null` to skip code signing. Test build: `yarn packmactest` uses `--dir` (no DMG) with store compression.
+
+### Release Process (Two Steps)
+
+1. `yarn release` → runs `np` → prompts for version → bumps `package.json` → git commit + tag → pushes → creates GitHub release draft
+2. `yarn publish` → `yarn compile && electron-builder --macos --linux --windows -p always` → builds all platforms → uploads artifacts to GitHub release → manually remove draft flag on GitHub
+
+### ExifTool Binary Update
+
+`update_exiftool.pl` (Perl script):
+
+1. Fetches checksums from `https://exiftool.org/checksums.txt`
+2. Downloads source tarball (Unix) and zip (Windows) to `exiftool_downloads/`
+3. Verifies SHA1 checksums (dies on mismatch)
+4. Extracts and copies: Unix `exiftool` + `lib/` → `.resources/nix/bin/`, Windows `.exe` → `.resources/win/bin/`
+5. Flag `--cache-downloads-working-dir` preserves downloads between runs (useful for CI)
+
+### Postinstall
+
+`electron-builder install-app-deps` runs after `yarn install` — rebuilds native modules for Electron's Node version.
+
+## Code Patterns
+
+- **Exports**: Named exports only — no default exports anywhere in codebase
+- **Async**: Promise `.then()` chains preferred over async/await; `.finally()` for cleanup; `.catch()` often swallows errors silently
+- **File processing**: Generator function `filePath()` yields paths, consumed by recursive `processFile()` that distributes work across ExifTool process pool
+- **DOM**: Pure native API — `createElement()`, `querySelector()`, `querySelectorAll('[i18n]')`, `classList.add/remove`, `appendChild`
+- **IPC convention**: Event constants exported from the module that sets up the listener (e.g., `EVENT_FILES_ADDED` from `dock.ts`). `ipcMain.handle`/`ipcRenderer.invoke` for request-response, `ipcMain.on`/`ipcRenderer.send` for fire-and-forget
+- **Platform guards**: Early-return pattern — `if (!isMac()) return;`
+- **TypeScript**: Permissive — heavy `any` for exiftool metadata, explicit return types on public functions, custom `.d.ts` for `node-exiftool`, no strict null checks
+- **CSS**: Custom properties in `vars.css` (spacing scale `--unit-1` through `--unit-16`, color tokens), flat class names (no BEM), dark mode via `@media (prefers-color-scheme: dark)`, pure CSS popovers with transitions
+- **i18n**: HTML `i18n` attribute + `strings.json` dictionary → renderer calls `setupI18n()` which queries all `[i18n]` elements → locale fallback chain: regional (e.g. `zh-CN`) → base (`zh`) → English
+- **Resource paths**: `resourcesPath()` returns `.resources/` in dev, `process.resourcesPath` in production — used by `binaries.ts` and `i18n.ts`
 
 ## Dependencies
 
