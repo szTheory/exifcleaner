@@ -9,8 +9,9 @@ Cross-platform Electron desktop app to strip EXIF/metadata from images, videos, 
 - **Build**: electron-vite 5.x + Vite 7.x + esbuild (3 targets: main, preload, renderer)
 - **Packaging**: electron-builder 22.8 (produces .dmg, .AppImage, .deb, .rpm, .exe, portable)
 - **UI**: Vanilla HTML/CSS/TypeScript — no frameworks (React, Vue, etc.)
-- **Core dep**: `node-exiftool` 2.3.0 wrapping bundled exiftool Perl binaries
+- **ExifTool**: Hand-rolled wrapper in `src/infrastructure/exiftool/` wrapping bundled exiftool Perl binaries
 - **Formatting**: Prettier 3.x with tabs
+- **Dependencies**: Zero production dependencies — all external code is hand-rolled or in devDependencies
 
 ## Commands
 
@@ -49,7 +50,7 @@ Entry: `index.ts` → `init.ts` (i18n, exif handlers, context menu, dock, app ha
 
 - `app_setup.ts` — single instance lock, lifecycle events, exiftool cleanup on quit
 - `dock.ts` — IPC handlers for progress tracking, Mac dock badge, Windows taskbar flash
-- `exif_handlers.ts` — exiftool IPC handlers (`exif:read`, `exif:remove`), single long-lived exiftool process
+- `exif_handlers.ts` — exiftool IPC handlers (`exif:read`, `exif:remove`), uses hand-rolled `ExiftoolProcess` from infrastructure layer
 - `file_open.ts` — native file dialog
 - `menu*.ts` — menu bar templates (app, file, edit, view, window, help, dock)
 - `i18n.ts` — main process i18n, exposes locale and strings via IPC
@@ -88,6 +89,13 @@ Shared between processes (main imports Node-dependent files, renderer imports pu
 - `resources.ts` — resource path resolution (dev vs production)
 - `env.ts` — `isDev()` detection
 - `ipc_events.ts` — IPC channel name constants
+
+### Infrastructure (`src/infrastructure/`)
+
+Hand-rolled wrappers for external processes (main process only):
+
+- `exiftool/ExiftoolProcess.ts` — hand-rolled exiftool wrapper (~240 lines), implements `-stay_open` protocol with command queue, stdout buffering, graceful shutdown, 30s command timeout
+- `exiftool/types.ts` — TypeScript interfaces (`ExifToolResult`, `ExifToolCloseResult`)
 
 ### IPC Channels (8 total)
 
@@ -135,8 +143,8 @@ src/
   preload/           2 files — contextBridge API (index.ts + api_types.ts)
   renderer/          12 TS files + index.html + env.d.ts — sandboxed UI
   common/            8 files — shared (i18n_lookup.ts is pure, others Node-dependent)
+  infrastructure/    exiftool/ — hand-rolled ExifTool wrapper (ExiftoolProcess.ts + types.ts)
   styles/            11 CSS files — theming and layout
-  types/             1 file — node-exiftool type definitions
 ```
 
 Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `electron.vite.config.ts` (build config for main + preload + renderer), `tsconfig.json` (strict, verbatimModuleSyntax, ES2021 target, bundler moduleResolution), `update_exiftool.pl` (Perl, downloads+verifies exiftool binaries).
@@ -186,7 +194,7 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 - **DOM**: Pure native API — `createElement()`, `querySelector()`, `querySelectorAll('[i18n]')`, `classList.add/remove`, `appendChild`
 - **IPC convention**: Event constants in `common/ipc_events.ts`. Renderer accesses IPC only through `window.api.*` (contextBridge). `ipcMain.handle`/`ipcRenderer.invoke` for request-response, `ipcMain.on`/`ipcRenderer.send` for fire-and-forget
 - **Platform guards**: Early-return pattern — `if (!isMac()) return;`
-- **TypeScript**: `strict: true` + `verbatimModuleSyntax: true` — strong null checks, no implicit any, type-only imports enforced (`import type` or inline `type` keyword). Explicit `any` kept only for truly dynamic exiftool metadata. Custom `.d.ts` for `node-exiftool` with named result interfaces
+- **TypeScript**: `strict: true` + `verbatimModuleSyntax: true` — strong null checks, no implicit any, type-only imports enforced (`import type` or inline `type` keyword). Explicit `any` kept only for truly dynamic exiftool metadata
 - **CSS**: Custom properties in `vars.css` (spacing scale `--unit-1` through `--unit-16`, color tokens), flat class names currently — migrating to BEM in design overhaul (Phase 9), dark mode via `@media (prefers-color-scheme: dark)`, pure CSS popovers/animations (no JS animation libs)
 - **i18n**: HTML `i18n` attribute + `strings.json` dictionary → renderer `setupI18n()` fetches strings from main via IPC, caches locally, queries all `[i18n]` elements → locale fallback chain: regional (e.g. `zh-CN`) → base (`zh`) → English
 - **Resource paths**: `resourcesPath()` returns `.resources/` in dev, `process.resourcesPath` in production — used by `binaries.ts` and `i18n.ts`
@@ -195,10 +203,11 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 
 ### Production
 
-| Package | Version | Purpose | Notes |
-| --- | --- | --- | --- |
-| `node-exiftool` | 2.3.0 | ExifTool process wrapper | Core dependency, essential |
-| `source-map-support` | ^0.5 | Better stack traces for TS | May be removable with modern Node |
+**Zero production dependencies.** All external code is either in devDependencies (build tools, type definitions) or hand-rolled:
+
+- ExifTool wrapper: hand-rolled in `src/infrastructure/exiftool/` (~240 lines)
+- Replaced `node-exiftool` 2.3.0 (unmaintained since 2018, CJS bloat)
+- Removed `source-map-support` (obsolete with Node 22's built-in `--enable-source-maps`)
 
 ### Dev
 
@@ -262,8 +271,8 @@ A `.travis.yml` exists but is minimal (lint + `tsc` on Node 14/16, no builds, ma
 - 64 open issues, 8 open PRs
 - No CI/CD pipeline
 - No automated tests
-- **Completed**: Chunk 1 (electron-webpack → electron-vite), Chunk 2 (TypeScript 5.7 + strict + Prettier 3.x), Chunk 3 (Electron 11 → 35 + contextIsolation + preload), Chunk 4 (ESM modules — verbatimModuleSyntax + type: module)
-- **Next**: Phase 4 (Verify + Cleanup), then Phase 5 (Playwright tests) — see `.claude/rules/modernization-roadmap.md`
+- **Completed**: Chunk 1 (electron-webpack → electron-vite), Chunk 2 (TypeScript 5.7 + strict + Prettier 3.x), Chunk 3 (Electron 11 → 35 + contextIsolation + preload), Chunk 4 (ESM modules — verbatimModuleSyntax + type: module), Phase 4 (Verify + Cleanup), Chunk 6 (Zero production dependencies — hand-rolled ExifTool wrapper)
+- **Next**: Phase 5 (Playwright e2e tests), then Phase 6 (DDD architecture refactor) — see `.claude/rules/modernization-roadmap.md`
 - See `devplans/` for detailed upgrade plans
 - See `.claude/rules/modernization-roadmap.md` for the master roadmap
 - See `.claude/rules/github-context.md` for community issues summary

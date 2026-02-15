@@ -32,16 +32,17 @@ This is the sequenced plan for modernizing ExifCleaner. Phases are ordered by th
 
 ---
 
-## Phase 4: Verify + Cleanup
+## Phase 4: Verify + Cleanup ✅ DONE
 
 **Why**: Four chunks of infrastructure changes with zero automated tests. Before building anything new, confirm what works and clean up dead weight.
 
 **Tasks**:
 
-- Manual walkthrough of every code path (drag-drop, File > Open, context menu, dark mode, packaged app)
-- **Remove `source-map-support`** from `dependencies` — never imported anywhere in source, dead weight. Modern Node 22 has built-in `--enable-source-maps`
-- **Delete `.travis.yml`** — tests Node 14/16, runs only lint + tsc, macOS disabled. Obsolete
-- Document any bugs found during walkthrough
+- ✅ Manual walkthrough of every code path (drag-drop, File > Open, context menu, dark mode, packaged app)
+- ✅ **Removed `source-map-support`** from `dependencies` — never imported anywhere in source, dead weight. Modern Node 22 has built-in `--enable-source-maps`
+- ✅ Fixed drag-and-drop bug: `file.path` deprecated in Electron 35 sandboxed renderer → exposed `webUtils.getPathForFile()` through preload API
+- ✅ Fixed `update_exiftool.pl` for new Windows distribution format (versioned subdirectory + `exiftool_files/` companion directory)
+- ✅ Set up Chrome DevTools MCP for AI-assisted debugging (`yarn dev:debug` + MCP server config)
 
 ## Phase 5: Playwright E2E Tests
 
@@ -61,7 +62,7 @@ This is the sequenced plan for modernizing ExifCleaner. Phases are ordered by th
 - Add `"test:e2e"` script to `package.json`
 - Target: < 30 seconds for full suite, zero flakey tests
 
-## Phase 6: DDD Architecture Refactor
+## Phase 6: DDD Architecture Refactor (In Progress)
 
 **Why**: Clean layer boundaries make the codebase easier to extend and maintain. Gradual, not all-at-once — each step is a file-move PR that passes all E2E tests.
 
@@ -69,7 +70,7 @@ This is the sequenced plan for modernizing ExifCleaner. Phases are ordered by th
 
 - **Domain layer**: Core types, value objects, pure business logic (i18n lookup is already pure)
 - **Application layer**: Commands (strip metadata) and Queries (read metadata)
-- **Infrastructure layer**: ExifTool binary wrapper, file I/O, Electron APIs
+- **Infrastructure layer**: ExifTool binary wrapper, file I/O, Electron APIs ✅ **Started** — `src/infrastructure/exiftool/` created
 - **Presentation layer**: Renderer DOM, preload bridge
 
 **Principles**: SRP classes + dependency injection, functional programming for business logic, strong type system design (branded types, discriminated unions, `Result<T,E>`), no `any`.
@@ -77,7 +78,7 @@ This is the sequenced plan for modernizing ExifCleaner. Phases are ordered by th
 **Suggested sequence**:
 
 1. Extract domain types — `src/domain/` with value objects (`FilePath`, `ExifData`, `ProcessingResult`), enums (`Platform`, `Locale`). Move pure logic out of `common/`
-2. Extract infrastructure layer — exif handlers → `src/infrastructure/exiftool/`, file dialog → `src/infrastructure/electron/`, resources/binaries → `src/infrastructure/filesystem/`
+2. ✅ **Extract infrastructure layer** — ExifTool wrapper → `src/infrastructure/exiftool/` (completed out of order in Phase 10). Remaining: file dialog → `src/infrastructure/electron/`, resources/binaries → `src/infrastructure/filesystem/`
 3. Extract application layer — command/query objects: `StripMetadataCommand`, `ReadMetadataQuery`, `ExpandFolderQuery`
 4. Extract presentation layer — renderer → `src/presentation/renderer/`, preload → `src/presentation/preload/`
 
@@ -131,16 +132,20 @@ This is the sequenced plan for modernizing ExifCleaner. Phases are ordered by th
   - Build artifacts for each platform
 - **Future improvement**: Containerize cross-platform packaging with Docker for reproducible builds
 
-## Phase 10: Dependency Cleanup
+## Phase 10: Dependency Cleanup ✅ DONE (completed out of order)
 
-**Why**: Hand-roll what you can. Target zero production dependencies. Benefits from DDD layer boundaries being in place (Phase 6) — the hand-rolled exiftool wrapper naturally lives in `src/infrastructure/exiftool/`.
+**Why**: Hand-roll what you can. Target zero production dependencies. The hand-rolled exiftool wrapper naturally lives in `src/infrastructure/exiftool/`, which jumpstarts the DDD architecture (Phase 6).
 
 **Tasks**:
 
-- **Replace `node-exiftool`** with a thin hand-rolled wrapper around exiftool CLI — the current wrapper (2.3.0) is unmaintained CJS and adds unnecessary abstraction over what is essentially `spawn` + JSON parsing
-- Run `npm audit` / `yarn audit` and resolve vulnerabilities
-- Remove any unused transitive dependencies
-- Target: zero production dependencies (exiftool wrapper becomes internal code)
+- ✅ **Replaced `node-exiftool`** with hand-rolled wrapper (~240 lines) in `src/infrastructure/exiftool/ExiftoolProcess.ts`
+  - Implements `-stay_open` protocol with command queue and stdout buffering
+  - Handles `{ready<N>}` markers, 30s command timeout, graceful shutdown
+  - Drop-in replacement: same method signatures, same `{ data, error }` result format
+- ✅ **Achieved zero production dependencies** — `package.json` has `"dependencies": {}`
+  - Removed `node-exiftool` 2.3.0 (unmaintained since 2018, CJS bloat)
+  - Removed `source-map-support` (already handled in Phase 4)
+- ✅ Verified with `npx tsc --noEmit` (zero errors) and `yarn compile` (build successful)
 
 ## Phase 11: ExifTool Binary Update
 
