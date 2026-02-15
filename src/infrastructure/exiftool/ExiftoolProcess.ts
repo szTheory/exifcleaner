@@ -158,7 +158,6 @@ export class ExiftoolProcess {
 		}
 
 		const command = [
-			"-json",
 			...extraArgs,
 			...metadataArgs,
 			filePath,
@@ -220,31 +219,48 @@ export class ExiftoolProcess {
 				clearTimeout(pending.timeout);
 				this.pendingCommands.delete(executeNum);
 
-				try {
-					const parsed = JSON.parse(jsonStr);
-					// Check if the result contains an error
-					if (Array.isArray(parsed) && parsed.length > 0) {
-						const firstItem = parsed[0];
-						if (
-							firstItem &&
-							typeof firstItem === "object" &&
-							"Error" in firstItem
-						) {
-							pending.resolve({
-								data: null,
-								error: String(firstItem.Error),
-							});
+				// Check if output is JSON (starts with [ or {) or plain text
+				const isJson = jsonStr.trimStart().startsWith('[') || jsonStr.trimStart().startsWith('{');
+
+				if (isJson) {
+					try {
+						const parsed = JSON.parse(jsonStr);
+						// Check if the result contains an error
+						if (Array.isArray(parsed) && parsed.length > 0) {
+							const firstItem = parsed[0];
+							if (
+								firstItem &&
+								typeof firstItem === "object" &&
+								"Error" in firstItem
+							) {
+								pending.resolve({
+									data: null,
+									error: String(firstItem.Error),
+								});
+							} else {
+								pending.resolve({ data: parsed, error: null });
+							}
 						} else {
 							pending.resolve({ data: parsed, error: null });
 						}
-					} else {
-						pending.resolve({ data: parsed, error: null });
+					} catch (err) {
+						pending.resolve({
+							data: null,
+							error: `Failed to parse ExifTool output: ${err instanceof Error ? err.message : String(err)}`,
+						});
 					}
-				} catch (err) {
-					pending.resolve({
-						data: null,
-						error: `Failed to parse ExifTool output: ${err instanceof Error ? err.message : String(err)}`,
-					});
+				} else {
+					// Plain text response (e.g., from write operations)
+					// Check for error messages in the text
+					if (jsonStr.toLowerCase().includes('error')) {
+						pending.resolve({
+							data: null,
+							error: jsonStr.trim(),
+						});
+					} else {
+						// Success - return empty data with no error
+						pending.resolve({ data: null, error: null });
+					}
 				}
 			}
 		}

@@ -2,12 +2,8 @@ import { ipcMain } from "electron";
 import { ExiftoolProcess } from "../infrastructure/exiftool/ExiftoolProcess";
 import { exiftoolBinPath } from "../common/binaries";
 
-const EXIFTOOL_ARGS_GET = [
-	"charset filename=UTF8",
-	"-File:all",
-	"-ExifToolVersion",
-];
-const EXIFTOOL_ARGS_REMOVE = ["charset filename=UTF8", "overwrite_original"];
+const EXIFTOOL_ARGS_GET = ["-File:all", "-ExifToolVersion"];
+const EXIFTOOL_ARGS_REMOVE = ["-overwrite_original"];
 
 let exifProcess: ExiftoolProcess | null = null;
 let openPromise: Promise<number> | null = null;
