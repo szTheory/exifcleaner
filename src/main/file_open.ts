@@ -4,7 +4,7 @@ import {
 	restoreWindowAndFocus,
 } from "../common/browser_window";
 
-import { EVENT_FILE_OPEN_ADD_FILES } from "../common/ipc_events";
+import { EVENT_FILE_OPEN_ADD_FILES } from "../domain/ipc_channels";
 export { EVENT_FILE_OPEN_ADD_FILES };
 
 export function fileOpen(

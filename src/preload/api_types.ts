@@ -1,4 +1,4 @@
-import type { I18nStringsDictionary } from "../common/i18n_lookup";
+import type { I18nStringsDictionary } from "../domain/i18n_lookup";
 
 export type { I18nStringsDictionary };
 

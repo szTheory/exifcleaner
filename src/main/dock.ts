@@ -7,7 +7,7 @@ import {
 	EVENT_FILES_ADDED,
 	EVENT_FILE_PROCESSED,
 	EVENT_ALL_FILES_PROCESSED,
-} from "../common/ipc_events";
+} from "../domain/ipc_channels";
 export { EVENT_FILES_ADDED, EVENT_FILE_PROCESSED, EVENT_ALL_FILES_PROCESSED };
 
 let batchCount = 0;

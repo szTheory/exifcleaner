@@ -1,6 +1,7 @@
 import { ipcMain } from "electron";
 import { ExiftoolProcess } from "../infrastructure/exiftool/ExiftoolProcess";
 import { exiftoolBinPath } from "../common/binaries";
+import { cleanExifData } from "../domain/exif";
 
 const EXIFTOOL_ARGS_GET = ["-File:all", "-ExifToolVersion"];
 const EXIFTOOL_ARGS_REMOVE = ["-overwrite_original"];
@@ -48,13 +49,4 @@ export async function closeExifProcess(): Promise<void> {
 		exifProcess = null;
 		openPromise = null;
 	}
-}
-
-function cleanExifData(
-	exifHash: Record<string, unknown>,
-): Record<string, unknown> {
-	if (exifHash.SourceFile) delete exifHash.SourceFile;
-	if (exifHash.ImageSize) delete exifHash.ImageSize;
-	if (exifHash.Megapixels) delete exifHash.Megapixels;
-	return exifHash;
 }

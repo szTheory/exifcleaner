@@ -1,5 +1,5 @@
-import { i18nLookup } from "../common/i18n_lookup";
-import type { I18nStringsDictionary } from "../common/i18n_lookup";
+import { i18nLookup } from "../domain/i18n_lookup";
+import type { I18nStringsDictionary } from "../domain/i18n_lookup";
 
 const ATTRIBUTE_I18N = "i18n";
 let cachedStrings: I18nStringsDictionary | null = null;

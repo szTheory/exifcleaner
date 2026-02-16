@@ -1,7 +1,7 @@
 import { app, ipcMain } from "electron";
 import { i18n as i18nCommon, getI18nStrings } from "../common/i18n";
 
-import { IPC_EVENT_NAME_GET_LOCALE } from "../common/ipc_events";
+import { IPC_EVENT_NAME_GET_LOCALE } from "../domain/ipc_channels";
 export { IPC_EVENT_NAME_GET_LOCALE };
 
 export function i18n(key: string): string {
