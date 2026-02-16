@@ -2,7 +2,7 @@ import { dialog, BrowserWindow } from "electron";
 import {
 	defaultBrowserWindow,
 	restoreWindowAndFocus,
-} from "../common/browser_window";
+} from "../infrastructure/electron/browser_window";
 
 import { EVENT_FILE_OPEN_ADD_FILES } from "../domain/ipc_channels";
 export { EVENT_FILE_OPEN_ADD_FILES };

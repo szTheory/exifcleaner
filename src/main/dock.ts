@@ -1,7 +1,7 @@
 import { app, ipcMain, BrowserWindow, nativeImage } from "electron";
-import { defaultBrowserWindow } from "../common/browser_window";
+import { defaultBrowserWindow } from "../infrastructure/electron/browser_window";
 import { isMac, isWindows } from "../common/platform";
-import { checkmarkPath } from "../common/resources";
+import { checkmarkPath } from "../infrastructure/electron/resources";
 
 import {
 	EVENT_FILES_ADDED,

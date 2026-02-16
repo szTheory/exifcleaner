@@ -1,7 +1,7 @@
 import { BrowserWindow, app } from "electron";
 import path from "path";
 import { isMac, isWindows } from "../common/platform";
-import { iconPath } from "../common/resources";
+import { iconPath } from "../infrastructure/electron/resources";
 
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;

@@ -1,5 +1,5 @@
 import { app, ipcMain } from "electron";
-import { i18n as i18nCommon, getI18nStrings } from "../common/i18n";
+import { i18n as i18nCommon, getI18nStrings } from "../infrastructure/electron/i18n_strings";
 
 import { IPC_EVENT_NAME_GET_LOCALE } from "../domain/ipc_channels";
 export { IPC_EVENT_NAME_GET_LOCALE };

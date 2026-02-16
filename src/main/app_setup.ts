@@ -2,9 +2,8 @@ import { app, BrowserWindow } from "electron";
 import {
 	currentBrowserWindow,
 	restoreWindowAndFocus,
-} from "../common/browser_window";
+} from "../infrastructure/electron/browser_window";
 import { createMainWindow } from "./window_setup";
-import { closeExifProcess } from "./exif_handlers";
 import { isWindows } from "../common/platform";
 import { fileOpen } from "./file_open";
 
@@ -46,16 +45,13 @@ function createWindowOnActivate(browserWindow: BrowserWindow | null): void {
 	});
 }
 
-function closeExifOnQuit(): void {
-	app.on("will-quit", () => {
-		closeExifProcess();
-	});
-}
-
-export function setupApp(browserWindow: BrowserWindow | null): void {
+export function setupApp(
+	browserWindow: BrowserWindow | null,
+	{ onQuit }: { onQuit: () => void },
+): void {
 	preventMultipleAppInstances();
 	openMinimizedIfAlreadyExists(browserWindow);
 	quitOnWindowsAllClosed();
 	createWindowOnActivate(browserWindow);
-	closeExifOnQuit();
+	app.on("will-quit", onQuit);
 }

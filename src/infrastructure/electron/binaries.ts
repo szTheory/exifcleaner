@@ -1,5 +1,5 @@
 import path from "path";
-import { getPlatform, Platform } from "./platform";
+import { getPlatform, Platform } from "../../common/platform";
 import { resourcesPath } from "./resources";
 
 enum BinaryPlatformSubpath {
