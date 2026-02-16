@@ -12,7 +12,11 @@
 		"sourceMap": true,
 		"skipLibCheck": true,
 		"strict": true,
-		"verbatimModuleSyntax": true
+		"verbatimModuleSyntax": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitReturns": true,
+		"useUnknownInCatchVariables": true,
+		"noUncheckedIndexedAccess": true
 	},
 	"include": ["./src/**/*.ts"]
 }

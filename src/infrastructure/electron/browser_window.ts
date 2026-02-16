@@ -4,7 +4,7 @@ export function currentBrowserWindow(
 	browserWindow: BrowserWindow | null | undefined,
 ): BrowserWindow | null {
 	if (!browserWindow) {
-		browserWindow = BrowserWindow.getAllWindows()[0];
+		browserWindow = BrowserWindow.getAllWindows()[0] ?? null;
 	}
 
 	return browserWindow;

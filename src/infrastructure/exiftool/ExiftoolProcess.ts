@@ -198,7 +198,7 @@ export class ExiftoolProcess {
 		let match: RegExpExecArray | null;
 
 		while ((match = readyRegex.exec(this.stdoutBuffer)) !== null) {
-			const executeNum = parseInt(match[1], 10);
+			const executeNum = parseInt(match[1]!, 10);
 			const markerIndex = match.index;
 
 			// Extract JSON up to the marker
