@@ -1,8 +1,9 @@
 import { sanitizeHTML } from "./sanitize";
+import type { ExifData } from "../preload/api_types";
 
 export function updateRowWithExif(
 	tdNode: HTMLTableCellElement,
-	exifData: any,
+	exifData: ExifData,
 ): void {
 	// td
 	tdNode.textContent = "";
@@ -34,7 +35,7 @@ export function updateRowWithExif(
 	}
 }
 
-function buildExifString({ exifData }: { exifData: any }): string {
+function buildExifString({ exifData }: { exifData: ExifData }): string {
 	let str = "";
 
 	for (const [key, value] of Object.entries(exifData)) {
@@ -51,7 +52,7 @@ export function updateRowWithCleanerSpinner(trNode: HTMLTableRowElement): void {
 	// td
 	const tdNode = trNode.querySelector("td:nth-child(3)");
 	if (!tdNode) {
-		throw `Could not find table data cell element for row ${trNode}`;
+		throw new Error(`Could not find table data cell element for row ${trNode}`);
 	}
 
 	// spinner

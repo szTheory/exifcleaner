@@ -1,7 +1,7 @@
 export function hideEmptyPane(): void {
 	const pane = emptyPane();
 	if (!pane) {
-		throw "Could not find empty pane to hide";
+		throw new Error("Could not find empty pane to hide");
 	}
 
 	pane.classList.add("d-none");

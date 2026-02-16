@@ -184,7 +184,8 @@ export class ExiftoolProcess {
 
 			this.pendingCommands.set(executeNum, { resolve, reject, timeout });
 
-			// Write command to stdin
+			// Safe: process and stdin guaranteed non-null — sendCommand validates
+			// this.process !== null (line 126) and stdin exists on spawned processes
 			this.process!.stdin!.write(command + "\n");
 		});
 	}

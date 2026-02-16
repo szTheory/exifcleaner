@@ -16,7 +16,7 @@ function handleDropEvent(event: DragEvent): void {
 
 	const dataTransfer = event.dataTransfer;
 	if (!dataTransfer) {
-		throw "Error getting data transfer for drop event";
+		throw new Error("Error getting data transfer for drop event");
 	}
 	const fileList = dataTransfer.files;
 	const paths = filePaths(fileList);

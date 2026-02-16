@@ -45,7 +45,7 @@ export function addTableRow(filePath: string): HTMLTableRowElement {
 	// add tr to list
 	const list = selectedFilesList();
 	if (!list) {
-		throw "Error while retrieving selected files list element";
+		throw new Error("Error while retrieving selected files list element");
 	}
 	list.appendChild(trNode);
 
