@@ -12,6 +12,7 @@ Cross-platform Electron desktop app to strip EXIF/metadata from images, videos, 
 - **ExifTool**: Hand-rolled wrapper in `src/infrastructure/exiftool/` wrapping bundled exiftool Perl binaries
 - **Formatting**: Prettier 3.x with tabs
 - **Dependencies**: Zero production dependencies — all external code is hand-rolled or in devDependencies
+- **Performance**: Processing speed is a core product value — the app must handle hundreds of files in seconds. Never add latency to the file processing pipeline.
 
 ## Commands
 
@@ -234,6 +235,7 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 - **Platform code**: guard with `isMac()` / `isWindows()` / `isLinux()` from `common/platform.ts`
 - **Security**: always use `sanitize()` from `renderer/sanitize.ts` for exiftool output (XSS prevention)
 - **i18n**: add translations to `.resources/strings.json`, use `i18n("key")` in main or `i18n` HTML attribute in renderer
+- **Performance is sacred**: ExifCleaner's speed is a core competitive advantage. The app processes hundreds of files in seconds via ExifTool's `-stay_open` mode. Never add per-file overhead (no unnecessary IPC round-trips, no sync I/O in the processing loop, no heavy DOM operations per row). Batch operations should feel instant. If a design choice conflicts with speed, speed wins.
 
 ## Build & Packaging
 

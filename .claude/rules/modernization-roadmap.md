@@ -190,3 +190,4 @@ This is the sequenced plan for modernizing ExifCleaner. Phases are ordered by th
 - ExifTool binaries must be bundled (no runtime download requirement)
 - **NEVER auto-publish releases** — CI builds artifacts, maintainer publishes manually
 - **NEVER enable auto-update** — no network traffic in production, ever
+- **Performance is sacred** — ExifCleaner processes hundreds of files in seconds; never add per-file latency to the processing pipeline
