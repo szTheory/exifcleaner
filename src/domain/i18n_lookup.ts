@@ -2,17 +2,31 @@
 // Safe for renderer, preload, and main.
 
 export enum Locale {
+	Arabic = "ar",
+	Catalan = "ca",
 	Chinese = "zh",
+	Croatian = "hr",
+	Czech = "cs",
+	Danish = "da",
+	Dutch = "nl",
 	English = "en",
 	French = "fr",
 	German = "de",
+	Hungarian = "hu",
 	Italian = "it",
 	Japanese = "ja",
+	Malayalam = "ml",
+	Persian = "fa",
 	Polish = "pl",
 	Portuguese = "pt",
+	PortugueseBR = "pt-BR",
 	Russian = "ru",
+	Slovak = "sk",
 	Spanish = "es",
-	Hungarian = "hu",
+	Swedish = "sv",
+	Turkish = "tr",
+	Ukrainian = "uk",
+	Vietnamese = "vn",
 }
 
 export type I18nStringSet = {
@@ -63,8 +77,9 @@ export function fallbackLocale(locale: string): string {
 		case "de-DE": //German (Germany)
 			return Locale.German;
 
-		case "pt-BR": //Portuguese (Brazil)
-		case "pt-PT": //Portuguese (Portugal)
+		case "pt-BR": // Portuguese (Brazil) -- has its own translations
+			return Locale.PortugueseBR;
+		case "pt-PT": // Portuguese (Portugal)
 			return Locale.Portuguese;
 
 		case "it-CH": //Italian (Switzerland)
@@ -73,6 +88,12 @@ export function fallbackLocale(locale: string): string {
 
 		case "es-419": //Spanish (Latin America)
 			return Locale.Spanish;
+
+		case "hr-HR": // Croatian (Croatia)
+			return Locale.Croatian;
+
+		case "vi": // Vietnamese (Electron reports "vi", strings.json uses "vn")
+			return Locale.Vietnamese;
 
 		default:
 			//default to English
