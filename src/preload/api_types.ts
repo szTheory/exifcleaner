@@ -26,6 +26,13 @@ export interface FilesApi {
 	onFileOpenAddFiles: (callback: (filePaths: string[]) => void) => () => void;
 }
 
+export interface ThemeApi {
+	get: () => Promise<{ shouldUseDarkColors: boolean }>;
+	onChanged: (
+		callback: (payload: { shouldUseDarkColors: boolean }) => void,
+	) => () => void;
+}
+
 export interface SettingsApi {
 	get: () => Promise<Settings>;
 	set: (
@@ -38,5 +45,6 @@ export interface ElectronApi {
 	exif: ExifApi;
 	i18n: I18nApi;
 	files: FilesApi;
+	theme: ThemeApi;
 	settings: SettingsApi;
 }

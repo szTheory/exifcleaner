@@ -39,6 +39,20 @@ const api: ElectronApi = {
 		},
 	},
 
+	theme: {
+		get: () => ipcRenderer.invoke("theme:get"),
+		onChanged: (
+			callback: (payload: { shouldUseDarkColors: boolean }) => void,
+		) => {
+			const handler = (
+				_event: Electron.IpcRendererEvent,
+				payload: unknown,
+			) => callback(payload as { shouldUseDarkColors: boolean });
+			ipcRenderer.on("theme:changed", handler);
+			return () => ipcRenderer.removeListener("theme:changed", handler);
+		},
+	},
+
 	settings: {
 		get: () => ipcRenderer.invoke("settings:get"),
 		set: (settings) => ipcRenderer.invoke("settings:set", settings),

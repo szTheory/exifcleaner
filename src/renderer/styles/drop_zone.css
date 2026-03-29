@@ -1,0 +1,19 @@
+.drop-zone {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 100vh;
+}
+
+.drop-zone--active {
+	border: 2px dashed var(--color-accent);
+	background-color: var(--color-drop-active);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.drop-zone {
+		transition:
+			border-color 0.15s ease,
+			background-color 0.15s ease;
+	}
+}
