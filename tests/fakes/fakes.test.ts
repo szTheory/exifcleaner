@@ -29,7 +29,7 @@ it("FakeExifTool allows configuring error results", async () => {
 it("FakeSettings initializes with DEFAULT_SETTINGS", async () => {
 	const fake = new FakeSettings();
 	const settings = fake.get();
-	expect(settings.preserveRotation).toBe(true);
+	expect(settings.preserveOrientation).toBe(true);
 	expect(settings.language).toBeNull();
 });
 
@@ -38,7 +38,7 @@ it("FakeSettings update merges partial settings", async () => {
 	await fake.update({ saveAsCopy: true });
 	const settings = fake.get();
 	expect(settings.saveAsCopy).toBe(true);
-	expect(settings.preserveRotation).toBe(true);
+	expect(settings.preserveOrientation).toBe(true);
 });
 
 it("FakeLogger records all messages with levels", () => {

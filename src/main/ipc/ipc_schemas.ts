@@ -7,7 +7,8 @@ export const getLocaleSchema = z.undefined();
 export const getI18nStringsSchema = z.undefined();
 export const settingsGetSchema = z.undefined();
 export const settingsSetSchema = z.object({
-	preserveRotation: z.boolean().optional(),
+	preserveOrientation: z.boolean().optional(),
+	preserveColorProfile: z.boolean().optional(),
 	saveAsCopy: z.boolean().optional(),
 	removeXattrs: z.boolean().optional(),
 	preserveTimestamps: z.boolean().optional(),

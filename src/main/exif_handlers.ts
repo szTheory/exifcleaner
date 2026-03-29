@@ -25,8 +25,10 @@ export function setupExifHandlers({
 			const settings = container.settings.get();
 			const result = await container.stripMetadata.execute({
 				filePath,
-				preserveRotation: settings.preserveRotation,
+				preserveOrientation: settings.preserveOrientation,
+				preserveColorProfile: settings.preserveColorProfile,
 				preserveTimestamps: settings.preserveTimestamps,
+				saveAsCopy: settings.saveAsCopy,
 			});
 			if (result.ok) {
 				return { data: null, error: null };

@@ -95,13 +95,13 @@ it("stops processing when signal is aborted", async () => {
 });
 
 it("reads settings from SettingsPort", async () => {
-	await settings.update({ preserveRotation: true });
+	await settings.update({ preserveOrientation: true });
 
 	await useCase.execute({
 		paths: ["/tmp/a.jpg"],
 	});
 
-	// Check that the strip command received preserveRotation via args
+	// Check that the strip command received preserveOrientation via args
 	const removeCalls = exiftool.calls.filter(
 		(c) => c.method === "removeMetadata",
 	);

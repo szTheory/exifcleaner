@@ -41,10 +41,15 @@ export interface SettingsApi {
 	onChanged: (callback: (settings: Settings) => void) => () => void;
 }
 
+export interface PlatformApi {
+	isMac: boolean;
+}
+
 export interface ElectronApi {
 	exif: ExifApi;
 	i18n: I18nApi;
 	files: FilesApi;
 	theme: ThemeApi;
 	settings: SettingsApi;
+	platform: PlatformApi;
 }

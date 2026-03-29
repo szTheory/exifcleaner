@@ -13,8 +13,10 @@ beforeEach(() => {
 it("strips metadata from a file with default settings", async () => {
 	const result = await command.execute({
 		filePath: "/tmp/photo.jpg",
-		preserveRotation: false,
+		preserveOrientation: false,
+		preserveColorProfile: false,
 		preserveTimestamps: false,
+		saveAsCopy: false,
 	});
 
 	expect(result.ok).toBe(true);
@@ -26,29 +28,33 @@ it("strips metadata from a file with default settings", async () => {
 	expect(args).toContain("-overwrite_original");
 });
 
-it("includes orientation preservation flags when preserveRotation is true", async () => {
+it("includes orientation flag when preserveOrientation is true", async () => {
 	await command.execute({
 		filePath: "/tmp/photo.jpg",
-		preserveRotation: true,
+		preserveOrientation: true,
+		preserveColorProfile: false,
 		preserveTimestamps: false,
+		saveAsCopy: false,
 	});
 
 	const args = exiftool.calls[0]!.args[1] as string[];
 	expect(args).toContain("-TagsFromFile");
 	expect(args).toContain("@");
 	expect(args).toContain("-Orientation");
-	expect(args).toContain("-ICC_Profile:all");
+	expect(args).not.toContain("-ICC_Profile");
 });
 
 it("includes preserve flag when preserveTimestamps is true", async () => {
 	await command.execute({
 		filePath: "/tmp/photo.jpg",
-		preserveRotation: false,
+		preserveOrientation: false,
+		preserveColorProfile: false,
 		preserveTimestamps: true,
+		saveAsCopy: false,
 	});
 
 	const args = exiftool.calls[0]!.args[1] as string[];
-	expect(args).toContain("-preserve");
+	expect(args).toContain("-P");
 });
 
 it("returns error result when exiftool fails", async () => {
@@ -56,8 +62,10 @@ it("returns error result when exiftool fails", async () => {
 
 	const result = await command.execute({
 		filePath: "/tmp/photo.jpg",
-		preserveRotation: false,
+		preserveOrientation: false,
+		preserveColorProfile: false,
 		preserveTimestamps: false,
+		saveAsCopy: false,
 	});
 
 	expect(result.ok).toBe(false);
@@ -72,8 +80,10 @@ it("respects abort signal", async () => {
 
 	const result = await command.execute({
 		filePath: "/tmp/photo.jpg",
-		preserveRotation: false,
+		preserveOrientation: false,
+		preserveColorProfile: false,
 		preserveTimestamps: false,
+		saveAsCopy: false,
 		signal: controller.signal,
 	});
 
@@ -87,8 +97,10 @@ it("respects abort signal", async () => {
 it("uses correct flag order: -all= before -TagsFromFile", async () => {
 	await command.execute({
 		filePath: "/tmp/photo.jpg",
-		preserveRotation: true,
+		preserveOrientation: true,
+		preserveColorProfile: false,
 		preserveTimestamps: false,
+		saveAsCopy: false,
 	});
 
 	const args = exiftool.calls[0]!.args[1] as string[];

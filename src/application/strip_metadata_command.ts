@@ -10,13 +10,19 @@ export class StripMetadataCommand {
 
 	async execute({
 		filePath,
-		preserveRotation,
+		preserveOrientation,
+		preserveColorProfile,
 		preserveTimestamps,
+		saveAsCopy,
+		outputPath,
 		signal,
 	}: {
 		filePath: string;
-		preserveRotation: boolean;
+		preserveOrientation: boolean;
+		preserveColorProfile: boolean;
 		preserveTimestamps: boolean;
+		saveAsCopy: boolean;
+		outputPath?: string;
 		signal?: AbortSignal;
 	}): Promise<Result<{ tagsRemoved: number }>> {
 		if (signal?.aborted) {
@@ -27,15 +33,23 @@ export class StripMetadataCommand {
 		// ExifTool processes flags left-to-right, so we strip first then copy back
 		const args: string[] = ["-all="];
 
-		if (preserveRotation) {
-			args.push("-TagsFromFile", "@", "-Orientation", "-ICC_Profile:all");
+		const preserveTags: string[] = [];
+		if (preserveOrientation) preserveTags.push("-Orientation");
+		if (preserveColorProfile) preserveTags.push("-ICC_Profile");
+
+		if (preserveTags.length > 0) {
+			args.push("-TagsFromFile", "@", ...preserveTags);
 		}
 
 		if (preserveTimestamps) {
-			args.push("-preserve");
+			args.push("-P");
 		}
 
-		args.push("-overwrite_original");
+		if (saveAsCopy && outputPath) {
+			args.push("-o", outputPath);
+		} else {
+			args.push("-overwrite_original");
+		}
 
 		const result = await this.exiftool.removeMetadata(filePath, args);
 

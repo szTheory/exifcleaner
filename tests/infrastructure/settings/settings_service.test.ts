@@ -91,7 +91,7 @@ describe("SettingsService", () => {
 
 		const custom = {
 			...DEFAULT_SETTINGS,
-			preserveRotation: false,
+			preserveOrientation: false,
 		};
 		await service.load();
 		await service.save(custom);
@@ -126,10 +126,15 @@ describe("SettingsService", () => {
 		const filePath = join(dir, "settings.json");
 		const logger = new FakeLogger();
 
+		// v1 file with preserveRotation=false should migrate to both new fields false
 		const oldFile = {
-			version: 0,
+			version: 1,
 			settings: {
 				preserveRotation: false,
+				saveAsCopy: false,
+				removeXattrs: false,
+				preserveTimestamps: false,
+				language: null,
 			},
 		};
 		await writeFile(filePath, JSON.stringify(oldFile), "utf-8");
@@ -137,8 +142,9 @@ describe("SettingsService", () => {
 		const service = new SettingsService({ filePath, logger });
 		const settings = await service.load();
 
-		// preserveRotation should be preserved from old file
-		expect(settings.preserveRotation).toBe(false);
+		// preserveRotation=false should map to both new fields as false
+		expect(settings.preserveOrientation).toBe(false);
+		expect(settings.preserveColorProfile).toBe(false);
 		// Other fields should come from defaults
 		expect(settings.saveAsCopy).toBe(DEFAULT_SETTINGS.saveAsCopy);
 		expect(settings.removeXattrs).toBe(DEFAULT_SETTINGS.removeXattrs);
@@ -166,7 +172,9 @@ describe("SettingsService", () => {
 
 		const result = service.get();
 		expect(result.saveAsCopy).toBe(true);
-		expect(result.preserveRotation).toBe(DEFAULT_SETTINGS.preserveRotation);
+		expect(result.preserveOrientation).toBe(
+			DEFAULT_SETTINGS.preserveOrientation,
+		);
 		expect(result.removeXattrs).toBe(DEFAULT_SETTINGS.removeXattrs);
 		await rm(dir, { recursive: true });
 	});

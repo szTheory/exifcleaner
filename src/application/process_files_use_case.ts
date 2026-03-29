@@ -60,10 +60,10 @@ export class ProcessFilesUseCase {
 					if (expanded.ok) {
 						filePaths.push(...expanded.value);
 					} else {
-						this.logger.warn(
-							"Failed to expand folder",
-							{ path: p, error: expanded.error },
-						);
+						this.logger.warn("Failed to expand folder", {
+							path: p,
+							error: expanded.error,
+						});
 					}
 				} else {
 					filePaths.push(p);
@@ -92,8 +92,10 @@ export class ProcessFilesUseCase {
 
 			const stripResult = await this.stripMetadata.execute({
 				filePath,
-				preserveRotation: currentSettings.preserveRotation,
+				preserveOrientation: currentSettings.preserveOrientation,
+				preserveColorProfile: currentSettings.preserveColorProfile,
 				preserveTimestamps: currentSettings.preserveTimestamps,
+				saveAsCopy: currentSettings.saveAsCopy,
 				signal,
 			});
 

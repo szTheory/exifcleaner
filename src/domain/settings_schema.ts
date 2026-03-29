@@ -3,10 +3,11 @@
 
 import type { Result } from "../common/result";
 
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 export interface Settings {
-	preserveRotation: boolean;
+	preserveOrientation: boolean;
+	preserveColorProfile: boolean;
 	saveAsCopy: boolean;
 	removeXattrs: boolean;
 	preserveTimestamps: boolean;
@@ -14,7 +15,8 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
-	preserveRotation: true,
+	preserveOrientation: true,
+	preserveColorProfile: true,
 	saveAsCopy: false,
 	removeXattrs: false,
 	preserveTimestamps: false,
@@ -34,13 +36,27 @@ export function migrateSettings(file: SettingsFile): {
 		return { settings: file.settings, didMigrate: false };
 	}
 
-	// Merge file settings over defaults to fill any missing fields
-	const migrated: Settings = {
+	let didMigrate = false;
+	let settings: Settings = {
 		...DEFAULT_SETTINGS,
 		...file.settings,
 	};
 
-	return { settings: migrated, didMigrate: true };
+	// v1 -> v2: Split preserveRotation into preserveOrientation + preserveColorProfile
+	if (file.version < 2) {
+		const oldSettings = file.settings as unknown as Record<string, unknown>;
+		const preserveRotation = oldSettings["preserveRotation"] !== false;
+		settings = {
+			...DEFAULT_SETTINGS,
+			...settings,
+			preserveOrientation: preserveRotation,
+			preserveColorProfile: preserveRotation,
+		};
+		delete (settings as unknown as Record<string, unknown>)["preserveRotation"];
+		didMigrate = true;
+	}
+
+	return { settings, didMigrate };
 }
 
 export function validateSettings(input: unknown): Result<Settings> {
@@ -51,10 +67,14 @@ export function validateSettings(input: unknown): Result<Settings> {
 	const raw = input as Record<string, unknown>;
 
 	const settings: Settings = {
-		preserveRotation:
-			typeof raw["preserveRotation"] === "boolean"
-				? raw["preserveRotation"]
-				: DEFAULT_SETTINGS.preserveRotation,
+		preserveOrientation:
+			typeof raw["preserveOrientation"] === "boolean"
+				? raw["preserveOrientation"]
+				: DEFAULT_SETTINGS.preserveOrientation,
+		preserveColorProfile:
+			typeof raw["preserveColorProfile"] === "boolean"
+				? raw["preserveColorProfile"]
+				: DEFAULT_SETTINGS.preserveColorProfile,
 		saveAsCopy:
 			typeof raw["saveAsCopy"] === "boolean"
 				? raw["saveAsCopy"]

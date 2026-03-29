@@ -42,9 +42,9 @@ describe("exifRemoveSchema", () => {
 });
 
 describe("settingsSetSchema", () => {
-	it("accepts partial settings with preserveRotation", () => {
-		const result = settingsSetSchema.parse({ preserveRotation: true });
-		expect(result.preserveRotation).toBe(true);
+	it("accepts partial settings with preserveOrientation", () => {
+		const result = settingsSetSchema.parse({ preserveOrientation: true });
+		expect(result.preserveOrientation).toBe(true);
 	});
 
 	it("accepts empty object (all fields optional)", () => {
@@ -52,9 +52,9 @@ describe("settingsSetSchema", () => {
 		expect(result).toEqual({});
 	});
 
-	it("rejects wrong type for preserveRotation", () => {
+	it("rejects wrong type for preserveOrientation", () => {
 		expect(() =>
-			settingsSetSchema.parse({ preserveRotation: "yes" }),
+			settingsSetSchema.parse({ preserveOrientation: "yes" }),
 		).toThrow(ZodError);
 	});
 
