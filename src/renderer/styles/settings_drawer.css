@@ -1,0 +1,129 @@
+/* Gear icon button — always visible top-right */
+.gear-icon {
+	position: absolute;
+	top: var(--ec-space-4);
+	right: var(--ec-space-4);
+	background: none;
+	border: none;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	color: var(--ec-color-text-secondary);
+	border-radius: 4px;
+	z-index: 50;
+}
+
+.gear-icon:hover {
+	color: var(--ec-color-text);
+	transition: color 150ms var(--ec-ease-out);
+}
+
+.gear-icon:focus-visible {
+	outline: 2px solid var(--ec-color-accent);
+	outline-offset: 2px;
+}
+
+/* Backdrop overlay */
+.settings-drawer__backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0);
+	transition: background 200ms var(--ec-ease-out);
+	z-index: 99;
+	pointer-events: none;
+}
+
+.settings-drawer__backdrop--visible {
+	background: rgba(0, 0, 0, 0.4);
+	transition-duration: 300ms;
+	pointer-events: auto;
+}
+
+[data-theme="dark"] .settings-drawer__backdrop--visible {
+	background: rgba(0, 0, 0, 0.5);
+}
+
+/* Drawer panel */
+.settings-drawer {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 320px;
+	background: var(--ec-color-bg);
+	transform: translateX(100%);
+	transition: transform 200ms var(--ec-ease-out);
+	z-index: 100;
+	box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+	overflow-y: auto;
+}
+
+.settings-drawer--open {
+	transform: translateX(0);
+	transition-duration: 300ms;
+}
+
+[data-theme="dark"] .settings-drawer {
+	box-shadow: -8px 0 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Header */
+.settings-drawer__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: var(--ec-space-6);
+	border-bottom: 1px solid var(--ec-color-border);
+}
+
+.settings-drawer__title {
+	font-size: var(--ec-font-size-label);
+	font-weight: var(--ec-font-weight-semibold);
+	color: var(--ec-color-text);
+	margin: 0;
+}
+
+/* Close button */
+.settings-drawer__close {
+	background: none;
+	border: none;
+	padding: var(--ec-space-2);
+	cursor: pointer;
+	color: var(--ec-color-text-secondary);
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.settings-drawer__close:hover {
+	color: var(--ec-color-text);
+}
+
+.settings-drawer__close:focus-visible {
+	outline: 2px solid var(--ec-color-accent);
+	outline-offset: 2px;
+}
+
+/* Body */
+.settings-drawer__body {
+	padding: var(--ec-space-8) var(--ec-space-6) var(--ec-space-6);
+}
+
+/* Reduced motion: disable all slide/fade animation */
+@media (prefers-reduced-motion: reduce) {
+	.settings-drawer {
+		transition: none;
+	}
+
+	.settings-drawer__backdrop {
+		transition: none;
+	}
+
+	.gear-icon {
+		transition: none;
+	}
+}
