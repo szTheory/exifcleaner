@@ -18,6 +18,14 @@ const api: ElectronApi = {
 	i18n: {
 		getLocale: () => ipcRenderer.invoke("get-locale"),
 		getStrings: () => ipcRenderer.invoke("get-i18n-strings"),
+		onLanguageChanged: (callback: (locale: string) => void) => {
+			const handler = (
+				_event: Electron.IpcRendererEvent,
+				newLocale: unknown,
+			) => callback(newLocale as string);
+			ipcRenderer.on("language:changed", handler);
+			return () => ipcRenderer.removeListener("language:changed", handler);
+		},
 	},
 
 	files: {

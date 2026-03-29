@@ -2,12 +2,61 @@ import type { MenuItemConstructorOptions } from "electron";
 import { nativeTheme, BrowserWindow } from "electron";
 import { i18n } from "./i18n";
 import { IPC_CHANNELS } from "../infrastructure/ipc/ipc_channels";
+import { LANGUAGE_NAMES } from "../domain/language_names";
 
 function broadcastThemeSet(mode: "light" | "dark" | "system"): void {
 	const win = BrowserWindow.getAllWindows()[0];
 	if (win) {
 		win.webContents.send(IPC_CHANNELS.THEME_MODE_CHANGED_FROM_MENU, mode);
 	}
+}
+
+// Set by init.ts to avoid circular dependency with container
+let onLanguageChange: ((code: string | null) => void) | null = null;
+let getLanguageSetting: (() => string | null) | null = null;
+
+export function setLanguageChangeHandler(
+	handler: (code: string | null) => void,
+): void {
+	onLanguageChange = handler;
+}
+
+export function setLanguageSettingGetter(
+	getter: () => string | null,
+): void {
+	getLanguageSetting = getter;
+}
+
+function languageSubmenu(): MenuItemConstructorOptions {
+	// Get the raw setting (null = System, string = explicit language)
+	const settingValue = getLanguageSetting?.() ?? null;
+
+	const languageItems: MenuItemConstructorOptions[] = LANGUAGE_NAMES.map(
+		(lang) => ({
+			label: lang.nativeName,
+			type: "radio" as const,
+			checked: settingValue === lang.code,
+			click: () => {
+				onLanguageChange?.(lang.code);
+			},
+		}),
+	);
+
+	return {
+		label: i18n("language") || "Language",
+		submenu: [
+			{
+				label: `${i18n("languageSystem") || "System"}`,
+				type: "radio" as const,
+				checked: settingValue === null,
+				click: () => {
+					onLanguageChange?.(null);
+				},
+			},
+			{ type: "separator" },
+			...languageItems,
+		],
+	};
 }
 
 export function viewMenuTemplate(): MenuItemConstructorOptions {
@@ -46,6 +95,7 @@ export function viewMenuTemplate(): MenuItemConstructorOptions {
 					},
 				],
 			},
+			languageSubmenu(),
 			{ type: "separator" },
 			{
 				label: i18n("menu.view.toggle-dev-tools"),

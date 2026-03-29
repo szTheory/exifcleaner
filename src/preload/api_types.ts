@@ -15,6 +15,7 @@ export interface ExifApi {
 export interface I18nApi {
 	getLocale: () => Promise<string>;
 	getStrings: () => Promise<I18nStringsDictionary>;
+	onLanguageChanged: (callback: (locale: string) => void) => () => void;
 }
 
 export interface FilesApi {

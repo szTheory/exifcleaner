@@ -1,9 +1,11 @@
 import { app, type BrowserWindow } from "electron";
 import packageJson from "../../package.json";
 import { preloadI18nStrings } from "../infrastructure/electron/i18n_strings";
-import { setupI18nHandlers, setContainer } from "./i18n";
+import { setupI18nHandlers, setContainer, handleLanguageChange } from "./i18n";
 import { setupExifHandlers } from "./exif_handlers";
 import { setupFolderHandlers } from "./folder_handlers";
+import { setLanguageChangeHandler, setLanguageSettingGetter } from "./menu_view";
+import { setDockLanguageChangeHandler, setDockLanguageSettingGetter } from "./menu_dock";
 import { setupSettingsHandlers } from "./settings_handlers";
 import { setupThemeHandlers } from "./theme_handlers";
 import { setupContextMenu } from "./context_menu";
@@ -36,6 +38,20 @@ export async function init(
 	}
 
 	setContainer(container);
+
+	// Wire language change handler for View menu and dock menu
+	const languageChangeHandler = (code: string | null): void => {
+		const previousLanguage = container.settings.get().language;
+		container.settings.update({ language: code });
+		handleLanguageChange(previousLanguage, code);
+	};
+	const languageSettingGetter = (): string | null =>
+		container.settings.get().language;
+	setLanguageChangeHandler(languageChangeHandler);
+	setLanguageSettingGetter(languageSettingGetter);
+	setDockLanguageChangeHandler(languageChangeHandler);
+	setDockLanguageSettingGetter(languageSettingGetter);
+
 	preloadI18nStrings();
 	setupI18nHandlers();
 	setupExifHandlers({ container });

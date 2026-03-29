@@ -5,6 +5,7 @@ import { IPC_CHANNELS } from "../infrastructure/ipc/ipc_channels";
 import { validateSettings } from "../domain/settings_schema";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import { settingsGetSchema, settingsSetSchema } from "./ipc/ipc_schemas";
+import { handleLanguageChange } from "./i18n";
 
 export function setupSettingsHandlers({
 	container,
@@ -28,16 +29,24 @@ export function setupSettingsHandlers({
 				return { success: false, error: validationResult.error };
 			}
 
+			// Capture previous language before updating
+			const previousLanguage = container.settings.get().language;
+
 			await container.settings.update(validationResult.value);
+
+			const newSettings = container.settings.get();
 
 			// Notify renderer of settings change
 			const win = getWindow();
 			if (win) {
 				win.webContents.send(
 					IPC_CHANNELS.SETTINGS_CHANGED,
-					container.settings.get(),
+					newSettings,
 				);
 			}
+
+			// Handle language change (rebuilds menus, notifies renderer)
+			handleLanguageChange(previousLanguage, newSettings.language);
 
 			return { success: true, error: null };
 		}),
