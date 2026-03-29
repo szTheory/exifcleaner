@@ -50,6 +50,15 @@ export interface SettingsApi {
 	onToggle: (callback: () => void) => () => void;
 }
 
+export interface FolderApi {
+	classify: (
+		paths: string[],
+	) => Promise<{ files: string[]; folders: string[] }>;
+	expand: (
+		dirPath: string,
+	) => Promise<{ files: string[]; skippedCount: number; error?: string }>;
+}
+
 export interface PlatformApi {
 	isMac: boolean;
 }
@@ -61,4 +70,5 @@ export interface ElectronApi {
 	theme: ThemeApi;
 	settings: SettingsApi;
 	platform: PlatformApi;
+	folder: FolderApi;
 }

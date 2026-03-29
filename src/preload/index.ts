@@ -83,6 +83,13 @@ const api: ElectronApi = {
 		},
 	},
 
+	folder: {
+		classify: (paths: string[]) =>
+			ipcRenderer.invoke("folder:classify", paths),
+		expand: (dirPath: string) =>
+			ipcRenderer.invoke("folder:expand", dirPath),
+	},
+
 	platform: {
 		isMac: process.platform === "darwin",
 	},

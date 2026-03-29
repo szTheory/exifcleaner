@@ -1,8 +1,9 @@
 import { app, type BrowserWindow } from "electron";
 import packageJson from "../../package.json";
 import { preloadI18nStrings } from "../infrastructure/electron/i18n_strings";
-import { setupI18nHandlers } from "./i18n";
+import { setupI18nHandlers, setContainer } from "./i18n";
 import { setupExifHandlers } from "./exif_handlers";
+import { setupFolderHandlers } from "./folder_handlers";
 import { setupSettingsHandlers } from "./settings_handlers";
 import { setupThemeHandlers } from "./theme_handlers";
 import { setupContextMenu } from "./context_menu";
@@ -34,9 +35,11 @@ export async function init(
 		hardenNavigation(browserWindow);
 	}
 
+	setContainer(container);
 	preloadI18nStrings();
 	setupI18nHandlers();
 	setupExifHandlers({ container });
+	setupFolderHandlers({ container });
 	setupSettingsHandlers({
 		container,
 		getWindow: () => browserWindow,

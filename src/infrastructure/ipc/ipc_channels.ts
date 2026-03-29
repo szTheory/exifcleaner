@@ -21,4 +21,9 @@ export const IPC_CHANNELS = {
 	THEME_ACCENT_COLOR: "theme:accent-color",
 	THEME_ACCENT_COLOR_CHANGED: "theme:accent-color-changed",
 	THEME_MODE_CHANGED_FROM_MENU: "theme:mode-changed-from-menu",
+	// Language channels for Phase 7
+	LANGUAGE_CHANGED: "language:changed",
+	// Folder recursion channels for Phase 7
+	FOLDER_CLASSIFY: "folder:classify",
+	FOLDER_EXPAND: "folder:expand",
 } as const;
