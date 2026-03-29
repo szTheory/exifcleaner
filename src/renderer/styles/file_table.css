@@ -76,8 +76,10 @@
 	padding: 0;
 }
 
-.file-table__chevron {
-	margin-left: auto;
+.file-table__after-done {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--ec-space-1);
 }
 
 .file-table__cell--name {
@@ -109,6 +111,24 @@
 		animation: ec-row-enter var(--ec-duration-normal) var(--ec-ease-out)
 			forwards;
 	}
+}
+
+/* Dark mode scrollbar contrast */
+[data-theme="dark"] .file-table__body::-webkit-scrollbar {
+	width: 8px;
+}
+
+[data-theme="dark"] .file-table__body::-webkit-scrollbar-track {
+	background: var(--ec-color-bg);
+}
+
+[data-theme="dark"] .file-table__body::-webkit-scrollbar-thumb {
+	background: var(--ec-color-border);
+	border-radius: 4px;
+}
+
+[data-theme="dark"] .file-table__body::-webkit-scrollbar-thumb:hover {
+	background: var(--ec-color-text-secondary);
 }
 
 /* Expansion area for metadata diff and error details */

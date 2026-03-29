@@ -177,7 +177,7 @@ export function SettingsDrawer({
 					</button>
 				</div>
 
-				{/* Appearance section (per D-17) */}
+				{/* Appearance section */}
 				<div className="settings-drawer__section">
 					<h3 className="settings-drawer__section-label">
 						{t("appearance") || "Appearance"}
@@ -205,9 +205,8 @@ export function SettingsDrawer({
 						label={t("appearance") || "Appearance"}
 					/>
 				</div>
-				<hr className="settings-drawer__separator" />
 
-				{/* Toggle list (per D-11) -- flat list in priority order */}
+				{/* Toggle list -- flat list in priority order */}
 				<div className="settings-drawer__body">
 					<ToggleSwitch
 						id="toggle-preserve-orientation"

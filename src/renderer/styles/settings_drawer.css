@@ -67,8 +67,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: var(--ec-space-6);
-	border-bottom: 1px solid var(--ec-color-border);
+	padding: var(--ec-space-6) var(--ec-space-6) var(--ec-space-2);
 }
 
 .settings-drawer__title {
@@ -102,12 +101,12 @@
 
 /* Body */
 .settings-drawer__body {
-	padding: var(--ec-space-8) var(--ec-space-6) var(--ec-space-6);
+	padding: var(--ec-space-4) var(--ec-space-6) var(--ec-space-6);
 }
 
 /* Appearance section */
 .settings-drawer__section {
-	padding: 0 var(--ec-space-6);
+	padding: var(--ec-space-2) var(--ec-space-6) 0;
 }
 
 .settings-drawer__section-label {
@@ -117,12 +116,6 @@
 	margin: 0 0 var(--ec-space-2) 0;
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
-}
-
-.settings-drawer__separator {
-	border: none;
-	border-top: 1px solid var(--ec-color-border);
-	margin: var(--ec-space-4) var(--ec-space-6);
 }
 
 /* Reduced motion: disable all slide/fade animation */

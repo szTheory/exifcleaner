@@ -87,14 +87,12 @@ export function FileRow({
 				onKeyDown={handleKeyDown}
 			>
 				<div className="file-table__cell file-table__cell--status">
-					<StatusIcon
-						status={file.status}
-						shouldAnimate={shouldAnimateCheck}
-					/>
-					{isExpandable && (
-						<ChevronIcon
-							expanded={isExpanded}
-							className="file-table__chevron"
+					{isExpandable ? (
+						<ChevronIcon expanded={isExpanded} />
+					) : (
+						<StatusIcon
+							status={file.status}
+							shouldAnimate={shouldAnimateCheck}
 						/>
 					)}
 				</div>
@@ -106,7 +104,9 @@ export function FileRow({
 				</div>
 				<div className="file-table__cell">{formatFileSize(file.size)}</div>
 				<div className="file-table__cell">{renderBeforeCell(file)}</div>
-				<div className="file-table__cell">{renderAfterCell(file)}</div>
+				<div className="file-table__cell">
+						{renderAfterCell(file, shouldAnimateCheck)}
+					</div>
 			</div>
 			{isExpanded && isError && file.error !== null && (
 				<ErrorExpansion error={file.error} onCopy={onCopyToast} />
@@ -146,7 +146,10 @@ function renderBeforeCell(file: FileEntry): React.JSX.Element {
 	}
 }
 
-function renderAfterCell(file: FileEntry): React.JSX.Element {
+function renderAfterCell(
+	file: FileEntry,
+	shouldAnimate: boolean,
+): React.JSX.Element {
 	switch (file.status) {
 		case FileProcessingStatus.Pending:
 		case FileProcessingStatus.Reading:
@@ -154,7 +157,15 @@ function renderAfterCell(file: FileEntry): React.JSX.Element {
 			return <></>;
 		case FileProcessingStatus.Complete:
 		case FileProcessingStatus.NoMetadataFound:
-			return <>{file.afterTags ?? ""}</>;
+			return (
+				<span className="file-table__after-done">
+					{file.afterTags ?? ""}
+					<StatusIcon
+						status={file.status}
+						shouldAnimate={shouldAnimate}
+					/>
+				</span>
+			);
 		case FileProcessingStatus.Error:
 			return <></>;
 		default: {
