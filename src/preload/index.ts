@@ -56,6 +56,15 @@ const api: ElectronApi = {
 			return () =>
 				ipcRenderer.removeListener("theme:accent-color-changed", handler);
 		},
+		onThemeModeChanged: (
+			callback: (mode: "light" | "dark" | "system") => void,
+		) => {
+			const handler = (_event: Electron.IpcRendererEvent, mode: unknown) =>
+				callback(mode as "light" | "dark" | "system");
+			ipcRenderer.on("theme:mode-changed-from-menu", handler);
+			return () =>
+				ipcRenderer.removeListener("theme:mode-changed-from-menu", handler);
+		},
 	},
 
 	settings: {

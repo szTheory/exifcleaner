@@ -20,4 +20,5 @@ export const IPC_CHANNELS = {
 	THEME_SET: "theme:set",
 	THEME_ACCENT_COLOR: "theme:accent-color",
 	THEME_ACCENT_COLOR_CHANGED: "theme:accent-color-changed",
+	THEME_MODE_CHANGED_FROM_MENU: "theme:mode-changed-from-menu",
 } as const;

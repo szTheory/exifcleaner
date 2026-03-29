@@ -48,7 +48,7 @@
 	width: 44px;
 	height: 24px;
 	border-radius: 12px;
-	background: var(--ec-color-border);
+	background: var(--ec-toggle-off-track);
 	position: relative;
 }
 

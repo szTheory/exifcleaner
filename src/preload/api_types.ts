@@ -36,6 +36,9 @@ export interface ThemeApi {
 	onAccentColorChanged: (
 		callback: (payload: { color: string }) => void,
 	) => () => void;
+	onThemeModeChanged?: (
+		callback: (mode: "light" | "dark" | "system") => void,
+	) => () => void;
 }
 
 export interface SettingsApi {

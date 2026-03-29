@@ -9,7 +9,7 @@
 	justify-content: space-between;
 	padding: 0 var(--ec-space-4);
 	background: var(--ec-color-bg);
-	border-top: 1px solid var(--ec-color-border);
+	border-top: 1px solid var(--ec-border-status-bar);
 	z-index: 10;
 }
 
