@@ -103,6 +103,7 @@ export function FileTable(): React.JSX.Element {
 	return (
 		<section className="file-table" role="table" aria-label="File list">
 			<div className="file-table__header" role="row">
+				<div className="file-table__header-cell" />
 				<div className="file-table__header-cell">NAME</div>
 				<div className="file-table__header-cell">TYPE</div>
 				<div className="file-table__header-cell">SIZE</div>

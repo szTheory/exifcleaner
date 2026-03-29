@@ -78,6 +78,9 @@ export function FileRow({
 				onClick={onToggleExpand}
 				onKeyDown={handleKeyDown}
 			>
+				<div className="file-table__cell file-table__cell--status">
+					<StatusIcon status={file.status} shouldAnimate={shouldAnimateCheck} />
+				</div>
 				<div className="file-table__cell file-table__cell--name">
 					{file.name}
 				</div>
@@ -86,9 +89,7 @@ export function FileRow({
 				</div>
 				<div className="file-table__cell">{formatFileSize(file.size)}</div>
 				<div className="file-table__cell">{renderBeforeCell(file)}</div>
-				<div className="file-table__cell">
-					{renderAfterCell(file, shouldAnimateCheck)}
-				</div>
+				<div className="file-table__cell">{renderAfterCell(file)}</div>
 			</div>
 			{isExpanded && isError && file.error !== null && (
 				<ErrorExpansion error={file.error} onCopy={onCopyToast} />
@@ -107,46 +108,24 @@ export function FileRow({
 function renderBeforeCell(file: FileEntry): React.JSX.Element {
 	switch (file.status) {
 		case FileProcessingStatus.Pending:
-			return <span className="file-table__cell--muted">--</span>;
 		case FileProcessingStatus.Reading:
-			return (
-				<StatusIcon
-					status={FileProcessingStatus.Reading}
-					shouldAnimate={false}
-				/>
-			);
+			return <span className="file-table__cell--muted">--</span>;
 		default:
 			return <>{file.beforeTags ?? "--"}</>;
 	}
 }
 
-function renderAfterCell(
-	file: FileEntry,
-	shouldAnimateCheck: boolean,
-): React.JSX.Element {
+function renderAfterCell(file: FileEntry): React.JSX.Element {
 	switch (file.status) {
 		case FileProcessingStatus.Pending:
 		case FileProcessingStatus.Reading:
-			return <span className="file-table__cell--muted">--</span>;
 		case FileProcessingStatus.Processing:
-			return (
-				<StatusIcon
-					status={FileProcessingStatus.Processing}
-					shouldAnimate={false}
-				/>
-			);
+			return <span className="file-table__cell--muted">--</span>;
 		case FileProcessingStatus.Complete:
 		case FileProcessingStatus.NoMetadataFound:
-			return (
-				<>
-					{file.afterTags}{" "}
-					<StatusIcon status={file.status} shouldAnimate={shouldAnimateCheck} />
-				</>
-			);
+			return <>{file.afterTags ?? "--"}</>;
 		case FileProcessingStatus.Error:
-			return (
-				<StatusIcon status={FileProcessingStatus.Error} shouldAnimate={false} />
-			);
+			return <span className="file-table__cell--muted">--</span>;
 		default: {
 			const _exhaustive: never = file.status;
 			throw new Error(`Unhandled status: ${_exhaustive}`);

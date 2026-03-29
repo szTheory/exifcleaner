@@ -1,5 +1,5 @@
 /* FileTable — BEM classes for table layout
-   Columns: NAME (1fr) | TYPE (72px) | SIZE (80px) | BEFORE (72px) | AFTER (72px) */
+   Columns: STATUS (32px) | NAME (1fr) | TYPE (72px) | SIZE (80px) | BEFORE (72px) | AFTER (72px) */
 
 .file-table {
 	display: flex;
@@ -11,7 +11,7 @@
 	position: sticky;
 	top: 0;
 	display: grid;
-	grid-template-columns: 1fr 72px 80px 72px 72px;
+	grid-template-columns: 32px 1fr 72px 80px 72px 72px;
 	background: var(--ec-color-surface);
 	border-bottom: 1px solid var(--ec-color-border);
 	padding: var(--ec-space-2) var(--ec-space-4);
@@ -33,7 +33,7 @@
 
 .file-table__row {
 	display: grid;
-	grid-template-columns: 1fr 72px 80px 72px 72px;
+	grid-template-columns: 32px 1fr 72px 80px 72px 72px;
 	min-height: 44px;
 	border-bottom: 1px solid var(--ec-color-border);
 	padding: 0 var(--ec-space-4);
@@ -52,11 +52,9 @@
 }
 
 .file-table__row--complete {
-	border-left: 2px solid var(--ec-color-success);
 }
 
 .file-table__row--error {
-	border-left: 2px solid var(--ec-color-error);
 	background: var(--ec-color-error-bg);
 }
 
@@ -65,6 +63,13 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.file-table__cell--status {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
 }
 
 .file-table__cell--name {
