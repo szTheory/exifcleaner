@@ -14,6 +14,8 @@ function makeFile(overrides: Partial<FileEntry> = {}): FileEntry {
 		status: FileProcessingStatus.Pending,
 		beforeTags: null,
 		afterTags: null,
+		beforeMetadata: null,
+		afterMetadata: null,
 		error: null,
 		...overrides,
 	};
@@ -76,6 +78,8 @@ describe("appReducer", () => {
 			expect(added!.status).toBe(FileProcessingStatus.Pending);
 			expect(added!.beforeTags).toBeNull();
 			expect(added!.afterTags).toBeNull();
+			expect(added!.beforeMetadata).toBeNull();
+			expect(added!.afterMetadata).toBeNull();
 			expect(added!.error).toBeNull();
 		});
 	});
@@ -125,19 +129,25 @@ describe("appReducer", () => {
 	});
 
 	describe("UPDATE_FILE_METADATA", () => {
-		it("sets beforeTags and afterTags for matching file id", () => {
+		it("sets beforeTags, afterTags, and metadata objects for matching file id", () => {
 			const file = makeFile({ id: "file-1" });
 			const state = makeInitialState({ files: [file] });
+			const beforeMeta = { "Camera:Make": "Canon" };
+			const afterMeta = {};
 
 			const result = appReducer(state, {
 				type: "UPDATE_FILE_METADATA",
 				id: "file-1",
 				beforeTags: 42,
 				afterTags: 3,
+				beforeMetadata: beforeMeta,
+				afterMetadata: afterMeta,
 			});
 
 			expect(result.files[0]!.beforeTags).toBe(42);
 			expect(result.files[0]!.afterTags).toBe(3);
+			expect(result.files[0]!.beforeMetadata).toEqual(beforeMeta);
+			expect(result.files[0]!.afterMetadata).toEqual(afterMeta);
 		});
 	});
 

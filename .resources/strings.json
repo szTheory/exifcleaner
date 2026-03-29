@@ -1167,5 +1167,59 @@
 		"vn": "Xóa siêu dữ liệu từ tập tin được chọn",
 		"fa": "پاک کردن متادیتاها از فایل‌های انتخاب شده",
 		"ca": "Elimina les metadades dels fitxers seleccionats"
+	},
+	"appearance": {
+		"en": "Appearance"
+	},
+	"themeLight": {
+		"en": "Light"
+	},
+	"themeAuto": {
+		"en": "Auto"
+	},
+	"themeDark": {
+		"en": "Dark"
+	},
+	"noMetadataFound": {
+		"en": "No metadata found"
+	},
+	"copyAll": {
+		"en": "Copy all"
+	},
+	"metadataGroupHeader": {
+		"en": "{groupName} ({removed} of {total} removed)"
+	},
+	"metaGroupCamera": {
+		"en": "Camera"
+	},
+	"metaGroupLocation": {
+		"en": "Location"
+	},
+	"metaGroupTime": {
+		"en": "Time"
+	},
+	"metaGroupAuthor": {
+		"en": "Author"
+	},
+	"metaGroupImage": {
+		"en": "Image"
+	},
+	"metaGroupVideo": {
+		"en": "Video"
+	},
+	"metaGroupDocument": {
+		"en": "Document"
+	},
+	"metaGroupPublishing": {
+		"en": "Publishing"
+	},
+	"metaGroupColorProfile": {
+		"en": "Color Profile"
+	},
+	"metaGroupCameraInternals": {
+		"en": "Camera Internals"
+	},
+	"metaGroupOther": {
+		"en": "Other"
 	}
 }

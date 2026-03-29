@@ -12,6 +12,8 @@ export interface FileEntry {
 	status: FileProcessingStatus;
 	beforeTags: number | null;
 	afterTags: number | null;
+	beforeMetadata: Record<string, unknown> | null;
+	afterMetadata: Record<string, unknown> | null;
 	error: string | null;
 }
 
@@ -30,6 +32,8 @@ export type AppAction =
 			id: string;
 			beforeTags: number;
 			afterTags: number;
+			beforeMetadata: Record<string, unknown> | null;
+			afterMetadata: Record<string, unknown> | null;
 	  }
 	| { type: "UPDATE_FILE_ERROR"; id: string; error: string }
 	| { type: "TOGGLE_FOLDER"; folder: string }
@@ -62,6 +66,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 								...file,
 								beforeTags: action.beforeTags,
 								afterTags: action.afterTags,
+								beforeMetadata: action.beforeMetadata,
+								afterMetadata: action.afterMetadata,
 							}
 						: file,
 				),

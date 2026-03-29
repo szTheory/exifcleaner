@@ -38,12 +38,14 @@ export async function processFileEntries(
 			const afterMetadata = await window.api.exif.readMetadata(entry.path);
 			const afterTags = Object.keys(afterMetadata).length;
 
-			// Step 4: Update state with counts
+			// Step 4: Update state with counts and full metadata
 			dispatch({
 				type: "UPDATE_FILE_METADATA",
 				id: entry.id,
 				beforeTags,
 				afterTags,
+				beforeMetadata,
+				afterMetadata,
 			});
 
 			// Step 5: Mark complete (or no-metadata-found if before === 0)

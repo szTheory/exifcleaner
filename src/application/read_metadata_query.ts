@@ -14,7 +14,7 @@ export class ReadMetadataQuery {
 	}: {
 		filePath: string;
 	}): Promise<Result<Record<string, unknown>>> {
-		const args = ["-File:all", "-ExifToolVersion"];
+		const args = ["-G2", "-File:all", "-ExifToolVersion"];
 		const result = await this.exiftool.readMetadata(filePath, args);
 
 		if (result.data === null) {

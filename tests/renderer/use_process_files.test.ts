@@ -39,6 +39,8 @@ function makeFileEntry(overrides: Partial<FileEntry> = {}): FileEntry {
 		status: overrides.status ?? FileProcessingStatus.Pending,
 		beforeTags: overrides.beforeTags ?? null,
 		afterTags: overrides.afterTags ?? null,
+		beforeMetadata: overrides.beforeMetadata ?? null,
+		afterMetadata: overrides.afterMetadata ?? null,
 		error: overrides.error ?? null,
 	};
 }
@@ -146,6 +148,8 @@ describe("processFileEntries", () => {
 			id: "test-id-1",
 			beforeTags: 3,
 			afterTags: 1,
+			beforeMetadata: { tag1: "v", tag2: "v", tag3: "v" },
+			afterMetadata: { tag1: "v" },
 		});
 	});
 
