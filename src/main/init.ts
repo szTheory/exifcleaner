@@ -9,6 +9,12 @@ import { setupDockEventHandlers } from "./dock";
 import { setupApp } from "./app_setup";
 import { createContainer, initContainer } from "./container";
 import type { Container } from "./container";
+import { hardenNavigation } from "./security/navigation";
+import { installPermissionGate } from "./security/permissions";
+import {
+	registerAllowedSender,
+	unregisterSender,
+} from "./ipc/ipc_validation";
 
 function setupUserModelId(): void {
 	app.setAppUserModelId(packageJson.build.appId);
@@ -19,6 +25,16 @@ export async function init(
 ): Promise<Container> {
 	const container = createContainer();
 	await initContainer(container);
+
+	// Install security hardening before any IPC handlers fire
+	installPermissionGate();
+	if (browserWindow) {
+		registerAllowedSender(browserWindow.webContents.id);
+		browserWindow.webContents.on("destroyed", () => {
+			unregisterSender(browserWindow.webContents.id);
+		});
+		hardenNavigation(browserWindow);
+	}
 
 	preloadI18nStrings();
 	setupI18nHandlers();

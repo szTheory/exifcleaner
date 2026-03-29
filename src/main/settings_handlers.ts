@@ -3,6 +3,8 @@ import type { BrowserWindow } from "electron";
 import type { Container } from "./container";
 import { IPC_CHANNELS } from "../infrastructure/ipc/ipc_channels";
 import { validateSettings } from "../domain/settings_schema";
+import { createValidatedHandler } from "./ipc/ipc_validation";
+import { settingsGetSchema, settingsSetSchema } from "./ipc/ipc_schemas";
 
 export function setupSettingsHandlers({
 	container,
@@ -11,13 +13,16 @@ export function setupSettingsHandlers({
 	container: Container;
 	getWindow: () => BrowserWindow | null;
 }): void {
-	ipcMain.handle(IPC_CHANNELS.SETTINGS_GET, async () => {
-		return container.settings.get();
-	});
+	ipcMain.handle(
+		IPC_CHANNELS.SETTINGS_GET,
+		createValidatedHandler(settingsGetSchema, async () => {
+			return container.settings.get();
+		}),
+	);
 
 	ipcMain.handle(
 		IPC_CHANNELS.SETTINGS_SET,
-		async (_event, input: unknown) => {
+		createValidatedHandler(settingsSetSchema, async (input) => {
 			const validationResult = validateSettings(input);
 			if (!validationResult.ok) {
 				return { success: false, error: validationResult.error };
@@ -35,6 +40,6 @@ export function setupSettingsHandlers({
 			}
 
 			return { success: true, error: null };
-		},
+		}),
 	);
 }

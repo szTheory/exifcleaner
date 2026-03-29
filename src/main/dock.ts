@@ -2,6 +2,12 @@ import { app, ipcMain, BrowserWindow, nativeImage } from "electron";
 import { defaultBrowserWindow } from "../infrastructure/electron/browser_window";
 import { isMac, isWindows } from "../common/platform";
 import { checkmarkPath } from "../infrastructure/electron/resources";
+import { createValidatedListener } from "./ipc/ipc_validation";
+import {
+	filesAddedSchema,
+	fileProcessedSchema,
+	allFilesProcessedSchema,
+} from "./ipc/ipc_schemas";
 
 import {
 	EVENT_FILES_ADDED,
@@ -16,31 +22,40 @@ let remainingCount = 0;
 export function setupDockEventHandlers(
 	browserWindow: BrowserWindow | null,
 ): void {
-	ipcMain.on(EVENT_FILES_ADDED, (_event, filesCount) => {
-		storeBatchCount(filesCount);
+	ipcMain.on(
+		EVENT_FILES_ADDED,
+		createValidatedListener(filesAddedSchema, (filesCount) => {
+			storeBatchCount(filesCount);
 
-		updateDockAndProgressBar(browserWindow);
-		windowsOverlayIcon(browserWindow, false);
-	});
-
-	ipcMain.on(EVENT_FILE_PROCESSED, (_event, _arg) => {
-		storeFilesCount(remainingCount - 1);
-
-		// if there are none remaining, let the all finished
-		// event take care of it so we don't double up
-		if (remainingCount > 0) {
 			updateDockAndProgressBar(browserWindow);
-		}
-	});
+			windowsOverlayIcon(browserWindow, false);
+		}),
+	);
 
-	ipcMain.on(EVENT_ALL_FILES_PROCESSED, (_event, _arg) => {
-		storeBatchCount(0);
+	ipcMain.on(
+		EVENT_FILE_PROCESSED,
+		createValidatedListener(fileProcessedSchema, () => {
+			storeFilesCount(remainingCount - 1);
 
-		updateDockAndProgressBar(browserWindow);
-		updateDockBounce(browserWindow);
-		windowsFlashFrame(browserWindow);
-		windowsOverlayIcon(browserWindow, true);
-	});
+			// if there are none remaining, let the all finished
+			// event take care of it so we don't double up
+			if (remainingCount > 0) {
+				updateDockAndProgressBar(browserWindow);
+			}
+		}),
+	);
+
+	ipcMain.on(
+		EVENT_ALL_FILES_PROCESSED,
+		createValidatedListener(allFilesProcessedSchema, () => {
+			storeBatchCount(0);
+
+			updateDockAndProgressBar(browserWindow);
+			updateDockBounce(browserWindow);
+			windowsFlashFrame(browserWindow);
+			windowsOverlayIcon(browserWindow, true);
+		}),
+	);
 }
 
 function storeBatchCount(filesCount: number) {
