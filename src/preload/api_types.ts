@@ -1,4 +1,5 @@
 import type { I18nStringsDictionary } from "../domain/i18n_lookup";
+import type { Settings } from "../domain/settings_schema";
 
 export type { I18nStringsDictionary };
 
@@ -25,8 +26,17 @@ export interface FilesApi {
 	onFileOpenAddFiles: (callback: (filePaths: string[]) => void) => () => void;
 }
 
+export interface SettingsApi {
+	get: () => Promise<Settings>;
+	set: (
+		settings: Partial<Settings>,
+	) => Promise<{ success: boolean; error: string | null }>;
+	onChanged: (callback: (settings: Settings) => void) => () => void;
+}
+
 export interface ElectronApi {
 	exif: ExifApi;
 	i18n: I18nApi;
 	files: FilesApi;
+	settings: SettingsApi;
 }

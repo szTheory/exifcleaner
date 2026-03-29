@@ -38,6 +38,20 @@ const api: ElectronApi = {
 				ipcRenderer.removeListener("file-open-add-files", handler);
 		},
 	},
+
+	settings: {
+		get: () => ipcRenderer.invoke("settings:get"),
+		set: (settings) => ipcRenderer.invoke("settings:set", settings),
+		onChanged: (callback) => {
+			const handler = (
+				_event: Electron.IpcRendererEvent,
+				settings: unknown,
+			) => callback(settings as import("../domain/settings_schema").Settings);
+			ipcRenderer.on("settings:changed", handler);
+			return () =>
+				ipcRenderer.removeListener("settings:changed", handler);
+		},
+	},
 };
 
 contextBridge.exposeInMainWorld("api", api);

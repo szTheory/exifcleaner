@@ -9,8 +9,8 @@ import { currentBrowserWindow } from "../infrastructure/electron/browser_window"
 var browserWindow = null as BrowserWindow | null;
 
 async function setup(): Promise<void> {
-	init(browserWindow);
 	await app.whenReady();
+	await init(browserWindow);
 	setupMenus();
 
 	// keep reference to main window to prevent losing it on GC
