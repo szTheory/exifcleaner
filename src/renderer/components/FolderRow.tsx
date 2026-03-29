@@ -2,6 +2,7 @@
 
 import type { FolderDiscoveryStatus } from "../contexts/AppContext";
 import { middleTruncatePath } from "../../domain/path_truncation";
+import { ChevronIcon } from "./ChevronIcon";
 
 export function FolderRow({
 	folder,
@@ -16,7 +17,6 @@ export function FolderRow({
 	onToggle: () => void;
 	discoveryStatus: FolderDiscoveryStatus;
 }): React.JSX.Element {
-	const chevronClass = `folder-row__chevron${isCollapsed ? " folder-row__chevron--collapsed" : ""}`;
 	const displayLabel = middleTruncatePath(folder, 40);
 
 	return (
@@ -26,21 +26,7 @@ export function FolderRow({
 				onClick={onToggle}
 				aria-label={isCollapsed ? `Expand ${folder}` : `Collapse ${folder}`}
 			>
-				<svg
-					className={chevronClass}
-					width="16"
-					height="16"
-					viewBox="0 0 16 16"
-					fill="none"
-				>
-					<path
-						d="M6 4L10 8L6 12"
-						stroke="currentColor"
-						strokeWidth="1.5"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-					/>
-				</svg>
+				<ChevronIcon expanded={!isCollapsed} />
 			</button>
 			<span className="folder-row__label" title={folder}>
 				{displayLabel}
