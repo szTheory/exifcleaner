@@ -34,6 +34,7 @@ export function I18nProvider({
 	const [locale, setLocale] = useState("en");
 	const [isLoading, setIsLoading] = useState(true);
 
+	// Initial load of i18n data
 	useEffect(() => {
 		let cancelled = false;
 
@@ -53,6 +54,16 @@ export function I18nProvider({
 		return () => {
 			cancelled = true;
 		};
+	}, []);
+
+	// Listen for language changes from main process (hot-swap)
+	useEffect(() => {
+		const unsubscribe = window.api.i18n.onLanguageChanged(
+			(newLocale: string) => {
+				setLocale(newLocale);
+			},
+		);
+		return unsubscribe;
 	}, []);
 
 	const t = useCallback(

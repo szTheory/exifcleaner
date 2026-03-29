@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import type { Settings } from "../../domain/settings_schema";
 import { ToggleSwitch } from "./ToggleSwitch";
 import { SegmentedControl } from "./SegmentedControl";
+import { LanguageDropdown } from "./LanguageDropdown";
 import { ThemeContext } from "../contexts/ThemeContext";
 import { I18nContext } from "../contexts/I18nContext";
 import "../styles/settings_drawer.css";
@@ -203,6 +204,19 @@ export function SettingsDrawer({
 						value={themeMode}
 						onChange={setThemeMode}
 						label={t("appearance") || "Appearance"}
+					/>
+				</div>
+
+				{/* Language section */}
+				<div className="settings-drawer__section">
+					<h3 className="settings-drawer__section-label">
+						{t("language") || "Language"}
+					</h3>
+					<LanguageDropdown
+						currentLanguage={settings.language}
+						onLanguageChange={(code) => {
+							window.api.settings.set({ language: code });
+						}}
 					/>
 				</div>
 
