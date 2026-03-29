@@ -15,8 +15,8 @@
 	"scripts": {
 		"update-exiftool": "./update_exiftool.pl",
 		"postinstall": "electron-builder install-app-deps",
-		"format": "yarn prettier --write 'src/**/*.ts'",
-		"lint": "prettier --check 'src/**/*.ts'",
+		"format": "yarn prettier --write 'src/**/*.{ts,tsx}'",
+		"lint": "prettier --check 'src/**/*.{ts,tsx}'",
 		"start": "ELECTRON_RUN_AS_NODE= electron-vite preview",
 		"packmactest": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
 		"packwin": "yarn run compile && electron-builder --windows",

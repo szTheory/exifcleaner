@@ -16,7 +16,10 @@
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitReturns": true,
 		"useUnknownInCatchVariables": true,
-		"noUncheckedIndexedAccess": true
+		"noUncheckedIndexedAccess": true,
+		"jsx": "react-jsx",
+		"jsxImportSource": "react",
+		"lib": ["ES2021", "DOM", "DOM.Iterable"]
 	},
-	"include": ["./src/**/*.ts"]
+	"include": ["./src/**/*.ts", "./src/**/*.tsx"]
 }
