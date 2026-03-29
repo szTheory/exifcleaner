@@ -109,9 +109,9 @@ function renderBeforeCell(file: FileEntry): React.JSX.Element {
 	switch (file.status) {
 		case FileProcessingStatus.Pending:
 		case FileProcessingStatus.Reading:
-			return <span className="file-table__cell--muted">--</span>;
+			return <></>;
 		default:
-			return <>{file.beforeTags ?? "--"}</>;
+			return <>{file.beforeTags ?? ""}</>;
 	}
 }
 
@@ -120,12 +120,12 @@ function renderAfterCell(file: FileEntry): React.JSX.Element {
 		case FileProcessingStatus.Pending:
 		case FileProcessingStatus.Reading:
 		case FileProcessingStatus.Processing:
-			return <span className="file-table__cell--muted">--</span>;
+			return <></>;
 		case FileProcessingStatus.Complete:
 		case FileProcessingStatus.NoMetadataFound:
-			return <>{file.afterTags ?? "--"}</>;
+			return <>{file.afterTags ?? ""}</>;
 		case FileProcessingStatus.Error:
-			return <span className="file-table__cell--muted">--</span>;
+			return <></>;
 		default: {
 			const _exhaustive: never = file.status;
 			throw new Error(`Unhandled status: ${_exhaustive}`);

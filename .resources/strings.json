@@ -311,6 +311,9 @@
 		"fa": "نمایش همه",
 		"ca": "Mostra-ho tot"
 	},
+	"menu.app.settings": {
+		"en": "Settings"
+	},
 	"menu.app.quit": {
 		"en": "Quit",
 		"da": "Afslut",

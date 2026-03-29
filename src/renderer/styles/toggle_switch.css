@@ -81,3 +81,13 @@
 [data-theme="dark"] .toggle-switch__thumb {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
+
+/* Toggle animation — spring easing on thumb, fade on track */
+@media (prefers-reduced-motion: no-preference) {
+	.toggle-switch__thumb {
+		transition: left 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+	.toggle-switch__track {
+		transition: background-color 200ms var(--ec-ease-out);
+	}
+}

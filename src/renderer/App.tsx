@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { I18nProvider } from "./contexts/I18nContext";
 import { AppProvider, useAppContext } from "./contexts/AppContext";
@@ -13,6 +13,14 @@ function AppContent(): React.JSX.Element {
 	const { state } = useAppContext();
 	const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 	const gearRef = useRef<HTMLButtonElement>(null);
+
+	// Listen for settings:toggle IPC from menu/keyboard shortcut
+	useEffect(() => {
+		const unsubscribe = window.api.settings.onToggle(() => {
+			setIsSettingsOpen((prev) => !prev);
+		});
+		return unsubscribe;
+	}, []);
 
 	// Return focus to gear icon on close
 	const handleClose = useCallback((): void => {

@@ -57,6 +57,11 @@ const api: ElectronApi = {
 			ipcRenderer.on("settings:changed", handler);
 			return () => ipcRenderer.removeListener("settings:changed", handler);
 		},
+		onToggle: (callback: () => void) => {
+			const handler = () => callback();
+			ipcRenderer.on("settings:toggle", handler);
+			return () => ipcRenderer.removeListener("settings:toggle", handler);
+		},
 	},
 
 	platform: {

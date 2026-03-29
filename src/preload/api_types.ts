@@ -39,6 +39,7 @@ export interface SettingsApi {
 		settings: Partial<Settings>,
 	) => Promise<{ success: boolean; error: string | null }>;
 	onChanged: (callback: (settings: Settings) => void) => () => void;
+	onToggle: (callback: () => void) => () => void;
 }
 
 export interface PlatformApi {

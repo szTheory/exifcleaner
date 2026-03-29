@@ -12,6 +12,7 @@ export const IPC_CHANNELS = {
 	SETTINGS_GET: "settings:get",
 	SETTINGS_SET: "settings:set",
 	SETTINGS_CHANGED: "settings:changed",
+	SETTINGS_TOGGLE: "settings:toggle",
 	// Theme channels for Phase 3
 	THEME_GET: "theme:get",
 	THEME_CHANGED: "theme:changed",
