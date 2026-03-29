@@ -2,6 +2,18 @@ import { createContext, useContext, useReducer } from "react";
 import type { Dispatch, ReactNode } from "react";
 import { FileProcessingStatus } from "../../domain/file_status";
 
+export type FolderDiscoveryStatus =
+	| "scanning"
+	| "discovering"
+	| "complete"
+	| "empty";
+
+export interface FolderState {
+	path: string;
+	status: FolderDiscoveryStatus;
+	fileCount: number;
+}
+
 export interface FileEntry {
 	id: string;
 	path: string;
@@ -21,6 +33,7 @@ export interface AppState {
 	files: FileEntry[];
 	collapsedFolders: Set<string>;
 	expandedRowId: string | null;
+	folderStates: Map<string, FolderState>;
 }
 
 export type AppAction =
@@ -37,7 +50,15 @@ export type AppAction =
 	  }
 	| { type: "UPDATE_FILE_ERROR"; id: string; error: string }
 	| { type: "TOGGLE_FOLDER"; folder: string }
-	| { type: "TOGGLE_ROW_EXPANSION"; id: string };
+	| { type: "TOGGLE_ROW_EXPANSION"; id: string }
+	| { type: "ADD_FOLDER_SCANNING"; folder: string }
+	| {
+			type: "UPDATE_FOLDER_STATE";
+			folder: string;
+			status: FolderDiscoveryStatus;
+			fileCount: number;
+	  }
+	| { type: "COLLAPSE_FOLDER"; folder: string };
 
 export function appReducer(state: AppState, action: AppAction): AppState {
 	switch (action.type) {
@@ -49,6 +70,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 				files: [],
 				collapsedFolders: new Set<string>(),
 				expandedRowId: null,
+				folderStates: new Map<string, FolderState>(),
 			};
 		case "UPDATE_FILE_STATUS":
 			return {
@@ -99,6 +121,29 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 				...state,
 				expandedRowId: state.expandedRowId === action.id ? null : action.id,
 			};
+		case "ADD_FOLDER_SCANNING": {
+			const nextFolders = new Map(state.folderStates);
+			nextFolders.set(action.folder, {
+				path: action.folder,
+				status: "scanning",
+				fileCount: 0,
+			});
+			return { ...state, folderStates: nextFolders };
+		}
+		case "UPDATE_FOLDER_STATE": {
+			const nextFolders = new Map(state.folderStates);
+			nextFolders.set(action.folder, {
+				path: action.folder,
+				status: action.status,
+				fileCount: action.fileCount,
+			});
+			return { ...state, folderStates: nextFolders };
+		}
+		case "COLLAPSE_FOLDER": {
+			const nextCollapsed = new Set(state.collapsedFolders);
+			nextCollapsed.add(action.folder);
+			return { ...state, collapsedFolders: nextCollapsed };
+		}
 		default: {
 			const _exhaustive: never = action;
 			throw new Error(`Unhandled action: ${JSON.stringify(_exhaustive)}`);
@@ -110,6 +155,7 @@ const initialState: AppState = {
 	files: [],
 	collapsedFolders: new Set<string>(),
 	expandedRowId: null,
+	folderStates: new Map<string, FolderState>(),
 };
 
 interface AppContextValue {

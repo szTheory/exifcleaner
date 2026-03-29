@@ -3,10 +3,11 @@
 .folder-row {
 	display: flex;
 	align-items: center;
-	padding: var(--ec-space-2) var(--ec-space-4);
+	height: 36px;
+	padding: 0 var(--ec-space-4);
 	background: var(--ec-color-surface);
 	gap: var(--ec-space-2);
-	font-size: var(--ec-font-size-heading);
+	font-size: var(--ec-font-size-small);
 	font-weight: var(--ec-font-weight-semibold);
 	border-bottom: 1px solid var(--ec-color-border);
 }
@@ -53,8 +54,30 @@
 
 .folder-row__count {
 	font-size: var(--ec-font-size-small);
-	color: var(--ec-color-text-secondary);
+	color: var(--ec-color-muted);
 	font-weight: var(--ec-font-weight-regular);
+	white-space: nowrap;
+}
+
+/* Scanning pulse animation */
+.folder-row__count--scanning {
+	animation: ec-pulse 1500ms ease-in-out infinite;
+}
+
+@keyframes ec-pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.4;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.folder-row__count--scanning {
+		animation: none;
+	}
 }
 
 /* Chevron rotation animation gated behind prefers-reduced-motion */

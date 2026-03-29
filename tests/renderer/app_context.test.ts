@@ -26,6 +26,7 @@ function makeInitialState(overrides: Partial<AppState> = {}): AppState {
 		files: [],
 		collapsedFolders: new Set<string>(),
 		expandedRowId: null,
+		folderStates: new Map(),
 		...overrides,
 	};
 }

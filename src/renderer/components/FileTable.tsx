@@ -3,7 +3,7 @@
 
 import { useCallback, useRef, useState, useEffect } from "react";
 import { useAppContext } from "../contexts/AppContext";
-import type { FileEntry } from "../contexts/AppContext";
+import type { FileEntry, FolderDiscoveryStatus } from "../contexts/AppContext";
 import { FileRow } from "./FileRow";
 import { FolderRow } from "./FolderRow";
 import { Toast } from "./Toast";
@@ -42,8 +42,11 @@ export function FileTable(): React.JSX.Element {
 		showToast("Copied to clipboard");
 	}, []);
 
-	// Derive folder groups from files
-	const { folderGroups, ungroupedFiles } = groupFilesByFolder(state.files);
+	// Derive folder groups from files, including folders in scanning state with no files yet
+	const { folderGroups, ungroupedFiles } = groupFilesByFolder(
+		state.files,
+		state.folderStates,
+	);
 
 	// Build a global stagger index across all visible rows
 	let staggerIndex = 0;
@@ -79,13 +82,19 @@ export function FileTable(): React.JSX.Element {
 				{/* Folder groups */}
 				{folderGroups.map(({ folder, files }) => {
 					const isCollapsed = isFolderCollapsed(folder, state.collapsedFolders);
+					const folderState = state.folderStates.get(folder);
+					const discoveryStatus: FolderDiscoveryStatus =
+						folderState !== undefined ? folderState.status : "complete";
+					const displayCount =
+						folderState !== undefined ? folderState.fileCount : files.length;
 					return (
 						<div key={folder}>
 							<FolderRow
 								folder={folder}
-								fileCount={files.length}
+								fileCount={displayCount}
 								isCollapsed={isCollapsed}
 								onToggle={() => dispatch({ type: "TOGGLE_FOLDER", folder })}
+								discoveryStatus={discoveryStatus}
 							/>
 							{!isCollapsed &&
 								files.map((file) => {
@@ -121,7 +130,10 @@ interface FolderGroup {
 	files: FileEntry[];
 }
 
-function groupFilesByFolder(files: FileEntry[]): {
+function groupFilesByFolder(
+	files: FileEntry[],
+	folderStates: Map<string, { path: string; status: string; fileCount: number }>,
+): {
 	folderGroups: FolderGroup[];
 	ungroupedFiles: FileEntry[];
 } {
@@ -138,6 +150,13 @@ function groupFilesByFolder(files: FileEntry[]): {
 			} else {
 				folderMap.set(file.folder, [file]);
 			}
+		}
+	}
+
+	// Include folders from folderStates that have no files yet (scanning state)
+	for (const [folderKey] of folderStates) {
+		if (!folderMap.has(folderKey)) {
+			folderMap.set(folderKey, []);
 		}
 	}
 
