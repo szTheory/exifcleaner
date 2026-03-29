@@ -3,36 +3,44 @@
    Prefix: --ec-* for new tokens, backward-compat aliases for existing consumers */
 
 :root {
-	/* Colors — Light Mode */
+	/* Colors -- Light Mode */
 	--ec-color-bg: #f5f6f8;
 	--ec-color-text: #3b4351;
 	--ec-color-text-secondary: #66758c;
 	--ec-color-border: #dadee4;
 	--ec-color-surface: #e8ecf0;
-	--ec-color-accent: #521737;
-	--ec-color-success: #2d8659;
+	--ec-color-accent: #007AFF;
+	--ec-color-success: #34c759;
 	--ec-color-error: #c44536;
 	--ec-color-error-bg: #fff0f0;
 	--ec-color-info: #3b7fc4;
 	--ec-color-gold: #f8d057;
 	--ec-color-gold-bg: rgba(248, 208, 87, 0.05);
 	--ec-color-muted: #9da7b6;
+	--ec-color-removed-bg: rgba(255, 59, 48, 0.08);
+	--ec-color-preserved-bg: rgba(52, 199, 89, 0.08);
 
-	/* Type pill colors — Light Mode */
-	--ec-pill-jpg-bg: rgba(59, 127, 196, 0.1);
-	--ec-pill-jpg-text: #3b7fc4;
-	--ec-pill-heic-bg: rgba(120, 80, 160, 0.1);
-	--ec-pill-heic-text: #7850a0;
-	--ec-pill-png-bg: rgba(45, 134, 89, 0.1);
-	--ec-pill-png-text: #2d8659;
-	--ec-pill-pdf-bg: rgba(196, 69, 54, 0.1);
-	--ec-pill-pdf-text: #c44536;
-	--ec-pill-mov-bg: rgba(198, 146, 42, 0.1);
-	--ec-pill-mov-text: #c6922a;
-	--ec-pill-dng-bg: rgba(233, 112, 67, 0.1);
-	--ec-pill-dng-text: #e97043;
+	/* Adaptive tokens -- Light Mode */
+	--ec-shadow-drawer: rgba(0, 0, 0, 0.12);
+	--ec-backdrop-opacity: 0.4;
+	--ec-toggle-off-track: #d1d1d6;
+	--ec-border-status-bar: transparent;
 
-	/* Spacing — 8px grid */
+	/* Type pill colors -- Light Mode (muted, ~40% reduced saturation) */
+	--ec-pill-jpg-bg: rgba(100, 140, 170, 0.08);
+	--ec-pill-jpg-text: #6a8fa8;
+	--ec-pill-heic-bg: rgba(120, 100, 140, 0.08);
+	--ec-pill-heic-text: #8a7aa0;
+	--ec-pill-png-bg: rgba(80, 130, 100, 0.08);
+	--ec-pill-png-text: #5a9070;
+	--ec-pill-pdf-bg: rgba(160, 100, 90, 0.08);
+	--ec-pill-pdf-text: #a06a60;
+	--ec-pill-mov-bg: rgba(160, 140, 80, 0.08);
+	--ec-pill-mov-text: #a09060;
+	--ec-pill-dng-bg: rgba(180, 120, 80, 0.08);
+	--ec-pill-dng-text: #b08060;
+
+	/* Spacing -- 8px grid */
 	--ec-space-1: 4px;
 	--ec-space-2: 8px;
 	--ec-space-3: 12px;
@@ -44,6 +52,8 @@
 	/* Typography */
 	--ec-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
 		Roboto, "Helvetica Neue", Arial, sans-serif;
+	--ec-font-family-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+		"Liberation Mono", Menlo, monospace;
 	--ec-font-size-small: 14px;
 	--ec-font-size-body: 16px;
 	--ec-font-size-label: 20px;
@@ -70,34 +80,42 @@
 }
 
 [data-theme="dark"] {
-	/* Colors — Dark Mode */
+	/* Colors -- Dark Mode */
 	--ec-color-bg: #141416;
 	--ec-color-text: #c5c5cb;
 	--ec-color-text-secondary: #818188;
 	--ec-color-border: #48484d;
 	--ec-color-surface: #1c1c1f;
-	--ec-color-accent: #c4467a;
-	--ec-color-success: #2d8659;
+	--ec-color-accent: #007AFF;
+	--ec-color-success: #30d158;
 	--ec-color-error: #c44536;
 	--ec-color-error-bg: #3d1a16;
 	--ec-color-info: #6ba3d6;
 	--ec-color-gold: #f8d057;
 	--ec-color-gold-bg: rgba(248, 208, 87, 0.08);
 	--ec-color-muted: #636369;
+	--ec-color-removed-bg: rgba(255, 69, 58, 0.12);
+	--ec-color-preserved-bg: rgba(48, 209, 88, 0.12);
 
-	/* Type pill colors — Dark Mode */
-	--ec-pill-jpg-bg: rgba(59, 127, 196, 0.18);
-	--ec-pill-jpg-text: #6ba3d6;
-	--ec-pill-heic-bg: rgba(120, 80, 160, 0.18);
-	--ec-pill-heic-text: #a07cc8;
-	--ec-pill-png-bg: rgba(45, 134, 89, 0.18);
-	--ec-pill-png-text: #4caf7a;
-	--ec-pill-pdf-bg: rgba(196, 69, 54, 0.18);
-	--ec-pill-pdf-text: #d6706a;
-	--ec-pill-mov-bg: rgba(198, 146, 42, 0.18);
-	--ec-pill-mov-text: #d4a94e;
-	--ec-pill-dng-bg: rgba(233, 112, 67, 0.18);
-	--ec-pill-dng-text: #e97043;
+	/* Adaptive tokens -- Dark Mode */
+	--ec-shadow-drawer: rgba(0, 0, 0, 0.3);
+	--ec-backdrop-opacity: 0.6;
+	--ec-toggle-off-track: #3a3a3e;
+	--ec-border-status-bar: var(--ec-color-border);
+
+	/* Type pill colors -- Dark Mode (muted) */
+	--ec-pill-jpg-bg: rgba(100, 140, 170, 0.14);
+	--ec-pill-jpg-text: #7a9ab0;
+	--ec-pill-heic-bg: rgba(120, 100, 140, 0.14);
+	--ec-pill-heic-text: #9a8ab0;
+	--ec-pill-png-bg: rgba(80, 130, 100, 0.14);
+	--ec-pill-png-text: #6aa080;
+	--ec-pill-pdf-bg: rgba(160, 100, 90, 0.14);
+	--ec-pill-pdf-text: #b07a70;
+	--ec-pill-mov-bg: rgba(160, 140, 80, 0.14);
+	--ec-pill-mov-text: #b0a070;
+	--ec-pill-dng-bg: rgba(180, 120, 80, 0.14);
+	--ec-pill-dng-text: #c09070;
 
 	/* Backward-compat aliases */
 	--color-bg: var(--ec-color-bg);
@@ -108,4 +126,20 @@
 	--color-drop-active: var(--ec-color-gold-bg);
 	--color-error-bg: var(--ec-color-error-bg);
 	--color-error-text: var(--ec-color-error);
+}
+
+/* Text selection uses accent color */
+::selection {
+	background-color: var(--ec-color-accent);
+	color: white;
+}
+
+/* Theme crossfade -- only applied during manual theme switch (D-22, D-23) */
+@media (prefers-reduced-motion: no-preference) {
+	html.theme-transitioning,
+	html.theme-transitioning * {
+		transition: background-color var(--ec-duration-normal) var(--ec-ease-out),
+			color var(--ec-duration-normal) var(--ec-ease-out),
+			border-color var(--ec-duration-normal) var(--ec-ease-out) !important;
+	}
 }
