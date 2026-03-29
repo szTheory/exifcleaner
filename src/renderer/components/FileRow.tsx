@@ -1,13 +1,16 @@
 // Single file row with 5 columns: NAME, TYPE, SIZE, BEFORE, AFTER.
-// Supports expansion for error details and metadata info.
+// Supports expansion for error details and metadata inspection.
 
 import { useRef } from "react";
 import type { FileEntry } from "../contexts/AppContext";
 import { FileProcessingStatus } from "../../domain/file_status";
 import { TypePill } from "./TypePill";
 import { StatusIcon } from "./StatusIcon";
+import { ChevronIcon } from "./ChevronIcon";
 import { ErrorExpansion } from "./ErrorExpansion";
+import { MetadataExpansion } from "./MetadataExpansion";
 import { formatFileSize } from "../utils/format_file_size";
+import { useI18n } from "../hooks/use_i18n";
 
 export function FileRow({
 	file,
@@ -25,16 +28,19 @@ export function FileRow({
 	onCopyToast: () => void;
 }): React.JSX.Element {
 	const enteringRef = useRef(true);
+	const { t } = useI18n();
 
 	const isComplete =
 		file.status === FileProcessingStatus.Complete ||
 		file.status === FileProcessingStatus.NoMetadataFound;
 	const isError = file.status === FileProcessingStatus.Error;
+	const isExpandable = isComplete || isError;
 
 	const rowClasses = [
 		"file-table__row",
 		isComplete ? "file-table__row--complete" : "",
 		isError ? "file-table__row--error" : "",
+		isExpandable ? "file-table__row--expandable" : "",
 		enteringRef.current ? "file-table__row--entering" : "",
 	]
 		.filter(Boolean)
@@ -47,7 +53,9 @@ export function FileRow({
 	function handleKeyDown(e: React.KeyboardEvent): void {
 		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
-			onToggleExpand();
+			if (isExpandable) {
+				onToggleExpand();
+			}
 		} else if (e.key === "Escape" && isExpanded) {
 			e.preventDefault();
 			onToggleExpand();
@@ -75,11 +83,20 @@ export function FileRow({
 				}
 				tabIndex={0}
 				role="row"
-				onClick={onToggleExpand}
+				onClick={isExpandable ? onToggleExpand : undefined}
 				onKeyDown={handleKeyDown}
 			>
 				<div className="file-table__cell file-table__cell--status">
-					<StatusIcon status={file.status} shouldAnimate={shouldAnimateCheck} />
+					<StatusIcon
+						status={file.status}
+						shouldAnimate={shouldAnimateCheck}
+					/>
+					{isExpandable && (
+						<ChevronIcon
+							expanded={isExpanded}
+							className="file-table__chevron"
+						/>
+					)}
 				</div>
 				<div className="file-table__cell file-table__cell--name">
 					{file.name}
@@ -94,13 +111,27 @@ export function FileRow({
 			{isExpanded && isError && file.error !== null && (
 				<ErrorExpansion error={file.error} onCopy={onCopyToast} />
 			)}
-			{isExpanded && isComplete && (
-				<div className="file-table__expansion">
-					<span className="file-table__cell--muted">
-						Metadata details available in a future update
-					</span>
-				</div>
-			)}
+			{isExpanded &&
+				isComplete &&
+				file.status === FileProcessingStatus.Complete &&
+				file.beforeMetadata !== null &&
+				file.afterMetadata !== null && (
+					<MetadataExpansion
+						beforeMetadata={file.beforeMetadata}
+						afterMetadata={file.afterMetadata}
+						onCopy={onCopyToast}
+						i18nLookup={t}
+					/>
+				)}
+			{isExpanded &&
+				isComplete &&
+				file.status === FileProcessingStatus.NoMetadataFound && (
+					<div className="file-table__expansion">
+						<span className="metadata-expansion__empty">
+							{t("noMetadataFound")}
+						</span>
+					</div>
+				)}
 		</div>
 	);
 }

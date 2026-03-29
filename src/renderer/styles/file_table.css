@@ -38,8 +38,12 @@
 	border-bottom: 1px solid var(--ec-color-border);
 	padding: 0 var(--ec-space-4);
 	align-items: center;
-	cursor: pointer;
+	cursor: default;
 	outline-offset: -2px;
+}
+
+.file-table__row--expandable {
+	cursor: pointer;
 }
 
 .file-table__row:hover {
@@ -68,8 +72,12 @@
 .file-table__cell--status {
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	gap: var(--ec-space-1);
 	padding: 0;
+}
+
+.file-table__chevron {
+	margin-left: auto;
 }
 
 .file-table__cell--name {
@@ -100,5 +108,28 @@
 	.file-table__row--entering {
 		animation: ec-row-enter var(--ec-duration-normal) var(--ec-ease-out)
 			forwards;
+	}
+}
+
+/* Expansion area for metadata diff and error details */
+.file-table__expansion {
+	border-bottom: 1px solid var(--ec-color-border);
+	padding: var(--ec-space-3) var(--ec-space-4);
+}
+
+@keyframes expansion-slide-open {
+	from {
+		opacity: 0;
+		max-height: 0;
+	}
+	to {
+		opacity: 1;
+		max-height: 300px;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.file-table__expansion {
+		animation: expansion-slide-open var(--ec-duration-normal) var(--ec-ease-out);
 	}
 }
