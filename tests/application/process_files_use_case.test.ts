@@ -7,16 +7,19 @@ import { ExpandFolderCommand } from "../../src/application/expand_folder_command
 import { FakeExifTool } from "../fakes/fake_exiftool";
 import { FakeSettings } from "../fakes/fake_settings";
 import { FakeLogger } from "../fakes/fake_logger";
+import { FakeXattrCommand } from "../fakes/fake_xattr";
 
 let exiftool: FakeExifTool;
 let settings: FakeSettings;
 let logger: FakeLogger;
+let xattr: FakeXattrCommand;
 let useCase: ProcessFilesUseCase;
 
 beforeEach(() => {
 	exiftool = new FakeExifTool();
 	settings = new FakeSettings();
 	logger = new FakeLogger();
+	xattr = new FakeXattrCommand();
 	const stripMetadata = new StripMetadataCommand({ exiftool });
 	const readMetadata = new ReadMetadataQuery({ exiftool });
 	const expandFolder = new ExpandFolderCommand();
@@ -24,6 +27,7 @@ beforeEach(() => {
 		stripMetadata,
 		readMetadata,
 		expandFolder,
+		xattr,
 		settings,
 		logger,
 	});
@@ -108,4 +112,43 @@ it("reads settings from SettingsPort", async () => {
 	expect(removeCalls).toHaveLength(1);
 	const args = removeCalls[0]!.args[1] as string[];
 	expect(args).toContain("-TagsFromFile");
+});
+
+it("passes generateCleanedPath output when saveAsCopy is true", async () => {
+	await settings.update({ saveAsCopy: true });
+
+	await useCase.execute({
+		paths: ["/tmp/a.jpg"],
+	});
+
+	const removeCalls = exiftool.calls.filter(
+		(c) => c.method === "removeMetadata",
+	);
+	expect(removeCalls).toHaveLength(1);
+	const args = removeCalls[0]!.args[1] as string[];
+	expect(args).toContain("-o");
+	// Output path should contain _cleaned
+	const oIndex = args.indexOf("-o");
+	expect(args[oIndex + 1]).toContain("_cleaned");
+});
+
+it("calls xattr after successful strip when removeXattrs is enabled", async () => {
+	await settings.update({ removeXattrs: true });
+
+	await useCase.execute({
+		paths: ["/tmp/a.jpg"],
+	});
+
+	expect(xattr.calls).toHaveLength(1);
+	expect(xattr.calls[0]!.filePath).toBe("/tmp/a.jpg");
+});
+
+it("does not call xattr when removeXattrs is disabled", async () => {
+	await settings.update({ removeXattrs: false });
+
+	await useCase.execute({
+		paths: ["/tmp/a.jpg"],
+	});
+
+	expect(xattr.calls).toHaveLength(0);
 });

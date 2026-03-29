@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { stat } from "node:fs/promises";
 import type { Result } from "../common/result";
 import type { SettingsPort } from "./settings_port";
@@ -5,6 +6,8 @@ import type { LoggerPort } from "./logger_port";
 import type { StripMetadataCommand } from "./strip_metadata_command";
 import type { ReadMetadataQuery } from "./read_metadata_query";
 import type { ExpandFolderCommand } from "./expand_folder_command";
+import type { XattrCommand } from "./xattr_command";
+import { generateCleanedPath } from "../domain/cleaned_path";
 
 export interface FileResult {
 	filePath: string;
@@ -16,6 +19,7 @@ export class ProcessFilesUseCase {
 	private readonly stripMetadata: StripMetadataCommand;
 	private readonly readMetadata: ReadMetadataQuery;
 	private readonly expandFolder: ExpandFolderCommand;
+	private readonly xattr: XattrCommand;
 	private readonly settings: SettingsPort;
 	private readonly logger: LoggerPort;
 
@@ -23,18 +27,21 @@ export class ProcessFilesUseCase {
 		stripMetadata,
 		readMetadata,
 		expandFolder,
+		xattr,
 		settings,
 		logger,
 	}: {
 		stripMetadata: StripMetadataCommand;
 		readMetadata: ReadMetadataQuery;
 		expandFolder: ExpandFolderCommand;
+		xattr: XattrCommand;
 		settings: SettingsPort;
 		logger: LoggerPort;
 	}) {
 		this.stripMetadata = stripMetadata;
 		this.readMetadata = readMetadata;
 		this.expandFolder = expandFolder;
+		this.xattr = xattr;
 		this.settings = settings;
 		this.logger = logger;
 	}
@@ -90,17 +97,28 @@ export class ProcessFilesUseCase {
 				continue;
 			}
 
+			const outputPath = currentSettings.saveAsCopy
+				? generateCleanedPath(filePath, (p) => existsSync(p))
+				: undefined;
+
 			const stripResult = await this.stripMetadata.execute({
 				filePath,
 				preserveOrientation: currentSettings.preserveOrientation,
 				preserveColorProfile: currentSettings.preserveColorProfile,
 				preserveTimestamps: currentSettings.preserveTimestamps,
 				saveAsCopy: currentSettings.saveAsCopy,
+				outputPath,
 				signal,
 			});
 
 			let fileResult: FileResult;
 			if (stripResult.ok) {
+				// Run xattr removal after successful strip if enabled
+				if (currentSettings.removeXattrs) {
+					await this.xattr.execute({
+						filePath: outputPath ?? filePath,
+					});
+				}
 				fileResult = { filePath, status: "success" };
 			} else {
 				fileResult = {
