@@ -3,12 +3,9 @@ import type { ReactNode } from "react";
 import { useAppContext } from "../contexts/AppContext";
 import type { FileEntry } from "../contexts/AppContext";
 import { FileProcessingStatus } from "../../domain/file_status";
-
-function getFileExtension(filename: string): string {
-	const lastDot = filename.lastIndexOf(".");
-	if (lastDot === -1 || lastDot === filename.length - 1) return "";
-	return filename.substring(lastDot + 1).toUpperCase();
-}
+import { isSupportedFile } from "../../domain/file_types";
+import { getFileExtension } from "../utils/get_file_extension";
+import { useProcessFiles } from "../hooks/use_process_files";
 
 function buildFileEntry(path: string, name: string, size: number): FileEntry {
 	return {
@@ -32,6 +29,7 @@ export function DropZone({
 }): React.JSX.Element {
 	const [isDragOver, setIsDragOver] = useState(false);
 	const { dispatch } = useAppContext();
+	const { processFiles } = useProcessFiles();
 
 	const handleDragOver = (e: React.DragEvent): void => {
 		e.preventDefault();
@@ -50,30 +48,36 @@ export function DropZone({
 		e.stopPropagation();
 		setIsDragOver(false);
 		const droppedFiles = Array.from(e.dataTransfer.files);
-		const files = droppedFiles.map((file) => {
-			const path = window.api.files.getPathForFile(file);
-			const name = window.api.files.basename(path);
-			return buildFileEntry(path, name, file.size);
-		});
-		if (files.length > 0) {
-			dispatch({ type: "ADD_FILES", files });
+		const entries: FileEntry[] = droppedFiles
+			.filter((file) => isSupportedFile(file.name))
+			.map((file) => {
+				const path = window.api.files.getPathForFile(file);
+				const name = window.api.files.basename(path);
+				return buildFileEntry(path, name, file.size);
+			});
+		if (entries.length > 0) {
+			dispatch({ type: "ADD_FILES", files: entries });
+			processFiles(entries);
 		}
 	};
 
 	// Listen for files added via File > Open menu
 	useEffect(() => {
 		const cleanup = window.api.files.onFileOpenAddFiles((filePaths) => {
-			const files = filePaths.map((p) => {
-				const name = window.api.files.basename(p);
-				// File size not available from menu path; use 0 as fallback
-				return buildFileEntry(p, name, 0);
-			});
-			if (files.length > 0) {
-				dispatch({ type: "ADD_FILES", files });
+			const entries = filePaths
+				.filter((p) => isSupportedFile(p))
+				.map((p) => {
+					const name = window.api.files.basename(p);
+					// File size not available from menu path; use 0 as fallback
+					return buildFileEntry(p, name, 0);
+				});
+			if (entries.length > 0) {
+				dispatch({ type: "ADD_FILES", files: entries });
+				processFiles(entries);
 			}
 		});
 		return cleanup;
-	}, [dispatch]);
+	}, [dispatch, processFiles]);
 
 	return (
 		<div
