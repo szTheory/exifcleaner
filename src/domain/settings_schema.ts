@@ -3,7 +3,9 @@
 
 import type { Result } from "../common/result";
 
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
+
+export type ThemeMode = "light" | "dark" | "system";
 
 export interface Settings {
 	preserveOrientation: boolean;
@@ -12,6 +14,7 @@ export interface Settings {
 	removeXattrs: boolean;
 	preserveTimestamps: boolean;
 	language: string | null;
+	themeMode: ThemeMode;
 }
 
 export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
@@ -21,6 +24,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
 	removeXattrs: false,
 	preserveTimestamps: false,
 	language: null,
+	themeMode: "system",
 });
 
 export interface SettingsFile {
@@ -56,7 +60,23 @@ export function migrateSettings(file: SettingsFile): {
 		didMigrate = true;
 	}
 
+	// v2 -> v3: Add themeMode field
+	if (file.version < 3) {
+		settings = { ...settings, themeMode: "system" };
+		didMigrate = true;
+	}
+
 	return { settings, didMigrate };
+}
+
+const VALID_THEME_MODES: ReadonlySet<string> = new Set([
+	"light",
+	"dark",
+	"system",
+]);
+
+function isValidThemeMode(value: unknown): value is ThemeMode {
+	return typeof value === "string" && VALID_THEME_MODES.has(value);
 }
 
 export function validateSettings(input: unknown): Result<Settings> {
@@ -91,6 +111,9 @@ export function validateSettings(input: unknown): Result<Settings> {
 			typeof raw["language"] === "string" || raw["language"] === null
 				? (raw["language"] as string | null)
 				: DEFAULT_SETTINGS.language,
+		themeMode: isValidThemeMode(raw["themeMode"])
+			? raw["themeMode"]
+			: DEFAULT_SETTINGS.themeMode,
 	};
 
 	return { ok: true, value: settings };

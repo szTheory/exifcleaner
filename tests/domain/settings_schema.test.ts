@@ -8,8 +8,8 @@ import {
 import type { Settings, SettingsFile } from "../../src/domain/settings_schema";
 
 describe("CURRENT_SCHEMA_VERSION", () => {
-	it("is version 2", () => {
-		expect(CURRENT_SCHEMA_VERSION).toBe(2);
+	it("is version 3", () => {
+		expect(CURRENT_SCHEMA_VERSION).toBe(3);
 	});
 });
 
@@ -28,6 +28,10 @@ describe("DEFAULT_SETTINGS", () => {
 
 	it("does not have preserveRotation field", () => {
 		expect("preserveRotation" in DEFAULT_SETTINGS).toBe(false);
+	});
+
+	it("has themeMode defaulting to system", () => {
+		expect(DEFAULT_SETTINGS.themeMode).toBe("system");
 	});
 });
 
@@ -95,6 +99,30 @@ describe("validateSettings", () => {
 			expect(result.error).toContain("non-null object");
 		}
 	});
+
+	it("validates themeMode=dark", () => {
+		const result = validateSettings({ themeMode: "dark" });
+		expect(result.ok).toBe(true);
+		if (result.ok) {
+			expect(result.value.themeMode).toBe("dark");
+		}
+	});
+
+	it("defaults themeMode for invalid value", () => {
+		const result = validateSettings({ themeMode: "invalid" });
+		expect(result.ok).toBe(true);
+		if (result.ok) {
+			expect(result.value.themeMode).toBe("system");
+		}
+	});
+
+	it("defaults themeMode when missing", () => {
+		const result = validateSettings({});
+		expect(result.ok).toBe(true);
+		if (result.ok) {
+			expect(result.value.themeMode).toBe("system");
+		}
+	});
 });
 
 describe("migrateSettings", () => {
@@ -159,6 +187,46 @@ describe("migrateSettings", () => {
 		expect(didMigrate).toBe(true);
 		expect(settings.preserveOrientation).toBe(true);
 		expect(settings.preserveColorProfile).toBe(true);
+	});
+
+	it("migrates v2 to v3 by adding themeMode=system", () => {
+		const file: SettingsFile = {
+			version: 2,
+			settings: {
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				saveAsCopy: false,
+				removeXattrs: false,
+				preserveTimestamps: false,
+				language: null,
+			} as unknown as Settings,
+		};
+		const { settings, didMigrate } = migrateSettings(file);
+		expect(didMigrate).toBe(true);
+		expect(settings.themeMode).toBe("system");
+		expect(settings.preserveOrientation).toBe(true);
+	});
+
+	it("migrates v1 to v3 applying both migrations", () => {
+		const file = {
+			version: 1,
+			settings: {
+				preserveRotation: false,
+				saveAsCopy: true,
+				removeXattrs: false,
+				preserveTimestamps: false,
+				language: "de",
+			},
+		} as unknown as SettingsFile;
+		const { settings, didMigrate } = migrateSettings(file);
+		expect(didMigrate).toBe(true);
+		// v1->v2 migration
+		expect(settings.preserveOrientation).toBe(false);
+		expect(settings.preserveColorProfile).toBe(false);
+		expect("preserveRotation" in settings).toBe(false);
+		// v2->v3 migration
+		expect(settings.themeMode).toBe("system");
+		expect(settings.language).toBe("de");
 	});
 
 	it("migrates v0 and fills defaults", () => {
