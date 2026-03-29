@@ -38,6 +38,9 @@ const api: ElectronApi = {
 
 	theme: {
 		get: () => ipcRenderer.invoke("theme:get"),
+		set: (mode: "light" | "dark" | "system") =>
+			ipcRenderer.invoke("theme:set", mode),
+		getAccentColor: () => ipcRenderer.invoke("theme:accent-color"),
 		onChanged: (
 			callback: (payload: { shouldUseDarkColors: boolean }) => void,
 		) => {
@@ -45,6 +48,13 @@ const api: ElectronApi = {
 				callback(payload as { shouldUseDarkColors: boolean });
 			ipcRenderer.on("theme:changed", handler);
 			return () => ipcRenderer.removeListener("theme:changed", handler);
+		},
+		onAccentColorChanged: (callback: (payload: { color: string }) => void) => {
+			const handler = (_event: Electron.IpcRendererEvent, payload: unknown) =>
+				callback(payload as { color: string });
+			ipcRenderer.on("theme:accent-color-changed", handler);
+			return () =>
+				ipcRenderer.removeListener("theme:accent-color-changed", handler);
 		},
 	},
 

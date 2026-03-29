@@ -12,10 +12,7 @@ import { createContainer, initContainer } from "./container";
 import type { Container } from "./container";
 import { hardenNavigation } from "./security/navigation";
 import { installPermissionGate } from "./security/permissions";
-import {
-	registerAllowedSender,
-	unregisterSender,
-} from "./ipc/ipc_validation";
+import { registerAllowedSender, unregisterSender } from "./ipc/ipc_validation";
 
 function setupUserModelId(): void {
 	app.setAppUserModelId(packageJson.build.appId);
@@ -46,6 +43,7 @@ export async function init(
 	});
 	setupThemeHandlers({
 		getWindow: () => browserWindow,
+		settingsService: container.settings,
 	});
 	setupContextMenu();
 	setupDockEventHandlers(browserWindow);

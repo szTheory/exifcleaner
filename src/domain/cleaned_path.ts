@@ -6,7 +6,10 @@ export function generateCleanedPath(
 	exists: (candidate: string) => boolean,
 ): string {
 	// Find the last separator (supports both / and \)
-	const lastSep = Math.max(filePath.lastIndexOf("/"), filePath.lastIndexOf("\\"));
+	const lastSep = Math.max(
+		filePath.lastIndexOf("/"),
+		filePath.lastIndexOf("\\"),
+	);
 	const dir = lastSep >= 0 ? filePath.slice(0, lastSep) : "";
 	const filename = lastSep >= 0 ? filePath.slice(lastSep + 1) : filePath;
 

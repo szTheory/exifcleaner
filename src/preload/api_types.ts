@@ -28,8 +28,13 @@ export interface FilesApi {
 
 export interface ThemeApi {
 	get: () => Promise<{ shouldUseDarkColors: boolean }>;
+	set: (mode: "light" | "dark" | "system") => Promise<{ success: boolean }>;
+	getAccentColor: () => Promise<{ color: string }>;
 	onChanged: (
 		callback: (payload: { shouldUseDarkColors: boolean }) => void,
+	) => () => void;
+	onAccentColorChanged: (
+		callback: (payload: { color: string }) => void,
 	) => () => void;
 }
 

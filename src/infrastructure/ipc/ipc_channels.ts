@@ -16,4 +16,8 @@ export const IPC_CHANNELS = {
 	// Theme channels for Phase 3
 	THEME_GET: "theme:get",
 	THEME_CHANGED: "theme:changed",
+	// Theme channels for Phase 6 (dark mode control)
+	THEME_SET: "theme:set",
+	THEME_ACCENT_COLOR: "theme:accent-color",
+	THEME_ACCENT_COLOR_CHANGED: "theme:accent-color-changed",
 } as const;

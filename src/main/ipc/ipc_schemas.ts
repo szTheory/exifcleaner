@@ -13,8 +13,11 @@ export const settingsSetSchema = z.object({
 	removeXattrs: z.boolean().optional(),
 	preserveTimestamps: z.boolean().optional(),
 	language: z.string().nullable().optional(),
+	themeMode: z.enum(["light", "dark", "system"]).optional(),
 });
 export const themeGetSchema = z.undefined();
+export const themeSetSchema = z.enum(["light", "dark", "system"]);
+export const themeAccentColorSchema = z.undefined();
 
 // send channels (fire-and-forget, renderer -> main)
 export const filesAddedSchema = z.number().int().positive();
