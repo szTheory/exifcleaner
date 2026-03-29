@@ -19,6 +19,13 @@ export const themeGetSchema = z.undefined();
 export const themeSetSchema = z.enum(["light", "dark", "system"]);
 export const themeAccentColorSchema = z.undefined();
 
+// File reveal channels (Phase 7)
+export const fileRevealSchema = z.string().min(1);
+export const fileRevealContextMenuSchema = z.object({
+	cleanedPath: z.string().min(1),
+	originalPath: z.string().min(1),
+});
+
 // Folder recursion channels (Phase 7)
 export const folderClassifySchema = z.array(z.string().min(1));
 export const folderExpandSchema = z.string().min(1);

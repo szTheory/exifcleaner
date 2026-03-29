@@ -45,8 +45,9 @@ export function StatusBar({
 							className="status-bar__button"
 							type="button"
 							onClick={onCleanMore}
+							aria-label="Clear all results"
 						>
-							Clean more
+							Clear
 						</button>
 					)}
 				</>

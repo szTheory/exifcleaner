@@ -86,7 +86,43 @@
 }
 
 .file-table__cell--name {
+	display: flex;
+	align-items: center;
 	font-size: var(--ec-font-size-body);
+}
+
+/* Reveal icon — appears on row hover for completed files */
+.file-table__reveal {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	margin-left: var(--ec-space-1);
+	border: none;
+	background: transparent;
+	color: var(--ec-color-text-secondary);
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity var(--ec-duration-fast) var(--ec-ease-out);
+	vertical-align: middle;
+	flex-shrink: 0;
+}
+
+.file-table__row:hover .file-table__reveal,
+.file-table__reveal:focus-visible {
+	opacity: 1;
+}
+
+.file-table__reveal:hover {
+	color: var(--ec-color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.file-table__reveal {
+		transition: none;
+	}
 }
 
 .file-table__cell--muted {

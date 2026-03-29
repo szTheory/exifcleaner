@@ -26,4 +26,7 @@ export const IPC_CHANNELS = {
 	// Folder recursion channels for Phase 7
 	FOLDER_CLASSIFY: "folder:classify",
 	FOLDER_EXPAND: "folder:expand",
+	// File reveal channels for Phase 7
+	FILE_REVEAL: "file:reveal",
+	FILE_REVEAL_CONTEXT_MENU: "file:reveal-context-menu",
 } as const;

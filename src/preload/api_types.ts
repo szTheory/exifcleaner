@@ -60,6 +60,16 @@ export interface FolderApi {
 	) => Promise<{ files: string[]; skippedCount: number; error?: string }>;
 }
 
+export interface RevealApi {
+	showInFolder: (
+		filePath: string,
+	) => Promise<{ success: boolean; error?: string }>;
+	showContextMenu: (paths: {
+		cleanedPath: string;
+		originalPath: string;
+	}) => Promise<{ success: boolean }>;
+}
+
 export interface PlatformApi {
 	isMac: boolean;
 }
@@ -71,5 +81,6 @@ export interface ElectronApi {
 	theme: ThemeApi;
 	settings: SettingsApi;
 	platform: PlatformApi;
+	reveal: RevealApi;
 	folder: FolderApi;
 }

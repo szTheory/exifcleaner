@@ -8,6 +8,7 @@ import { setLanguageChangeHandler, setLanguageSettingGetter } from "./menu_view"
 import { setDockLanguageChangeHandler, setDockLanguageSettingGetter } from "./menu_dock";
 import { setupSettingsHandlers } from "./settings_handlers";
 import { setupThemeHandlers } from "./theme_handlers";
+import { setupRevealHandlers } from "./reveal_handlers";
 import { setupContextMenu } from "./context_menu";
 import { setupDockEventHandlers } from "./dock";
 import { setupApp } from "./app_setup";
@@ -64,6 +65,7 @@ export async function init(
 		getWindow: () => browserWindow,
 		settingsService: container.settings,
 	});
+	setupRevealHandlers();
 	setupContextMenu();
 	setupDockEventHandlers(browserWindow);
 	setupUserModelId();

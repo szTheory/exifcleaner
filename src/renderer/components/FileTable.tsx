@@ -11,6 +11,16 @@ import { Toast } from "./Toast";
 export function FileTable(): React.JSX.Element {
 	const { state, dispatch } = useAppContext();
 	const animatedCheckRef = useRef(new Set<string>());
+	const [saveAsCopy, setSaveAsCopy] = useState(false);
+
+	// Load saveAsCopy setting and listen for changes
+	useEffect(() => {
+		window.api.settings.get().then((s) => setSaveAsCopy(s.saveAsCopy));
+		const unsub = window.api.settings.onChanged((s) =>
+			setSaveAsCopy(s.saveAsCopy),
+		);
+		return unsub;
+	}, []);
 
 	// Toast state for copy confirmation
 	const [toastVisible, setToastVisible] = useState(false);
@@ -40,6 +50,10 @@ export function FileTable(): React.JSX.Element {
 
 	const handleCopyToast = useCallback(() => {
 		showToast("Copied to clipboard");
+	}, []);
+
+	const handleRevealError = useCallback((message: string) => {
+		showToast(message);
 	}, []);
 
 	// Derive folder groups from files, including folders in scanning state with no files yet
@@ -76,6 +90,8 @@ export function FileTable(): React.JSX.Element {
 							staggerIndex={idx}
 							animatedCheckRef={animatedCheckRef}
 							onCopyToast={handleCopyToast}
+							saveAsCopy={saveAsCopy}
+							onRevealError={handleRevealError}
 						/>
 					);
 				})}
@@ -113,6 +129,8 @@ export function FileTable(): React.JSX.Element {
 											staggerIndex={idx}
 											animatedCheckRef={animatedCheckRef}
 											onCopyToast={handleCopyToast}
+											saveAsCopy={saveAsCopy}
+											onRevealError={handleRevealError}
 										/>
 									);
 								})}

@@ -91,6 +91,15 @@ const api: ElectronApi = {
 		},
 	},
 
+	reveal: {
+		showInFolder: (filePath: string) =>
+			ipcRenderer.invoke("file:reveal", filePath),
+		showContextMenu: (paths: {
+			cleanedPath: string;
+			originalPath: string;
+		}) => ipcRenderer.invoke("file:reveal-context-menu", paths),
+	},
+
 	folder: {
 		classify: (paths: string[]) =>
 			ipcRenderer.invoke("folder:classify", paths),

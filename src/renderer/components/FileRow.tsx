@@ -12,6 +12,22 @@ import { MetadataExpansion } from "./MetadataExpansion";
 import { formatFileSize } from "../utils/format_file_size";
 import { useI18n } from "../hooks/use_i18n";
 
+/** Compute the cleaned copy path (simple version for reveal, no collision check). */
+function computeCleanedPath(filePath: string): string {
+	const lastSep = Math.max(
+		filePath.lastIndexOf("/"),
+		filePath.lastIndexOf("\\"),
+	);
+	const dir = lastSep >= 0 ? filePath.slice(0, lastSep) : "";
+	const filename = lastSep >= 0 ? filePath.slice(lastSep + 1) : filePath;
+	const dotIndex = filename.lastIndexOf(".");
+	const base = dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
+	const ext = dotIndex > 0 ? filename.slice(dotIndex) : "";
+	const sep = lastSep >= 0 ? filePath[lastSep] : "/";
+	const prefix = dir ? `${dir}${sep}` : "";
+	return `${prefix}${base}_cleaned${ext}`;
+}
+
 export function FileRow({
 	file,
 	isExpanded,
@@ -19,6 +35,8 @@ export function FileRow({
 	staggerIndex,
 	animatedCheckRef,
 	onCopyToast,
+	saveAsCopy,
+	onRevealError,
 }: {
 	file: FileEntry;
 	isExpanded: boolean;
@@ -26,6 +44,8 @@ export function FileRow({
 	staggerIndex: number;
 	animatedCheckRef: React.RefObject<Set<string>>;
 	onCopyToast: () => void;
+	saveAsCopy?: boolean;
+	onRevealError?: (message: string) => void;
 }): React.JSX.Element {
 	const enteringRef = useRef(true);
 	const { t } = useI18n();
@@ -60,6 +80,24 @@ export function FileRow({
 			e.preventDefault();
 			onToggleExpand();
 		}
+	}
+
+	function handleRevealClick(): void {
+		const targetPath =
+			saveAsCopy === true ? computeCleanedPath(file.path) : file.path;
+		window.api.reveal.showInFolder(targetPath).then((result) => {
+			if (!result.success && result.error !== undefined) {
+				onRevealError?.(result.error);
+			}
+		});
+	}
+
+	function handleRevealContextMenu(): void {
+		if (saveAsCopy !== true) return;
+		window.api.reveal.showContextMenu({
+			cleanedPath: computeCleanedPath(file.path),
+			originalPath: file.path,
+		});
 	}
 
 	// Determine if checkmark should animate (one-shot via ref)
@@ -98,6 +136,44 @@ export function FileRow({
 				</div>
 				<div className="file-table__cell file-table__cell--name">
 					{file.name}
+					{isComplete && (
+						<span
+							className="file-table__reveal"
+							onClick={(e) => {
+								e.stopPropagation();
+								handleRevealClick();
+							}}
+							onContextMenu={(e) => {
+								e.preventDefault();
+								e.stopPropagation();
+								handleRevealContextMenu();
+							}}
+							onKeyDown={(e) => {
+								if (e.key === "Enter" || e.key === " ") {
+									e.preventDefault();
+									handleRevealClick();
+								}
+							}}
+							aria-label="Reveal in file manager"
+							role="button"
+							tabIndex={0}
+						>
+							<svg
+								width="14"
+								height="14"
+								viewBox="0 0 16 16"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="1.5"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<path d="M7 3H3V13H13V9" />
+								<path d="M10 2H14V6" />
+								<path d="M14 2L7 9" />
+							</svg>
+						</span>
+					)}
 				</div>
 				<div className="file-table__cell">
 					<TypePill extension={file.extension} />
