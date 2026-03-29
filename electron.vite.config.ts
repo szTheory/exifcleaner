@@ -7,13 +7,17 @@ function cspPlugin(): Plugin {
 		name: "html-csp",
 		transformIndexHtml(_html, ctx) {
 			const isDev = ctx.server !== undefined;
+			const scriptSrc = isDev
+				? "'self' 'unsafe-inline'"
+				: "'self'";
+			const styleSrc = isDev ? "'self' 'unsafe-inline'" : "'self'";
 			const connectSrc = isDev ? "'self' ws://localhost:*" : "'self'";
 			return [
 				{
 					tag: "meta",
 					attrs: {
 						"http-equiv": "Content-Security-Policy",
-						content: `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src ${connectSrc}; base-uri 'none'; frame-ancestors 'none'`,
+						content: `default-src 'none'; script-src ${scriptSrc}; style-src ${styleSrc}; img-src 'self' data:; connect-src ${connectSrc}; base-uri 'none'`,
 					},
 					injectTo: "head-prepend",
 				},
