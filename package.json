@@ -28,12 +28,21 @@
 		"dev": "ELECTRON_RUN_AS_NODE= electron-vite dev",
 		"dev:debug": "ELECTRON_RUN_AS_NODE= electron-vite dev --remote-debugging-port=9222",
 		"compile": "electron-vite build",
+		"typecheck": "tsc --noEmit",
+		"preview": "ELECTRON_RUN_AS_NODE= electron-vite preview",
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"react": "^19.2.0",
+		"react-dom": "^19.2.0",
+		"zod": "^3.25.0"
+	},
 	"devDependencies": {
 		"@types/node": "^22",
+		"@types/react": "^19.2.0",
+		"@types/react-dom": "^19.2.0",
+		"@vitejs/plugin-react": "^4.7.0",
 		"electron": "^35",
 		"electron-builder": "^22.8",
 		"electron-vite": "^5.0.0",
