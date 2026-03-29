@@ -4,18 +4,14 @@ import { AppProvider, useAppContext } from "./contexts/AppContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { EmptyState } from "./components/EmptyState";
 import { DropZone } from "./components/DropZone";
-import { FileList } from "./components/FileList";
+import { FileTable } from "./components/FileTable";
 
 function AppContent(): React.JSX.Element {
 	const { state } = useAppContext();
 
 	return (
 		<DropZone>
-			{state.files.length === 0 ? (
-				<EmptyState />
-			) : (
-				<FileList files={state.files} />
-			)}
+			{state.files.length === 0 ? <EmptyState /> : <FileTable />}
 		</DropZone>
 	);
 }
