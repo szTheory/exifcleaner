@@ -1,8 +1,11 @@
-// IPC event names shared between main and renderer processes.
-// Extracted here so renderer code does not import from main process modules.
+// Re-export for backward compatibility during migration.
+// Consumers should import from infrastructure/ipc/ipc_channels.ts directly.
+export { IPC_CHANNELS } from "../infrastructure/ipc/ipc_channels";
 
-export const EVENT_FILES_ADDED = "files-added";
-export const EVENT_FILE_PROCESSED = "file-processed";
-export const EVENT_ALL_FILES_PROCESSED = "all-files-processed";
-export const EVENT_FILE_OPEN_ADD_FILES = "file-open-add-files";
-export const IPC_EVENT_NAME_GET_LOCALE = "get-locale";
+// Legacy named exports for files that still import individual constants
+import { IPC_CHANNELS } from "../infrastructure/ipc/ipc_channels";
+export const EVENT_FILES_ADDED = IPC_CHANNELS.FILES_ADDED;
+export const EVENT_FILE_PROCESSED = IPC_CHANNELS.FILE_PROCESSED;
+export const EVENT_ALL_FILES_PROCESSED = IPC_CHANNELS.ALL_FILES_PROCESSED;
+export const EVENT_FILE_OPEN_ADD_FILES = IPC_CHANNELS.FILE_OPEN_ADD_FILES;
+export const IPC_EVENT_NAME_GET_LOCALE = IPC_CHANNELS.GET_LOCALE;
