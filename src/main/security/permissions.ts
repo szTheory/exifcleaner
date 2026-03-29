@@ -1,7 +1,20 @@
 import { session } from "electron";
 
-export function installPermissionGate(): void {
-	session.defaultSession.setPermissionRequestHandler(
+// Accepts an optional session-like object for testability.
+// In production, defaults to session.defaultSession.
+export function installPermissionGate(
+	targetSession?: {
+		setPermissionRequestHandler: (
+			handler: (
+				webContents: unknown,
+				permission: string,
+				callback: (granted: boolean) => void,
+			) => void,
+		) => void;
+	},
+): void {
+	const sess = targetSession ?? session.defaultSession;
+	sess.setPermissionRequestHandler(
 		(_webContents, permission, callback) => {
 			console.warn(`[security] Denied permission: ${permission}`);
 			callback(false);

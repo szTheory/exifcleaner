@@ -1,7 +1,14 @@
 import { shell } from "electron";
 import type { BrowserWindow } from "electron";
 
-export function hardenNavigation(win: BrowserWindow): void {
+// Accepts an optional openExternal function for testability.
+// In production, defaults to shell.openExternal.
+export function hardenNavigation(
+	win: BrowserWindow,
+	openExternal?: (url: string) => void,
+): void {
+	const openUrl = openExternal ?? ((url: string) => shell.openExternal(url));
+
 	win.webContents.on("will-navigate", (event, url) => {
 		const isDevAllowed =
 			process.env.NODE_ENV !== "production" &&
@@ -17,7 +24,7 @@ export function hardenNavigation(win: BrowserWindow): void {
 		try {
 			const parsed = new URL(url);
 			if (parsed.protocol === "https:") {
-				shell.openExternal(url);
+				openUrl(url);
 			}
 		} catch {
 			// Invalid URL, ignore
