@@ -14,15 +14,18 @@
 	grid-template-columns: 24px 1fr 72px 80px 88px 88px;
 	background: var(--ec-color-surface);
 	border-bottom: 1px solid var(--ec-color-border);
-	padding: var(--ec-space-2) var(--ec-space-4);
-	font-size: var(--ec-font-size-label);
+	padding: var(--ec-space-1) var(--ec-space-4);
+	font-size: 11px;
 	font-weight: var(--ec-font-weight-semibold);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--ec-color-text-secondary);
 	text-align: left;
 	z-index: 10;
 }
 
 .file-table__header-cell {
-	padding: var(--ec-space-2);
+	padding: var(--ec-space-1) var(--ec-space-2);
 	text-align: left;
 }
 

@@ -1,19 +1,16 @@
-/* Gear icon button — always visible top-right */
+/* Gear icon button — bottom-left of status bar */
 .gear-icon {
-	position: absolute;
-	top: var(--ec-space-4);
-	right: var(--ec-space-4);
 	background: none;
 	border: none;
-	width: 32px;
-	height: 32px;
+	width: 28px;
+	height: 28px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
 	color: var(--ec-color-text-secondary);
 	border-radius: 4px;
-	z-index: 50;
+	-webkit-app-region: no-drag;
 }
 
 .gear-icon:hover {

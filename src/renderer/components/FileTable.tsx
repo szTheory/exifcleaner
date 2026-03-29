@@ -1,21 +1,16 @@
-// Main orchestrating component: renders 5-column file table with folder groups,
-// status bar, and toast notification.
+// Main orchestrating component: renders 5-column file table with folder groups
+// and toast notification. Status bar is rendered by App.tsx.
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import { useAppContext } from "../contexts/AppContext";
 import type { FileEntry } from "../contexts/AppContext";
-import { FileProcessingStatus } from "../../domain/file_status";
-import { useElapsedTime } from "../hooks/use_elapsed_time";
 import { FileRow } from "./FileRow";
 import { FolderRow } from "./FolderRow";
-import { StatusBar } from "./StatusBar";
 import { Toast } from "./Toast";
 
 export function FileTable(): React.JSX.Element {
 	const { state, dispatch } = useAppContext();
 	const animatedCheckRef = useRef(new Set<string>());
-	const { elapsedSeconds, startTimer, stopTimer, resetTimer } =
-		useElapsedTime();
 
 	// Toast state for copy confirmation
 	const [toastVisible, setToastVisible] = useState(false);
@@ -49,53 +44,6 @@ export function FileTable(): React.JSX.Element {
 
 	// Derive folder groups from files
 	const { folderGroups, ungroupedFiles } = groupFilesByFolder(state.files);
-
-	// Compute derived stats
-	const totalCount = state.files.length;
-	const completedFiles = state.files.filter(
-		(f) =>
-			f.status === FileProcessingStatus.Complete ||
-			f.status === FileProcessingStatus.NoMetadataFound ||
-			f.status === FileProcessingStatus.Error,
-	);
-	const completedCount = completedFiles.length;
-	const totalTagsRemoved = state.files.reduce((sum, f) => {
-		if (
-			(f.status === FileProcessingStatus.Complete ||
-				f.status === FileProcessingStatus.NoMetadataFound) &&
-			f.beforeTags !== null &&
-			f.afterTags !== null
-		) {
-			return sum + (f.beforeTags - f.afterTags);
-		}
-		return sum;
-	}, 0);
-
-	// Check if all files are done processing
-	const allDone =
-		state.files.length > 0 &&
-		state.files.every(
-			(f) =>
-				f.status === FileProcessingStatus.Complete ||
-				f.status === FileProcessingStatus.Error ||
-				f.status === FileProcessingStatus.NoMetadataFound,
-		);
-
-	// Control elapsed time timer based on processing state
-	useEffect(() => {
-		if (state.files.length > 0 && !allDone) {
-			startTimer();
-		} else if (allDone) {
-			stopTimer();
-		}
-	}, [state.files.length, allDone, startTimer, stopTimer]);
-
-	// Reset timer when files are cleared
-	useEffect(() => {
-		if (state.files.length === 0) {
-			resetTimer();
-		}
-	}, [state.files.length, resetTimer]);
 
 	// Build a global stagger index across all visible rows
 	let staggerIndex = 0;
@@ -163,13 +111,6 @@ export function FileTable(): React.JSX.Element {
 					);
 				})}
 			</div>
-			<StatusBar
-				completedCount={completedCount}
-				totalCount={totalCount}
-				totalTagsRemoved={totalTagsRemoved}
-				elapsedSeconds={elapsedSeconds}
-				onCleanMore={() => dispatch({ type: "CLEAR_FILES" })}
-			/>
 			<Toast message={toastMessage} visible={toastVisible} />
 		</section>
 	);
