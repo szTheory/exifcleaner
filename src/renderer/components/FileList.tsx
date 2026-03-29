@@ -14,7 +14,7 @@ export function FileList({
 		>
 			<ul className="file-list__items" role="list">
 				{files.map((file) => (
-					<li key={file.path} className="file-list__item">
+					<li key={file.id} className="file-list__item">
 						<span className="file-list__name">{file.name}</span>
 						<span className="file-list__path">{file.path}</span>
 					</li>
