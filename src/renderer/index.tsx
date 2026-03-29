@@ -8,6 +8,12 @@ import "./styles/error_boundary.css";
 import "./styles/empty_state.css";
 import "./styles/drop_zone.css";
 import "./styles/file_list.css";
+import "./styles/file_table.css";
+import "./styles/status_icon.css";
+import "./styles/type_pill.css";
+import "./styles/status_bar.css";
+import "./styles/folder_row.css";
+import "./styles/toast.css";
 
 const rootEl = document.getElementById("root");
 if (!rootEl) {

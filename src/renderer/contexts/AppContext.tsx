@@ -50,9 +50,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 			return {
 				...state,
 				files: state.files.map((file) =>
-					file.id === action.id
-						? { ...file, status: action.status }
-						: file,
+					file.id === action.id ? { ...file, status: action.status } : file,
 				),
 			};
 		case "UPDATE_FILE_METADATA":
@@ -93,14 +91,11 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 		case "TOGGLE_ROW_EXPANSION":
 			return {
 				...state,
-				expandedRowId:
-					state.expandedRowId === action.id ? null : action.id,
+				expandedRowId: state.expandedRowId === action.id ? null : action.id,
 			};
 		default: {
 			const _exhaustive: never = action;
-			throw new Error(
-				`Unhandled action: ${JSON.stringify(_exhaustive)}`,
-			);
+			throw new Error(`Unhandled action: ${JSON.stringify(_exhaustive)}`);
 		}
 	}
 }

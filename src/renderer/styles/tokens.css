@@ -1,26 +1,111 @@
+/* Design token system for ExifCleaner v4.0
+   Source of truth: devplans/10-brand-identity.md, 04-UI-SPEC.md
+   Prefix: --ec-* for new tokens, backward-compat aliases for existing consumers */
+
 :root {
-	--color-bg: #f5f6f8;
-	--color-text: #333333;
-	--color-text-secondary: #666666;
-	--color-border: #e0e0e0;
-	--color-accent: #4a90d9;
-	--color-drop-active: rgba(74, 144, 217, 0.1);
-	--color-error-bg: #fff0f0;
-	--color-error-text: #cc0000;
-	--spacing-xs: 4px;
-	--spacing-sm: 8px;
-	--spacing-md: 16px;
-	--spacing-lg: 24px;
-	--spacing-xl: 32px;
+	/* Colors — Light Mode */
+	--ec-color-bg: #f5f6f8;
+	--ec-color-text: #3b4351;
+	--ec-color-text-secondary: #66758c;
+	--ec-color-border: #dadee4;
+	--ec-color-surface: #e8ecf0;
+	--ec-color-accent: #521737;
+	--ec-color-success: #2d8659;
+	--ec-color-error: #c44536;
+	--ec-color-error-bg: #fff0f0;
+	--ec-color-info: #3b7fc4;
+	--ec-color-gold: #f8d057;
+	--ec-color-gold-bg: rgba(248, 208, 87, 0.05);
+	--ec-color-muted: #9da7b6;
+
+	/* Type pill colors — Light Mode */
+	--ec-pill-jpg-bg: rgba(59, 127, 196, 0.1);
+	--ec-pill-jpg-text: #3b7fc4;
+	--ec-pill-heic-bg: rgba(120, 80, 160, 0.1);
+	--ec-pill-heic-text: #7850a0;
+	--ec-pill-png-bg: rgba(45, 134, 89, 0.1);
+	--ec-pill-png-text: #2d8659;
+	--ec-pill-pdf-bg: rgba(196, 69, 54, 0.1);
+	--ec-pill-pdf-text: #c44536;
+	--ec-pill-mov-bg: rgba(198, 146, 42, 0.1);
+	--ec-pill-mov-text: #c6922a;
+	--ec-pill-dng-bg: rgba(233, 112, 67, 0.1);
+	--ec-pill-dng-text: #e97043;
+
+	/* Spacing — 8px grid */
+	--ec-space-1: 4px;
+	--ec-space-2: 8px;
+	--ec-space-3: 12px;
+	--ec-space-4: 16px;
+	--ec-space-6: 24px;
+	--ec-space-8: 32px;
+	--ec-space-12: 48px;
+
+	/* Typography */
+	--ec-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+		Roboto, "Helvetica Neue", Arial, sans-serif;
+	--ec-font-size-small: 14px;
+	--ec-font-size-body: 16px;
+	--ec-font-size-label: 20px;
+	--ec-font-size-heading: 24px;
+	--ec-font-weight-regular: 400;
+	--ec-font-weight-semibold: 600;
+
+	/* Animation */
+	--ec-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+	--ec-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+	--ec-duration-fast: 150ms;
+	--ec-duration-normal: 200ms;
+	--ec-duration-slow: 300ms;
+
+	/* Backward-compat aliases for existing consumers (app.css, empty_state.css, error_boundary.css) */
+	--color-bg: var(--ec-color-bg);
+	--color-text: var(--ec-color-text);
+	--color-text-secondary: var(--ec-color-text-secondary);
+	--color-border: var(--ec-color-border);
+	--color-accent: var(--ec-color-accent);
+	--color-drop-active: var(--ec-color-gold-bg);
+	--color-error-bg: var(--ec-color-error-bg);
+	--color-error-text: var(--ec-color-error);
 }
 
 [data-theme="dark"] {
-	--color-bg: #1e1e1e;
-	--color-text: #e0e0e0;
-	--color-text-secondary: #999999;
-	--color-border: #3a3a3a;
-	--color-accent: #6ab0f3;
-	--color-drop-active: rgba(106, 176, 243, 0.15);
-	--color-error-bg: #2d0000;
-	--color-error-text: #ff6666;
+	/* Colors — Dark Mode */
+	--ec-color-bg: #141416;
+	--ec-color-text: #c5c5cb;
+	--ec-color-text-secondary: #818188;
+	--ec-color-border: #48484d;
+	--ec-color-surface: #1c1c1f;
+	--ec-color-accent: #c4467a;
+	--ec-color-success: #2d8659;
+	--ec-color-error: #c44536;
+	--ec-color-error-bg: #3d1a16;
+	--ec-color-info: #6ba3d6;
+	--ec-color-gold: #f8d057;
+	--ec-color-gold-bg: rgba(248, 208, 87, 0.08);
+	--ec-color-muted: #636369;
+
+	/* Type pill colors — Dark Mode */
+	--ec-pill-jpg-bg: rgba(59, 127, 196, 0.18);
+	--ec-pill-jpg-text: #6ba3d6;
+	--ec-pill-heic-bg: rgba(120, 80, 160, 0.18);
+	--ec-pill-heic-text: #a07cc8;
+	--ec-pill-png-bg: rgba(45, 134, 89, 0.18);
+	--ec-pill-png-text: #4caf7a;
+	--ec-pill-pdf-bg: rgba(196, 69, 54, 0.18);
+	--ec-pill-pdf-text: #d6706a;
+	--ec-pill-mov-bg: rgba(198, 146, 42, 0.18);
+	--ec-pill-mov-text: #d4a94e;
+	--ec-pill-dng-bg: rgba(233, 112, 67, 0.18);
+	--ec-pill-dng-text: #e97043;
+
+	/* Backward-compat aliases */
+	--color-bg: var(--ec-color-bg);
+	--color-text: var(--ec-color-text);
+	--color-text-secondary: var(--ec-color-text-secondary);
+	--color-border: var(--ec-color-border);
+	--color-accent: var(--ec-color-accent);
+	--color-drop-active: var(--ec-color-gold-bg);
+	--color-error-bg: var(--ec-color-error-bg);
+	--color-error-text: var(--ec-color-error);
 }

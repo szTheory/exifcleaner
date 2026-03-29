@@ -1,0 +1,42 @@
+/* StatusBar — Bottom bar with progress summary and "Clean more" button */
+
+.status-bar {
+	position: sticky;
+	bottom: 0;
+	height: 44px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 var(--ec-space-4);
+	background: var(--ec-color-bg);
+	border-top: 1px solid var(--ec-color-border);
+	z-index: 10;
+}
+
+.status-bar__summary {
+	font-size: var(--ec-font-size-small);
+	color: var(--ec-color-text-secondary);
+	font-weight: var(--ec-font-weight-regular);
+}
+
+.status-bar__count {
+	font-size: var(--ec-font-size-body);
+	font-weight: var(--ec-font-weight-regular);
+	color: var(--ec-color-text);
+}
+
+.status-bar__button {
+	background: none;
+	border: none;
+	font-size: var(--ec-font-size-small);
+	font-weight: var(--ec-font-weight-semibold);
+	color: var(--ec-color-accent);
+	cursor: pointer;
+	padding: var(--ec-space-2) var(--ec-space-4);
+	text-decoration: none;
+	font-family: var(--ec-font-family);
+}
+
+.status-bar__button:hover {
+	text-decoration: underline;
+}

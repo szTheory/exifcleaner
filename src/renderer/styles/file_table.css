@@ -1,0 +1,99 @@
+/* FileTable — BEM classes for table layout
+   Columns: NAME (1fr) | TYPE (72px) | SIZE (80px) | BEFORE (72px) | AFTER (72px) */
+
+.file-table {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+.file-table__header {
+	position: sticky;
+	top: 0;
+	display: grid;
+	grid-template-columns: 1fr 72px 80px 72px 72px;
+	background: var(--ec-color-surface);
+	border-bottom: 1px solid var(--ec-color-border);
+	padding: var(--ec-space-2) var(--ec-space-4);
+	font-size: var(--ec-font-size-label);
+	font-weight: var(--ec-font-weight-semibold);
+	text-align: left;
+	z-index: 10;
+}
+
+.file-table__header-cell {
+	padding: var(--ec-space-2);
+	text-align: left;
+}
+
+.file-table__body {
+	flex: 1;
+	overflow-y: auto;
+}
+
+.file-table__row {
+	display: grid;
+	grid-template-columns: 1fr 72px 80px 72px 72px;
+	min-height: 44px;
+	border-bottom: 1px solid var(--ec-color-border);
+	padding: 0 var(--ec-space-4);
+	align-items: center;
+	cursor: pointer;
+	outline-offset: -2px;
+}
+
+.file-table__row:hover {
+	background: var(--ec-color-surface);
+}
+
+.file-table__row:focus-visible {
+	outline: 2px solid var(--ec-color-accent);
+	outline-offset: 2px;
+}
+
+.file-table__row--complete {
+	border-left: 2px solid var(--ec-color-success);
+}
+
+.file-table__row--error {
+	border-left: 2px solid var(--ec-color-error);
+	background: var(--ec-color-error-bg);
+}
+
+.file-table__cell {
+	padding: var(--ec-space-2);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.file-table__cell--name {
+	font-size: var(--ec-font-size-body);
+}
+
+.file-table__cell--muted {
+	color: var(--ec-color-muted);
+}
+
+/* Row entrance animation — stagger delay set via inline style --ec-stagger-delay */
+.file-table__row--entering {
+	animation-delay: var(--ec-stagger-delay, 0ms);
+}
+
+@keyframes ec-row-enter {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.file-table__row--entering {
+		animation: ec-row-enter var(--ec-duration-normal) var(--ec-ease-out)
+			forwards;
+	}
+}

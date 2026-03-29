@@ -1,0 +1,59 @@
+/* StatusIcon — BEM classes for status icons (spinner, checkmark, error) */
+
+.status-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+}
+
+.status-icon__spinner {
+	width: 16px;
+	height: 16px;
+	border: 2px solid transparent;
+	border-top-color: var(--ec-color-muted);
+	border-radius: 50%;
+}
+
+.status-icon__check {
+	color: var(--ec-color-success);
+}
+
+.status-icon__error {
+	color: var(--ec-color-error);
+}
+
+/* Keyframes */
+@keyframes ec-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes ec-check-pop {
+	0% {
+		transform: scale(0);
+	}
+	70% {
+		transform: scale(1.15);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+/* All animations gated behind prefers-reduced-motion */
+@media (prefers-reduced-motion: no-preference) {
+	.status-icon__spinner {
+		animation: ec-spin 1s linear infinite;
+	}
+
+	.status-icon__check--animate {
+		animation: ec-check-pop var(--ec-duration-slow) var(--ec-ease-spring)
+			forwards;
+	}
+}

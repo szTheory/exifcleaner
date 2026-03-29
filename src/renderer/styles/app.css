@@ -4,4 +4,5 @@
 	min-height: 100vh;
 	background-color: var(--color-bg);
 	color: var(--color-text);
+	font-family: var(--ec-font-family);
 }

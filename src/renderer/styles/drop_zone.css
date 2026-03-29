@@ -6,8 +6,8 @@
 }
 
 .drop-zone--active {
-	border: 2px dashed var(--color-accent);
-	background-color: var(--color-drop-active);
+	border: 2px dashed var(--ec-color-gold);
+	background-color: var(--ec-color-gold-bg);
 }
 
 @media (prefers-reduced-motion: no-preference) {
