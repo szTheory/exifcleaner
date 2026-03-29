@@ -18,6 +18,8 @@ function buildFileEntry(path: string, name: string, size: number): FileEntry {
 		status: FileProcessingStatus.Pending,
 		beforeTags: null,
 		afterTags: null,
+		beforeMetadata: null,
+		afterMetadata: null,
 		error: null,
 	};
 }
