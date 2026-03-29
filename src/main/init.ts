@@ -4,6 +4,7 @@ import { preloadI18nStrings } from "../infrastructure/electron/i18n_strings";
 import { setupI18nHandlers } from "./i18n";
 import { setupExifHandlers } from "./exif_handlers";
 import { setupSettingsHandlers } from "./settings_handlers";
+import { setupThemeHandlers } from "./theme_handlers";
 import { setupContextMenu } from "./context_menu";
 import { setupDockEventHandlers } from "./dock";
 import { setupApp } from "./app_setup";
@@ -41,6 +42,9 @@ export async function init(
 	setupExifHandlers({ container });
 	setupSettingsHandlers({
 		container,
+		getWindow: () => browserWindow,
+	});
+	setupThemeHandlers({
 		getWindow: () => browserWindow,
 	});
 	setupContextMenu();
