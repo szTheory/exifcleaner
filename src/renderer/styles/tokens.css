@@ -3,6 +3,7 @@
    Prefix: --ec-* for new tokens, backward-compat aliases for existing consumers */
 
 :root {
+	color-scheme: light;
 	/* Colors -- Light Mode */
 	--ec-color-bg: #f5f6f8;
 	--ec-color-text: #3b4351;
@@ -80,6 +81,7 @@
 }
 
 [data-theme="dark"] {
+	color-scheme: dark;
 	/* Colors -- Dark Mode */
 	--ec-color-bg: #141416;
 	--ec-color-text: #c5c5cb;

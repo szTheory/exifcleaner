@@ -1,5 +1,5 @@
 /* FileTable — BEM classes for table layout
-   Columns: STATUS (32px) | NAME (1fr) | TYPE (72px) | SIZE (80px) | BEFORE (72px) | AFTER (72px) */
+   Columns: STATUS (24px) | NAME (1fr) | TYPE (72px) | SIZE (80px) | BEFORE (80px) | AFTER (80px) */
 
 .file-table {
 	display: flex;
@@ -11,7 +11,7 @@
 	position: sticky;
 	top: 0;
 	display: grid;
-	grid-template-columns: 32px 1fr 72px 80px 72px 72px;
+	grid-template-columns: 24px 1fr 72px 80px 80px 80px;
 	background: var(--ec-color-surface);
 	border-bottom: 1px solid var(--ec-color-border);
 	padding: var(--ec-space-2) var(--ec-space-4);
@@ -33,7 +33,7 @@
 
 .file-table__row {
 	display: grid;
-	grid-template-columns: 32px 1fr 72px 80px 72px 72px;
+	grid-template-columns: 24px 1fr 72px 80px 80px 80px;
 	min-height: 44px;
 	border-bottom: 1px solid var(--ec-color-border);
 	padding: 0 var(--ec-space-4);
@@ -111,24 +111,6 @@
 		animation: ec-row-enter var(--ec-duration-normal) var(--ec-ease-out)
 			forwards;
 	}
-}
-
-/* Dark mode scrollbar contrast */
-[data-theme="dark"] .file-table__body::-webkit-scrollbar {
-	width: 8px;
-}
-
-[data-theme="dark"] .file-table__body::-webkit-scrollbar-track {
-	background: var(--ec-color-bg);
-}
-
-[data-theme="dark"] .file-table__body::-webkit-scrollbar-thumb {
-	background: var(--ec-color-border);
-	border-radius: 4px;
-}
-
-[data-theme="dark"] .file-table__body::-webkit-scrollbar-thumb:hover {
-	background: var(--ec-color-text-secondary);
 }
 
 /* Expansion area for metadata diff and error details */

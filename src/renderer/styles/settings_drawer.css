@@ -106,7 +106,7 @@
 
 /* Appearance section */
 .settings-drawer__section {
-	padding: var(--ec-space-2) var(--ec-space-6) 0;
+	padding: var(--ec-space-4) var(--ec-space-6) 0;
 }
 
 .settings-drawer__section-label {
