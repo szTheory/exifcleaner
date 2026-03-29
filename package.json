@@ -27,7 +27,9 @@
 		"release": "np",
 		"dev": "ELECTRON_RUN_AS_NODE= electron-vite dev",
 		"dev:debug": "ELECTRON_RUN_AS_NODE= electron-vite dev --remote-debugging-port=9222",
-		"compile": "electron-vite build"
+		"compile": "electron-vite build",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"dependencies": {},
 	"devDependencies": {
@@ -37,7 +39,8 @@
 		"electron-vite": "^5.0.0",
 		"prettier": "^3.0",
 		"typescript": "~5.7.0",
-		"vite": "^7.3.1"
+		"vite": "^7.3.1",
+		"vitest": "3.2.4"
 	},
 	"np": {
 		"publish": false,
