@@ -15,12 +15,16 @@ export async function launchApp(): Promise<{
 		cwd: path.resolve(__dirname, "../../.."),
 		env: {
 			...process.env,
-			NODE_ENV: "production",
+			// Use "development" so resource paths resolve to .resources/ in project root
+			// (not the Electron.app bundle). The compiled output in out/ is still used.
+			NODE_ENV: "development",
 		},
 		timeout: 15000,
 	});
 	const window = await app.firstWindow();
 	await window.waitForLoadState("domcontentloaded");
+	// Wait for the React app to mount (main element with role="main")
+	await window.waitForSelector("[role='main']", { timeout: 10000 });
 	return { app, window };
 }
 
