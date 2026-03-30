@@ -97,7 +97,11 @@ export function FileTable(): React.JSX.Element {
 				})}
 				{/* Folder groups */}
 				{folderGroups.map(({ folder, files }) => {
-					const isCollapsed = isFolderCollapsed(folder, state.collapsedFolders);
+					const isDirectlyCollapsed = state.collapsedFolders.has(folder);
+					const isParentCollapsed = isCollapsedByParent(folder, state.collapsedFolders);
+					// Hide entire subfolder group when a parent folder is collapsed
+					if (isParentCollapsed) return null;
+					const isCollapsed = isDirectlyCollapsed;
 					const folderState = state.folderStates.get(folder);
 					const discoveryStatus: FolderDiscoveryStatus =
 						folderState !== undefined ? folderState.status : "complete";
@@ -186,15 +190,13 @@ function groupFilesByFolder(
 	return { folderGroups, ungroupedFiles };
 }
 
-/** Check if a folder is collapsed, including hierarchical prefix matching. */
-function isFolderCollapsed(
+/** Check if a folder's parent is collapsed (not itself, but an ancestor). */
+function isCollapsedByParent(
 	folder: string,
 	collapsedFolders: Set<string>,
 ): boolean {
-	if (collapsedFolders.has(folder)) return true;
-	// Hierarchical collapse: if any parent folder is collapsed, children are hidden
 	for (const collapsed of collapsedFolders) {
-		if (folder.startsWith(collapsed)) return true;
+		if (folder !== collapsed && folder.startsWith(collapsed)) return true;
 	}
 	return false;
 }

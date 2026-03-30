@@ -1,7 +1,20 @@
-// Bottom status bar with gear icon (left), progress summary, and "Clean more" button (right).
+// Bottom status bar with gear icon (left), progress summary, and "Clear" button (right).
 // Renders persistently across both EmptyState and FileTable views.
 
 import type { ReactNode } from "react";
+import { useI18n } from "../hooks/use_i18n";
+
+/** Replace `{key}` placeholders with values from a params object. */
+function interpolate(
+	template: string,
+	params: Record<string, string | number>,
+): string {
+	let result = template;
+	for (const [key, value] of Object.entries(params)) {
+		result = result.replace(`{${key}}`, String(value));
+	}
+	return result;
+}
 
 export function StatusBar({
 	gearIcon,
@@ -18,6 +31,7 @@ export function StatusBar({
 	elapsedSeconds?: number;
 	onCleanMore?: () => void;
 }): React.JSX.Element {
+	const { t } = useI18n();
 	const hasStats =
 		totalCount !== undefined && totalCount > 0 && completedCount !== undefined;
 
@@ -27,27 +41,27 @@ export function StatusBar({
 			{hasStats && (
 				<>
 					<div className="status-bar__summary">
-						<span className="status-bar__count">{completedCount}</span>{" "}
-						of{" "}
-						<span className="status-bar__count">{totalCount}</span>{" "}
-						cleaned{" \u2014 "}
-						<span className="status-bar__count">
-							{totalTagsRemoved ?? 0}
-						</span>{" "}
-						tags removed{" \u2014 "}
-						<span className="status-bar__count">
-							{elapsedSeconds ?? 0}
-						</span>
-						s
+						{interpolate(t("statusBar.xOfYCleaned"), {
+							completed: completedCount,
+							total: totalCount,
+						})}
+						{" \u2014 "}
+						{interpolate(t("statusBar.tagsRemoved"), {
+							count: totalTagsRemoved ?? 0,
+						})}
+						{" \u2014 "}
+						{interpolate(t("statusBar.elapsed"), {
+							seconds: elapsedSeconds ?? 0,
+						})}
 					</div>
 					{onCleanMore !== undefined && (
 						<button
 							className="status-bar__button"
 							type="button"
 							onClick={onCleanMore}
-							aria-label="Clear all results"
+							aria-label={t("statusBar.clear")}
 						>
-							Clear
+							{t("statusBar.clear")}
 						</button>
 					)}
 				</>

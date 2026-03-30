@@ -28,6 +28,16 @@ export function FolderRow({
 			>
 				<ChevronIcon expanded={!isCollapsed} />
 			</button>
+			<svg
+				className="folder-row__icon"
+				width="16"
+				height="16"
+				viewBox="0 0 16 16"
+				fill="currentColor"
+				aria-hidden="true"
+			>
+				<path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H7.707L6.354 3.146A.5.5 0 0 0 6 3H1.5z" />
+			</svg>
 			<span className="folder-row__label" title={folder}>
 				{displayLabel}
 			</span>

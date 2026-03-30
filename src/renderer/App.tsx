@@ -13,7 +13,7 @@ import { StatusBar } from "./components/StatusBar";
 import { SettingsDrawer } from "./components/SettingsDrawer";
 
 function AppContent(): React.JSX.Element {
-	const { state } = useAppContext();
+	const { state, dispatch } = useAppContext();
 	const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 	const gearRef = useRef<HTMLButtonElement>(null);
 

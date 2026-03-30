@@ -37,6 +37,11 @@
 
 /* Chevron styling handled by shared ChevronIcon component */
 
+.folder-row__icon {
+	flex-shrink: 0;
+	color: var(--ec-color-text-secondary);
+}
+
 .folder-row__label {
 	flex: 1;
 	overflow: hidden;
