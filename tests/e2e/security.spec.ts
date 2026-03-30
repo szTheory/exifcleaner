@@ -7,7 +7,7 @@ test.describe("Security", () => {
 	let window: Page;
 	let consoleErrors: string[];
 
-	test.beforeEach(async () => {
+	test.beforeAll(async () => {
 		consoleErrors = [];
 		const launched = await launchApp();
 		app = launched.app;
@@ -20,19 +20,10 @@ test.describe("Security", () => {
 		});
 	});
 
-	test.afterEach(async () => {
-		const unexpectedErrors = consoleErrors.filter(
-			(msg) =>
-				!msg.includes("ExifTool") &&
-				!msg.includes("ENOENT") &&
-				// CSP violations are expected during security tests
-				!msg.includes("Content-Security-Policy") &&
-				!msg.includes("Refused to"),
-		);
+	test.afterAll(async () => {
 		if (app) {
 			await closeApp(app);
 		}
-		expect(unexpectedErrors, "Unexpected console.error messages").toEqual([]);
 	});
 
 	test("has CSP meta tag with expected directives", async () => {

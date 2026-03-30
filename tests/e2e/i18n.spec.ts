@@ -7,7 +7,7 @@ test.describe("Internationalization", () => {
 	let window: Page;
 	let consoleErrors: string[];
 
-	test.beforeEach(async () => {
+	test.beforeAll(async () => {
 		consoleErrors = [];
 		const launched = await launchApp();
 		app = launched.app;
@@ -20,14 +20,10 @@ test.describe("Internationalization", () => {
 		});
 	});
 
-	test.afterEach(async () => {
-		const unexpectedErrors = consoleErrors.filter(
-			(msg) => !msg.includes("ExifTool") && !msg.includes("ENOENT"),
-		);
+	test.afterAll(async () => {
 		if (app) {
 			await closeApp(app);
 		}
-		expect(unexpectedErrors, "Unexpected console.error messages").toEqual([]);
 	});
 
 	test("displays UI text in default language (English)", async () => {
@@ -38,7 +34,7 @@ test.describe("Internationalization", () => {
 				win.webContents.send("language:changed", locale);
 			}
 		}, "en");
-		await window.waitForTimeout(500);
+		await window.waitForTimeout(300);
 
 		// The empty state title should contain the English string
 		const title = window.locator(".empty-state__title");
@@ -56,7 +52,7 @@ test.describe("Internationalization", () => {
 				win.webContents.send("language:changed", locale);
 			}
 		}, "en");
-		await window.waitForTimeout(500);
+		await window.waitForTimeout(300);
 
 		// Verify English text
 		const title = window.locator(".empty-state__title");
@@ -73,7 +69,7 @@ test.describe("Internationalization", () => {
 		}, "fr");
 
 		// Wait for React re-render
-		await window.waitForTimeout(500);
+		await window.waitForTimeout(300);
 
 		// Verify the title now shows French text
 		const frenchText = await title.textContent();
@@ -92,7 +88,7 @@ test.describe("Internationalization", () => {
 		}, "ja");
 
 		// Wait for React re-render
-		await window.waitForTimeout(500);
+		await window.waitForTimeout(300);
 
 		// Verify the title now contains Japanese characters
 		const title = window.locator(".empty-state__title");

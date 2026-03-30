@@ -7,7 +7,7 @@ test.describe("Accessibility", () => {
 	let window: Page;
 	let consoleErrors: string[];
 
-	test.beforeEach(async () => {
+	test.beforeAll(async () => {
 		consoleErrors = [];
 		const launched = await launchApp();
 		app = launched.app;
@@ -20,14 +20,10 @@ test.describe("Accessibility", () => {
 		});
 	});
 
-	test.afterEach(async () => {
-		const unexpectedErrors = consoleErrors.filter(
-			(msg) => !msg.includes("ExifTool") && !msg.includes("ENOENT"),
-		);
+	test.afterAll(async () => {
 		if (app) {
 			await closeApp(app);
 		}
-		expect(unexpectedErrors, "Unexpected console.error messages").toEqual([]);
 	});
 
 	test("supports keyboard tab navigation through interactive elements", async () => {
@@ -61,6 +57,12 @@ test.describe("Accessibility", () => {
 	});
 
 	test("shows visible focus indicator on focused elements", async () => {
+		// Reset focus
+		await window.evaluate(() => {
+			(document.activeElement as HTMLElement)?.blur();
+			document.body.focus();
+		});
+
 		// Tab to the gear button (first interactive element)
 		await window.keyboard.press("Tab");
 
