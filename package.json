@@ -31,7 +31,9 @@
 		"typecheck": "tsc --noEmit",
 		"preview": "ELECTRON_RUN_AS_NODE= electron-vite preview",
 		"test": "vitest run",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"test:e2e": "npx playwright test",
+		"test:all": "vitest run && npx playwright test"
 	},
 	"dependencies": {
 		"react": "^19.2.0",
@@ -39,6 +41,7 @@
 		"zod": "^3.25.0"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.58.2",
 		"@types/node": "^22",
 		"@types/react": "^19.2.0",
 		"@types/react-dom": "^19.2.0",

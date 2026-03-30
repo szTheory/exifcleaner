@@ -524,6 +524,13 @@
     lodash "^4.17.15"
     tmp-promise "^3.0.2"
 
+"@playwright/test@^1.58.2":
+  version "1.58.2"
+  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.58.2.tgz#b0ad585d2e950d690ef52424967a42f40c6d2cbd"
+  integrity sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA==
+  dependencies:
+    playwright "1.58.2"
+
 "@rolldown/pluginutils@1.0.0-beta.27":
   version "1.0.0-beta.27"
   resolved "https://registry.yarnpkg.com/@rolldown/pluginutils/-/pluginutils-1.0.0-beta.27.tgz#47d2bf4cef6d470b22f5831b420f8964e0bf755f"
@@ -1776,6 +1783,11 @@ fs.realpath@^1.0.0:
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
 
+fsevents@2.3.2:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
+  integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
+
 fsevents@~2.3.2, fsevents@~2.3.3:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.3.tgz#cac6407785d03675a2a5e1a5305c697b347d90d6"
@@ -2336,6 +2348,20 @@ picomatch@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.3.tgz#796c76136d1eead715db1e7bad785dedd695a042"
   integrity sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==
+
+playwright-core@1.58.2:
+  version "1.58.2"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.58.2.tgz#ac5f5b4b10d29bcf934415f0b8d133b34b0dcb13"
+  integrity sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==
+
+playwright@1.58.2:
+  version "1.58.2"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.58.2.tgz#afe547164539b0bcfcb79957394a7a3fa8683cfd"
+  integrity sha512-vA30H8Nvkq/cPBnNw4Q8TWz1EJyqgpuinBcHET0YVJVFldr8JDNiU9LaWAE1KqSkRYazuaBhTpB5ZzShOezQ6A==
+  dependencies:
+    playwright-core "1.58.2"
+  optionalDependencies:
+    fsevents "2.3.2"
 
 plist@^3.0.1:
   version "3.0.2"
