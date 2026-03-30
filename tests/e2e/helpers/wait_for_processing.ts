@@ -5,9 +5,32 @@ export async function waitForProcessing(
 	options?: { timeout?: number },
 ): Promise<void> {
 	const timeout = options?.timeout ?? 10000;
-	// Wait for the "Clean more" button to become visible,
-	// which signals all file processing is complete
-	await window
-		.getByRole("button", { name: /clean more/i })
-		.waitFor({ state: "visible", timeout });
+	const pollInterval = 200;
+	const deadline = Date.now() + timeout;
+
+	// Wait until:
+	// 1. At least one file row exists
+	// 2. No spinners are visible (all files finished processing)
+	while (Date.now() < deadline) {
+		const state = await window.evaluate(() => {
+			const rows = document.querySelectorAll(".file-table__row");
+			const spinners = document.querySelectorAll(
+				'.status-icon__spinner',
+			);
+			return {
+				rowCount: rows.length,
+				spinnerCount: spinners.length,
+			};
+		});
+
+		if (state.rowCount > 0 && state.spinnerCount === 0) {
+			return;
+		}
+
+		await window.waitForTimeout(pollInterval);
+	}
+
+	throw new Error(
+		`waitForProcessing timed out after ${timeout}ms — files may still be processing`,
+	);
 }
