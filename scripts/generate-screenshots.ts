@@ -48,17 +48,37 @@ async function createTempFixtures(): Promise<{
 		path.join(os.tmpdir(), "exifcleaner-screenshots-"),
 	);
 
-	const fixtureNames = [
+	// Source fixtures to copy from
+	const sourceFixtures = [
 		"sample.jpg",
 		"sample.png",
 		"sample.pdf",
 		"sample.webp",
 	];
+
+	// Create 12 files by copying fixtures with varied names to fill the table
+	const targetNames = [
+		"vacation_beach.jpg",
+		"family_portrait.png",
+		"tax_return_2024.pdf",
+		"product_photo.webp",
+		"sunset_panorama.jpg",
+		"wedding_ceremony.png",
+		"contract_signed.pdf",
+		"storefront_hero.webp",
+		"birthday_party.jpg",
+		"headshot_linkedin.png",
+		"mortgage_docs.pdf",
+		"real_estate_listing.webp",
+	];
 	const files: string[] = [];
 
-	for (const name of fixtureNames) {
-		const src = path.join(fixturesDir, name);
-		const dest = path.join(tmpDir, name);
+	for (let i = 0; i < targetNames.length; i++) {
+		const src = path.join(
+			fixturesDir,
+			sourceFixtures[i % sourceFixtures.length]!,
+		);
+		const dest = path.join(tmpDir, targetNames[i]!);
 		fs.copyFileSync(src, dest);
 		files.push(dest);
 	}
@@ -158,6 +178,21 @@ async function screenshot(window: Page, name: string): Promise<void> {
 	);
 }
 
+async function forceLanguage(
+	page: Page,
+	locale: string,
+): Promise<void> {
+	// Fetch current settings, update only language, then persist.
+	// This avoids resetting other settings to defaults.
+	await page.evaluate(async (lang) => {
+		/* eslint-disable @typescript-eslint/no-explicit-any */
+		const api = (globalThis as any).api;
+		const current = await api.settings.get();
+		await api.settings.set({ ...current, language: lang });
+		/* eslint-enable @typescript-eslint/no-explicit-any */
+	}, locale);
+}
+
 async function main(): Promise<void> {
 	console.log("ExifCleaner Screenshot Generator\n");
 
@@ -179,8 +214,12 @@ async function main(): Promise<void> {
 		app = launched.app;
 		const window = launched.window;
 
-		// Set consistent window size for screenshots
-		await setWindowSize(app, 1200, 800);
+		// Set consistent window size for screenshots (compact for marketing)
+		await setWindowSize(app, 960, 700);
+		await window.waitForTimeout(500);
+
+		// Force English language before taking screenshots (overrides system locale)
+		await forceLanguage(window, "en");
 		await window.waitForTimeout(500);
 
 		// ---- State 1: Light mode with files processed ----
@@ -273,25 +312,14 @@ async function main(): Promise<void> {
 		await window.waitForTimeout(500);
 		await drawer.waitFor({ state: "visible", timeout: 5000 });
 
-		// Switch language via IPC to show a non-English locale
-		// This demonstrates the language switching capability
-		await app.evaluate(({ BrowserWindow }, locale) => {
-			const win = BrowserWindow.getAllWindows()[0];
-			if (win) {
-				win.webContents.send("language:changed", locale);
-			}
-		}, "ja");
+		// Switch language to Japanese to demonstrate i18n capability
+		await forceLanguage(window, "ja");
 		await window.waitForTimeout(500);
 
 		await screenshot(window, "language-switch.png");
 
 		// Reset language back to English
-		await app.evaluate(({ BrowserWindow }, locale) => {
-			const win = BrowserWindow.getAllWindows()[0];
-			if (win) {
-				win.webContents.send("language:changed", locale);
-			}
-		}, "en");
+		await forceLanguage(window, "en");
 
 		console.log("\nAll 5 screenshots generated successfully!");
 		console.log(`Output directory: ${outputDir}`);
