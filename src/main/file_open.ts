@@ -2,12 +2,13 @@ import { dialog, BrowserWindow } from "electron";
 import {
 	defaultBrowserWindow,
 	restoreWindowAndFocus,
-} from "../common/browser_window";
+} from "../infrastructure/electron/browser_window";
 
-export const EVENT_FILE_OPEN_ADD_FILES = "file-open-add-files";
+import { EVENT_FILE_OPEN_ADD_FILES } from "../domain/ipc_channels";
+export { EVENT_FILE_OPEN_ADD_FILES };
 
 export function fileOpen(
-	browserWindow: BrowserWindow | undefined | null
+	browserWindow: BrowserWindow | undefined | null,
 ): void {
 	browserWindow = defaultBrowserWindow(browserWindow);
 	restoreWindowAndFocus(browserWindow);
@@ -20,7 +21,7 @@ export function fileOpen(
 			if (result.filePaths) {
 				defaultBrowserWindow(browserWindow).webContents.send(
 					EVENT_FILE_OPEN_ADD_FILES,
-					result.filePaths
+					result.filePaths,
 				);
 			}
 		});

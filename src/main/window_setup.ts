@@ -1,12 +1,18 @@
-import { BrowserWindow, app } from "electron";
-import url from "url";
+import { BrowserWindow, app, nativeTheme } from "electron";
 import path from "path";
-import { isDev } from "../common/env";
 import { isMac, isWindows } from "../common/platform";
-import { iconPath } from "../common/resources";
+import { iconPath } from "../infrastructure/electron/resources";
+import {
+	loadWindowState,
+	setupWindowStatePersistence,
+} from "./window_state";
 
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;
+
+// Match CSS --color-bg tokens from the React ThemeProvider
+const LIGHT_BACKGROUND_COLOR = "#F5F6F8";
+const DARK_BACKGROUND_COLOR = "#1e1e1e";
 
 function setupMainWindowClose(browserWindow: BrowserWindow) {
 	browserWindow.on("closed", () => {
@@ -38,49 +44,52 @@ function windowsStopFlashingFrameOnFocus(browserWindow: BrowserWindow) {
 	browserWindow.once("focus", () => browserWindow.flashFrame(false));
 }
 
-function urlForLoad() {
-	if (isDev()) {
-		const port = process.env.ELECTRON_WEBPACK_WDS_PORT;
-		if (!port) {
-			throw "No Electron webpack WDS port set for dev. Try running `yarn run dev` instead for development mode.";
-		}
-
-		return `http://localhost:${port}`;
+function mainWindowLoadUrl(browserWindow: BrowserWindow) {
+	if (!app.isPackaged && process.env["ELECTRON_RENDERER_URL"]) {
+		browserWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
 	} else {
-		return url.format({
-			pathname: path.join(__dirname, "index.html"),
-			protocol: "file",
-			slashes: true,
-		});
+		browserWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
 	}
 }
 
-function mainWindowLoadUrl(browserWindow: BrowserWindow) {
-	browserWindow.loadURL(urlForLoad());
-}
-
-const WINDOW_BACKGROUND_COLOR = "#F5F6F8";
-
 export function createMainWindow(): BrowserWindow {
-	let options = {
+	const savedState = loadWindowState();
+
+	// Dynamic background color based on system theme at creation time
+	// eliminates white flash in dark mode (SEC-04)
+	const backgroundColor = nativeTheme.shouldUseDarkColors
+		? DARK_BACKGROUND_COLOR
+		: LIGHT_BACKGROUND_COLOR;
+
+	const options: Electron.BrowserWindowConstructorOptions = {
 		title: app.name,
 		show: false,
-		width: DEFAULT_WINDOW_WIDTH,
-		height: DEFAULT_WINDOW_HEIGHT + 25,
+		width: savedState.width,
+		height: savedState.height,
+		...(savedState.x !== undefined && savedState.y !== undefined
+			? { x: savedState.x, y: savedState.y }
+			: {}),
 		minWidth: DEFAULT_WINDOW_WIDTH,
 		minHeight: DEFAULT_WINDOW_HEIGHT + 25,
 		webPreferences: {
-			nodeIntegration: true,
-			// TODO: need to get this working with "true" to upgrade to Electron 12,
-			// but electron-webpack depends on it being "false" and it's been abandonded
-			// contextIsolation: true,
+			nodeIntegration: false,
+			contextIsolation: true,
+			sandbox: true,
+			devTools: !app.isPackaged,
+			preload: path.join(__dirname, "../preload/index.cjs"),
 		},
-		//set specific background color eliminate white flicker on content load
-		backgroundColor: WINDOW_BACKGROUND_COLOR,
+		backgroundColor,
 		icon: iconPath(),
 	};
 
-	return new BrowserWindow(options);
+	const win = new BrowserWindow(options);
+
+	// Restore maximized state after creation
+	if (savedState.isMaximized) {
+		win.maximize();
+	}
+
+	return win;
 }
 
 export function setupMainWindow(browserWindow: BrowserWindow): void {
@@ -89,4 +98,5 @@ export function setupMainWindow(browserWindow: BrowserWindow): void {
 	mainWindowLoadUrl(browserWindow);
 	showWindowOnReady(browserWindow);
 	windowsStopFlashingFrameOnFocus(browserWindow);
+	setupWindowStatePersistence(browserWindow);
 }

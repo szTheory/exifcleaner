@@ -1,6 +1,7 @@
-import { MenuItemConstructorOptions, app } from "electron";
+import { type MenuItemConstructorOptions, BrowserWindow, app } from "electron";
 import { i18n } from "./i18n";
 import { isMac } from "../common/platform";
+import { IPC_CHANNELS } from "../infrastructure/ipc/ipc_channels";
 
 export function appMenuTemplate(): MenuItemConstructorOptions {
 	return {
@@ -16,6 +17,19 @@ export function appMenuTemplate(): MenuItemConstructorOptions {
 			{
 				label: i18n("menu.app.services"),
 				role: "services",
+			},
+			{
+				type: "separator",
+			},
+			{
+				label: `${i18n("menu.app.settings")}\u2026`,
+				accelerator: "CmdOrCtrl+,",
+				click: () => {
+					const win = BrowserWindow.getAllWindows()[0];
+					if (win) {
+						win.webContents.send(IPC_CHANNELS.SETTINGS_TOGGLE);
+					}
+				},
 			},
 			{
 				type: "separator",

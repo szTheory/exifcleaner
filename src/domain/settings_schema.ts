@@ -1,0 +1,120 @@
+// Pure domain logic — zero dependencies, zero I/O.
+// Settings schema defines all user preferences with typed defaults.
+
+import type { Result } from "../common/result";
+
+export const CURRENT_SCHEMA_VERSION = 3;
+
+export type ThemeMode = "light" | "dark" | "system";
+
+export interface Settings {
+	preserveOrientation: boolean;
+	preserveColorProfile: boolean;
+	saveAsCopy: boolean;
+	removeXattrs: boolean;
+	preserveTimestamps: boolean;
+	language: string | null;
+	themeMode: ThemeMode;
+}
+
+export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
+	preserveOrientation: true,
+	preserveColorProfile: true,
+	saveAsCopy: false,
+	removeXattrs: false,
+	preserveTimestamps: false,
+	language: null,
+	themeMode: "system",
+});
+
+export interface SettingsFile {
+	version: number;
+	settings: Settings;
+}
+
+export function migrateSettings(file: SettingsFile): {
+	settings: Settings;
+	didMigrate: boolean;
+} {
+	if (file.version === CURRENT_SCHEMA_VERSION) {
+		return { settings: file.settings, didMigrate: false };
+	}
+
+	let didMigrate = false;
+	let settings: Settings = {
+		...DEFAULT_SETTINGS,
+		...file.settings,
+	};
+
+	// v1 -> v2: Split preserveRotation into preserveOrientation + preserveColorProfile
+	if (file.version < 2) {
+		const oldSettings = file.settings as unknown as Record<string, unknown>;
+		const preserveRotation = oldSettings["preserveRotation"] !== false;
+		settings = {
+			...DEFAULT_SETTINGS,
+			...settings,
+			preserveOrientation: preserveRotation,
+			preserveColorProfile: preserveRotation,
+		};
+		delete (settings as unknown as Record<string, unknown>)["preserveRotation"];
+		didMigrate = true;
+	}
+
+	// v2 -> v3: Add themeMode field
+	if (file.version < 3) {
+		settings = { ...settings, themeMode: "system" };
+		didMigrate = true;
+	}
+
+	return { settings, didMigrate };
+}
+
+const VALID_THEME_MODES: ReadonlySet<string> = new Set([
+	"light",
+	"dark",
+	"system",
+]);
+
+function isValidThemeMode(value: unknown): value is ThemeMode {
+	return typeof value === "string" && VALID_THEME_MODES.has(value);
+}
+
+export function validateSettings(input: unknown): Result<Settings> {
+	if (typeof input !== "object" || input === null) {
+		return { ok: false, error: "Settings must be a non-null object" };
+	}
+
+	const raw = input as Record<string, unknown>;
+
+	const settings: Settings = {
+		preserveOrientation:
+			typeof raw["preserveOrientation"] === "boolean"
+				? raw["preserveOrientation"]
+				: DEFAULT_SETTINGS.preserveOrientation,
+		preserveColorProfile:
+			typeof raw["preserveColorProfile"] === "boolean"
+				? raw["preserveColorProfile"]
+				: DEFAULT_SETTINGS.preserveColorProfile,
+		saveAsCopy:
+			typeof raw["saveAsCopy"] === "boolean"
+				? raw["saveAsCopy"]
+				: DEFAULT_SETTINGS.saveAsCopy,
+		removeXattrs:
+			typeof raw["removeXattrs"] === "boolean"
+				? raw["removeXattrs"]
+				: DEFAULT_SETTINGS.removeXattrs,
+		preserveTimestamps:
+			typeof raw["preserveTimestamps"] === "boolean"
+				? raw["preserveTimestamps"]
+				: DEFAULT_SETTINGS.preserveTimestamps,
+		language:
+			typeof raw["language"] === "string" || raw["language"] === null
+				? (raw["language"] as string | null)
+				: DEFAULT_SETTINGS.language,
+		themeMode: isValidThemeMode(raw["themeMode"])
+			? raw["themeMode"]
+			: DEFAULT_SETTINGS.themeMode,
+	};
+
+	return { ok: true, value: settings };
+}

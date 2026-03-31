@@ -1,4 +1,4 @@
-import { app, Menu, MenuItemConstructorOptions } from "electron";
+import { app, Menu, type MenuItemConstructorOptions } from "electron";
 import { isMac, isWindows } from "../common/platform";
 import { appMenuTemplate } from "./menu_app";
 import { dockMenuTemplate } from "./menu_dock";
@@ -39,7 +39,7 @@ function setupDockMenu(): void {
 		return;
 	}
 
-	app.dock.setMenu(dockMenu());
+	app.dock?.setMenu(dockMenu());
 }
 
 function setupUserTasksMenu(): void {

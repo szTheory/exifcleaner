@@ -1,7 +1,8 @@
-import { MenuItemConstructorOptions } from "electron";
+import { type MenuItemConstructorOptions, BrowserWindow } from "electron";
 import { i18n } from "./i18n";
 import { fileMenuOpenItem } from "./menu_file_open";
 import { isMac } from "../common/platform";
+import { IPC_CHANNELS } from "../infrastructure/ipc/ipc_channels";
 
 export function fileMenuTemplate(): MenuItemConstructorOptions {
 	return {
@@ -10,6 +11,16 @@ export function fileMenuTemplate(): MenuItemConstructorOptions {
 		type: "submenu",
 		submenu: [
 			fileMenuOpenItem(),
+			{
+				label: `${i18n("menu.app.settings")}\u2026`,
+				accelerator: "CmdOrCtrl+,",
+				click: () => {
+					const win = BrowserWindow.getAllWindows()[0];
+					if (win) {
+						win.webContents.send(IPC_CHANNELS.SETTINGS_TOGGLE);
+					}
+				},
+			},
 			{
 				type: "separator",
 			},
@@ -23,9 +34,9 @@ function fileQuitTemplate(): MenuItemConstructorOptions {
 		? {
 				label: i18n("menu.file.close"),
 				role: "close",
-		  }
+			}
 		: {
 				label: i18n("menu.file.quit"),
 				role: "quit",
-		  };
+			};
 }

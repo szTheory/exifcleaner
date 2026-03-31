@@ -240,6 +240,12 @@ sub remove_old_binaries {
     print_output("No pre-existing Windows binary to remove\n");
   }
 
+  # remove old Windows `exiftool_files` dir (new distribution format)
+  my $remove_path_files_win = BIN_DIR_WINDOWS . '/exiftool_files';
+  if ( -d $remove_path_files_win ) {
+    remove_dir($remove_path_files_win);
+  }
+
   return;
 }
 
@@ -278,15 +284,28 @@ sub verify_successful_install {
   return;
 }
 
-# The Windows ExifTool binary is just an .exe file. We have to
-# rename it from `exiftool(-k).exe` to `exiftool.exe` and move
-# it to the ExifCleaner Windows bin dir.
+# The Windows ExifTool distribution contains `exiftool(-k).exe` plus a
+# companion `exiftool_files/` directory. Both are inside a versioned
+# subdirectory within the zip. We copy the exe (renamed to `exiftool.exe`)
+# and the companion directory to the ExifCleaner Windows bin dir.
 sub copy_windows_binary {
-  my $from_path = DOWNLOADS_WORKING_DIR . '/exiftool(-k).exe';
-  my $to_path   = BIN_DIR_WINDOWS . '/exiftool.exe';
+  my $zip_filename = shift;
 
-  my @command = ( 'cp', $from_path, $to_path );
+  my ($zip_dir_name) = $zip_filename =~ /^(.+)[.]zip$/;
+  my $from_dir = DOWNLOADS_WORKING_DIR . "/$zip_dir_name";
+
+  # copy exiftool(-k).exe as exiftool.exe
+  my $from_exe = "$from_dir/exiftool(-k).exe";
+  my $to_exe   = BIN_DIR_WINDOWS . '/exiftool.exe';
+  my @command = ( 'cp', $from_exe, $to_exe );
   run_command(@command);
+
+  # copy companion exiftool_files/ directory if it exists (new format)
+  my $from_files_dir = "$from_dir/exiftool_files";
+  if ( -d $from_files_dir ) {
+    @command = ( 'cp', '-R', $from_files_dir, BIN_DIR_WINDOWS );
+    run_command(@command);
+  }
 
   return;
 }
@@ -356,7 +375,7 @@ sub run {
 
   header('Moving fresh binaries');
   copy_unix_binary($code_filename);
-  copy_windows_binary();
+  copy_windows_binary($windows_version_filename);
 
   header('Clean up downloads working directory');
   if ($cache_downloads_working_dir) {
@@ -373,7 +392,7 @@ sub run {
 # Pass the command line argument --cache-downloads-working-dir
 # to cache the downloads working directory to avoid repeated
 # downloads from the exiftool server. Useful for CI
-my $cache_downloads_working_dir = $ARGV[0] eq "--cache-downloads-working-dir";
+my $cache_downloads_working_dir = defined($ARGV[0]) && $ARGV[0] eq "--cache-downloads-working-dir";
 
 run($cache_downloads_working_dir);
 verify_successful_install();

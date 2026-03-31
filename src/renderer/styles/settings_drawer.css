@@ -1,0 +1,131 @@
+/* Gear icon button — bottom-left of status bar */
+.gear-icon {
+	background: none;
+	border: none;
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	color: var(--ec-color-text-secondary);
+	border-radius: 4px;
+	-webkit-app-region: no-drag;
+}
+
+.gear-icon:hover {
+	color: var(--ec-color-text);
+	transition: color 150ms var(--ec-ease-out);
+}
+
+.gear-icon:focus-visible {
+	outline: 2px solid var(--ec-color-accent);
+	outline-offset: 2px;
+}
+
+/* Backdrop overlay */
+.settings-drawer__backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0);
+	transition: background 200ms var(--ec-ease-out);
+	z-index: 99;
+	pointer-events: none;
+}
+
+.settings-drawer__backdrop--visible {
+	background: rgba(0, 0, 0, var(--ec-backdrop-opacity));
+	transition-duration: 300ms;
+	pointer-events: auto;
+}
+
+/* Drawer panel */
+.settings-drawer {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 320px;
+	background: var(--ec-color-bg);
+	transform: translateX(100%);
+	transition: transform 200ms var(--ec-ease-out);
+	z-index: 100;
+	box-shadow: -8px 0 24px var(--ec-shadow-drawer);
+	overflow-y: auto;
+}
+
+.settings-drawer--open {
+	transform: translateX(0);
+	transition-duration: 300ms;
+}
+
+/* Header */
+.settings-drawer__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: var(--ec-space-6) var(--ec-space-6) var(--ec-space-2);
+}
+
+.settings-drawer__title {
+	font-size: var(--ec-font-size-label);
+	font-weight: var(--ec-font-weight-semibold);
+	color: var(--ec-color-text);
+	margin: 0;
+}
+
+/* Close button */
+.settings-drawer__close {
+	background: none;
+	border: none;
+	padding: var(--ec-space-2);
+	cursor: pointer;
+	color: var(--ec-color-text-secondary);
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.settings-drawer__close:hover {
+	color: var(--ec-color-text);
+}
+
+.settings-drawer__close:focus-visible {
+	outline: 2px solid var(--ec-color-accent);
+	outline-offset: 2px;
+}
+
+/* Body */
+.settings-drawer__body {
+	padding: var(--ec-space-4) var(--ec-space-6) var(--ec-space-6);
+}
+
+/* Appearance section */
+.settings-drawer__section {
+	padding: var(--ec-space-4) var(--ec-space-6) 0;
+}
+
+.settings-drawer__section-label {
+	font-size: var(--ec-font-size-small);
+	font-weight: var(--ec-font-weight-semibold);
+	color: var(--ec-color-text-secondary);
+	margin: 0 0 var(--ec-space-2) 0;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+/* Reduced motion: disable all slide/fade animation */
+@media (prefers-reduced-motion: reduce) {
+	.settings-drawer {
+		transition: none;
+	}
+
+	.settings-drawer__backdrop {
+		transition: none;
+	}
+
+	.gear-icon {
+		transition: none;
+	}
+}

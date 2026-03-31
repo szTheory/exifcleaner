@@ -1,0 +1,36 @@
+/* Toast — Simple notification for clipboard copy confirmation */
+
+.toast {
+	position: fixed;
+	bottom: calc(44px + var(--ec-space-4));
+	left: 50%;
+	transform: translateX(-50%);
+	background: var(--ec-color-text);
+	color: var(--ec-color-bg);
+	padding: var(--ec-space-2) var(--ec-space-4);
+	border-radius: 4px;
+	font-size: var(--ec-font-size-small);
+	z-index: 100;
+	pointer-events: none;
+}
+
+.toast--visible {
+	opacity: 1;
+}
+
+.toast--hidden {
+	opacity: 0;
+}
+
+/* Dark mode: inverted colors (light text on dark bg becomes dark text on light bg) */
+[data-theme="dark"] .toast {
+	background-color: var(--ec-color-text);
+	color: var(--ec-color-bg);
+}
+
+/* Fade transition gated behind prefers-reduced-motion */
+@media (prefers-reduced-motion: no-preference) {
+	.toast {
+		transition: opacity var(--ec-duration-fast) var(--ec-ease-out);
+	}
+}

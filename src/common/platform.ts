@@ -32,6 +32,6 @@ export function getPlatform(): Platform {
 		case "win32":
 			return Platform.WIN;
 		default:
-			throw `Did not recognize platform ${currentPlatform}`;
+			throw new Error(`Did not recognize platform ${currentPlatform}`);
 	}
 }

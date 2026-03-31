@@ -1,8 +1,9 @@
 import {
+	type BaseWindow,
 	BrowserWindow,
-	MenuItemConstructorOptions,
-	MenuItem,
-	KeyboardEvent,
+	type MenuItemConstructorOptions,
+	type MenuItem,
+	type KeyboardEvent,
 } from "electron";
 import { i18n } from "./i18n";
 import { fileOpen } from "./file_open";
@@ -17,8 +18,8 @@ export function fileMenuOpenItem(): MenuItemConstructorOptions {
 
 function fileOpenClick(
 	_menuItem: MenuItem,
-	browserWindow: BrowserWindow | undefined,
-	_event: KeyboardEvent
+	browserWindow: BaseWindow | undefined,
+	_event: KeyboardEvent,
 ): void {
-	fileOpen(browserWindow);
+	fileOpen(browserWindow instanceof BrowserWindow ? browserWindow : undefined);
 }

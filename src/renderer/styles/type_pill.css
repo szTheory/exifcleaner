@@ -1,0 +1,67 @@
+/* TypePill — Color-coded extension badges */
+
+.type-pill {
+	display: inline-block;
+	padding: var(--ec-space-1) var(--ec-space-2);
+	border-radius: 4px;
+	font-size: var(--ec-font-size-small);
+	font-weight: var(--ec-font-weight-regular);
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+	line-height: 1;
+	background: rgba(157, 167, 182, 0.1);
+	color: var(--ec-color-muted);
+}
+
+/* Image — JPG/JPEG */
+.type-pill--jpg,
+.type-pill--jpeg {
+	background: var(--ec-pill-jpg-bg);
+	color: var(--ec-pill-jpg-text);
+}
+
+/* Image — HEIC/HEIF */
+.type-pill--heic,
+.type-pill--heif {
+	background: var(--ec-pill-heic-bg);
+	color: var(--ec-pill-heic-text);
+}
+
+/* Image — PNG */
+.type-pill--png {
+	background: var(--ec-pill-png-bg);
+	color: var(--ec-pill-png-text);
+}
+
+/* Document — PDF */
+.type-pill--pdf {
+	background: var(--ec-pill-pdf-bg);
+	color: var(--ec-pill-pdf-text);
+}
+
+/* Video — MOV, MP4, M4V, AVI, MKV, 3GP, WMV */
+.type-pill--mov,
+.type-pill--mp4,
+.type-pill--m4v,
+.type-pill--avi,
+.type-pill--mkv,
+.type-pill--3gp,
+.type-pill--wmv {
+	background: var(--ec-pill-mov-bg);
+	color: var(--ec-pill-mov-text);
+}
+
+/* RAW — DNG, CR2, CR3, NEF, ARW, ORF, RW2, RAF, PEF, SRW */
+.type-pill--dng,
+.type-pill--cr2,
+.type-pill--cr3,
+.type-pill--nef,
+.type-pill--arw,
+.type-pill--orf,
+.type-pill--rw2,
+.type-pill--raf,
+.type-pill--pef,
+.type-pill--srw {
+	background: var(--ec-pill-dng-bg);
+	color: var(--ec-pill-dng-text);
+}

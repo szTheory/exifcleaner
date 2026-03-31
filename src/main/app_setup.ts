@@ -2,7 +2,7 @@ import { app, BrowserWindow } from "electron";
 import {
 	currentBrowserWindow,
 	restoreWindowAndFocus,
-} from "../common/browser_window";
+} from "../infrastructure/electron/browser_window";
 import { createMainWindow } from "./window_setup";
 import { isWindows } from "../common/platform";
 import { fileOpen } from "./file_open";
@@ -14,11 +14,11 @@ function preventMultipleAppInstances(): void {
 }
 
 function openMinimizedIfAlreadyExists(
-	browserWindow: BrowserWindow | null
+	browserWindow: BrowserWindow | null,
 ): void {
 	app.on(
 		"second-instance",
-		(_event: Event, argv: string[], _workingDirectory: string) => {
+		(_event, argv) => {
 			console.log(argv);
 			if (isWindows() && argv.length > 0 && argv.includes("--open-file")) {
 				fileOpen(browserWindow);
@@ -26,7 +26,7 @@ function openMinimizedIfAlreadyExists(
 			}
 
 			restoreWindowAndFocus(browserWindow);
-		}
+		},
 	);
 }
 
@@ -45,9 +45,13 @@ function createWindowOnActivate(browserWindow: BrowserWindow | null): void {
 	});
 }
 
-export function setupApp(browserWindow: BrowserWindow | null): void {
+export function setupApp(
+	browserWindow: BrowserWindow | null,
+	{ onQuit }: { onQuit: () => void },
+): void {
 	preventMultipleAppInstances();
 	openMinimizedIfAlreadyExists(browserWindow);
 	quitOnWindowsAllClosed();
 	createWindowOnActivate(browserWindow);
+	app.on("will-quit", onQuit);
 }

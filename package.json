@@ -5,7 +5,8 @@
 	"description": "Clean exif metadata from images, videos, and PDF documents",
 	"license": "MIT",
 	"repository": "github:szTheory/exifcleaner",
-	"main": "src/main/index.js",
+	"type": "module",
+	"main": "./out/main/index.js",
 	"author": {
 		"name": "szTheory",
 		"email": "szTheory@users.noreply.github.com",
@@ -14,9 +15,9 @@
 	"scripts": {
 		"update-exiftool": "./update_exiftool.pl",
 		"postinstall": "electron-builder install-app-deps",
-		"format": "yarn prettier --write 'src/**/*.ts'",
-		"lint": "prettier --check 'src/**/*.ts'",
-		"start": "electron .",
+		"format": "yarn prettier --write 'src/**/*.{ts,tsx}'",
+		"lint": "prettier --check 'src/**/*.{ts,tsx}'",
+		"start": "ELECTRON_RUN_AS_NODE= electron-vite preview",
 		"packmactest": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
 		"packwin": "yarn run compile && electron-builder --windows",
 		"packlinux": "yarn run compile && electron-builder --linux",
@@ -24,22 +25,35 @@
 		"build": "yarn run compile && electron-builder --macos --linux --windows",
 		"publish": "yarn run compile && electron-builder --macos --linux --windows -p always",
 		"release": "np",
-		"dev": "electron-webpack dev",
-		"compile": "electron-webpack"
+		"dev": "ELECTRON_RUN_AS_NODE= electron-vite dev",
+		"dev:debug": "ELECTRON_RUN_AS_NODE= electron-vite dev --remote-debugging-port=9222",
+		"compile": "electron-vite build",
+		"typecheck": "tsc --noEmit",
+		"preview": "ELECTRON_RUN_AS_NODE= electron-vite preview",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:e2e": "npx playwright test",
+		"test:all": "vitest run && npx playwright test",
+		"screenshots": "tsx scripts/generate-screenshots.ts"
 	},
 	"dependencies": {
-		"node-exiftool": "2.3.0",
-		"source-map-support": "^0.5"
+		"react": "^19.2.0",
+		"react-dom": "^19.2.0",
+		"zod": "^3.25.0"
 	},
 	"devDependencies": {
-		"@types/node": "^12.0",
-		"electron": "^11.0",
-		"electron-builder": "^22.8",
-		"electron-webpack": "^2.8",
-		"electron-webpack-ts": "^4.0",
-		"prettier": "2.1",
-		"typescript": "^3.8",
-		"webpack": "^4.41"
+		"@playwright/test": "^1.58.2",
+		"@types/node": "^22",
+		"@types/react": "^19.2.0",
+		"@types/react-dom": "^19.2.0",
+		"@vitejs/plugin-react": "^4.7.0",
+		"electron": "^35",
+		"electron-builder": "^26",
+		"electron-vite": "^5.0.0",
+		"prettier": "^3.0",
+		"typescript": "~5.7.0",
+		"vite": "^7.3.1",
+		"vitest": "3.2.4"
 	},
 	"np": {
 		"publish": false,
@@ -56,6 +70,18 @@
 		"mac": {
 			"category": "public.app-category.graphics-and-images",
 			"darkModeSupport": true,
+			"target": [
+				{
+					"target": "dmg",
+					"arch": [
+						"universal"
+					]
+				}
+			],
+			"hardenedRuntime": true,
+			"entitlements": "build/entitlements.mac.plist",
+			"entitlementsInherit": "build/entitlements.mac.inherit.plist",
+			"notarize": true,
 			"extraResources": [
 				{
 					"from": ".resources/nix/bin",
@@ -67,19 +93,7 @@
 			]
 		},
 		"dmg": {
-			"iconSize": 160,
-			"contents": [
-				{
-					"x": 180,
-					"y": 170
-				},
-				{
-					"x": 480,
-					"y": 170,
-					"type": "link",
-					"path": "/Applications"
-				}
-			]
+			"iconSize": 160
 		},
 		"linux": {
 			"target": [
@@ -132,5 +146,6 @@
 				]
 			}
 		]
-	}
+	},
+	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

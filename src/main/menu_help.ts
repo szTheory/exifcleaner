@@ -1,4 +1,4 @@
-import { shell, app, MenuItemConstructorOptions } from "electron";
+import { shell, app, type MenuItemConstructorOptions } from "electron";
 import os from "os";
 import { isMac } from "../common/platform";
 import { showAboutWindow } from "./menu_app_about";
@@ -28,7 +28,7 @@ function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 				const url = newGithubIssueUrl(
 					GITHUB_USERNAME,
 					GITHUB_PROJECTNAME,
-					newGithubIssueBody()
+					newGithubIssueBody(),
 				);
 				shell.openExternal(url);
 			},
@@ -45,7 +45,7 @@ function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 				click() {
 					showAboutWindow(GITHUB_USERNAME, WEBSITE_URL);
 				},
-			}
+			},
 		);
 	}
 

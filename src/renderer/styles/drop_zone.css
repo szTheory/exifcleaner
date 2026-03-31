@@ -1,0 +1,19 @@
+.drop-zone {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+}
+
+.drop-zone--active {
+	border: 2px dashed var(--ec-color-gold);
+	background-color: var(--ec-color-gold-bg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.drop-zone {
+		transition:
+			border-color 0.15s ease,
+			background-color 0.15s ease;
+	}
+}

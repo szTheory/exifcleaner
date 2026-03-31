@@ -1,0 +1,16 @@
+name: Update Homebrew Cask
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  bump-cask:
+    name: Update Homebrew Cask
+    runs-on: macos-latest
+    steps:
+      - name: Update Homebrew cask
+        uses: macauley/action-homebrew-bump-cask@v1
+        with:
+          token: ${{ secrets.HOMEBREW_TOKEN }}
+          cask: exifcleaner

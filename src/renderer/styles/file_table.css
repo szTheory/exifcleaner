@@ -1,0 +1,177 @@
+/* FileTable — BEM classes for table layout
+   Columns: STATUS (24px) | NAME (1fr) | TYPE (72px) | SIZE (80px) | BEFORE (88px) | AFTER (88px) */
+
+.file-table {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+}
+
+.file-table__header {
+	position: sticky;
+	top: 0;
+	display: grid;
+	grid-template-columns: 24px 1fr 72px 80px 88px 88px;
+	background: var(--ec-color-surface);
+	border-bottom: 1px solid var(--ec-color-border);
+	padding: var(--ec-space-1) var(--ec-space-4);
+	font-size: 11px;
+	font-weight: var(--ec-font-weight-semibold);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--ec-color-text-secondary);
+	text-align: left;
+	z-index: 10;
+}
+
+.file-table__header-cell {
+	padding: var(--ec-space-1) var(--ec-space-2);
+	text-align: left;
+}
+
+.file-table__body {
+	flex: 1;
+	overflow-y: auto;
+}
+
+.file-table__row {
+	display: grid;
+	grid-template-columns: 24px 1fr 72px 80px 88px 88px;
+	min-height: 44px;
+	border-bottom: 1px solid var(--ec-color-border);
+	padding: 0 var(--ec-space-4);
+	align-items: center;
+	cursor: default;
+	outline-offset: -2px;
+}
+
+.file-table__row--expandable {
+	cursor: pointer;
+}
+
+.file-table__row:hover {
+	background: var(--ec-color-surface);
+}
+
+.file-table__row:focus-visible {
+	outline: 2px solid var(--ec-color-accent);
+	outline-offset: 2px;
+}
+
+.file-table__row--complete {
+}
+
+.file-table__row--error {
+	background: var(--ec-color-error-bg);
+}
+
+.file-table__cell {
+	padding: var(--ec-space-2);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.file-table__cell--status {
+	display: flex;
+	align-items: center;
+	gap: var(--ec-space-1);
+	padding: 0;
+}
+
+.file-table__after-done {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--ec-space-1);
+}
+
+.file-table__cell--name {
+	display: flex;
+	align-items: center;
+	font-size: var(--ec-font-size-body);
+}
+
+/* Reveal icon — appears on row hover for completed files */
+.file-table__reveal {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	margin-left: var(--ec-space-1);
+	border: none;
+	background: transparent;
+	color: var(--ec-color-text-secondary);
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity var(--ec-duration-fast) var(--ec-ease-out);
+	vertical-align: middle;
+	flex-shrink: 0;
+}
+
+.file-table__row:hover .file-table__reveal,
+.file-table__reveal:focus-visible {
+	opacity: 1;
+}
+
+.file-table__reveal:hover {
+	color: var(--ec-color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.file-table__reveal {
+		transition: none;
+	}
+}
+
+.file-table__cell--muted {
+	color: var(--ec-color-muted);
+}
+
+/* Row entrance animation — stagger delay set via inline style --ec-stagger-delay */
+.file-table__row--entering {
+	animation-delay: var(--ec-stagger-delay, 0ms);
+}
+
+@keyframes ec-row-enter {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.file-table__row--entering {
+		animation: ec-row-enter var(--ec-duration-normal) var(--ec-ease-out)
+			forwards;
+	}
+}
+
+/* Expansion area for metadata diff and error details */
+.file-table__expansion {
+	border-bottom: 1px solid var(--ec-color-border);
+	padding: var(--ec-space-3) var(--ec-space-4);
+}
+
+@keyframes expansion-slide-open {
+	from {
+		opacity: 0;
+		max-height: 0;
+	}
+	to {
+		opacity: 1;
+		max-height: 300px;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.file-table__expansion {
+		animation: expansion-slide-open var(--ec-duration-normal) var(--ec-ease-out);
+	}
+}
