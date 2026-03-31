@@ -25,9 +25,7 @@ export function setupFolderHandlers({
 					}
 				} catch (err: unknown) {
 					// Skip inaccessible paths (ENOENT, EPERM)
-					console.warn(
-						`[folder:classify] Skipped inaccessible path: ${p}`,
-					);
+					console.warn(`[folder:classify] Skipped inaccessible path: ${p}`);
 				}
 			}
 

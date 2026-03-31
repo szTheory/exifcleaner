@@ -35,9 +35,7 @@ export function MetadataExpansion({
 						: typeof field.value === "string"
 							? field.value
 							: JSON.stringify(field.value);
-				lines.push(
-					`${prefix} ${friendlyName}: ${field.name} = ${valueStr}`,
-				);
+				lines.push(`${prefix} ${friendlyName}: ${field.name} = ${valueStr}`);
 			}
 		}
 		navigator.clipboard.writeText(lines.join("\n")).then(onCopy, () => {
@@ -72,8 +70,7 @@ export function MetadataExpansion({
 						key={group.rawGroupName}
 						group={group}
 						friendlyName={
-							i18nLookup(group.friendlyNameKey) ||
-							group.rawGroupName
+							i18nLookup(group.friendlyNameKey) || group.rawGroupName
 						}
 					/>
 				))}

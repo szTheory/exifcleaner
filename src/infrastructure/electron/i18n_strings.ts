@@ -1,7 +1,10 @@
 import fs from "fs";
 import path from "path";
 import { resourcesPath } from "./resources";
-import { i18nLookup, type I18nStringsDictionary } from "../../domain/i18n_lookup";
+import {
+	i18nLookup,
+	type I18nStringsDictionary,
+} from "../../domain/i18n_lookup";
 
 let strings: I18nStringsDictionary | null = null;
 

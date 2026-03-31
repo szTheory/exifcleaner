@@ -2,10 +2,7 @@ import { BrowserWindow, app, nativeTheme } from "electron";
 import path from "path";
 import { isMac, isWindows } from "../common/platform";
 import { iconPath } from "../infrastructure/electron/resources";
-import {
-	loadWindowState,
-	setupWindowStatePersistence,
-} from "./window_state";
+import { loadWindowState, setupWindowStatePersistence } from "./window_state";
 
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;

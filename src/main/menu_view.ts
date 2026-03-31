@@ -21,9 +21,7 @@ export function setLanguageChangeHandler(
 	onLanguageChange = handler;
 }
 
-export function setLanguageSettingGetter(
-	getter: () => string | null,
-): void {
+export function setLanguageSettingGetter(getter: () => string | null): void {
 	getLanguageSetting = getter;
 }
 

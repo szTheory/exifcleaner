@@ -4,8 +4,14 @@ import { preloadI18nStrings } from "../infrastructure/electron/i18n_strings";
 import { setupI18nHandlers, setContainer, handleLanguageChange } from "./i18n";
 import { setupExifHandlers } from "./exif_handlers";
 import { setupFolderHandlers } from "./folder_handlers";
-import { setLanguageChangeHandler, setLanguageSettingGetter } from "./menu_view";
-import { setDockLanguageChangeHandler, setDockLanguageSettingGetter } from "./menu_dock";
+import {
+	setLanguageChangeHandler,
+	setLanguageSettingGetter,
+} from "./menu_view";
+import {
+	setDockLanguageChangeHandler,
+	setDockLanguageSettingGetter,
+} from "./menu_dock";
 import { setupSettingsHandlers } from "./settings_handlers";
 import { setupThemeHandlers } from "./theme_handlers";
 import { setupRevealHandlers } from "./reveal_handlers";

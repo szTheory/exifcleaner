@@ -3,11 +3,7 @@
 export type { ExifData } from "./exif";
 export { cleanExifData } from "./exif";
 
-export {
-	Locale,
-	i18nLookup,
-	fallbackLocale,
-} from "./i18n_lookup";
+export { Locale, i18nLookup, fallbackLocale } from "./i18n_lookup";
 export type { I18nStringSet, I18nStringsDictionary } from "./i18n_lookup";
 
 export type { Settings, SettingsFile } from "./settings_schema";
