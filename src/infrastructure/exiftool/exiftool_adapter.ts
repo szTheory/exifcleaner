@@ -1,5 +1,5 @@
-import type { ExifToolPort } from "../../application/exiftool_port";
-import type { Result } from "../../common/result";
+import type { ExifToolPort } from "../../application";
+import type { Result } from "../../common";
 import type { ExiftoolProcess } from "./ExiftoolProcess";
 
 // Adapter pattern: wraps the existing ExiftoolProcess with the clean ExifToolPort

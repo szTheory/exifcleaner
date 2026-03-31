@@ -1,5 +1,5 @@
-import type { I18nStringsDictionary } from "../domain/i18n_lookup";
-import type { Settings } from "../domain/settings_schema";
+import type { I18nStringsDictionary } from "../domain";
+import type { Settings } from "../domain";
 
 export type { I18nStringsDictionary };
 

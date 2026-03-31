@@ -1,8 +1,8 @@
 import type { MenuItemConstructorOptions } from "electron";
 import { nativeTheme, BrowserWindow } from "electron";
 import { i18n } from "./i18n";
-import { IPC_CHANNELS } from "../common/ipc_channels";
-import { LANGUAGE_NAMES } from "../domain/language_names";
+import { IPC_CHANNELS } from "../common";
+import { LANGUAGE_NAMES } from "../domain";
 
 function broadcastThemeSet(mode: "light" | "dark" | "system"): void {
 	const win = BrowserWindow.getAllWindows()[0];

@@ -1,7 +1,8 @@
 import { app, type BrowserWindow } from "electron";
 import packageJson from "../../package.json";
-import { preloadI18nStrings } from "../infrastructure/electron/i18n_strings";
-import { setupI18nHandlers, setContainer, handleLanguageChange } from "./i18n";
+import { preloadI18nStrings } from "../infrastructure";
+import { setupI18nHandlers, setContainer, handleLanguageChange, setLanguageChangeCallback } from "./i18n";
+import { setupMenus } from "./menu";
 import { setupExifHandlers } from "./exif_handlers";
 import { setupFolderHandlers } from "./folder_handlers";
 import { setLanguageChangeHandler, setLanguageSettingGetter } from "./menu_view";
@@ -39,6 +40,9 @@ export async function init(
 	}
 
 	setContainer(container);
+
+	// Wire menu rebuild callback for language changes (breaks i18n.ts -> menu.ts cycle)
+	setLanguageChangeCallback(() => setupMenus());
 
 	// Wire language change handler for View menu and dock menu
 	const languageChangeHandler = (code: string | null): void => {

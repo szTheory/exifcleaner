@@ -1,4 +1,4 @@
-import type { Settings } from "../domain/settings_schema";
+import type { Settings } from "../domain";
 
 export interface SettingsPort {
 	load(): Promise<Settings>;

@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from "react";
 import type { Dispatch } from "react";
 import type { FileEntry, AppAction } from "../contexts/AppContext";
 import { useAppContext } from "../contexts/AppContext";
-import { FileProcessingStatus } from "../../domain/file_status";
+import { FileProcessingStatus } from "../../domain";
 
 /**
  * Core processing logic extracted for testability.

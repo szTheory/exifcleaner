@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer } from "react";
 import type { Dispatch, ReactNode } from "react";
-import { FileProcessingStatus } from "../../domain/file_status";
+import { FileProcessingStatus } from "../../domain";
 
 export type FolderDiscoveryStatus =
 	| "scanning"

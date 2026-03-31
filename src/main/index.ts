@@ -2,7 +2,7 @@ import { BrowserWindow, app } from "electron";
 import { setupMenus } from "./menu";
 import { init } from "./init";
 import { createMainWindow, setupMainWindow } from "./window_setup";
-import { currentBrowserWindow } from "../infrastructure/electron/browser_window";
+import { currentBrowserWindow } from "../infrastructure";
 
 // Maintain reference to window to
 // prevent it from being garbage collected

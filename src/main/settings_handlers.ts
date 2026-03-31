@@ -1,8 +1,8 @@
 import { ipcMain } from "electron";
 import type { BrowserWindow } from "electron";
 import type { Container } from "./container";
-import { IPC_CHANNELS } from "../common/ipc_channels";
-import { validateSettings } from "../domain/settings_schema";
+import { IPC_CHANNELS } from "../common";
+import { validateSettings } from "../domain";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import { settingsGetSchema, settingsSetSchema } from "./ipc/ipc_schemas";
 import { handleLanguageChange } from "./i18n";

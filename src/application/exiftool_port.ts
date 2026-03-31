@@ -1,4 +1,4 @@
-import type { Result } from "../common/result";
+import type { Result } from "../common";
 
 export interface ExifToolPort {
 	open(): Promise<number>;

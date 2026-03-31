@@ -1,8 +1,8 @@
 import { type MenuItemConstructorOptions, BrowserWindow } from "electron";
 import { fileMenuOpenItem } from "./menu_file_open";
 import { i18n } from "./i18n";
-import { IPC_CHANNELS } from "../common/ipc_channels";
-import { LANGUAGE_NAMES } from "../domain/language_names";
+import { IPC_CHANNELS } from "../common";
+import { LANGUAGE_NAMES } from "../domain";
 
 // Set by init.ts to avoid circular dependency with container
 let onLanguageChange: ((code: string | null) => void) | null = null;

@@ -80,7 +80,7 @@ const api: ElectronApi = {
 		set: (settings) => ipcRenderer.invoke("settings:set", settings),
 		onChanged: (callback) => {
 			const handler = (_event: Electron.IpcRendererEvent, settings: unknown) =>
-				callback(settings as import("../domain/settings_schema").Settings);
+				callback(settings as import("../domain").Settings);
 			ipcRenderer.on("settings:changed", handler);
 			return () => ipcRenderer.removeListener("settings:changed", handler);
 		},

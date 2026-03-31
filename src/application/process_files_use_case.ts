@@ -1,13 +1,13 @@
 import { existsSync } from "node:fs";
 import { stat } from "node:fs/promises";
-import type { Result } from "../common/result";
+import type { Result } from "../common";
 import type { SettingsPort } from "./settings_port";
 import type { LoggerPort } from "./logger_port";
 import type { StripMetadataCommand } from "./strip_metadata_command";
 import type { ReadMetadataQuery } from "./read_metadata_query";
 import type { ExpandFolderCommand } from "./expand_folder_command";
 import type { XattrCommand } from "./xattr_command";
-import { generateCleanedPath } from "../domain/cleaned_path";
+import { generateCleanedPath } from "../domain";
 
 export interface FileResult {
 	filePath: string;

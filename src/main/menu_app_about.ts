@@ -1,5 +1,5 @@
 import { app } from "electron";
-import { iconPath } from "../infrastructure/electron/resources";
+import { iconPath } from "../infrastructure";
 import { i18n } from "./i18n";
 
 export function showAboutWindow(author: string, websiteUrl: string): void {

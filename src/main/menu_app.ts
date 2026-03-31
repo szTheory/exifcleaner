@@ -1,7 +1,6 @@
 import { type MenuItemConstructorOptions, BrowserWindow, app } from "electron";
 import { i18n } from "./i18n";
-import { isMac } from "../common/platform";
-import { IPC_CHANNELS } from "../common/ipc_channels";
+import { isMac, IPC_CHANNELS } from "../common";
 
 export function appMenuTemplate(): MenuItemConstructorOptions {
 	return {

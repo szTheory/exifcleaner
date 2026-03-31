@@ -1,7 +1,6 @@
 import { app, ipcMain, BrowserWindow, nativeImage } from "electron";
-import { defaultBrowserWindow } from "../infrastructure/electron/browser_window";
-import { isMac, isWindows } from "../common/platform";
-import { checkmarkPath } from "../infrastructure/electron/resources";
+import { defaultBrowserWindow, checkmarkPath } from "../infrastructure";
+import { isMac, isWindows } from "../common";
 import { createValidatedListener } from "./ipc/ipc_validation";
 import {
 	filesAddedSchema,
@@ -9,7 +8,7 @@ import {
 	allFilesProcessedSchema,
 } from "./ipc/ipc_schemas";
 
-import { IPC_CHANNELS } from "../common/ipc_channels";
+import { IPC_CHANNELS } from "../common";
 
 let batchCount = 0;
 let remainingCount = 0;

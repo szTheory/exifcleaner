@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useContext } from "react";
-import type { Settings } from "../../domain/settings_schema";
+import type { Settings } from "../../domain";
 import { ToggleSwitch } from "./ToggleSwitch";
 import { SegmentedControl } from "./SegmentedControl";
 import { LanguageDropdown } from "./LanguageDropdown";

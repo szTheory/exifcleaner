@@ -1,13 +1,13 @@
 import { readFile, writeFile, rename } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
-import type { Settings, SettingsFile } from "../../domain/settings_schema";
+import type { Settings, SettingsFile } from "../../domain";
 import {
 	DEFAULT_SETTINGS,
 	CURRENT_SCHEMA_VERSION,
 	migrateSettings,
-} from "../../domain/settings_schema";
-import type { SettingsPort } from "../../application/settings_port";
-import type { LoggerPort } from "../../application/logger_port";
+} from "../../domain";
+import type { SettingsPort } from "../../application";
+import type { LoggerPort } from "../../application";
 
 export class SettingsService implements SettingsPort {
 	private readonly filePath: string;

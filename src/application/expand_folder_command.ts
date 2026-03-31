@@ -1,7 +1,7 @@
 import { readdir } from "node:fs/promises";
 import path from "node:path";
-import type { Result } from "../common/result";
-import { isSupportedFile } from "../domain/file_types";
+import type { Result } from "../common";
+import { isSupportedFile } from "../domain";
 
 export class ExpandFolderCommand {
 	async execute({

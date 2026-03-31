@@ -3,7 +3,7 @@
 
 import { useRef } from "react";
 import type { FileEntry } from "../contexts/AppContext";
-import { FileProcessingStatus } from "../../domain/file_status";
+import { FileProcessingStatus } from "../../domain";
 import { TypePill } from "./TypePill";
 import { StatusIcon } from "./StatusIcon";
 import { ChevronIcon } from "./ChevronIcon";

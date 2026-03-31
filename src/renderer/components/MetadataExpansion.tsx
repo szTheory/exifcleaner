@@ -2,7 +2,7 @@
 // Renders MetadataGroup components for each ExifTool family 2 category.
 
 import { useMemo } from "react";
-import { computeMetadataDiff } from "../../domain/metadata_groups";
+import { computeMetadataDiff } from "../../domain";
 import { MetadataGroup } from "./MetadataGroup";
 import "../styles/metadata_expansion.css";
 

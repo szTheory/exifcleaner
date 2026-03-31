@@ -1,5 +1,5 @@
 import type { ExifToolPort } from "./exiftool_port";
-import type { Result } from "../common/result";
+import type { Result } from "../common";
 
 export class StripMetadataCommand {
 	private readonly exiftool: ExifToolPort;

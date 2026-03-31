@@ -2,9 +2,9 @@ import { app, BrowserWindow } from "electron";
 import {
 	currentBrowserWindow,
 	restoreWindowAndFocus,
-} from "../infrastructure/electron/browser_window";
+} from "../infrastructure";
 import { createMainWindow } from "./window_setup";
-import { isWindows } from "../common/platform";
+import { isWindows } from "../common";
 import { fileOpen } from "./file_open";
 
 function preventMultipleAppInstances(): void {

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import type { ThemeMode } from "../../domain/settings_schema";
+import type { ThemeMode } from "../../domain";
 
 export interface ThemeContextValue {
 	theme: "dark" | "light";

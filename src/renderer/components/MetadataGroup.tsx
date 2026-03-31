@@ -2,7 +2,7 @@
 // All groups collapsed by default per D-26.
 
 import { useState } from "react";
-import type { MetadataDiffGroup } from "../../domain/metadata_groups";
+import type { MetadataDiffGroup } from "../../domain";
 import { MetadataField } from "./MetadataField";
 import { ChevronIcon } from "./ChevronIcon";
 

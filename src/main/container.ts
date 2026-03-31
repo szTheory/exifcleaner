@@ -1,16 +1,20 @@
 import { app } from "electron";
 import path from "node:path";
-import { ExiftoolProcess } from "../infrastructure/exiftool/ExiftoolProcess";
-import { ExifToolAdapter } from "../infrastructure/exiftool/exiftool_adapter";
-import { SettingsService } from "../infrastructure/settings/settings_service";
-import { ConsoleLogger } from "../infrastructure/logging/console_logger";
-import { StripMetadataCommand } from "../application/strip_metadata_command";
-import { ReadMetadataQuery } from "../application/read_metadata_query";
-import { ExpandFolderCommand } from "../application/expand_folder_command";
-import { XattrCommand } from "../application/xattr_command";
-import { removeXattrs } from "../infrastructure/xattr/xattr_service";
-import { ProcessFilesUseCase } from "../application/process_files_use_case";
-import { exiftoolBinPath } from "../infrastructure/electron/binaries";
+import {
+	ExiftoolProcess,
+	ExifToolAdapter,
+	SettingsService,
+	ConsoleLogger,
+	removeXattrs,
+	exiftoolBinPath,
+} from "../infrastructure";
+import {
+	StripMetadataCommand,
+	ReadMetadataQuery,
+	ExpandFolderCommand,
+	XattrCommand,
+	ProcessFilesUseCase,
+} from "../application";
 
 export function createContainer(): {
 	exiftoolProcess: ExiftoolProcess;

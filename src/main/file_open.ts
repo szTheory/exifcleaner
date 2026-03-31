@@ -2,9 +2,8 @@ import { dialog, BrowserWindow } from "electron";
 import {
 	defaultBrowserWindow,
 	restoreWindowAndFocus,
-} from "../infrastructure/electron/browser_window";
-
-import { IPC_CHANNELS } from "../common/ipc_channels";
+} from "../infrastructure";
+import { IPC_CHANNELS } from "../common";
 
 export function fileOpen(
 	browserWindow: BrowserWindow | undefined | null,

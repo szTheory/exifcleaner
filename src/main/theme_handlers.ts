@@ -1,17 +1,14 @@
 import { ipcMain, nativeTheme, systemPreferences } from "electron";
 import type { BrowserWindow } from "electron";
-import { IPC_CHANNELS } from "../common/ipc_channels";
+import { IPC_CHANNELS } from "../common";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import {
 	themeGetSchema,
 	themeSetSchema,
 	themeAccentColorSchema,
 } from "./ipc/ipc_schemas";
-import {
-	parseAccentColorHex,
-	ACCENT_COLOR_FALLBACK,
-} from "../domain/accent_color";
-import type { SettingsService } from "../infrastructure/settings/settings_service";
+import { parseAccentColorHex, ACCENT_COLOR_FALLBACK } from "../domain";
+import type { SettingsService } from "../infrastructure";
 
 function getAccentColorHex(): string {
 	if (process.platform === "darwin" || process.platform === "win32") {

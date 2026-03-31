@@ -1,5 +1,5 @@
 import { app, Menu, type MenuItemConstructorOptions } from "electron";
-import { isMac, isWindows } from "../common/platform";
+import { isMac, isWindows } from "../common";
 import { appMenuTemplate } from "./menu_app";
 import { dockMenuTemplate } from "./menu_dock";
 import { editMenuTemplate } from "./menu_edit";

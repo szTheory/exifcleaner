@@ -1,7 +1,7 @@
 // Single metadata field row with removed/preserved indicator.
 // Removed fields show red tint + minus icon, preserved show green tint + checkmark.
 
-import type { MetadataDiffField } from "../../domain/metadata_groups";
+import type { MetadataDiffField } from "../../domain";
 
 export function MetadataField({
 	field,

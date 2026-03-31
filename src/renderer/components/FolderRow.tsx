@@ -1,7 +1,7 @@
 // Folder grouping row with collapsible chevron toggle and discovery status.
 
 import type { FolderDiscoveryStatus } from "../contexts/AppContext";
-import { middleTruncatePath } from "../../domain/path_truncation";
+import { middleTruncatePath } from "../../domain";
 import { ChevronIcon } from "./ChevronIcon";
 
 export function FolderRow({

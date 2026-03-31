@@ -1,15 +1,12 @@
 import { app, ipcMain, BrowserWindow } from "electron";
-import {
-	i18n as i18nCommon,
-	getI18nStrings,
-} from "../infrastructure/electron/i18n_strings";
-import { IPC_CHANNELS } from "../common/ipc_channels";
+import { i18n as i18nCommon, getI18nStrings } from "../infrastructure";
+import { IPC_CHANNELS } from "../common";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import { getLocaleSchema, getI18nStringsSchema } from "./ipc/ipc_schemas";
 import type { Container } from "./container";
-import { setupMenus } from "./menu";
 
 let containerRef: Container | null = null;
+let onLanguageChangeCallback: (() => void) | null = null;
 
 export function setContainer(container: Container): void {
 	containerRef = container;
@@ -29,8 +26,12 @@ export function locale(): string {
 	return app.getLocale();
 }
 
+export function setLanguageChangeCallback(callback: () => void): void {
+	onLanguageChangeCallback = callback;
+}
+
 export function rebuildMenusForLanguageChange(): void {
-	setupMenus();
+	onLanguageChangeCallback?.();
 }
 
 export function setupI18nHandlers(): void {
