@@ -97,9 +97,7 @@ export class ExiftoolProcess {
 		const exitPromise = new Promise<{ success: boolean; error: Error | null }>(
 			(resolve) => {
 				const timeout = setTimeout(() => {
-					console.warn(
-						"ExifTool did not exit gracefully, killing process",
-					);
+					console.warn("ExifTool did not exit gracefully, killing process");
 					proc.kill();
 					resolve({
 						success: false,
@@ -175,11 +173,7 @@ export class ExiftoolProcess {
 			// Set 30s timeout for command
 			const timeout = setTimeout(() => {
 				this.pendingCommands.delete(executeNum);
-				reject(
-					new Error(
-						`ExifTool command timed out (execute ${executeNum})`,
-					),
-				);
+				reject(new Error(`ExifTool command timed out (execute ${executeNum})`));
 			}, 30000);
 
 			this.pendingCommands.set(executeNum, { resolve, reject, timeout });
@@ -221,7 +215,9 @@ export class ExiftoolProcess {
 				this.pendingCommands.delete(executeNum);
 
 				// Check if output is JSON (starts with [ or {) or plain text
-				const isJson = jsonStr.trimStart().startsWith('[') || jsonStr.trimStart().startsWith('{');
+				const isJson =
+					jsonStr.trimStart().startsWith("[") ||
+					jsonStr.trimStart().startsWith("{");
 
 				if (isJson) {
 					try {
@@ -253,7 +249,7 @@ export class ExiftoolProcess {
 				} else {
 					// Plain text response (e.g., from write operations)
 					// Check for error messages in the text
-					if (jsonStr.toLowerCase().includes('error')) {
+					if (jsonStr.toLowerCase().includes("error")) {
 						pending.resolve({
 							data: null,
 							error: jsonStr.trim(),

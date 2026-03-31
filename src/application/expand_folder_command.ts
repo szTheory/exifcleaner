@@ -4,11 +4,7 @@ import type { Result } from "../common/result";
 import { isSupportedFile } from "../domain/file_types";
 
 export class ExpandFolderCommand {
-	async execute({
-		dirPath,
-	}: {
-		dirPath: string;
-	}): Promise<Result<string[]>> {
+	async execute({ dirPath }: { dirPath: string }): Promise<Result<string[]>> {
 		try {
 			const entries = await readdir(dirPath, {
 				recursive: true,
@@ -24,8 +20,7 @@ export class ExpandFolderCommand {
 
 			return { ok: true, value: filePaths };
 		} catch (err: unknown) {
-			const message =
-				err instanceof Error ? err.message : String(err);
+			const message = err instanceof Error ? err.message : String(err);
 			return {
 				ok: false,
 				error: "Failed to read directory: " + message,

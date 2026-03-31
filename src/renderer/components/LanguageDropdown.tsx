@@ -91,9 +91,8 @@ export function LanguageDropdown({
 	useEffect(() => {
 		if (!isOpen || focusedIndex < 0 || !listRef.current) return;
 
-		const items = listRef.current.querySelectorAll<HTMLElement>(
-			'[role="option"]',
-		);
+		const items =
+			listRef.current.querySelectorAll<HTMLElement>('[role="option"]');
 		const item = items[focusedIndex];
 		if (item) {
 			item.scrollIntoView({ block: "nearest" });
@@ -131,15 +130,11 @@ export function LanguageDropdown({
 			switch (e.key) {
 				case "ArrowDown":
 					e.preventDefault();
-					setFocusedIndex((prev) =>
-						prev < TOTAL_ITEMS - 1 ? prev + 1 : 0,
-					);
+					setFocusedIndex((prev) => (prev < TOTAL_ITEMS - 1 ? prev + 1 : 0));
 					break;
 				case "ArrowUp":
 					e.preventDefault();
-					setFocusedIndex((prev) =>
-						prev > 0 ? prev - 1 : TOTAL_ITEMS - 1,
-					);
+					setFocusedIndex((prev) => (prev > 0 ? prev - 1 : TOTAL_ITEMS - 1));
 					break;
 				case "Enter":
 				case " ":
@@ -192,9 +187,7 @@ export function LanguageDropdown({
 							const idx = LANGUAGE_NAMES.findIndex(
 								(l) => l.code === currentLanguage,
 							);
-							setFocusedIndex(
-								idx >= 0 ? idx + LANGUAGE_OFFSET : SYSTEM_INDEX,
-							);
+							setFocusedIndex(idx >= 0 ? idx + LANGUAGE_OFFSET : SYSTEM_INDEX);
 						}
 					}
 				}}

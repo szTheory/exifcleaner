@@ -34,18 +34,10 @@ export class ErrorBoundary extends Component<
 	render(): ReactNode {
 		if (this.state.hasError) {
 			return (
-				<div
-					className="error-boundary"
-					role="alert"
-					aria-live="assertive"
-				>
-					<p className="error-boundary__message">
-						Something went wrong.
-					</p>
+				<div className="error-boundary" role="alert" aria-live="assertive">
+					<p className="error-boundary__message">Something went wrong.</p>
 					{this.state.error !== null && (
-						<p className="error-boundary__detail">
-							{this.state.error.message}
-						</p>
+						<p className="error-boundary__detail">{this.state.error.message}</p>
 					)}
 					<button
 						className="error-boundary__button"
