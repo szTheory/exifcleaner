@@ -67,6 +67,15 @@
 			"protocol": "https"
 		},
 		"appId": "com.exifcleaner",
+		"electronFuses": {
+			"runAsNode": false,
+			"enableCookieEncryption": true,
+			"enableNodeOptionsEnvironmentVariable": false,
+			"enableNodeCliInspectArguments": false,
+			"enableEmbeddedAsarIntegrityValidation": true,
+			"onlyLoadAppFromAsar": true,
+			"grantFileProtocolExtraPrivileges": false
+		},
 		"mac": {
 			"category": "public.app-category.graphics-and-images",
 			"darkModeSupport": true,
