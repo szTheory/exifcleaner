@@ -21,16 +21,10 @@ function buildMenu(canCopy: boolean): Menu {
 }
 
 export function setupContextMenu(): void {
-	app.on(
-		"browser-window-created",
-		(_event, browserWindow) => {
-			browserWindow.webContents.on(
-				"context-menu",
-				(_event, params) => {
-					const isTextSelected = params.selectionText.trim().length > 0;
-					buildMenu(params.editFlags.canCopy && isTextSelected).popup();
-				},
-			);
-		},
-	);
+	app.on("browser-window-created", (_event, browserWindow) => {
+		browserWindow.webContents.on("context-menu", (_event, params) => {
+			const isTextSelected = params.selectionText.trim().length > 0;
+			buildMenu(params.editFlags.canCopy && isTextSelected).popup();
+		});
+	});
 }

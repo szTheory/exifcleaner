@@ -51,7 +51,10 @@ export function setupI18nHandlers(): void {
 }
 
 // Called when settings change to detect language changes and rebuild menus
-export function handleLanguageChange(previousLanguage: string | null, newLanguage: string | null): void {
+export function handleLanguageChange(
+	previousLanguage: string | null,
+	newLanguage: string | null,
+): void {
 	if (previousLanguage === newLanguage) return;
 
 	rebuildMenusForLanguageChange();

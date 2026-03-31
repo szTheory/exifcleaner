@@ -1,12 +1,23 @@
 import { app, type BrowserWindow } from "electron";
 import packageJson from "../../package.json";
 import { preloadI18nStrings } from "../infrastructure";
-import { setupI18nHandlers, setContainer, handleLanguageChange, setLanguageChangeCallback } from "./i18n";
+import {
+	setupI18nHandlers,
+	setContainer,
+	handleLanguageChange,
+	setLanguageChangeCallback,
+} from "./i18n";
 import { setupMenus } from "./menu/menu";
 import { setupExifHandlers } from "./exif_handlers";
 import { setupFolderHandlers } from "./folder_handlers";
-import { setLanguageChangeHandler, setLanguageSettingGetter } from "./menu/menu_view";
-import { setDockLanguageChangeHandler, setDockLanguageSettingGetter } from "./menu/menu_dock";
+import {
+	setLanguageChangeHandler,
+	setLanguageSettingGetter,
+} from "./menu/menu_view";
+import {
+	setDockLanguageChangeHandler,
+	setDockLanguageSettingGetter,
+} from "./menu/menu_dock";
 import { setupSettingsHandlers } from "./settings_handlers";
 import { setupThemeHandlers } from "./theme_handlers";
 import { setupRevealHandlers } from "./reveal_handlers";

@@ -26,7 +26,9 @@ function binaryPlatformSubpath(): BinaryPlatformSubpath {
 		case Platform.MAC:
 			return BinaryPlatformSubpath.Nix;
 		default:
-			throw new Error(`Could not determine dev Exiftool binary subpath for platform ${platform}`);
+			throw new Error(
+				`Could not determine dev Exiftool binary subpath for platform ${platform}`,
+			);
 	}
 }
 
@@ -40,7 +42,9 @@ function binaryFilename(): string {
 		case Platform.MAC:
 			return BinFilename.Nix;
 		default:
-			throw new Error(`Could not determine the ExifTool binary path for platform ${platform}`);
+			throw new Error(
+				`Could not determine the ExifTool binary path for platform ${platform}`,
+			);
 	}
 }
 

@@ -3,7 +3,10 @@
 
 import { useCallback, useRef, useState, useEffect } from "react";
 import { useAppContext } from "../../contexts/AppContext";
-import type { FileEntry, FolderDiscoveryStatus } from "../../contexts/AppContext";
+import type {
+	FileEntry,
+	FolderDiscoveryStatus,
+} from "../../contexts/AppContext";
 import { FileRow } from "./FileRow";
 import { FolderRow } from "./FolderRow";
 import { Toast } from "../ui/Toast";
@@ -98,7 +101,10 @@ export function FileTable(): React.JSX.Element {
 				{/* Folder groups */}
 				{folderGroups.map(({ folder, files }) => {
 					const isDirectlyCollapsed = state.collapsedFolders.has(folder);
-					const isParentCollapsed = isCollapsedByParent(folder, state.collapsedFolders);
+					const isParentCollapsed = isCollapsedByParent(
+						folder,
+						state.collapsedFolders,
+					);
 					// Hide entire subfolder group when a parent folder is collapsed
 					if (isParentCollapsed) return null;
 					const isCollapsed = isDirectlyCollapsed;
@@ -154,7 +160,10 @@ interface FolderGroup {
 
 function groupFilesByFolder(
 	files: FileEntry[],
-	folderStates: Map<string, { path: string; status: string; fileCount: number }>,
+	folderStates: Map<
+		string,
+		{ path: string; status: string; fileCount: number }
+	>,
 ): {
 	folderGroups: FolderGroup[];
 	ungroupedFiles: FileEntry[];

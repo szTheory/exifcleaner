@@ -16,18 +16,15 @@ function preventMultipleAppInstances(): void {
 function openMinimizedIfAlreadyExists(
 	browserWindow: BrowserWindow | null,
 ): void {
-	app.on(
-		"second-instance",
-		(_event, argv) => {
-			console.log(argv);
-			if (isWindows() && argv.length > 0 && argv.includes("--open-file")) {
-				fileOpen(browserWindow);
-				return;
-			}
+	app.on("second-instance", (_event, argv) => {
+		console.log(argv);
+		if (isWindows() && argv.length > 0 && argv.includes("--open-file")) {
+			fileOpen(browserWindow);
+			return;
+		}
 
-			restoreWindowAndFocus(browserWindow);
-		},
-	);
+		restoreWindowAndFocus(browserWindow);
+	});
 }
 
 function quitOnWindowsAllClosed(): void {

@@ -47,8 +47,7 @@ export class SettingsService implements SettingsPort {
 			settings,
 		};
 		const json = JSON.stringify(file, null, "\t");
-		const tempPath =
-			this.filePath + "." + randomBytes(6).toString("hex");
+		const tempPath = this.filePath + "." + randomBytes(6).toString("hex");
 
 		try {
 			await writeFile(tempPath, json, "utf-8");

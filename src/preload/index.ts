@@ -19,10 +19,8 @@ const api: ElectronApi = {
 		getLocale: () => ipcRenderer.invoke("get-locale"),
 		getStrings: () => ipcRenderer.invoke("get-i18n-strings"),
 		onLanguageChanged: (callback: (locale: string) => void) => {
-			const handler = (
-				_event: Electron.IpcRendererEvent,
-				newLocale: unknown,
-			) => callback(newLocale as string);
+			const handler = (_event: Electron.IpcRendererEvent, newLocale: unknown) =>
+				callback(newLocale as string);
 			ipcRenderer.on("language:changed", handler);
 			return () => ipcRenderer.removeListener("language:changed", handler);
 		},
@@ -94,17 +92,13 @@ const api: ElectronApi = {
 	reveal: {
 		showInFolder: (filePath: string) =>
 			ipcRenderer.invoke("file:reveal", filePath),
-		showContextMenu: (paths: {
-			cleanedPath: string;
-			originalPath: string;
-		}) => ipcRenderer.invoke("file:reveal-context-menu", paths),
+		showContextMenu: (paths: { cleanedPath: string; originalPath: string }) =>
+			ipcRenderer.invoke("file:reveal-context-menu", paths),
 	},
 
 	folder: {
-		classify: (paths: string[]) =>
-			ipcRenderer.invoke("folder:classify", paths),
-		expand: (dirPath: string) =>
-			ipcRenderer.invoke("folder:expand", dirPath),
+		classify: (paths: string[]) => ipcRenderer.invoke("folder:classify", paths),
+		expand: (dirPath: string) => ipcRenderer.invoke("folder:expand", dirPath),
 	},
 
 	platform: {

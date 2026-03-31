@@ -51,10 +51,7 @@ export function FolderRow({
 	);
 }
 
-function renderCount(
-	status: FolderDiscoveryStatus,
-	fileCount: number,
-): string {
+function renderCount(status: FolderDiscoveryStatus, fileCount: number): string {
 	switch (status) {
 		case "scanning":
 			return "Scanning\u2026";

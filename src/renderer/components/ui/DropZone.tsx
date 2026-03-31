@@ -29,11 +29,7 @@ function buildFileEntry(
 }
 
 function computeFolderLabel(folderPath: string, filePath: string): string {
-	const folderBaseName =
-		folderPath
-			.split(/[/\\]/)
-			.filter(Boolean)
-			.pop() || "";
+	const folderBaseName = folderPath.split(/[/\\]/).filter(Boolean).pop() || "";
 	const relativePath = filePath
 		.slice(folderPath.length)
 		.replace(/[/\\][^/\\]+$/, "");
@@ -96,10 +92,7 @@ export function DropZone({
 			// Step 2: Process each folder
 			for (const folderPath of folderPaths) {
 				const folderBaseName =
-					folderPath
-						.split(/[/\\]/)
-						.filter(Boolean)
-						.pop() || folderPath;
+					folderPath.split(/[/\\]/).filter(Boolean).pop() || folderPath;
 
 				// Show scanning state immediately
 				dispatch({
@@ -122,16 +115,11 @@ export function DropZone({
 				}
 
 				const discoveredFiles = result.files;
-				const folderEntries: FileEntry[] = discoveredFiles.map(
-					(filePath) => {
-						const name = window.api.files.basename(filePath);
-						const folderLabel = computeFolderLabel(
-							folderPath,
-							filePath,
-						);
-						return buildFileEntry(filePath, name, 0, folderLabel);
-					},
-				);
+				const folderEntries: FileEntry[] = discoveredFiles.map((filePath) => {
+					const name = window.api.files.basename(filePath);
+					const folderLabel = computeFolderLabel(folderPath, filePath);
+					return buildFileEntry(filePath, name, 0, folderLabel);
+				});
 
 				if (folderEntries.length === 0) {
 					// Empty folder
@@ -163,9 +151,7 @@ export function DropZone({
 
 				// Show toast for skipped folders
 				if (result.skippedCount > 0 && onSkipToast !== undefined) {
-					onSkipToast(
-						`${result.skippedCount} folders couldn't be read`,
-					);
+					onSkipToast(`${result.skippedCount} folders couldn't be read`);
 				}
 			}
 		},

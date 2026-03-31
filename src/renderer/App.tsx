@@ -90,9 +90,7 @@ function AppContent(): React.JSX.Element {
 	return (
 		<>
 			<div className="app__content" aria-hidden={isSettingsOpen || undefined}>
-				<DropZone>
-					{hasFiles ? <FileTable /> : <EmptyState />}
-				</DropZone>
+				<DropZone>{hasFiles ? <FileTable /> : <EmptyState />}</DropZone>
 			</div>
 			<StatusBar
 				gearIcon={gearIcon}
@@ -101,9 +99,7 @@ function AppContent(): React.JSX.Element {
 				totalTagsRemoved={hasFiles ? totalTagsRemoved : undefined}
 				elapsedSeconds={hasFiles ? elapsedSeconds : undefined}
 				onCleanMore={
-					hasFiles
-						? () => dispatch({ type: "CLEAR_FILES" })
-						: undefined
+					hasFiles ? () => dispatch({ type: "CLEAR_FILES" }) : undefined
 				}
 			/>
 			<SettingsDrawer isOpen={isSettingsOpen} onClose={handleClose} />

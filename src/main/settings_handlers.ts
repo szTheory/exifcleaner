@@ -39,10 +39,7 @@ export function setupSettingsHandlers({
 			// Notify renderer of settings change
 			const win = getWindow();
 			if (win) {
-				win.webContents.send(
-					IPC_CHANNELS.SETTINGS_CHANGED,
-					newSettings,
-				);
+				win.webContents.send(IPC_CHANNELS.SETTINGS_CHANGED, newSettings);
 			}
 
 			// Handle language change (rebuilds menus, notifies renderer)
