@@ -308,5 +308,5 @@ devplans
 
 # Playwright
 playwright-report/
-test-results/.planning/
 test-results/
+.planning/
