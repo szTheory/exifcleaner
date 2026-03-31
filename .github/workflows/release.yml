@@ -1,0 +1,223 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Lint, Typecheck & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint (Prettier)
+        run: yarn lint
+
+      - name: Typecheck (tsc --noEmit)
+        run: yarn typecheck
+
+      - name: Unit tests (Vitest)
+        run: yarn test
+
+      - name: Compile (electron-vite build)
+        run: yarn compile
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+      - name: Install Playwright
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Disable AppArmor restriction (Ubuntu 24.04)
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      - name: E2E tests (Playwright)
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" yarn test:e2e
+
+  build-macos:
+    name: Build macOS (Signed)
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Import signing certificate
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+
+          echo "$CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          security import "$CERTIFICATE_PATH" -P "$CERTIFICATE_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
+
+          rm "$CERTIFICATE_PATH"
+
+      - name: Decode Apple API key
+        env:
+          API_KEY_BASE64: ${{ secrets.APPLE_API_KEY_BASE64 }}
+        run: |
+          mkdir -p ~/private_keys
+          echo "$API_KEY_BASE64" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
+
+      - name: Build macOS (signed + notarized)
+        env:
+          CSC_LINK: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
+          CSC_KEY_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          APPLE_API_KEY: ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: yarn compile && electron-builder --macos --publish never
+
+      - name: Cleanup keychain
+        if: always()
+        run: security delete-keychain $RUNNER_TEMP/build.keychain-db 2>/dev/null || true
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-macos
+          path: dist/*.dmg
+          retention-days: 30
+
+  build-windows:
+    name: Build Windows
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build Windows artifacts
+        run: yarn packwin --publish never
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-windows
+          path: dist/*.exe
+          retention-days: 30
+
+  build-linux:
+    name: Build Linux
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build Linux artifacts
+        run: yarn packlinux --publish never
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-linux
+          path: |
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.rpm
+          retention-days: 30
+
+  release:
+    name: Create Release
+    needs: [build-macos, build-windows, build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate SHASUMS256.txt
+        run: |
+          cd artifacts
+          find . -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" \) -exec sha256sum {} \; | sed 's|  \./[^/]*/|  |' > ../SHASUMS256.txt
+          cd ..
+          cat SHASUMS256.txt
+
+      - name: Get version
+        id: version
+        run: echo "version=v$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
+
+      - name: Create git tag
+        run: |
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ExifCleaner ${{ steps.version.outputs.version }}
+          draft: true
+          generate_release_notes: true
+          files: |
+            artifacts/release-macos/*
+            artifacts/release-windows/*
+            artifacts/release-linux/*
+            SHASUMS256.txt
