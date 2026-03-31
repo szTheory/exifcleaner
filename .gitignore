@@ -283,21 +283,22 @@ Temporary Items
 # git repo for ExifTool, used to pull down latest binary
 gitignore
 exiftool_downloads
-.resources/nix/bin/**
-.resources/win/bin/**
 
 yarn-error.log
 
 
-# Explicitly include the exiftool binaries
-# that were being hit by the .gitignore rule .*
+# ExifTool binaries committed to git (required for CI, especially Windows which lacks Perl)
 !.resources
-!.resources/nix/bin/.keep
-!.resources/win/bin/.keep
+!.resources/nix/
+!.resources/nix/bin/
+!.resources/nix/bin/**
+!.resources/win/
+!.resources/win/bin/
+!.resources/win/bin/**
 
-# Explicitly include Travis CI configuration 
+# Explicitly include GitHub Actions and config files
 # that were being hit by the .gitignore rule .*
-!.travis.yml
+!.github/
 
 # Explicitly include Prettier configuration
 # that was being hit by the .gitignore rule .*
