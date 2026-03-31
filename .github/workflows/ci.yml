@@ -36,6 +36,9 @@ jobs:
       - name: Unit tests (Vitest)
         run: yarn test
 
+      - name: Check circular dependencies (madge)
+        run: yarn check:deps
+
       - name: Compile (electron-vite build)
         run: yarn compile
 

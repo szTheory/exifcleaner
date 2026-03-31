@@ -34,7 +34,8 @@
 		"test:watch": "vitest",
 		"test:e2e": "npx playwright test",
 		"test:all": "vitest run && npx playwright test",
-		"screenshots": "tsx scripts/generate-screenshots.ts"
+		"screenshots": "tsx scripts/generate-screenshots.ts",
+		"check:deps": "madge --circular --extensions ts,tsx src/"
 	},
 	"dependencies": {
 		"react": "^19.2.0",
@@ -50,6 +51,7 @@
 		"electron": "^35",
 		"electron-builder": "^26",
 		"electron-vite": "^5.0.0",
+		"madge": "^8.0.0",
 		"prettier": "^3.0",
 		"typescript": "~5.7.0",
 		"vite": "^7.3.1",
