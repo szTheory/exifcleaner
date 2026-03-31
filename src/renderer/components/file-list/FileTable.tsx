@@ -2,11 +2,11 @@
 // and toast notification. Status bar is rendered by App.tsx.
 
 import { useCallback, useRef, useState, useEffect } from "react";
-import { useAppContext } from "../contexts/AppContext";
-import type { FileEntry, FolderDiscoveryStatus } from "../contexts/AppContext";
+import { useAppContext } from "../../contexts/AppContext";
+import type { FileEntry, FolderDiscoveryStatus } from "../../contexts/AppContext";
 import { FileRow } from "./FileRow";
 import { FolderRow } from "./FolderRow";
-import { Toast } from "./Toast";
+import { Toast } from "../ui/Toast";
 
 export function FileTable(): React.JSX.Element {
 	const { state, dispatch } = useAppContext();

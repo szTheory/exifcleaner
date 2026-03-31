@@ -1,4 +1,4 @@
-import { useI18n } from "../hooks/use_i18n";
+import { useI18n } from "../../hooks/use_i18n";
 
 export function EmptyState(): React.JSX.Element {
 	const { t } = useI18n();

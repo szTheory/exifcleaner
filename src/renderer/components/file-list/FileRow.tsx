@@ -2,15 +2,15 @@
 // Supports expansion for error details and metadata inspection.
 
 import { useRef } from "react";
-import type { FileEntry } from "../contexts/AppContext";
-import { FileProcessingStatus } from "../../domain";
-import { TypePill } from "./TypePill";
-import { StatusIcon } from "./StatusIcon";
-import { ChevronIcon } from "./ChevronIcon";
+import type { FileEntry } from "../../contexts/AppContext";
+import { FileProcessingStatus } from "../../../domain";
+import { TypePill } from "../ui/TypePill";
+import { StatusIcon } from "../ui/StatusIcon";
+import { ChevronIcon } from "../icons/ChevronIcon";
 import { ErrorExpansion } from "./ErrorExpansion";
 import { MetadataExpansion } from "./MetadataExpansion";
-import { formatFileSize } from "../utils/format_file_size";
-import { useI18n } from "../hooks/use_i18n";
+import { formatFileSize } from "../../utils/format_file_size";
+import { useI18n } from "../../hooks/use_i18n";
 
 /** Compute the cleaned copy path (simple version for reveal, no collision check). */
 function computeCleanedPath(filePath: string): string {

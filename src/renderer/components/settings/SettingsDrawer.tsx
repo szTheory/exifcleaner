@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useCallback, useContext } from "react";
-import type { Settings } from "../../domain";
+import type { Settings } from "../../../domain";
 import { ToggleSwitch } from "./ToggleSwitch";
 import { SegmentedControl } from "./SegmentedControl";
 import { LanguageDropdown } from "./LanguageDropdown";
-import { ThemeContext } from "../contexts/ThemeContext";
-import { I18nContext } from "../contexts/I18nContext";
-import "../styles/settings_drawer.css";
+import { ThemeContext } from "../../contexts/ThemeContext";
+import { I18nContext } from "../../contexts/I18nContext";
+import "../../styles/settings_drawer.css";
 
 function SunIcon(): React.JSX.Element {
 	return (

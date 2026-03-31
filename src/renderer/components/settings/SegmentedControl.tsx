@@ -1,4 +1,4 @@
-import "../styles/segmented_control.css";
+import "../../styles/segmented_control.css";
 
 interface SegmentOption<T extends string> {
 	value: T;

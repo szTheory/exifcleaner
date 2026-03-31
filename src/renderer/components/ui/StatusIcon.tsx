@@ -1,6 +1,6 @@
 // Status icon for file processing states: pending dot, spinner, checkmark, circle-X.
 
-import { FileProcessingStatus } from "../../domain";
+import { FileProcessingStatus } from "../../../domain";
 
 export function StatusIcon({
 	status,

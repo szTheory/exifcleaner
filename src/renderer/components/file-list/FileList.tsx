@@ -1,5 +1,5 @@
-import { useI18n } from "../hooks/use_i18n";
-import type { FileEntry } from "../contexts/AppContext";
+import { useI18n } from "../../hooks/use_i18n";
+import type { FileEntry } from "../../contexts/AppContext";
 
 export function FileList({ files }: { files: FileEntry[] }): React.JSX.Element {
 	const { t } = useI18n();

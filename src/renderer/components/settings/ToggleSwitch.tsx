@@ -1,4 +1,4 @@
-import "../styles/toggle_switch.css";
+import "../../styles/toggle_switch.css";
 
 export function ToggleSwitch({
 	id,

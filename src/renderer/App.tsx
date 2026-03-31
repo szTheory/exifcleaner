@@ -4,13 +4,13 @@ import { I18nProvider } from "./contexts/I18nContext";
 import { AppProvider, useAppContext } from "./contexts/AppContext";
 import { FileProcessingStatus } from "../domain";
 import { useElapsedTime } from "./hooks/use_elapsed_time";
-import { ErrorBoundary } from "./components/ErrorBoundary";
-import { EmptyState } from "./components/EmptyState";
-import { DropZone } from "./components/DropZone";
-import { FileTable } from "./components/FileTable";
-import { GearIcon } from "./components/GearIcon";
-import { StatusBar } from "./components/StatusBar";
-import { SettingsDrawer } from "./components/SettingsDrawer";
+import { ErrorBoundary } from "./components/ui/ErrorBoundary";
+import { EmptyState } from "./components/ui/EmptyState";
+import { DropZone } from "./components/ui/DropZone";
+import { FileTable } from "./components/file-list/FileTable";
+import { GearIcon } from "./components/icons/GearIcon";
+import { StatusBar } from "./components/ui/StatusBar";
+import { SettingsDrawer } from "./components/settings/SettingsDrawer";
 
 function AppContent(): React.JSX.Element {
 	const { state, dispatch } = useAppContext();

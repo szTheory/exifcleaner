@@ -2,7 +2,7 @@
 // Renders persistently across both EmptyState and FileTable views.
 
 import type { ReactNode } from "react";
-import { useI18n } from "../hooks/use_i18n";
+import { useI18n } from "../../hooks/use_i18n";
 
 /** Replace `{key}` placeholders with values from a params object. */
 function interpolate(

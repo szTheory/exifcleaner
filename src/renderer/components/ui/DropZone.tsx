@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import type { ReactNode } from "react";
-import { useAppContext } from "../contexts/AppContext";
-import type { FileEntry } from "../contexts/AppContext";
-import { FileProcessingStatus, isSupportedFile } from "../../domain";
-import { getFileExtension } from "../utils/get_file_extension";
-import { useProcessFiles } from "../hooks/use_process_files";
+import { useAppContext } from "../../contexts/AppContext";
+import type { FileEntry } from "../../contexts/AppContext";
+import { FileProcessingStatus, isSupportedFile } from "../../../domain";
+import { getFileExtension } from "../../utils/get_file_extension";
+import { useProcessFiles } from "../../hooks/use_process_files";
 
 function buildFileEntry(
 	path: string,
