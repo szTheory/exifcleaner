@@ -69,6 +69,18 @@
 		"mac": {
 			"category": "public.app-category.graphics-and-images",
 			"darkModeSupport": true,
+			"target": [
+				{
+					"target": "dmg",
+					"arch": [
+						"universal"
+					]
+				}
+			],
+			"hardenedRuntime": true,
+			"entitlements": "build/entitlements.mac.plist",
+			"entitlementsInherit": "build/entitlements.mac.inherit.plist",
+			"notarize": true,
 			"extraResources": [
 				{
 					"from": ".resources/nix/bin",
@@ -80,19 +92,7 @@
 			]
 		},
 		"dmg": {
-			"iconSize": 160,
-			"contents": [
-				{
-					"x": 180,
-					"y": 170
-				},
-				{
-					"x": 480,
-					"y": 170,
-					"type": "link",
-					"path": "/Applications"
-				}
-			]
+			"iconSize": 160
 		},
 		"linux": {
 			"target": [
