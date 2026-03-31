@@ -1,14 +1,14 @@
 import { app, ipcMain, BrowserWindow, nativeImage } from "electron";
-import { defaultBrowserWindow, checkmarkPath } from "../infrastructure";
-import { isMac, isWindows } from "../common";
-import { createValidatedListener } from "./ipc/ipc_validation";
+import { defaultBrowserWindow, checkmarkPath } from "../../infrastructure";
+import { isMac, isWindows } from "../../common";
+import { createValidatedListener } from "../ipc/ipc_validation";
 import {
 	filesAddedSchema,
 	fileProcessedSchema,
 	allFilesProcessedSchema,
-} from "./ipc/ipc_schemas";
+} from "../ipc/ipc_schemas";
 
-import { IPC_CHANNELS } from "../common";
+import { IPC_CHANNELS } from "../../common";
 
 let batchCount = 0;
 let remainingCount = 0;

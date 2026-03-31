@@ -1,5 +1,5 @@
 import { it, expect, describe } from "vitest";
-import { generateCleanedPath } from "../../src/domain/cleaned_path";
+import { generateCleanedPath } from "../../src/domain/files/cleaned_path";
 
 describe("generateCleanedPath", () => {
 	it("appends _cleaned suffix when no collision", () => {

@@ -1,9 +1,9 @@
 import { it, expect, beforeEach } from "vitest";
 import { ProcessFilesUseCase } from "../../src/application/process_files_use_case";
 import type { FileResult } from "../../src/application/process_files_use_case";
-import { StripMetadataCommand } from "../../src/application/strip_metadata_command";
-import { ReadMetadataQuery } from "../../src/application/read_metadata_query";
-import { ExpandFolderCommand } from "../../src/application/expand_folder_command";
+import { StripMetadataCommand } from "../../src/application/commands/strip_metadata_command";
+import { ReadMetadataQuery } from "../../src/application/queries/read_metadata_query";
+import { ExpandFolderCommand } from "../../src/application/commands/expand_folder_command";
 import { FakeExifTool } from "../fakes/fake_exiftool";
 import { FakeSettings } from "../fakes/fake_settings";
 import { FakeLogger } from "../fakes/fake_logger";

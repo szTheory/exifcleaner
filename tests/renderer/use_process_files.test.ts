@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { FileProcessingStatus } from "../../src/domain/file_status";
+import { FileProcessingStatus } from "../../src/domain/files/file_status";
 import type { FileEntry } from "../../src/renderer/contexts/AppContext";
 import type { AppAction } from "../../src/renderer/contexts/AppContext";
 

@@ -1,5 +1,5 @@
 import { app, Menu, type MenuItemConstructorOptions } from "electron";
-import { isMac, isWindows } from "../common";
+import { isMac, isWindows } from "../../common";
 import { appMenuTemplate } from "./menu_app";
 import { dockMenuTemplate } from "./menu_dock";
 import { editMenuTemplate } from "./menu_edit";
@@ -7,7 +7,7 @@ import { fileMenuTemplate } from "./menu_file";
 import { helpMenuTemplate } from "./menu_help";
 import { viewMenuTemplate } from "./menu_view";
 import { windowMenuTemplate } from "./menu_window";
-import { i18n } from "./i18n";
+import { i18n } from "../i18n";
 
 const APP_ARG_WINDOWS_TASK_OPEN_FILE = "--open-file";
 

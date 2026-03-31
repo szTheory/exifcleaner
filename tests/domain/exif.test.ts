@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cleanExifData } from "../../src/domain/exif";
+import { cleanExifData } from "../../src/domain/exif/exif";
 
 describe("cleanExifData", () => {
 	it("strips flat SourceFile key", () => {

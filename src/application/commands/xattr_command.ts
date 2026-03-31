@@ -1,4 +1,4 @@
-import type { LoggerPort } from "./logger_port";
+import type { LoggerPort } from "../logger_port";
 
 export interface XattrPort {
 	removeXattrs(args: { filePath: string; logger: LoggerPort }): Promise<void>;

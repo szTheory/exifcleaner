@@ -15,7 +15,7 @@ vi.mock("../../src/common/platform", () => ({
 
 // Import after mocks are set up
 const { removeXattrs } = await import(
-	"../../src/infrastructure/xattr/xattr_service"
+	"../../src/infrastructure/xattr_service"
 );
 
 describe("removeXattrs", () => {

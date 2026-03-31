@@ -1,5 +1,5 @@
 import { it, expect, beforeEach } from "vitest";
-import { ReadMetadataQuery } from "../../src/application/read_metadata_query";
+import { ReadMetadataQuery } from "../../src/application/queries/read_metadata_query";
 import { FakeExifTool } from "../fakes/fake_exiftool";
 
 let exiftool: FakeExifTool;

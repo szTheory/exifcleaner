@@ -1,5 +1,5 @@
 import { it, expect, describe, beforeEach } from "vitest";
-import { StripMetadataCommand } from "../../src/application/strip_metadata_command";
+import { StripMetadataCommand } from "../../src/application/commands/strip_metadata_command";
 import { FakeExifTool } from "../fakes/fake_exiftool";
 
 let exiftool: FakeExifTool;

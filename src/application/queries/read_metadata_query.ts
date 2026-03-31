@@ -1,6 +1,6 @@
-import type { ExifToolPort } from "./exiftool_port";
-import type { Result } from "../common";
-import { cleanExifData } from "../domain";
+import type { ExifToolPort } from "../exiftool_port";
+import type { Result } from "../../common";
+import { cleanExifData } from "../../domain";
 
 export class ReadMetadataQuery {
 	private readonly exiftool: ExifToolPort;

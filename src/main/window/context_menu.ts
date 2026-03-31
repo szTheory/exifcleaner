@@ -1,5 +1,5 @@
 import { app, Menu, MenuItem } from "electron";
-import { i18n } from "./i18n";
+import { i18n } from "../i18n";
 
 function buildMenu(canCopy: boolean): Menu {
 	const menu = new Menu();

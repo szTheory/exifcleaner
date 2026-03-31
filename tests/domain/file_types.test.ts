@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { isSupportedFile } from "../../src/domain/file_types";
+import { isSupportedFile } from "../../src/domain/files/file_types";
 
 it("returns true for supported image extensions", () => {
 	expect(isSupportedFile("photo.jpg")).toBe(true);

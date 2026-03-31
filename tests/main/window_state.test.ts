@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	isWithinDisplayBounds,
 	validateAndLoadState,
-} from "../../src/main/window_state";
+} from "../../src/main/window/window_state";
 import type { Display } from "electron";
 
 // Helper to create a display-like object with workArea

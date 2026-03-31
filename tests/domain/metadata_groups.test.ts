@@ -3,7 +3,7 @@ import {
 	parseGroupedKey,
 	getFriendlyGroupKey,
 	computeMetadataDiff,
-} from "../../src/domain/metadata_groups";
+} from "../../src/domain/exif/metadata_groups";
 
 describe("parseGroupedKey", () => {
 	it('parses "Camera:Make" into group="Camera" and field="Make"', () => {

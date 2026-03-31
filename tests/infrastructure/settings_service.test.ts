@@ -3,12 +3,12 @@ import { mkdir, rm, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { randomBytes } from "node:crypto";
-import { FakeLogger } from "../../fakes/fake_logger";
-import { SettingsService } from "../../../src/infrastructure/settings/settings_service";
+import { FakeLogger } from "../fakes/fake_logger";
+import { SettingsService } from "../../src/infrastructure/settings_service";
 import {
 	DEFAULT_SETTINGS,
 	CURRENT_SCHEMA_VERSION,
-} from "../../../src/domain/settings_schema";
+} from "../../src/domain/settings_schema";
 
 function makeTempDir(): string {
 	return join(tmpdir(), `settings-test-${randomBytes(6).toString("hex")}`);

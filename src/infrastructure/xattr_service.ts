@@ -1,6 +1,6 @@
 import { exec } from "node:child_process";
-import { isMac } from "../../common";
-import type { LoggerPort } from "../../application";
+import { isMac } from "../common";
+import type { LoggerPort } from "../application";
 
 export function removeXattrs({
 	filePath,

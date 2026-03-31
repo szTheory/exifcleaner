@@ -1,7 +1,7 @@
 import { BrowserWindow, app, nativeTheme } from "electron";
 import path from "path";
-import { isMac, isWindows } from "../common";
-import { iconPath } from "../infrastructure";
+import { isMac, isWindows } from "../../common";
+import { iconPath } from "../../infrastructure";
 import {
 	loadWindowState,
 	setupWindowStatePersistence,

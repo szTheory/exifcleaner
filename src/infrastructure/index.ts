@@ -6,13 +6,13 @@ export { ExifToolAdapter } from "./exiftool/exiftool_adapter";
 export type { ExifToolResult, ExifToolCloseResult } from "./exiftool/types";
 
 // Settings
-export { SettingsService } from "./settings/settings_service";
+export { SettingsService } from "./settings_service";
 
 // Logging
-export { ConsoleLogger } from "./logging/console_logger";
+export { ConsoleLogger } from "./console_logger";
 
 // Xattr
-export { removeXattrs } from "./xattr/xattr_service";
+export { removeXattrs } from "./xattr_service";
 
 // Electron utilities
 export { exiftoolBinPath } from "./electron/binaries";

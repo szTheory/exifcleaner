@@ -3,10 +3,10 @@ import { stat } from "node:fs/promises";
 import type { Result } from "../common";
 import type { SettingsPort } from "./settings_port";
 import type { LoggerPort } from "./logger_port";
-import type { StripMetadataCommand } from "./strip_metadata_command";
-import type { ReadMetadataQuery } from "./read_metadata_query";
-import type { ExpandFolderCommand } from "./expand_folder_command";
-import type { XattrCommand } from "./xattr_command";
+import type { StripMetadataCommand } from "./commands/strip_metadata_command";
+import type { ReadMetadataQuery } from "./queries/read_metadata_query";
+import type { ExpandFolderCommand } from "./commands/expand_folder_command";
+import type { XattrCommand } from "./commands/xattr_command";
 import { generateCleanedPath } from "../domain";
 
 export interface FileResult {

@@ -1,5 +1,5 @@
 import { it, expect, beforeEach, afterEach } from "vitest";
-import { ExpandFolderCommand } from "../../src/application/expand_folder_command";
+import { ExpandFolderCommand } from "../../src/application/commands/expand_folder_command";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
