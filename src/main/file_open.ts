@@ -4,8 +4,7 @@ import {
 	restoreWindowAndFocus,
 } from "../infrastructure/electron/browser_window";
 
-import { EVENT_FILE_OPEN_ADD_FILES } from "../domain/ipc_channels";
-export { EVENT_FILE_OPEN_ADD_FILES };
+import { IPC_CHANNELS } from "../common/ipc_channels";
 
 export function fileOpen(
 	browserWindow: BrowserWindow | undefined | null,
@@ -20,7 +19,7 @@ export function fileOpen(
 		.then((result) => {
 			if (result.filePaths) {
 				defaultBrowserWindow(browserWindow).webContents.send(
-					EVENT_FILE_OPEN_ADD_FILES,
+					IPC_CHANNELS.FILE_OPEN_ADD_FILES,
 					result.filePaths,
 				);
 			}

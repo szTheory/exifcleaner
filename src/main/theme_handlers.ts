@@ -1,6 +1,6 @@
 import { ipcMain, nativeTheme, systemPreferences } from "electron";
 import type { BrowserWindow } from "electron";
-import { IPC_CHANNELS } from "../infrastructure/ipc/ipc_channels";
+import { IPC_CHANNELS } from "../common/ipc_channels";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import {
 	themeGetSchema,

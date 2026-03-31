@@ -9,12 +9,7 @@ import {
 	allFilesProcessedSchema,
 } from "./ipc/ipc_schemas";
 
-import {
-	EVENT_FILES_ADDED,
-	EVENT_FILE_PROCESSED,
-	EVENT_ALL_FILES_PROCESSED,
-} from "../domain/ipc_channels";
-export { EVENT_FILES_ADDED, EVENT_FILE_PROCESSED, EVENT_ALL_FILES_PROCESSED };
+import { IPC_CHANNELS } from "../common/ipc_channels";
 
 let batchCount = 0;
 let remainingCount = 0;
@@ -23,7 +18,7 @@ export function setupDockEventHandlers(
 	browserWindow: BrowserWindow | null,
 ): void {
 	ipcMain.on(
-		EVENT_FILES_ADDED,
+		IPC_CHANNELS.FILES_ADDED,
 		createValidatedListener(filesAddedSchema, (filesCount) => {
 			storeBatchCount(filesCount);
 
@@ -33,7 +28,7 @@ export function setupDockEventHandlers(
 	);
 
 	ipcMain.on(
-		EVENT_FILE_PROCESSED,
+		IPC_CHANNELS.FILE_PROCESSED,
 		createValidatedListener(fileProcessedSchema, () => {
 			storeFilesCount(remainingCount - 1);
 
@@ -46,7 +41,7 @@ export function setupDockEventHandlers(
 	);
 
 	ipcMain.on(
-		EVENT_ALL_FILES_PROCESSED,
+		IPC_CHANNELS.ALL_FILES_PROCESSED,
 		createValidatedListener(allFilesProcessedSchema, () => {
 			storeBatchCount(0);
 

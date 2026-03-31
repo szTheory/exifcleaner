@@ -1,7 +1,7 @@
 import type { MenuItemConstructorOptions } from "electron";
 import { nativeTheme, BrowserWindow } from "electron";
 import { i18n } from "./i18n";
-import { IPC_CHANNELS } from "../infrastructure/ipc/ipc_channels";
+import { IPC_CHANNELS } from "../common/ipc_channels";
 import { LANGUAGE_NAMES } from "../domain/language_names";
 
 function broadcastThemeSet(mode: "light" | "dark" | "system"): void {
