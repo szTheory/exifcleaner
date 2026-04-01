@@ -13,7 +13,6 @@ import {
 	ReadMetadataQuery,
 	ExpandFolderCommand,
 	XattrCommand,
-	ProcessFilesUseCase,
 } from "../application";
 
 export function createContainer(): {
@@ -25,7 +24,6 @@ export function createContainer(): {
 	readMetadata: ReadMetadataQuery;
 	expandFolder: ExpandFolderCommand;
 	xattrCommand: XattrCommand;
-	processFiles: ProcessFilesUseCase;
 } {
 	const logger = new ConsoleLogger();
 	const exiftoolProcess = new ExiftoolProcess({ binPath: exiftoolBinPath });
@@ -37,14 +35,6 @@ export function createContainer(): {
 	const expandFolder = new ExpandFolderCommand();
 	const xattrAdapter = { removeXattrs };
 	const xattrCommand = new XattrCommand({ xattr: xattrAdapter, logger });
-	const processFiles = new ProcessFilesUseCase({
-		stripMetadata,
-		readMetadata,
-		expandFolder,
-		xattr: xattrCommand,
-		settings,
-		logger,
-	});
 
 	return {
 		exiftoolProcess,
@@ -55,7 +45,6 @@ export function createContainer(): {
 		readMetadata,
 		expandFolder,
 		xattrCommand,
-		processFiles,
 	};
 }
 
