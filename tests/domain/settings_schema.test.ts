@@ -2,6 +2,7 @@ import { it, expect, describe } from "vitest";
 import {
 	validateSettings,
 	migrateSettings,
+	isSettingsFile,
 	DEFAULT_SETTINGS,
 	CURRENT_SCHEMA_VERSION,
 } from "../../src/domain/settings_schema";
@@ -122,6 +123,111 @@ describe("validateSettings", () => {
 		if (result.ok) {
 			expect(result.value.themeMode).toBe("system");
 		}
+	});
+});
+
+describe("isSettingsFile", () => {
+	it("returns true for a valid SettingsFile shape", () => {
+		const valid = {
+			version: 3,
+			settings: {
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				saveAsCopy: false,
+				removeXattrs: false,
+				preserveTimestamps: false,
+				language: null,
+				themeMode: "system",
+			},
+		};
+		expect(isSettingsFile(valid)).toBe(true);
+	});
+
+	it("returns true when language is a string", () => {
+		const valid = {
+			version: 3,
+			settings: {
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				saveAsCopy: false,
+				removeXattrs: false,
+				preserveTimestamps: false,
+				language: "en",
+				themeMode: "dark",
+			},
+		};
+		expect(isSettingsFile(valid)).toBe(true);
+	});
+
+	it("returns false for null", () => {
+		expect(isSettingsFile(null)).toBe(false);
+	});
+
+	it("returns false for undefined", () => {
+		expect(isSettingsFile(undefined)).toBe(false);
+	});
+
+	it("returns false for a string", () => {
+		expect(isSettingsFile("hello")).toBe(false);
+	});
+
+	it("returns false when version is missing", () => {
+		expect(
+			isSettingsFile({
+				settings: { ...DEFAULT_SETTINGS },
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when version is not a number", () => {
+		expect(
+			isSettingsFile({
+				version: "3",
+				settings: { ...DEFAULT_SETTINGS },
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when settings is missing", () => {
+		expect(isSettingsFile({ version: 3 })).toBe(false);
+	});
+
+	it("returns false when settings is null", () => {
+		expect(isSettingsFile({ version: 3, settings: null })).toBe(false);
+	});
+
+	it("returns false when settings has wrong field types", () => {
+		expect(
+			isSettingsFile({
+				version: 3,
+				settings: {
+					preserveOrientation: "yes", // wrong type
+					preserveColorProfile: true,
+					saveAsCopy: false,
+					removeXattrs: false,
+					preserveTimestamps: false,
+					language: null,
+					themeMode: "system",
+				},
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when themeMode is invalid", () => {
+		expect(
+			isSettingsFile({
+				version: 3,
+				settings: {
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					saveAsCopy: false,
+					removeXattrs: false,
+					preserveTimestamps: false,
+					language: null,
+					themeMode: "invalid",
+				},
+			}),
+		).toBe(false);
 	});
 });
 
