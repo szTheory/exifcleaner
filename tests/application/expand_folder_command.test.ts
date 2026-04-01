@@ -64,3 +64,27 @@ it("returns FolderError for nonexistent directory", async () => {
 		expect(result.error.cause).toBeTruthy();
 	}
 });
+
+it("returns read-failed error for permission-denied directory", async () => {
+	// chmod 0o000 does not prevent root from reading — skip on root
+	const { getuid } = await import("node:process");
+	if (typeof getuid === "function" && getuid() === 0) return;
+
+	const { chmod } = await import("node:fs/promises");
+	const restrictedDir = path.join(tmpDir, "restricted");
+	await mkdir(restrictedDir);
+	await writeFile(path.join(restrictedDir, "photo.jpg"), "fake");
+	await chmod(restrictedDir, 0o000);
+
+	try {
+		const result = await command.execute({ dirPath: restrictedDir });
+
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.error.code).toBe("read-failed");
+			expect(result.error.dirPath).toBe(restrictedDir);
+		}
+	} finally {
+		await chmod(restrictedDir, 0o755);
+	}
+});

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mkdir, rm, writeFile, readFile } from "node:fs/promises";
+import { mkdir, rm, writeFile, readFile, chmod } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { randomBytes } from "node:crypto";
@@ -177,5 +177,35 @@ describe("SettingsService", () => {
 		);
 		expect(result.removeXattrs).toBe(DEFAULT_SETTINGS.removeXattrs);
 		await rm(dir, { recursive: true });
+	});
+
+	it("logs error and retries when save encounters write failure", async () => {
+		// chmod 0o444 does not prevent root from writing — skip on root
+		const { getuid } = await import("node:process");
+		if (typeof getuid === "function" && getuid() === 0) return;
+
+		const dir = makeTempDir();
+		await mkdir(dir, { recursive: true });
+		const filePath = join(dir, "settings.json");
+		const logger = new FakeLogger();
+		const service = new SettingsService({ filePath, logger });
+
+		await service.load();
+
+		// Make the directory read-only so writeFile fails
+		await chmod(dir, 0o444);
+
+		try {
+			await service.save({ settings: DEFAULT_SETTINGS });
+
+			// save() should not throw — it catches and logs
+			// Verify it logged an error (first attempt) and a warn (retry attempt)
+			expect(logger.messages.some((m) => m.level === "error")).toBe(true);
+			expect(logger.messages.some((m) => m.level === "warn")).toBe(true);
+		} finally {
+			// Restore permissions before cleanup
+			await chmod(dir, 0o755);
+			await rm(dir, { recursive: true });
+		}
 	});
 });
