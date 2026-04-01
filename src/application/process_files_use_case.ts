@@ -67,9 +67,9 @@ export class ProcessFilesUseCase {
 					if (expanded.ok) {
 						filePaths.push(...expanded.value);
 					} else {
-						this.logger.warn("Failed to expand folder", {
-							path: p,
-							error: expanded.error,
+						this.logger.warn({
+							message: "Failed to expand folder",
+							context: { path: p, error: expanded.error },
 						});
 					}
 				} else {
@@ -98,7 +98,10 @@ export class ProcessFilesUseCase {
 			}
 
 			const outputPath = currentSettings.saveAsCopy
-				? generateCleanedPath(filePath, (p) => existsSync(p))
+				? generateCleanedPath({
+						filePath,
+						exists: (p) => existsSync(p),
+					})
 				: undefined;
 
 			const stripResult = await this.stripMetadata.execute({
@@ -126,9 +129,9 @@ export class ProcessFilesUseCase {
 					status: "error",
 					error: stripResult.error,
 				};
-				this.logger.warn("File processing failed", {
-					filePath,
-					error: stripResult.error,
+				this.logger.warn({
+					message: "File processing failed",
+					context: { filePath, error: stripResult.error },
 				});
 			}
 

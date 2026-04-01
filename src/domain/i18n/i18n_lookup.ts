@@ -37,11 +37,17 @@ export type I18nStringsDictionary = {
 	[key: string]: I18nStringSet;
 };
 
-export function i18nLookup(
-	strings: I18nStringsDictionary,
-	key: string,
-	locale: string,
-): string {
+interface I18nLookupParams {
+	strings: I18nStringsDictionary;
+	key: string;
+	locale: string;
+}
+
+export function i18nLookup({
+	strings,
+	key,
+	locale,
+}: I18nLookupParams): string {
 	const i18nString = strings[key];
 	if (!i18nString) {
 		throw new Error(
@@ -50,7 +56,7 @@ export function i18nLookup(
 	}
 	const text =
 		i18nString[locale] ||
-		i18nString[fallbackLocale(locale)] ||
+		i18nString[fallbackLocale({ locale })] ||
 		i18nString[Locale.English];
 	if (!text) {
 		throw new Error(`Could not find interface text for ${key}`);
@@ -61,7 +67,11 @@ export function i18nLookup(
 // Select a fallback for each "dialect" if it doesn't already
 // have its own translation more specific than the main entry
 // Locales list: https://www.electronjs.org/docs/api/locales
-export function fallbackLocale(locale: string): string {
+interface FallbackLocaleParams {
+	locale: string;
+}
+
+export function fallbackLocale({ locale }: FallbackLocaleParams): string {
 	switch (locale) {
 		case "zh-CN": //Chinese (Simplified)
 		case "zh-TW": //Chinese (Traditional)

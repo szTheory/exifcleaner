@@ -37,7 +37,11 @@ export const SUPPORTED_EXTENSIONS: ReadonlySet<string> = new Set([
 	".pdf",
 ]);
 
-export function isSupportedFile(filename: string): boolean {
+interface IsSupportedFileParams {
+	filename: string;
+}
+
+export function isSupportedFile({ filename }: IsSupportedFileParams): boolean {
 	const lastDot = filename.lastIndexOf(".");
 	if (lastDot === -1) {
 		return false;

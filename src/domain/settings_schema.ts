@@ -38,6 +38,8 @@ const VALID_THEME_MODES: ReadonlySet<string> = new Set([
 	"system",
 ]);
 
+// Type guard functions keep positional params (TypeScript type predicates
+// cannot reference destructured binding elements).
 function isValidThemeMode(value: unknown): value is ThemeMode {
 	return typeof value === "string" && VALID_THEME_MODES.has(value);
 }
@@ -87,7 +89,11 @@ export function isSettingsFile(value: unknown): value is SettingsFile {
 	return true;
 }
 
-export function migrateSettings(file: SettingsFile): {
+interface MigrateSettingsParams {
+	file: SettingsFile;
+}
+
+export function migrateSettings({ file }: MigrateSettingsParams): {
 	settings: Settings;
 	didMigrate: boolean;
 } {
@@ -129,7 +135,13 @@ export function migrateSettings(file: SettingsFile): {
 	return { settings, didMigrate };
 }
 
-export function validateSettings(input: unknown): Result<Settings> {
+interface ValidateSettingsParams {
+	input: unknown;
+}
+
+export function validateSettings({
+	input,
+}: ValidateSettingsParams): Result<Settings> {
 	if (typeof input !== "object" || input === null) {
 		return { ok: false, error: "Settings must be a non-null object" };
 	}

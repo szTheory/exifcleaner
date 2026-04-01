@@ -51,12 +51,18 @@ it("processes files and calls onProgress for each", async () => {
 it("continues processing after per-file failure", async () => {
 	let callCount = 0;
 	const originalRemove = exiftool.removeMetadata.bind(exiftool);
-	exiftool.removeMetadata = async (filePath: string, args: string[]) => {
+	exiftool.removeMetadata = async ({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}) => {
 		callCount++;
 		if (callCount === 1) {
 			return { data: null, error: "Failed on first file" };
 		}
-		return originalRemove(filePath, args);
+		return originalRemove({ filePath, args });
 	};
 
 	const result = await useCase.execute({
@@ -76,11 +82,17 @@ it("stops processing when signal is aborted", async () => {
 	let processedCount = 0;
 
 	const originalRemove = exiftool.removeMetadata.bind(exiftool);
-	exiftool.removeMetadata = async (filePath: string, args: string[]) => {
+	exiftool.removeMetadata = async ({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}) => {
 		processedCount++;
 		// Abort after processing first file
 		controller.abort();
-		return originalRemove(filePath, args);
+		return originalRemove({ filePath, args });
 	};
 
 	const result = await useCase.execute({
@@ -99,7 +111,7 @@ it("stops processing when signal is aborted", async () => {
 });
 
 it("reads settings from SettingsPort", async () => {
-	await settings.update({ preserveOrientation: true });
+	await settings.update({ partial: { preserveOrientation: true } });
 
 	await useCase.execute({
 		paths: ["/tmp/a.jpg"],
@@ -115,7 +127,7 @@ it("reads settings from SettingsPort", async () => {
 });
 
 it("passes generateCleanedPath output when saveAsCopy is true", async () => {
-	await settings.update({ saveAsCopy: true });
+	await settings.update({ partial: { saveAsCopy: true } });
 
 	await useCase.execute({
 		paths: ["/tmp/a.jpg"],
@@ -133,7 +145,7 @@ it("passes generateCleanedPath output when saveAsCopy is true", async () => {
 });
 
 it("calls xattr after successful strip when removeXattrs is enabled", async () => {
-	await settings.update({ removeXattrs: true });
+	await settings.update({ partial: { removeXattrs: true } });
 
 	await useCase.execute({
 		paths: ["/tmp/a.jpg"],
@@ -144,7 +156,7 @@ it("calls xattr after successful strip when removeXattrs is enabled", async () =
 });
 
 it("does not call xattr when removeXattrs is disabled", async () => {
-	await settings.update({ removeXattrs: false });
+	await settings.update({ partial: { removeXattrs: false } });
 
 	await useCase.execute({
 		paths: ["/tmp/a.jpg"],

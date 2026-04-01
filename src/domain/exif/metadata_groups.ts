@@ -30,11 +30,23 @@ const EXIFTOOL_GROUP_FRIENDLY_KEYS: Record<string, string> = {
 	MakerNotes: "metaGroupCameraInternals",
 };
 
-export function getFriendlyGroupKey(rawGroupName: string): string {
+interface GetFriendlyGroupKeyParams {
+	rawGroupName: string;
+}
+
+export function getFriendlyGroupKey({
+	rawGroupName,
+}: GetFriendlyGroupKeyParams): string {
 	return EXIFTOOL_GROUP_FRIENDLY_KEYS[rawGroupName] ?? "metaGroupOther";
 }
 
-export function parseGroupedKey(key: string): { group: string; field: string } {
+interface ParseGroupedKeyParams {
+	key: string;
+}
+
+export function parseGroupedKey({
+	key,
+}: ParseGroupedKeyParams): { group: string; field: string } {
 	const colonIndex = key.indexOf(":");
 	if (colonIndex === -1) {
 		return { group: "Other", field: key };
@@ -45,38 +57,55 @@ export function parseGroupedKey(key: string): { group: string; field: string } {
 // Computed fields that ExifTool adds (not user metadata). Excluded from diff.
 const DIFF_EXCLUDED_FIELDS = new Set(["SourceFile", "ImageSize", "Megapixels"]);
 
-function isExcludedField(field: string): boolean {
+interface IsExcludedFieldParams {
+	field: string;
+}
+
+function isExcludedField({ field }: IsExcludedFieldParams) {
 	return DIFF_EXCLUDED_FIELDS.has(field);
 }
 
-export function computeMetadataDiff(
-	before: Record<string, unknown>,
-	after: Record<string, unknown>,
-): MetadataDiffGroup[] {
+interface ComputeMetadataDiffParams {
+	before: Record<string, unknown>;
+	after: Record<string, unknown>;
+}
+
+export function computeMetadataDiff({
+	before,
+	after,
+}: ComputeMetadataDiffParams): MetadataDiffGroup[] {
 	const groupMap = new Map<string, MetadataDiffField[]>();
 
 	// Process all before-metadata keys
 	for (const [key, value] of Object.entries(before)) {
-		const { group, field } = parseGroupedKey(key);
-		if (isExcludedField(field)) continue;
+		const { group, field } = parseGroupedKey({ key });
+		if (isExcludedField({ field })) continue;
 
 		if (!groupMap.has(group)) {
 			groupMap.set(group, []);
 		}
 		const removed = !(key in after);
-		getOrThrow(groupMap, group).push({ name: field, value, removed });
+		getOrThrow({ map: groupMap, key: group }).push({
+			name: field,
+			value,
+			removed,
+		});
 	}
 
 	// Process after-only keys (preserved fields not in before -- rare but possible)
 	for (const [key, value] of Object.entries(after)) {
-		const { group, field } = parseGroupedKey(key);
-		if (isExcludedField(field)) continue;
+		const { group, field } = parseGroupedKey({ key });
+		if (isExcludedField({ field })) continue;
 		if (key in before) continue; // Already processed
 
 		if (!groupMap.has(group)) {
 			groupMap.set(group, []);
 		}
-		getOrThrow(groupMap, group).push({ name: field, value, removed: false });
+		getOrThrow({ map: groupMap, key: group }).push({
+			name: field,
+			value,
+			removed: false,
+		});
 	}
 
 	// Build sorted groups
@@ -85,7 +114,7 @@ export function computeMetadataDiff(
 		const removedCount = fields.filter((f) => f.removed).length;
 		groups.push({
 			rawGroupName,
-			friendlyNameKey: getFriendlyGroupKey(rawGroupName),
+			friendlyNameKey: getFriendlyGroupKey({ rawGroupName }),
 			fields,
 			removedCount,
 			totalCount: fields.length,

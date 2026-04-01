@@ -51,7 +51,7 @@ export class StripMetadataCommand {
 			args.push("-overwrite_original");
 		}
 
-		const result = await this.exiftool.removeMetadata(filePath, args);
+		const result = await this.exiftool.removeMetadata({ filePath, args });
 
 		if (result.error !== null) {
 			return { ok: false, error: result.error };

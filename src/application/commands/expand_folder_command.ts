@@ -13,7 +13,7 @@ export class ExpandFolderCommand {
 
 			const filePaths: string[] = [];
 			for (const entry of entries) {
-				if (entry.isFile() && isSupportedFile(entry.name)) {
+				if (entry.isFile() && isSupportedFile({ filename: entry.name })) {
 					filePaths.push(path.join(entry.parentPath, entry.name));
 				}
 			}

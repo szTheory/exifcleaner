@@ -1,10 +1,15 @@
 // Pure domain logic — generates collision-free output paths for save-as-copy mode.
 // No I/O dependencies: uses pure string manipulation for path operations.
 
-export function generateCleanedPath(
-	filePath: string,
-	exists: (candidate: string) => boolean,
-): string {
+interface GenerateCleanedPathParams {
+	filePath: string;
+	exists: (candidate: string) => boolean;
+}
+
+export function generateCleanedPath({
+	filePath,
+	exists,
+}: GenerateCleanedPathParams): string {
 	// Find the last separator (supports both / and \)
 	const lastSep = Math.max(
 		filePath.lastIndexOf("/"),

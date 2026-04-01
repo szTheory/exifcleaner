@@ -4,12 +4,12 @@ import { assertNever, getOrThrow } from "../../src/common/types";
 describe("getOrThrow", () => {
 	it("returns value when key exists", () => {
 		const map = new Map<string, number>([["a", 1]]);
-		expect(getOrThrow(map, "a")).toBe(1);
+		expect(getOrThrow({ map, key: "a" })).toBe(1);
 	});
 
 	it("throws Error with key in message when key is missing", () => {
 		const map = new Map<string, number>();
-		expect(() => getOrThrow(map, "missingKey")).toThrowError(
+		expect(() => getOrThrow({ map, key: "missingKey" })).toThrowError(
 			/missingKey/,
 		);
 	});
@@ -17,7 +17,7 @@ describe("getOrThrow", () => {
 	it("throws an Error instance (not a string)", () => {
 		const map = new Map<string, number>();
 		try {
-			getOrThrow(map, "x");
+			getOrThrow({ map, key: "x" });
 			expect.fail("should have thrown");
 		} catch (err: unknown) {
 			expect(err).toBeInstanceOf(Error);
@@ -29,12 +29,12 @@ describe("assertNever", () => {
 	it("throws at runtime when called with a value", () => {
 		// Cast to never for test purposes (test files are exempt per D-18)
 		const value = "unexpected" as never;
-		expect(() => assertNever(value)).toThrowError(/unexpected/i);
+		expect(() => assertNever({ value })).toThrowError(/unexpected/i);
 	});
 
 	it("throws with custom message when provided", () => {
 		const value = 42 as never;
-		expect(() => assertNever(value, "custom error")).toThrowError(
+		expect(() => assertNever({ value, message: "custom error" })).toThrowError(
 			"custom error",
 		);
 	});
@@ -42,7 +42,7 @@ describe("assertNever", () => {
 	it("throws an Error instance", () => {
 		const value = "x" as never;
 		try {
-			assertNever(value);
+			assertNever({ value });
 			expect.fail("should have thrown");
 		} catch (err: unknown) {
 			expect(err).toBeInstanceOf(Error);

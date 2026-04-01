@@ -25,18 +25,24 @@ export class FakeExifTool implements ExifToolPort {
 		return { ok: true, value: undefined };
 	}
 
-	async readMetadata(
-		filePath: string,
-		args: string[],
-	): Promise<{ data: Record<string, unknown>[] | null; error: string | null }> {
+	async readMetadata({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}): Promise<{ data: Record<string, unknown>[] | null; error: string | null }> {
 		this.calls.push({ method: "readMetadata", args: [filePath, args] });
 		return this.readResult;
 	}
 
-	async removeMetadata(
-		filePath: string,
-		args: string[],
-	): Promise<{ data: null; error: string | null }> {
+	async removeMetadata({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}): Promise<{ data: null; error: string | null }> {
 		this.calls.push({ method: "removeMetadata", args: [filePath, args] });
 		return this.removeResult;
 	}

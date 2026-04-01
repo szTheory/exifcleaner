@@ -8,7 +8,11 @@ export type ExifData = Record<string, unknown>;
 
 const COMPUTED_FIELDS = new Set(["SourceFile", "ImageSize", "Megapixels"]);
 
-function isComputedField(key: string): boolean {
+interface IsComputedFieldParams {
+	key: string;
+}
+
+function isComputedField({ key }: IsComputedFieldParams) {
 	if (COMPUTED_FIELDS.has(key)) return true;
 	const colonIndex = key.indexOf(":");
 	if (colonIndex !== -1) {
@@ -17,10 +21,14 @@ function isComputedField(key: string): boolean {
 	return false;
 }
 
-export function cleanExifData(raw: ExifData): ExifData {
+interface CleanExifDataParams {
+	raw: ExifData;
+}
+
+export function cleanExifData({ raw }: CleanExifDataParams): ExifData {
 	const cleaned: ExifData = {};
 	for (const [key, value] of Object.entries(raw)) {
-		if (!isComputedField(key)) {
+		if (!isComputedField({ key })) {
 			cleaned[key] = value;
 		}
 	}
