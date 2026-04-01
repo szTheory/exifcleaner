@@ -12,3 +12,4 @@ export type {
 	SettingsChannel,
 	ThemeChannel,
 } from "./ipc_channels";
+export { logError } from "./log_error";

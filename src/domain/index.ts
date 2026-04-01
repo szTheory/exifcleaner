@@ -29,3 +29,11 @@ export {
 	computeMetadataDiff,
 } from "./exif/metadata_groups";
 export { middleTruncatePath } from "./path_truncation";
+export type { ExifError } from "./exif/exif_errors";
+export { formatExifError } from "./exif/exif_errors";
+export type { SettingsError } from "./settings_errors";
+export { formatSettingsError } from "./settings_errors";
+export type { FolderError } from "./files/folder_errors";
+export { formatFolderError } from "./files/folder_errors";
+export type { WindowStateError } from "./window_state_errors";
+export { formatWindowStateError } from "./window_state_errors";
