@@ -10,11 +10,6 @@ interface ExtractResult {
 	readonly remaining: string;
 }
 
-/**
- * Extracts completed {readyN} segments from an ExifTool stdout buffer.
- * Each segment contains the output text preceding its {readyN} marker
- * and the execute number parsed from the marker.
- */
 export function extractReadySegments({
 	buffer,
 }: {
@@ -45,10 +40,6 @@ export function extractReadySegments({
 	return { completed, remaining };
 }
 
-/**
- * Parses raw ExifTool output text into a structured result.
- * Handles JSON arrays/objects, error text, success text, and empty output.
- */
 export function parseExiftoolOutput({
 	raw,
 }: {
