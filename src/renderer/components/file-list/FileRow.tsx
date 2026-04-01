@@ -4,6 +4,7 @@
 import { useRef } from "react";
 import type { FileEntry } from "../../contexts/AppContext";
 import { FileProcessingStatus } from "../../../domain";
+import { assertNever } from "../../../common";
 import { TypePill } from "../ui/TypePill";
 import { StatusIcon } from "../ui/StatusIcon";
 import { ChevronIcon } from "../icons/ChevronIcon";
@@ -100,6 +101,11 @@ export function FileRow({
 		});
 	}
 
+	// Custom property for staggered animation delay
+	const progressStyle: React.CSSProperties = {
+		"--ec-stagger-delay": `${staggerIndex * 30}ms`,
+	};
+
 	// Determine if checkmark should animate (one-shot via ref)
 	let shouldAnimateCheck = false;
 	if (isComplete && !animatedCheckRef.current.has(file.id)) {
@@ -114,11 +120,7 @@ export function FileRow({
 		>
 			<div
 				className={rowClasses}
-				style={
-					{
-						"--ec-stagger-delay": `${staggerIndex * 30}ms`,
-					} as React.CSSProperties
-				}
+				style={progressStyle}
 				tabIndex={0}
 				role="row"
 				onClick={isExpandable ? onToggleExpand : undefined}
@@ -241,9 +243,7 @@ function renderAfterCell(
 			);
 		case FileProcessingStatus.Error:
 			return <></>;
-		default: {
-			const _exhaustive: never = file.status;
-			throw new Error(`Unhandled status: ${_exhaustive}`);
-		}
+		default:
+			return assertNever(file.status);
 	}
 }

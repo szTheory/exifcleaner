@@ -76,7 +76,8 @@ export function LanguageDropdown({
 		function handleMouseDown(e: MouseEvent): void {
 			if (
 				containerRef.current &&
-				!containerRef.current.contains(e.target as Node)
+				e.target instanceof Node &&
+				!containerRef.current.contains(e.target)
 			) {
 				setIsOpen(false);
 				setFocusedIndex(-1);

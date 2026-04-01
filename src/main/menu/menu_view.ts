@@ -30,9 +30,9 @@ function languageSubmenu(): MenuItemConstructorOptions {
 	const settingValue = getLanguageSetting?.() ?? null;
 
 	const languageItems: MenuItemConstructorOptions[] = LANGUAGE_NAMES.map(
-		(lang) => ({
+		(lang): MenuItemConstructorOptions => ({
 			label: lang.nativeName,
-			type: "radio" as const,
+			type: "radio",
 			checked: settingValue === lang.code,
 			click: () => {
 				onLanguageChange?.(lang.code);
@@ -45,7 +45,7 @@ function languageSubmenu(): MenuItemConstructorOptions {
 		submenu: [
 			{
 				label: `${i18n("languageSystem") || "System"}`,
-				type: "radio" as const,
+				type: "radio",
 				checked: settingValue === null,
 				click: () => {
 					onLanguageChange?.(null);

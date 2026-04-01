@@ -47,7 +47,8 @@ export function isSettingsFile(value: unknown): value is SettingsFile {
 		return false;
 	}
 
-	const obj = value as Record<string, unknown>;
+	const obj: Record<string, unknown> = Object.create(null);
+	Object.assign(obj, value);
 
 	if (typeof obj["version"] !== "number") {
 		return false;
@@ -57,28 +58,29 @@ export function isSettingsFile(value: unknown): value is SettingsFile {
 		return false;
 	}
 
-	const settings = obj["settings"] as Record<string, unknown>;
+	const settingsObj: Record<string, unknown> = Object.create(null);
+	Object.assign(settingsObj, obj["settings"]);
 
 	if (
-		typeof settings["preserveOrientation"] !== "boolean" ||
-		typeof settings["preserveColorProfile"] !== "boolean" ||
-		typeof settings["saveAsCopy"] !== "boolean" ||
-		typeof settings["removeXattrs"] !== "boolean" ||
-		typeof settings["preserveTimestamps"] !== "boolean"
+		typeof settingsObj["preserveOrientation"] !== "boolean" ||
+		typeof settingsObj["preserveColorProfile"] !== "boolean" ||
+		typeof settingsObj["saveAsCopy"] !== "boolean" ||
+		typeof settingsObj["removeXattrs"] !== "boolean" ||
+		typeof settingsObj["preserveTimestamps"] !== "boolean"
 	) {
 		return false;
 	}
 
 	// language must be string or null
 	if (
-		settings["language"] !== null &&
-		typeof settings["language"] !== "string"
+		settingsObj["language"] !== null &&
+		typeof settingsObj["language"] !== "string"
 	) {
 		return false;
 	}
 
 	// themeMode must be a valid ThemeMode
-	if (!isValidThemeMode(settings["themeMode"])) {
+	if (!isValidThemeMode(settingsObj["themeMode"])) {
 		return false;
 	}
 
@@ -101,15 +103,19 @@ export function migrateSettings(file: SettingsFile): {
 
 	// v1 -> v2: Split preserveRotation into preserveOrientation + preserveColorProfile
 	if (file.version < 2) {
-		const oldSettings = file.settings as unknown as Record<string, unknown>;
-		const preserveRotation = oldSettings["preserveRotation"] !== false;
+		// Old v1 settings may have a preserveRotation field not in current type
+		const oldRaw: Record<string, unknown> = Object.create(null);
+		Object.assign(oldRaw, file.settings);
+		const preserveRotation = oldRaw["preserveRotation"] !== false;
 		settings = {
 			...DEFAULT_SETTINGS,
 			...settings,
 			preserveOrientation: preserveRotation,
 			preserveColorProfile: preserveRotation,
 		};
-		delete (settings as unknown as Record<string, unknown>)["preserveRotation"];
+		// Remove legacy field so it doesn't persist in the migrated object
+		const mutable: Record<string, unknown> = settings;
+		delete mutable["preserveRotation"];
 		didMigrate = true;
 	}
 
@@ -127,7 +133,8 @@ export function validateSettings(input: unknown): Result<Settings> {
 		return { ok: false, error: "Settings must be a non-null object" };
 	}
 
-	const raw = input as Record<string, unknown>;
+	const raw: Record<string, unknown> = Object.create(null);
+	Object.assign(raw, input);
 
 	const settings: Settings = {
 		preserveOrientation:
@@ -151,9 +158,11 @@ export function validateSettings(input: unknown): Result<Settings> {
 				? raw["preserveTimestamps"]
 				: DEFAULT_SETTINGS.preserveTimestamps,
 		language:
-			typeof raw["language"] === "string" || raw["language"] === null
-				? (raw["language"] as string | null)
-				: DEFAULT_SETTINGS.language,
+			typeof raw["language"] === "string"
+				? raw["language"]
+				: raw["language"] === null
+					? null
+					: DEFAULT_SETTINGS.language,
 		themeMode: isValidThemeMode(raw["themeMode"])
 			? raw["themeMode"]
 			: DEFAULT_SETTINGS.themeMode,

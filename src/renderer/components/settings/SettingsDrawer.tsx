@@ -184,23 +184,29 @@ export function SettingsDrawer({
 						{t("appearance") || "Appearance"}
 					</h3>
 					<SegmentedControl
-						options={[
-							{
-								value: "light" as const,
-								label: t("themeLight") || "Light",
-								icon: <SunIcon />,
-							},
-							{
-								value: "system" as const,
-								label: t("themeAuto") || "Auto",
-								icon: <AutoIcon />,
-							},
-							{
-								value: "dark" as const,
-								label: t("themeDark") || "Dark",
-								icon: <MoonIcon />,
-							},
-						]}
+						options={
+							[
+								{
+									value: "light",
+									label: t("themeLight") || "Light",
+									icon: <SunIcon />,
+								},
+								{
+									value: "system",
+									label: t("themeAuto") || "Auto",
+									icon: <AutoIcon />,
+								},
+								{
+									value: "dark",
+									label: t("themeDark") || "Dark",
+									icon: <MoonIcon />,
+								},
+							] satisfies Array<{
+								value: "light" | "dark" | "system";
+								label: string;
+								icon: React.JSX.Element;
+							}>
+						}
 						value={themeMode}
 						onChange={setThemeMode}
 						label={t("appearance") || "Appearance"}

@@ -68,7 +68,7 @@ export function setupThemeHandlers({
 	// Accent color changes (Windows/Linux; macOS reads on nativeTheme.updated above)
 	if (process.platform === "win32" || process.platform === "linux") {
 		systemPreferences.on(
-			"accent-color-changed" as "accent-color-changed",
+			"accent-color-changed",
 			() => {
 				const win = getWindow();
 				if (win) {

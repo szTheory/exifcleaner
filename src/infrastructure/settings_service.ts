@@ -5,6 +5,7 @@ import {
 	DEFAULT_SETTINGS,
 	CURRENT_SCHEMA_VERSION,
 	migrateSettings,
+	isSettingsFile,
 } from "../domain";
 import type { SettingsPort } from "../application";
 import type { LoggerPort } from "../application";
@@ -22,7 +23,14 @@ export class SettingsService implements SettingsPort {
 	async load(): Promise<Settings> {
 		try {
 			const raw = await readFile(this.filePath, "utf-8");
-			const parsed = JSON.parse(raw) as SettingsFile;
+			const parsed: unknown = JSON.parse(raw);
+			if (!isSettingsFile(parsed)) {
+				this.logger.warn("Settings file has invalid format, using defaults", {
+					filePath: this.filePath,
+				});
+				this.cache = { ...DEFAULT_SETTINGS };
+				return this.cache;
+			}
 			const { settings, didMigrate } = migrateSettings(parsed);
 			this.cache = settings;
 

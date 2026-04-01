@@ -1,8 +1,7 @@
 import { app, screen } from "electron";
 import type { BrowserWindow, Display } from "electron";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, renameSync } from "node:fs";
 import { randomBytes } from "node:crypto";
-import { rename } from "node:fs/promises";
 import path from "node:path";
 
 export interface WindowState {
@@ -18,7 +17,8 @@ export function isWindowState(value: unknown): value is WindowState {
 		return false;
 	}
 
-	const obj = value as Record<string, unknown>;
+	const obj: Record<string, unknown> = Object.create(null);
+	Object.assign(obj, value);
 
 	if (typeof obj["width"] !== "number" || typeof obj["height"] !== "number") {
 		return false;
@@ -98,33 +98,16 @@ export function validateAndLoadState(
 		return { ...DEFAULT_STATE };
 	}
 
-	if (typeof parsed !== "object" || parsed === null) {
+	if (!isWindowState(parsed)) {
 		return { ...DEFAULT_STATE };
 	}
 
-	const obj = parsed as Record<string, unknown>;
-
-	// Validate required fields
-	if (
-		typeof obj["width"] !== "number" ||
-		typeof obj["height"] !== "number" ||
-		typeof obj["isMaximized"] !== "boolean"
-	) {
-		return { ...DEFAULT_STATE };
-	}
-
-	const width = obj["width"];
-	const height = obj["height"];
-	const isMaximized = obj["isMaximized"];
+	const { width, height, isMaximized, x, y } = parsed;
 
 	// Validate dimensions are positive
 	if (width <= 0 || height <= 0) {
 		return { ...DEFAULT_STATE };
 	}
-
-	// Position may be undefined (first launch or intentionally centered)
-	const x = typeof obj["x"] === "number" ? obj["x"] : undefined;
-	const y = typeof obj["y"] === "number" ? obj["y"] : undefined;
 
 	// If position is defined, check it's within display bounds
 	if (x !== undefined && y !== undefined) {
@@ -176,8 +159,7 @@ export function saveWindowState(win: BrowserWindow): void {
 	try {
 		writeFileSync(tempPath, json, "utf-8");
 		// Atomic rename (sync for close event reliability)
-		const fs = require("node:fs") as typeof import("node:fs");
-		fs.renameSync(tempPath, statePath);
+		renameSync(tempPath, statePath);
 	} catch (err: unknown) {
 		console.error("Failed to save window state", String(err));
 	}

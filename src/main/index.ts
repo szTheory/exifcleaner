@@ -6,7 +6,7 @@ import { currentBrowserWindow } from "../infrastructure";
 
 // Maintain reference to window to
 // prevent it from being garbage collected
-var browserWindow = null as BrowserWindow | null;
+let browserWindow: BrowserWindow | null = null;
 
 async function setup(): Promise<void> {
 	await app.whenReady();
