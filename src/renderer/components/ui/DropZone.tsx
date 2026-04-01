@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import { useAppContext } from "../../contexts/AppContext";
-import type { FileEntry } from "../../contexts/AppContext";
+import type { FileEntry, AppAction } from "../../contexts/AppContext";
 import { FileProcessingStatus, isSupportedFile } from "../../../domain";
 import { getFileExtension } from "../../utils/get_file_extension";
 import { useProcessFiles } from "../../hooks/use_process_files";
@@ -38,6 +38,75 @@ function computeFolderLabel(folderPath: string, filePath: string): string {
 	return relativePath
 		? `${folderBaseName}${relativePath}/`
 		: `${folderBaseName}/`;
+}
+
+function buildLooseEntries(filePaths: string[]): FileEntry[] {
+	return filePaths
+		.filter((p) => isSupportedFile({ filename: p }))
+		.map((p) => {
+			const name = window.api.files.basename(p);
+			return buildFileEntry(p, name, 0, null);
+		});
+}
+
+async function expandAndProcessFolder({
+	folderPath,
+	dispatch,
+	processFiles,
+	onSkipToast,
+}: {
+	folderPath: string;
+	dispatch: (action: AppAction) => void;
+	processFiles: (files: FileEntry[]) => void;
+	onSkipToast?: ((message: string) => void) | undefined;
+}): Promise<void> {
+	const folderBaseName =
+		folderPath.split(/[/\\]/).filter(Boolean).pop() || folderPath;
+	const folderLabel = folderBaseName + "/";
+
+	dispatch({ type: "ADD_FOLDER_SCANNING", folder: folderLabel });
+
+	const result = await window.api.folder.expand(folderPath);
+
+	if (result.error !== undefined) {
+		dispatch({
+			type: "UPDATE_FOLDER_STATE",
+			folder: folderLabel,
+			status: "empty",
+			fileCount: 0,
+		});
+		return;
+	}
+
+	const folderEntries: FileEntry[] = result.files.map((filePath) => {
+		const name = window.api.files.basename(filePath);
+		return buildFileEntry(filePath, name, 0, computeFolderLabel(folderPath, filePath));
+	});
+
+	if (folderEntries.length === 0) {
+		dispatch({
+			type: "UPDATE_FOLDER_STATE",
+			folder: folderLabel,
+			status: "empty",
+			fileCount: 0,
+		});
+		setTimeout(() => {
+			dispatch({ type: "COLLAPSE_FOLDER", folder: folderLabel });
+		}, FOLDER_AUTO_COLLAPSE_DELAY_MS);
+	} else {
+		dispatch({ type: "ADD_FILES", files: folderEntries });
+		dispatch({
+			type: "UPDATE_FOLDER_STATE",
+			folder: folderLabel,
+			status: "complete",
+			fileCount: folderEntries.length,
+		});
+		processFiles(folderEntries);
+	}
+
+	if (result.skippedCount > 0 && onSkipToast !== undefined) {
+		onSkipToast(`${result.skippedCount} folders couldn't be read`);
+	}
 }
 
 export function DropZone({
@@ -78,73 +147,19 @@ export function DropZone({
 				await window.api.folder.classify(allPaths);
 
 			// Loose files first (mixed drop ordering per D-07)
-			const looseEntries: FileEntry[] = filePaths
-				.filter((p) => isSupportedFile({ filename: p }))
-				.map((p) => {
-					const name = window.api.files.basename(p);
-					return buildFileEntry(p, name, 0, null);
-				});
-
+			const looseEntries = buildLooseEntries(filePaths);
 			if (looseEntries.length > 0) {
 				dispatch({ type: "ADD_FILES", files: looseEntries });
 				processFiles(looseEntries);
 			}
 
 			for (const folderPath of folderPaths) {
-				const folderBaseName =
-					folderPath.split(/[/\\]/).filter(Boolean).pop() || folderPath;
-
-				dispatch({
-					type: "ADD_FOLDER_SCANNING",
-					folder: folderBaseName + "/",
+				await expandAndProcessFolder({
+					folderPath,
+					dispatch,
+					processFiles,
+					onSkipToast,
 				});
-
-				const result = await window.api.folder.expand(folderPath);
-
-				if (result.error !== undefined) {
-					dispatch({
-						type: "UPDATE_FOLDER_STATE",
-						folder: folderBaseName + "/",
-						status: "empty",
-						fileCount: 0,
-					});
-					continue;
-				}
-
-				const discoveredFiles = result.files;
-				const folderEntries: FileEntry[] = discoveredFiles.map((filePath) => {
-					const name = window.api.files.basename(filePath);
-					const folderLabel = computeFolderLabel(folderPath, filePath);
-					return buildFileEntry(filePath, name, 0, folderLabel);
-				});
-
-				if (folderEntries.length === 0) {
-					dispatch({
-						type: "UPDATE_FOLDER_STATE",
-						folder: folderBaseName + "/",
-						status: "empty",
-						fileCount: 0,
-					});
-					setTimeout(() => {
-						dispatch({
-							type: "COLLAPSE_FOLDER",
-							folder: folderBaseName + "/",
-						});
-					}, FOLDER_AUTO_COLLAPSE_DELAY_MS);
-				} else {
-					dispatch({ type: "ADD_FILES", files: folderEntries });
-					dispatch({
-						type: "UPDATE_FOLDER_STATE",
-						folder: folderBaseName + "/",
-						status: "complete",
-						fileCount: folderEntries.length,
-					});
-					processFiles(folderEntries);
-				}
-
-				if (result.skippedCount > 0 && onSkipToast !== undefined) {
-					onSkipToast(`${result.skippedCount} folders couldn't be read`);
-				}
 			}
 		},
 		[dispatch, processFiles, onSkipToast],
