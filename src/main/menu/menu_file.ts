@@ -5,13 +5,13 @@ import { isMac, IPC_CHANNELS } from "../../common";
 
 export function fileMenuTemplate(): MenuItemConstructorOptions {
 	return {
-		label: i18n("menu.file.name"),
+		label: i18n({ key: "menu.file.name" }),
 		role: "fileMenu",
 		type: "submenu",
 		submenu: [
 			fileMenuOpenItem(),
 			{
-				label: `${i18n("menu.app.settings")}\u2026`,
+				label: `${i18n({ key: "menu.app.settings" })}\u2026`,
 				accelerator: "CmdOrCtrl+,",
 				click: () => {
 					const win = BrowserWindow.getAllWindows()[0];
@@ -31,11 +31,11 @@ export function fileMenuTemplate(): MenuItemConstructorOptions {
 function fileQuitTemplate(): MenuItemConstructorOptions {
 	return isMac()
 		? {
-				label: i18n("menu.file.close"),
+				label: i18n({ key: "menu.file.close" }),
 				role: "close",
 			}
 		: {
-				label: i18n("menu.file.quit"),
+				label: i18n({ key: "menu.file.quit" }),
 				role: "quit",
 			};
 }

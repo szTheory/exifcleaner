@@ -142,7 +142,7 @@ export function FileRow({
 				<div className="file-table__cell">
 					<TypePill extension={file.extension} />
 				</div>
-				<div className="file-table__cell">{formatFileSize(file.size)}</div>
+				<div className="file-table__cell">{formatFileSize({ bytes: file.size })}</div>
 				<div className="file-table__cell">{renderBeforeCell(file)}</div>
 				<div className="file-table__cell">
 					{renderAfterCell(file, shouldAnimateCheck)}
@@ -244,6 +244,6 @@ function renderAfterCell(
 		case FileProcessingStatus.Error:
 			return <></>;
 		default:
-			return assertNever(file.status);
+			return assertNever({ value: file.status });
 	}
 }

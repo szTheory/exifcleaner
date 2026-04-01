@@ -146,7 +146,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 			return { ...state, collapsedFolders: nextCollapsed };
 		}
 		default:
-			return assertNever(action);
+			return assertNever({ value: action });
 	}
 }
 

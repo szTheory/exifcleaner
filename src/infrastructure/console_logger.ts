@@ -1,7 +1,13 @@
 import type { LoggerPort } from "../application";
 
 export class ConsoleLogger implements LoggerPort {
-	info(message: string, context?: Record<string, unknown>): void {
+	info({
+		message,
+		context,
+	}: {
+		message: string;
+		context?: Record<string, unknown>;
+	}): void {
 		if (context) {
 			console.log(message, context);
 		} else {
@@ -9,7 +15,13 @@ export class ConsoleLogger implements LoggerPort {
 		}
 	}
 
-	warn(message: string, context?: Record<string, unknown>): void {
+	warn({
+		message,
+		context,
+	}: {
+		message: string;
+		context?: Record<string, unknown>;
+	}): void {
 		if (context) {
 			console.warn(message, context);
 		} else {
@@ -17,7 +29,13 @@ export class ConsoleLogger implements LoggerPort {
 		}
 	}
 
-	error(message: string, context?: Record<string, unknown>): void {
+	error({
+		message,
+		context,
+	}: {
+		message: string;
+		context?: Record<string, unknown>;
+	}): void {
 		if (context) {
 			console.error(message, context);
 		} else {

@@ -1,9 +1,14 @@
 import { shell, type MenuItemConstructorOptions } from "electron";
 
-export function openUrlMenuItem(
-	label: string,
-	url: string,
-): MenuItemConstructorOptions {
+interface OpenUrlMenuItemParams {
+	label: string;
+	url: string;
+}
+
+export function openUrlMenuItem({
+	label,
+	url,
+}: OpenUrlMenuItemParams): MenuItemConstructorOptions {
 	return {
 		label: label,
 		click: function () {

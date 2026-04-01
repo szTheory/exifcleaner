@@ -16,9 +16,9 @@ export function removeXattrs({
 	return new Promise((resolve) => {
 		exec(`xattr -cr "${filePath}"`, (error) => {
 			if (error) {
-				logger.warn("Failed to remove xattrs", {
-					filePath,
-					error: error.message,
+				logger.warn({
+					message: "Failed to remove xattrs",
+					context: { filePath, error: error.message },
 				});
 			}
 			resolve();

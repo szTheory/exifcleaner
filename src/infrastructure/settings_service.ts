@@ -43,31 +43,32 @@ export class SettingsService implements SettingsPort {
 			// that have version+settings for migration. isSettingsFile checks
 			// current-schema shape, so older versions won't pass it.
 			if (!isSettingsFileOrLegacy(parsed)) {
-				this.logger.warn("Settings file has invalid format, using defaults", {
-					filePath: this.filePath,
+				this.logger.warn({
+					message: "Settings file has invalid format, using defaults",
+					context: { filePath: this.filePath },
 				});
 				this.cache = { ...DEFAULT_SETTINGS };
 				return this.cache;
 			}
-			const { settings, didMigrate } = migrateSettings(parsed);
+			const { settings, didMigrate } = migrateSettings({ file: parsed });
 			this.cache = settings;
 
 			if (didMigrate) {
-				await this.save(this.cache);
+				await this.save({ settings: this.cache });
 			}
 
 			return this.cache;
 		} catch (err: unknown) {
-			this.logger.warn("Failed to load settings, using defaults", {
-				filePath: this.filePath,
-				error: String(err),
+			this.logger.warn({
+				message: "Failed to load settings, using defaults",
+				context: { filePath: this.filePath, error: String(err) },
 			});
 			this.cache = { ...DEFAULT_SETTINGS };
 			return this.cache;
 		}
 	}
 
-	async save(settings: Settings): Promise<void> {
+	async save({ settings }: { settings: Settings }): Promise<void> {
 		const file: SettingsFile = {
 			version: CURRENT_SCHEMA_VERSION,
 			settings,
@@ -80,9 +81,9 @@ export class SettingsService implements SettingsPort {
 			await rename(tempPath, this.filePath);
 			this.cache = settings;
 		} catch (err: unknown) {
-			this.logger.error("Failed to save settings, retrying", {
-				filePath: this.filePath,
-				error: String(err),
+			this.logger.error({
+				message: "Failed to save settings, retrying",
+				context: { filePath: this.filePath, error: String(err) },
 			});
 
 			// One retry after 100ms
@@ -92,13 +93,14 @@ export class SettingsService implements SettingsPort {
 				await rename(tempPath, this.filePath);
 				this.cache = settings;
 			} catch (retryErr: unknown) {
-				this.logger.warn(
-					"Settings save retry failed, changes cached in memory only",
-					{
+				this.logger.warn({
+					message:
+						"Settings save retry failed, changes cached in memory only",
+					context: {
 						filePath: this.filePath,
 						error: String(retryErr),
 					},
-				);
+				});
 				// Cache stays updated in memory for the session
 				this.cache = settings;
 			}
@@ -109,8 +111,8 @@ export class SettingsService implements SettingsPort {
 		return this.cache;
 	}
 
-	async update(partial: Partial<Settings>): Promise<void> {
+	async update({ partial }: { partial: Partial<Settings> }): Promise<void> {
 		const updated: Settings = { ...this.cache, ...partial };
-		await this.save(updated);
+		await this.save({ settings: updated });
 	}
 }

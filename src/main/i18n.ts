@@ -12,8 +12,12 @@ export function setContainer(container: Container): void {
 	containerRef = container;
 }
 
-export function i18n(key: string): string {
-	return i18nCommon(key, locale());
+interface MainI18nParams {
+	key: string;
+}
+
+export function i18n({ key }: MainI18nParams): string {
+	return i18nCommon({ key, locale: locale() });
 }
 
 export function locale(): string {

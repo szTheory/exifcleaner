@@ -53,8 +53,8 @@ function setupUserTasksMenu(): void {
 			arguments: APP_ARG_WINDOWS_TASK_OPEN_FILE,
 			iconPath: process.execPath,
 			iconIndex: 0,
-			title: i18n("usertasks:open-file.label"),
-			description: i18n("usertasks:open-file.description"),
+			title: i18n({ key: "usertasks:open-file.label" }),
+			description: i18n({ key: "usertasks:open-file.description" }),
 		},
 	]);
 }

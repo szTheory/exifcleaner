@@ -97,6 +97,6 @@ export function StatusIcon({
 			);
 
 		default:
-			return assertNever(status);
+			return assertNever({ value: status });
 	}
 }

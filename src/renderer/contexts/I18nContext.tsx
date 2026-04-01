@@ -72,7 +72,7 @@ export function I18nProvider({
 				return key;
 			}
 			try {
-				return i18nLookup(dictionary, key, locale);
+				return i18nLookup({ strings: dictionary, key, locale });
 			} catch {
 				return key;
 			}

@@ -16,7 +16,7 @@ function buildFileEntry(
 		id: crypto.randomUUID(),
 		path,
 		name,
-		extension: getFileExtension(name),
+		extension: getFileExtension({ filename: name }),
 		size,
 		folder,
 		status: FileProcessingStatus.Pending,
@@ -78,7 +78,7 @@ export function DropZone({
 
 			// Step 1: Process loose files first (mixed drop ordering per D-07)
 			const looseEntries: FileEntry[] = filePaths
-				.filter((p) => isSupportedFile(p))
+				.filter((p) => isSupportedFile({ filename: p }))
 				.map((p) => {
 					const name = window.api.files.basename(p);
 					return buildFileEntry(p, name, 0, null);
@@ -162,7 +162,7 @@ export function DropZone({
 	useEffect(() => {
 		const cleanup = window.api.files.onFileOpenAddFiles((menuFilePaths) => {
 			const entries = menuFilePaths
-				.filter((p) => isSupportedFile(p))
+				.filter((p) => isSupportedFile({ filename: p }))
 				.map((p) => {
 					const name = window.api.files.basename(p);
 					return buildFileEntry(p, name, 0, null);

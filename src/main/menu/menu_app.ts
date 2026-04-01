@@ -7,21 +7,21 @@ export function appMenuTemplate(): MenuItemConstructorOptions {
 		label: app.getName(),
 		submenu: [
 			{
-				label: `${i18n("menu.app.about")}${app.getName()}`,
+				label: `${i18n({ key: "menu.app.about" })}${app.getName()}`,
 				role: "about",
 			},
 			{
 				type: "separator",
 			},
 			{
-				label: i18n("menu.app.services"),
+				label: i18n({ key: "menu.app.services" }),
 				role: "services",
 			},
 			{
 				type: "separator",
 			},
 			{
-				label: `${i18n("menu.app.settings")}\u2026`,
+				label: `${i18n({ key: "menu.app.settings" })}\u2026`,
 				accelerator: "CmdOrCtrl+,",
 				click: () => {
 					const win = BrowserWindow.getAllWindows()[0];
@@ -34,15 +34,15 @@ export function appMenuTemplate(): MenuItemConstructorOptions {
 				type: "separator",
 			},
 			{
-				label: `${i18n("menu.app.hide")} ${app.getName()}`,
+				label: `${i18n({ key: "menu.app.hide" })} ${app.getName()}`,
 				role: "hide",
 			},
 			{
-				label: i18n("menu.app.hide-others"),
+				label: i18n({ key: "menu.app.hide-others" }),
 				role: "hideOthers",
 			},
 			{
-				label: i18n("menu.app.show-all"),
+				label: i18n({ key: "menu.app.show-all" }),
 				role: "unhide",
 			},
 			{
@@ -50,8 +50,8 @@ export function appMenuTemplate(): MenuItemConstructorOptions {
 			},
 			{
 				label: isMac()
-					? `${i18n("menu.app.quit")} ${app.getName()}`
-					: i18n("menu.app.quit"),
+					? `${i18n({ key: "menu.app.quit" })} ${app.getName()}`
+					: i18n({ key: "menu.app.quit" }),
 				role: "quit",
 			},
 		],

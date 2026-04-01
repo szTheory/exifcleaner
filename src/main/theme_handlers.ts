@@ -13,7 +13,7 @@ import type { SettingsService } from "../infrastructure";
 function getAccentColorHex(): string {
 	if (process.platform === "darwin" || process.platform === "win32") {
 		const raw = systemPreferences.getAccentColor();
-		return parseAccentColorHex(raw);
+		return parseAccentColorHex({ raw });
 	}
 	return ACCENT_COLOR_FALLBACK;
 }
@@ -37,7 +37,7 @@ export function setupThemeHandlers({
 		createValidatedHandler(themeSetSchema, async (mode) => {
 			nativeTheme.themeSource = mode;
 			if (settingsService) {
-				await settingsService.update({ themeMode: mode });
+				await settingsService.update({ partial: { themeMode: mode } });
 			}
 			return { success: true };
 		}),

@@ -1,4 +1,8 @@
-export function formatFileSize(bytes: number): string {
+interface FormatFileSizeParams {
+	bytes: number;
+}
+
+export function formatFileSize({ bytes }: FormatFileSizeParams): string {
 	if (bytes === 0) return "0 B";
 	const units = ["B", "KB", "MB", "GB"];
 	const i = Math.min(

@@ -41,10 +41,10 @@ function languageSubmenu(): MenuItemConstructorOptions {
 	);
 
 	return {
-		label: i18n("language") || "Language",
+		label: i18n({ key: "language" }) || "Language",
 		submenu: [
 			{
-				label: `${i18n("languageSystem") || "System"}`,
+				label: `${i18n({ key: "languageSystem" }) || "System"}`,
 				type: "radio",
 				checked: settingValue === null,
 				click: () => {
@@ -59,13 +59,13 @@ function languageSubmenu(): MenuItemConstructorOptions {
 
 export function viewMenuTemplate(): MenuItemConstructorOptions {
 	return {
-		label: i18n("menu.view.name"),
+		label: i18n({ key: "menu.view.name" }),
 		submenu: [
 			{
-				label: i18n("appearance") || "Appearance",
+				label: i18n({ key: "appearance" }) || "Appearance",
 				submenu: [
 					{
-						label: i18n("themeLight") || "Light",
+						label: i18n({ key: "themeLight" }) || "Light",
 						type: "radio",
 						checked: nativeTheme.themeSource === "light",
 						click: () => {
@@ -74,7 +74,7 @@ export function viewMenuTemplate(): MenuItemConstructorOptions {
 						},
 					},
 					{
-						label: i18n("themeAuto") || "Auto",
+						label: i18n({ key: "themeAuto" }) || "Auto",
 						type: "radio",
 						checked: nativeTheme.themeSource === "system",
 						click: () => {
@@ -83,7 +83,7 @@ export function viewMenuTemplate(): MenuItemConstructorOptions {
 						},
 					},
 					{
-						label: i18n("themeDark") || "Dark",
+						label: i18n({ key: "themeDark" }) || "Dark",
 						type: "radio",
 						checked: nativeTheme.themeSource === "dark",
 						click: () => {
@@ -96,25 +96,25 @@ export function viewMenuTemplate(): MenuItemConstructorOptions {
 			languageSubmenu(),
 			{ type: "separator" },
 			{
-				label: i18n("menu.view.toggle-dev-tools"),
+				label: i18n({ key: "menu.view.toggle-dev-tools" }),
 				role: "toggleDevTools",
 			},
 			{ type: "separator" },
 			{
-				label: i18n("menu.view.zoom-reset"),
+				label: i18n({ key: "menu.view.zoom-reset" }),
 				role: "resetZoom",
 			},
 			{
-				label: i18n("menu.view.zoom-in"),
+				label: i18n({ key: "menu.view.zoom-in" }),
 				role: "zoomIn",
 			},
 			{
-				label: i18n("menu.view.zoom-out"),
+				label: i18n({ key: "menu.view.zoom-out" }),
 				role: "zoomOut",
 			},
 			{ type: "separator" },
 			{
-				label: i18n("menu.view.toggle-full-screen"),
+				label: i18n({ key: "menu.view.toggle-full-screen" }),
 				role: "togglefullscreen",
 			},
 		],

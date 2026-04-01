@@ -8,7 +8,7 @@ import type { ExiftoolProcess } from "./ExiftoolProcess";
 export class ExifToolAdapter implements ExifToolPort {
 	private readonly process: ExiftoolProcess;
 
-	constructor(process: ExiftoolProcess) {
+	constructor({ process }: { process: ExiftoolProcess }) {
 		this.process = process;
 	}
 
@@ -27,22 +27,32 @@ export class ExifToolAdapter implements ExifToolPort {
 		};
 	}
 
-	async readMetadata(
-		filePath: string,
-		args: string[],
-	): Promise<{ data: Record<string, unknown>[] | null; error: string | null }> {
-		return this.process.readMetadata(filePath, args);
+	async readMetadata({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}): Promise<{ data: Record<string, unknown>[] | null; error: string | null }> {
+		return this.process.readMetadata({ filePath, args });
 	}
 
-	async removeMetadata(
-		filePath: string,
-		args: string[],
-	): Promise<{ data: null; error: string | null }> {
+	async removeMetadata({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}): Promise<{ data: null; error: string | null }> {
 		// Bridge: ExifToolPort's removeMetadata receives args like
 		// ["-all=", "-TagsFromFile", "@", "-Orientation", "-overwrite_original"].
 		// The adapter passes these as extraArgs to writeMetadata with an empty
 		// metadata object {} since -all= is already in the args array.
-		const result = await this.process.writeMetadata(filePath, {}, args, false);
+		const result = await this.process.writeMetadata({
+			filePath,
+			metadata: {},
+			extraArgs: args,
+		});
 		return { data: null, error: result.error };
 	}
 }

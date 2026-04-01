@@ -15,7 +15,7 @@ export class ExiftoolProcess {
 	private stdoutBuffer = "";
 	private stderrBuffer = "";
 
-	constructor(binPath: string) {
+	constructor({ binPath }: { binPath: string }) {
 		this.binPath = binPath;
 	}
 
@@ -117,10 +117,13 @@ export class ExiftoolProcess {
 		return exitPromise;
 	}
 
-	async readMetadata(
-		filePath: string,
-		args: string[],
-	): Promise<ExifToolResult> {
+	async readMetadata({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}): Promise<ExifToolResult> {
 		if (!this.process || !this.process.stdin) {
 			throw new Error("ExifTool process is not open");
 		}
@@ -130,15 +133,18 @@ export class ExiftoolProcess {
 			"\n",
 		);
 
-		return this.sendCommand(executeNum, command);
+		return this.sendCommand({ executeNum, command });
 	}
 
-	async writeMetadata(
-		filePath: string,
-		metadata: Record<string, unknown>,
-		extraArgs: string[],
-		debug: boolean,
-	): Promise<ExifToolResult> {
+	async writeMetadata({
+		filePath,
+		metadata,
+		extraArgs,
+	}: {
+		filePath: string;
+		metadata: Record<string, unknown>;
+		extraArgs: string[];
+	}): Promise<ExifToolResult> {
 		if (!this.process || !this.process.stdin) {
 			throw new Error("ExifTool process is not open");
 		}
@@ -162,13 +168,16 @@ export class ExiftoolProcess {
 			`-execute${executeNum}`,
 		].join("\n");
 
-		return this.sendCommand(executeNum, command);
+		return this.sendCommand({ executeNum, command });
 	}
 
-	private sendCommand(
-		executeNum: number,
-		command: string,
-	): Promise<ExifToolResult> {
+	private sendCommand({
+		executeNum,
+		command,
+	}: {
+		executeNum: number;
+		command: string;
+	}): Promise<ExifToolResult> {
 		if (!this.process || !this.process.stdin) {
 			throw new Error(
 				"ExifTool process is not open. Call open() before sending commands.",

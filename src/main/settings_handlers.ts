@@ -24,7 +24,7 @@ export function setupSettingsHandlers({
 	ipcMain.handle(
 		IPC_CHANNELS.SETTINGS_SET,
 		createValidatedHandler(settingsSetSchema, async (input) => {
-			const validationResult = validateSettings(input);
+			const validationResult = validateSettings({ input });
 			if (!validationResult.ok) {
 				return { success: false, error: validationResult.error };
 			}
@@ -32,7 +32,7 @@ export function setupSettingsHandlers({
 			// Capture previous language before updating
 			const previousLanguage = container.settings.get().language;
 
-			await container.settings.update(validationResult.value);
+			await container.settings.update({ partial: validationResult.value });
 
 			const newSettings = container.settings.get();
 

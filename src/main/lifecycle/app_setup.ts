@@ -13,17 +13,21 @@ function preventMultipleAppInstances(): void {
 	}
 }
 
-function openMinimizedIfAlreadyExists(
-	browserWindow: BrowserWindow | null,
-): void {
+interface OpenMinimizedParams {
+	browserWindow: BrowserWindow | null;
+}
+
+function openMinimizedIfAlreadyExists({
+	browserWindow,
+}: OpenMinimizedParams): void {
 	app.on("second-instance", (_event, argv) => {
 		console.log(argv);
 		if (isWindows() && argv.length > 0 && argv.includes("--open-file")) {
-			fileOpen(browserWindow);
+			fileOpen({ browserWindow });
 			return;
 		}
 
-		restoreWindowAndFocus(browserWindow);
+		restoreWindowAndFocus({ browserWindow });
 	});
 }
 
@@ -33,22 +37,30 @@ function quitOnWindowsAllClosed(): void {
 	});
 }
 
-function createWindowOnActivate(browserWindow: BrowserWindow | null): void {
+interface CreateWindowOnActivateParams {
+	browserWindow: BrowserWindow | null;
+}
+
+function createWindowOnActivate({
+	browserWindow,
+}: CreateWindowOnActivateParams): void {
 	app.on("activate", () => {
-		browserWindow = currentBrowserWindow(browserWindow);
+		browserWindow = currentBrowserWindow({ browserWindow });
 		if (!browserWindow) {
 			browserWindow = createMainWindow();
 		}
 	});
 }
 
-export function setupApp(
-	browserWindow: BrowserWindow | null,
-	{ onQuit }: { onQuit: () => void },
-): void {
+interface SetupAppParams {
+	browserWindow: BrowserWindow | null;
+	onQuit: () => void;
+}
+
+export function setupApp({ browserWindow, onQuit }: SetupAppParams): void {
 	preventMultipleAppInstances();
-	openMinimizedIfAlreadyExists(browserWindow);
+	openMinimizedIfAlreadyExists({ browserWindow });
 	quitOnWindowsAllClosed();
-	createWindowOnActivate(browserWindow);
+	createWindowOnActivate({ browserWindow });
 	app.on("will-quit", onQuit);
 }

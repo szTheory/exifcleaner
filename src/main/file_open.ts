@@ -2,19 +2,21 @@ import { dialog, BrowserWindow } from "electron";
 import { defaultBrowserWindow, restoreWindowAndFocus } from "../infrastructure";
 import { IPC_CHANNELS } from "../common";
 
-export function fileOpen(
-	browserWindow: BrowserWindow | undefined | null,
-): void {
-	browserWindow = defaultBrowserWindow(browserWindow);
-	restoreWindowAndFocus(browserWindow);
+interface FileOpenParams {
+	browserWindow: BrowserWindow | undefined | null;
+}
+
+export function fileOpen({ browserWindow }: FileOpenParams): void {
+	const win = defaultBrowserWindow({ browserWindow });
+	restoreWindowAndFocus({ browserWindow: win });
 
 	dialog
-		.showOpenDialog(browserWindow, {
+		.showOpenDialog(win, {
 			properties: ["openFile", "multiSelections"],
 		})
 		.then((result) => {
 			if (result.filePaths) {
-				defaultBrowserWindow(browserWindow).webContents.send(
+				defaultBrowserWindow({ browserWindow: win }).webContents.send(
 					IPC_CHANNELS.FILE_OPEN_ADD_FILES,
 					result.filePaths,
 				);

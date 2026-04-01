@@ -6,7 +6,7 @@ export function showAboutWindow(author: string, websiteUrl: string): void {
 	let aboutPanelOptions = {
 		applicationName: app.getName(),
 		applicationVersion: app.getVersion(),
-		copyright: `${i18n("aboutwindow:copyright")} © ${author}`,
+		copyright: `${i18n({ key: "aboutwindow:copyright" })} © ${author}`,
 		version: app.getVersion(),
 		credits: author,
 		authors: [author],

@@ -28,8 +28,8 @@ export function createContainer(): {
 	processFiles: ProcessFilesUseCase;
 } {
 	const logger = new ConsoleLogger();
-	const exiftoolProcess = new ExiftoolProcess(exiftoolBinPath);
-	const exiftool = new ExifToolAdapter(exiftoolProcess);
+	const exiftoolProcess = new ExiftoolProcess({ binPath: exiftoolBinPath });
+	const exiftool = new ExifToolAdapter({ process: exiftoolProcess });
 	const settingsPath = path.join(app.getPath("userData"), "settings.json");
 	const settings = new SettingsService({ filePath: settingsPath, logger });
 	const stripMetadata = new StripMetadataCommand({ exiftool });

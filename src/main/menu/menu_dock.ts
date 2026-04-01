@@ -35,10 +35,10 @@ function dockLanguageSubmenu(): MenuItemConstructorOptions {
 	);
 
 	return {
-		label: i18n("language") || "Language",
+		label: i18n({ key: "language" }) || "Language",
 		submenu: [
 			{
-				label: `${i18n("languageSystem") || "System"}`,
+				label: `${i18n({ key: "languageSystem" }) || "System"}`,
 				type: "radio",
 				checked: settingValue === null,
 				click: () => {
@@ -55,7 +55,7 @@ export function dockMenuTemplate(): MenuItemConstructorOptions[] {
 	return [
 		fileMenuOpenItem(),
 		{
-			label: `${i18n("menu.app.settings")}\u2026`,
+			label: `${i18n({ key: "menu.app.settings" })}\u2026`,
 			click: () => {
 				const win = BrowserWindow.getAllWindows()[0];
 				if (win) {

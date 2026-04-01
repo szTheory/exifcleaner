@@ -18,7 +18,7 @@ export function FolderRow({
 	onToggle: () => void;
 	discoveryStatus: FolderDiscoveryStatus;
 }): React.JSX.Element {
-	const displayLabel = middleTruncatePath(folder, 40);
+	const displayLabel = middleTruncatePath({ folderPath: folder, maxLength: 40 });
 
 	return (
 		<div className="folder-row">
@@ -63,6 +63,6 @@ function renderCount(status: FolderDiscoveryStatus, fileCount: number): string {
 		case "empty":
 			return "0 supported files";
 		default:
-			return assertNever(status);
+			return assertNever({ value: status });
 	}
 }

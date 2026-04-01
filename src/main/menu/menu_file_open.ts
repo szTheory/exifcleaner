@@ -10,7 +10,7 @@ import { fileOpen } from "../file_open";
 
 export function fileMenuOpenItem(): MenuItemConstructorOptions {
 	return {
-		label: `${i18n("menu.file.open")}…`,
+		label: `${i18n({ key: "menu.file.open" })}…`,
 		accelerator: "CmdOrCtrl+O",
 		click: fileOpenClick,
 	};
@@ -21,5 +21,8 @@ function fileOpenClick(
 	browserWindow: BaseWindow | undefined,
 	_event: KeyboardEvent,
 ): void {
-	fileOpen(browserWindow instanceof BrowserWindow ? browserWindow : undefined);
+	fileOpen({
+		browserWindow:
+			browserWindow instanceof BrowserWindow ? browserWindow : undefined,
+	});
 }

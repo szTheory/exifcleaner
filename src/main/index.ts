@@ -12,7 +12,7 @@ async function setup(): Promise<void> {
 	await app.whenReady();
 
 	// keep reference to main window to prevent losing it on GC
-	browserWindow = currentBrowserWindow(browserWindow);
+	browserWindow = currentBrowserWindow({ browserWindow });
 	if (!browserWindow) {
 		browserWindow = createMainWindow();
 	}
@@ -20,7 +20,7 @@ async function setup(): Promise<void> {
 	// Order matters: createMainWindow() first (uses loadWindowState + dynamic bg),
 	// then init() (registers sender ID, sets up IPC/theme handlers),
 	// then setupMainWindow() (loads URL, shows on ready, wires state persistence)
-	await init(browserWindow);
+	await init({ browserWindow });
 	setupMenus();
 	setupMainWindow(browserWindow);
 }

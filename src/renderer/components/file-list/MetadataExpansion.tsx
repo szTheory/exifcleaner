@@ -18,7 +18,7 @@ export function MetadataExpansion({
 	i18nLookup: (key: string) => string;
 }): React.JSX.Element {
 	const groups = useMemo(
-		() => computeMetadataDiff(beforeMetadata, afterMetadata),
+		() => computeMetadataDiff({ before: beforeMetadata, after: afterMetadata }),
 		[beforeMetadata, afterMetadata],
 	);
 

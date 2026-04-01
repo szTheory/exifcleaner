@@ -41,7 +41,7 @@ describe("SettingsService", () => {
 			saveAsCopy: true,
 			language: "fr",
 		};
-		await service1.save(custom);
+		await service1.save({ settings: custom });
 
 		const service2 = new SettingsService({ filePath, logger });
 		const loaded = await service2.load();
@@ -58,7 +58,7 @@ describe("SettingsService", () => {
 		const service = new SettingsService({ filePath, logger });
 
 		await service.load();
-		await service.save(DEFAULT_SETTINGS);
+		await service.save({ settings: DEFAULT_SETTINGS });
 
 		const raw = await readFile(filePath, "utf-8");
 		const parsed = JSON.parse(raw);
@@ -75,7 +75,7 @@ describe("SettingsService", () => {
 		const service = new SettingsService({ filePath, logger });
 
 		await service.load();
-		await service.save(DEFAULT_SETTINGS);
+		await service.save({ settings: DEFAULT_SETTINGS });
 
 		const raw = await readFile(filePath, "utf-8");
 		expect(raw).toContain("\t");
@@ -94,7 +94,7 @@ describe("SettingsService", () => {
 			preserveOrientation: false,
 		};
 		await service.load();
-		await service.save(custom);
+		await service.save({ settings: custom });
 
 		// Delete the file — get() should still return cached value
 		await rm(filePath);
@@ -168,7 +168,7 @@ describe("SettingsService", () => {
 		const service = new SettingsService({ filePath, logger });
 
 		await service.load();
-		await service.update({ saveAsCopy: true });
+		await service.update({ partial: { saveAsCopy: true } });
 
 		const result = service.get();
 		expect(result.saveAsCopy).toBe(true);

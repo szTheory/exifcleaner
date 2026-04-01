@@ -7,7 +7,7 @@ function buildMenu(canCopy: boolean): Menu {
 	if (canCopy) {
 		menu.append(
 			new MenuItem({
-				label: i18n("contextmenu.copy"),
+				label: i18n({ key: "contextmenu.copy" }),
 				role: "copy",
 				visible: canCopy,
 				enabled: canCopy,
@@ -15,7 +15,7 @@ function buildMenu(canCopy: boolean): Menu {
 		);
 	}
 	menu.append(
-		new MenuItem({ label: i18n("contextmenu.select-all"), role: "selectAll" }),
+		new MenuItem({ label: i18n({ key: "contextmenu.select-all" }), role: "selectAll" }),
 	);
 	return menu;
 }

@@ -13,9 +13,13 @@ import { IPC_CHANNELS } from "../../common";
 let batchCount = 0;
 let remainingCount = 0;
 
-export function setupDockEventHandlers(
-	browserWindow: BrowserWindow | null,
-): void {
+interface SetupDockEventHandlersParams {
+	browserWindow: BrowserWindow | null;
+}
+
+export function setupDockEventHandlers({
+	browserWindow,
+}: SetupDockEventHandlersParams): void {
 	ipcMain.on(
 		IPC_CHANNELS.FILES_ADDED,
 		createValidatedListener(filesAddedSchema, (filesCount) => {
@@ -80,7 +84,7 @@ function updateDockCount(): void {
 }
 
 function updateProgressBar(browserWindow: BrowserWindow | null): void {
-	browserWindow = defaultBrowserWindow(null);
+	browserWindow = defaultBrowserWindow({ browserWindow: null });
 	let ratio =
 		remainingCount <= 0 ? -1 : (batchCount - remainingCount) / batchCount;
 
@@ -91,7 +95,7 @@ function updateDockBounce(browserWindow: BrowserWindow | null): void {
 	if (!isMac()) {
 		return;
 	}
-	browserWindow = defaultBrowserWindow(null);
+	browserWindow = defaultBrowserWindow({ browserWindow: null });
 	if (browserWindow.isFocused()) {
 		// don't bother if the window is already focused
 		return;
@@ -107,7 +111,7 @@ function windowsFlashFrame(browserWindow: BrowserWindow | null): void {
 	if (!isWindows()) {
 		return;
 	}
-	browserWindow = defaultBrowserWindow(browserWindow);
+	browserWindow = defaultBrowserWindow({ browserWindow });
 	if (browserWindow.isFocused()) {
 		// don't bother if the window is already focused
 		return;
@@ -123,7 +127,7 @@ function windowsOverlayIcon(
 	if (!isWindows()) {
 		return;
 	}
-	browserWindow = defaultBrowserWindow(browserWindow);
+	browserWindow = defaultBrowserWindow({ browserWindow });
 
 	const icon = enabled ? nativeImage.createFromPath(checkmarkPath()) : null;
 

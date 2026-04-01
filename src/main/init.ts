@@ -34,9 +34,13 @@ function setupUserModelId(): void {
 	app.setAppUserModelId(packageJson.build.appId);
 }
 
-export async function init(
-	browserWindow: BrowserWindow | null,
-): Promise<Container> {
+interface InitParams {
+	browserWindow: BrowserWindow | null;
+}
+
+export async function init({
+	browserWindow,
+}: InitParams): Promise<Container> {
 	const container = createContainer();
 	await initContainer(container);
 
@@ -58,7 +62,7 @@ export async function init(
 	// Wire language change handler for View menu and dock menu
 	const languageChangeHandler = (code: string | null): void => {
 		const previousLanguage = container.settings.get().language;
-		container.settings.update({ language: code });
+		container.settings.update({ partial: { language: code } });
 		handleLanguageChange(previousLanguage, code);
 	};
 	const languageSettingGetter = (): string | null =>
@@ -82,9 +86,10 @@ export async function init(
 	});
 	setupRevealHandlers();
 	setupContextMenu();
-	setupDockEventHandlers(browserWindow);
+	setupDockEventHandlers({ browserWindow });
 	setupUserModelId();
-	setupApp(browserWindow, {
+	setupApp({
+		browserWindow,
 		onQuit: () => container.exiftoolProcess.close(),
 	});
 

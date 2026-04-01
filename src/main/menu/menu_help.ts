@@ -12,7 +12,7 @@ const SOURCE_CODE_URL = `https://github.com/${GITHUB_USERNAME}/${GITHUB_PROJECTN
 
 export function helpMenuTemplate(): MenuItemConstructorOptions {
 	return {
-		label: i18n("menu.help.name"),
+		label: i18n({ key: "menu.help.name" }),
 		role: "help",
 		submenu: buildHelpSubmenu(),
 	};
@@ -20,10 +20,16 @@ export function helpMenuTemplate(): MenuItemConstructorOptions {
 
 function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 	let submenu = [
-		openUrlMenuItem(i18n("menu.help.website"), WEBSITE_URL),
-		openUrlMenuItem(i18n("menu.help.source-code"), SOURCE_CODE_URL),
+		openUrlMenuItem({
+			label: i18n({ key: "menu.help.website" }),
+			url: WEBSITE_URL,
+		}),
+		openUrlMenuItem({
+			label: i18n({ key: "menu.help.source-code" }),
+			url: SOURCE_CODE_URL,
+		}),
 		{
-			label: `${i18n("menu.help.report-issue")}…`,
+			label: `${i18n({ key: "menu.help.report-issue" })}…`,
 			click() {
 				const url = newGithubIssueUrl(
 					GITHUB_USERNAME,
@@ -41,7 +47,7 @@ function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 				type: "separator",
 			},
 			{
-				label: `${i18n("menu.help.about")}${app.getName()}`,
+				label: `${i18n({ key: "menu.help.about" })}${app.getName()}`,
 				click() {
 					showAboutWindow(GITHUB_USERNAME, WEBSITE_URL);
 				},
