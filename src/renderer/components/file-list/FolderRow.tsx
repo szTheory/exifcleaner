@@ -2,7 +2,7 @@
 
 import type { FolderDiscoveryStatus } from "../../contexts/AppContext";
 import { middleTruncatePath } from "../../../domain";
-import { assertNever } from "../../../common";
+import { assertNever } from "../../../common/types";
 import { ChevronIcon } from "../icons/ChevronIcon";
 
 export function FolderRow({

@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer } from "react";
 import type { Dispatch, ReactNode } from "react";
 import { FileProcessingStatus } from "../../domain";
-import { assertNever } from "../../common";
+import { assertNever } from "../../common/types";
 
 export type FolderDiscoveryStatus =
 	| "scanning"
