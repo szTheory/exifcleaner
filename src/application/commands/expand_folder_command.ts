@@ -1,10 +1,15 @@
 import { readdir } from "node:fs/promises";
 import path from "node:path";
 import type { Result } from "../../common";
+import type { FolderError } from "../../domain";
 import { isSupportedFile } from "../../domain";
 
 export class ExpandFolderCommand {
-	async execute({ dirPath }: { dirPath: string }): Promise<Result<string[]>> {
+	async execute({
+		dirPath,
+	}: {
+		dirPath: string;
+	}): Promise<Result<string[], FolderError>> {
 		try {
 			const entries = await readdir(dirPath, {
 				recursive: true,
@@ -20,10 +25,13 @@ export class ExpandFolderCommand {
 
 			return { ok: true, value: filePaths };
 		} catch (err: unknown) {
-			const message = err instanceof Error ? err.message : String(err);
 			return {
 				ok: false,
-				error: "Failed to read directory: " + message,
+				error: {
+					code: "read-failed",
+					dirPath,
+					cause: err instanceof Error ? err.message : String(err),
+				},
 			};
 		}
 	}

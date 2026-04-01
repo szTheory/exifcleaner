@@ -53,10 +53,14 @@ it("returns empty array for empty directory", async () => {
 	}
 });
 
-it("returns error for nonexistent directory", async () => {
-	const result = await command.execute({
-		dirPath: path.join(tmpDir, "nonexistent"),
-	});
+it("returns FolderError for nonexistent directory", async () => {
+	const nonexistent = path.join(tmpDir, "nonexistent");
+	const result = await command.execute({ dirPath: nonexistent });
 
 	expect(result.ok).toBe(false);
+	if (!result.ok) {
+		expect(result.error.code).toBe("read-failed");
+		expect(result.error.dirPath).toBe(nonexistent);
+		expect(result.error.cause).toBeTruthy();
+	}
 });

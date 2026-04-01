@@ -8,6 +8,7 @@ import {
 	CURRENT_SCHEMA_VERSION,
 	migrateSettings,
 	isSettingsFile,
+	formatSettingsError,
 } from "../domain";
 import type { SettingsPort } from "../application";
 import type { LoggerPort } from "../application";
@@ -46,7 +47,10 @@ export class SettingsService implements SettingsPort {
 			// current-schema shape, so older versions won't pass it.
 			if (!isSettingsFileOrLegacy(parsed)) {
 				this.logger.warn({
-					message: "Settings file has invalid format, using defaults",
+					message: formatSettingsError({
+						code: "invalid-format",
+						filePath: this.filePath,
+					}),
 					context: { filePath: this.filePath },
 				});
 				this.cache = { ...DEFAULT_SETTINGS };
@@ -62,8 +66,12 @@ export class SettingsService implements SettingsPort {
 			return this.cache;
 		} catch (err: unknown) {
 			this.logger.warn({
-				message: "Failed to load settings, using defaults",
-				context: { filePath: this.filePath, error: String(err) },
+				message: formatSettingsError({
+					code: "read-failed",
+					filePath: this.filePath,
+					cause: String(err),
+				}),
+				context: { filePath: this.filePath },
 			});
 			this.cache = { ...DEFAULT_SETTINGS };
 			return this.cache;
@@ -84,8 +92,12 @@ export class SettingsService implements SettingsPort {
 			this.cache = settings;
 		} catch (err: unknown) {
 			this.logger.error({
-				message: "Failed to save settings, retrying",
-				context: { filePath: this.filePath, error: String(err) },
+				message: formatSettingsError({
+					code: "write-failed",
+					filePath: this.filePath,
+					cause: String(err),
+				}),
+				context: { filePath: this.filePath },
 			});
 
 			try {
@@ -97,12 +109,12 @@ export class SettingsService implements SettingsPort {
 				this.cache = settings;
 			} catch (retryErr: unknown) {
 				this.logger.warn({
-					message:
-						"Settings save retry failed, changes cached in memory only",
-					context: {
+					message: formatSettingsError({
+						code: "write-failed",
 						filePath: this.filePath,
-						error: String(retryErr),
-					},
+						cause: String(retryErr),
+					}),
+					context: { filePath: this.filePath },
 				});
 				// Cache stays updated in memory for the session
 				this.cache = settings;

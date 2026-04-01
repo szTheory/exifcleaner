@@ -27,7 +27,17 @@ export async function processFileEntries(
 				id: entry.id,
 				status: FileProcessingStatus.Processing,
 			});
-			await window.api.exif.removeMetadata(entry.path);
+			const removeResult = await window.api.exif.removeMetadata(entry.path);
+
+			if (removeResult.error !== null) {
+				dispatch({
+					type: "UPDATE_FILE_ERROR",
+					id: entry.id,
+					error: removeResult.error,
+				});
+				window.api.files.notifyFileProcessed();
+				continue;
+			}
 
 			const afterMetadata = await window.api.exif.readMetadata(entry.path);
 			const afterTags = Object.keys(afterMetadata).length;
@@ -52,7 +62,7 @@ export async function processFileEntries(
 			});
 
 			window.api.files.notifyFileProcessed();
-		} catch (err) {
+		} catch (err: unknown) {
 			dispatch({
 				type: "UPDATE_FILE_ERROR",
 				id: entry.id,

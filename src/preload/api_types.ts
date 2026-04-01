@@ -9,7 +9,9 @@ export interface ExifData {
 
 export interface ExifApi {
 	readMetadata: (filePath: string) => Promise<ExifData>;
-	removeMetadata: (filePath: string) => Promise<object>;
+	removeMetadata: (
+		filePath: string,
+	) => Promise<{ data: null; error: string | null }>;
 }
 
 export interface I18nApi {

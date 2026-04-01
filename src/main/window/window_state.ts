@@ -3,6 +3,8 @@ import type { BrowserWindow, Display } from "electron";
 import { readFileSync, writeFileSync, renameSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import path from "node:path";
+import { logError } from "../../common";
+import { formatWindowStateError } from "../../domain";
 
 const WINDOW_STATE_SAVE_DEBOUNCE_MS = 300;
 
@@ -147,7 +149,14 @@ export function saveWindowState(win: BrowserWindow): void {
 		// Atomic rename -- sync for close event reliability
 		renameSync(tempPath, statePath);
 	} catch (err: unknown) {
-		console.error("Failed to save window state", String(err));
+		logError(
+			"window-state",
+			formatWindowStateError({
+				code: "save-failed",
+				filePath: statePath,
+				cause: String(err),
+			}),
+		);
 	}
 }
 
