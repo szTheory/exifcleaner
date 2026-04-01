@@ -4,6 +4,8 @@ import { readFileSync, writeFileSync, renameSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import path from "node:path";
 
+const WINDOW_STATE_SAVE_DEBOUNCE_MS = 300;
+
 export interface WindowState {
 	readonly width: number;
 	readonly height: number;
@@ -28,7 +30,6 @@ export function isWindowState(value: unknown): value is WindowState {
 		return false;
 	}
 
-	// x and y are optional but must be number if present
 	if (obj["x"] !== undefined && typeof obj["x"] !== "number") {
 		return false;
 	}
@@ -55,18 +56,14 @@ function getStatePath(): string {
 	return path.join(app.getPath("userData"), "window-state.json");
 }
 
-/**
- * Pure function: checks if a window rect overlaps any display work area.
- * Overlap means the window's rectangle intersects with at least one display.
- */
+// Pure function: checks if a window rect overlaps any display work area.
 export function isWithinDisplayBounds(
 	bounds: { x: number; y: number; width: number; height: number },
 	displays: Display[],
 ): boolean {
 	for (const display of displays) {
 		const area = display.workArea;
-		// Check rectangle intersection: two rects overlap if and only if
-		// neither is fully to the left, right, above, or below the other
+		// Two rects overlap iff neither is fully to the left, right, above, or below the other
 		const overlaps =
 			bounds.x < area.x + area.width &&
 			bounds.x + bounds.width > area.x &&
@@ -79,10 +76,8 @@ export function isWithinDisplayBounds(
 	return false;
 }
 
-/**
- * Pure function: validates JSON string and returns a WindowState.
- * Testable without Electron's screen or fs modules.
- */
+// Pure function: validates JSON string and returns a WindowState.
+// Testable without Electron's screen or fs modules.
 export function validateAndLoadState(
 	json: string | null,
 	displays: Display[],
@@ -104,15 +99,12 @@ export function validateAndLoadState(
 
 	const { width, height, isMaximized, x, y } = parsed;
 
-	// Validate dimensions are positive
 	if (width <= 0 || height <= 0) {
 		return { ...DEFAULT_STATE };
 	}
 
-	// If position is defined, check it's within display bounds
 	if (x !== undefined && y !== undefined) {
 		if (!isWithinDisplayBounds({ x, y, width, height }, displays)) {
-			// Off-screen: keep dimensions but reset position
 			return { width, height, x: undefined, y: undefined, isMaximized };
 		}
 	}
@@ -120,10 +112,7 @@ export function validateAndLoadState(
 	return { width, height, x, y, isMaximized };
 }
 
-/**
- * Loads window state from disk. Synchronous since it runs once before
- * window creation and the file is tiny (<200 bytes).
- */
+// Synchronous since it runs once before window creation and the file is tiny (<200 bytes).
 export function loadWindowState(): WindowState {
 	try {
 		const json = readFileSync(getStatePath(), "utf-8");
@@ -134,10 +123,7 @@ export function loadWindowState(): WindowState {
 	}
 }
 
-/**
- * Saves current window bounds to disk using atomic write.
- * Only saves if window is not minimized (avoid saving minimized dimensions).
- */
+// Only saves if window is not minimized (avoid saving minimized dimensions).
 export function saveWindowState(win: BrowserWindow): void {
 	if (win.isMinimized()) {
 		return;
@@ -158,17 +144,14 @@ export function saveWindowState(win: BrowserWindow): void {
 
 	try {
 		writeFileSync(tempPath, json, "utf-8");
-		// Atomic rename (sync for close event reliability)
+		// Atomic rename -- sync for close event reliability
 		renameSync(tempPath, statePath);
 	} catch (err: unknown) {
 		console.error("Failed to save window state", String(err));
 	}
 }
 
-/**
- * Attaches resize, move, and close handlers that persist window state.
- * Uses debounced save (300ms) for resize/move to avoid disk thrashing.
- */
+// Debounced save for resize/move to avoid disk thrashing.
 export function setupWindowStatePersistence(win: BrowserWindow): void {
 	let saveTimeout: ReturnType<typeof setTimeout> | undefined;
 
@@ -178,7 +161,7 @@ export function setupWindowStatePersistence(win: BrowserWindow): void {
 		}
 		saveTimeout = setTimeout(() => {
 			saveWindowState(win);
-		}, 300);
+		}, WINDOW_STATE_SAVE_DEBOUNCE_MS);
 	};
 
 	win.on("resize", debouncedSave);

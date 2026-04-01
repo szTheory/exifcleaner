@@ -4,7 +4,6 @@
 import type { ReactNode } from "react";
 import { useI18n } from "../../hooks/use_i18n";
 
-/** Replace `{key}` placeholders with values from a params object. */
 function interpolate(
 	template: string,
 	params: Record<string, string | number>,

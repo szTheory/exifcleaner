@@ -11,12 +11,13 @@ import { FileRow } from "./FileRow";
 import { FolderRow } from "./FolderRow";
 import { Toast } from "../ui/Toast";
 
+const TOAST_AUTO_HIDE_DELAY_MS = 2000;
+
 export function FileTable(): React.JSX.Element {
 	const { state, dispatch } = useAppContext();
 	const animatedCheckRef = useRef(new Set<string>());
 	const [saveAsCopy, setSaveAsCopy] = useState(false);
 
-	// Load saveAsCopy setting and listen for changes
 	useEffect(() => {
 		window.api.settings.get().then((s) => setSaveAsCopy(s.saveAsCopy));
 		const unsub = window.api.settings.onChanged((s) =>
@@ -25,7 +26,6 @@ export function FileTable(): React.JSX.Element {
 		return unsub;
 	}, []);
 
-	// Toast state for copy confirmation
 	const [toastVisible, setToastVisible] = useState(false);
 	const [toastMessage, setToastMessage] = useState("");
 	const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -39,10 +39,9 @@ export function FileTable(): React.JSX.Element {
 		toastTimerRef.current = setTimeout(() => {
 			setToastVisible(false);
 			toastTimerRef.current = null;
-		}, 2000);
+		}, TOAST_AUTO_HIDE_DELAY_MS);
 	}
 
-	// Clean up toast timer on unmount
 	useEffect(() => {
 		return () => {
 			if (toastTimerRef.current !== null) {
@@ -59,13 +58,11 @@ export function FileTable(): React.JSX.Element {
 		showToast(message);
 	}, []);
 
-	// Derive folder groups from files, including folders in scanning state with no files yet
 	const { folderGroups, ungroupedFiles } = groupFilesByFolder(
 		state.files,
 		state.folderStates,
 	);
 
-	// Build a global stagger index across all visible rows
 	let staggerIndex = 0;
 
 	return (
@@ -79,7 +76,6 @@ export function FileTable(): React.JSX.Element {
 				<div className="file-table__header-cell">AFTER</div>
 			</div>
 			<div className="file-table__body">
-				{/* Ungrouped files (folder === null) render first */}
 				{ungroupedFiles.map((file) => {
 					const idx = staggerIndex++;
 					return (
@@ -98,14 +94,12 @@ export function FileTable(): React.JSX.Element {
 						/>
 					);
 				})}
-				{/* Folder groups */}
 				{folderGroups.map(({ folder, files }) => {
 					const isDirectlyCollapsed = state.collapsedFolders.has(folder);
 					const isParentCollapsed = isCollapsedByParent(
 						folder,
 						state.collapsedFolders,
 					);
-					// Hide entire subfolder group when a parent folder is collapsed
 					if (isParentCollapsed) return null;
 					const isCollapsed = isDirectlyCollapsed;
 					const folderState = state.folderStates.get(folder);
@@ -184,7 +178,6 @@ function groupFilesByFolder(
 		}
 	}
 
-	// Include folders from folderStates that have no files yet (scanning state)
 	for (const [folderKey] of folderStates) {
 		if (!folderMap.has(folderKey)) {
 			folderMap.set(folderKey, []);
@@ -199,7 +192,6 @@ function groupFilesByFolder(
 	return { folderGroups, ungroupedFiles };
 }
 
-/** Check if a folder's parent is collapsed (not itself, but an ancestor). */
 function isCollapsedByParent(
 	folder: string,
 	collapsedFolders: Set<string>,

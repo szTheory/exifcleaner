@@ -1,6 +1,5 @@
 // Color-coded extension badge for the file type column.
 
-/** Maps extension aliases to the canonical CSS modifier class. */
 function pillClass(extension: string): string {
 	const ext = extension.toLowerCase();
 
@@ -8,7 +7,7 @@ function pillClass(extension: string): string {
 	if (ext === "jpeg") return "jpg";
 	if (ext === "heif") return "heic";
 
-	// Video aliases — all map to mov
+	// Video aliases -- all map to mov
 	if (
 		ext === "m4v" ||
 		ext === "avi" ||
@@ -18,7 +17,7 @@ function pillClass(extension: string): string {
 	)
 		return "mov";
 
-	// RAW aliases — all map to dng
+	// RAW aliases -- all map to dng
 	if (
 		ext === "cr2" ||
 		ext === "cr3" ||

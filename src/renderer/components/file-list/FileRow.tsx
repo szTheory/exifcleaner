@@ -13,7 +13,6 @@ import { MetadataExpansion } from "./MetadataExpansion";
 import { formatFileSize } from "../../utils/format_file_size";
 import { useI18n } from "../../hooks/use_i18n";
 
-/** Compute the cleaned copy path (simple version for reveal, no collision check). */
 function computeCleanedPath(filePath: string): string {
 	const lastSep = Math.max(
 		filePath.lastIndexOf("/"),
@@ -101,12 +100,10 @@ export function FileRow({
 		});
 	}
 
-	// Custom property for staggered animation delay
 	const progressStyle: React.CSSProperties = {
 		"--ec-stagger-delay": `${staggerIndex * 30}ms`,
 	};
 
-	// Determine if checkmark should animate (one-shot via ref)
 	let shouldAnimateCheck = false;
 	if (isComplete && !animatedCheckRef.current.has(file.id)) {
 		shouldAnimateCheck = true;

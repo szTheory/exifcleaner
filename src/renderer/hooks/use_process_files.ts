@@ -4,11 +4,8 @@ import type { FileEntry, AppAction } from "../contexts/AppContext";
 import { useAppContext } from "../contexts/AppContext";
 import { FileProcessingStatus } from "../../domain";
 
-/**
- * Core processing logic extracted for testability.
- * Processes files sequentially: read metadata -> strip -> read after -> update state.
- * Handles queuing for rapid successive drops (pitfall #1 from RESEARCH.md).
- */
+// Processes files sequentially: read metadata -> strip -> read after -> update state.
+// Uses a queue ref to handle rapid successive drops without race conditions.
 export async function processFileEntries(
 	entries: FileEntry[],
 	dispatch: Dispatch<AppAction>,
@@ -17,7 +14,6 @@ export async function processFileEntries(
 
 	for (const entry of entries) {
 		try {
-			// Step 1: Read metadata (before count)
 			dispatch({
 				type: "UPDATE_FILE_STATUS",
 				id: entry.id,
@@ -26,7 +22,6 @@ export async function processFileEntries(
 			const beforeMetadata = await window.api.exif.readMetadata(entry.path);
 			const beforeTags = Object.keys(beforeMetadata).length;
 
-			// Step 2: Strip metadata
 			dispatch({
 				type: "UPDATE_FILE_STATUS",
 				id: entry.id,
@@ -34,11 +29,9 @@ export async function processFileEntries(
 			});
 			await window.api.exif.removeMetadata(entry.path);
 
-			// Step 3: Read metadata (after count)
 			const afterMetadata = await window.api.exif.readMetadata(entry.path);
 			const afterTags = Object.keys(afterMetadata).length;
 
-			// Step 4: Update state with counts and full metadata
 			dispatch({
 				type: "UPDATE_FILE_METADATA",
 				id: entry.id,
@@ -48,7 +41,6 @@ export async function processFileEntries(
 				afterMetadata,
 			});
 
-			// Step 5: Mark complete (or no-metadata-found if before === 0)
 			const finalStatus =
 				beforeTags === 0
 					? FileProcessingStatus.NoMetadataFound
@@ -74,10 +66,6 @@ export async function processFileEntries(
 	window.api.files.notifyAllFilesProcessed();
 }
 
-/**
- * React hook that connects file processing to AppContext state.
- * Uses a queue ref to handle rapid successive file drops without race conditions.
- */
 export function useProcessFiles(): {
 	processFiles: (entries: FileEntry[]) => Promise<void>;
 	isProcessing: boolean;

@@ -6,6 +6,8 @@ import { FileProcessingStatus, isSupportedFile } from "../../../domain";
 import { getFileExtension } from "../../utils/get_file_extension";
 import { useProcessFiles } from "../../hooks/use_process_files";
 
+const FOLDER_AUTO_COLLAPSE_DELAY_MS = 1500;
+
 function buildFileEntry(
 	path: string,
 	name: string,
@@ -72,11 +74,10 @@ export function DropZone({
 				window.api.files.getPathForFile(file),
 			);
 
-			// Classify paths into files and folders via IPC
 			const { files: filePaths, folders: folderPaths } =
 				await window.api.folder.classify(allPaths);
 
-			// Step 1: Process loose files first (mixed drop ordering per D-07)
+			// Loose files first (mixed drop ordering per D-07)
 			const looseEntries: FileEntry[] = filePaths
 				.filter((p) => isSupportedFile({ filename: p }))
 				.map((p) => {
@@ -89,22 +90,18 @@ export function DropZone({
 				processFiles(looseEntries);
 			}
 
-			// Step 2: Process each folder
 			for (const folderPath of folderPaths) {
 				const folderBaseName =
 					folderPath.split(/[/\\]/).filter(Boolean).pop() || folderPath;
 
-				// Show scanning state immediately
 				dispatch({
 					type: "ADD_FOLDER_SCANNING",
 					folder: folderBaseName + "/",
 				});
 
-				// Expand folder via IPC
 				const result = await window.api.folder.expand(folderPath);
 
 				if (result.error !== undefined) {
-					// Folder expansion failed
 					dispatch({
 						type: "UPDATE_FOLDER_STATE",
 						folder: folderBaseName + "/",
@@ -122,22 +119,19 @@ export function DropZone({
 				});
 
 				if (folderEntries.length === 0) {
-					// Empty folder
 					dispatch({
 						type: "UPDATE_FOLDER_STATE",
 						folder: folderBaseName + "/",
 						status: "empty",
 						fileCount: 0,
 					});
-					// Auto-collapse after 1.5s
 					setTimeout(() => {
 						dispatch({
 							type: "COLLAPSE_FOLDER",
 							folder: folderBaseName + "/",
 						});
-					}, 1500);
+					}, FOLDER_AUTO_COLLAPSE_DELAY_MS);
 				} else {
-					// Add files and update folder state
 					dispatch({ type: "ADD_FILES", files: folderEntries });
 					dispatch({
 						type: "UPDATE_FOLDER_STATE",
@@ -145,11 +139,9 @@ export function DropZone({
 						status: "complete",
 						fileCount: folderEntries.length,
 					});
-					// Auto-start processing
 					processFiles(folderEntries);
 				}
 
-				// Show toast for skipped folders
 				if (result.skippedCount > 0 && onSkipToast !== undefined) {
 					onSkipToast(`${result.skippedCount} folders couldn't be read`);
 				}
@@ -158,7 +150,7 @@ export function DropZone({
 		[dispatch, processFiles, onSkipToast],
 	);
 
-	// Listen for files added via File > Open menu
+	// Files added via File > Open menu
 	useEffect(() => {
 		const cleanup = window.api.files.onFileOpenAddFiles((menuFilePaths) => {
 			const entries = menuFilePaths

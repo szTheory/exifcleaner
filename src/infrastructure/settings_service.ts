@@ -1,6 +1,8 @@
 import { readFile, writeFile, rename } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import type { Settings, SettingsFile } from "../domain";
+
+const SETTINGS_SAVE_RETRY_DELAY_MS = 100;
 import {
 	DEFAULT_SETTINGS,
 	CURRENT_SCHEMA_VERSION,
@@ -86,9 +88,10 @@ export class SettingsService implements SettingsPort {
 				context: { filePath: this.filePath, error: String(err) },
 			});
 
-			// One retry after 100ms
 			try {
-				await new Promise((resolve) => setTimeout(resolve, 100));
+				await new Promise((resolve) =>
+					setTimeout(resolve, SETTINGS_SAVE_RETRY_DELAY_MS),
+				);
 				await writeFile(tempPath, json, "utf-8");
 				await rename(tempPath, this.filePath);
 				this.cache = settings;
