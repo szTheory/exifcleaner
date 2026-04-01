@@ -13,6 +13,33 @@ export interface WindowState {
 	isMaximized: boolean;
 }
 
+export function isWindowState(value: unknown): value is WindowState {
+	if (typeof value !== "object" || value === null) {
+		return false;
+	}
+
+	const obj = value as Record<string, unknown>;
+
+	if (typeof obj["width"] !== "number" || typeof obj["height"] !== "number") {
+		return false;
+	}
+
+	if (typeof obj["isMaximized"] !== "boolean") {
+		return false;
+	}
+
+	// x and y are optional but must be number if present
+	if (obj["x"] !== undefined && typeof obj["x"] !== "number") {
+		return false;
+	}
+
+	if (obj["y"] !== undefined && typeof obj["y"] !== "number") {
+		return false;
+	}
+
+	return true;
+}
+
 const DEFAULT_WIDTH = 580;
 const DEFAULT_HEIGHT = 337;
 

@@ -32,6 +32,59 @@ export interface SettingsFile {
 	settings: Settings;
 }
 
+const VALID_THEME_MODES: ReadonlySet<string> = new Set([
+	"light",
+	"dark",
+	"system",
+]);
+
+function isValidThemeMode(value: unknown): value is ThemeMode {
+	return typeof value === "string" && VALID_THEME_MODES.has(value);
+}
+
+export function isSettingsFile(value: unknown): value is SettingsFile {
+	if (typeof value !== "object" || value === null) {
+		return false;
+	}
+
+	const obj = value as Record<string, unknown>;
+
+	if (typeof obj["version"] !== "number") {
+		return false;
+	}
+
+	if (typeof obj["settings"] !== "object" || obj["settings"] === null) {
+		return false;
+	}
+
+	const settings = obj["settings"] as Record<string, unknown>;
+
+	if (
+		typeof settings["preserveOrientation"] !== "boolean" ||
+		typeof settings["preserveColorProfile"] !== "boolean" ||
+		typeof settings["saveAsCopy"] !== "boolean" ||
+		typeof settings["removeXattrs"] !== "boolean" ||
+		typeof settings["preserveTimestamps"] !== "boolean"
+	) {
+		return false;
+	}
+
+	// language must be string or null
+	if (
+		settings["language"] !== null &&
+		typeof settings["language"] !== "string"
+	) {
+		return false;
+	}
+
+	// themeMode must be a valid ThemeMode
+	if (!isValidThemeMode(settings["themeMode"])) {
+		return false;
+	}
+
+	return true;
+}
+
 export function migrateSettings(file: SettingsFile): {
 	settings: Settings;
 	didMigrate: boolean;
@@ -67,16 +120,6 @@ export function migrateSettings(file: SettingsFile): {
 	}
 
 	return { settings, didMigrate };
-}
-
-const VALID_THEME_MODES: ReadonlySet<string> = new Set([
-	"light",
-	"dark",
-	"system",
-]);
-
-function isValidThemeMode(value: unknown): value is ThemeMode {
-	return typeof value === "string" && VALID_THEME_MODES.has(value);
 }
 
 export function validateSettings(input: unknown): Result<Settings> {
