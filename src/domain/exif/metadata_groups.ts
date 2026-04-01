@@ -1,18 +1,20 @@
 // Pure domain logic -- zero dependencies, zero I/O.
 // Metadata diff computation and ExifTool family 2 group name mapping.
 
+import { getOrThrow } from "../../common/types";
+
 export interface MetadataDiffField {
-	name: string;
-	value: unknown;
-	removed: boolean;
+	readonly name: string;
+	readonly value: unknown;
+	readonly removed: boolean;
 }
 
 export interface MetadataDiffGroup {
-	rawGroupName: string;
-	friendlyNameKey: string;
-	fields: MetadataDiffField[];
-	removedCount: number;
-	totalCount: number;
+	readonly rawGroupName: string;
+	readonly friendlyNameKey: string;
+	readonly fields: readonly MetadataDiffField[];
+	readonly removedCount: number;
+	readonly totalCount: number;
 }
 
 const EXIFTOOL_GROUP_FRIENDLY_KEYS: Record<string, string> = {
@@ -62,7 +64,7 @@ export function computeMetadataDiff(
 			groupMap.set(group, []);
 		}
 		const removed = !(key in after);
-		groupMap.get(group)!.push({ name: field, value, removed });
+		getOrThrow(groupMap, group).push({ name: field, value, removed });
 	}
 
 	// Process after-only keys (preserved fields not in before -- rare but possible)
@@ -74,7 +76,7 @@ export function computeMetadataDiff(
 		if (!groupMap.has(group)) {
 			groupMap.set(group, []);
 		}
-		groupMap.get(group)!.push({ name: field, value, removed: false });
+		getOrThrow(groupMap, group).push({ name: field, value, removed: false });
 	}
 
 	// Build sorted groups

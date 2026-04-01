@@ -10,9 +10,9 @@ import type { XattrCommand } from "./commands/xattr_command";
 import { generateCleanedPath } from "../domain";
 
 export interface FileResult {
-	filePath: string;
-	status: "success" | "error" | "skipped";
-	error?: string;
+	readonly filePath: string;
+	readonly status: "success" | "error" | "skipped";
+	readonly error?: string | undefined;
 }
 
 export class ProcessFilesUseCase {

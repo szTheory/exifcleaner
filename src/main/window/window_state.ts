@@ -5,11 +5,11 @@ import { randomBytes } from "node:crypto";
 import path from "node:path";
 
 export interface WindowState {
-	width: number;
-	height: number;
-	x: number | undefined;
-	y: number | undefined;
-	isMaximized: boolean;
+	readonly width: number;
+	readonly height: number;
+	readonly x: number | undefined;
+	readonly y: number | undefined;
+	readonly isMaximized: boolean;
 }
 
 export function isWindowState(value: unknown): value is WindowState {

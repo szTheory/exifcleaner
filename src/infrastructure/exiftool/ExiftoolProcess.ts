@@ -169,6 +169,14 @@ export class ExiftoolProcess {
 		executeNum: number,
 		command: string,
 	): Promise<ExifToolResult> {
+		if (!this.process || !this.process.stdin) {
+			throw new Error(
+				"ExifTool process is not open. Call open() before sending commands.",
+			);
+		}
+
+		const stdin = this.process.stdin;
+
 		return new Promise((resolve, reject) => {
 			// Set 30s timeout for command
 			const timeout = setTimeout(() => {
@@ -178,9 +186,7 @@ export class ExiftoolProcess {
 
 			this.pendingCommands.set(executeNum, { resolve, reject, timeout });
 
-			// Safe: process and stdin guaranteed non-null — sendCommand validates
-			// this.process !== null (line 126) and stdin exists on spawned processes
-			this.process!.stdin!.write(command + "\n");
+			stdin.write(command + "\n");
 		});
 	}
 
@@ -192,7 +198,11 @@ export class ExiftoolProcess {
 		let match: RegExpExecArray | null;
 
 		while ((match = readyRegex.exec(this.stdoutBuffer)) !== null) {
-			const executeNum = parseInt(match[1]!, 10);
+			const marker = match[1];
+			if (marker === undefined) {
+				continue;
+			}
+			const executeNum = parseInt(marker, 10);
 			const markerIndex = match.index;
 
 			// Extract JSON up to the marker

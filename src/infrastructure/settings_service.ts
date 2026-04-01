@@ -13,10 +13,11 @@ import type { LoggerPort } from "../application";
 // Validates current-schema OR legacy settings files (which need migration).
 // isSettingsFile only passes for current-schema shape, so legacy v1/v2 files
 // need a looser check before being passed to migrateSettings.
-function isSettingsFileOrLegacy(value: unknown): boolean {
+function isSettingsFileOrLegacy(value: unknown): value is SettingsFile {
 	if (isSettingsFile(value)) return true;
 	if (typeof value !== "object" || value === null) return false;
-	const obj = value as Record<string, unknown>;
+	const obj: Record<string, unknown> = Object.create(null);
+	Object.assign(obj, value);
 	return (
 		typeof obj["version"] === "number" &&
 		typeof obj["settings"] === "object" &&
@@ -48,9 +49,7 @@ export class SettingsService implements SettingsPort {
 				this.cache = { ...DEFAULT_SETTINGS };
 				return this.cache;
 			}
-			const { settings, didMigrate } = migrateSettings(
-				parsed as SettingsFile,
-			);
+			const { settings, didMigrate } = migrateSettings(parsed);
 			this.cache = settings;
 
 			if (didMigrate) {

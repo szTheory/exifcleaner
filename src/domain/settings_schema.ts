@@ -107,14 +107,16 @@ export function migrateSettings(file: SettingsFile): {
 		const oldRaw: Record<string, unknown> = Object.create(null);
 		Object.assign(oldRaw, file.settings);
 		const preserveRotation = oldRaw["preserveRotation"] !== false;
+		// Construct clean Settings object without legacy preserveRotation key
 		settings = {
-			...DEFAULT_SETTINGS,
-			...settings,
 			preserveOrientation: preserveRotation,
 			preserveColorProfile: preserveRotation,
+			saveAsCopy: settings.saveAsCopy,
+			removeXattrs: settings.removeXattrs,
+			preserveTimestamps: settings.preserveTimestamps,
+			language: settings.language,
+			themeMode: settings.themeMode,
 		};
-		// Remove legacy field so it doesn't persist in the migrated object
-		delete (settings as unknown as Record<string, unknown>)["preserveRotation"];
 		didMigrate = true;
 	}
 
