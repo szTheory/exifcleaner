@@ -1,5 +1,6 @@
 import type { ExifToolPort } from "../exiftool_port";
 import type { Result } from "../../common";
+import type { ExifError } from "../../domain";
 
 export class StripMetadataCommand {
 	private readonly exiftool: ExifToolPort;
@@ -24,9 +25,12 @@ export class StripMetadataCommand {
 		saveAsCopy: boolean;
 		outputPath?: string | undefined;
 		signal?: AbortSignal | undefined;
-	}): Promise<Result<{ tagsRemoved: number }>> {
+	}): Promise<Result<{ tagsRemoved: number }, ExifError>> {
 		if (signal?.aborted) {
-			return { ok: false, error: "Aborted" };
+			return {
+				ok: false,
+				error: { code: "exiftool-error", detail: "Aborted" },
+			};
 		}
 
 		// CRITICAL FLAG ORDER: -all= must come before -TagsFromFile
@@ -53,8 +57,8 @@ export class StripMetadataCommand {
 
 		const result = await this.exiftool.removeMetadata({ filePath, args });
 
-		if (result.error !== null) {
-			return { ok: false, error: result.error };
+		if (!result.ok) {
+			return result;
 		}
 
 		return { ok: true, value: { tagsRemoved: 0 } };

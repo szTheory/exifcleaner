@@ -145,7 +145,7 @@ describe("arg assembly", () => {
 });
 
 describe("signal handling", () => {
-	it("returns Aborted when signal is already aborted", async () => {
+	it("returns error when signal is already aborted", async () => {
 		const controller = new AbortController();
 		controller.abort();
 
@@ -160,7 +160,7 @@ describe("signal handling", () => {
 
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
-			expect(result.error).toBe("Aborted");
+			expect(result.error.code).toBe("exiftool-error");
 		}
 		expect(exiftool.calls).toHaveLength(0);
 	});
@@ -168,7 +168,10 @@ describe("signal handling", () => {
 
 describe("error handling", () => {
 	it("returns error result when exiftool fails", async () => {
-		exiftool.removeResult = { data: null, error: "Permission denied" };
+		exiftool.removeResult = {
+			ok: false,
+			error: { code: "exiftool-error", detail: "Permission denied" },
+		};
 
 		const result = await command.execute({
 			filePath: "/tmp/photo.jpg",
@@ -180,7 +183,7 @@ describe("error handling", () => {
 
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
-			expect(result.error).toBe("Permission denied");
+			expect(result.error.code).toBe("exiftool-error");
 		}
 	});
 });

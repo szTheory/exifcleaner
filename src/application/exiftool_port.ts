@@ -1,4 +1,5 @@
 import type { Result } from "../common";
+import type { ExifError } from "../domain";
 
 export interface ExifToolPort {
 	open(): Promise<number>;
@@ -9,12 +10,12 @@ export interface ExifToolPort {
 	}: {
 		filePath: string;
 		args: string[];
-	}): Promise<{ data: Record<string, unknown>[] | null; error: string | null }>;
+	}): Promise<Result<Record<string, unknown>[], ExifError>>;
 	removeMetadata({
 		filePath,
 		args,
 	}: {
 		filePath: string;
 		args: string[];
-	}): Promise<{ data: null; error: string | null }>;
+	}): Promise<Result<void, ExifError>>;
 }
