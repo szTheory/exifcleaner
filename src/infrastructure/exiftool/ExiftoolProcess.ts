@@ -1,5 +1,9 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import type { ExifToolResult, ExifToolCloseResult } from "./types";
+import {
+	extractReadySegments,
+	parseExiftoolOutput,
+} from "./exiftool_stdout_parser";
 
 const EXIFTOOL_CLOSE_TIMEOUT_MS = 5000;
 const EXIFTOOL_COMMAND_TIMEOUT_MS = 30000;
@@ -195,71 +199,17 @@ export class ExiftoolProcess {
 
 	private parseStdout(chunk: string): void {
 		this.stdoutBuffer += chunk;
+		const { completed, remaining } = extractReadySegments({
+			buffer: this.stdoutBuffer,
+		});
+		this.stdoutBuffer = remaining;
 
-		const readyRegex = /\{ready(\d+)\}/g;
-		let match: RegExpExecArray | null;
-
-		while ((match = readyRegex.exec(this.stdoutBuffer)) !== null) {
-			const marker = match[1];
-			if (marker === undefined) {
-				continue;
-			}
-			const executeNum = parseInt(marker, 10);
-			const markerIndex = match.index;
-
-			const jsonStr = this.stdoutBuffer.substring(0, markerIndex).trim();
-
-			this.stdoutBuffer = this.stdoutBuffer.substring(
-				markerIndex + match[0].length,
-			);
-			this.stdoutBuffer = this.stdoutBuffer.replace(/^\s+/, "");
-
-			// Reset regex lastIndex since we modified the buffer
-			readyRegex.lastIndex = 0;
-
-			const pending = this.pendingCommands.get(executeNum);
+		for (const segment of completed) {
+			const pending = this.pendingCommands.get(segment.executeNum);
 			if (pending) {
 				clearTimeout(pending.timeout);
-				this.pendingCommands.delete(executeNum);
-
-				const isJson =
-					jsonStr.trimStart().startsWith("[") ||
-					jsonStr.trimStart().startsWith("{");
-
-				if (isJson) {
-					try {
-						const parsed = JSON.parse(jsonStr);
-						if (Array.isArray(parsed) && parsed.length > 0) {
-							const firstItem = parsed[0];
-							if (
-								firstItem &&
-								typeof firstItem === "object" &&
-								"Error" in firstItem
-							) {
-								pending.resolve({
-									data: null,
-									error: String(firstItem.Error),
-								});
-							} else {
-								pending.resolve({ data: parsed, error: null });
-							}
-						} else {
-							pending.resolve({ data: parsed, error: null });
-						}
-					} catch (err) {
-						pending.resolve({
-							data: null,
-							error: `Failed to parse ExifTool output: ${err instanceof Error ? err.message : String(err)}`,
-						});
-					}
-				} else if (jsonStr.toLowerCase().includes("error")) {
-					pending.resolve({
-						data: null,
-						error: jsonStr.trim(),
-					});
-				} else {
-					pending.resolve({ data: null, error: null });
-				}
+				this.pendingCommands.delete(segment.executeNum);
+				pending.resolve(parseExiftoolOutput({ raw: segment.output }));
 			}
 		}
 	}
