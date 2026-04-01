@@ -10,6 +10,20 @@ import {
 import type { SettingsPort } from "../application";
 import type { LoggerPort } from "../application";
 
+// Validates current-schema OR legacy settings files (which need migration).
+// isSettingsFile only passes for current-schema shape, so legacy v1/v2 files
+// need a looser check before being passed to migrateSettings.
+function isSettingsFileOrLegacy(value: unknown): boolean {
+	if (isSettingsFile(value)) return true;
+	if (typeof value !== "object" || value === null) return false;
+	const obj = value as Record<string, unknown>;
+	return (
+		typeof obj["version"] === "number" &&
+		typeof obj["settings"] === "object" &&
+		obj["settings"] !== null
+	);
+}
+
 export class SettingsService implements SettingsPort {
 	private readonly filePath: string;
 	private readonly logger: LoggerPort;
@@ -24,14 +38,19 @@ export class SettingsService implements SettingsPort {
 		try {
 			const raw = await readFile(this.filePath, "utf-8");
 			const parsed: unknown = JSON.parse(raw);
-			if (!isSettingsFile(parsed)) {
+			// Accept current-schema files via full validation, or legacy files
+			// that have version+settings for migration. isSettingsFile checks
+			// current-schema shape, so older versions won't pass it.
+			if (!isSettingsFileOrLegacy(parsed)) {
 				this.logger.warn("Settings file has invalid format, using defaults", {
 					filePath: this.filePath,
 				});
 				this.cache = { ...DEFAULT_SETTINGS };
 				return this.cache;
 			}
-			const { settings, didMigrate } = migrateSettings(parsed);
+			const { settings, didMigrate } = migrateSettings(
+				parsed as SettingsFile,
+			);
 			this.cache = settings;
 
 			if (didMigrate) {

@@ -1,6 +1,7 @@
 // Status icon for file processing states: pending dot, spinner, checkmark, circle-X.
 
 import { FileProcessingStatus } from "../../../domain";
+import { assertNever } from "../../../common";
 
 export function StatusIcon({
 	status,
@@ -95,9 +96,7 @@ export function StatusIcon({
 				</span>
 			);
 
-		default: {
-			const _exhaustive: never = status;
-			throw new Error(`Unhandled status: ${_exhaustive}`);
-		}
+		default:
+			return assertNever(status);
 	}
 }

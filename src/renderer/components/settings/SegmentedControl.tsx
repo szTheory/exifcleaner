@@ -6,7 +6,7 @@ interface SegmentOption<T extends string> {
 	icon: React.JSX.Element;
 }
 
-export function SegmentedControl<T extends string>({
+export function SegmentedControl<const T extends string>({
 	options,
 	value,
 	onChange,
@@ -23,11 +23,17 @@ export function SegmentedControl<T extends string>({
 		if (e.key === "ArrowRight" || e.key === "ArrowDown") {
 			e.preventDefault();
 			const next = (index + 1) % options.length;
-			onChange(options[next]!.value);
+			const nextOption = options[next];
+			if (nextOption !== undefined) {
+				onChange(nextOption.value);
+			}
 		} else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
 			e.preventDefault();
 			const prev = (index - 1 + options.length) % options.length;
-			onChange(options[prev]!.value);
+			const prevOption = options[prev];
+			if (prevOption !== undefined) {
+				onChange(prevOption.value);
+			}
 		}
 	}
 

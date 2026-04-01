@@ -2,6 +2,7 @@
 
 import type { FolderDiscoveryStatus } from "../../contexts/AppContext";
 import { middleTruncatePath } from "../../../domain";
+import { assertNever } from "../../../common";
 import { ChevronIcon } from "../icons/ChevronIcon";
 
 export function FolderRow({
@@ -61,9 +62,7 @@ function renderCount(status: FolderDiscoveryStatus, fileCount: number): string {
 			return `${fileCount} files`;
 		case "empty":
 			return "0 supported files";
-		default: {
-			const _exhaustive: never = status;
-			throw new Error(`Unhandled status: ${_exhaustive}`);
-		}
+		default:
+			return assertNever(status);
 	}
 }

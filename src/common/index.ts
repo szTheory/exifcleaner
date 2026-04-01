@@ -5,3 +5,10 @@ export { assertNever, getOrThrow } from "./types";
 
 export type { Result } from "./result";
 export { IPC_CHANNELS } from "./ipc_channels";
+export type {
+	IpcInvokeMap,
+	IpcSendMap,
+	ExifChannel,
+	SettingsChannel,
+	ThemeChannel,
+} from "./ipc_channels";

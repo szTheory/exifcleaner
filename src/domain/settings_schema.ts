@@ -8,13 +8,13 @@ export const CURRENT_SCHEMA_VERSION = 3;
 export type ThemeMode = "light" | "dark" | "system";
 
 export interface Settings {
-	preserveOrientation: boolean;
-	preserveColorProfile: boolean;
-	saveAsCopy: boolean;
-	removeXattrs: boolean;
-	preserveTimestamps: boolean;
-	language: string | null;
-	themeMode: ThemeMode;
+	readonly preserveOrientation: boolean;
+	readonly preserveColorProfile: boolean;
+	readonly saveAsCopy: boolean;
+	readonly removeXattrs: boolean;
+	readonly preserveTimestamps: boolean;
+	readonly language: string | null;
+	readonly themeMode: ThemeMode;
 }
 
 export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
@@ -28,8 +28,8 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
 });
 
 export interface SettingsFile {
-	version: number;
-	settings: Settings;
+	readonly version: number;
+	readonly settings: Settings;
 }
 
 const VALID_THEME_MODES: ReadonlySet<string> = new Set([
@@ -114,8 +114,7 @@ export function migrateSettings(file: SettingsFile): {
 			preserveColorProfile: preserveRotation,
 		};
 		// Remove legacy field so it doesn't persist in the migrated object
-		const mutable: Record<string, unknown> = settings;
-		delete mutable["preserveRotation"];
+		delete (settings as unknown as Record<string, unknown>)["preserveRotation"];
 		didMigrate = true;
 	}
 

@@ -10,6 +10,7 @@ export type { Settings, SettingsFile, ThemeMode } from "./settings_schema";
 export {
 	DEFAULT_SETTINGS,
 	CURRENT_SCHEMA_VERSION,
+	isSettingsFile,
 	migrateSettings,
 	validateSettings,
 } from "./settings_schema";
