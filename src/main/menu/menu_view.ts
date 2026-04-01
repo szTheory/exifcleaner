@@ -3,6 +3,7 @@ import { nativeTheme, BrowserWindow } from "electron";
 import { i18n } from "../i18n";
 import { IPC_CHANNELS } from "../../common";
 import { LANGUAGE_NAMES } from "../../domain";
+import type { ThemeMode } from "../../domain";
 
 function broadcastThemeSet(mode: "light" | "dark" | "system"): void {
 	const win = BrowserWindow.getAllWindows()[0];
@@ -14,6 +15,8 @@ function broadcastThemeSet(mode: "light" | "dark" | "system"): void {
 // Set by init.ts to avoid circular dependency with container
 let onLanguageChange: ((code: string | null) => void) | null = null;
 let getLanguageSetting: (() => string | null) | null = null;
+let onThemeChange: ((mode: ThemeMode) => void) | null = null;
+let getThemeSetting: (() => ThemeMode) | null = null;
 
 export function setLanguageChangeHandler(
 	handler: (code: string | null) => void,
@@ -23,6 +26,16 @@ export function setLanguageChangeHandler(
 
 export function setLanguageSettingGetter(getter: () => string | null): void {
 	getLanguageSetting = getter;
+}
+
+export function setThemeChangeHandler(
+	handler: (mode: ThemeMode) => void,
+): void {
+	onThemeChange = handler;
+}
+
+export function setThemeSettingGetter(getter: () => ThemeMode): void {
+	getThemeSetting = getter;
 }
 
 function languageSubmenu(): MenuItemConstructorOptions {
@@ -67,28 +80,31 @@ export function viewMenuTemplate(): MenuItemConstructorOptions {
 					{
 						label: i18n({ key: "themeLight" }) || "Light",
 						type: "radio",
-						checked: nativeTheme.themeSource === "light",
+						checked: (getThemeSetting?.() ?? "system") === "light",
 						click: () => {
 							nativeTheme.themeSource = "light";
 							broadcastThemeSet("light");
+							onThemeChange?.("light");
 						},
 					},
 					{
 						label: i18n({ key: "themeAuto" }) || "Auto",
 						type: "radio",
-						checked: nativeTheme.themeSource === "system",
+						checked: (getThemeSetting?.() ?? "system") === "system",
 						click: () => {
 							nativeTheme.themeSource = "system";
 							broadcastThemeSet("system");
+							onThemeChange?.("system");
 						},
 					},
 					{
 						label: i18n({ key: "themeDark" }) || "Dark",
 						type: "radio",
-						checked: nativeTheme.themeSource === "dark",
+						checked: (getThemeSetting?.() ?? "system") === "dark",
 						click: () => {
 							nativeTheme.themeSource = "dark";
 							broadcastThemeSet("dark");
+							onThemeChange?.("dark");
 						},
 					},
 				],

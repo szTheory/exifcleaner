@@ -13,6 +13,8 @@ import { setupFolderHandlers } from "./folder_handlers";
 import {
 	setLanguageChangeHandler,
 	setLanguageSettingGetter,
+	setThemeChangeHandler,
+	setThemeSettingGetter,
 } from "./menu/menu_view";
 import {
 	setDockLanguageChangeHandler,
@@ -71,6 +73,12 @@ export async function init({
 	setLanguageSettingGetter(languageSettingGetter);
 	setDockLanguageChangeHandler(languageChangeHandler);
 	setDockLanguageSettingGetter(languageSettingGetter);
+
+	// Wire theme change handler for View menu (same callback injection pattern as language)
+	setThemeChangeHandler((mode) => {
+		container.settings.update({ partial: { themeMode: mode } });
+	});
+	setThemeSettingGetter(() => container.settings.get().themeMode);
 
 	preloadI18nStrings();
 	setupI18nHandlers();
