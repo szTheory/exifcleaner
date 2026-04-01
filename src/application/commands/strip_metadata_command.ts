@@ -22,8 +22,8 @@ export class StripMetadataCommand {
 		preserveColorProfile: boolean;
 		preserveTimestamps: boolean;
 		saveAsCopy: boolean;
-		outputPath?: string;
-		signal?: AbortSignal;
+		outputPath?: string | undefined;
+		signal?: AbortSignal | undefined;
 	}): Promise<Result<{ tagsRemoved: number }>> {
 		if (signal?.aborted) {
 			return { ok: false, error: "Aborted" };

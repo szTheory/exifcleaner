@@ -25,11 +25,11 @@ export function StatusBar({
 	onCleanMore,
 }: {
 	gearIcon: ReactNode;
-	completedCount?: number;
-	totalCount?: number;
-	totalTagsRemoved?: number;
-	elapsedSeconds?: number;
-	onCleanMore?: () => void;
+	completedCount?: number | undefined;
+	totalCount?: number | undefined;
+	totalTagsRemoved?: number | undefined;
+	elapsedSeconds?: number | undefined;
+	onCleanMore?: (() => void) | undefined;
 }): React.JSX.Element {
 	const { t } = useI18n();
 	const hasStats =
