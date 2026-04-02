@@ -67,16 +67,13 @@ export function setupThemeHandlers({
 
 	// Accent color changes (Windows/Linux; macOS reads on nativeTheme.updated above)
 	if (process.platform === "win32" || process.platform === "linux") {
-		systemPreferences.on(
-			"accent-color-changed",
-			() => {
-				const win = getWindow();
-				if (win) {
-					win.webContents.send(IPC_CHANNELS.THEME_ACCENT_COLOR_CHANGED, {
-						color: getAccentColorHex(),
-					});
-				}
-			},
-		);
+		systemPreferences.on("accent-color-changed", () => {
+			const win = getWindow();
+			if (win) {
+				win.webContents.send(IPC_CHANNELS.THEME_ACCENT_COLOR_CHANGED, {
+					color: getAccentColorHex(),
+				});
+			}
+		});
 	}
 }

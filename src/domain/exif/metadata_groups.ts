@@ -44,9 +44,10 @@ interface ParseGroupedKeyParams {
 	key: string;
 }
 
-export function parseGroupedKey({
-	key,
-}: ParseGroupedKeyParams): { group: string; field: string } {
+export function parseGroupedKey({ key }: ParseGroupedKeyParams): {
+	group: string;
+	field: string;
+} {
 	const colonIndex = key.indexOf(":");
 	if (colonIndex === -1) {
 		return { group: "Other", field: key };

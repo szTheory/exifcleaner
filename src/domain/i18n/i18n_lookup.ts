@@ -43,11 +43,7 @@ interface I18nLookupParams {
 	locale: string;
 }
 
-export function i18nLookup({
-	strings,
-	key,
-	locale,
-}: I18nLookupParams): string {
+export function i18nLookup({ strings, key, locale }: I18nLookupParams): string {
 	const i18nString = strings[key];
 	if (!i18nString) {
 		throw new Error(

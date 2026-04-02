@@ -40,9 +40,7 @@ interface InitParams {
 	browserWindow: BrowserWindow | null;
 }
 
-export async function init({
-	browserWindow,
-}: InitParams): Promise<Container> {
+export async function init({ browserWindow }: InitParams): Promise<Container> {
 	const container = createContainer();
 	await initContainer(container);
 

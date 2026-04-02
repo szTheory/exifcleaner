@@ -80,7 +80,12 @@ async function expandAndProcessFolder({
 
 	const folderEntries: FileEntry[] = result.files.map((filePath) => {
 		const name = window.api.files.basename(filePath);
-		return buildFileEntry(filePath, name, 0, computeFolderLabel(folderPath, filePath));
+		return buildFileEntry(
+			filePath,
+			name,
+			0,
+			computeFolderLabel(folderPath, filePath),
+		);
 	});
 
 	if (folderEntries.length === 0) {

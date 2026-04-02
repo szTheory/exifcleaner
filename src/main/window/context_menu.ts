@@ -15,7 +15,10 @@ function buildMenu(canCopy: boolean): Menu {
 		);
 	}
 	menu.append(
-		new MenuItem({ label: i18n({ key: "contextmenu.select-all" }), role: "selectAll" }),
+		new MenuItem({
+			label: i18n({ key: "contextmenu.select-all" }),
+			role: "selectAll",
+		}),
 	);
 	return menu;
 }

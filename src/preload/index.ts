@@ -38,9 +38,7 @@ function isThemeChangedPayload(
 	);
 }
 
-function isAccentColorPayload(
-	value: unknown,
-): value is { color: string } {
+function isAccentColorPayload(value: unknown): value is { color: string } {
 	return (
 		typeof value === "object" &&
 		value !== null &&
@@ -62,8 +60,7 @@ function isSettings(value: unknown): value is Settings {
 const api: ElectronApi = {
 	exif: {
 		readMetadata: (filePath: string) => typedInvoke("exif:read", filePath),
-		removeMetadata: (filePath: string) =>
-			typedInvoke("exif:remove", filePath),
+		removeMetadata: (filePath: string) => typedInvoke("exif:remove", filePath),
 	},
 
 	i18n: {
@@ -86,8 +83,7 @@ const api: ElectronApi = {
 	files: {
 		basename,
 		getPathForFile: (file: File) => webUtils.getPathForFile(file),
-		notifyFilesAdded: (count: number) =>
-			ipcRenderer.send("files-added", count),
+		notifyFilesAdded: (count: number) => ipcRenderer.send("files-added", count),
 		notifyFileProcessed: () => ipcRenderer.send("file-processed"),
 		notifyAllFilesProcessed: () => ipcRenderer.send("all-files-processed"),
 		onFileOpenAddFiles: (callback: (filePaths: string[]) => void) => {
@@ -102,16 +98,12 @@ const api: ElectronApi = {
 
 	theme: {
 		get: () => typedInvoke("theme:get"),
-		set: (mode: "light" | "dark" | "system") =>
-			typedInvoke("theme:set", mode),
+		set: (mode: "light" | "dark" | "system") => typedInvoke("theme:set", mode),
 		getAccentColor: () => typedInvoke("theme:accent-color"),
 		onChanged: (
 			callback: (payload: { shouldUseDarkColors: boolean }) => void,
 		) => {
-			const handler = (
-				_event: Electron.IpcRendererEvent,
-				payload: unknown,
-			) => {
+			const handler = (_event: Electron.IpcRendererEvent, payload: unknown) => {
 				if (isThemeChangedPayload(payload)) {
 					callback(payload);
 				}
@@ -119,13 +111,8 @@ const api: ElectronApi = {
 			ipcRenderer.on("theme:changed", handler);
 			return () => ipcRenderer.removeListener("theme:changed", handler);
 		},
-		onAccentColorChanged: (
-			callback: (payload: { color: string }) => void,
-		) => {
-			const handler = (
-				_event: Electron.IpcRendererEvent,
-				payload: unknown,
-			) => {
+		onAccentColorChanged: (callback: (payload: { color: string }) => void) => {
+			const handler = (_event: Electron.IpcRendererEvent, payload: unknown) => {
 				if (isAccentColorPayload(payload)) {
 					callback(payload);
 				}
@@ -137,10 +124,7 @@ const api: ElectronApi = {
 		onThemeModeChanged: (
 			callback: (mode: "light" | "dark" | "system") => void,
 		) => {
-			const handler = (
-				_event: Electron.IpcRendererEvent,
-				mode: unknown,
-			) => {
+			const handler = (_event: Electron.IpcRendererEvent, mode: unknown) => {
 				if (isThemeMode(mode)) {
 					callback(mode);
 				}
@@ -174,8 +158,7 @@ const api: ElectronApi = {
 	},
 
 	reveal: {
-		showInFolder: (filePath: string) =>
-			typedInvoke("file:reveal", filePath),
+		showInFolder: (filePath: string) => typedInvoke("file:reveal", filePath),
 		showContextMenu: (paths: { cleanedPath: string; originalPath: string }) =>
 			typedInvoke("file:reveal-context-menu", paths),
 	},

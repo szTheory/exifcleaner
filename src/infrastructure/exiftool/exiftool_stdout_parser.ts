@@ -40,11 +40,7 @@ export function extractReadySegments({
 	return { completed, remaining };
 }
 
-export function parseExiftoolOutput({
-	raw,
-}: {
-	raw: string;
-}): ExifToolResult {
+export function parseExiftoolOutput({ raw }: { raw: string }): ExifToolResult {
 	if (raw === "") {
 		return { data: null, error: null };
 	}
@@ -64,9 +60,7 @@ export function parseExiftoolOutput({
 				) {
 					return {
 						data: null,
-						error: String(
-							(firstItem as Record<string, unknown>).Error,
-						),
+						error: String((firstItem as Record<string, unknown>).Error),
 					};
 				}
 				return { data: parsed as Record<string, unknown>[], error: null };

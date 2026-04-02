@@ -18,7 +18,10 @@ export function FolderRow({
 	onToggle: () => void;
 	discoveryStatus: FolderDiscoveryStatus;
 }): React.JSX.Element {
-	const displayLabel = middleTruncatePath({ folderPath: folder, maxLength: 40 });
+	const displayLabel = middleTruncatePath({
+		folderPath: folder,
+		maxLength: 40,
+	});
 
 	return (
 		<div className="folder-row">
