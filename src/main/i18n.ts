@@ -1,25 +1,23 @@
 import { app, ipcMain, BrowserWindow } from "electron";
-import {
-	i18n as i18nCommon,
-	getI18nStrings,
-} from "../infrastructure/electron/i18n_strings";
-import { IPC_EVENT_NAME_GET_LOCALE } from "../domain/ipc_channels";
-import { IPC_CHANNELS } from "../infrastructure/ipc/ipc_channels";
+import { i18n as i18nCommon, getI18nStrings } from "../infrastructure";
+import { IPC_CHANNELS } from "../common";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import { getLocaleSchema, getI18nStringsSchema } from "./ipc/ipc_schemas";
 import type { Container } from "./container";
-import { setupMenus } from "./menu";
-
-export { IPC_EVENT_NAME_GET_LOCALE };
 
 let containerRef: Container | null = null;
+let onLanguageChangeCallback: (() => void) | null = null;
 
 export function setContainer(container: Container): void {
 	containerRef = container;
 }
 
-export function i18n(key: string): string {
-	return i18nCommon(key, locale());
+interface MainI18nParams {
+	key: string;
+}
+
+export function i18n({ key }: MainI18nParams): string {
+	return i18nCommon({ key, locale: locale() });
 }
 
 export function locale(): string {
@@ -32,13 +30,17 @@ export function locale(): string {
 	return app.getLocale();
 }
 
+export function setLanguageChangeCallback(callback: () => void): void {
+	onLanguageChangeCallback = callback;
+}
+
 export function rebuildMenusForLanguageChange(): void {
-	setupMenus();
+	onLanguageChangeCallback?.();
 }
 
 export function setupI18nHandlers(): void {
 	ipcMain.handle(
-		IPC_EVENT_NAME_GET_LOCALE,
+		IPC_CHANNELS.GET_LOCALE,
 		createValidatedHandler(getLocaleSchema, async () => {
 			return locale();
 		}),

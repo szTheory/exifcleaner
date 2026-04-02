@@ -25,12 +25,6 @@ export async function launchApp(): Promise<{
 	await window.waitForLoadState("domcontentloaded");
 	// Wait for the React app to mount (main element with role="main")
 	await window.waitForSelector("[role='main']", { timeout: 10000 });
-	// Wait for the BrowserWindow to become visible (ready-to-show → show)
-	await app.evaluate(({ BrowserWindow }) => {
-		const win = BrowserWindow.getAllWindows()[0];
-		if (!win || win.isVisible()) return;
-		return new Promise<void>((resolve) => win.once("show", resolve));
-	});
 	return { app, window };
 }
 

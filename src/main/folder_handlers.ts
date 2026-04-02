@@ -3,6 +3,8 @@ import { stat } from "node:fs/promises";
 import type { Container } from "./container";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import { folderClassifySchema, folderExpandSchema } from "./ipc/ipc_schemas";
+import { logError } from "../common";
+import { formatFolderError } from "../domain";
 
 export function setupFolderHandlers({
 	container,
@@ -24,8 +26,8 @@ export function setupFolderHandlers({
 						files.push(p);
 					}
 				} catch (err: unknown) {
-					// Skip inaccessible paths (ENOENT, EPERM)
-					console.warn(`[folder:classify] Skipped inaccessible path: ${p}`);
+					// Skip inaccessible paths (ENOENT, EPERM) — expected for stale drag-drop
+					logError("folder:classify", err);
 				}
 			}
 
@@ -42,7 +44,11 @@ export function setupFolderHandlers({
 				return { files: result.value, skippedCount: 0 };
 			}
 
-			return { files: [], skippedCount: 0, error: result.error };
+			return {
+				files: [],
+				skippedCount: 0,
+				error: formatFolderError(result.error),
+			};
 		}),
 	);
 }

@@ -1,18 +1,18 @@
 import type { ExifToolPort } from "../../src/application/exiftool_port";
 import type { Result } from "../../src/common/result";
+import type { ExifError } from "../../src/domain/exif/exif_errors";
 
 export class FakeExifTool implements ExifToolPort {
 	calls: Array<{ method: string; args: unknown[] }> = [];
 
-	readResult: { data: Record<string, unknown>[] | null; error: string | null } =
-		{
-			data: [{ FileName: "test.jpg" }],
-			error: null,
-		};
+	readResult: Result<Record<string, unknown>[], ExifError> = {
+		ok: true,
+		value: [{ FileName: "test.jpg" }],
+	};
 
-	removeResult: { data: null; error: string | null } = {
-		data: null,
-		error: null,
+	removeResult: Result<void, ExifError> = {
+		ok: true,
+		value: undefined,
 	};
 
 	async open(): Promise<number> {
@@ -25,18 +25,24 @@ export class FakeExifTool implements ExifToolPort {
 		return { ok: true, value: undefined };
 	}
 
-	async readMetadata(
-		filePath: string,
-		args: string[],
-	): Promise<{ data: Record<string, unknown>[] | null; error: string | null }> {
+	async readMetadata({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}): Promise<Result<Record<string, unknown>[], ExifError>> {
 		this.calls.push({ method: "readMetadata", args: [filePath, args] });
 		return this.readResult;
 	}
 
-	async removeMetadata(
-		filePath: string,
-		args: string[],
-	): Promise<{ data: null; error: string | null }> {
+	async removeMetadata({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}): Promise<Result<void, ExifError>> {
 		this.calls.push({ method: "removeMetadata", args: [filePath, args] });
 		return this.removeResult;
 	}

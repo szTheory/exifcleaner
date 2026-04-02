@@ -1,5 +1,5 @@
 import { it, expect, beforeEach } from "vitest";
-import { ReadMetadataQuery } from "../../src/application/read_metadata_query";
+import { ReadMetadataQuery } from "../../src/application/queries/read_metadata_query";
 import { FakeExifTool } from "../fakes/fake_exiftool";
 
 let exiftool: FakeExifTool;
@@ -12,8 +12,8 @@ beforeEach(() => {
 
 it("reads and cleans metadata from a file", async () => {
 	exiftool.readResult = {
-		data: [{ FileName: "test.jpg", SourceFile: "/tmp/test.jpg", Make: "Canon" }],
-		error: null,
+		ok: true,
+		value: [{ FileName: "test.jpg", SourceFile: "/tmp/test.jpg", Make: "Canon" }],
 	};
 
 	const result = await query.execute({ filePath: "/tmp/test.jpg" });
@@ -28,7 +28,7 @@ it("reads and cleans metadata from a file", async () => {
 });
 
 it("returns empty object when no metadata entries", async () => {
-	exiftool.readResult = { data: [], error: null };
+	exiftool.readResult = { ok: true, value: [] };
 
 	const result = await query.execute({ filePath: "/tmp/test.jpg" });
 
@@ -39,12 +39,15 @@ it("returns empty object when no metadata entries", async () => {
 });
 
 it("returns error when exiftool fails", async () => {
-	exiftool.readResult = { data: null, error: "File not found" };
+	exiftool.readResult = {
+		ok: false,
+		error: { code: "exiftool-error", detail: "File not found" },
+	};
 
 	const result = await query.execute({ filePath: "/tmp/test.jpg" });
 
 	expect(result.ok).toBe(false);
 	if (!result.ok) {
-		expect(result.error).toBe("File not found");
+		expect(result.error.code).toBe("exiftool-error");
 	}
 });

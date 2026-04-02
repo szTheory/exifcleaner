@@ -8,13 +8,13 @@ export const CURRENT_SCHEMA_VERSION = 3;
 export type ThemeMode = "light" | "dark" | "system";
 
 export interface Settings {
-	preserveOrientation: boolean;
-	preserveColorProfile: boolean;
-	saveAsCopy: boolean;
-	removeXattrs: boolean;
-	preserveTimestamps: boolean;
-	language: string | null;
-	themeMode: ThemeMode;
+	readonly preserveOrientation: boolean;
+	readonly preserveColorProfile: boolean;
+	readonly saveAsCopy: boolean;
+	readonly removeXattrs: boolean;
+	readonly preserveTimestamps: boolean;
+	readonly language: string | null;
+	readonly themeMode: ThemeMode;
 }
 
 export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
@@ -28,11 +28,72 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
 });
 
 export interface SettingsFile {
-	version: number;
-	settings: Settings;
+	readonly version: number;
+	readonly settings: Settings;
 }
 
-export function migrateSettings(file: SettingsFile): {
+const VALID_THEME_MODES: ReadonlySet<string> = new Set([
+	"light",
+	"dark",
+	"system",
+]);
+
+// Type guard functions keep positional params (TypeScript type predicates
+// cannot reference destructured binding elements).
+function isValidThemeMode(value: unknown): value is ThemeMode {
+	return typeof value === "string" && VALID_THEME_MODES.has(value);
+}
+
+export function isSettingsFile(value: unknown): value is SettingsFile {
+	if (typeof value !== "object" || value === null) {
+		return false;
+	}
+
+	const obj: Record<string, unknown> = Object.create(null);
+	Object.assign(obj, value);
+
+	if (typeof obj["version"] !== "number") {
+		return false;
+	}
+
+	if (typeof obj["settings"] !== "object" || obj["settings"] === null) {
+		return false;
+	}
+
+	const settingsObj: Record<string, unknown> = Object.create(null);
+	Object.assign(settingsObj, obj["settings"]);
+
+	if (
+		typeof settingsObj["preserveOrientation"] !== "boolean" ||
+		typeof settingsObj["preserveColorProfile"] !== "boolean" ||
+		typeof settingsObj["saveAsCopy"] !== "boolean" ||
+		typeof settingsObj["removeXattrs"] !== "boolean" ||
+		typeof settingsObj["preserveTimestamps"] !== "boolean"
+	) {
+		return false;
+	}
+
+	// language must be string or null
+	if (
+		settingsObj["language"] !== null &&
+		typeof settingsObj["language"] !== "string"
+	) {
+		return false;
+	}
+
+	// themeMode must be a valid ThemeMode
+	if (!isValidThemeMode(settingsObj["themeMode"])) {
+		return false;
+	}
+
+	return true;
+}
+
+interface MigrateSettingsParams {
+	file: SettingsFile;
+}
+
+export function migrateSettings({ file }: MigrateSettingsParams): {
 	settings: Settings;
 	didMigrate: boolean;
 } {
@@ -48,15 +109,20 @@ export function migrateSettings(file: SettingsFile): {
 
 	// v1 -> v2: Split preserveRotation into preserveOrientation + preserveColorProfile
 	if (file.version < 2) {
-		const oldSettings = file.settings as unknown as Record<string, unknown>;
-		const preserveRotation = oldSettings["preserveRotation"] !== false;
+		// Old v1 settings may have a preserveRotation field not in current type
+		const oldRaw: Record<string, unknown> = Object.create(null);
+		Object.assign(oldRaw, file.settings);
+		const preserveRotation = oldRaw["preserveRotation"] !== false;
+		// Construct clean Settings object without legacy preserveRotation key
 		settings = {
-			...DEFAULT_SETTINGS,
-			...settings,
 			preserveOrientation: preserveRotation,
 			preserveColorProfile: preserveRotation,
+			saveAsCopy: settings.saveAsCopy,
+			removeXattrs: settings.removeXattrs,
+			preserveTimestamps: settings.preserveTimestamps,
+			language: settings.language,
+			themeMode: settings.themeMode,
 		};
-		delete (settings as unknown as Record<string, unknown>)["preserveRotation"];
 		didMigrate = true;
 	}
 
@@ -69,22 +135,19 @@ export function migrateSettings(file: SettingsFile): {
 	return { settings, didMigrate };
 }
 
-const VALID_THEME_MODES: ReadonlySet<string> = new Set([
-	"light",
-	"dark",
-	"system",
-]);
-
-function isValidThemeMode(value: unknown): value is ThemeMode {
-	return typeof value === "string" && VALID_THEME_MODES.has(value);
+interface ValidateSettingsParams {
+	input: unknown;
 }
 
-export function validateSettings(input: unknown): Result<Settings> {
+export function validateSettings({
+	input,
+}: ValidateSettingsParams): Result<Settings> {
 	if (typeof input !== "object" || input === null) {
 		return { ok: false, error: "Settings must be a non-null object" };
 	}
 
-	const raw = input as Record<string, unknown>;
+	const raw: Record<string, unknown> = Object.create(null);
+	Object.assign(raw, input);
 
 	const settings: Settings = {
 		preserveOrientation:
@@ -108,9 +171,11 @@ export function validateSettings(input: unknown): Result<Settings> {
 				? raw["preserveTimestamps"]
 				: DEFAULT_SETTINGS.preserveTimestamps,
 		language:
-			typeof raw["language"] === "string" || raw["language"] === null
-				? (raw["language"] as string | null)
-				: DEFAULT_SETTINGS.language,
+			typeof raw["language"] === "string"
+				? raw["language"]
+				: raw["language"] === null
+					? null
+					: DEFAULT_SETTINGS.language,
 		themeMode: isValidThemeMode(raw["themeMode"])
 			? raw["themeMode"]
 			: DEFAULT_SETTINGS.themeMode,

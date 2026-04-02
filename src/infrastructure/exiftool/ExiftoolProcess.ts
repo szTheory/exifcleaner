@@ -1,5 +1,12 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import type { ExifToolResult, ExifToolCloseResult } from "./types";
+import {
+	extractReadySegments,
+	parseExiftoolOutput,
+} from "./exiftool_stdout_parser";
+
+const EXIFTOOL_CLOSE_TIMEOUT_MS = 5000;
+const EXIFTOOL_COMMAND_TIMEOUT_MS = 30000;
 
 interface CommandResolver {
 	resolve: (result: ExifToolResult) => void;
@@ -15,7 +22,7 @@ export class ExiftoolProcess {
 	private stdoutBuffer = "";
 	private stderrBuffer = "";
 
-	constructor(binPath: string) {
+	constructor({ binPath }: { binPath: string }) {
 		this.binPath = binPath;
 	}
 
@@ -27,14 +34,12 @@ export class ExiftoolProcess {
 		const proc = spawn(this.binPath, ["-stay_open", "True", "-@", "-"]);
 		this.process = proc;
 
-		// Handle spawn errors
 		proc.on("error", (err) => {
 			console.error("ExifTool process error:", err);
 			this.rejectAllPending(err);
 			this.process = null;
 		});
 
-		// Handle unexpected exit
 		proc.on("exit", (code, signal) => {
 			if (this.pendingCommands.size > 0) {
 				console.error(
@@ -49,17 +54,14 @@ export class ExiftoolProcess {
 			this.process = null;
 		});
 
-		// Handle stdout
 		proc.stdout?.setEncoding("utf8");
 		proc.stdout?.on("data", (chunk: string) => {
 			this.parseStdout(chunk);
 		});
 
-		// Handle stderr (log for debugging)
 		proc.stderr?.setEncoding("utf8");
 		proc.stderr?.on("data", (chunk: string) => {
 			this.stderrBuffer += chunk;
-			// Log stderr in case of issues
 			if (this.stderrBuffer.includes("\n")) {
 				const lines = this.stderrBuffer.split("\n");
 				this.stderrBuffer = lines.pop() || "";
@@ -85,7 +87,6 @@ export class ExiftoolProcess {
 
 		const proc = this.process;
 
-		// Send graceful shutdown command
 		try {
 			proc.stdin?.write("-stay_open\nFalse\n");
 			proc.stdin?.end();
@@ -93,7 +94,6 @@ export class ExiftoolProcess {
 			console.error("Error sending close command to ExifTool:", err);
 		}
 
-		// Wait for exit with timeout
 		const exitPromise = new Promise<{ success: boolean; error: Error | null }>(
 			(resolve) => {
 				const timeout = setTimeout(() => {
@@ -103,7 +103,7 @@ export class ExiftoolProcess {
 						success: false,
 						error: new Error("ExifTool process did not exit in time"),
 					});
-				}, 5000);
+				}, EXIFTOOL_CLOSE_TIMEOUT_MS);
 
 				proc.on("exit", () => {
 					clearTimeout(timeout);
@@ -117,10 +117,13 @@ export class ExiftoolProcess {
 		return exitPromise;
 	}
 
-	async readMetadata(
-		filePath: string,
-		args: string[],
-	): Promise<ExifToolResult> {
+	async readMetadata({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}): Promise<ExifToolResult> {
 		if (!this.process || !this.process.stdin) {
 			throw new Error("ExifTool process is not open");
 		}
@@ -130,22 +133,24 @@ export class ExiftoolProcess {
 			"\n",
 		);
 
-		return this.sendCommand(executeNum, command);
+		return this.sendCommand({ executeNum, command });
 	}
 
-	async writeMetadata(
-		filePath: string,
-		metadata: Record<string, unknown>,
-		extraArgs: string[],
-		debug: boolean,
-	): Promise<ExifToolResult> {
+	async writeMetadata({
+		filePath,
+		metadata,
+		extraArgs,
+	}: {
+		filePath: string;
+		metadata: Record<string, unknown>;
+		extraArgs: string[];
+	}): Promise<ExifToolResult> {
 		if (!this.process || !this.process.stdin) {
 			throw new Error("ExifTool process is not open");
 		}
 
 		const executeNum = this.executeCounter++;
 
-		// Build metadata args (e.g., "-all=" to clear all metadata)
 		const metadataArgs: string[] = [];
 		for (const [key, value] of Object.entries(metadata)) {
 			if (value === "") {
@@ -162,103 +167,49 @@ export class ExiftoolProcess {
 			`-execute${executeNum}`,
 		].join("\n");
 
-		return this.sendCommand(executeNum, command);
+		return this.sendCommand({ executeNum, command });
 	}
 
-	private sendCommand(
-		executeNum: number,
-		command: string,
-	): Promise<ExifToolResult> {
+	private sendCommand({
+		executeNum,
+		command,
+	}: {
+		executeNum: number;
+		command: string;
+	}): Promise<ExifToolResult> {
+		if (!this.process || !this.process.stdin) {
+			throw new Error(
+				"ExifTool process is not open. Call open() before sending commands.",
+			);
+		}
+
+		const stdin = this.process.stdin;
+
 		return new Promise((resolve, reject) => {
-			// Set 30s timeout for command
 			const timeout = setTimeout(() => {
 				this.pendingCommands.delete(executeNum);
 				reject(new Error(`ExifTool command timed out (execute ${executeNum})`));
-			}, 30000);
+			}, EXIFTOOL_COMMAND_TIMEOUT_MS);
 
 			this.pendingCommands.set(executeNum, { resolve, reject, timeout });
 
-			// Safe: process and stdin guaranteed non-null — sendCommand validates
-			// this.process !== null (line 126) and stdin exists on spawned processes
-			this.process!.stdin!.write(command + "\n");
+			stdin.write(command + "\n");
 		});
 	}
 
 	private parseStdout(chunk: string): void {
 		this.stdoutBuffer += chunk;
+		const { completed, remaining } = extractReadySegments({
+			buffer: this.stdoutBuffer,
+		});
+		this.stdoutBuffer = remaining;
 
-		// Look for {ready<N>} markers
-		const readyRegex = /\{ready(\d+)\}/g;
-		let match: RegExpExecArray | null;
-
-		while ((match = readyRegex.exec(this.stdoutBuffer)) !== null) {
-			const executeNum = parseInt(match[1]!, 10);
-			const markerIndex = match.index;
-
-			// Extract JSON up to the marker
-			const jsonStr = this.stdoutBuffer.substring(0, markerIndex).trim();
-
-			// Remove processed data from buffer (including {ready<N>}\n\n)
-			this.stdoutBuffer = this.stdoutBuffer.substring(
-				markerIndex + match[0].length,
-			);
-			// Skip trailing newlines after {ready}
-			this.stdoutBuffer = this.stdoutBuffer.replace(/^\s+/, "");
-
-			// Reset regex index since we modified the buffer
-			readyRegex.lastIndex = 0;
-
-			// Resolve the pending promise
-			const pending = this.pendingCommands.get(executeNum);
+		for (const segment of completed) {
+			const pending = this.pendingCommands.get(segment.executeNum);
 			if (pending) {
 				clearTimeout(pending.timeout);
-				this.pendingCommands.delete(executeNum);
-
-				// Check if output is JSON (starts with [ or {) or plain text
-				const isJson =
-					jsonStr.trimStart().startsWith("[") ||
-					jsonStr.trimStart().startsWith("{");
-
-				if (isJson) {
-					try {
-						const parsed = JSON.parse(jsonStr);
-						// Check if the result contains an error
-						if (Array.isArray(parsed) && parsed.length > 0) {
-							const firstItem = parsed[0];
-							if (
-								firstItem &&
-								typeof firstItem === "object" &&
-								"Error" in firstItem
-							) {
-								pending.resolve({
-									data: null,
-									error: String(firstItem.Error),
-								});
-							} else {
-								pending.resolve({ data: parsed, error: null });
-							}
-						} else {
-							pending.resolve({ data: parsed, error: null });
-						}
-					} catch (err) {
-						pending.resolve({
-							data: null,
-							error: `Failed to parse ExifTool output: ${err instanceof Error ? err.message : String(err)}`,
-						});
-					}
-				} else {
-					// Plain text response (e.g., from write operations)
-					// Check for error messages in the text
-					if (jsonStr.toLowerCase().includes("error")) {
-						pending.resolve({
-							data: null,
-							error: jsonStr.trim(),
-						});
-					} else {
-						// Success - return empty data with no error
-						pending.resolve({ data: null, error: null });
-					}
-				}
+				this.pendingCommands.delete(segment.executeNum);
+				pending.resolve(parseExiftoolOutput({ raw: segment.output }));
 			}
 		}
 	}

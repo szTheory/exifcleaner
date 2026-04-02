@@ -17,6 +17,7 @@
 		"noImplicitReturns": true,
 		"useUnknownInCatchVariables": true,
 		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
 		"lib": ["ES2021", "DOM", "DOM.Iterable"]

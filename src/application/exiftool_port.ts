@@ -1,14 +1,21 @@
-import type { Result } from "../common/result";
+import type { Result } from "../common";
+import type { ExifError } from "../domain";
 
 export interface ExifToolPort {
 	open(): Promise<number>;
 	close(): Promise<Result<void>>;
-	readMetadata(
-		filePath: string,
-		args: string[],
-	): Promise<{ data: Record<string, unknown>[] | null; error: string | null }>;
-	removeMetadata(
-		filePath: string,
-		args: string[],
-	): Promise<{ data: null; error: string | null }>;
+	readMetadata({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}): Promise<Result<Record<string, unknown>[], ExifError>>;
+	removeMetadata({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}): Promise<Result<void, ExifError>>;
 }

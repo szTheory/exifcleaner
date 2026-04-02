@@ -6,9 +6,11 @@
  */
 
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import zlib from "node:zlib";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -68,51 +70,95 @@ function createMinimalJpeg(): Buffer {
 	]);
 }
 
-// Minimal valid 1x1 PNG (white pixel)
+// Build a PNG chunk with correct CRC32 (covers type + data)
+function pngChunk(type: string, data: Buffer): Buffer {
+	const typeBytes = Buffer.from(type, "ascii");
+	const length = Buffer.alloc(4);
+	length.writeUInt32BE(data.length, 0);
+	const crcInput = Buffer.concat([typeBytes, data]);
+	const crc = Buffer.alloc(4);
+	crc.writeInt32BE(crc32(crcInput), 0);
+	return Buffer.concat([length, typeBytes, data, crc]);
+}
+
+// CRC32 for PNG (ISO 3309 / ITU-T V.42)
+function crc32(buf: Buffer): number {
+	let c = 0xffffffff;
+	for (let i = 0; i < buf.length; i++) {
+		c = c ^ buf[i]!;
+		for (let j = 0; j < 8; j++) {
+			c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+		}
+	}
+	return (c ^ 0xffffffff) | 0;
+}
+
+// Minimal valid 1x1 PNG (white pixel) with correct CRCs
 function createMinimalPng(): Buffer {
-	// PNG signature + IHDR + IDAT + IEND for a 1x1 white pixel
-	return Buffer.from([
-		// PNG signature
+	const signature = Buffer.from([
 		0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-		// IHDR chunk (13 bytes: width=1, height=1, bit_depth=8, color_type=2 RGB)
-		0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01,
-		0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
-		0xde,
-		// IDAT chunk (zlib compressed: filter=0, R=255, G=255, B=255)
-		0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41, 0x54, 0x08, 0xd7, 0x63, 0xf8,
-		0xcf, 0xc0, 0x00, 0x00, 0x00, 0x04, 0x00, 0x01, 0x02, 0x47, 0x06, 0xa8,
-		// IEND chunk
-		0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
+	]);
+	// IHDR: width=1, height=1, bit_depth=8, color_type=2 (RGB), compression=0, filter=0, interlace=0
+	const ihdrData = Buffer.from([
+		0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00,
+		0x00,
+	]);
+	// Raw pixel data: filter byte 0 + RGB white (255, 255, 255)
+	const rawPixel = Buffer.from([0x00, 0xff, 0xff, 0xff]);
+	const compressed = zlib.deflateSync(rawPixel);
+	return Buffer.concat([
+		signature,
+		pngChunk("IHDR", ihdrData),
+		pngChunk("IDAT", compressed),
+		pngChunk("IEND", Buffer.alloc(0)),
 	]);
 }
 
 // Minimal valid PDF with correct xref offsets
+// PDF spec: xref entries must be exactly 20 bytes each with \r\n or space+\n terminator
 function createMinimalPdf(): Buffer {
-	// Build PDF with precise byte offsets for xref table
-	const lines = [
-		"%PDF-1.0\n",
-		"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
-		"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n",
-		"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >>\nendobj\n",
-	];
+	// Build body objects, tracking byte offsets precisely
+	const parts: string[] = [];
 	const offsets: number[] = [];
 	let pos = 0;
-	for (const line of lines) {
+
+	const addPart = (s: string): void => {
+		parts.push(s);
+		pos += Buffer.byteLength(s, "ascii");
+	};
+	const markOffset = (): void => {
 		offsets.push(pos);
-		pos += Buffer.byteLength(line, "utf-8");
-	}
-	const pad = (n: number): string => String(n).padStart(10, "0");
-	const xref =
-		`xref\n0 4\n` +
-		`0000000000 65535 f \n` +
-		`${pad(offsets[1]!)} 00000 n \n` +
-		`${pad(offsets[2]!)} 00000 n \n` +
-		`${pad(offsets[3]!)} 00000 n \n`;
+	};
+
+	addPart("%PDF-1.4\n");
+
+	markOffset(); // obj 1
+	addPart("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+
+	markOffset(); // obj 2
+	addPart("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n");
+
+	markOffset(); // obj 3
+	addPart(
+		"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >>\nendobj\n",
+	);
+
 	const xrefOffset = pos;
-	const trailer =
-		`trailer\n<< /Size 4 /Root 1 0 R >>\n` +
-		`startxref\n${xrefOffset}\n%%EOF\n`;
-	return Buffer.from(lines.join("") + xref + trailer, "utf-8");
+	const pad = (n: number): string => String(n).padStart(10, "0");
+
+	// Each xref entry must be exactly 20 bytes: oooooooooo ggggg f/n \r\n (no trailing space before \r\n)
+	// Format: 10-digit offset + space + 5-digit generation + space + 'f'/'n' + space + \n = 20 bytes
+	// OR: 10-digit offset + space + 5-digit generation + space + 'f'/'n' + \r + \n = 20 bytes
+	addPart("xref\n");
+	addPart("0 4\n");
+	addPart(`${pad(0)} 65535 f\r\n`);
+	addPart(`${pad(offsets[0]!)} 00000 n\r\n`);
+	addPart(`${pad(offsets[1]!)} 00000 n\r\n`);
+	addPart(`${pad(offsets[2]!)} 00000 n\r\n`);
+	addPart("trailer\n<< /Size 4 /Root 1 0 R >>\n");
+	addPart(`startxref\n${xrefOffset}\n%%EOF\n`);
+
+	return Buffer.from(parts.join(""), "ascii");
 }
 
 // Minimal valid MP4 container (ftyp + moov atoms)
@@ -129,25 +175,43 @@ function createMinimalMp4(): Buffer {
 	return Buffer.concat([ftyp, moov]);
 }
 
-// Minimal valid WebP (RIFF container with VP8 lossy)
+// Minimal valid WebP (VP8 lossy) — a proper 1x1 keyframe
+// VP8 spec: frame tag (3 bytes) + start code (3 bytes) + frame header
 function createMinimalWebp(): Buffer {
-	// Minimal 1x1 WebP (VP8 lossy format)
+	// Known-good minimal 1x1 VP8 bitstream (10 bytes)
+	// Frame tag: keyframe, version=0, show_frame=1, first_part_size
+	// Start code: 0x9D 0x01 0x2A
+	// Width=1 (no scale), Height=1 (no scale)
+	// Then minimal partition data
 	const vp8Data = Buffer.from([
-		// VP8 bitstream for 1x1 white pixel
-		0x30, 0x01, 0x00, 0x9d, 0x01, 0x2a, 0x01, 0x00, 0x01, 0x00, 0x01, 0x40,
-		0x25, 0xa4, 0x00, 0x03, 0x70, 0x00, 0xfe, 0xfb, 0x94, 0x00, 0x00,
+		// Frame tag: keyframe=0, version=0, show_frame=1, partition0_size=3
+		0x30, 0x01, 0x00,
+		// Start code + dimensions
+		0x9d, 0x01, 0x2a, // VP8 start code
+		0x01, 0x00, // width=1, scale=0
+		0x01, 0x00, // height=1, scale=0
+		// Minimal partition data (boolean decoder init + single macroblock)
+		0x02, 0x00, 0x34, 0x25, 0xa4, 0x00, 0x03, 0x70, 0x00, 0xfe, 0xfb, 0x94,
+		0x00, 0x00,
 	]);
-	const riffSize = 4 + 8 + vp8Data.length; // 'WEBP' + VP8 chunk header + data
-	const header = Buffer.alloc(12);
-	header.write("RIFF", 0);
-	header.writeUInt32LE(riffSize, 4);
-	header.write("WEBP", 8);
+
+	// VP8 chunk size must match actual data (pad to even if needed)
+	const paddedVp8 =
+		vp8Data.length % 2 === 0
+			? vp8Data
+			: Buffer.concat([vp8Data, Buffer.alloc(1)]);
 
 	const vp8Header = Buffer.alloc(8);
 	vp8Header.write("VP8 ", 0);
-	vp8Header.writeUInt32LE(vp8Data.length, 4);
+	vp8Header.writeUInt32LE(vp8Data.length, 4); // chunk size is unpadded
 
-	return Buffer.concat([header, vp8Header, vp8Data]);
+	const riffPayloadSize = 4 + 8 + paddedVp8.length; // 'WEBP' + chunk header + padded data
+	const riffHeader = Buffer.alloc(12);
+	riffHeader.write("RIFF", 0);
+	riffHeader.writeUInt32LE(riffPayloadSize, 4);
+	riffHeader.write("WEBP", 8);
+
+	return Buffer.concat([riffHeader, vp8Header, paddedVp8]);
 }
 
 function generateFixtures(): void {
@@ -169,10 +233,16 @@ function generateFixtures(): void {
 	]);
 	console.log("  Created sample.jpg (JPEG with EXIF)");
 
-	// sample.png - PNG with no metadata
+	// sample.png - PNG with known metadata (tEXt chunks)
 	const pngPath = path.join(FIXTURES_DIR, "sample.png");
 	fs.writeFileSync(pngPath, createMinimalPng());
-	console.log("  Created sample.png (PNG without EXIF)");
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-Author=Test Author",
+		"-Copyright=Test Copyright 2024",
+		pngPath,
+	]);
+	console.log("  Created sample.png (PNG with metadata)");
 
 	// sample.pdf - PDF with metadata
 	const pdfPath = path.join(FIXTURES_DIR, "sample.pdf");

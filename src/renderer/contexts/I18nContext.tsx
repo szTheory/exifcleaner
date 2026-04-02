@@ -6,8 +6,8 @@ import {
 	useState,
 } from "react";
 import type { ReactNode } from "react";
-import { i18nLookup } from "../../domain/i18n_lookup";
-import type { I18nStringsDictionary } from "../../domain/i18n_lookup";
+import { i18nLookup } from "../../domain";
+import type { I18nStringsDictionary } from "../../domain";
 
 export interface I18nContextValue {
 	t: (key: string) => string;
@@ -72,7 +72,7 @@ export function I18nProvider({
 				return key;
 			}
 			try {
-				return i18nLookup(dictionary, key, locale);
+				return i18nLookup({ strings: dictionary, key, locale });
 			} catch {
 				return key;
 			}

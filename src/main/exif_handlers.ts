@@ -2,6 +2,7 @@ import { ipcMain } from "electron";
 import type { Container } from "./container";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import { exifReadSchema, exifRemoveSchema } from "./ipc/ipc_schemas";
+import { formatExifError } from "../domain";
 
 export function setupExifHandlers({
 	container,
@@ -33,7 +34,7 @@ export function setupExifHandlers({
 			if (result.ok) {
 				return { data: null, error: null };
 			}
-			return { data: null, error: result.error };
+			return { data: null, error: formatExifError(result.error) };
 		}),
 	);
 }

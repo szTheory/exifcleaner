@@ -12,24 +12,24 @@ describe("ACCENT_COLOR_FALLBACK", () => {
 
 describe("parseAccentColorHex", () => {
 	it("strips alpha and prepends # for 8-char RGBA string", () => {
-		expect(parseAccentColorHex("aabbccdd")).toBe("#aabbcc");
+		expect(parseAccentColorHex({ raw: "aabbccdd" })).toBe("#aabbcc");
 	});
 
 	it("lowercases the output", () => {
-		expect(parseAccentColorHex("FF0000FF")).toBe("#ff0000");
+		expect(parseAccentColorHex({ raw: "FF0000FF" })).toBe("#ff0000");
 	});
 
 	it("returns fallback for empty string", () => {
-		expect(parseAccentColorHex("")).toBe("#007AFF");
+		expect(parseAccentColorHex({ raw: "" })).toBe("#007AFF");
 	});
 
 	it("returns fallback for short strings", () => {
-		expect(parseAccentColorHex("abc")).toBe("#007AFF");
+		expect(parseAccentColorHex({ raw: "abc" })).toBe("#007AFF");
 	});
 
 	it("returns fallback for non-string input", () => {
-		expect(parseAccentColorHex(undefined as unknown as string)).toBe(
-			"#007AFF",
-		);
+		expect(
+			parseAccentColorHex({ raw: undefined as unknown as string }),
+		).toBe("#007AFF");
 	});
 });

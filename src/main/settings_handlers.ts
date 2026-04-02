@@ -1,8 +1,8 @@
 import { ipcMain } from "electron";
 import type { BrowserWindow } from "electron";
 import type { Container } from "./container";
-import { IPC_CHANNELS } from "../infrastructure/ipc/ipc_channels";
-import { validateSettings } from "../domain/settings_schema";
+import { IPC_CHANNELS } from "../common";
+import { validateSettings } from "../domain";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import { settingsGetSchema, settingsSetSchema } from "./ipc/ipc_schemas";
 import { handleLanguageChange } from "./i18n";
@@ -24,7 +24,7 @@ export function setupSettingsHandlers({
 	ipcMain.handle(
 		IPC_CHANNELS.SETTINGS_SET,
 		createValidatedHandler(settingsSetSchema, async (input) => {
-			const validationResult = validateSettings(input);
+			const validationResult = validateSettings({ input });
 			if (!validationResult.ok) {
 				return { success: false, error: validationResult.error };
 			}
@@ -32,7 +32,7 @@ export function setupSettingsHandlers({
 			// Capture previous language before updating
 			const previousLanguage = container.settings.get().language;
 
-			await container.settings.update(validationResult.value);
+			await container.settings.update({ partial: validationResult.value });
 
 			const newSettings = container.settings.get();
 

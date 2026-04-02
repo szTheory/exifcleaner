@@ -44,6 +44,57 @@ test.describe("Security", () => {
 		expect(csp).toContain("'self'");
 	});
 
+	test("CSP blocks eval() from inline scripts", async () => {
+		// Playwright's evaluate() uses DevTools protocol which bypasses CSP.
+		// To test CSP enforcement, inject an inline script element that tries eval.
+		// CSP script-src 'self' blocks both inline scripts and eval().
+		const executed = await window.evaluate(() => {
+			return new Promise<boolean>((resolve) => {
+				(window as any).__evalTestResult = "not-run";
+				const script = document.createElement("script");
+				script.textContent =
+					'try { eval("1+1"); window.__evalTestResult = "eval-succeeded"; } catch(e) { window.__evalTestResult = "eval-blocked"; }';
+				document.head.appendChild(script);
+				// Inline script is blocked by CSP, so __evalTestResult stays "not-run"
+				setTimeout(() => {
+					resolve((window as any).__evalTestResult === "not-run");
+				}, 100);
+			});
+		});
+		expect(executed).toBe(true);
+	});
+
+	test("CSP blocks dynamic script injection", async () => {
+		const executed = await window.evaluate(() => {
+			(window as any).__injectedScriptRan = false;
+			const script = document.createElement("script");
+			script.textContent = "(window).__injectedScriptRan = true;";
+			document.head.appendChild(script);
+			return (window as any).__injectedScriptRan;
+		});
+		expect(executed).toBe(false);
+	});
+
+	test("has secure BrowserWindow configuration", async () => {
+		const isNodeIntegrationEnabled = await window.evaluate(() => {
+			return typeof require !== "undefined";
+		});
+		expect(isNodeIntegrationEnabled).toBe(false);
+	});
+
+	test("CSP meta tag has no wildcard or remote origins", async () => {
+		const csp = await window.evaluate(() => {
+			const meta = document.querySelector(
+				'meta[http-equiv="Content-Security-Policy"]',
+			);
+			return meta?.getAttribute("content") ?? "";
+		});
+		expect(csp).not.toContain("*");
+		expect(csp).not.toContain("http:");
+		expect(csp).not.toContain("https:");
+		expect(csp).toContain("'self'");
+	});
+
 	test("blocks navigation to external URLs", async () => {
 		// Capture URL before navigation attempt
 		const urlBefore = window.url();
