@@ -1,18 +1,60 @@
 # Changelog
 
-## Next release (WIP)
+## 4.0.0
 
-- Add CI pipeline with Travis CI
+Complete modernization of ExifCleaner after a 5-year hiatus. Every layer of the application has been rebuilt — from Electron 11 to 35, vanilla DOM to React 19, loose scripts to DDD architecture, zero tests to 265 unit + 42 E2E tests.
 
-### Features
+### Security
 
-- Improved dark mode styling and start screen icon
-- Add translations for Croatian and Turkish
+- Upgrade to Electron 35 (from 11) with all Chromium security patches
+- Content Security Policy (CSP) meta tag blocks eval, inline scripts, and remote resources
+- Electron Fuses disable runAsNode, NODE_OPTIONS, and --inspect in production builds
+- IPC payload validation with Zod schemas on all 16 channels
+- IPC sender verification — only the authorized BrowserWindow can invoke handlers
+- Navigation hardening — renderer cannot navigate to external URLs
+- Permission gate — all Chromium permission requests denied by default
+- Renderer fully sandboxed with contextIsolation, no Node.js access
 
-### Infrastructure
+### Added
 
-- Remove node-sass and sass-loader dev dependencies
-- Remove Spectre Sass framework dependency and replace it with plain CSS using CSS variables
+- **Preserve orientation metadata** — option to keep EXIF rotation tag so photos don't flip (issues #209, #234)
+- **Save as copy** — create `_cleaned` copy instead of overwriting original (issues #218, #124)
+- **Remove macOS extended attributes** — strips xattr/quarantine metadata (issue #86)
+- **Preserve file timestamps** — keep original created/modified dates
+- **Folder recursion** — drop a folder to process all files inside recursively (issues #171, #231)
+- **Metadata inspection** — expand any file to see before/after metadata diff
+- **Language switching** — change language from settings without restarting (issue #244, 25 locales)
+- **WebP support** verified working (issue #264)
+- **Settings panel** with 5 privacy toggles, theme selector, and language picker
+- **Dark mode** with intentional design respecting OS `prefers-color-scheme`
+- Playwright E2E test suite (42 tests, 10 specs, ~30s)
+- Vitest unit test suite (265 tests, ~1.4s)
+- GitHub Actions CI — lint, typecheck, unit tests, E2E tests, cross-platform builds
+- GitHub Actions release workflow with macOS code signing and notarization
+- SHASUMS256.txt generated automatically for all release artifacts
+- Translations: Persian, Catalan, Croatian updates merged
+
+### Changed
+
+- **React 19 SPA** replaces vanilla DOM renderer — component architecture with BEM CSS design system
+- **DDD architecture** — domain types, application commands/queries, infrastructure adapters, composition root
+- **TypeScript 5.7** strict mode with all additional safety flags (noUncheckedIndexedAccess, exactOptionalPropertyTypes, etc.)
+- **electron-vite 5 + Vite 7** replaces electron-webpack — faster builds, HMR, ESM
+- **electron-builder 26** (from 22) with macOS universal binary support (Intel + Apple Silicon)
+- **ExifTool v13.50** (from 12.25) with checksum verification
+- **Hand-rolled ExifTool wrapper** replaces node-exiftool — implements -stay_open protocol directly (~240 lines)
+- **Full ESM** — `"type": "module"` throughout, `verbatimModuleSyntax` enforced
+- Platform requirements: macOS 10.15+, Windows 10+, Linux 64-bit (previously macOS 10.10+, Windows 7+)
+- Typed error handling with discriminated unions across 4 error domains
+
+### Removed
+
+- `node-exiftool` npm dependency (replaced by hand-rolled wrapper)
+- `source-map-support` (Node 22 has built-in source maps)
+- Spectre CSS framework (replaced by BEM CSS with custom properties)
+- `electron-webpack` and webpack (replaced by electron-vite)
+- Travis CI configuration (replaced by GitHub Actions)
+- Auto-update check on startup (never worked reliably, removed entirely)
 
 ## 3.6.0 - 4 May 2021
 

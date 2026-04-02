@@ -8,10 +8,10 @@ Cross-platform Electron desktop app to strip EXIF/metadata from images, videos, 
 - **Language**: TypeScript 5.7 with `strict: true` + `verbatimModuleSyntax: true` (type-check only, electron-vite/esbuild compiles)
 - **Build**: electron-vite 5.x + Vite 7.x + esbuild (3 targets: main, preload, renderer)
 - **Packaging**: electron-builder 22.8 (produces .dmg, .AppImage, .deb, .rpm, .exe, portable)
-- **UI**: Vanilla HTML/CSS/TypeScript — no frameworks (React, Vue, etc.)
+- **UI**: React 19 SPA with BEM CSS design system
 - **ExifTool**: Hand-rolled wrapper in `src/infrastructure/exiftool/` wrapping bundled exiftool Perl binaries
 - **Formatting**: Prettier 3.x with tabs
-- **Dependencies**: Zero production dependencies — all external code is hand-rolled or in devDependencies
+- **Dependencies**: Three production dependencies (react, react-dom, zod) — ExifTool wrapper is hand-rolled
 - **Performance**: Processing speed is a core product value — the app must handle hundreds of files in seconds. Never add latency to the file processing pipeline.
 
 ## Commands
@@ -204,11 +204,11 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 
 ### Production
 
-**Zero production dependencies.** All external code is either in devDependencies (build tools, type definitions) or hand-rolled:
+**Three production dependencies** (react, react-dom, zod). ExifTool wrapper is hand-rolled:
 
 - ExifTool wrapper: hand-rolled in `src/infrastructure/exiftool/` (~240 lines)
-- Replaced `node-exiftool` 2.3.0 (unmaintained since 2018, CJS bloat)
-- Removed `source-map-support` (obsolete with Node 22's built-in `--enable-source-maps`)
+- IPC validation: Zod schemas for all 16 channels
+- UI: React 19 SPA with BEM CSS design system
 
 ### Dev
 
