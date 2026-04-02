@@ -1,9 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 
-/**
- * Timer hook for tracking processing duration.
- * Updates 10x/sec for responsive display in the status bar.
- */
+const TIMER_UPDATE_INTERVAL_MS = 100;
+
 export function useElapsedTime(): {
 	elapsedSeconds: number;
 	startTimer: () => void;
@@ -23,7 +21,7 @@ export function useElapsedTime(): {
 					Math.round((Date.now() - startTimeRef.current) / 1000),
 				);
 			}
-		}, 100);
+		}, TIMER_UPDATE_INTERVAL_MS);
 	}, []);
 
 	const stopTimer = useCallback((): void => {
@@ -39,7 +37,6 @@ export function useElapsedTime(): {
 		startTimeRef.current = null;
 	}, [stopTimer]);
 
-	// Cleanup on unmount
 	useEffect(() => {
 		return () => stopTimer();
 	}, [stopTimer]);

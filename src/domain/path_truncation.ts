@@ -3,10 +3,15 @@
 
 const ELLIPSIS = "\u2026";
 
-export function middleTruncatePath(
-	folderPath: string,
-	maxLength: number,
-): string {
+interface MiddleTruncatePathParams {
+	folderPath: string;
+	maxLength: number;
+}
+
+export function middleTruncatePath({
+	folderPath,
+	maxLength,
+}: MiddleTruncatePathParams): string {
 	if (folderPath.length === 0) return "";
 	if (folderPath.length <= maxLength) return folderPath;
 

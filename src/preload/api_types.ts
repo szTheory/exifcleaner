@@ -1,5 +1,5 @@
-import type { I18nStringsDictionary } from "../domain/i18n_lookup";
-import type { Settings } from "../domain/settings_schema";
+import type { I18nStringsDictionary } from "../domain";
+import type { Settings } from "../domain";
 
 export type { I18nStringsDictionary };
 
@@ -9,7 +9,9 @@ export interface ExifData {
 
 export interface ExifApi {
 	readMetadata: (filePath: string) => Promise<ExifData>;
-	removeMetadata: (filePath: string) => Promise<object>;
+	removeMetadata: (
+		filePath: string,
+	) => Promise<{ data: null; error: string | null }>;
 }
 
 export interface I18nApi {

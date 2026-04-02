@@ -1,16 +1,19 @@
 import { app } from "electron";
 import path from "node:path";
-import { ExiftoolProcess } from "../infrastructure/exiftool/ExiftoolProcess";
-import { ExifToolAdapter } from "../infrastructure/exiftool/exiftool_adapter";
-import { SettingsService } from "../infrastructure/settings/settings_service";
-import { ConsoleLogger } from "../infrastructure/logging/console_logger";
-import { StripMetadataCommand } from "../application/strip_metadata_command";
-import { ReadMetadataQuery } from "../application/read_metadata_query";
-import { ExpandFolderCommand } from "../application/expand_folder_command";
-import { XattrCommand } from "../application/xattr_command";
-import { removeXattrs } from "../infrastructure/xattr/xattr_service";
-import { ProcessFilesUseCase } from "../application/process_files_use_case";
-import { exiftoolBinPath } from "../infrastructure/electron/binaries";
+import {
+	ExiftoolProcess,
+	ExifToolAdapter,
+	SettingsService,
+	ConsoleLogger,
+	removeXattrs,
+	exiftoolBinPath,
+} from "../infrastructure";
+import {
+	StripMetadataCommand,
+	ReadMetadataQuery,
+	ExpandFolderCommand,
+	XattrCommand,
+} from "../application";
 
 export function createContainer(): {
 	exiftoolProcess: ExiftoolProcess;
@@ -21,11 +24,10 @@ export function createContainer(): {
 	readMetadata: ReadMetadataQuery;
 	expandFolder: ExpandFolderCommand;
 	xattrCommand: XattrCommand;
-	processFiles: ProcessFilesUseCase;
 } {
 	const logger = new ConsoleLogger();
-	const exiftoolProcess = new ExiftoolProcess(exiftoolBinPath);
-	const exiftool = new ExifToolAdapter(exiftoolProcess);
+	const exiftoolProcess = new ExiftoolProcess({ binPath: exiftoolBinPath });
+	const exiftool = new ExifToolAdapter({ process: exiftoolProcess });
 	const settingsPath = path.join(app.getPath("userData"), "settings.json");
 	const settings = new SettingsService({ filePath: settingsPath, logger });
 	const stripMetadata = new StripMetadataCommand({ exiftool });
@@ -33,14 +35,6 @@ export function createContainer(): {
 	const expandFolder = new ExpandFolderCommand();
 	const xattrAdapter = { removeXattrs };
 	const xattrCommand = new XattrCommand({ xattr: xattrAdapter, logger });
-	const processFiles = new ProcessFilesUseCase({
-		stripMetadata,
-		readMetadata,
-		expandFolder,
-		xattr: xattrCommand,
-		settings,
-		logger,
-	});
 
 	return {
 		exiftoolProcess,
@@ -51,7 +45,6 @@ export function createContainer(): {
 		readMetadata,
 		expandFolder,
 		xattrCommand,
-		processFiles,
 	};
 }
 

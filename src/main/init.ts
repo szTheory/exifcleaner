@@ -1,23 +1,31 @@
 import { app, type BrowserWindow } from "electron";
 import packageJson from "../../package.json";
-import { preloadI18nStrings } from "../infrastructure/electron/i18n_strings";
-import { setupI18nHandlers, setContainer, handleLanguageChange } from "./i18n";
+import { preloadI18nStrings } from "../infrastructure";
+import {
+	setupI18nHandlers,
+	setContainer,
+	handleLanguageChange,
+	setLanguageChangeCallback,
+} from "./i18n";
+import { setupMenus } from "./menu/menu";
 import { setupExifHandlers } from "./exif_handlers";
 import { setupFolderHandlers } from "./folder_handlers";
 import {
 	setLanguageChangeHandler,
 	setLanguageSettingGetter,
-} from "./menu_view";
+	setThemeChangeHandler,
+	setThemeSettingGetter,
+} from "./menu/menu_view";
 import {
 	setDockLanguageChangeHandler,
 	setDockLanguageSettingGetter,
-} from "./menu_dock";
+} from "./menu/menu_dock";
 import { setupSettingsHandlers } from "./settings_handlers";
 import { setupThemeHandlers } from "./theme_handlers";
 import { setupRevealHandlers } from "./reveal_handlers";
-import { setupContextMenu } from "./context_menu";
-import { setupDockEventHandlers } from "./dock";
-import { setupApp } from "./app_setup";
+import { setupContextMenu } from "./window/context_menu";
+import { setupDockEventHandlers } from "./lifecycle/dock";
+import { setupApp } from "./lifecycle/app_setup";
 import { createContainer, initContainer } from "./container";
 import type { Container } from "./container";
 import { hardenNavigation } from "./security/navigation";
@@ -28,9 +36,11 @@ function setupUserModelId(): void {
 	app.setAppUserModelId(packageJson.build.appId);
 }
 
-export async function init(
-	browserWindow: BrowserWindow | null,
-): Promise<Container> {
+interface InitParams {
+	browserWindow: BrowserWindow | null;
+}
+
+export async function init({ browserWindow }: InitParams): Promise<Container> {
 	const container = createContainer();
 	await initContainer(container);
 
@@ -46,10 +56,13 @@ export async function init(
 
 	setContainer(container);
 
+	// Wire menu rebuild callback for language changes (breaks i18n.ts -> menu.ts cycle)
+	setLanguageChangeCallback(() => setupMenus());
+
 	// Wire language change handler for View menu and dock menu
 	const languageChangeHandler = (code: string | null): void => {
 		const previousLanguage = container.settings.get().language;
-		container.settings.update({ language: code });
+		container.settings.update({ partial: { language: code } });
 		handleLanguageChange(previousLanguage, code);
 	};
 	const languageSettingGetter = (): string | null =>
@@ -58,6 +71,12 @@ export async function init(
 	setLanguageSettingGetter(languageSettingGetter);
 	setDockLanguageChangeHandler(languageChangeHandler);
 	setDockLanguageSettingGetter(languageSettingGetter);
+
+	// Wire theme change handler for View menu (same callback injection pattern as language)
+	setThemeChangeHandler((mode) => {
+		container.settings.update({ partial: { themeMode: mode } });
+	});
+	setThemeSettingGetter(() => container.settings.get().themeMode);
 
 	preloadI18nStrings();
 	setupI18nHandlers();
@@ -73,9 +92,10 @@ export async function init(
 	});
 	setupRevealHandlers();
 	setupContextMenu();
-	setupDockEventHandlers(browserWindow);
+	setupDockEventHandlers({ browserWindow });
 	setupUserModelId();
-	setupApp(browserWindow, {
+	setupApp({
+		browserWindow,
 		onQuit: () => container.exiftoolProcess.close(),
 	});
 

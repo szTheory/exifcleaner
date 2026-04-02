@@ -2,6 +2,7 @@ import { it, expect, describe } from "vitest";
 import {
 	validateSettings,
 	migrateSettings,
+	isSettingsFile,
 	DEFAULT_SETTINGS,
 	CURRENT_SCHEMA_VERSION,
 } from "../../src/domain/settings_schema";
@@ -45,7 +46,7 @@ describe("validateSettings", () => {
 			preserveTimestamps: true,
 			language: "fr",
 		};
-		const result = validateSettings(input);
+		const result = validateSettings({ input });
 		expect(result.ok).toBe(true);
 		if (result.ok) {
 			expect(result.value.preserveOrientation).toBe(false);
@@ -56,7 +57,7 @@ describe("validateSettings", () => {
 	});
 
 	it("fills defaults for missing boolean fields", () => {
-		const result = validateSettings({});
+		const result = validateSettings({ input: {} });
 		expect(result.ok).toBe(true);
 		if (result.ok) {
 			expect(result.value.preserveOrientation).toBe(true);
@@ -69,7 +70,9 @@ describe("validateSettings", () => {
 	});
 
 	it("falls back to default for non-boolean preserveOrientation", () => {
-		const result = validateSettings({ preserveOrientation: "yes" });
+		const result = validateSettings({
+			input: { preserveOrientation: "yes" },
+		});
 		expect(result.ok).toBe(true);
 		if (result.ok) {
 			expect(result.value.preserveOrientation).toBe(true);
@@ -77,7 +80,9 @@ describe("validateSettings", () => {
 	});
 
 	it("falls back to default for non-boolean preserveColorProfile", () => {
-		const result = validateSettings({ preserveColorProfile: 42 });
+		const result = validateSettings({
+			input: { preserveColorProfile: 42 },
+		});
 		expect(result.ok).toBe(true);
 		if (result.ok) {
 			expect(result.value.preserveColorProfile).toBe(true);
@@ -85,7 +90,7 @@ describe("validateSettings", () => {
 	});
 
 	it("rejects non-object input", () => {
-		const result = validateSettings("string");
+		const result = validateSettings({ input: "string" });
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
 			expect(result.error).toContain("non-null object");
@@ -93,7 +98,7 @@ describe("validateSettings", () => {
 	});
 
 	it("rejects null input", () => {
-		const result = validateSettings(null);
+		const result = validateSettings({ input: null });
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
 			expect(result.error).toContain("non-null object");
@@ -101,7 +106,7 @@ describe("validateSettings", () => {
 	});
 
 	it("validates themeMode=dark", () => {
-		const result = validateSettings({ themeMode: "dark" });
+		const result = validateSettings({ input: { themeMode: "dark" } });
 		expect(result.ok).toBe(true);
 		if (result.ok) {
 			expect(result.value.themeMode).toBe("dark");
@@ -109,7 +114,7 @@ describe("validateSettings", () => {
 	});
 
 	it("defaults themeMode for invalid value", () => {
-		const result = validateSettings({ themeMode: "invalid" });
+		const result = validateSettings({ input: { themeMode: "invalid" } });
 		expect(result.ok).toBe(true);
 		if (result.ok) {
 			expect(result.value.themeMode).toBe("system");
@@ -117,11 +122,116 @@ describe("validateSettings", () => {
 	});
 
 	it("defaults themeMode when missing", () => {
-		const result = validateSettings({});
+		const result = validateSettings({ input: {} });
 		expect(result.ok).toBe(true);
 		if (result.ok) {
 			expect(result.value.themeMode).toBe("system");
 		}
+	});
+});
+
+describe("isSettingsFile", () => {
+	it("returns true for a valid SettingsFile shape", () => {
+		const valid = {
+			version: 3,
+			settings: {
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				saveAsCopy: false,
+				removeXattrs: false,
+				preserveTimestamps: false,
+				language: null,
+				themeMode: "system",
+			},
+		};
+		expect(isSettingsFile(valid)).toBe(true);
+	});
+
+	it("returns true when language is a string", () => {
+		const valid = {
+			version: 3,
+			settings: {
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				saveAsCopy: false,
+				removeXattrs: false,
+				preserveTimestamps: false,
+				language: "en",
+				themeMode: "dark",
+			},
+		};
+		expect(isSettingsFile(valid)).toBe(true);
+	});
+
+	it("returns false for null", () => {
+		expect(isSettingsFile(null)).toBe(false);
+	});
+
+	it("returns false for undefined", () => {
+		expect(isSettingsFile(undefined)).toBe(false);
+	});
+
+	it("returns false for a string", () => {
+		expect(isSettingsFile("hello")).toBe(false);
+	});
+
+	it("returns false when version is missing", () => {
+		expect(
+			isSettingsFile({
+				settings: { ...DEFAULT_SETTINGS },
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when version is not a number", () => {
+		expect(
+			isSettingsFile({
+				version: "3",
+				settings: { ...DEFAULT_SETTINGS },
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when settings is missing", () => {
+		expect(isSettingsFile({ version: 3 })).toBe(false);
+	});
+
+	it("returns false when settings is null", () => {
+		expect(isSettingsFile({ version: 3, settings: null })).toBe(false);
+	});
+
+	it("returns false when settings has wrong field types", () => {
+		expect(
+			isSettingsFile({
+				version: 3,
+				settings: {
+					preserveOrientation: "yes", // wrong type
+					preserveColorProfile: true,
+					saveAsCopy: false,
+					removeXattrs: false,
+					preserveTimestamps: false,
+					language: null,
+					themeMode: "system",
+				},
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when themeMode is invalid", () => {
+		expect(
+			isSettingsFile({
+				version: 3,
+				settings: {
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					saveAsCopy: false,
+					removeXattrs: false,
+					preserveTimestamps: false,
+					language: null,
+					themeMode: "invalid",
+				},
+			}),
+		).toBe(false);
 	});
 });
 
@@ -131,7 +241,7 @@ describe("migrateSettings", () => {
 			version: CURRENT_SCHEMA_VERSION,
 			settings: { ...DEFAULT_SETTINGS, saveAsCopy: true },
 		};
-		const { settings, didMigrate } = migrateSettings(file);
+		const { settings, didMigrate } = migrateSettings({ file });
 		expect(didMigrate).toBe(false);
 		expect(settings.saveAsCopy).toBe(true);
 	});
@@ -147,7 +257,7 @@ describe("migrateSettings", () => {
 				language: null,
 			},
 		} as unknown as SettingsFile;
-		const { settings, didMigrate } = migrateSettings(file);
+		const { settings, didMigrate } = migrateSettings({ file });
 		expect(didMigrate).toBe(true);
 		expect(settings.preserveOrientation).toBe(true);
 		expect(settings.preserveColorProfile).toBe(true);
@@ -165,7 +275,7 @@ describe("migrateSettings", () => {
 				language: "de",
 			},
 		} as unknown as SettingsFile;
-		const { settings, didMigrate } = migrateSettings(file);
+		const { settings, didMigrate } = migrateSettings({ file });
 		expect(didMigrate).toBe(true);
 		expect(settings.preserveOrientation).toBe(false);
 		expect(settings.preserveColorProfile).toBe(false);
@@ -183,7 +293,7 @@ describe("migrateSettings", () => {
 				language: null,
 			},
 		} as unknown as SettingsFile;
-		const { settings, didMigrate } = migrateSettings(file);
+		const { settings, didMigrate } = migrateSettings({ file });
 		expect(didMigrate).toBe(true);
 		expect(settings.preserveOrientation).toBe(true);
 		expect(settings.preserveColorProfile).toBe(true);
@@ -201,7 +311,7 @@ describe("migrateSettings", () => {
 				language: null,
 			} as unknown as Settings,
 		};
-		const { settings, didMigrate } = migrateSettings(file);
+		const { settings, didMigrate } = migrateSettings({ file });
 		expect(didMigrate).toBe(true);
 		expect(settings.themeMode).toBe("system");
 		expect(settings.preserveOrientation).toBe(true);
@@ -218,7 +328,7 @@ describe("migrateSettings", () => {
 				language: "de",
 			},
 		} as unknown as SettingsFile;
-		const { settings, didMigrate } = migrateSettings(file);
+		const { settings, didMigrate } = migrateSettings({ file });
 		expect(didMigrate).toBe(true);
 		// v1->v2 migration
 		expect(settings.preserveOrientation).toBe(false);
@@ -234,7 +344,7 @@ describe("migrateSettings", () => {
 			version: 0,
 			settings: {} as Settings,
 		} as unknown as SettingsFile;
-		const { settings, didMigrate } = migrateSettings(file);
+		const { settings, didMigrate } = migrateSettings({ file });
 		expect(didMigrate).toBe(true);
 		expect(settings.preserveOrientation).toBe(true);
 		expect(settings.preserveColorProfile).toBe(true);

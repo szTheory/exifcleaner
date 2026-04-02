@@ -5,3 +5,10 @@ declare global {
 		api: ElectronApi;
 	}
 }
+
+// Augment React CSSProperties to allow CSS custom properties (--*)
+declare module "react" {
+	interface CSSProperties {
+		[key: `--${string}`]: string | number | undefined;
+	}
+}

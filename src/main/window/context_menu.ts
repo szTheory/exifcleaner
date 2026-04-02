@@ -1,0 +1,33 @@
+import { app, Menu, MenuItem } from "electron";
+import { i18n } from "../i18n";
+
+function buildMenu(canCopy: boolean): Menu {
+	const menu = new Menu();
+
+	if (canCopy) {
+		menu.append(
+			new MenuItem({
+				label: i18n({ key: "contextmenu.copy" }),
+				role: "copy",
+				visible: canCopy,
+				enabled: canCopy,
+			}),
+		);
+	}
+	menu.append(
+		new MenuItem({
+			label: i18n({ key: "contextmenu.select-all" }),
+			role: "selectAll",
+		}),
+	);
+	return menu;
+}
+
+export function setupContextMenu(): void {
+	app.on("browser-window-created", (_event, browserWindow) => {
+		browserWindow.webContents.on("context-menu", (_event, params) => {
+			const isTextSelected = params.selectionText.trim().length > 0;
+			buildMenu(params.editFlags.canCopy && isTextSelected).popup();
+		});
+	});
+}

@@ -1,0 +1,138 @@
+import type { MenuItemConstructorOptions } from "electron";
+import { nativeTheme, BrowserWindow } from "electron";
+import { i18n } from "../i18n";
+import { IPC_CHANNELS } from "../../common";
+import { LANGUAGE_NAMES } from "../../domain";
+import type { ThemeMode } from "../../domain";
+
+function broadcastThemeSet(mode: "light" | "dark" | "system"): void {
+	const win = BrowserWindow.getAllWindows()[0];
+	if (win) {
+		win.webContents.send(IPC_CHANNELS.THEME_MODE_CHANGED_FROM_MENU, mode);
+	}
+}
+
+// Set by init.ts to avoid circular dependency with container
+let onLanguageChange: ((code: string | null) => void) | null = null;
+let getLanguageSetting: (() => string | null) | null = null;
+let onThemeChange: ((mode: ThemeMode) => void) | null = null;
+let getThemeSetting: (() => ThemeMode) | null = null;
+
+export function setLanguageChangeHandler(
+	handler: (code: string | null) => void,
+): void {
+	onLanguageChange = handler;
+}
+
+export function setLanguageSettingGetter(getter: () => string | null): void {
+	getLanguageSetting = getter;
+}
+
+export function setThemeChangeHandler(
+	handler: (mode: ThemeMode) => void,
+): void {
+	onThemeChange = handler;
+}
+
+export function setThemeSettingGetter(getter: () => ThemeMode): void {
+	getThemeSetting = getter;
+}
+
+function languageSubmenu(): MenuItemConstructorOptions {
+	// Get the raw setting (null = System, string = explicit language)
+	const settingValue = getLanguageSetting?.() ?? null;
+
+	const languageItems: MenuItemConstructorOptions[] = LANGUAGE_NAMES.map(
+		(lang): MenuItemConstructorOptions => ({
+			label: lang.nativeName,
+			type: "radio",
+			checked: settingValue === lang.code,
+			click: () => {
+				onLanguageChange?.(lang.code);
+			},
+		}),
+	);
+
+	return {
+		label: i18n({ key: "language" }) || "Language",
+		submenu: [
+			{
+				label: `${i18n({ key: "languageSystem" }) || "System"}`,
+				type: "radio",
+				checked: settingValue === null,
+				click: () => {
+					onLanguageChange?.(null);
+				},
+			},
+			{ type: "separator" },
+			...languageItems,
+		],
+	};
+}
+
+export function viewMenuTemplate(): MenuItemConstructorOptions {
+	return {
+		label: i18n({ key: "menu.view.name" }),
+		submenu: [
+			{
+				label: i18n({ key: "appearance" }) || "Appearance",
+				submenu: [
+					{
+						label: i18n({ key: "themeLight" }) || "Light",
+						type: "radio",
+						checked: (getThemeSetting?.() ?? "system") === "light",
+						click: () => {
+							nativeTheme.themeSource = "light";
+							broadcastThemeSet("light");
+							onThemeChange?.("light");
+						},
+					},
+					{
+						label: i18n({ key: "themeAuto" }) || "Auto",
+						type: "radio",
+						checked: (getThemeSetting?.() ?? "system") === "system",
+						click: () => {
+							nativeTheme.themeSource = "system";
+							broadcastThemeSet("system");
+							onThemeChange?.("system");
+						},
+					},
+					{
+						label: i18n({ key: "themeDark" }) || "Dark",
+						type: "radio",
+						checked: (getThemeSetting?.() ?? "system") === "dark",
+						click: () => {
+							nativeTheme.themeSource = "dark";
+							broadcastThemeSet("dark");
+							onThemeChange?.("dark");
+						},
+					},
+				],
+			},
+			languageSubmenu(),
+			{ type: "separator" },
+			{
+				label: i18n({ key: "menu.view.toggle-dev-tools" }),
+				role: "toggleDevTools",
+			},
+			{ type: "separator" },
+			{
+				label: i18n({ key: "menu.view.zoom-reset" }),
+				role: "resetZoom",
+			},
+			{
+				label: i18n({ key: "menu.view.zoom-in" }),
+				role: "zoomIn",
+			},
+			{
+				label: i18n({ key: "menu.view.zoom-out" }),
+				role: "zoomOut",
+			},
+			{ type: "separator" },
+			{
+				label: i18n({ key: "menu.view.toggle-full-screen" }),
+				role: "togglefullscreen",
+			},
+		],
+	};
+}

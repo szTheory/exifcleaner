@@ -1,22 +1,19 @@
 import { ipcMain, nativeTheme, systemPreferences } from "electron";
 import type { BrowserWindow } from "electron";
-import { IPC_CHANNELS } from "../infrastructure/ipc/ipc_channels";
+import { IPC_CHANNELS } from "../common";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import {
 	themeGetSchema,
 	themeSetSchema,
 	themeAccentColorSchema,
 } from "./ipc/ipc_schemas";
-import {
-	parseAccentColorHex,
-	ACCENT_COLOR_FALLBACK,
-} from "../domain/accent_color";
-import type { SettingsService } from "../infrastructure/settings/settings_service";
+import { parseAccentColorHex, ACCENT_COLOR_FALLBACK } from "../domain";
+import type { SettingsService } from "../infrastructure";
 
 function getAccentColorHex(): string {
 	if (process.platform === "darwin" || process.platform === "win32") {
 		const raw = systemPreferences.getAccentColor();
-		return parseAccentColorHex(raw);
+		return parseAccentColorHex({ raw });
 	}
 	return ACCENT_COLOR_FALLBACK;
 }
@@ -40,7 +37,7 @@ export function setupThemeHandlers({
 		createValidatedHandler(themeSetSchema, async (mode) => {
 			nativeTheme.themeSource = mode;
 			if (settingsService) {
-				await settingsService.update({ themeMode: mode });
+				await settingsService.update({ partial: { themeMode: mode } });
 			}
 			return { success: true };
 		}),
@@ -70,16 +67,13 @@ export function setupThemeHandlers({
 
 	// Accent color changes (Windows/Linux; macOS reads on nativeTheme.updated above)
 	if (process.platform === "win32" || process.platform === "linux") {
-		systemPreferences.on(
-			"accent-color-changed" as "accent-color-changed",
-			() => {
-				const win = getWindow();
-				if (win) {
-					win.webContents.send(IPC_CHANNELS.THEME_ACCENT_COLOR_CHANGED, {
-						color: getAccentColorHex(),
-					});
-				}
-			},
-		);
+		systemPreferences.on("accent-color-changed", () => {
+			const win = getWindow();
+			if (win) {
+				win.webContents.send(IPC_CHANNELS.THEME_ACCENT_COLOR_CHANGED, {
+					color: getAccentColorHex(),
+				});
+			}
+		});
 	}
 }

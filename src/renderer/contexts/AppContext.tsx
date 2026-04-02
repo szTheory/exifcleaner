@@ -1,6 +1,7 @@
 import { createContext, useContext, useReducer } from "react";
 import type { Dispatch, ReactNode } from "react";
-import { FileProcessingStatus } from "../../domain/file_status";
+import { FileProcessingStatus } from "../../domain";
+import { assertNever } from "../../common/types";
 
 export type FolderDiscoveryStatus =
 	| "scanning"
@@ -144,10 +145,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 			nextCollapsed.add(action.folder);
 			return { ...state, collapsedFolders: nextCollapsed };
 		}
-		default: {
-			const _exhaustive: never = action;
-			throw new Error(`Unhandled action: ${JSON.stringify(_exhaustive)}`);
-		}
+		default:
+			return assertNever({ value: action });
 	}
 }
 

@@ -3,26 +3,26 @@ import {
 	parseGroupedKey,
 	getFriendlyGroupKey,
 	computeMetadataDiff,
-} from "../../src/domain/metadata_groups";
+} from "../../src/domain/exif/metadata_groups";
 
 describe("parseGroupedKey", () => {
 	it('parses "Camera:Make" into group="Camera" and field="Make"', () => {
-		const result = parseGroupedKey("Camera:Make");
+		const result = parseGroupedKey({ key: "Camera:Make" });
 		expect(result).toEqual({ group: "Camera", field: "Make" });
 	});
 
 	it('parses "GPS:GPSLatitude" into group="GPS" and field="GPSLatitude"', () => {
-		const result = parseGroupedKey("GPS:GPSLatitude");
+		const result = parseGroupedKey({ key: "GPS:GPSLatitude" });
 		expect(result).toEqual({ group: "GPS", field: "GPSLatitude" });
 	});
 
 	it('returns group="Other" for keys without a colon', () => {
-		const result = parseGroupedKey("SourceFile");
+		const result = parseGroupedKey({ key: "SourceFile" });
 		expect(result).toEqual({ group: "Other", field: "SourceFile" });
 	});
 
 	it('parses "ICC_Profile:ProfileDescription" correctly', () => {
-		const result = parseGroupedKey("ICC_Profile:ProfileDescription");
+		const result = parseGroupedKey({ key: "ICC_Profile:ProfileDescription" });
 		expect(result).toEqual({
 			group: "ICC_Profile",
 			field: "ProfileDescription",
@@ -32,15 +32,21 @@ describe("parseGroupedKey", () => {
 
 describe("getFriendlyGroupKey", () => {
 	it('returns "metaGroupCamera" for "Camera"', () => {
-		expect(getFriendlyGroupKey("Camera")).toBe("metaGroupCamera");
+		expect(getFriendlyGroupKey({ rawGroupName: "Camera" })).toBe(
+			"metaGroupCamera",
+		);
 	});
 
 	it('returns "metaGroupLocation" for "GPS"', () => {
-		expect(getFriendlyGroupKey("GPS")).toBe("metaGroupLocation");
+		expect(getFriendlyGroupKey({ rawGroupName: "GPS" })).toBe(
+			"metaGroupLocation",
+		);
 	});
 
 	it('returns "metaGroupOther" for unknown group names', () => {
-		expect(getFriendlyGroupKey("UnknownGroup")).toBe("metaGroupOther");
+		expect(getFriendlyGroupKey({ rawGroupName: "UnknownGroup" })).toBe(
+			"metaGroupOther",
+		);
 	});
 });
 
@@ -54,7 +60,7 @@ describe("computeMetadataDiff", () => {
 			"Camera:Make": "Canon",
 		};
 
-		const groups = computeMetadataDiff(before, after);
+		const groups = computeMetadataDiff({ before, after });
 
 		// Camera group: Make preserved
 		const camera = groups.find((g) => g.rawGroupName === "Camera");
@@ -81,7 +87,7 @@ describe("computeMetadataDiff", () => {
 		};
 		const after = {};
 
-		const groups = computeMetadataDiff(before, after);
+		const groups = computeMetadataDiff({ before, after });
 		const keys = groups.map((g) => g.friendlyNameKey);
 
 		// metaGroupCamera < metaGroupLocation < metaGroupTime
@@ -102,7 +108,7 @@ describe("computeMetadataDiff", () => {
 		};
 		const after = {};
 
-		const groups = computeMetadataDiff(before, after);
+		const groups = computeMetadataDiff({ before, after });
 		const allFields = groups.flatMap((g) => g.fields.map((f) => f.name));
 
 		expect(allFields).not.toContain("SourceFile");
@@ -112,7 +118,7 @@ describe("computeMetadataDiff", () => {
 	});
 
 	it("returns empty array for empty before and after", () => {
-		const groups = computeMetadataDiff({}, {});
+		const groups = computeMetadataDiff({ before: {}, after: {} });
 		expect(groups).toEqual([]);
 	});
 
@@ -123,7 +129,7 @@ describe("computeMetadataDiff", () => {
 		};
 		const after = {};
 
-		const groups = computeMetadataDiff(before, after);
+		const groups = computeMetadataDiff({ before, after });
 		const camera = groups.find((g) => g.rawGroupName === "Camera");
 
 		expect(camera).toBeDefined();

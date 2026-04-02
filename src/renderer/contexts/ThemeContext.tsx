@@ -6,7 +6,9 @@ import {
 	useState,
 } from "react";
 import type { ReactNode } from "react";
-import type { ThemeMode } from "../../domain/settings_schema";
+import type { ThemeMode } from "../../domain";
+
+const THEME_CROSSFADE_DURATION_MS = 200;
 
 export interface ThemeContextValue {
 	theme: "dark" | "light";
@@ -48,7 +50,6 @@ export function ThemeProvider({
 				setThemeModeState(settingsResult.themeMode);
 				document.documentElement.setAttribute("data-theme", resolved);
 
-				// Apply system accent color as CSS custom property
 				document.documentElement.style.setProperty(
 					"--ec-color-accent",
 					accentResult.color,
@@ -60,14 +61,13 @@ export function ThemeProvider({
 
 		loadTheme();
 
-		// Listen for OS theme changes (no crossfade -- system-driven)
+		// No crossfade for system-driven theme changes
 		const cleanupTheme = window.api.theme.onChanged((payload) => {
 			const resolved = payload.shouldUseDarkColors ? "dark" : "light";
 			setTheme(resolved);
 			document.documentElement.setAttribute("data-theme", resolved);
 		});
 
-		// Listen for accent color changes
 		const cleanupAccent = window.api.theme.onAccentColorChanged((payload) => {
 			document.documentElement.style.setProperty(
 				"--ec-color-accent",
@@ -75,7 +75,6 @@ export function ThemeProvider({
 			);
 		});
 
-		// Listen for theme mode changes from View menu
 		const cleanupMenuMode = window.api.theme.onThemeModeChanged?.((mode) => {
 			setThemeModeState(mode);
 		});
@@ -89,7 +88,7 @@ export function ThemeProvider({
 	}, []);
 
 	const setThemeMode = useCallback((mode: ThemeMode): void => {
-		// Add crossfade transition class for manual switch (D-22)
+		// Crossfade transition class for manual switch (D-22)
 		document.documentElement.classList.add("theme-transitioning");
 
 		setThemeModeState(mode);
@@ -99,7 +98,7 @@ export function ThemeProvider({
 		// Remove transition class after animation completes (D-23)
 		setTimeout(() => {
 			document.documentElement.classList.remove("theme-transitioning");
-		}, 200);
+		}, THEME_CROSSFADE_DURATION_MS);
 	}, []);
 
 	const value = useMemo(

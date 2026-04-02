@@ -3,7 +3,13 @@
 
 export const ACCENT_COLOR_FALLBACK = "#007AFF";
 
-export function parseAccentColorHex(raw: string): string {
+interface ParseAccentColorHexParams {
+	raw: string;
+}
+
+export function parseAccentColorHex({
+	raw,
+}: ParseAccentColorHexParams): string {
 	if (typeof raw !== "string" || raw.length < 6) {
 		return ACCENT_COLOR_FALLBACK;
 	}

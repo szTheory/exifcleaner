@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { LANGUAGE_NAMES } from "../../src/domain/language_names";
-import { Locale } from "../../src/domain/i18n_lookup";
+import { LANGUAGE_NAMES } from "../../src/domain/i18n/language_names";
+import { Locale } from "../../src/domain/i18n/i18n_lookup";
 
 describe("LANGUAGE_NAMES", () => {
 	it("has exactly 25 entries", () => {

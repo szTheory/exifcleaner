@@ -9,7 +9,7 @@ export class FakeSettings implements SettingsPort {
 		return { ...this.settings };
 	}
 
-	async save(settings: Settings): Promise<void> {
+	async save({ settings }: { settings: Settings }): Promise<void> {
 		this.settings = { ...settings };
 	}
 
@@ -17,7 +17,7 @@ export class FakeSettings implements SettingsPort {
 		return { ...this.settings };
 	}
 
-	async update(partial: Partial<Settings>): Promise<void> {
+	async update({ partial }: { partial: Partial<Settings> }): Promise<void> {
 		this.settings = { ...this.settings, ...partial };
 	}
 }
