@@ -124,11 +124,11 @@ jobs:
           APPLE_API_KEY: ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-        run: yarn compile && electron-builder --macos --publish never
+        run: yarn compile && npx electron-builder --macos --publish never
 
       - name: Build macOS (ad-hoc signed)
         if: steps.signing.outputs.available == 'false'
-        run: yarn compile && electron-builder --macos -c.mac.identity=- --publish never
+        run: yarn compile && npx electron-builder --macos -c.mac.identity=- --publish never
 
       - name: Cleanup keychain
         if: steps.signing.outputs.available == 'true'

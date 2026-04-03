@@ -37,9 +37,15 @@ test.describe("App Launch", () => {
 	});
 
 	test("shows the main window on launch", async () => {
-		const isVisible = await app.evaluate(({ BrowserWindow }) => {
+		const isVisible = await app.evaluate(async ({ BrowserWindow }) => {
 			const win = BrowserWindow.getAllWindows()[0];
-			return win?.isVisible() ?? false;
+			if (!win) return false;
+			// Window uses show: false + ready-to-show — may not be visible yet on slow CI
+			if (win.isVisible()) return true;
+			return new Promise<boolean>((resolve) => {
+				win.once("show", () => resolve(true));
+				setTimeout(() => resolve(win.isVisible()), 5000);
+			});
 		});
 		expect(isVisible).toBe(true);
 	});
