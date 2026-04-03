@@ -18,10 +18,10 @@
 		"format": "yarn prettier --write 'src/**/*.{ts,tsx}'",
 		"lint": "prettier --check 'src/**/*.{ts,tsx}'",
 		"start": "ELECTRON_RUN_AS_NODE= electron-vite preview",
-		"packmactest": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=-",
+		"packmactest": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
 		"packwin": "yarn run compile && electron-builder --windows",
 		"packlinux": "yarn run compile && electron-builder --linux",
-		"packmac": "yarn run compile && electron-builder --macos -c.mac.identity=-",
+		"packmac": "yarn run compile && electron-builder --macos -c.mac.identity=null",
 		"build": "yarn run compile && electron-builder --macos --linux --windows",
 		"publish": "yarn run compile && electron-builder --macos --linux --windows -p always",
 		"release": "echo 'Use GitHub Actions release workflow (workflow_dispatch) instead' && exit 1",
@@ -64,7 +64,6 @@
 			"repo": "exifcleaner",
 			"protocol": "https"
 		},
-		"afterSign": "./scripts/afterPack.cjs",
 		"appId": "com.exifcleaner",
 		"mac": {
 			"category": "public.app-category.graphics-and-images",
