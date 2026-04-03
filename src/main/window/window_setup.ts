@@ -91,9 +91,10 @@ export function createMainWindow(): BrowserWindow {
 
 export function setupMainWindow(browserWindow: BrowserWindow): void {
 	setupMainWindowClose(browserWindow);
-	// load URL before showing the window to avoid flash of unloaded content
-	mainWindowLoadUrl(browserWindow);
+	// Register show listener BEFORE loading URL — ready-to-show can fire
+	// during loadFile in packaged builds (asar reads are near-instant)
 	showWindowOnReady(browserWindow);
+	mainWindowLoadUrl(browserWindow);
 	windowsStopFlashingFrameOnFocus(browserWindow);
 	setupWindowStatePersistence(browserWindow);
 }

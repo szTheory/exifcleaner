@@ -18,10 +18,10 @@
 		"format": "yarn prettier --write 'src/**/*.{ts,tsx}'",
 		"lint": "prettier --check 'src/**/*.{ts,tsx}'",
 		"start": "ELECTRON_RUN_AS_NODE= electron-vite preview",
-		"packmactest": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
+		"packmactest": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=-",
 		"packwin": "yarn run compile && electron-builder --windows",
 		"packlinux": "yarn run compile && electron-builder --linux",
-		"packmac": "yarn run compile && electron-builder --macos -c.mac.identity=null",
+		"packmac": "yarn run compile && electron-builder --macos -c.mac.identity=-",
 		"build": "yarn run compile && electron-builder --macos --linux --windows",
 		"publish": "yarn run compile && electron-builder --macos --linux --windows -p always",
 		"release": "echo 'Use GitHub Actions release workflow (workflow_dispatch) instead' && exit 1",
@@ -64,16 +64,8 @@
 			"repo": "exifcleaner",
 			"protocol": "https"
 		},
+		"afterSign": "./scripts/afterPack.cjs",
 		"appId": "com.exifcleaner",
-		"electronFuses": {
-			"runAsNode": false,
-			"enableCookieEncryption": true,
-			"enableNodeOptionsEnvironmentVariable": false,
-			"enableNodeCliInspectArguments": false,
-			"enableEmbeddedAsarIntegrityValidation": true,
-			"onlyLoadAppFromAsar": true,
-			"grantFileProtocolExtraPrivileges": false
-		},
 		"mac": {
 			"category": "public.app-category.graphics-and-images",
 			"darkModeSupport": true,
@@ -81,11 +73,12 @@
 				{
 					"target": "dmg",
 					"arch": [
-						"universal"
+						"arm64",
+						"x64"
 					]
 				}
 			],
-			"hardenedRuntime": true,
+			"hardenedRuntime": false,
 			"entitlements": "build/entitlements.mac.plist",
 			"entitlementsInherit": "build/entitlements.mac.inherit.plist",
 			"notarize": true,
