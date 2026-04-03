@@ -1,9 +1,6 @@
-import { app, BrowserWindow } from "electron";
-import {
-	currentBrowserWindow,
-	restoreWindowAndFocus,
-} from "../../infrastructure";
-import { createMainWindow } from "../window/window_setup";
+import { app } from "electron";
+import type { BrowserWindow } from "electron";
+import { restoreWindowAndFocus } from "../../infrastructure";
 import { isWindows } from "../../common";
 import { fileOpen } from "../file_open";
 
@@ -37,21 +34,6 @@ function quitOnWindowsAllClosed(): void {
 	});
 }
 
-interface CreateWindowOnActivateParams {
-	browserWindow: BrowserWindow | null;
-}
-
-function createWindowOnActivate({
-	browserWindow,
-}: CreateWindowOnActivateParams): void {
-	app.on("activate", () => {
-		browserWindow = currentBrowserWindow({ browserWindow });
-		if (!browserWindow) {
-			browserWindow = createMainWindow();
-		}
-	});
-}
-
 interface SetupAppParams {
 	browserWindow: BrowserWindow | null;
 	onQuit: () => void;
@@ -61,6 +43,7 @@ export function setupApp({ browserWindow, onQuit }: SetupAppParams): void {
 	preventMultipleAppInstances();
 	openMinimizedIfAlreadyExists({ browserWindow });
 	quitOnWindowsAllClosed();
-	createWindowOnActivate({ browserWindow });
+	// Note: "activate" handler (re-create window on dock click) is in index.ts
+	// because it needs to call the full init + setupMainWindow sequence
 	app.on("will-quit", onQuit);
 }

@@ -1,5 +1,7 @@
+import { app } from "electron";
+
 export function isProd(): boolean {
-	return process.env.NODE_ENV === "production";
+	return app.isPackaged;
 }
 
 export function isDev(): boolean {
