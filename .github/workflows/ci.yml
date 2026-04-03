@@ -2,9 +2,8 @@ name: CI
 
 on:
   push:
-    branches: ['**']
+    branches: [master]
   pull_request:
-    branches: ['**']
 
 # Cancel in-progress runs for same branch/PR
 concurrency:
