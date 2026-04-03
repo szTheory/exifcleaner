@@ -64,6 +64,7 @@
 			"repo": "exifcleaner",
 			"protocol": "https"
 		},
+		"afterPack": "./scripts/afterPack.cjs",
 		"appId": "com.exifcleaner",
 		"mac": {
 			"category": "public.app-category.graphics-and-images",
