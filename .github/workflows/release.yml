@@ -57,7 +57,7 @@ jobs:
         run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" yarn test:e2e
 
   build-macos:
-    name: Build macOS (Signed)
+    name: Build macOS
     needs: test
     runs-on: macos-latest
     steps:
@@ -72,7 +72,18 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Check signing availability
+        id: signing
+        run: |
+          if [ -n "${{ secrets.MACOS_CERTIFICATE_BASE64 }}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "⚠ No signing certificate configured — building unsigned"
+          fi
+
       - name: Import signing certificate
+        if: steps.signing.outputs.available == 'true'
         env:
           CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
           CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
@@ -98,6 +109,7 @@ jobs:
           rm "$CERTIFICATE_PATH"
 
       - name: Decode Apple API key
+        if: steps.signing.outputs.available == 'true'
         env:
           API_KEY_BASE64: ${{ secrets.APPLE_API_KEY_BASE64 }}
         run: |
@@ -105,6 +117,7 @@ jobs:
           echo "$API_KEY_BASE64" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
 
       - name: Build macOS (signed + notarized)
+        if: steps.signing.outputs.available == 'true'
         env:
           CSC_LINK: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
           CSC_KEY_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
@@ -113,8 +126,12 @@ jobs:
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
         run: yarn compile && electron-builder --macos --publish never
 
+      - name: Build macOS (unsigned)
+        if: steps.signing.outputs.available == 'false'
+        run: yarn compile && electron-builder --macos -c.mac.identity=null --publish never
+
       - name: Cleanup keychain
-        if: always()
+        if: steps.signing.outputs.available == 'true'
         run: security delete-keychain $RUNNER_TEMP/build.keychain-db 2>/dev/null || true
 
       - name: Upload macOS artifacts
