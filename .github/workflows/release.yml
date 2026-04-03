@@ -126,9 +126,9 @@ jobs:
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
         run: yarn compile && npx electron-builder --macos --publish never
 
-      - name: Build macOS (ad-hoc signed)
+      - name: Build macOS (unsigned)
         if: steps.signing.outputs.available == 'false'
-        run: yarn compile && npx electron-builder --macos -c.mac.identity=- --publish never
+        run: yarn compile && npx electron-builder --macos -c.mac.identity=null --publish never
 
       - name: Cleanup keychain
         if: steps.signing.outputs.available == 'true'
