@@ -23,7 +23,8 @@
     "cs": "Nejsou vybrány žádné soubory",
     "vn": "Không có tập tin nào được chọn",
     "fa": "فایلی انتخاب نشده است",
-    "ca": "No s'ha seleccionat cap fitxer"
+    "ca": "No s'ha seleccionat cap fitxer",
+    "ro": "Niciun fișier selectat"
   },
   "empty.subtitle": {
     "en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
@@ -49,7 +50,8 @@
     "cs": "Přetáhněte sem fotografie, videa nebo soubory PDF a automaticky z nich odstraníte metadata.",
     "vn": "Kéo và thả tập tin hình ảnh, video hoặc PDF để tự động xóa siêu dữ liệu.",
     "fa": "تصاویر، ویدئو یا فایل‌های پی‌دی‌اف را اینجا بکشید تا متادیتا به صورت خودکار حذف شود.",
-    "ca": "Arrossegueu i deixeu anar imatges, vídeos o fitxers PDF per a eliminar automàticament les metadades."
+    "ca": "Arrossegueu i deixeu anar imatges, vídeos o fitxers PDF per a eliminar automàticament les metadades.",
+    "ro": "Trage și plasează imagini, videoclipuri sau fișiere PDF pentru a elimina automat metadatele."
   },
   "table.header.filename": {
     "en": "Selected files",
@@ -75,7 +77,8 @@
     "cs": "Vybrané soubory",
     "vn": "Những tập tin đã được chọn",
     "fa": "فایل‌های انتخابی",
-    "ca": "Fitxers seleccionats"
+    "ca": "Fitxers seleccionats",
+    "ro": "Fișiere selectate"
   },
   "table.header.exif-before": {
     "en": "# Exif Before",
@@ -101,7 +104,8 @@
     "cs": "Exif předtím",
     "vn": "#Trước Exif",
     "fa": "# پیش از Exif",
-    "ca": "Exif avans"
+    "ca": "Exif avans",
+    "ro": "# Exif înainte"
   },
   "table.header.exif-after": {
     "en": "# Exif After",
@@ -127,7 +131,8 @@
     "cs": "Exif poté",
     "vn": "#Sau Exif",
     "fa": "# پس از Exif",
-    "ca": "Exif després"
+    "ca": "Exif després",
+    "ro": "# Exif după"
   },
   "contextmenu.copy": {
     "en": "Copy",
@@ -153,7 +158,8 @@
     "cs": "Kopírovat",
     "vn": "Sao chép",
     "fa": "کپی",
-    "ca": "Copia"
+    "ca": "Copia",
+    "ro": "Copiază"
   },
   "contextmenu.select-all": {
     "en": "Select All",
@@ -179,7 +185,8 @@
     "cs": "Vybrat vše",
     "vn": "Chọn tất cả",
     "fa": "انتخاب همه",
-    "ca": "Selecciona-ho tot"
+    "ca": "Selecciona-ho tot",
+    "ro": "Selectează tot"
   },
   "menu.app.about": {
     "en": "About ",
@@ -205,7 +212,8 @@
     "cs": "O aplikaci ",
     "vn": "Giới thiệu",
     "fa": "درباره",
-    "ca": "Quant a "
+    "ca": "Quant a ",
+    "ro": "Despre "
   },
   "menu.app.services": {
     "en": "Services",
@@ -231,7 +239,8 @@
     "cs": "Služby",
     "vn": "Dịch vụ",
     "fa": "سرویس‌ها",
-    "ca": "Serveis"
+    "ca": "Serveis",
+    "ro": "Servicii"
   },
   "menu.app.hide": {
     "en": "Hide",
@@ -257,7 +266,8 @@
     "cs": "Skrýt",
     "vn": "Ẩn",
     "fa": "پنهان",
-    "ca": "Amaga"
+    "ca": "Amaga",
+    "ro": "Ascunde"
   },
   "menu.app.hide-others": {
     "en": "Hide Others",
@@ -283,7 +293,8 @@
     "cs": "Skrýt ostatní",
     "vn": "Ẩn những tập tin khác",
     "fa": "پنهان کردن بقیه",
-    "ca": "Amaga els altres"
+    "ca": "Amaga els altres",
+    "ro": "Ascunde celelalte"
   },
   "menu.app.show-all": {
     "en": "Show All",
@@ -309,11 +320,13 @@
     "cs": "Zobrazit vše",
     "vn": "Hiện tất cả",
     "fa": "نمایش همه",
-    "ca": "Mostra-ho tot"
+    "ca": "Mostra-ho tot",
+    "ro": "Afișează tot"
   },
   "menu.app.settings": {
     "en": "Settings",
-    "fr": "Préférences"
+    "fr": "Préférences",
+    "ro": "Preferințe"
   },
   "menu.app.quit": {
     "en": "Quit",
@@ -339,7 +352,8 @@
     "cs": "Ukončit",
     "vn": "Thoát",
     "fa": "خروج",
-    "ca": "Surt"
+    "ca": "Surt",
+    "ro": "Închide"
   },
   "menu.file.name": {
     "en": "File",
@@ -365,7 +379,8 @@
     "cs": "Soubor",
     "vn": "Tập tin",
     "fa": "فایل",
-    "ca": "Fitxer"
+    "ca": "Fitxer",
+    "ro": "Fișier"
   },
   "menu.file.open": {
     "en": "Open",
@@ -391,7 +406,8 @@
     "cs": "Otevřít",
     "vn": "Mở để chọn file",
     "fa": "باز کردن",
-    "ca": "Obre"
+    "ca": "Obre",
+    "ro": "Deschide"
   },
   "menu.file.close": {
     "en": "Close",
@@ -417,7 +433,8 @@
     "cs": "Zavřít",
     "vn": "Đóng",
     "fa": "کپی",
-    "ca": "Tanca"
+    "ca": "Tanca",
+    "ro": "Închide"
   },
   "menu.file.quit": {
     "en": "Quit",
@@ -443,7 +460,8 @@
     "cs": "Ukončit",
     "vn": "Thoát",
     "fa": "بستن",
-    "ca": "Surt"
+    "ca": "Surt",
+    "ro": "Ieșire"
   },
   "menu.edit.name": {
     "en": "Edit",
@@ -469,7 +487,8 @@
     "cs": "Upravit",
     "vn": "Chỉnh sửa",
     "fa": "ویرایش",
-    "ca": "Edita"
+    "ca": "Edita",
+    "ro": "Editare"
   },
   "menu.edit.copy": {
     "en": "Copy",
@@ -495,7 +514,8 @@
     "cs": "Kopírovat",
     "vn": "Sao chép",
     "fa": "کپی",
-    "ca": "Copia"
+    "ca": "Copia",
+    "ro": "Copiază"
   },
   "menu.edit.select-all": {
     "en": "Select All",
@@ -521,7 +541,8 @@
     "cs": "Vybrat vše",
     "vn": "Chọn tất cả",
     "fa": "انتخاب همه",
-    "ca": "Selecciona-ho tot"
+    "ca": "Selecciona-ho tot",
+    "ro": "Selectează tot"
   },
   "menu.edit.speech": {
     "en": "Speech",
@@ -547,7 +568,8 @@
     "cs": "Řeč",
     "vn": "Ngôn ngữ",
     "fa": "سخنرانی",
-    "ca": "Veu"
+    "ca": "Veu",
+    "ro": "Vorbire"
   },
   "menu.edit.speech.start-speaking": {
     "en": "Start Speaking",
@@ -573,7 +595,8 @@
     "cs": "Začněte mluvit",
     "vn": "Bắt đầu nói",
     "fa": "شروع سخنرانی",
-    "ca": "Comenceu a parlar"
+    "ca": "Comenceu a parlar",
+    "ro": "Începe vorbirea"
   },
   "menu.edit.speech.stop-speaking": {
     "en": "Stop Speaking",
@@ -599,7 +622,8 @@
     "cs": "Přestaňte mluvit",
     "vn": "Ngừng nói",
     "fa": "توقف سخنرانی",
-    "ca": "Deixeu de parlar"
+    "ca": "Deixeu de parlar",
+    "ro": "Oprește vorbirea"
   },
   "menu.view.name": {
     "en": "View",
@@ -625,7 +649,8 @@
     "cs": "Zobrazení",
     "vn": "Xem thêm",
     "fa": "نما",
-    "ca": "Visualitza"
+    "ca": "Visualitza",
+    "ro": "Vizualizare"
   },
   "menu.view.toggle-dev-tools": {
     "en": "Toggle Developer Tools",
@@ -651,7 +676,8 @@
     "cs": "Přepnout vývojářské nástroje",
     "vn": "Bật/Tắt công cụ dành cho nhà phát triển",
     "fa": "تغییر وضعیت ابزارهای توسعه‌دهنده",
-    "ca": "Habilita les eines per a desenvolupadors"
+    "ca": "Habilita les eines per a desenvolupadors",
+    "ro": "Comută la instrumentele pentru dezvoltatori"
   },
   "menu.view.zoom-reset": {
     "en": "Actual Size",
@@ -677,7 +703,8 @@
     "cs": "Výchozí velikost",
     "vn": "Kích cỡ thực sự",
     "fa": "اندازه واقعی",
-    "ca": "Mida actual"
+    "ca": "Mida actual",
+    "ro": "Dimensiune reală"
   },
   "menu.view.zoom-in": {
     "en": "Zoom In",
@@ -703,7 +730,8 @@
     "cs": "Přiblížit",
     "vn": "Phóng to màn hình chính",
     "fa": "بزرگنمایی",
-    "ca": "Amplia"
+    "ca": "Amplia",
+    "ro": "Mărește"
   },
   "menu.view.zoom-out": {
     "en": "Zoom Out",
@@ -729,7 +757,8 @@
     "cs": "Oddálit",
     "vn": "Thu nhỏ màn hình chính",
     "fa": "کوچکنمایی",
-    "ca": "Allunya"
+    "ca": "Allunya",
+    "ro": "Micșorează"
   },
   "menu.view.toggle-full-screen": {
     "en": "Toggle Full Screen",
@@ -755,7 +784,8 @@
     "cs": "Přepnout režim celé obrazovky",
     "vn": "Toàn màn hình",
     "fa": "تغییر وضعیت تمام صفحه",
-    "ca": "Habilita la pantalla completa"
+    "ca": "Habilita la pantalla completa",
+    "ro": "Comută modul ecran complet"
   },
   "menu.window.name": {
     "en": "Window",
@@ -781,7 +811,8 @@
     "cs": "Okno",
     "vn": "Màn cửa sổ",
     "fa": "پنجره",
-    "ca": "Finestra"
+    "ca": "Finestra",
+    "ro": "Fereastră"
   },
   "menu.window.minimize-mac": {
     "en": "Minimize",
@@ -807,7 +838,8 @@
     "cs": "Minimalizovat",
     "vn": "Thu nhỏ",
     "fa": "کمینه",
-    "ca": "Minimitza"
+    "ca": "Minimitza",
+    "ro": "Minimizează"
   },
   "menu.window.minimize": {
     "en": "Minimize",
@@ -833,7 +865,8 @@
     "cs": "Minimalizovat",
     "vn": "Thu nhỏ",
     "fa": "کمینه",
-    "ca": "Minimitza"
+    "ca": "Minimitza",
+    "ro": "Minimizează"
   },
   "menu.window.zoom-mac": {
     "en": "Zoom",
@@ -859,7 +892,8 @@
     "cs": "Zvětšit",
     "vn": "Phóng to",
     "fa": "بزرگنمایی",
-    "ca": "Maximitza"
+    "ca": "Maximitza",
+    "ro": "Zoom"
   },
   "menu.window.zoom": {
     "en": "Zoom",
@@ -885,7 +919,8 @@
     "cs": "Zvětšit",
     "vn": "Phóng to",
     "fa": "بزرگنمایی",
-    "ca": "Maximitza"
+    "ca": "Maximitza",
+    "ro": "Zoom"
   },
   "menu.window.front": {
     "en": "Bring All to Front",
@@ -911,7 +946,8 @@
     "cs": "Přesunout vše do popředí",
     "vn": "Mang tất cả tập tin lên trước",
     "fa": "همه را جلو بیاورید",
-    "ca": "Porta-ho tot al davant"
+    "ca": "Porta-ho tot al davant",
+    "ro": "Adu totul în față"
   },
   "menu.window.window": {
     "en": "Window",
@@ -937,7 +973,8 @@
     "cs": "Okno",
     "vn": "Màn cửa sổ",
     "fa": "پنجره",
-    "ca": "Finestra"
+    "ca": "Finestra",
+    "ro": "Fereastră"
   },
   "menu.window.close": {
     "en": "Close",
@@ -963,7 +1000,8 @@
     "cs": "Zavřít",
     "vn": "Đóng",
     "fa": "بستن",
-    "ca": "Tanca"
+    "ca": "Tanca",
+    "ro": "Închide"
   },
   "menu.help.name": {
     "en": "Help",
@@ -989,7 +1027,8 @@
     "cs": "Pomoc",
     "vn": "Hỗ trợ",
     "fa": "کمک",
-    "ca": "Ajuda"
+    "ca": "Ajuda",
+    "ro": "Ajutor"
   },
   "menu.help.website": {
     "en": "Website",
@@ -1015,7 +1054,8 @@
     "cs": "Webová stránka",
     "vn": "Dịa chỉ web của chúng tôi",
     "fa": "وبسایت",
-    "ca": "Lloc web"
+    "ca": "Lloc web",
+    "ro": "Website"
   },
   "menu.help.source-code": {
     "en": "Source Code",
@@ -1041,7 +1081,8 @@
     "cs": "Zdrojový kód",
     "vn": "Mã nguồn của Exif Cleaner",
     "fa": "کد منبع",
-    "ca": "Codi font"
+    "ca": "Codi font",
+    "ro": "Cod sursă"
   },
   "menu.help.report-issue": {
     "en": "Report an Issue",
@@ -1067,7 +1108,8 @@
     "cs": "Nahlásit problém",
     "vn": "Báo cáo lỗi",
     "fa": "گزارش یک اشکال",
-    "ca": "Informa d'un problema"
+    "ca": "Informa d'un problema",
+    "ro": "Raportează o problemă"
   },
   "menu.help.about": {
     "en": "About ",
@@ -1093,7 +1135,8 @@
     "cs": "O programu",
     "vn": "Về phần mềm",
     "fa": "درباره",
-    "ca": "Quant a "
+    "ca": "Quant a ",
+    "ro": "Despre "
   },
   "aboutwindow:copyright": {
     "en": "Copyright",
@@ -1119,7 +1162,8 @@
     "cs": "Autorská práva",
     "vn": "Bản quyền",
     "fa": "کپی رایت",
-    "ca": "Copyright"
+    "ca": "Copyright",
+    "ro": "Drepturi de autor"
   },
   "usertasks:open-file.label": {
     "en": "Open files",
@@ -1143,7 +1187,8 @@
     "cs": "Otevřít soubory",
     "vn": "Mở tập tin",
     "fa": "باز کردن فایل‌ها",
-    "ca": "Obre els fitxers"
+    "ca": "Obre els fitxers",
+    "ro": "Deschide fișiere"
   },
   "usertasks:open-file.description": {
     "en": "Remove metadata from selected files",
@@ -1167,79 +1212,98 @@
     "cs": "Odstranit metadata z vybraných souborů",
     "vn": "Xóa siêu dữ liệu từ tập tin được chọn",
     "fa": "پاک کردن متادیتاها از فایل‌های انتخاب شده",
-    "ca": "Elimina les metadades dels fitxers seleccionats"
+    "ca": "Elimina les metadades dels fitxers seleccionats",
+    "ro": "Elimină metadatele din fișierele selectate"
   },
   "appearance": {
     "en": "Appearance",
-    "fr": "Apparence"
+    "fr": "Apparence",
+    "ro": "Aspect"
   },
   "themeLight": {
     "en": "Light",
-    "fr": "Clair"
+    "fr": "Clair",
+    "ro": "Luminos"
   },
   "themeAuto": {
     "en": "Auto",
-    "fr": "Auto"
+    "fr": "Auto",
+    "ro": "Automat"
   },
   "themeDark": {
     "en": "Dark",
-    "fr": "Sombre"
+    "fr": "Sombre",
+    "ro": "Întunecat"
   },
   "noMetadataFound": {
     "en": "No metadata found",
-    "fr": "Aucune métadonnée trouvée"
+    "fr": "Aucune métadonnée trouvée",
+    "ro": "Nu s-au găsit metadate"
   },
   "copyAll": {
     "en": "Copy all",
-    "fr": "Tout copier"
+    "fr": "Tout copier",
+    "ro": "Copiază tot"
   },
   "metadataGroupHeader": {
     "en": "{groupName} ({removed} of {total} removed)",
-    "fr": "{groupName} ({removed} sur {total} supprimées)"
+    "fr": "{groupName} ({removed} sur {total} supprimées)",
+    "ro": "{groupName} ({removed} din {total} eliminate)"
   },
   "metaGroupCamera": {
     "en": "Camera",
-    "fr": "Appareil photo"
+    "fr": "Appareil photo",
+    "ro": "Cameră"
   },
   "metaGroupLocation": {
     "en": "Location",
-    "fr": "Localisation"
+    "fr": "Localisation",
+    "ro": "Locație"
   },
   "metaGroupTime": {
     "en": "Time",
-    "fr": "Date et heure"
+    "fr": "Date et heure",
+    "ro": "Data și ora"
   },
   "metaGroupAuthor": {
     "en": "Author",
-    "fr": "Auteur"
+    "fr": "Auteur",
+    "ro": "Autor"
   },
   "metaGroupImage": {
     "en": "Image",
-    "fr": "Image"
+    "fr": "Image",
+    "ro": "Imagine"
   },
   "metaGroupVideo": {
     "en": "Video",
-    "fr": "Vidéo"
+    "fr": "Vidéo",
+    "ro": "Video"
   },
   "metaGroupDocument": {
     "en": "Document",
-    "fr": "Document"
+    "fr": "Document",
+    "ro": "Document"
   },
   "metaGroupPublishing": {
     "en": "Publishing",
-    "fr": "Publication"
+    "fr": "Publication",
+    "ro": "Publicare"
   },
   "metaGroupColorProfile": {
     "en": "Color Profile",
-    "fr": "Profil colorimétrique"
+    "fr": "Profil colorimétrique",
+    "ro": "Profil de culoare"
   },
   "metaGroupCameraInternals": {
     "en": "Camera Internals",
-    "fr": "Paramètres internes"
+    "fr": "Paramètres internes",
+    "ro": "Parametri interni ai camerei"
   },
   "metaGroupOther": {
     "en": "Other",
-    "fr": "Autre"
+    "fr": "Autre",
+    "ro": "Altele"
   },
   "language": {
     "en": "Language",
@@ -1266,7 +1330,8 @@
     "vn": "Ngon ngu",
     "fa": "زبان",
     "ca": "Idioma",
-    "pt": "Idioma"
+    "pt": "Idioma",
+    "ro": "Limbă"
   },
   "languageSystem": {
     "en": "System",
@@ -1293,22 +1358,27 @@
     "vn": "He thong",
     "fa": "سیستم",
     "ca": "Sistema",
-    "pt": "Sistema"
+    "pt": "Sistema",
+    "ro": "Sistem"
   },
   "statusBar.xOfYCleaned": {
     "en": "{completed} of {total} cleaned",
-    "fr": "{completed} sur {total} nettoyé(s)"
+    "fr": "{completed} sur {total} nettoyé(s)",
+    "ro": "{completed} din {total} curățate"
   },
   "statusBar.tagsRemoved": {
     "en": "{count} tags removed",
-    "fr": "{count} balises supprimées"
+    "fr": "{count} balises supprimées",
+    "ro": "{count} etichete eliminate"
   },
   "statusBar.elapsed": {
     "en": "{seconds}s",
-    "fr": "{seconds}s"
+    "fr": "{seconds}s",
+    "ro": "{seconds}s"
   },
   "statusBar.clear": {
     "en": "Clear",
-    "fr": "Effacer"
+    "fr": "Effacer",
+    "ro": "Golește"
   }
 }

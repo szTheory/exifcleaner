@@ -27,6 +27,7 @@ export const LANGUAGE_NAMES: ReadonlyArray<LanguageEntry> = [
 		nativeName: "Portugues (Brasil)",
 		englishName: "Portuguese (Brazil)",
 	},
+	{ code: "ro", nativeName: "Română", englishName: "Romanian" },
 	{ code: "sk", nativeName: "Slovencina", englishName: "Slovak" },
 	{ code: "sv", nativeName: "Svenska", englishName: "Swedish" },
 	{ code: "vn", nativeName: "Tieng Viet", englishName: "Vietnamese" },
