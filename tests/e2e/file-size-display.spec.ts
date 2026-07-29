@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { launchApp, closeApp } from "./helpers/app_launcher";
 import { createFixtureDir } from "../helpers/fixture_copier";
 import { waitForProcessing } from "./helpers/wait_for_processing";
+import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
 
 /**
  * Regression tests for the SIZE column, which read "0 B" for every file in every
@@ -51,7 +52,7 @@ test.describe("File size display", () => {
 	}
 
 	test("shows the real byte size of a processed file", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("sample.jpg");
 
@@ -70,8 +71,22 @@ test.describe("File size display", () => {
 			// renders "3.1 KB", which is how this test first went wrong.
 			expect(sizeWhenAdded).toBeLessThan(1024);
 
+			const before = snapshotDir(dir);
+
 			await addFiles([tempFile]);
 			await waitForProcessing(window);
+
+			const after = snapshotDir(dir);
+
+			// 711 -> 315 bytes in place is the byte-level version of what the
+			// displayed size column is asserting above -- this closes the
+			// same-size/different-bytes gap the helper exists to catch, just on the
+			// spec that already proved the shrink numerically.
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg"],
+				added: [],
+				removed: [],
+			});
 
 			const sizeCell = window.locator(".file-table__cell--size").first();
 			await expect(sizeCell).toHaveText(`${sizeWhenAdded} B`);
@@ -81,22 +96,38 @@ test.describe("File size display", () => {
 	});
 
 	test("shows 0 B only when the file is genuinely empty", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const emptyFile = copyFixture("zero_byte.jpg");
 			expect(fs.statSync(emptyFile).size).toBe(0);
 
+			const before = snapshotDir(dir);
+
 			await addFiles([emptyFile]);
 
 			const sizeCell = window.locator(".file-table__cell--size").first();
+			// toHaveText is the wait here (auto-retrying) — there is no separate
+			// waitForProcessing call for this test, so the after-snapshot is taken
+			// once this assertion has settled, not immediately after addFiles.
 			await expect(sizeCell).toHaveText("0 B");
+
+			const after = snapshotDir(dir);
+
+			// A zero-byte file has no header for ExifTool to write against; it
+			// errors before -overwrite_original and stays untouched at 0 bytes.
+			assertDirEffect(before, after, {
+				unchanged: ["zero_byte.jpg"],
+				added: [],
+				modified: [],
+				removed: [],
+			});
 		} finally {
 			cleanup();
 		}
 	});
 
 	test("gives each row its own size rather than repeating one value", async () => {
-		const { copyFixtures, cleanup } = createFixtureDir();
+		const { dir, copyFixtures, cleanup } = createFixtureDir();
 		try {
 			// Three fixtures with three distinct sizes, so a mapping bug that gives
 			// every row the same value shows up as duplicate labels. Asserts on
@@ -114,8 +145,18 @@ test.describe("File size display", () => {
 				"fixtures must have distinct sizes for this test to detect mismapping",
 			).toBe(3);
 
+			const before = snapshotDir(dir);
+
 			await addFiles(tempFiles);
 			await waitForProcessing(window, { timeout: 30000, expectedFiles: 3 });
+
+			const after = snapshotDir(dir);
+
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg", "sample.png", "sample.mp4"],
+				added: [],
+				removed: [],
+			});
 
 			const labels = await window
 				.locator(".file-table__cell--size")
@@ -135,11 +176,22 @@ test.describe("File size display", () => {
 	 * count or timer would have sailed through that.
 	 */
 	test("status bar reports a real tag count, not a placeholder", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("sample.jpg");
+
+			const before = snapshotDir(dir);
+
 			await addFiles([tempFile]);
 			await waitForProcessing(window);
+
+			const after = snapshotDir(dir);
+
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg"],
+				added: [],
+				removed: [],
+			});
 
 			// Addressed via data-stat rather than by matching the rendered sentence:
 			// the app follows the host system locale, so a prose assertion passes in
