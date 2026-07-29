@@ -100,6 +100,61 @@ describe("assertDirEffect", () => {
 		}
 	});
 
+	test("non-empty delta with an empty expectation object names every observed mutation", () => {
+		const dir = mkTempDir();
+		try {
+			fs.writeFileSync(path.join(dir, "toModify.txt"), "before-bytes");
+			fs.writeFileSync(path.join(dir, "toDelete.txt"), "gone-soon");
+			const before = snapshotDir(dir);
+
+			fs.writeFileSync(path.join(dir, "toModify.txt"), "after-bytes");
+			fs.rmSync(path.join(dir, "toDelete.txt"));
+			fs.writeFileSync(path.join(dir, "toAdd.txt"), "brand-new");
+			const after = snapshotDir(dir);
+
+			let message = "";
+			try {
+				assertDirEffect(before, after, {});
+			} catch (err: unknown) {
+				message = err instanceof Error ? err.message : String(err);
+			}
+
+			expect(message).toContain("toModify.txt");
+			expect(message).toContain("toDelete.txt");
+			expect(message).toContain("toAdd.txt");
+		} finally {
+			fs.rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
+	test("exiftool backup file (_original suffix) produces a named diagnostic, not a generic message", () => {
+		const dir = mkTempDir();
+		try {
+			const before = snapshotDir(dir);
+			fs.writeFileSync(path.join(dir, "sample.jpg_original"), "backup-bytes");
+			const after = snapshotDir(dir);
+
+			expect(() => assertDirEffect(before, after, {})).toThrowError(
+				/-overwrite_original/,
+			);
+		} finally {
+			fs.rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
+	test("Finder metadata file (.DS_Store) produces a named diagnostic and still fails", () => {
+		const dir = mkTempDir();
+		try {
+			const before = snapshotDir(dir);
+			fs.writeFileSync(path.join(dir, ".DS_Store"), "finder-bytes");
+			const after = snapshotDir(dir);
+
+			expect(() => assertDirEffect(before, after, {})).toThrowError(/Finder/);
+		} finally {
+			fs.rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
 	test("declared but did not happen: an added path that was never created throws", () => {
 		const dir = mkTempDir();
 		try {
