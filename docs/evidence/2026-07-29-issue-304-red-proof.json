@@ -1,0 +1,247 @@
+{
+  "config": {
+    "argv": [
+      "/Users/jon/.asdf/installs/nodejs/22.14.0/bin/node",
+      "/Users/jon/projects/exifcleaner/exifcleaner-electron/node_modules/.bin/playwright",
+      "test",
+      "--project=dev",
+      "--grep",
+      "#304",
+      "--reporter=list,json"
+    ],
+    "configFile": "/Users/jon/projects/exifcleaner/exifcleaner-electron/playwright.config.ts",
+    "rootDir": "/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/jon/projects/exifcleaner/exifcleaner-electron/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "dev",
+        "name": "dev",
+        "testDir": "/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "*.spec.ts"
+        ],
+        "timeout": 15000
+      },
+      {
+        "outputDir": "/Users/jon/projects/exifcleaner/exifcleaner-electron/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "smoke",
+        "name": "smoke",
+        "testDir": "/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/smoke",
+        "testIgnore": [],
+        "testMatch": [
+          "*.smoke.ts"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "settings.spec.ts",
+      "file": "settings.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Settings",
+          "file": "settings.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "#304 save-as-copy on: original survives, a cleaned copy appears",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "dev",
+                  "projectName": "dev",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1378,
+                      "error": {
+                        "message": "Error: assertDirEffect found 3 problem(s):\nunnamed file modified (content differs): sample.jpg\ndeclared added but did not happen: sample_cleaned.jpg\ndeclared unchanged but changed or missing: sample.jpg\n\nFull delta (= unchanged, ~ modified, + added, - removed):\n~ sample.jpg  (711 -> 315)  content differs\n\nPaste-ready observed literal:\nadded: []\nmodified: [\"sample.jpg\"]\nremoved: []",
+                        "stack": "Error: assertDirEffect found 3 problem(s):\nunnamed file modified (content differs): sample.jpg\ndeclared added but did not happen: sample_cleaned.jpg\ndeclared unchanged but changed or missing: sample.jpg\n\nFull delta (= unchanged, ~ modified, + added, - removed):\n~ sample.jpg  (711 -> 315)  content differs\n\nPaste-ready observed literal:\nadded: []\nmodified: [\"sample.jpg\"]\nremoved: []\n    at assertDirEffect (/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/helpers/dir_effect.ts:372:8)\n    at /Users/jon/projects/exifcleaner/exifcleaner-electron/tests/e2e/settings.spec.ts:241:4",
+                        "location": {
+                          "file": "/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/helpers/dir_effect.ts",
+                          "column": 8,
+                          "line": 372
+                        },
+                        "snippet": "\u001b[90m   at \u001b[39m../helpers/dir_effect.ts:372\n\n\u001b[0m \u001b[90m 370 |\u001b[39m \t}\n \u001b[90m 371 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 372 |\u001b[39m \t\u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(renderFailure(rows\u001b[33m,\u001b[39m problems))\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \t      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 373 |\u001b[39m }\n \u001b[90m 374 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/helpers/dir_effect.ts",
+                            "column": 8,
+                            "line": 372
+                          },
+                          "message": "Error: assertDirEffect found 3 problem(s):\nunnamed file modified (content differs): sample.jpg\ndeclared added but did not happen: sample_cleaned.jpg\ndeclared unchanged but changed or missing: sample.jpg\n\nFull delta (= unchanged, ~ modified, + added, - removed):\n~ sample.jpg  (711 -> 315)  content differs\n\nPaste-ready observed literal:\nadded: []\nmodified: [\"sample.jpg\"]\nremoved: []\n\n\u001b[90m   at \u001b[39m../helpers/dir_effect.ts:372\n\n\u001b[0m \u001b[90m 370 |\u001b[39m \t}\n \u001b[90m 371 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 372 |\u001b[39m \t\u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(renderFailure(rows\u001b[33m,\u001b[39m problems))\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \t      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 373 |\u001b[39m }\n \u001b[90m 374 |\u001b[39m\u001b[0m\n\u001b[2m    at assertDirEffect (/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/helpers/dir_effect.ts:372:8)\u001b[22m\n\u001b[2m    at /Users/jon/projects/exifcleaner/exifcleaner-electron/tests/e2e/settings.spec.ts:241:4\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-29T18:20:33.131Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/jon/projects/exifcleaner/exifcleaner-electron/test-results/settings-Settings-304-save-ea9bd-ives-a-cleaned-copy-appears-dev/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/jon/projects/exifcleaner/exifcleaner-electron/test-results/settings-Settings-304-save-ea9bd-ives-a-cleaned-copy-appears-dev/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/helpers/dir_effect.ts",
+                        "column": 8,
+                        "line": 372
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d877ffdf71ec720167ae-f90ac58ecc711c26536a",
+              "file": "settings.spec.ts",
+              "line": 217,
+              "column": 2
+            },
+            {
+              "title": "#304 characterization (DELETE WITH THE FIX): save-as-copy currently overwrites the original",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "dev",
+                  "projectName": "dev",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1356,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-29T18:20:34.872Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d877ffdf71ec720167ae-0b1881ab58e79a50e5c3",
+              "file": "settings.spec.ts",
+              "line": 259,
+              "column": 2
+            },
+            {
+              "title": "#304 overwrite mode (not a #304 proof, stays green after the fix): save-as-copy off overwrites in place",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "dev",
+                  "projectName": "dev",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1371,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-29T18:20:36.244Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d877ffdf71ec720167ae-d1550f23ca127b5826f2",
+              "file": "settings.spec.ts",
+              "line": 298,
+              "column": 2
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-29T18:20:32.713Z",
+    "duration": 4924.759999999999,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}
