@@ -76,15 +76,12 @@ test.describe("Folder Recursion", () => {
 			expect(expandResult.files.length).toBe(2);
 
 			// Now send the discovered files via IPC for processing
-			await app.evaluate(
-				({ BrowserWindow }, filePaths) => {
-					const win = BrowserWindow.getAllWindows()[0];
-					if (win) {
-						win.webContents.send("file-open-add-files", filePaths);
-					}
-				},
-				expandResult.files,
-			);
+			await app.evaluate(({ BrowserWindow }, filePaths) => {
+				const win = BrowserWindow.getAllWindows()[0];
+				if (win) {
+					win.webContents.send("file-open-add-files", filePaths);
+				}
+			}, expandResult.files);
 
 			await waitForProcessing(window, { timeout: 15000 });
 
@@ -93,9 +90,7 @@ test.describe("Folder Recursion", () => {
 			await expect(dataRows).toHaveCount(2);
 
 			// Verify files are processed on disk
-			await assertMetadataStripped(
-				path.join(vacationDir, "sample.jpg"),
-			);
+			await assertMetadataStripped(path.join(vacationDir, "sample.jpg"));
 			await assertMetadataStripped(path.join(photosDir, "sample.png"));
 		} finally {
 			fs.rmSync(tempRoot, { recursive: true, force: true });
@@ -133,8 +128,8 @@ test.describe("Folder Recursion", () => {
 			// Verify both files are discovered (flat list, full paths)
 			expect(expandResult.files.length).toBe(2);
 
-			const filenames = expandResult.files.map((f: string) =>
-				f.split("/").pop() || f.split("\\").pop() || f,
+			const filenames = expandResult.files.map(
+				(f: string) => f.split("/").pop() || f.split("\\").pop() || f,
 			);
 			expect(filenames).toContain("top.jpg");
 			expect(filenames).toContain("deep.png");

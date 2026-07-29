@@ -21,9 +21,7 @@ describe("WindowStateError", () => {
 			];
 
 			for (const error of errors) {
-				expect(
-					formatWindowStateError(error).length,
-				).toBeGreaterThan(0);
+				expect(formatWindowStateError(error).length).toBeGreaterThan(0);
 			}
 		});
 	});

@@ -73,9 +73,7 @@ test.describe("Settings", () => {
 		await window.waitForTimeout(300); // Let React re-render
 
 		// Verify the checkbox reflects the change
-		const orientationInput = window.locator(
-			"#toggle-preserve-orientation",
-		);
+		const orientationInput = window.locator("#toggle-preserve-orientation");
 		const afterToggle = await orientationInput.isChecked();
 		expect(afterToggle).toBe(false);
 
@@ -105,9 +103,7 @@ test.describe("Settings", () => {
 		);
 		await window.waitForTimeout(300);
 
-		const timestampsInput = window.locator(
-			"#toggle-preserve-timestamps",
-		);
+		const timestampsInput = window.locator("#toggle-preserve-timestamps");
 		const afterToggle = await timestampsInput.isChecked();
 		expect(afterToggle).toBe(true);
 
@@ -118,10 +114,7 @@ test.describe("Settings", () => {
 	});
 
 	test("toggles xattr removal switch", async () => {
-		test.skip(
-			process.platform !== "darwin",
-			"xattr is macOS-only",
-		);
+		test.skip(process.platform !== "darwin", "xattr is macOS-only");
 
 		// Open settings
 		const gearButton = window.locator(".gear-icon");
@@ -155,9 +148,7 @@ test.describe("Settings", () => {
 			const tempFile = copyFixture("sample.jpg");
 
 			// Ensure orientation preservation is enabled (default: true)
-			const settings = await window.evaluate(() =>
-				window.api.settings.get(),
-			);
+			const settings = await window.evaluate(() => window.api.settings.get());
 			expect(settings.preserveOrientation).toBe(true);
 
 			// Process the file
@@ -220,8 +211,6 @@ test.describe("Settings", () => {
 		// the setting propagates correctly.
 
 		// Reset to default (false)
-		await window.evaluate(() =>
-			window.api.settings.set({ saveAsCopy: false }),
-		);
+		await window.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
 	});
 });

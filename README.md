@@ -19,7 +19,7 @@
 - Dark mode (follows OS preference)
 - 25 languages with in-app language switching
 - No automatic updates or network traffic — zero telemetry, zero phone-home
-- Signed and notarized on macOS
+- Every release verified by CI against the actual installed app on macOS, Windows, and Linux
 
 ## What's New in v4.0
 
@@ -29,7 +29,7 @@ ExifCleaner v4.0 is a complete modernization — the first release since v3.6.0 
 - **Metadata inspection**: expand any processed file to see exactly what was removed
 - **Language switching**: change language from settings without restarting (25 locales)
 - **Security hardened**: CSP, Electron Fuses, IPC validation, navigation hardening, permission gates
-- **macOS universal binary**: native Apple Silicon support
+- **Native Apple Silicon and Intel builds**: separate downloads, no Rosetta needed
 - **265 unit tests + 42 E2E tests**: comprehensive quality gates
 
 See the [CHANGELOG](CHANGELOG.md) for the full list of changes.
@@ -38,17 +38,65 @@ See the [CHANGELOG](CHANGELOG.md) for the full list of changes.
 
 macOS 10.15+, Windows 10+, and Linux are supported (64-bit).
 
-- **macOS**: [Download the .dmg file](https://github.com/szTheory/exifcleaner/releases/latest) (universal binary — Intel + Apple Silicon)
+- **macOS**: [Download the .dmg file](https://github.com/szTheory/exifcleaner/releases/latest) — pick the `arm64` build for Apple Silicon, the other for Intel
 - **Windows**: [Download the .exe installer or portable version](https://github.com/szTheory/exifcleaner/releases/latest)
 - **Linux**: [Download the .AppImage, .deb, or .rpm file](https://github.com/szTheory/exifcleaner/releases/latest)
 
 For Linux, the AppImage needs to be [made executable](https://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download.
+
+> **Your OS will warn you the first time you open it.** ExifCleaner is not code-signed —
+> see [Opening unsigned builds](#opening-unsigned-builds) for the one-time steps, and why.
 
 Arch Linux users can install from the AUR:
 
 ```bash
 paru -S exifcleaner-bin
 ```
+
+### Opening unsigned builds
+
+ExifCleaner is **not code-signed**. On first launch your OS will warn you. This is
+expected, it is a one-time step, and it does not mean the download is unsafe — verify
+the checksum below if you want certainty.
+
+**macOS**
+
+- **macOS 14 (Sonoma) and earlier**: right-click (or Control-click) the app → **Open** →
+  click **Open** in the dialog.
+- **macOS 15 (Sequoia) and later**: right-click → Open no longer works. Double-click the
+  app once and let it be blocked, then go to **System Settings → Privacy & Security**,
+  scroll down, and click **Open Anyway** next to the ExifCleaner message.
+
+**Windows**
+
+Windows Defender SmartScreen shows *"Windows protected your PC"*. Click **More info** →
+**Run anyway**.
+
+**Linux**
+
+No gatekeeping. The AppImage just needs `chmod +x` (above). `.deb` and `.rpm` install
+normally.
+
+### Why isn't it signed?
+
+Signing macOS builds requires an Apple Developer certificate at $99/year, and the
+certificate embeds the holder's **legal name**, which macOS then displays in the
+Gatekeeper dialog. Windows requires a separate EV certificate at $200–600/year tied to a
+verified legal identity. For a privacy tool maintained anonymously, that tradeoff isn't
+one this project is willing to make.
+
+What you get instead:
+
+- **Published SHA-256 checksums** for every artifact (below) — verifies the download is
+  byte-for-byte what CI built.
+- **Every release is built in public** by [GitHub Actions](.github/workflows/release.yml)
+  from tagged source you can read, not on anyone's laptop.
+- **CI installs and runs the actual artifact** before it can be released — it mounts the
+  DMG, installs it, launches it, and strips metadata from a test image. A build that
+  doesn't work never reaches the release page.
+
+> **Only download from the [GitHub releases page](https://github.com/szTheory/exifcleaner/releases).**
+> Builds shared through other channels are not ours and are not verified.
 
 ### Verifying checksums
 
@@ -233,10 +281,18 @@ yarn dev --lang=es
 
 Releases are built by GitHub Actions. To publish:
 
-1. Trigger the [Release workflow](../../actions/workflows/release.yml) via `workflow_dispatch` in the GitHub Actions UI
-2. CI builds all platforms (macOS signed + notarized, Windows, Linux)
-3. A draft GitHub release is created with all artifacts and SHASUMS256.txt
-4. Review the draft and publish when ready
+1. Make sure `RELEASE_NOTES.md` is current — it becomes the release body verbatim
+2. Trigger the [Release workflow](../../actions/workflows/release.yml) via `workflow_dispatch` in the GitHub Actions UI
+3. CI builds all platforms unsigned, then **installs and smoke-tests each packaged
+   artifact** — mounts the DMG / runs the NSIS installer / extracts the AppImage,
+   launches the installed binary, and strips metadata from a test image. macOS
+   additionally runs the Gatekeeper regression gate. A build that fails any of these
+   cannot reach the release page.
+4. A draft GitHub release is created with all artifacts and SHASUMS256.txt
+5. Download the DMG **through a browser** and confirm it opens (this is the one check CI
+   cannot do — neither `codesign` nor `spctl` can tell "shows a dialog you click through"
+   from "launches cleanly")
+6. Review the draft and publish when ready
 
 ### Contributors
 

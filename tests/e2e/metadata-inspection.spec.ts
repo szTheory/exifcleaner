@@ -120,9 +120,7 @@ test.describe("Metadata Inspection", () => {
 				"FileSize",
 				"MIMEType",
 			];
-			const hasKnownTag = knownTags.some((tag) =>
-				allNames.includes(tag),
-			);
+			const hasKnownTag = knownTags.some((tag) => allNames.includes(tag));
 			expect(
 				hasKnownTag,
 				`Expected at least one of ${knownTags.join(", ")} in metadata fields. Found: ${allNames.join(", ")}`,
@@ -166,9 +164,7 @@ test.describe("Metadata Inspection", () => {
 			// After processing sample.jpg with preserveOrientation=true,
 			// ExifByteOrder gets stripped (present in before, absent in after).
 			// This should appear as a removed field.
-			const removedFields = expansion.locator(
-				".metadata-field--removed",
-			);
+			const removedFields = expansion.locator(".metadata-field--removed");
 			const removedCount = await removedFields.count();
 			expect(removedCount).toBeGreaterThan(0);
 
@@ -180,9 +176,7 @@ test.describe("Metadata Inspection", () => {
 			expect(iconText).toBe("\u2212");
 
 			// Verify preserved fields also exist (structural tags present in both)
-			const preservedFields = expansion.locator(
-				".metadata-field--preserved",
-			);
+			const preservedFields = expansion.locator(".metadata-field--preserved");
 			const preservedCount = await preservedFields.count();
 			expect(preservedCount).toBeGreaterThan(0);
 
@@ -190,8 +184,7 @@ test.describe("Metadata Inspection", () => {
 			const firstPreservedIcon = preservedFields
 				.first()
 				.locator(".metadata-field__icon");
-			const preservedIconText =
-				await firstPreservedIcon.textContent();
+			const preservedIconText = await firstPreservedIcon.textContent();
 			expect(preservedIconText).toBe("\u2713");
 		} finally {
 			cleanup();

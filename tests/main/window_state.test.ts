@@ -6,7 +6,12 @@ import {
 import type { Display } from "electron";
 
 // Helper to create a display-like object with workArea
-function makeDisplay(x: number, y: number, width: number, height: number): Display {
+function makeDisplay(
+	x: number,
+	y: number,
+	width: number,
+	height: number,
+): Display {
 	return {
 		workArea: { x, y, width, height },
 	} as Display;

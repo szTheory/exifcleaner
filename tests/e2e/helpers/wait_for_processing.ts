@@ -19,15 +19,11 @@ export async function waitForProcessing(
 	while (Date.now() < deadline) {
 		const state = await window.evaluate(() => {
 			const rows = document.querySelectorAll(".file-table__row");
-			const spinners = document.querySelectorAll(
-				".status-icon__spinner",
-			);
+			const spinners = document.querySelectorAll(".status-icon__spinner");
 			const completeRows = document.querySelectorAll(
 				".file-table__row--complete",
 			);
-			const errorRows = document.querySelectorAll(
-				".file-table__row--error",
-			);
+			const errorRows = document.querySelectorAll(".file-table__row--error");
 			return {
 				rowCount: rows.length,
 				spinnerCount: spinners.length,

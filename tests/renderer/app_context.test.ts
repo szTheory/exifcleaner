@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { FileProcessingStatus } from "../../src/domain/files/file_status";
-import type { AppState, AppAction, FileEntry } from "../../src/renderer/contexts/AppContext";
+import type {
+	AppState,
+	AppAction,
+	FileEntry,
+} from "../../src/renderer/contexts/AppContext";
 import { appReducer } from "../../src/renderer/contexts/AppContext";
 
 function makeFile(overrides: Partial<FileEntry> = {}): FileEntry {

@@ -43,8 +43,8 @@ test.describe("Dark Mode", () => {
 		expect(dataTheme).toBe("dark");
 
 		// Verify nativeTheme reports dark colors
-		const shouldUseDark = await app.evaluate(({ nativeTheme }) =>
-			nativeTheme.shouldUseDarkColors,
+		const shouldUseDark = await app.evaluate(
+			({ nativeTheme }) => nativeTheme.shouldUseDarkColors,
 		);
 		expect(shouldUseDark).toBe(true);
 	});

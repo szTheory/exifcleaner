@@ -44,9 +44,7 @@ describe("FolderError", () => {
 			];
 
 			for (const error of errors) {
-				const roundTripped = JSON.parse(
-					JSON.stringify(error),
-				) as FolderError;
+				const roundTripped = JSON.parse(JSON.stringify(error)) as FolderError;
 				expect(roundTripped).toEqual(error);
 			}
 		});

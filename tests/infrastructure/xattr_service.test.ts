@@ -14,9 +14,7 @@ vi.mock("../../src/common/platform", () => ({
 }));
 
 // Import after mocks are set up
-const { removeXattrs } = await import(
-	"../../src/infrastructure/xattr_service"
-);
+const { removeXattrs } = await import("../../src/infrastructure/xattr_service");
 
 describe("removeXattrs", () => {
 	let logger: FakeLogger;
@@ -41,10 +39,7 @@ describe("removeXattrs", () => {
 	it("calls exec with xattr -cr on macOS", async () => {
 		mockIsMac.mockReturnValue(true);
 		mockExec.mockImplementation(
-			(
-				_cmd: string,
-				callback: (error: Error | null) => void,
-			) => {
+			(_cmd: string, callback: (error: Error | null) => void) => {
 				callback(null);
 			},
 		);
@@ -60,10 +55,7 @@ describe("removeXattrs", () => {
 	it("logs warning on exec error but still resolves (non-fatal)", async () => {
 		mockIsMac.mockReturnValue(true);
 		mockExec.mockImplementation(
-			(
-				_cmd: string,
-				callback: (error: Error | null) => void,
-			) => {
+			(_cmd: string, callback: (error: Error | null) => void) => {
 				callback(new Error("xattr: No such file"));
 			},
 		);

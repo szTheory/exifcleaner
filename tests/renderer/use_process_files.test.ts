@@ -187,9 +187,7 @@ describe("processFileEntries", () => {
 
 	it("dispatches UPDATE_FILE_ERROR on IPC failure", async () => {
 		const entry = makeFileEntry();
-		mockApi.exif.readMetadata.mockRejectedValue(
-			new Error("ExifTool crashed"),
-		);
+		mockApi.exif.readMetadata.mockRejectedValue(new Error("ExifTool crashed"));
 
 		await processFileEntries([entry], mockDispatch);
 

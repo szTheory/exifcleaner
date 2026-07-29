@@ -30,10 +30,7 @@ test.describe("App Launch", () => {
 		if (app) {
 			await closeApp(app);
 		}
-		expect(
-			unexpectedErrors,
-			"Unexpected console.error messages",
-		).toEqual([]);
+		expect(unexpectedErrors, "Unexpected console.error messages").toEqual([]);
 	});
 
 	test("shows the main window on launch", async () => {

@@ -13,7 +13,9 @@ beforeEach(() => {
 it("reads and cleans metadata from a file", async () => {
 	exiftool.readResult = {
 		ok: true,
-		value: [{ FileName: "test.jpg", SourceFile: "/tmp/test.jpg", Make: "Canon" }],
+		value: [
+			{ FileName: "test.jpg", SourceFile: "/tmp/test.jpg", Make: "Canon" },
+		],
 	};
 
 	const result = await query.execute({ filePath: "/tmp/test.jpg" });

@@ -28,8 +28,8 @@ describe("parseAccentColorHex", () => {
 	});
 
 	it("returns fallback for non-string input", () => {
-		expect(
-			parseAccentColorHex({ raw: undefined as unknown as string }),
-		).toBe("#007AFF");
+		expect(parseAccentColorHex({ raw: undefined as unknown as string })).toBe(
+			"#007AFF",
+		);
 	});
 });

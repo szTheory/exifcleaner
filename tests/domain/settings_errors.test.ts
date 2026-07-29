@@ -57,9 +57,7 @@ describe("SettingsError", () => {
 			];
 
 			for (const error of errors) {
-				const roundTripped = JSON.parse(
-					JSON.stringify(error),
-				) as SettingsError;
+				const roundTripped = JSON.parse(JSON.stringify(error)) as SettingsError;
 				expect(roundTripped).toEqual(error);
 			}
 		});

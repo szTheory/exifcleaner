@@ -21,7 +21,12 @@ describe("installPermissionGate", () => {
 		const fakeSession = createFakeSession();
 		installPermissionGate(fakeSession);
 
-		const permissions = ["camera", "microphone", "geolocation", "notifications"];
+		const permissions = [
+			"camera",
+			"microphone",
+			"geolocation",
+			"notifications",
+		];
 		for (const permission of permissions) {
 			let granted: boolean | undefined;
 			fakeSession.permissionHandler!(null, permission, (result) => {
