@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { snapshotDir, assertDirEffect } from "../../helpers/dir_effect";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = __dirname;
@@ -29,6 +30,10 @@ const EXIFTOOL =
  * These assertions run against the fixtures as they exist on disk, so they fail whether
  * the cause is a bad generator, a bad commit, or a checkout on a platform that renormalizes
  * line endings.
+ *
+ * The shared helper below now asserts a whole-directory digest delta around the strip
+ * attempt instead of the file-count check that missed sample.pdf, so a hard-erroring file
+ * that still satisfies a count can no longer pass silently here either.
  */
 
 /** Fixtures the app is expected to strip successfully. */
@@ -53,17 +58,36 @@ function stripInTempCopy(name: string): { ok: boolean; output: string } {
 	try {
 		const copy = path.join(dir, name);
 		fs.copyFileSync(path.join(FIXTURES_DIR, name), copy);
+
+		const before = snapshotDir(dir);
+
+		let result: { ok: boolean; output: string };
 		try {
 			const output = execFileSync(
 				EXIFTOOL,
 				["-all=", "-overwrite_original", copy],
 				{ encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
 			);
-			return { ok: true, output };
+			result = { ok: true, output };
 		} catch (err: unknown) {
 			const e = err as { stdout?: string; stderr?: string };
-			return { ok: false, output: `${e.stdout ?? ""}${e.stderr ?? ""}` };
+			result = { ok: false, output: `${e.stdout ?? ""}${e.stderr ?? ""}` };
 		}
+
+		const after = snapshotDir(dir);
+
+		// A successful strip rewrites the fixture in place; a failed strip -- the
+		// outcome the UNWRITABLE_FIXTURES cases below exercise -- leaves it
+		// byte-for-byte, which is exactly the distinction a file *count* cannot make.
+		assertDirEffect(
+			before,
+			after,
+			result.ok
+				? { modified: [name], added: [], removed: [] }
+				: { unchanged: [name], added: [], removed: [] },
+		);
+
+		return result;
 	} finally {
 		fs.rmSync(dir, { recursive: true, force: true });
 	}
