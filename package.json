@@ -40,6 +40,7 @@
 		"test:all": "vitest run && playwright test --project=dev",
 		"verify:gatekeeper": "node scripts/gatekeeper_check.mjs",
 		"verify:direffect": "node scripts/dir_effect_gate.mjs",
+		"verify:known-gaps": "node scripts/known_gap_gate.mjs",
 		"verify:contents": "node scripts/verify_artifact_contents.mjs",
 		"screenshots": "tsx scripts/generate-screenshots.ts",
 		"check:deps": "madge --circular --extensions ts,tsx src/"
