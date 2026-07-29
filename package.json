@@ -18,10 +18,13 @@
 		"format": "yarn prettier --write 'src/**/*.{ts,tsx}'",
 		"lint": "prettier --check 'src/**/*.{ts,tsx}'",
 		"start": "ELECTRON_RUN_AS_NODE= electron-vite preview",
-		"packmactest": "yarn run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
-		"packwin": "yarn run compile && electron-builder --windows",
-		"packlinux": "yarn run compile && electron-builder --linux",
-		"packmac": "yarn run compile && electron-builder --macos -c.mac.identity=null",
+		"packmactest": "yarn run compile && electron-builder --dir -c.compression=store",
+		"packwin": "yarn run compile && electron-builder --windows --publish never",
+		"packlinux": "yarn run compile && electron-builder --linux --publish never",
+		"packmac": "yarn run compile && electron-builder --macos --publish never",
+		"packmacdir": "yarn run compile && electron-builder --macos --dir -c.compression=store",
+		"packwindir": "yarn run compile && electron-builder --windows --dir -c.compression=store",
+		"packlinuxdir": "yarn run compile && electron-builder --linux --dir -c.compression=store",
 		"build": "yarn run compile && electron-builder --macos --linux --windows",
 		"publish": "yarn run compile && electron-builder --macos --linux --windows -p always",
 		"release": "echo 'Use GitHub Actions release workflow (workflow_dispatch) instead' && exit 1",
@@ -32,8 +35,11 @@
 		"preview": "ELECTRON_RUN_AS_NODE= electron-vite preview",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"test:e2e": "npx playwright test",
-		"test:all": "vitest run && npx playwright test",
+		"test:e2e": "playwright test --project=dev",
+		"test:smoke": "playwright test --project=smoke",
+		"test:all": "vitest run && playwright test --project=dev",
+		"verify:gatekeeper": "node scripts/gatekeeper_check.mjs",
+		"verify:contents": "node scripts/verify_artifact_contents.mjs",
 		"screenshots": "tsx scripts/generate-screenshots.ts",
 		"check:deps": "madge --circular --extensions ts,tsx src/"
 	},
@@ -43,7 +49,8 @@
 		"zod": "^3.25.0"
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.58.2",
+		"@playwright/test": "1.62.0",
+		"playwright": "1.62.0",
 		"@types/node": "^22",
 		"@types/react": "^19.2.0",
 		"@types/react-dom": "^19.2.0",
@@ -78,10 +85,9 @@
 					]
 				}
 			],
+			"identity": null,
 			"hardenedRuntime": false,
-			"entitlements": "build/entitlements.mac.plist",
-			"entitlementsInherit": "build/entitlements.mac.inherit.plist",
-			"notarize": true,
+			"notarize": false,
 			"extraResources": [
 				{
 					"from": ".resources/nix/bin",
@@ -112,6 +118,11 @@
 					]
 				}
 			]
+		},
+		"nsis": {
+			"oneClick": true,
+			"perMachine": false,
+			"runAfterFinish": false
 		},
 		"win": {
 			"target": [
