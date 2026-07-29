@@ -309,3 +309,6 @@ devplans
 # Playwright
 playwright-report/
 test-results/
+
+# GSD planning lives in the parent workspace repo, not here
+.planning/
