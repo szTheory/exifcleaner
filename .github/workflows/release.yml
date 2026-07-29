@@ -32,6 +32,11 @@ jobs:
       - name: Unit tests (Vitest)
         run: yarn test
 
+      # Parity with ci.yml. Release previously omitted this, so a release could
+      # ship something CI never checked.
+      - name: Check circular dependencies (madge)
+        run: yarn check:deps
+
       - name: Compile (electron-vite build)
         run: yarn compile
 
@@ -72,67 +77,44 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Check signing availability
-        id: signing
+      # Signed/notarized path deleted deliberately. ExifCleaner ships unsigned
+      # with an ad-hoc signature (scripts/afterPack.cjs). Apple notarization
+      # requires a paid Developer ID whose certificate embeds the holder's legal
+      # name in the Gatekeeper dialog, which is incompatible with this project's
+      # anonymity. Keeping the dead path around meant a step labelled "signed +
+      # notarized" that actually produced unsigned artifacts, plus a latent bug
+      # (APPLE_API_KEY used a literal unexpanded "~").
+      # See SIGNING-SETUP.md if this is ever revisited.
+      - name: Build macOS artifacts
+        run: yarn packmac
+
+      # Smoke runs in the SAME job as the build: upload-artifact normalizes file
+      # modes to 644 and drops symlinks, so an unpacked .app cannot cross a job
+      # boundary intact. Only the sealed .dmg does.
+      - name: Install from DMG
+        id: install
         run: |
-          if [ -n "${{ secrets.MACOS_CERTIFICATE_BASE64 }}" ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "⚠ No signing certificate configured — building unsigned"
-          fi
+          APP=$(scripts/smoke/install-macos.sh dist/*arm64.dmg "$RUNNER_TEMP/smoke")
+          echo "executable=$APP" >> "$GITHUB_OUTPUT"
+          echo "bundle=$(dirname "$(dirname "$APP")")" >> "$GITHUB_OUTPUT"
 
-      - name: Import signing certificate
-        if: steps.signing.outputs.available == 'true'
+      - name: Gatekeeper gate
+        run: node scripts/gatekeeper_check.mjs --app "${{ steps.install.outputs.bundle }}"
+
+      - name: Smoke test packaged app
         env:
-          CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
-          CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-        run: |
-          CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
-          KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain-db
-          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+          EXIFCLEANER_PACKAGED_APP: ${{ steps.install.outputs.executable }}
+        run: yarn test:smoke
 
-          echo "$CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
-
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 3600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-          security import "$CERTIFICATE_PATH" -P "$CERTIFICATE_PASSWORD" \
-            -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
-
-          security set-key-partition-list -S apple-tool:,apple:,codesign: \
-            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
-
-          rm "$CERTIFICATE_PATH"
-
-      - name: Decode Apple API key
-        if: steps.signing.outputs.available == 'true'
-        env:
-          API_KEY_BASE64: ${{ secrets.APPLE_API_KEY_BASE64 }}
-        run: |
-          mkdir -p ~/private_keys
-          echo "$API_KEY_BASE64" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
-
-      - name: Build macOS (signed + notarized)
-        if: steps.signing.outputs.available == 'true'
-        env:
-          CSC_LINK: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
-          CSC_KEY_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-          APPLE_API_KEY: ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
-          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-        run: yarn compile && npx electron-builder --macos --publish never
-
-      - name: Build macOS (unsigned)
-        if: steps.signing.outputs.available == 'false'
-        run: yarn compile && npx electron-builder --macos -c.mac.identity=null --publish never
-
-      - name: Cleanup keychain
-        if: steps.signing.outputs.available == 'true'
-        run: security delete-keychain $RUNNER_TEMP/build.keychain-db 2>/dev/null || true
+      - name: Upload smoke report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-report-macos
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
@@ -158,7 +140,32 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build Windows artifacts
-        run: yarn packwin --publish never
+        run: yarn packwin
+
+      # nsis.runAfterFinish:false stops the silent install auto-launching the app;
+      # the install script also stops any stray instance. Without both, Playwright's
+      # launch becomes a second instance that hangs on the single-instance lock.
+      - name: Install from NSIS installer
+        id: install
+        shell: pwsh
+        run: |
+          $app = ./scripts/smoke/install-windows.ps1 -DistDir dist
+          "executable=$app" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Smoke test packaged app
+        env:
+          EXIFCLEANER_PACKAGED_APP: ${{ steps.install.outputs.executable }}
+        run: yarn test:smoke
+
+      - name: Upload smoke report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-report-windows
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
@@ -184,7 +191,33 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build Linux artifacts
-        run: yarn packlinux --publish never
+        run: yarn packlinux
+
+      # Same AppArmor workaround the dev E2E job needs — the packaged app runs the
+      # same Chromium renderer.
+      - name: Disable AppArmor restriction (Ubuntu 24.04)
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+
+      - name: Extract AppImage
+        id: install
+        run: |
+          APP=$(scripts/smoke/install-linux.sh dist/*.AppImage "$RUNNER_TEMP/smoke")
+          echo "executable=$APP" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test packaged app
+        env:
+          EXIFCLEANER_PACKAGED_APP: ${{ steps.install.outputs.executable }}
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" yarn test:smoke
+
+      - name: Upload smoke report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-report-linux
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
@@ -221,10 +254,27 @@ jobs:
         id: version
         run: echo "version=v$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
 
+      # Idempotent. The previous unconditional `git tag && git push` hard-fails on
+      # any re-run, which matters a great deal when you are on release attempt
+      # five. Re-running on the same commit is now a no-op; re-running on a
+      # different commit under the same version is a loud, explanatory red.
       - name: Create git tag
         run: |
-          git tag ${{ steps.version.outputs.version }}
-          git push origin ${{ steps.version.outputs.version }}
+          V="${{ steps.version.outputs.version }}"
+          git fetch --tags --force
+          if git rev-parse -q --verify "refs/tags/$V" >/dev/null; then
+            EXISTING=$(git rev-parse "$V^{commit}")
+            if [ "$EXISTING" = "$GITHUB_SHA" ]; then
+              echo "Tag $V already points at $GITHUB_SHA — reusing."
+            else
+              echo "::error::Tag $V exists at $EXISTING but this run is $GITHUB_SHA."
+              echo "::error::Delete the stale tag or bump the version in package.json."
+              exit 1
+            fi
+          else
+            git tag "$V"
+            git push origin "$V"
+          fi
 
       - name: Create draft release
         uses: softprops/action-gh-release@v2
@@ -232,7 +282,13 @@ jobs:
           tag_name: ${{ steps.version.outputs.version }}
           name: ExifCleaner ${{ steps.version.outputs.version }}
           draft: true
-          generate_release_notes: true
+          # body_path, NOT generate_release_notes. They are mutually exclusive, and
+          # with autogeneration on, the hand-written notes — including the entire
+          # macOS unsigned-bypass section users most need — never reach the page.
+          body_path: RELEASE_NOTES.md
+          # An artifact-name typo would otherwise silently publish a release with
+          # no binaries, which is a worse failure mode than a red job.
+          fail_on_unmatched_files: true
           files: |
             artifacts/release-macos/*
             artifacts/release-windows/*

@@ -139,7 +139,32 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build Windows artifacts
-        run: yarn packwin --publish never
+        run: yarn packwin
+
+      # nsis.runAfterFinish:false stops the silent install auto-launching the app;
+      # the install script also stops any stray instance. Without both, Playwright's
+      # launch becomes a second instance that hangs on the single-instance lock.
+      - name: Install from NSIS installer
+        id: install
+        shell: pwsh
+        run: |
+          $app = ./scripts/smoke/install-windows.ps1 -DistDir dist
+          "executable=$app" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Smoke test packaged app
+        env:
+          EXIFCLEANER_PACKAGED_APP: ${{ steps.install.outputs.executable }}
+        run: yarn test:smoke
+
+      - name: Upload smoke report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-report-windows
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
@@ -166,7 +191,33 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build Linux artifacts
-        run: yarn packlinux --publish never
+        run: yarn packlinux
+
+      # Same AppArmor workaround the dev E2E job needs — the packaged app runs the
+      # same Chromium renderer.
+      - name: Disable AppArmor restriction (Ubuntu 24.04)
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+
+      - name: Extract AppImage
+        id: install
+        run: |
+          APP=$(scripts/smoke/install-linux.sh dist/*.AppImage "$RUNNER_TEMP/smoke")
+          echo "executable=$APP" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test packaged app
+        env:
+          EXIFCLEANER_PACKAGED_APP: ${{ steps.install.outputs.executable }}
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" yarn test:smoke
+
+      - name: Upload smoke report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-report-linux
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
