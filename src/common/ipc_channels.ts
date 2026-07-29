@@ -2,6 +2,12 @@ import type { ExifToolResult } from "../infrastructure/exiftool/types";
 import type { Settings, ThemeMode } from "../domain/settings_schema";
 import type { I18nStringsDictionary } from "../domain/i18n/i18n_lookup";
 
+/** A path the main process confirmed is a file, with the size from that same stat(). */
+export interface ClassifiedFile {
+	path: string;
+	size: number;
+}
+
 export const IPC_CHANNELS = {
 	// Existing channels (preserved for backward compatibility with current renderer)
 	FILES_ADDED: "files-added",
@@ -71,7 +77,12 @@ export interface IpcInvokeMap {
 	[IPC_CHANNELS.GET_I18N_STRINGS]: { args: []; return: I18nStringsDictionary };
 	[IPC_CHANNELS.FOLDER_CLASSIFY]: {
 		args: [paths: string[]];
-		return: { files: string[]; folders: string[] };
+		// Carries size because the handler already stat()s every path to decide
+		// file-vs-folder. Returning bare paths meant every caller had to invent a
+		// size, and all three invented 0 — the SIZE column read "0 B" for every
+		// file in every shipped build. The size travels with the path so it cannot
+		// be forgotten at a call site.
+		return: { files: ClassifiedFile[]; folders: string[] };
 	};
 	[IPC_CHANNELS.FOLDER_EXPAND]: {
 		args: [dirPath: string];

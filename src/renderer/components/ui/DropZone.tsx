@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import { useAppContext } from "../../contexts/AppContext";
 import type { FileEntry, AppAction } from "../../contexts/AppContext";
+import type { ClassifiedFile } from "../../../common/ipc_channels";
 import { FileProcessingStatus, isSupportedFile } from "../../../domain";
 import { getFileExtension } from "../../utils/get_file_extension";
 import { useProcessFiles } from "../../hooks/use_process_files";
@@ -40,13 +41,27 @@ function computeFolderLabel(folderPath: string, filePath: string): string {
 		: `${folderBaseName}/`;
 }
 
-function buildLooseEntries(filePaths: string[]): FileEntry[] {
-	return filePaths
-		.filter((p) => isSupportedFile({ filename: p }))
-		.map((p) => {
-			const name = window.api.files.basename(p);
-			return buildFileEntry(p, name, 0, null);
+function buildLooseEntries(files: ClassifiedFile[]): FileEntry[] {
+	return files
+		.filter((f) => isSupportedFile({ filename: f.path }))
+		.map((f) => {
+			const name = window.api.files.basename(f.path);
+			return buildFileEntry(f.path, name, f.size, null);
 		});
+}
+
+/**
+ * Resolve real sizes for paths that arrived without them (folder expansion, File > Open).
+ *
+ * classify() stats each path anyway, so this reuses the one place in the app that
+ * already knows a file's size rather than adding a second way to ask. Paths that
+ * vanished between listing and here are dropped by classify, which is correct — a
+ * file that no longer exists should not get a row.
+ */
+async function classifyForSizes(paths: string[]): Promise<ClassifiedFile[]> {
+	if (paths.length === 0) return [];
+	const { files } = await window.api.folder.classify(paths);
+	return files;
 }
 
 async function expandAndProcessFolder({
@@ -78,13 +93,14 @@ async function expandAndProcessFolder({
 		return;
 	}
 
-	const folderEntries: FileEntry[] = result.files.map((filePath) => {
-		const name = window.api.files.basename(filePath);
+	const sized = await classifyForSizes(result.files);
+	const folderEntries: FileEntry[] = sized.map((f) => {
+		const name = window.api.files.basename(f.path);
 		return buildFileEntry(
-			filePath,
+			f.path,
 			name,
-			0,
-			computeFolderLabel(folderPath, filePath),
+			f.size,
+			computeFolderLabel(folderPath, f.path),
 		);
 	});
 
@@ -173,16 +189,16 @@ export function DropZone({
 	// Files added via File > Open menu
 	useEffect(() => {
 		const cleanup = window.api.files.onFileOpenAddFiles((menuFilePaths) => {
-			const entries = menuFilePaths
-				.filter((p) => isSupportedFile({ filename: p }))
-				.map((p) => {
-					const name = window.api.files.basename(p);
-					return buildFileEntry(p, name, 0, null);
-				});
-			if (entries.length > 0) {
-				dispatch({ type: "ADD_FILES", files: entries });
-				processFiles(entries);
-			}
+			void (async () => {
+				const sized = await classifyForSizes(
+					menuFilePaths.filter((p) => isSupportedFile({ filename: p })),
+				);
+				const entries = buildLooseEntries(sized);
+				if (entries.length > 0) {
+					dispatch({ type: "ADD_FILES", files: entries });
+					processFiles(entries);
+				}
+			})();
 		});
 		return cleanup;
 	}, [dispatch, processFiles]);

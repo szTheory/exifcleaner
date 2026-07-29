@@ -39,19 +39,32 @@ export function StatusBar({
 			<div className="status-bar__left">{gearIcon}</div>
 			{hasStats && (
 				<>
+					{/*
+					  Segments carry data-stat so tests can address a value without
+					  matching translated prose. Asserting on the rendered sentence
+					  only works in the locale the assertion was written in, and the
+					  app follows the host system locale \u2014 so such a test passes in CI
+					  and fails for any contributor whose machine is not English.
+					*/}
 					<div className="status-bar__summary">
-						{interpolate(t("statusBar.xOfYCleaned"), {
-							completed: completedCount,
-							total: totalCount,
-						})}
+						<span data-stat="cleaned">
+							{interpolate(t("statusBar.xOfYCleaned"), {
+								completed: completedCount,
+								total: totalCount,
+							})}
+						</span>
 						{" \u2014 "}
-						{interpolate(t("statusBar.tagsRemoved"), {
-							count: totalTagsRemoved ?? 0,
-						})}
+						<span data-stat="tags-removed" data-value={totalTagsRemoved ?? 0}>
+							{interpolate(t("statusBar.tagsRemoved"), {
+								count: totalTagsRemoved ?? 0,
+							})}
+						</span>
 						{" \u2014 "}
-						{interpolate(t("statusBar.elapsed"), {
-							seconds: elapsedSeconds ?? 0,
-						})}
+						<span data-stat="elapsed">
+							{interpolate(t("statusBar.elapsed"), {
+								seconds: elapsedSeconds ?? 0,
+							})}
+						</span>
 					</div>
 					{onCleanMore !== undefined && (
 						<button
