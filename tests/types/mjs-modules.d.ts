@@ -44,3 +44,19 @@ declare module "*dir_effect_gate.mjs" {
 		reason?: string;
 	};
 }
+
+declare module "*known_gap_gate.mjs" {
+	export const BANNED_PROSE_PHRASES: readonly string[];
+	export type KnownGapProblem = {
+		readonly file: string;
+		readonly line: number;
+		readonly phrase: string;
+		readonly message: string;
+	};
+	export function collectTestSourceFiles(rootDir?: string): string[];
+	export function scanBannedProse(
+		source: string,
+		filename: string,
+	): readonly KnownGapProblem[];
+	export function main(): number;
+}
