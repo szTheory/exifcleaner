@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import type { ElectronApplication, Page } from "playwright";
 import fs from "node:fs";
 import { launchApp, closeApp } from "./helpers/app_launcher";
-import { createFixtureDir } from "./helpers/fixture_copier";
+import { createFixtureDir } from "../helpers/fixture_copier";
 import { waitForProcessing } from "./helpers/wait_for_processing";
 
 /**

@@ -7,7 +7,7 @@ import {
 	launchPackagedApp,
 	closePackagedApp,
 } from "./helpers/packaged_launcher";
-import { createFixtureDir } from "../e2e/helpers/fixture_copier";
+import { createFixtureDir } from "../helpers/fixture_copier";
 import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
 import { waitForProcessing } from "../e2e/helpers/wait_for_processing";
 

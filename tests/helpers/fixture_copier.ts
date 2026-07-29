@@ -15,7 +15,7 @@ export function createFixtureDir(): {
 	const dir = fs.mkdtempSync(path.join(os.tmpdir(), "exifcleaner-e2e-"));
 
 	function copyFixture(name: string): string {
-		const src = path.resolve(__dirname, "../fixtures", name);
+		const src = path.resolve(__dirname, "../e2e/fixtures", name);
 		const dest = path.join(dir, name);
 		fs.copyFileSync(src, dest);
 		return dest;
