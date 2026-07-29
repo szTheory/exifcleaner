@@ -25,3 +25,22 @@ declare module "*gatekeeper_check.mjs" {
 		reason?: string;
 	};
 }
+
+declare module "*dir_effect_gate.mjs" {
+	export function classifyTestFile(
+		source: string,
+		filename: string,
+	): {
+		ok: boolean;
+		collected: boolean;
+		writesToDisk: boolean;
+		reason?: string;
+	};
+	export function classifyExemptionFreshness(
+		relPath: string,
+		source: string,
+	): {
+		stale: boolean;
+		reason?: string;
+	};
+}

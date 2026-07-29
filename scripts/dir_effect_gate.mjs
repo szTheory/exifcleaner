@@ -125,6 +125,40 @@ export function classifyTestFile(source, filename) {
 	};
 }
 
+/**
+ * Given the relative path of a KNOWN EXEMPT entry and a (real or hypothetical) source for
+ * that file, report whether the exemption is stale. Pure function -- unit-tested in
+ * tests/scripts/dir_effect_gate.test.ts over literal fixture strings -- so both directions
+ * of D-25's self-pruning obligation (file no longer writes to disk / file now asserts) are
+ * covered without filesystem access. The third staleness direction -- the exempted file no
+ * longer existing at all -- inherently requires a filesystem check and lives only in
+ * checkExemptionsAreLive() below.
+ *
+ * @param {string} relPath must be a key present in EXEMPT
+ * @param {string} source the file's contents to re-classify
+ * @returns {{stale: boolean, reason?: string}}
+ */
+export function classifyExemptionFreshness(relPath, source) {
+	if (!EXEMPT.has(relPath)) {
+		throw new Error(
+			`classifyExemptionFreshness: "${relPath}" is not an EXEMPT entry`,
+		);
+	}
+
+	const result = classifyTestFile(source, relPath);
+
+	if (!result.writesToDisk) {
+		return { stale: true, reason: `${relPath} no longer writes to disk` };
+	}
+	if (result.ok) {
+		return {
+			stale: true,
+			reason: `${relPath} now references ${ASSERTION_TOKEN}`,
+		};
+	}
+	return { stale: false };
+}
+
 function fail(message) {
 	console.error(`\n✗ DIRECTORY-EFFECT GATE FAILED:\n${message}\n`);
 	process.exit(1);
@@ -159,19 +193,10 @@ function checkExemptionsAreLive(problems) {
 		}
 
 		const source = fs.readFileSync(absolute, "utf8");
-		const result = classifyTestFile(source, relPath);
-
-		if (!result.writesToDisk) {
+		const freshness = classifyExemptionFreshness(relPath, source);
+		if (freshness.stale) {
 			problems.push(
-				`stale exemption: ${relPath} no longer writes to disk — prune this EXEMPT entry`,
-			);
-			continue;
-		}
-
-		if (result.ok) {
-			problems.push(
-				`stale exemption: ${relPath} now references ${ASSERTION_TOKEN} — prune this ` +
-					"EXEMPT entry, the gap it recorded is closed",
+				`stale exemption: ${freshness.reason} — prune this EXEMPT entry`,
 			);
 		}
 	}
