@@ -143,14 +143,13 @@ test.describe("Settings", () => {
 	});
 
 	test("preserves orientation metadata when toggle is enabled", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("sample.jpg");
-
 			// Ensure orientation preservation is enabled (default: true)
 			const settings = await page.evaluate(() => window.api.settings.get());
 			expect(settings.preserveOrientation).toBe(true);
-
+			const before = snapshotDir(dir);
 			// Process the file
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
@@ -163,10 +162,11 @@ test.describe("Settings", () => {
 			);
 
 			await waitForProcessing(page, { timeout: 15000 });
-
+			const after = snapshotDir(dir);
+			// Only sample.jpg changes on disk (additive to the checks below).
+			assertDirEffect(before, after, { modified: ["sample.jpg"] });
 			// Read the processed file's metadata
 			const tags = await readMetadataTags(tempFile);
-
 			// When preserveOrientation is enabled, the file processes without errors.
 			// Verify the file was processed (has at least structural tags).
 			const tagKeys = Object.keys(tags);
