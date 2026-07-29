@@ -1,7 +1,8 @@
 import type { I18nStringsDictionary } from "../domain";
 import type { Settings } from "../domain";
+import type { ClassifiedFile } from "../common/ipc_channels";
 
-export type { I18nStringsDictionary };
+export type { I18nStringsDictionary, ClassifiedFile };
 
 export interface ExifData {
 	[key: string]: unknown;
@@ -56,7 +57,7 @@ export interface SettingsApi {
 export interface FolderApi {
 	classify: (
 		paths: string[],
-	) => Promise<{ files: string[]; folders: string[] }>;
+	) => Promise<{ files: ClassifiedFile[]; folders: string[] }>;
 	expand: (
 		dirPath: string,
 	) => Promise<{ files: string[]; skippedCount: number; error?: string }>;

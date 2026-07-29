@@ -139,7 +139,7 @@ export function FileRow({
 				<div className="file-table__cell">
 					<TypePill extension={file.extension} />
 				</div>
-				<div className="file-table__cell">
+				<div className="file-table__cell file-table__cell--size">
 					{formatFileSize({ bytes: file.size })}
 				</div>
 				<div className="file-table__cell">{renderBeforeCell(file)}</div>
