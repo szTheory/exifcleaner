@@ -38,6 +38,9 @@ jobs:
       - name: Check circular dependencies (madge)
         run: yarn check:deps
 
+      - name: Directory-effect gate (dir_effect_gate)
+        run: yarn verify:direffect
+
       - name: Compile (electron-vite build)
         run: yarn compile
 
