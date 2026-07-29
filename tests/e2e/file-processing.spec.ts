@@ -4,6 +4,7 @@ import { launchApp, closeApp } from "./helpers/app_launcher";
 import { createFixtureDir } from "../helpers/fixture_copier";
 import { assertMetadataStripped } from "./helpers/metadata_assertions";
 import { waitForProcessing } from "./helpers/wait_for_processing";
+import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
 
 test.describe("File Processing", () => {
 	let app: ElectronApplication;
@@ -38,9 +39,11 @@ test.describe("File Processing", () => {
 	});
 
 	test("strips EXIF metadata from a single JPEG file", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("sample.jpg");
+
+			const before = snapshotDir(dir);
 
 			// Send file via IPC (same channel as File > Open / drag-drop)
 			await app.evaluate(
@@ -56,6 +59,16 @@ test.describe("File Processing", () => {
 			// Wait for processing to complete
 			await waitForProcessing(window);
 
+			const after = snapshotDir(dir);
+
+			// Metadata stripping happens in place: -overwrite_original means the
+			// original filename is rewritten, never a second file added.
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg"],
+				added: [],
+				removed: [],
+			});
+
 			// Verify file row appears in UI
 			const rows = window.locator('[role="row"]');
 			// Header row + at least 1 data row
@@ -69,7 +82,7 @@ test.describe("File Processing", () => {
 	});
 
 	test("processes a batch of 3 mixed file types", async () => {
-		const { copyFixtures, cleanup } = createFixtureDir();
+		const { dir, copyFixtures, cleanup } = createFixtureDir();
 		try {
 			// Use file types proven reliable across macOS, Windows, and Linux CI:
 			// JPEG (standard image), PNG (lossless), MP4 (video container)
@@ -78,6 +91,8 @@ test.describe("File Processing", () => {
 				"sample.png",
 				"sample.mp4",
 			]);
+
+			const before = snapshotDir(dir);
 
 			await app.evaluate(({ BrowserWindow }, filePaths) => {
 				const win = BrowserWindow.getAllWindows()[0];
@@ -89,6 +104,14 @@ test.describe("File Processing", () => {
 			await waitForProcessing(window, {
 				timeout: 30000,
 				expectedFiles: 3,
+			});
+
+			const after = snapshotDir(dir);
+
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg", "sample.png", "sample.mp4"],
+				added: [],
+				removed: [],
 			});
 
 			// Verify all 3 file rows visible
@@ -113,9 +136,11 @@ test.describe("File Processing", () => {
 	});
 
 	test("shows type pills during processing", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("sample.jpg");
+
+			const before = snapshotDir(dir);
 
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
@@ -129,6 +154,14 @@ test.describe("File Processing", () => {
 
 			await waitForProcessing(window);
 
+			const after = snapshotDir(dir);
+
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg"],
+				added: [],
+				removed: [],
+			});
+
 			// Verify type pill is visible (TypePill renders the extension)
 			const typePill = window.locator(".type-pill");
 			await expect(typePill.first()).toBeVisible();
@@ -140,13 +173,15 @@ test.describe("File Processing", () => {
 	});
 
 	test("updates the status bar with file count", async () => {
-		const { copyFixtures, cleanup } = createFixtureDir();
+		const { dir, copyFixtures, cleanup } = createFixtureDir();
 		try {
 			const tempFiles = copyFixtures([
 				"sample.jpg",
 				"sample.png",
 				"sample.pdf",
 			]);
+
+			const before = snapshotDir(dir);
 
 			await app.evaluate(({ BrowserWindow }, filePaths) => {
 				const win = BrowserWindow.getAllWindows()[0];
@@ -156,6 +191,14 @@ test.describe("File Processing", () => {
 			}, tempFiles);
 
 			await waitForProcessing(window);
+
+			const after = snapshotDir(dir);
+
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg", "sample.png", "sample.pdf"],
+				added: [],
+				removed: [],
+			});
 
 			// Status bar should show summary with the count
 			const statusSummary = window.locator(".status-bar__summary");
@@ -168,10 +211,18 @@ test.describe("File Processing", () => {
 	});
 
 	test("supports Clean more cycle", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			// First cycle: process a file
 			const tempFile1 = copyFixture("sample.jpg");
+
+			// Baseline taken with only tempFile1 on disk (tempFile2 doesn't exist
+			// yet), so the eventual delta can tell "modified in place" (tempFile1,
+			// present both before and after) apart from "newly created during this
+			// test" (tempFile2, copied in mid-test for the second cycle) — the two
+			// cycles exercise different disk-effect shapes and the assertion below
+			// is written to catch either one collapsing into the other.
+			const before = snapshotDir(dir);
 
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
@@ -207,6 +258,14 @@ test.describe("File Processing", () => {
 			);
 
 			await waitForProcessing(window);
+
+			const after = snapshotDir(dir);
+
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg"],
+				added: ["sample.png"],
+				removed: [],
+			});
 
 			// Verify processing worked again
 			await assertMetadataStripped(tempFile2);
