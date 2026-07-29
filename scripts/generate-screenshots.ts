@@ -185,6 +185,35 @@ async function screenshot(window: Page, name: string): Promise<void> {
 	console.log(`  Saved: ${name} (${Math.round(stats.size / 1024)} KB)`);
 }
 
+async function setTheme(
+	app: ElectronApplication,
+	window: Page,
+	theme: "light" | "dark",
+): Promise<void> {
+	await app.evaluate(({ nativeTheme }, source) => {
+		nativeTheme.themeSource = source;
+	}, theme);
+	await window.waitForTimeout(400);
+}
+
+/**
+ * Captures the current UI state in both themes, as `<name>.png` and `<name>-dark.png`.
+ *
+ * The website swaps screenshots with its own theme, so every state needs a dark twin --
+ * otherwise a dark page renders a glowing white slab. Leaves the app back in light mode so
+ * the next state is set up under known conditions.
+ */
+async function screenshotBothThemes(
+	app: ElectronApplication,
+	window: Page,
+	baseName: string,
+): Promise<void> {
+	await screenshot(window, `${baseName}.png`);
+	await setTheme(app, window, "dark");
+	await screenshot(window, `${baseName}-dark.png`);
+	await setTheme(app, window, "light");
+}
+
 async function forceLanguage(page: Page, locale: string): Promise<void> {
 	// Fetch current settings, update only language, then persist.
 	// This avoids resetting other settings to defaults.
@@ -232,11 +261,7 @@ async function main(): Promise<void> {
 		// ---- State 1: Light mode with files processed ----
 		console.log("\n[1/5] Light mode with files processed");
 
-		// Ensure light theme
-		await app.evaluate(({ nativeTheme }) => {
-			nativeTheme.themeSource = "light";
-		});
-		await window.waitForTimeout(300);
+		await setTheme(app, window, "light");
 
 		// Send files for processing
 		await sendFiles(app, tempFiles);
@@ -248,21 +273,13 @@ async function main(): Promise<void> {
 		// ---- State 2: Dark mode with files processed ----
 		console.log("[2/5] Dark mode with files processed");
 
-		await app.evaluate(({ nativeTheme }) => {
-			nativeTheme.themeSource = "dark";
-		});
-		await window.waitForTimeout(500);
-
+		await setTheme(app, window, "dark");
 		await screenshot(window, "dark-processed.png");
 
 		// ---- State 3: Settings drawer open ----
-		console.log("[3/5] Settings drawer open");
+		console.log("[3/5] Settings drawer open (light + dark)");
 
-		// Switch back to light mode for settings screenshot
-		await app.evaluate(({ nativeTheme }) => {
-			nativeTheme.themeSource = "light";
-		});
-		await window.waitForTimeout(300);
+		await setTheme(app, window, "light");
 
 		// Open settings via gear icon click
 		const gearButton = window.locator(".gear-icon");
@@ -273,10 +290,10 @@ async function main(): Promise<void> {
 		const drawer = window.locator('[role="dialog"][aria-label="Settings"]');
 		await drawer.waitFor({ state: "visible", timeout: 5000 });
 
-		await screenshot(window, "settings-open.png");
+		await screenshotBothThemes(app, window, "settings-open");
 
 		// ---- State 4: Metadata diff expanded ----
-		console.log("[4/5] Metadata diff expanded");
+		console.log("[4/5] Metadata diff expanded (light + dark)");
 
 		// Close settings drawer
 		const closeButton = drawer.locator('[aria-label="Close settings"]');
@@ -299,10 +316,10 @@ async function main(): Promise<void> {
 			await window.waitForTimeout(300);
 		}
 
-		await screenshot(window, "metadata-diff.png");
+		await screenshotBothThemes(app, window, "metadata-diff");
 
 		// ---- State 5: Language switching ----
-		console.log("[5/5] Language switching");
+		console.log("[5/5] Language switching (light + dark)");
 
 		// Collapse the expanded file row by clicking it again
 		await fileRow.click();
@@ -317,12 +334,12 @@ async function main(): Promise<void> {
 		await forceLanguage(window, "ja");
 		await window.waitForTimeout(500);
 
-		await screenshot(window, "language-switch.png");
+		await screenshotBothThemes(app, window, "language-switch");
 
 		// Reset language back to English
 		await forceLanguage(window, "en");
 
-		console.log("\nAll 5 screenshots generated successfully!");
+		console.log("\nAll 8 screenshots generated successfully!");
 		console.log(`Output directory: ${outputDir}`);
 	} finally {
 		if (app) {
