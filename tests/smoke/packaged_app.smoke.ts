@@ -10,6 +10,7 @@ import {
 import { createFixtureDir } from "../helpers/fixture_copier";
 import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
 import { waitForProcessing } from "../e2e/helpers/wait_for_processing";
+import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
 
 // Smoke tests for the PACKAGED artifact — the .dmg/.exe/.AppImage a user downloads,
 // installed the way a user installs it, not the dev build from out/.
@@ -114,9 +115,11 @@ test.describe("Packaged artifact", () => {
 		//
 		// A "window opened" assertion would NOT have caught #288: the window renders
 		// fine with mis-resolved resource paths.
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("sample.jpg");
+
+			const before = snapshotDir(dir);
 
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
@@ -130,6 +133,14 @@ test.describe("Packaged artifact", () => {
 
 			await waitForProcessing(window);
 
+			const after = snapshotDir(dir);
+
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg"],
+				added: [],
+				removed: [],
+			});
+
 			await assertMetadataStripped(tempFile);
 		} finally {
 			cleanup();
@@ -139,13 +150,15 @@ test.describe("Packaged artifact", () => {
 	test("processes a batch of mixed file types", async () => {
 		// Covers the video and PNG code paths, which invoke ExifTool with a different
 		// argument shape than JPEG.
-		const { copyFixtures, cleanup } = createFixtureDir();
+		const { dir, copyFixtures, cleanup } = createFixtureDir();
 		try {
 			const tempFiles = copyFixtures([
 				"sample.jpg",
 				"sample.png",
 				"sample.mp4",
 			]);
+
+			const before = snapshotDir(dir);
 
 			await app.evaluate(({ BrowserWindow }, filePaths) => {
 				const win = BrowserWindow.getAllWindows()[0];
@@ -157,6 +170,14 @@ test.describe("Packaged artifact", () => {
 			await waitForProcessing(window, {
 				timeout: 60000,
 				expectedFiles: tempFiles.length,
+			});
+
+			const after = snapshotDir(dir);
+
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg", "sample.png", "sample.mp4"],
+				added: [],
+				removed: [],
 			});
 
 			for (const tempFile of tempFiles) {
