@@ -1,1 +1,23 @@
 * text=auto eol=lf
+
+# Binary assets must reach disk byte-for-byte. `text=auto` decides binary-ness by looking
+# for NUL bytes, which silently misfires on files that are structurally binary but happen
+# to contain none: tests/e2e/fixtures/sample.pdf is pure ASCII, so git classified it as
+# text and rewrote the CRLF terminators in its xref table to LF on commit. The PDF spec
+# requires xref entries to be exactly 20 bytes; that rewrite made them 19, ExifTool
+# rejected the fixture with "Invalid xref table", and PDF metadata removal went untested.
+#
+# Listed explicitly rather than trusting the heuristic.
+*.pdf binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.gif binary
+*.webp binary
+*.tif binary
+*.tiff binary
+*.mp4 binary
+*.mov binary
+*.m4a binary
+*.ico binary
+*.icns binary
