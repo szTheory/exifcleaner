@@ -205,10 +205,8 @@ test.describe("Settings", () => {
 		);
 		expect(updatedSettings.saveAsCopy).toBe(newValue);
 
-		// The save-as-copy feature creates _cleaned copies. The full pipeline
-		// test is deferred since the exif:remove IPC handler doesn't currently
-		// pass outputPath (pre-existing gap). UI toggle verification confirms
-		// the setting propagates correctly.
+		// The executable #304 marker below owns the full pipeline contract.
+		// This test only verifies settings propagation.
 
 		// Reset to default (false)
 		await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));

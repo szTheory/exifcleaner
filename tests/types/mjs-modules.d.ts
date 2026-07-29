@@ -58,5 +58,10 @@ declare module "*known_gap_gate.mjs" {
 		source: string,
 		filename: string,
 	): readonly KnownGapProblem[];
+	export function scanCollectedTestSources(
+		rootDir?: string,
+	): readonly KnownGapProblem[];
+	export function formatLocalDiagnostic(problem: KnownGapProblem): string;
+	export function formatGitHubAnnotation(problem: KnownGapProblem): string;
 	export function main(): number;
 }

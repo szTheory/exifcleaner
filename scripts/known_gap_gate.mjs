@@ -135,6 +135,18 @@ export function scanBannedProse(source, filename) {
 	return problems.sort(compareProblems);
 }
 
+export function scanCollectedTestSources(rootDir = process.cwd()) {
+	const files = collectTestSourceFiles(rootDir);
+	const problems = [];
+
+	for (const relPath of files) {
+		const source = fs.readFileSync(path.join(rootDir, relPath), "utf8");
+		problems.push(...scanBannedProse(source, relPath));
+	}
+
+	return problems.sort(compareProblems);
+}
+
 function escapeMessage(value) {
 	return String(value)
 		.replaceAll("%", "%25")
@@ -146,11 +158,11 @@ function escapeProperty(value) {
 	return escapeMessage(value).replaceAll(":", "%3A").replaceAll(",", "%2C");
 }
 
-function formatLocalDiagnostic(problem) {
+export function formatLocalDiagnostic(problem) {
 	return `${problem.file}:${problem.line}: known-gap prose phrase "${problem.phrase}" is not machine-readable. ${problem.message}`;
 }
 
-function formatGitHubAnnotation(problem) {
+export function formatGitHubAnnotation(problem) {
 	const message = `known-gap prose phrase "${problem.phrase}" is not machine-readable. ${problem.message}`;
 	return `::error file=${escapeProperty(problem.file)},line=${problem.line}::${escapeMessage(message)}`;
 }
@@ -167,12 +179,7 @@ function fail(problems) {
 
 export function main() {
 	const files = collectTestSourceFiles(process.cwd());
-	const problems = [];
-
-	for (const relPath of files) {
-		const source = fs.readFileSync(path.join(process.cwd(), relPath), "utf8");
-		problems.push(...scanBannedProse(source, relPath));
-	}
+	const problems = scanCollectedTestSources(process.cwd());
 
 	if (problems.length > 0) {
 		fail(problems.sort(compareProblems));
