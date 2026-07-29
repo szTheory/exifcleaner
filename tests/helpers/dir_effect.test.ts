@@ -23,10 +23,7 @@ describe("assertDirEffect", () => {
 			fs.writeFileSync(path.join(dir, "sample.jpg"), "original-bytes");
 			const before = snapshotDir(dir);
 
-			fs.writeFileSync(
-				path.join(dir, "sample_cleaned.jpg"),
-				"cleaned-bytes",
-			);
+			fs.writeFileSync(path.join(dir, "sample_cleaned.jpg"), "cleaned-bytes");
 			const after = snapshotDir(dir);
 
 			expect(() =>
@@ -46,10 +43,7 @@ describe("assertDirEffect", () => {
 			fs.writeFileSync(path.join(dir, "sample.jpg"), "original-bytes");
 			const before = snapshotDir(dir);
 
-			fs.writeFileSync(
-				path.join(dir, "sample_cleaned.jpg"),
-				"cleaned-bytes",
-			);
+			fs.writeFileSync(path.join(dir, "sample_cleaned.jpg"), "cleaned-bytes");
 			fs.writeFileSync(path.join(dir, "stray.txt"), "unexpected");
 			const after = snapshotDir(dir);
 
