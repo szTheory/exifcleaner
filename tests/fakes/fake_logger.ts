@@ -14,7 +14,11 @@ export class FakeLogger implements LoggerPort {
 		message: string;
 		context?: Record<string, unknown>;
 	}): void {
-		this.messages.push({ level: "info", message, context });
+		this.messages.push({
+			level: "info",
+			message,
+			...(context !== undefined ? { context } : {}),
+		});
 	}
 
 	warn({
@@ -24,7 +28,11 @@ export class FakeLogger implements LoggerPort {
 		message: string;
 		context?: Record<string, unknown>;
 	}): void {
-		this.messages.push({ level: "warn", message, context });
+		this.messages.push({
+			level: "warn",
+			message,
+			...(context !== undefined ? { context } : {}),
+		});
 	}
 
 	error({
@@ -34,6 +42,10 @@ export class FakeLogger implements LoggerPort {
 		message: string;
 		context?: Record<string, unknown>;
 	}): void {
-		this.messages.push({ level: "error", message, context });
+		this.messages.push({
+			level: "error",
+			message,
+			...(context !== undefined ? { context } : {}),
+		});
 	}
 }

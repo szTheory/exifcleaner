@@ -22,5 +22,5 @@
 		"jsxImportSource": "react",
 		"lib": ["ES2021", "DOM", "DOM.Iterable"]
 	},
-	"include": ["./src/**/*.ts", "./src/**/*.tsx"]
+	"include": ["./src/**/*.ts", "./src/**/*.tsx", "./tests/**/*.ts"]
 }

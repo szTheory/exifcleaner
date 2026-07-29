@@ -1,4 +1,4 @@
-import type { XattrCommand } from "../../src/application/xattr_command";
+import type { XattrCommand } from "../../src/application/commands/xattr_command";
 
 export class FakeXattrCommand implements Pick<XattrCommand, "execute"> {
 	calls: { filePath: string }[] = [];

@@ -27,11 +27,20 @@ export async function launchApp(): Promise<{
 		path.join(os.tmpdir(), "exifcleaner-e2e-profile-"),
 	);
 
+	// process.env values are typed string | undefined; filter the undefined ones out
+	// before spreading, since Playwright's env option requires Record<string, string>.
+	const definedEnv: Record<string, string> = {};
+	for (const [key, value] of Object.entries(process.env)) {
+		if (value !== undefined) {
+			definedEnv[key] = value;
+		}
+	}
+
 	const app = await electron.launch({
 		args: [".", `--user-data-dir=${userDataDir}`],
 		cwd: path.resolve(__dirname, "../../.."),
 		env: {
-			...process.env,
+			...definedEnv,
 			// Use "development" so resource paths resolve to .resources/ in project root
 			// (not the Electron.app bundle). The compiled output in out/ is still used.
 			NODE_ENV: "development",

@@ -98,11 +98,20 @@ export async function launchPackagedApp(): Promise<{
 	const neutralCwd = mkdtempSync(path.join(tmpdir(), "exifcleaner-smoke-cwd-"));
 	const executablePath = packagedExecutablePath();
 
+	// process.env values are typed string | undefined; filter the undefined ones out
+	// before spreading, since Playwright's env option requires Record<string, string>.
+	const definedEnv: Record<string, string> = {};
+	for (const [key, value] of Object.entries(process.env)) {
+		if (value !== undefined) {
+			definedEnv[key] = value;
+		}
+	}
+
 	const app = await electron.launch({
 		executablePath,
 		args: [],
 		cwd: neutralCwd,
-		env: { ...process.env, ...appImageEnv(executablePath) },
+		env: { ...definedEnv, ...appImageEnv(executablePath) },
 		timeout: LAUNCH_TIMEOUT_MS,
 	});
 

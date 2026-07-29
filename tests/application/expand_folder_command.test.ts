@@ -60,8 +60,12 @@ it("returns FolderError for nonexistent directory", async () => {
 	expect(result.ok).toBe(false);
 	if (!result.ok) {
 		expect(result.error.code).toBe("read-failed");
-		expect(result.error.dirPath).toBe(nonexistent);
-		expect(result.error.cause).toBeTruthy();
+		// An equality matcher does not narrow the FolderError union -- narrow explicitly
+		// before reading members that exist only on the "read-failed" variant.
+		if (result.error.code === "read-failed") {
+			expect(result.error.dirPath).toBe(nonexistent);
+			expect(result.error.cause).toBeTruthy();
+		}
 	}
 });
 
@@ -82,7 +86,11 @@ it("returns read-failed error for permission-denied directory", async () => {
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
 			expect(result.error.code).toBe("read-failed");
-			expect(result.error.dirPath).toBe(restrictedDir);
+			// An equality matcher does not narrow the FolderError union -- narrow
+			// explicitly before reading the "read-failed"-only dirPath member.
+			if (result.error.code === "read-failed") {
+				expect(result.error.dirPath).toBe(restrictedDir);
+			}
 		}
 	} finally {
 		await chmod(restrictedDir, 0o755);
