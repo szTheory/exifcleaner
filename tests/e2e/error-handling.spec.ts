@@ -4,6 +4,7 @@ import { launchApp, closeApp } from "./helpers/app_launcher";
 import { createFixtureDir } from "../helpers/fixture_copier";
 import { assertMetadataStripped } from "./helpers/metadata_assertions";
 import { waitForProcessing } from "./helpers/wait_for_processing";
+import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
 
 test.describe("Error Handling", () => {
 	let app: ElectronApplication;
@@ -46,9 +47,11 @@ test.describe("Error Handling", () => {
 	});
 
 	test("handles a corrupted file without crashing", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("corrupted.jpg");
+
+			const before = snapshotDir(dir);
 
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
@@ -62,6 +65,20 @@ test.describe("Error Handling", () => {
 
 			// Wait for processing to complete (app should handle corrupted file gracefully)
 			await waitForProcessing(window, { timeout: 15000 });
+
+			const after = snapshotDir(dir);
+
+			// ExifTool errors out on the corrupted fixture and never reaches
+			// -overwrite_original, so the original bytes are left exactly as
+			// copied -- a partial or truncated write here would be the write-side
+			// half of the #304 failure class, just triggered by a bad input
+			// instead of a bad setting.
+			assertDirEffect(before, after, {
+				unchanged: ["corrupted.jpg"],
+				added: [],
+				modified: [],
+				removed: [],
+			});
 
 			// Verify the file row appears and processing completed
 			const dataRows = window.locator(".file-table__row");
@@ -80,9 +97,11 @@ test.describe("Error Handling", () => {
 	});
 
 	test("handles a zero-byte file gracefully", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("zero_byte.jpg");
+
+			const before = snapshotDir(dir);
 
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
@@ -96,6 +115,19 @@ test.describe("Error Handling", () => {
 
 			// Wait for processing to complete
 			await waitForProcessing(window, { timeout: 15000 });
+
+			const after = snapshotDir(dir);
+
+			// A zero-byte file has no valid header for ExifTool to write against,
+			// so it errors before -overwrite_original and the fixture stays at 0
+			// bytes -- distinct from "0 B is correct" (file-size-display.spec.ts),
+			// this asserts nothing was written at all.
+			assertDirEffect(before, after, {
+				unchanged: ["zero_byte.jpg"],
+				added: [],
+				modified: [],
+				removed: [],
+			});
 
 			// Verify the file row appears and processing completed without crash
 			const dataRows = window.locator(".file-table__row");
@@ -113,9 +145,11 @@ test.describe("Error Handling", () => {
 	});
 
 	test("filters out unsupported file formats", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("unsupported.txt");
+
+			const before = snapshotDir(dir);
 
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
@@ -131,6 +165,17 @@ test.describe("Error Handling", () => {
 			// The app's isSupportedFile() filters .txt files before adding to state
 			await window.waitForTimeout(2000);
 
+			const after = snapshotDir(dir);
+
+			// isSupportedFile() filters this out in the renderer before any IPC
+			// call reaches ExifTool, so the file is never even opened for writing.
+			assertDirEffect(before, after, {
+				unchanged: ["unsupported.txt"],
+				added: [],
+				modified: [],
+				removed: [],
+			});
+
 			const dataRows = window.locator(".file-table__row");
 			const rowCount = await dataRows.count();
 			expect(rowCount).toBe(0);
@@ -144,10 +189,17 @@ test.describe("Error Handling", () => {
 	});
 
 	test("recovers and processes good files after problematic files", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			// First: send a corrupted file
 			const corruptedFile = copyFixture("corrupted.jpg");
+
+			// Baseline taken with only the corrupted fixture on disk (the good
+			// fixture is copied in later, mid-test), so the delta below can tell
+			// "left alone because it failed" (corrupted.jpg, present both before
+			// and after) apart from "written because it succeeded" (sample.jpg,
+			// copied in after this snapshot for the second attempt).
+			const before = snapshotDir(dir);
 
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
@@ -184,6 +236,15 @@ test.describe("Error Handling", () => {
 			);
 
 			await waitForProcessing(window);
+
+			const after = snapshotDir(dir);
+
+			assertDirEffect(before, after, {
+				unchanged: ["corrupted.jpg"],
+				added: ["sample.jpg"],
+				modified: [],
+				removed: [],
+			});
 
 			// Verify the good file processed successfully
 			await assertMetadataStripped(goodFile);
