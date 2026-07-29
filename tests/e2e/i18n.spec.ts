@@ -4,6 +4,10 @@ import { launchApp, closeApp } from "./helpers/app_launcher";
 
 test.describe("Internationalization", () => {
 	let app: ElectronApplication;
+	// Hazard: this Page-typed variable is named `window`, which shadows the DOM global
+	// inside no-argument .evaluate() closures (TypeScript resolves lexically, not to
+	// the in-page context). See settings.spec.ts for the fix if this file grows an
+	// .evaluate(() => window....) call that needs type-checking.
 	let window: Page;
 	let consoleErrors: string[];
 

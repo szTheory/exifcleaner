@@ -7,16 +7,16 @@ import { waitForProcessing } from "./helpers/wait_for_processing";
 
 test.describe("Settings", () => {
 	let app: ElectronApplication;
-	let window: Page;
+	let page: Page;
 	let consoleErrors: string[];
 
 	test.beforeEach(async () => {
 		consoleErrors = [];
 		const launched = await launchApp();
 		app = launched.app;
-		window = launched.window;
+		page = launched.window;
 
-		window.on("console", (msg) => {
+		page.on("console", (msg) => {
 			if (msg.type() === "error") {
 				consoleErrors.push(msg.text());
 			}
@@ -35,12 +35,12 @@ test.describe("Settings", () => {
 
 	test("opens and closes the settings drawer", async () => {
 		// Click the gear icon to open settings
-		const gearButton = window.locator(".gear-icon");
+		const gearButton = page.locator(".gear-icon");
 		await expect(gearButton).toBeVisible();
 		await gearButton.click();
 
 		// Verify settings drawer is visible
-		const drawer = window.locator('[role="dialog"][aria-label="Settings"]');
+		const drawer = page.locator('[role="dialog"][aria-label="Settings"]');
 		await expect(drawer).toBeVisible();
 
 		// Verify drawer has the Settings title
@@ -57,58 +57,58 @@ test.describe("Settings", () => {
 
 	test("toggles preserve orientation switch", async () => {
 		// Open settings
-		const gearButton = window.locator(".gear-icon");
+		const gearButton = page.locator(".gear-icon");
 		await gearButton.click();
 
 		// Get initial state via settings API
-		const initialSettings = await window.evaluate(() =>
+		const initialSettings = await page.evaluate(() =>
 			window.api.settings.get(),
 		);
 		expect(initialSettings.preserveOrientation).toBe(true);
 
 		// Toggle off via settings API
-		await window.evaluate(() =>
+		await page.evaluate(() =>
 			window.api.settings.set({ preserveOrientation: false }),
 		);
-		await window.waitForTimeout(300); // Let React re-render
+		await page.waitForTimeout(300); // Let React re-render
 
 		// Verify the checkbox reflects the change
-		const orientationInput = window.locator("#toggle-preserve-orientation");
+		const orientationInput = page.locator("#toggle-preserve-orientation");
 		const afterToggle = await orientationInput.isChecked();
 		expect(afterToggle).toBe(false);
 
 		// Toggle back on
-		await window.evaluate(() =>
+		await page.evaluate(() =>
 			window.api.settings.set({ preserveOrientation: true }),
 		);
-		await window.waitForTimeout(300);
+		await page.waitForTimeout(300);
 		const afterToggleBack = await orientationInput.isChecked();
 		expect(afterToggleBack).toBe(true);
 	});
 
 	test("toggles preserve timestamps switch", async () => {
 		// Open settings
-		const gearButton = window.locator(".gear-icon");
+		const gearButton = page.locator(".gear-icon");
 		await gearButton.click();
 
 		// Get initial state
-		const initialSettings = await window.evaluate(() =>
+		const initialSettings = await page.evaluate(() =>
 			window.api.settings.get(),
 		);
 		expect(initialSettings.preserveTimestamps).toBe(false);
 
 		// Toggle on via settings API
-		await window.evaluate(() =>
+		await page.evaluate(() =>
 			window.api.settings.set({ preserveTimestamps: true }),
 		);
-		await window.waitForTimeout(300);
+		await page.waitForTimeout(300);
 
-		const timestampsInput = window.locator("#toggle-preserve-timestamps");
+		const timestampsInput = page.locator("#toggle-preserve-timestamps");
 		const afterToggle = await timestampsInput.isChecked();
 		expect(afterToggle).toBe(true);
 
 		// Reset
-		await window.evaluate(() =>
+		await page.evaluate(() =>
 			window.api.settings.set({ preserveTimestamps: false }),
 		);
 	});
@@ -117,29 +117,29 @@ test.describe("Settings", () => {
 		test.skip(process.platform !== "darwin", "xattr is macOS-only");
 
 		// Open settings
-		const gearButton = window.locator(".gear-icon");
+		const gearButton = page.locator(".gear-icon");
 		await gearButton.click();
 
 		// Get initial state
-		const initialSettings = await window.evaluate(() =>
+		const initialSettings = await page.evaluate(() =>
 			window.api.settings.get(),
 		);
 		expect(initialSettings.removeXattrs).toBe(false);
 
 		// Toggle on via settings API
-		await window.evaluate(() =>
-			window.api.settings.set({ removeXattrs: true }),
-		);
-		await window.waitForTimeout(300);
+		await page.evaluate(() => {
+			window.api.settings.set({ removeXattrs: true });
+		});
+		await page.waitForTimeout(300);
 
-		const xattrInput = window.locator("#toggle-remove-xattrs");
+		const xattrInput = page.locator("#toggle-remove-xattrs");
 		const afterToggle = await xattrInput.isChecked();
 		expect(afterToggle).toBe(true);
 
 		// Reset
-		await window.evaluate(() =>
-			window.api.settings.set({ removeXattrs: false }),
-		);
+		await page.evaluate(() => {
+			window.api.settings.set({ removeXattrs: false });
+		});
 	});
 
 	test("preserves orientation metadata when toggle is enabled", async () => {
@@ -148,7 +148,7 @@ test.describe("Settings", () => {
 			const tempFile = copyFixture("sample.jpg");
 
 			// Ensure orientation preservation is enabled (default: true)
-			const settings = await window.evaluate(() => window.api.settings.get());
+			const settings = await page.evaluate(() => window.api.settings.get());
 			expect(settings.preserveOrientation).toBe(true);
 
 			// Process the file
@@ -162,7 +162,7 @@ test.describe("Settings", () => {
 				[tempFile],
 			);
 
-			await waitForProcessing(window, { timeout: 15000 });
+			await waitForProcessing(page, { timeout: 15000 });
 
 			// Read the processed file's metadata
 			const tags = await readMetadataTags(tempFile);
@@ -178,29 +178,29 @@ test.describe("Settings", () => {
 
 	test("toggles save-as-copy switch and verifies _cleaned setting propagation", async () => {
 		// Open settings
-		const gearButton = window.locator(".gear-icon");
+		const gearButton = page.locator(".gear-icon");
 		await gearButton.click();
 
 		// Get initial state
-		const initialSettings = await window.evaluate(() =>
+		const initialSettings = await page.evaluate(() =>
 			window.api.settings.get(),
 		);
 
 		// Toggle save-as-copy to opposite of current
 		const newValue = !initialSettings.saveAsCopy;
-		await window.evaluate(
+		await page.evaluate(
 			(v) => window.api.settings.set({ saveAsCopy: v }),
 			newValue,
 		);
-		await window.waitForTimeout(300);
+		await page.waitForTimeout(300);
 
 		// Verify the checkbox reflects the change
-		const saveAsCopyInput = window.locator("#toggle-save-as-copy");
+		const saveAsCopyInput = page.locator("#toggle-save-as-copy");
 		const afterToggle = await saveAsCopyInput.isChecked();
 		expect(afterToggle).toBe(newValue);
 
 		// Verify the setting was persisted via IPC
-		const updatedSettings = await window.evaluate(() =>
+		const updatedSettings = await page.evaluate(() =>
 			window.api.settings.get(),
 		);
 		expect(updatedSettings.saveAsCopy).toBe(newValue);
@@ -211,6 +211,6 @@ test.describe("Settings", () => {
 		// the setting propagates correctly.
 
 		// Reset to default (false)
-		await window.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
+		await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
 	});
 });

@@ -13,16 +13,16 @@ const __dirname = path.dirname(__filename);
 
 test.describe("Folder Recursion", () => {
 	let app: ElectronApplication;
-	let window: Page;
+	let page: Page;
 	let consoleErrors: string[];
 
 	test.beforeEach(async () => {
 		consoleErrors = [];
 		const launched = await launchApp();
 		app = launched.app;
-		window = launched.window;
+		page = launched.window;
 
-		window.on("console", (msg) => {
+		page.on("console", (msg) => {
 			if (msg.type() === "error") {
 				consoleErrors.push(msg.text());
 			}
@@ -66,7 +66,7 @@ test.describe("Folder Recursion", () => {
 			);
 
 			// Use folder:expand IPC via the renderer's window.api
-			const expandResult = await window.evaluate(
+			const expandResult = await page.evaluate(
 				(rootDir) => window.api.folder.expand(rootDir),
 				photosDir,
 			);
@@ -83,10 +83,10 @@ test.describe("Folder Recursion", () => {
 				}
 			}, expandResult.files);
 
-			await waitForProcessing(window, { timeout: 15000 });
+			await waitForProcessing(page, { timeout: 15000 });
 
 			// Verify 2 file rows appear
-			const dataRows = window.locator(".file-table__row");
+			const dataRows = page.locator(".file-table__row");
 			await expect(dataRows).toHaveCount(2);
 
 			// Verify files are processed on disk
@@ -120,7 +120,7 @@ test.describe("Folder Recursion", () => {
 			);
 
 			// Use folder:expand via the renderer's window.api
-			const expandResult = await window.evaluate(
+			const expandResult = await page.evaluate(
 				(rootDir) => window.api.folder.expand(rootDir),
 				level1,
 			);

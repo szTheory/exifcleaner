@@ -18,6 +18,10 @@ import { waitForProcessing } from "./helpers/wait_for_processing";
  */
 test.describe("File type coverage", () => {
 	let app: ElectronApplication;
+	// Hazard: this Page-typed variable is named `window`, which shadows the DOM global
+	// inside no-argument .evaluate() closures (TypeScript resolves lexically, not to
+	// the in-page context). See settings.spec.ts for the fix if this file grows an
+	// .evaluate(() => window....) call that needs type-checking.
 	let window: Page;
 
 	test.beforeEach(async () => {

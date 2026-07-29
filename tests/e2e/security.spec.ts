@@ -4,16 +4,16 @@ import { launchApp, closeApp } from "./helpers/app_launcher";
 
 test.describe("Security", () => {
 	let app: ElectronApplication;
-	let window: Page;
+	let page: Page;
 	let consoleErrors: string[];
 
 	test.beforeAll(async () => {
 		consoleErrors = [];
 		const launched = await launchApp();
 		app = launched.app;
-		window = launched.window;
+		page = launched.window;
 
-		window.on("console", (msg) => {
+		page.on("console", (msg) => {
 			if (msg.type() === "error") {
 				consoleErrors.push(msg.text());
 			}
@@ -27,7 +27,7 @@ test.describe("Security", () => {
 	});
 
 	test("has CSP meta tag with expected directives", async () => {
-		const csp = await window.evaluate(() => {
+		const csp = await page.evaluate(() => {
 			const meta = document.querySelector(
 				'meta[http-equiv="Content-Security-Policy"]',
 			);
@@ -48,7 +48,7 @@ test.describe("Security", () => {
 		// Playwright's evaluate() uses DevTools protocol which bypasses CSP.
 		// To test CSP enforcement, inject an inline script element that tries eval.
 		// CSP script-src 'self' blocks both inline scripts and eval().
-		const executed = await window.evaluate(() => {
+		const executed = await page.evaluate(() => {
 			return new Promise<boolean>((resolve) => {
 				(window as any).__evalTestResult = "not-run";
 				const script = document.createElement("script");
@@ -65,7 +65,7 @@ test.describe("Security", () => {
 	});
 
 	test("CSP blocks dynamic script injection", async () => {
-		const executed = await window.evaluate(() => {
+		const executed = await page.evaluate(() => {
 			(window as any).__injectedScriptRan = false;
 			const script = document.createElement("script");
 			script.textContent = "(window).__injectedScriptRan = true;";
@@ -76,14 +76,14 @@ test.describe("Security", () => {
 	});
 
 	test("has secure BrowserWindow configuration", async () => {
-		const isNodeIntegrationEnabled = await window.evaluate(() => {
+		const isNodeIntegrationEnabled = await page.evaluate(() => {
 			return typeof require !== "undefined";
 		});
 		expect(isNodeIntegrationEnabled).toBe(false);
 	});
 
 	test("CSP meta tag has no wildcard or remote origins", async () => {
-		const csp = await window.evaluate(() => {
+		const csp = await page.evaluate(() => {
 			const meta = document.querySelector(
 				'meta[http-equiv="Content-Security-Policy"]',
 			);
@@ -97,12 +97,12 @@ test.describe("Security", () => {
 
 	test("blocks navigation to external URLs", async () => {
 		// Capture URL before navigation attempt
-		const urlBefore = window.url();
+		const urlBefore = page.url();
 
 		// Attempt to navigate to an external URL
 		// Navigation is blocked synchronously by Electron's will-navigate handler.
 		// Per D-29: no explicit sleeps or waitForSelector -- immediate URL assertion.
-		await window.evaluate(() => {
+		await page.evaluate(() => {
 			try {
 				window.location.href = "https://example.com";
 			} catch {
@@ -111,7 +111,7 @@ test.describe("Security", () => {
 		});
 
 		// Verify the URL has not changed (no sleep needed per D-29)
-		const urlAfter = window.url();
+		const urlAfter = page.url();
 		expect(urlAfter).toBe(urlBefore);
 		expect(urlAfter).not.toContain("example.com");
 	});

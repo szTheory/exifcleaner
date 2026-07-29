@@ -4,16 +4,16 @@ import { launchApp, closeApp } from "./helpers/app_launcher";
 
 test.describe("Dark Mode", () => {
 	let app: ElectronApplication;
-	let window: Page;
+	let page: Page;
 	let consoleErrors: string[];
 
 	test.beforeAll(async () => {
 		consoleErrors = [];
 		const launched = await launchApp();
 		app = launched.app;
-		window = launched.window;
+		page = launched.window;
 
-		window.on("console", (msg) => {
+		page.on("console", (msg) => {
 			if (msg.type() === "error") {
 				consoleErrors.push(msg.text());
 			}
@@ -33,11 +33,11 @@ test.describe("Dark Mode", () => {
 		});
 
 		// Wait for theme change to propagate to renderer via IPC
-		await window.waitForTimeout(300);
+		await page.waitForTimeout(300);
 
 		// Verify the data-theme attribute on documentElement reflects dark mode
 		// The ThemeContext listens for nativeTheme changes via IPC and sets data-theme
-		const dataTheme = await window.evaluate(() =>
+		const dataTheme = await page.evaluate(() =>
 			document.documentElement.getAttribute("data-theme"),
 		);
 		expect(dataTheme).toBe("dark");
@@ -54,22 +54,22 @@ test.describe("Dark Mode", () => {
 		await app.evaluate(({ nativeTheme }) => {
 			nativeTheme.themeSource = "dark";
 		});
-		await window.waitForTimeout(300);
+		await page.waitForTimeout(300);
 
 		// Verify the drop zone is still visible
-		const dropZone = window.locator(".drop-zone");
+		const dropZone = page.locator(".drop-zone");
 		await expect(dropZone).toBeVisible();
 
 		// Verify the gear button is still visible
-		const gearButton = window.locator(".gear-icon");
+		const gearButton = page.locator(".gear-icon");
 		await expect(gearButton).toBeVisible();
 
 		// Verify the empty state section is still visible
-		const emptyState = window.locator("section.empty-state");
+		const emptyState = page.locator("section.empty-state");
 		await expect(emptyState).toBeVisible();
 
 		// Verify no elements have zero opacity (rendering failure indicator)
-		const hasZeroOpacity = await window.evaluate(() => {
+		const hasZeroOpacity = await page.evaluate(() => {
 			const elements = document.querySelectorAll("*");
 			for (const el of elements) {
 				const style = window.getComputedStyle(el);
@@ -87,16 +87,16 @@ test.describe("Dark Mode", () => {
 		await app.evaluate(({ nativeTheme }) => {
 			nativeTheme.themeSource = "dark";
 		});
-		await window.waitForTimeout(300);
+		await page.waitForTimeout(300);
 
 		// Now switch back to light
 		await app.evaluate(({ nativeTheme }) => {
 			nativeTheme.themeSource = "light";
 		});
-		await window.waitForTimeout(300);
+		await page.waitForTimeout(300);
 
 		// Verify data-theme attribute is light
-		const dataTheme = await window.evaluate(() =>
+		const dataTheme = await page.evaluate(() =>
 			document.documentElement.getAttribute("data-theme"),
 		);
 		expect(dataTheme).toBe("light");
@@ -107,7 +107,7 @@ test.describe("Dark Mode", () => {
 		await app.evaluate(({ nativeTheme }) => {
 			nativeTheme.themeSource = "system";
 		});
-		await window.waitForTimeout(300);
+		await page.waitForTimeout(300);
 
 		// Verify the app is still functional (window visible, no crash)
 		const isVisible = await app.evaluate(({ BrowserWindow }) => {
@@ -117,7 +117,7 @@ test.describe("Dark Mode", () => {
 		expect(isVisible).toBe(true);
 
 		// Verify the main content area is present
-		const main = window.locator("[role='main']");
+		const main = page.locator("[role='main']");
 		await expect(main).toBeVisible();
 	});
 });
