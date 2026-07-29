@@ -24,6 +24,13 @@
 
 ---
 
+> **Accuracy note (2026-07-29):** the status tables below were audited against the source.
+> Nine entries previously marked "❌ Not implemented" were in fact implemented, and most are
+> E2E-tested — navigation hardening, the permission gate, CSP, IPC sender validation, IPC
+> payload validation, the typed IPC contract, `ready-to-show`, window state persistence, and
+> external link handling. If you are about to build something from this document, verify the
+> claim against the code first.
+
 ## Quick Reference Checklists
 
 ### Security Checklist
@@ -164,7 +171,7 @@ export function hardenNavigation(win: BrowserWindow) {
 
 **Important**: Never pass **user-controlled** URLs directly to `shell.openExternal`. Always validate protocol and origin first.
 
-**ExifCleaner status**: ❌ Not implemented. Quick Win #1 (15 min, high security impact).
+**ExifCleaner status**: ✅ Implemented in `src/main/security/navigation.ts`.
 
 ### Permission Gate (Deny by Default)
 
@@ -200,7 +207,7 @@ export function installPermissionGate() {
 }
 ```
 
-**ExifCleaner status**: ❌ Not implemented. ExifCleaner loads only local content (`file://`), but this is defense in depth. Quick Win #2 (10 min, medium security impact).
+**ExifCleaner status**: ✅ Implemented in `src/main/security/permissions.ts` (deny by default).
 
 ### Content Security Policy (CSP)
 
@@ -230,7 +237,7 @@ export function installPermissionGate() {
 
 **Rule**: No `eval`, no remote scripts, no wildcard origins.
 
-**ExifCleaner status**: ❌ Not implemented. Quick Win #3 (5 min, high security impact).
+**ExifCleaner status**: ✅ Injected by `electron.vite.config.ts`; enforced by `tests/e2e/security.spec.ts`.
 
 ### Safe Secrets at Rest
 
@@ -272,7 +279,7 @@ Fuses let you disable internal knobs at build time (e.g., `ELECTRON_RUN_AS_NODE`
 - Disable `nodeOptions` — Prevents `NODE_OPTIONS` environment injection
 - Disable `nodeCliInspect` — Prevents `--inspect` flag
 
-**ExifCleaner status**: ❌ Not implemented. Track in Phase 12 (Apple Silicon + Code Signing).
+**ExifCleaner status**: ❌ Not implemented. Tracked as issue #312.
 
 ---
 
@@ -313,7 +320,7 @@ export type IpcChannels = {
 - Single place to see all IPC channels
 - Easy to audit what renderer can access
 
-**ExifCleaner status**: ❌ Not typed. Current IPC uses string channels without type contract. Quick Win #4 (30 min, high maintainability impact).
+**ExifCleaner status**: ✅ Typed contract in `src/common/ipc_channels.ts`.
 
 ### Preload: Expose a Tiny, Typed API
 
@@ -425,7 +432,7 @@ function isPathAllowed(path: string): boolean {
 2. Payload schema (is data well-formed?)
 3. Policy constraints (is this operation allowed?)
 
-**ExifCleaner status**: ❌ Partial. Current IPC handlers do not validate sender or payloads. Quick Win #4 (add sender validation: 15 min, add payload schemas: 30 min).
+**ExifCleaner status**: ✅ Sender validation in `src/main/ipc/ipc_validation.ts`; zod payload schemas for all channels in `src/main/ipc/ipc_schemas.ts`.
 
 ### Never Expose Raw Primitives That Enable RCE
 
@@ -492,7 +499,7 @@ export function createMainWindow() {
 - Faster perceived startup (window appears with content)
 - Professional feel (matches native apps)
 
-**ExifCleaner status**: ❌ Not implemented. Current code shows window immediately. Quick Win #5 (5 min, high UX impact).
+**ExifCleaner status**: ✅ Implemented in `src/main/window/window_setup.ts`.
 
 ### Platform-Specific Menus
 
@@ -718,7 +725,7 @@ export function setupWindowStatePersistence(win: BrowserWindow): void {
 }
 ```
 
-**ExifCleaner status**: ❌ Not implemented. Quick Win #6 (30 min, medium UX impact).
+**ExifCleaner status**: ✅ Implemented in `src/main/window/window_state.ts`.
 
 ### Single Instance Lock
 
@@ -785,7 +792,7 @@ document.addEventListener('click', (e) => {
 });
 ```
 
-**ExifCleaner status**: ❌ Not implemented. Quick Win #7 (add window open handler: 5 min, add link click handler: 10 min).
+**ExifCleaner status**: ✅ Implemented in `src/main/security/navigation.ts` — `setWindowOpenHandler` denies new windows and routes validated URLs to `shell.openExternal`.
 
 ### Accessibility (a11y)
 
@@ -797,7 +804,7 @@ document.addEventListener('click', (e) => {
 - Don't trap focus (Escape should close modals)
 - Respect `prefers-reduced-motion` for animations
 
-**ExifCleaner status**: ❌ Partial. Uses semantic HTML. No ARIA labels, no keyboard navigation testing.
+**ExifCleaner status**: ✅ Semantic HTML plus ARIA throughout the renderer, covered by `tests/e2e/accessibility.spec.ts`.
 
 ---
 
@@ -861,7 +868,7 @@ app.on('ready', () => {
 
 **Budget**: Target < 2 seconds from click → usable UI.
 
-**ExifCleaner status**: ❌ Not measured. Current startup likely fast (small codebase), but no metrics. Quick Win #8 (add timing: 5 min, optimize if > 2s: variable).
+**ExifCleaner status**: ❌ Not measured. Judged not worth an issue at current app size.
 
 ### Avoid Sync I/O on Startup
 
@@ -1049,7 +1056,7 @@ if [ $SIZE -gt 150000 ]; then
 fi
 ```
 
-**ExifCleaner status**: ❌ No automated size checks. Quick Win #9 (add CI size check: 15 min).
+**ExifCleaner status**: ❌ No automated size checks. Judged not worth an issue — revisit if builds start growing.
 
 ---
 
@@ -1064,12 +1071,12 @@ fi
 | `nodeIntegration: false` | ✅ Implemented | `src/main/window_setup.ts` | Phase 3 (Electron 35) |
 | `devTools: false` in prod | ✅ Implemented | `src/main/window_setup.ts` | Uses `NODE_ENV` check |
 | Preload with `contextBridge` | ✅ Implemented | `src/preload/index.ts` | Exposes `window.api` |
-| Navigation hardening | ❌ Not implemented | — | Quick Win #1 (15 min) |
-| Permission gate | ❌ Not implemented | — | Quick Win #2 (10 min) |
-| CSP header | ❌ Not implemented | — | Quick Win #3 (5 min) |
-| IPC sender validation | ❌ Not implemented | — | Quick Win #4 (15 min) |
-| IPC payload validation | ❌ Not implemented | — | Quick Win #4 (30 min) |
-| Typed IPC contract | ❌ Not implemented | — | Quick Win #4 (30 min) |
+| Navigation hardening | ✅ Implemented | `src/main/security/navigation.ts` | will-navigate + setWindowOpenHandler |
+| Permission gate | ✅ Implemented | `src/main/security/permissions.ts` | Deny by default |
+| CSP header | ✅ Implemented | `electron.vite.config.ts` | E2E-enforced |
+| IPC sender validation | ✅ Implemented | `src/main/ipc/ipc_validation.ts` | |
+| IPC payload validation | ✅ Implemented | `src/main/ipc/ipc_schemas.ts` | zod, all channels |
+| Typed IPC contract | ✅ Implemented | `src/common/ipc_channels.ts` | |
 
 ### Native Feel & Polish
 
@@ -1078,10 +1085,10 @@ fi
 | Platform menus | ✅ Implemented | `src/main/menu*.ts` | macOS/Win/Linux menus |
 | System theme | ✅ Partial | `src/styles/dark_mode.css` | CSS only, no IPC |
 | Single instance lock | ✅ Implemented | `src/main/app_setup.ts` | Prevents duplicates |
-| `ready-to-show` | ❌ Not implemented | — | Quick Win #5 (5 min) |
-| Window state persistence | ❌ Not implemented | — | Quick Win #6 (30 min) |
-| External link handling | ❌ Not implemented | — | Quick Win #7 (15 min) |
-| Keyboard accessibility | ❌ Partial | — | Semantic HTML, no ARIA |
+| `ready-to-show` | ✅ Implemented | `src/main/window/window_setup.ts` | |
+| Window state persistence | ✅ Implemented | `src/main/window/window_state.ts` | |
+| External link handling | ✅ Implemented | `src/main/security/navigation.ts` | setWindowOpenHandler + shell.openExternal |
+| Keyboard accessibility | ✅ Implemented | `src/renderer/` | ARIA + `tests/e2e/accessibility.spec.ts` |
 
 ### Performance
 
