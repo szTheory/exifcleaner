@@ -57,14 +57,54 @@ New since v3.6.0: Catalan, Croatian, Czech, Danish, Hungarian, Malayalam, Persia
 
 Verify your download: check `SHASUMS256.txt` against the file you downloaded.
 
-### macOS: opening unsigned apps
+## Opening unsigned builds
 
-ExifCleaner is not yet code-signed with an Apple Developer certificate. macOS will warn you on first launch:
+ExifCleaner is **not code-signed**. Your OS will warn you on first launch. This is
+expected and is a one-time step per platform.
 
-- **macOS Ventura and earlier**: Right-click the app > Open > click "Open" in the dialog
-- **macOS Sequoia 15.0+**: Open **System Settings > Privacy & Security**, scroll down, and click **"Open Anyway"** next to the ExifCleaner message
+### macOS
 
-You only need to do this once — after that the app opens normally.
+- **macOS 14 (Sonoma) and earlier**: right-click (or Control-click) the app → **Open** →
+  click **Open** in the dialog.
+- **macOS 15 (Sequoia) and later**: right-click → Open no longer works. Double-click the
+  app once and let it be blocked, then open **System Settings → Privacy & Security**,
+  scroll down, and click **Open Anyway** next to the ExifCleaner message.
+
+### Windows
+
+Windows Defender SmartScreen shows *"Windows protected your PC"*. Click **More info** →
+**Run anyway**.
+
+### Linux
+
+No gatekeeping. Make the AppImage executable with `chmod +x ExifCleaner-4.0.0.AppImage`.
+`.deb` and `.rpm` install normally:
+
+```bash
+sudo apt install ./exifcleaner_4.0.0_amd64.deb    # Debian/Ubuntu
+sudo dnf install ./exifcleaner-4.0.0.x86_64.rpm   # Fedora/RHEL
+```
+
+### Why isn't it signed?
+
+macOS signing requires an Apple Developer certificate at $99/year, and that certificate
+embeds the holder's **legal name**, which macOS displays in the Gatekeeper dialog.
+Windows requires a separate EV certificate at $200–600/year tied to a verified legal
+identity. For a privacy tool maintained anonymously, that isn't a tradeoff this project
+is willing to make.
+
+What you get instead:
+
+- **SHA-256 checksums** for every artifact in `SHASUMS256.txt` — verifies your download is
+  byte-for-byte what CI built.
+- **Builds happen in public** via GitHub Actions from tagged source you can read.
+- **CI installs and runs the real artifact** before this release could be published — it
+  mounts the DMG / runs the installer / extracts the AppImage, launches the installed app,
+  and strips metadata from a test image. macOS additionally runs a Gatekeeper regression
+  check. A build that doesn't actually work never reaches this page.
+
+> **Only download ExifCleaner from the [GitHub releases page](https://github.com/szTheory/exifcleaner/releases).**
+> Builds distributed through any other channel are not ours and are not verified.
 
 ---
 
