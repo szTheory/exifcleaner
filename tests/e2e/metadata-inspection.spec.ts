@@ -3,6 +3,7 @@ import type { ElectronApplication, Page } from "playwright";
 import { launchApp, closeApp } from "./helpers/app_launcher";
 import { createFixtureDir } from "../helpers/fixture_copier";
 import { waitForProcessing } from "./helpers/wait_for_processing";
+import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
 
 test.describe("Metadata Inspection", () => {
 	let app: ElectronApplication;
@@ -37,9 +38,11 @@ test.describe("Metadata Inspection", () => {
 	});
 
 	test("expands a processed file to show metadata details", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("sample.jpg");
+
+			const before = snapshotDir(dir);
 
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
@@ -52,6 +55,19 @@ test.describe("Metadata Inspection", () => {
 			);
 
 			await waitForProcessing(window);
+
+			const after = snapshotDir(dir);
+
+			// Metadata inspection reads the processed file's tags, but processing
+			// itself always strips in place -- a UI panel that renders correctly
+			// while the underlying file was left untouched (or a neighbour was
+			// touched) would still pass every assertion below.
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg"],
+				added: [],
+				removed: [],
+				unchanged: [],
+			});
 
 			// Click on the completed file row to expand it
 			const fileRow = window.locator(".file-table__row--complete").first();
@@ -67,9 +83,11 @@ test.describe("Metadata Inspection", () => {
 	});
 
 	test("shows metadata groups with before/after diff", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("sample.jpg");
+
+			const before = snapshotDir(dir);
 
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
@@ -82,6 +100,15 @@ test.describe("Metadata Inspection", () => {
 			);
 
 			await waitForProcessing(window);
+
+			const after = snapshotDir(dir);
+
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg"],
+				added: [],
+				removed: [],
+				unchanged: [],
+			});
 
 			// Click to expand the file row
 			const fileRow = window.locator(".file-table__row--complete").first();
@@ -135,9 +162,11 @@ test.describe("Metadata Inspection", () => {
 	});
 
 	test("shows removed indicators for stripped metadata tags", async () => {
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("sample.jpg");
+
+			const before = snapshotDir(dir);
 
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
@@ -150,6 +179,15 @@ test.describe("Metadata Inspection", () => {
 			);
 
 			await waitForProcessing(window);
+
+			const after = snapshotDir(dir);
+
+			assertDirEffect(before, after, {
+				modified: ["sample.jpg"],
+				added: [],
+				removed: [],
+				unchanged: [],
+			});
 
 			// Expand the file row
 			const fileRow = window.locator(".file-table__row--complete").first();
