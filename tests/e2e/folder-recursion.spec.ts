@@ -7,6 +7,7 @@ import { launchApp, closeApp } from "./helpers/app_launcher";
 import { assertMetadataStripped } from "./helpers/metadata_assertions";
 import { waitForProcessing } from "./helpers/wait_for_processing";
 import { fileURLToPath } from "node:url";
+import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -75,6 +76,11 @@ test.describe("Folder Recursion", () => {
 			expect(expandResult.files).toBeDefined();
 			expect(expandResult.files.length).toBe(2);
 
+			// Snapshot the temp root (not a leaf directory) so the recursive walk
+			// observes the whole tree -- a format handler that quietly wrote into
+			// photos/ instead of photos/vacation/ would otherwise be invisible.
+			const before = snapshotDir(tempRoot);
+
 			// Now send the discovered files via IPC for processing
 			await app.evaluate(({ BrowserWindow }, filePaths) => {
 				const win = BrowserWindow.getAllWindows()[0];
@@ -84,6 +90,18 @@ test.describe("Folder Recursion", () => {
 			}, expandResult.files);
 
 			await waitForProcessing(page, { timeout: 15000 });
+
+			const after = snapshotDir(tempRoot);
+
+			// Both nested files are stripped in place; the directories themselves
+			// (created before this test's baseline) are named unchanged so the
+			// nested structure itself, not just the leaf files, is asserted.
+			assertDirEffect(before, after, {
+				modified: ["photos/vacation/sample.jpg", "photos/sample.png"],
+				added: [],
+				removed: [],
+				unchanged: ["photos", "photos/vacation"],
+			});
 
 			// Verify 2 file rows appear
 			const dataRows = page.locator(".file-table__row");
@@ -119,11 +137,31 @@ test.describe("Folder Recursion", () => {
 				path.join(level2, "deep.png"),
 			);
 
+			// folder:expand is a read: it must not write. Snapshotting the temp
+			// root around this call is the nested case's read-only counterpart to
+			// the write-path retrofit above -- a byte touched here would otherwise
+			// be invisible, since this test never inspects file contents.
+			const before = snapshotDir(tempRoot);
+
 			// Use folder:expand via the renderer's window.api
 			const expandResult = await page.evaluate(
 				(rootDir) => window.api.folder.expand(rootDir),
 				level1,
 			);
+
+			const after = snapshotDir(tempRoot);
+
+			assertDirEffect(before, after, {
+				unchanged: [
+					"level1",
+					"level1/level2",
+					"level1/top.jpg",
+					"level1/level2/deep.png",
+				],
+				added: [],
+				modified: [],
+				removed: [],
+			});
 
 			// Verify both files are discovered (flat list, full paths)
 			expect(expandResult.files.length).toBe(2);
