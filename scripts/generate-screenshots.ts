@@ -4,9 +4,14 @@
  * Launches the Electron app via Playwright, drives it through 5 UI states,
  * and saves PNGs to the website's static images directory.
  *
- * Screenshots are captured WITHOUT macOS window chrome -- the chrome overlay
- * is added via CSS in the website layout (Plan 03). This separates concerns
- * and makes screenshots easier to regenerate.
+ * Screenshots are captured WITHOUT macOS window chrome. The website draws the chrome
+ * in CSS (assets/css/_hero.css), which stays crisp at any width and lets one image serve
+ * the macOS, Windows, and Linux tabs.
+ *
+ * Markdown can't do that, so the two README images are additionally run through
+ * frame-screenshot.ts, which bakes the same chrome in. They are written here rather than
+ * copied by hand so they can't fall behind the app -- the previous static/screenshot.png
+ * was a manual copy and ended up advertising bugs that had already been fixed.
  *
  * Usage:
  *   npx tsx scripts/generate-screenshots.ts
@@ -19,6 +24,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
+import { assertChromiumAvailable, frameScreenshot } from "./frame-screenshot";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,6 +34,8 @@ const outputDir = path.resolve(
 	"../exifcleaner-website/static/images/screenshots",
 );
 const fixturesDir = path.resolve(projectRoot, "tests/e2e/fixtures");
+// Framed variants for the README, which can't apply the website's CSS chrome.
+const readmeDir = path.resolve(projectRoot, "static");
 
 async function ensureBuilt(): Promise<void> {
 	const mainBundle = path.join(projectRoot, "out/main/index.js");
@@ -93,8 +101,17 @@ async function launchApp(): Promise<{
 	app: ElectronApplication;
 	window: Page;
 }> {
+	// Isolated user-data dir for two reasons: the app takes a single-instance lock keyed
+	// on this path, so a running installed ExifCleaner would otherwise make this instance
+	// quit on launch; and it guarantees default settings rather than inheriting whatever
+	// the maintainer happens to have configured locally.
+	const os = await import("node:os");
+	const userDataDir = fs.mkdtempSync(
+		path.join(os.tmpdir(), "exifcleaner-screenshots-profile-"),
+	);
+
 	const app = await electron.launch({
-		args: ["."],
+		args: [".", `--user-data-dir=${userDataDir}`],
 		cwd: projectRoot,
 		env: {
 			...process.env,
@@ -183,8 +200,11 @@ async function forceLanguage(page: Page, locale: string): Promise<void> {
 async function main(): Promise<void> {
 	console.log("ExifCleaner Screenshot Generator\n");
 
-	// Step 1: Ensure app is built
+	// Step 1: Ensure app is built, and that the framing step can run. Checked up front so
+	// a missing browser fails in seconds instead of after the full capture run, which
+	// would otherwise leave the website screenshots updated and the README ones stale.
 	await ensureBuilt();
+	await assertChromiumAvailable();
 
 	// Step 2: Create output directory
 	fs.mkdirSync(outputDir, { recursive: true });
@@ -310,6 +330,39 @@ async function main(): Promise<void> {
 		}
 		cleanup();
 	}
+
+	// Framed README variants. Deliberately after the app closes so Chromium isn't
+	// competing with Electron for the machine.
+	console.log("\nFraming README screenshots...");
+	fs.mkdirSync(readmeDir, { recursive: true });
+
+	const readmeVariants = [
+		{
+			source: "light-processed.png",
+			output: "screenshot.png",
+			theme: "light" as const,
+		},
+		{
+			source: "dark-processed.png",
+			output: "screenshot-dark.png",
+			theme: "dark" as const,
+		},
+	];
+
+	for (const variant of readmeVariants) {
+		const outputPath = path.join(readmeDir, variant.output);
+		await frameScreenshot({
+			inputPath: path.join(outputDir, variant.source),
+			outputPath,
+			theme: variant.theme,
+		});
+		const stats = fs.statSync(outputPath);
+		console.log(
+			`  Saved: ${variant.output} (${Math.round(stats.size / 1024)} KB)`,
+		);
+	}
+
+	console.log(`README images: ${readmeDir}`);
 }
 
 main().catch((err) => {
