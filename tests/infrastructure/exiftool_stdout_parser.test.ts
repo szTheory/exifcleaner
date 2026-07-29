@@ -49,9 +49,7 @@ describe("extractReadySegments", () => {
 		const result = extractReadySegments({
 			buffer: '[{"a":1}]\n{ready0}\npartial',
 		});
-		expect(result.completed).toEqual([
-			{ executeNum: 0, output: '[{"a":1}]' },
-		]);
+		expect(result.completed).toEqual([{ executeNum: 0, output: '[{"a":1}]' }]);
 		expect(result.remaining).toBe("partial");
 	});
 });

@@ -50,9 +50,7 @@ test.describe("Accessibility", () => {
 		expect(nonBodyFocused.length).toBeGreaterThan(0);
 
 		// The gear button (settings) should be in the tab order
-		const gearFocused = focusedTags.some((t) =>
-			t.includes("Open settings"),
-		);
+		const gearFocused = focusedTags.some((t) => t.includes("Open settings"));
 		expect(gearFocused).toBe(true);
 	});
 
@@ -149,9 +147,7 @@ test.describe("Accessibility", () => {
 		}
 
 		// All focused elements should be inside the dialog (focus trap)
-		const outsideCount = focusedElements.filter(
-			(e) => e === "outside",
-		).length;
+		const outsideCount = focusedElements.filter((e) => e === "outside").length;
 		expect(outsideCount).toBe(0);
 
 		// Press Escape to close the drawer

@@ -72,9 +72,7 @@ describe("ExifToolAdapter.readMetadata", () => {
 
 	it("returns exiftool-error with no-data message when data is null and error is null", async () => {
 		const fakeProcess = makeFakeProcess({
-			readMetadata: vi
-				.fn()
-				.mockResolvedValue({ data: null, error: null }),
+			readMetadata: vi.fn().mockResolvedValue({ data: null, error: null }),
 		});
 		const adapter = new ExifToolAdapter({ process: fakeProcess });
 

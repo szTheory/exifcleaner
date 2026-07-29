@@ -14,9 +14,7 @@ const FORBIDDEN_IMPORTS = [
 ];
 
 it("domain files have no I/O or Electron imports", () => {
-	const files = fs
-		.readdirSync(DOMAIN_DIR)
-		.filter((f) => f.endsWith(".ts"));
+	const files = fs.readdirSync(DOMAIN_DIR).filter((f) => f.endsWith(".ts"));
 
 	expect(files.length).toBeGreaterThan(0);
 

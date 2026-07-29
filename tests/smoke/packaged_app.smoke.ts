@@ -87,14 +87,11 @@ test.describe("Packaged artifact", () => {
 		// app.evaluate has no dynamic-import callback, so requiring modules inside it
 		// is not available.
 		const resourcesPath = await app.evaluate(({ app: electronApp }) => {
-			return electronApp.isPackaged
-				? process.resourcesPath
-				: process.cwd();
+			return electronApp.isPackaged ? process.resourcesPath : process.cwd();
 		});
 
 		const subdir = process.platform === "win32" ? "win" : "nix";
-		const filename =
-			process.platform === "win32" ? "exiftool.exe" : "exiftool";
+		const filename = process.platform === "win32" ? "exiftool.exe" : "exiftool";
 		const binPath = path.join(resourcesPath, subdir, "bin", filename);
 
 		expect(
@@ -150,15 +147,12 @@ test.describe("Packaged artifact", () => {
 				"sample.mp4",
 			]);
 
-			await app.evaluate(
-				({ BrowserWindow }, filePaths) => {
-					const win = BrowserWindow.getAllWindows()[0];
-					if (win) {
-						win.webContents.send("file-open-add-files", filePaths);
-					}
-				},
-				tempFiles,
-			);
+			await app.evaluate(({ BrowserWindow }, filePaths) => {
+				const win = BrowserWindow.getAllWindows()[0];
+				if (win) {
+					win.webContents.send("file-open-add-files", filePaths);
+				}
+			}, tempFiles);
 
 			await waitForProcessing(window, {
 				timeout: 60000,

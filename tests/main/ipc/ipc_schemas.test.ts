@@ -15,9 +15,7 @@ import {
 
 describe("exifReadSchema", () => {
 	it("accepts a non-empty string", () => {
-		expect(exifReadSchema.parse("/path/to/file.jpg")).toBe(
-			"/path/to/file.jpg",
-		);
+		expect(exifReadSchema.parse("/path/to/file.jpg")).toBe("/path/to/file.jpg");
 	});
 
 	it("rejects empty string", () => {

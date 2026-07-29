@@ -3,9 +3,9 @@ import { middleTruncatePath } from "../../src/domain/path_truncation";
 
 describe("middleTruncatePath", () => {
 	it("returns short paths unchanged", () => {
-		expect(middleTruncatePath({ folderPath: "short/path/", maxLength: 50 })).toBe(
-			"short/path/",
-		);
+		expect(
+			middleTruncatePath({ folderPath: "short/path/", maxLength: 50 }),
+		).toBe("short/path/");
 	});
 
 	it("returns paths with 2 or fewer segments unchanged", () => {
@@ -16,8 +16,7 @@ describe("middleTruncatePath", () => {
 
 	it("truncates long paths with ellipsis keeping first and last segments", () => {
 		const result = middleTruncatePath({
-			folderPath:
-				"very-long-first/second/third/fourth/fifth/last-segment/",
+			folderPath: "very-long-first/second/third/fourth/fifth/last-segment/",
 			maxLength: 35,
 		});
 		expect(result).toContain("very-long-first");
@@ -62,8 +61,8 @@ describe("middleTruncatePath", () => {
 	});
 
 	it("handles single segment paths", () => {
-		expect(
-			middleTruncatePath({ folderPath: "folder/", maxLength: 50 }),
-		).toBe("folder/");
+		expect(middleTruncatePath({ folderPath: "folder/", maxLength: 50 })).toBe(
+			"folder/",
+		);
 	});
 });

@@ -75,15 +75,12 @@ test.describe("File Processing", () => {
 				"sample.mp4",
 			]);
 
-			await app.evaluate(
-				({ BrowserWindow }, filePaths) => {
-					const win = BrowserWindow.getAllWindows()[0];
-					if (win) {
-						win.webContents.send("file-open-add-files", filePaths);
-					}
-				},
-				tempFiles,
-			);
+			await app.evaluate(({ BrowserWindow }, filePaths) => {
+				const win = BrowserWindow.getAllWindows()[0];
+				if (win) {
+					win.webContents.send("file-open-add-files", filePaths);
+				}
+			}, tempFiles);
 
 			await waitForProcessing(window, {
 				timeout: 30000,
@@ -99,9 +96,7 @@ test.describe("File Processing", () => {
 			await expect(statusBar).toBeVisible();
 
 			// Verify all rows show completion (auto-retrying assertion)
-			const completeRows = window.locator(
-				".file-table__row--complete",
-			);
+			const completeRows = window.locator(".file-table__row--complete");
 			await expect(completeRows).toHaveCount(3, { timeout: 10000 });
 
 			// Verify metadata stripped from all files on disk
@@ -149,15 +144,12 @@ test.describe("File Processing", () => {
 				"sample.pdf",
 			]);
 
-			await app.evaluate(
-				({ BrowserWindow }, filePaths) => {
-					const win = BrowserWindow.getAllWindows()[0];
-					if (win) {
-						win.webContents.send("file-open-add-files", filePaths);
-					}
-				},
-				tempFiles,
-			);
+			await app.evaluate(({ BrowserWindow }, filePaths) => {
+				const win = BrowserWindow.getAllWindows()[0];
+				if (win) {
+					win.webContents.send("file-open-add-files", filePaths);
+				}
+			}, tempFiles);
 
 			await waitForProcessing(window);
 

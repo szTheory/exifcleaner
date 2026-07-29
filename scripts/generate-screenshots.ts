@@ -108,10 +108,7 @@ async function launchApp(): Promise<{
 	return { app, window };
 }
 
-async function waitForProcessing(
-	window: Page,
-	timeout = 15000,
-): Promise<void> {
+async function waitForProcessing(window: Page, timeout = 15000): Promise<void> {
 	const pollInterval = 200;
 	const deadline = Date.now() + timeout;
 
@@ -132,24 +129,19 @@ async function waitForProcessing(
 		await window.waitForTimeout(pollInterval);
 	}
 
-	throw new Error(
-		`waitForProcessing timed out after ${timeout}ms`,
-	);
+	throw new Error(`waitForProcessing timed out after ${timeout}ms`);
 }
 
 async function sendFiles(
 	app: ElectronApplication,
 	filePaths: string[],
 ): Promise<void> {
-	await app.evaluate(
-		({ BrowserWindow }, paths) => {
-			const win = BrowserWindow.getAllWindows()[0];
-			if (win) {
-				win.webContents.send("file-open-add-files", paths);
-			}
-		},
-		filePaths,
-	);
+	await app.evaluate(({ BrowserWindow }, paths) => {
+		const win = BrowserWindow.getAllWindows()[0];
+		if (win) {
+			win.webContents.send("file-open-add-files", paths);
+		}
+	}, filePaths);
 }
 
 async function setWindowSize(
@@ -173,15 +165,10 @@ async function screenshot(window: Page, name: string): Promise<void> {
 	const outputPath = path.join(outputDir, name);
 	await window.screenshot({ path: outputPath });
 	const stats = fs.statSync(outputPath);
-	console.log(
-		`  Saved: ${name} (${Math.round(stats.size / 1024)} KB)`,
-	);
+	console.log(`  Saved: ${name} (${Math.round(stats.size / 1024)} KB)`);
 }
 
-async function forceLanguage(
-	page: Page,
-	locale: string,
-): Promise<void> {
+async function forceLanguage(page: Page, locale: string): Promise<void> {
 	// Fetch current settings, update only language, then persist.
 	// This avoids resetting other settings to defaults.
 	await page.evaluate(async (lang) => {
@@ -263,9 +250,7 @@ async function main(): Promise<void> {
 		await window.waitForTimeout(500);
 
 		// Verify settings drawer is visible
-		const drawer = window.locator(
-			'[role="dialog"][aria-label="Settings"]',
-		);
+		const drawer = window.locator('[role="dialog"][aria-label="Settings"]');
 		await drawer.waitFor({ state: "visible", timeout: 5000 });
 
 		await screenshot(window, "settings-open.png");
@@ -279,9 +264,7 @@ async function main(): Promise<void> {
 		await window.waitForTimeout(500);
 
 		// Click on a processed file row to expand metadata
-		const fileRow = window
-			.locator(".file-table__row--complete")
-			.first();
+		const fileRow = window.locator(".file-table__row--complete").first();
 		await fileRow.click();
 
 		// Wait for metadata expansion to be visible
@@ -289,9 +272,7 @@ async function main(): Promise<void> {
 		await expansion.waitFor({ state: "visible", timeout: 5000 });
 
 		// Expand the first metadata group to show some content
-		const groupHeaders = expansion.locator(
-			".metadata-group__header",
-		);
+		const groupHeaders = expansion.locator(".metadata-group__header");
 		const groupCount = await groupHeaders.count();
 		if (groupCount > 0) {
 			await groupHeaders.first().click();

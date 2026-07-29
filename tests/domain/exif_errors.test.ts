@@ -89,9 +89,7 @@ describe("ExifError", () => {
 			];
 
 			for (const error of errors) {
-				const roundTripped = JSON.parse(
-					JSON.stringify(error),
-				) as ExifError;
+				const roundTripped = JSON.parse(JSON.stringify(error)) as ExifError;
 				expect(roundTripped).toEqual(error);
 			}
 		});
