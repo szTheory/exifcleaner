@@ -132,8 +132,21 @@ script, which puts `node_modules/.bin` on PATH.
 - **Serial mode, `workers: 1`.** The packaged app holds an OS-level single-instance lock,
   so concurrent launches deadlock rather than fail cleanly. This is a constraint, not a
   tuning knob.
-- **No `NODE_ENV`, no `cwd`.** A packaged app must resolve everything from
-  `process.resourcesPath`. Supplying either would mask the #288 class of bug.
+- **No `NODE_ENV`, but an explicit NEUTRAL `cwd`.** Do not remove the `cwd` from
+  `packaged_launcher.ts`, and do not "simplify" it away. It is load-bearing, and the
+  reasoning is counterintuitive enough that it was gotten wrong the first time.
+
+  `resources.ts` falls back to `path.join(process.cwd(), ".resources")` when the app
+  believes it is in development. Playwright's launch **inherits the test runner's cwd**,
+  which is the repo root — where `.resources/nix/bin/exiftool` really does exist. So a
+  packaged build with #288 reintroduced resolves its "dev" path to the repo's own
+  resources and works perfectly.
+
+  This was measured, not theorized: with no `cwd` set, **all 5 specs passed against a
+  build with the `NODE_ENV` bug deliberately restored.** The suite was worthless and
+  looked healthy. Launching from an empty temp dir reproduces what a real user gets
+  from `/Applications` (cwd `/`, no `/.resources`), so a mis-resolved path fails here
+  the same way it fails for them.
 - **`metadata_assertions` uses the repo's ExifTool, not the bundled one.** That is
   deliberate: it gives an independent oracle. If both pointed at the bundled binary, a
   broken bundle could produce a self-consistent false pass.

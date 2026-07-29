@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 import type { ElectronApplication, Page } from "playwright";
+import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import {
 	launchPackagedApp,
 	closePackagedApp,
@@ -74,26 +77,34 @@ test.describe("Packaged artifact", () => {
 		).toBe(true);
 	});
 
-	test("can spawn the bundled ExifTool binary", async () => {
+	test("bundles a working ExifTool binary inside the app", async () => {
 		// Proves the binary survived extraResources packaging, sits outside the asar,
 		// and kept its executable bit. A lost exec bit fails at runtime with a
 		// confusing EACCES that no UI-level assertion would explain.
-		const version = await app.evaluate(async ({ app: electronApp }) => {
-			const { join } = await import("node:path");
-			const { execFileSync } = await import("node:child_process");
-
-			const subdir = process.platform === "win32" ? "win" : "nix";
-			const filename =
-				process.platform === "win32" ? "exiftool.exe" : "exiftool";
-			const binPath = join(
-				electronApp.isPackaged ? process.resourcesPath : process.cwd(),
-				subdir,
-				"bin",
-				filename,
-			);
-
-			return execFileSync(binPath, ["-ver"], { encoding: "utf8" }).trim();
+		//
+		// The path is read from the running app (so it reflects real resource
+		// resolution) but the binary is executed from the test process — Playwright's
+		// app.evaluate has no dynamic-import callback, so requiring modules inside it
+		// is not available.
+		const resourcesPath = await app.evaluate(({ app: electronApp }) => {
+			return electronApp.isPackaged
+				? process.resourcesPath
+				: process.cwd();
 		});
+
+		const subdir = process.platform === "win32" ? "win" : "nix";
+		const filename =
+			process.platform === "win32" ? "exiftool.exe" : "exiftool";
+		const binPath = path.join(resourcesPath, subdir, "bin", filename);
+
+		expect(
+			existsSync(binPath),
+			`bundled ExifTool missing at ${binPath} — extraResources did not survive packaging`,
+		).toBe(true);
+
+		const version = execFileSync(binPath, ["-ver"], {
+			encoding: "utf8",
+		}).trim();
 
 		expect(version).toMatch(/^\d+\.\d+/);
 	});

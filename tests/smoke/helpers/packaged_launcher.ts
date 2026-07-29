@@ -1,6 +1,8 @@
 import { _electron as electron } from "playwright";
 import type { ElectronApplication, Page } from "playwright";
-import { existsSync } from "node:fs";
+import { existsSync, mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 
 const EXECUTABLE_ENV_VAR = "EXIFCLEANER_PACKAGED_APP";
 
@@ -45,18 +47,35 @@ export function packagedExecutablePath(): string {
 /**
  * Launch the packaged binary and wait for the React app to mount.
  *
- * Deliberately sets no NODE_ENV and no cwd. `app.isPackaged` is the only environment
- * signal the app consults for resource resolution (that was the #288 fix), and a
- * packaged app must resolve everything from `process.resourcesPath`. Supplying either
- * would mask exactly the class of bug this suite exists to catch.
+ * Sets no NODE_ENV: `app.isPackaged` is the only environment signal the app consults
+ * for resource resolution (the #288 fix), and overriding NODE_ENV would defeat the test.
+ *
+ * CRITICALLY, launches from a NEUTRAL cwd. This is not incidental — it is the whole
+ * reason the suite can catch #288 at all.
+ *
+ * `resources.ts` falls back to `path.join(process.cwd(), ".resources")` when the app
+ * believes it is running in development. Playwright's launch inherits the test runner's
+ * cwd, which is the repo root — where `.resources/nix/bin/exiftool` really does exist.
+ * So a packaged build with #288 reintroduced resolves its "dev" path to the repo's own
+ * resources and works perfectly, and the whole suite passes on a broken artifact.
+ *
+ * That was measured, not theorized: with no cwd set, all 5 specs passed against a build
+ * with the NODE_ENV bug deliberately restored.
+ *
+ * A real user launching from /Applications has cwd "/", where "/.resources" does not
+ * exist. Pointing cwd at an empty temp dir reproduces that, so a mis-resolved path
+ * fails here the same way it fails for a user.
  */
 export async function launchPackagedApp(): Promise<{
 	app: ElectronApplication;
 	window: Page;
 }> {
+	const neutralCwd = mkdtempSync(path.join(tmpdir(), "exifcleaner-smoke-cwd-"));
+
 	const app = await electron.launch({
 		executablePath: packagedExecutablePath(),
 		args: [],
+		cwd: neutralCwd,
 		timeout: LAUNCH_TIMEOUT_MS,
 	});
 
