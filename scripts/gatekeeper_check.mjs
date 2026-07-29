@@ -121,9 +121,8 @@ function run(file, args) {
 		});
 		return { code: 0, output: stdout };
 	} catch (err) {
-		const e = /** @type {{status?: number, stdout?: string, stderr?: string}} */ (
-			err
-		);
+		const e =
+			/** @type {{status?: number, stdout?: string, stderr?: string}} */ (err);
 		return {
 			code: e.status ?? 1,
 			output: `${e.stdout ?? ""}${e.stderr ?? ""}`,
@@ -139,6 +138,19 @@ function fail(message) {
 function checkApp(appPath) {
 	if (!existsSync(appPath)) {
 		fail(`no such bundle: ${appPath}`);
+	}
+
+	// Reject anything that is not a .app up front. codesign will happily run against
+	// an inner directory and report "bundle format unrecognized, invalid, or unsuitable"
+	// — indistinguishable, to this script, from a genuinely broken signature. CI run
+	// 30419211027 hit exactly that: a caller passed ".../ExifCleaner.app/Contents" and
+	// the gate reported a healthy build as the unbypassable "damaged" class.
+	// A mis-wired path is a usage error and must not be reported as a signing verdict.
+	if (!appPath.endsWith(".app")) {
+		fail(
+			`--app must point at a .app bundle, got: ${appPath}\n` +
+				`  (if you derived this from the executable path, strip /Contents/MacOS/<name>)`,
+		);
 	}
 
 	// Work on a copy so the shipping artifact is never mutated by the gate.
@@ -158,12 +170,7 @@ function checkApp(appPath) {
 		// Bundle root ONLY, not recursive — that is what Finder and a browser actually
 		// produce. A recursive set is not a faithful simulation.
 		const quarantineValue = `0081;${Math.floor(Date.now() / 1000).toString(16)};ExifCleanerCI;${randomUUID()}`;
-		run("xattr", [
-			"-w",
-			"com.apple.quarantine",
-			quarantineValue,
-			target,
-		]);
+		run("xattr", ["-w", "com.apple.quarantine", quarantineValue, target]);
 
 		// Step 2 — VACUITY GUARD. Read the attribute back and compare.
 		//
@@ -258,6 +265,9 @@ function main() {
 }
 
 // Only run when invoked directly, so the module can be imported by tests.
-if (process.argv[1] !== undefined && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+if (
+	process.argv[1] !== undefined &&
+	import.meta.url.endsWith(path.basename(process.argv[1]))
+) {
 	main();
 }

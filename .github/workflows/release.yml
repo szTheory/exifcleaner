@@ -96,7 +96,9 @@ jobs:
         run: |
           APP=$(scripts/smoke/install-macos.sh dist/*arm64.dmg "$RUNNER_TEMP/smoke")
           echo "executable=$APP" >> "$GITHUB_OUTPUT"
-          echo "bundle=$(dirname "$(dirname "$APP")")" >> "$GITHUB_OUTPUT"
+          # See ci.yml: $APP is <bundle>.app/Contents/MacOS/<name>, so chained
+          # dirnames are off by one and yield a path codesign cannot verify.
+          echo "bundle=${APP%/Contents/MacOS/*}" >> "$GITHUB_OUTPUT"
 
       - name: Gatekeeper gate
         run: node scripts/gatekeeper_check.mjs --app "${{ steps.install.outputs.bundle }}"

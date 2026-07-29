@@ -92,7 +92,12 @@ jobs:
         run: |
           APP=$(scripts/smoke/install-macos.sh dist/*arm64.dmg "$RUNNER_TEMP/smoke")
           echo "executable=$APP" >> "$GITHUB_OUTPUT"
-          echo "bundle=$(dirname "$(dirname "$APP")")" >> "$GITHUB_OUTPUT"
+          # Strip the executable suffix rather than chaining dirname. $APP is
+          # <bundle>.app/Contents/MacOS/<name>, so this needs three dirnames, and a
+          # two-dirname version silently yielded ".../ExifCleaner.app/Contents" —
+          # which codesign rejects as "bundle format unrecognized", making a healthy
+          # build look like the "damaged" failure the gate exists to catch.
+          echo "bundle=${APP%/Contents/MacOS/*}" >> "$GITHUB_OUTPUT"
 
       # Regression gate for #290. Operates on its own quarantined copy.
       - name: Gatekeeper gate
