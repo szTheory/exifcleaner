@@ -1,52 +1,56 @@
 import { describe, expect, test } from "vitest";
-// eslint-disable-next-line -- .mjs script, imported for its pure parser
 import { classifySpctl } from "../../scripts/gatekeeper_check.mjs";
 
-// These fixtures encode the exact distinction this milestone exists to enforce:
-// an ad-hoc-signed app is EXPECTED to be "rejected" by spctl (that rejection is what
-// the bypassable "unidentified developer" dialog looks like from the CLI), while a
-// structurally broken bundle produces "damaged" or a sealed-resource complaint and is
-// NOT user-bypassable.
+// Fixtures below marked MEASURED are verbatim `spctl -a -vv --type execute` output
+// captured on macOS 26.5 (build 25F71) on 2026-07-28, against a real packmacdir build
+// of this project and two deliberately corrupted copies of it.
 //
-// The parser is the part of the gate most likely to rot, so it is covered here as a
-// pure function — these run on the Ubuntu job on every PR, with no macOS required.
+// The rest are corruption strings this parser must treat as fatal on any macOS.
+//
+// This suite is the anti-rot mechanism for the Gatekeeper gate: the parser is the part
+// most likely to drift, and these tests run on the Ubuntu job with no macOS required.
 
-const HEALTHY_ADHOC = `/tmp/ExifCleaner.app: rejected
-source=No Usable Signature
-origin=(null)`;
+// MEASURED — healthy ad-hoc bundle. Note there is NO source= line. An earlier version
+// of this parser required one and therefore failed closed on every healthy build.
+const MEASURED_HEALTHY = `/tmp/gk-healthy.app: rejected`;
 
-const HEALTHY_UNNOTARIZED = `/tmp/ExifCleaner.app: rejected
-source=Unnotarized Developer ID
-origin=Developer ID Application: Example`;
+// MEASURED — unsigned nested helper (codesign --remove-signature on a Helper.app).
+// Note `source=no usable signature` appears on a BROKEN bundle here, not a healthy one.
+const MEASURED_UNSIGNED_HELPER = `/tmp/gk-A.app: rejected
+source=no usable signature`;
 
-// The #290 state: pre-signed Electron frameworks left inside an otherwise-unsigned
-// bundle. Not bypassable — the user's only option is Trash.
-const DAMAGED = `/tmp/ExifCleaner.app: rejected (the code is damaged or has been modified)
+// MEASURED — broken outer seal (framework signature removed, outer re-signed w/o --deep).
+const MEASURED_BROKEN_SEAL = `/tmp/gk-B.app: rejected
+source=no usable signature`;
+
+const DAMAGED = `/tmp/x.app: rejected (the code is damaged or has been modified)
 source=No Usable Signature`;
 
-// The case that motivates layer 2 existing at all: codesign can pass while the
-// Gatekeeper assessment engine still rejects on the resource envelope.
-const SEALED_RESOURCE = `/tmp/ExifCleaner.app: rejected
+const SEALED_RESOURCE = `/tmp/x.app: rejected
 source=No Usable Signature
 a sealed resource is missing or invalid`;
 
-const OBSOLETE_ENVELOPE = `/tmp/ExifCleaner.app: rejected
+const OBSOLETE_ENVELOPE = `/tmp/x.app: rejected
 source=No Usable Signature
 resource envelope is obsolete (version 1 signature)`;
 
 describe("classifySpctl", () => {
-	test("accepts a healthy ad-hoc signature reporting no usable signature", () => {
-		const result = classifySpctl(HEALTHY_ADHOC);
+	test("accepts the measured healthy ad-hoc verdict, which has no source line", () => {
+		// Regression lock for the bug this parser shipped with: requiring a source=
+		// line rejected every healthy build on macOS 26.
+		const result = classifySpctl(MEASURED_HEALTHY);
 
 		expect(result.ok).toBe(true);
-		expect(result.source).toBe("no usable signature");
+		expect(result.source).toBe("(none)");
 	});
 
-	test("accepts an unnotarized developer id verdict", () => {
-		const result = classifySpctl(HEALTHY_UNNOTARIZED);
-
-		expect(result.ok).toBe(true);
-		expect(result.source).toBe("unnotarized developer id");
+	test("does not fail a bundle merely for reporting no usable signature", () => {
+		// On macOS 26 this string accompanies broken bundles, but on older macOS it is
+		// documented as the healthy ad-hoc signal. Its meaning is version-dependent, so
+		// this parser deliberately does not branch on it in either direction — codesign
+		// (layer 1) is the authoritative discriminator and catches both break modes.
+		expect(classifySpctl(MEASURED_UNSIGNED_HELPER).ok).toBe(true);
+		expect(classifySpctl(MEASURED_BROKEN_SEAL).ok).toBe(true);
 	});
 
 	test("rejects the damaged verdict that is not user-bypassable", () => {
@@ -57,8 +61,8 @@ describe("classifySpctl", () => {
 	});
 
 	test("rejects a missing sealed resource even when source= looks acceptable", () => {
-		// Regression lock for the ordering bug: the fatal check must run BEFORE the
-		// allow-list, or this output passes on the strength of its source= line alone.
+		// Ordering lock: the fatal scan must run before anything reads source=, or this
+		// output passes on the strength of its source= line alone.
 		const result = classifySpctl(SEALED_RESOURCE);
 
 		expect(result.ok).toBe(false);
@@ -72,25 +76,24 @@ describe("classifySpctl", () => {
 		expect(result.reason).toContain("resource envelope is obsolete");
 	});
 
-	test("fails closed on an unrecognized source", () => {
-		// If Apple renames a verdict, a human should widen the allow-list deliberately
-		// rather than have the gate silently accept anything it does not recognize.
-		const result = classifySpctl("/tmp/x.app: rejected\nsource=Brand New Verdict");
+	test("rejects unsigned code objects", () => {
+		const result = classifySpctl("x.app: code object is not signed at all");
 
 		expect(result.ok).toBe(false);
-		expect(result.reason).toContain("unrecognized source");
-	});
-
-	test("fails closed when spctl output has no source line", () => {
-		const result = classifySpctl("something completely unexpected");
-
-		expect(result.ok).toBe(false);
-		expect(result.reason).toContain("no source=");
 	});
 
 	test("is case-insensitive on fatal markers", () => {
 		const result = classifySpctl("/tmp/x.app: rejected (the code is DAMAGED)");
 
 		expect(result.ok).toBe(false);
+	});
+
+	test("reports the source when one is present", () => {
+		const result = classifySpctl(
+			"/tmp/x.app: accepted\nsource=Unnotarized Developer ID",
+		);
+
+		expect(result.ok).toBe(true);
+		expect(result.source).toBe("unnotarized developer id");
 	});
 });

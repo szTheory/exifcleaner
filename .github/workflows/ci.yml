@@ -78,14 +78,48 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      # --publish never lives in the pack script so no caller can forget it.
       - name: Build macOS artifacts
-        run: yarn packmac --publish never
+        run: yarn packmac
 
+      # Smoke runs in the SAME job as the build, deliberately.
+      # actions/upload-artifact normalizes file modes to 644 and drops symlinks —
+      # a .app is largely symlinks (Contents/Frameworks/*/Versions/Current) and
+      # would arrive corrupted, producing phantom "damaged" verdicts. Only the
+      # sealed .dmg crosses a job boundary.
+      - name: Install from DMG
+        id: install
+        run: |
+          APP=$(scripts/smoke/install-macos.sh dist/*arm64.dmg "$RUNNER_TEMP/smoke")
+          echo "executable=$APP" >> "$GITHUB_OUTPUT"
+          echo "bundle=$(dirname "$(dirname "$APP")")" >> "$GITHUB_OUTPUT"
+
+      # Regression gate for #290. Operates on its own quarantined copy.
+      - name: Gatekeeper gate
+        run: node scripts/gatekeeper_check.mjs --app "${{ steps.install.outputs.bundle }}"
+
+      - name: Smoke test packaged app
+        env:
+          EXIFCLEANER_PACKAGED_APP: ${{ steps.install.outputs.executable }}
+        run: yarn test:smoke
+
+      # always() so a smoke failure still leaves the artifact for debugging.
       - name: Upload macOS artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ExifCleaner-macOS
           path: dist/*.dmg
+          retention-days: 7
+
+      - name: Upload smoke report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-report-macos
+          path: |
+            playwright-report/
+            test-results/
           retention-days: 7
 
   build-windows:

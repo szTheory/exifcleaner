@@ -43,9 +43,39 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
-// Verdict substrings that mean the bundle is broken. Checked BEFORE the allow-list,
-// because macOS can emit an acceptable-looking `source=` line AND a sealed-resource
-// complaint in the same output — allow-list-first would pass #290.
+// EMPIRICALLY MEASURED on macOS 26.5 (build 25F71), 2026-07-28, against a real
+// `yarn packmacdir` build of this project. Do not replace these with examples from
+// Apple forum posts — those describe older macOS and do not match.
+//
+//   bundle state              codesign --verify --deep --strict   spctl -a -vv
+//   -----------------------   --------------------------------   ---------------------------
+//   healthy ad-hoc            exit 0, no output                  "rejected", NO source line
+//   unsigned nested helper    exit 1, "not signed at all"        "rejected", source=no usable signature
+//   broken outer seal         exit 1, "not signed at all"        "rejected", source=no usable signature
+//
+// Three consequences, each of which contradicts an assumption this gate was built on:
+//
+//  1. A HEALTHY ad-hoc bundle emits NO `source=` line at all. An earlier version of
+//     this parser required one and failed closed without it — i.e. it rejected every
+//     healthy build. Requiring a source= line is wrong.
+//
+//  2. `source=no usable signature` appears on BROKEN bundles here, not healthy ones.
+//     It was originally in the allow-list. That is inverted on this macOS. Its meaning
+//     is version-dependent, so this gate does NOT branch on it either way — treating it
+//     as fatal risks false-failing on an older macOS where it is the healthy signal.
+//
+//  3. codesign (layer 1) caught BOTH break variants, including the one deliberately
+//     constructed to be the "spctl-only" case. The two-layer rationale — that spctl
+//     sees resource-envelope problems codesign structurally cannot — did NOT reproduce
+//     here. Layer 1 is the authoritative discriminator; layer 2 is a net for specific
+//     corruption strings that may surface on other macOS versions.
+//
+// Recorded rather than quietly dropped, per the negative-test protocol in
+// tests/smoke/README.md: if the evidence contradicts the justification, change the
+// justification.
+
+// Unambiguous corruption. These are fatal on any macOS version — none of them can
+// describe a healthy bundle.
 const FATAL_MARKERS = [
 	"damaged",
 	"a sealed resource is missing or invalid",
@@ -58,18 +88,13 @@ const FATAL_MARKERS = [
 	"malformed",
 ];
 
-// The only two spctl verdicts that are correct for an intentionally ad-hoc-only build.
-//
-// VERIFIED: capture the real string from a CI run and record it here with the date and
-// macOS version before widening this list. Unknown verdicts fail closed on purpose — if
-// Apple renames one, a human should make that call deliberately rather than have the
-// gate silently widen to accept anything.
-const ALLOWED_SOURCES = ["unnotarized developer id", "no usable signature"];
-
 /**
  * Classify `spctl -a -vv` output. Pure function — unit-tested in
  * tests/scripts/gatekeeper_check.test.ts over recorded fixtures, so the parser
  * (the part that rots) is covered on every PR regardless of host platform.
+ *
+ * Deliberately does NOT require a `source=` line and does NOT branch on
+ * `no usable signature` — see the measurement table above.
  *
  * @param {string} output combined stdout+stderr from spctl
  * @returns {{ok: boolean, source?: string, reason?: string}}
@@ -83,22 +108,9 @@ export function classifySpctl(output) {
 	}
 
 	const match = /source=([^\n\r]*)/i.exec(output);
-	if (match === null || match[1] === undefined) {
-		return {
-			ok: false,
-			reason: "no source= line in spctl output; verdict unrecognized",
-		};
-	}
+	const source = match?.[1]?.trim().toLowerCase() ?? "(none)";
 
-	const source = match[1].trim().toLowerCase();
-	if (ALLOWED_SOURCES.includes(source)) {
-		return { ok: true, source };
-	}
-
-	return {
-		ok: false,
-		reason: `unrecognized source="${source}" — a human must classify this before it is allow-listed`,
-	};
+	return { ok: true, source };
 }
 
 function run(file, args) {
@@ -201,7 +213,9 @@ function checkApp(appPath) {
 		if (!verdict.ok) {
 			fail(`spctl verdict rejected: ${verdict.reason}`);
 		}
-		console.log(`  ✓ layer 2 passed: source=${verdict.source}`);
+		console.log(
+			`  ✓ layer 2 passed: no corruption markers (source=${verdict.source})`,
+		);
 
 		// Spot-check that the ad-hoc re-sign actually reached a nested helper. A helper
 		// showing an older identity than the outer app means --deep did not walk it.
