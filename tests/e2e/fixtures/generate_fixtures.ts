@@ -265,50 +265,45 @@ function generateFixtures(): void {
 	// sample.pdf - PDF with metadata
 	const pdfPath = path.join(FIXTURES_DIR, "sample.pdf");
 	fs.writeFileSync(pdfPath, createMinimalPdf());
-	try {
-		execFileSync(EXIFTOOL, [
-			"-overwrite_original",
-			"-Author=Test Author",
-			"-Title=Test Document",
-			"-Creator=TestCreator",
-			pdfPath,
-		]);
-	} catch {
-		// ExifTool may warn about minimal PDF structure; file is still valid
-		console.log("  Note: PDF metadata injection had warnings (expected)");
-	}
+	// Deliberately NOT wrapped in try/catch. This call used to swallow its failure behind
+	// a comment claiming the file was "still valid" -- it wasn't. createMinimalPdf briefly
+	// emitted 19-byte xref entries instead of the 20 the spec requires, so ExifTool
+	// rejected the fixture with "Invalid xref table" and could not write it. The generator
+	// was fixed but the committed fixture was never regenerated, and because the only test
+	// using sample.pdf asserted on the file *count* rather than on success, the suite went
+	// on passing while PDF metadata removal was entirely unverified. Let it throw.
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-Author=Test Author",
+		"-Title=Test Document",
+		"-Creator=TestCreator",
+		pdfPath,
+	]);
 	console.log("  Created sample.pdf (PDF with metadata)");
 
 	// sample.mp4 - MP4 with metadata
 	const mp4Path = path.join(FIXTURES_DIR, "sample.mp4");
 	fs.writeFileSync(mp4Path, createMinimalMp4());
-	try {
-		execFileSync(EXIFTOOL, [
-			"-overwrite_original",
-			"-Artist=Test Author",
-			"-Title=Test Video",
-			mp4Path,
-		]);
-	} catch {
-		// ExifTool may warn about minimal MP4 structure; the file is still valid
-		console.log("  Note: MP4 metadata injection had warnings (expected)");
-	}
+	// Not wrapped: execFileSync throws only on a nonzero exit, and ExifTool exits 0 for
+	// warnings. So a catch here could never absorb "minor structure warnings" -- only a
+	// genuine failure to write the fixture. See the sample.pdf note above.
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-Artist=Test Author",
+		"-Title=Test Video",
+		mp4Path,
+	]);
 	console.log("  Created sample.mp4 (MP4 container)");
 
 	// sample.webp - WebP with metadata
 	const webpPath = path.join(FIXTURES_DIR, "sample.webp");
 	fs.writeFileSync(webpPath, createMinimalWebp());
-	try {
-		execFileSync(EXIFTOOL, [
-			"-overwrite_original",
-			"-Artist=Test Author",
-			"-Make=TestCamera",
-			webpPath,
-		]);
-	} catch {
-		// ExifTool may warn about minimal WebP structure
-		console.log("  Note: WebP metadata injection had warnings (expected)");
-	}
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-Artist=Test Author",
+		"-Make=TestCamera",
+		webpPath,
+	]);
 	console.log("  Created sample.webp (WebP with EXIF)");
 
 	// Error fixtures

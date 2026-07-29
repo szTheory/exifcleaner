@@ -4,7 +4,10 @@
 
 > Desktop app to clean metadata from images, videos, PDFs, and other files.
 
-![ExifCleaner screenshot](static/screenshot.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="static/screenshot-dark.png">
+  <img alt="ExifCleaner cleaning a batch of images, videos, and PDFs" src="static/screenshot.png" width="900">
+</picture>
 
 ## Features
 
