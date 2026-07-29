@@ -7,8 +7,15 @@
 #
 # Uses --appimage-extract rather than mounting. FUSE availability on GitHub runners
 # has changed more than once historically and is the most reliable way to make an
-# AppImage job flaky. Extraction is built into the AppImage runtime itself and works
-# identically whether FUSE is present or not, so there is no detect-then-branch.
+# AppImage job flaky. Extraction is built into the AppImage runtime, so there is no
+# detect-then-branch.
+#
+# Extraction is NOT equivalent to mounting, though, and the difference bites: the
+# AppImage runtime exports APPDIR before exec'ing AppRun, and --appimage-extract does
+# not. AppRun resolves the real binary as "$APPDIR/exifcleaner", so an extracted
+# bundle launched with APPDIR unset tries to exec "/exifcleaner" and dies. Whoever
+# launches the path printed below must set APPDIR to its parent directory; the smoke
+# launcher (tests/smoke/helpers/packaged_launcher.ts) does this.
 
 set -uo pipefail
 

@@ -45,6 +45,31 @@ export function packagedExecutablePath(): string {
 }
 
 /**
+ * Environment an extracted AppImage needs that the AppImage runtime would normally provide.
+ *
+ * `AppRun` resolves the real binary as `$APPDIR/<name>`. When an AppImage is run
+ * normally, its bundled runtime FUSE-mounts the payload and exports `APPDIR` before
+ * exec'ing `AppRun`. `--appimage-extract` does neither: it only unpacks the squashfs,
+ * so `AppRun` inherits an empty `APPDIR` and tries to exec `/exifcleaner`.
+ *
+ * Measured on CI (Ubuntu, run 30419211027) before this was set:
+ *   AppRun: line 45: /exifcleaner: No such file or directory
+ *
+ * Setting `APPDIR` to the extraction root is exactly what the runtime does, so `AppRun`
+ * keeps doing its remaining job (notably exporting LD_LIBRARY_PATH for the bundled libs)
+ * rather than being bypassed by launching the inner binary directly.
+ *
+ * Returns an empty object off the AppImage path, so macOS and Windows are untouched.
+ */
+function appImageEnv(executablePath: string): Record<string, string> {
+	if (path.basename(executablePath) !== "AppRun") {
+		return {};
+	}
+
+	return { APPDIR: path.dirname(executablePath) };
+}
+
+/**
  * Launch the packaged binary and wait for the React app to mount.
  *
  * Sets no NODE_ENV: `app.isPackaged` is the only environment signal the app consults
@@ -71,11 +96,13 @@ export async function launchPackagedApp(): Promise<{
 	window: Page;
 }> {
 	const neutralCwd = mkdtempSync(path.join(tmpdir(), "exifcleaner-smoke-cwd-"));
+	const executablePath = packagedExecutablePath();
 
 	const app = await electron.launch({
-		executablePath: packagedExecutablePath(),
+		executablePath,
 		args: [],
 		cwd: neutralCwd,
+		env: { ...process.env, ...appImageEnv(executablePath) },
 		timeout: LAUNCH_TIMEOUT_MS,
 	});
 
@@ -86,6 +113,8 @@ export async function launchPackagedApp(): Promise<{
 	return { app, window };
 }
 
-export async function closePackagedApp(app: ElectronApplication): Promise<void> {
+export async function closePackagedApp(
+	app: ElectronApplication,
+): Promise<void> {
 	await app.close();
 }
