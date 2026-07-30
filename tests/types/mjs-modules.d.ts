@@ -81,6 +81,36 @@ declare module "*known_gap_gate.mjs" {
 		readonly markers: readonly KnownGapMarker[];
 		readonly problems: readonly RunnerPolicyProblem[];
 	};
+	export type KnownGapRecord = {
+		readonly id: string;
+		readonly issue: number;
+		readonly runner: "playwright" | "vitest";
+		readonly type: "test.fail" | "test.fails" | "it.fails";
+		readonly path: string;
+		readonly title: string;
+		readonly affectedScope: string;
+		readonly releasePolicy: "block" | "allow";
+		readonly impact?: string;
+		readonly workaround?: string;
+		readonly targetFixVersion?: string;
+	};
+	export type KnownGapsManifest = {
+		readonly schemaVersion: 1;
+		readonly targetVersion: string;
+		readonly records: readonly KnownGapRecord[];
+	};
+	export type ManifestValidationProblem = {
+		readonly code: string;
+		readonly message: string;
+	};
+	export function validateKnownGapsManifest(
+		manifest: unknown,
+		inventory: readonly KnownGapMarker[],
+		options: { readonly packageVersion: string; readonly release?: boolean },
+	): {
+		readonly records: readonly KnownGapRecord[];
+		readonly problems: readonly ManifestValidationProblem[];
+	};
 	export function formatLocalDiagnostic(problem: KnownGapProblem): string;
 	export function formatGitHubAnnotation(problem: KnownGapProblem): string;
 	export function main(): number;

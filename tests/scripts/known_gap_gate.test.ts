@@ -11,6 +11,7 @@ import {
 	scanBannedProse,
 	scanCollectedTestSources,
 	scanRunnerPolicy,
+	validateKnownGapsManifest,
 } from "../../scripts/known_gap_gate.mjs";
 
 const makeSource = (phrase: string): string =>
@@ -368,5 +369,121 @@ test.fails(\`#304 ${"${"}String("save-as-copy")}\`, () => {});`,
 		expect(nonLiteral.problems.map((problem) => problem.code)).toEqual([
 			"marker-title",
 		]);
+	});
+});
+
+describe("validateKnownGapsManifest", () => {
+	const marker = {
+		runner: "playwright",
+		type: "test.fail",
+		file: "tests/e2e/settings.spec.ts",
+		title: "#304 save-as-copy on: original survives, a cleaned copy appears",
+		issue: 304,
+	} as const;
+	const record = {
+		id: "KG-304-save-as-copy",
+		issue: 304,
+		runner: marker.runner,
+		type: marker.type,
+		path: marker.file,
+		title: marker.title,
+		affectedScope: "save-as-copy cleaning writes the original file",
+		releasePolicy: "block",
+	} as const;
+	const manifest = {
+		schemaVersion: 1,
+		targetVersion: "4.0.0",
+		records: [record],
+	} as const;
+	const validate = (candidate: unknown, release = false) =>
+		validateKnownGapsManifest(candidate, [marker], {
+			packageVersion: "4.0.0",
+			release,
+		});
+	const codesFor = (candidate: unknown, release = false) =>
+		validate(candidate, release).problems.map((problem) => problem.code);
+
+	test("accepts the exact reviewed #304 block record in normal mode", () => {
+		expect(validate(manifest).problems).toEqual([]);
+		expect(validate(manifest).records).toEqual([record]);
+	});
+
+	test("fails both source-to-manifest and manifest-to-source differences", () => {
+		expect(codesFor({ ...manifest, records: [] })).toEqual([
+			"missing-source-marker",
+		]);
+		expect(
+			codesFor({
+				...manifest,
+				records: [{ ...record, title: "#999 stale marker" }],
+			}),
+		).toEqual(["stale-manifest-record", "missing-source-marker"]);
+	});
+
+	test("rejects duplicate, renamed, downgraded, unknown-field, and wildcard records", () => {
+		const duplicateId = {
+			...manifest,
+			records: [{ ...record }, { ...record, path: "tests/e2e/other.spec.ts" }],
+		};
+		const duplicateIdentity = {
+			...manifest,
+			records: [{ ...record }, { ...record, id: "KG-304-copy" }],
+		};
+		const renamed = {
+			...manifest,
+			records: [{ ...record, id: "KG-304-renamed" }],
+		};
+		const downgraded = {
+			...manifest,
+			records: [{ ...record, releasePolicy: "allow" }],
+		};
+		const unknownField = {
+			...manifest,
+			records: [{ ...record, owner: "maintainer" }],
+		};
+		const wildcard = {
+			...manifest,
+			records: [{ ...record, path: "tests/e2e/*.spec.ts" }],
+		};
+
+		expect(codesFor(duplicateId)).toContain("duplicate-id");
+		expect(codesFor(duplicateIdentity)).toContain("duplicate-identity");
+		expect(codesFor(renamed)).toContain("stable-id");
+		expect(codesFor(downgraded)).toContain("policy-downgrade");
+		expect(codesFor(unknownField)).toContain("unknown-field");
+		expect(codesFor(wildcard)).toContain("invalid-path");
+	});
+
+	test("release mode rejects target-version drift and every block record", () => {
+		expect(
+			codesFor({ ...manifest, targetVersion: "4.0.1" }, true),
+		).toContain("target-version");
+		expect(codesFor(manifest, true)).toContain("release-block");
+	});
+
+	test("allow records require disclosure fields with three-part target version", () => {
+		const allowed = {
+			...manifest,
+			records: [
+				{
+					...record,
+					id: "KG-304-allowed",
+					releasePolicy: "allow",
+					impact: "Users can identify the known limitation before release.",
+					workaround: "Use overwrite mode only on disposable copies.",
+					targetFixVersion: "4.0.1",
+				},
+			],
+		};
+
+		expect(codesFor({ ...allowed, records: [{ ...allowed.records[0], impact: "" }] })).toContain(
+			"allow-disclosure",
+		);
+		expect(
+			codesFor({
+				...allowed,
+				records: [{ ...allowed.records[0], targetFixVersion: "4.1" }],
+			}),
+		).toContain("allow-disclosure");
 	});
 });
