@@ -481,6 +481,91 @@ fail("${expectedTitle}", async () => {
 		]);
 	});
 
+	test("rejects runner-object aliases without inventorying markers", () => {
+		const forbiddenCases = [
+			{
+				name: "Playwright import alias",
+				file: "tests/e2e/settings.spec.ts",
+				source: `import { test as pw } from "@playwright/test";
+pw.fail("${expectedTitle}", async () => {
+	expect(true).toBe(false);
+});`,
+			},
+			{
+				name: "Playwright assignment alias",
+				file: "tests/e2e/settings.spec.ts",
+				source: `import { test } from "@playwright/test";
+const pw = test;
+pw.fail("${expectedTitle}", async () => {
+	expect(true).toBe(false);
+});`,
+			},
+			{
+				name: "Vitest it assignment alias",
+				file: "tests/domain/example.test.ts",
+				source: `import { it } from "vitest";
+const spec = it;
+spec.fails("${expectedTitle}", () => {
+	expect(true).toBe(false);
+});`,
+			},
+			{
+				name: "transitive runner alias",
+				file: "tests/e2e/settings.spec.ts",
+				source: `import { test } from "@playwright/test";
+const first = test;
+const second = first;
+const third = second;
+third.fail("${expectedTitle}", async () => {
+	expect(true).toBe(false);
+});`,
+			},
+			{
+				name: "cycle-connected runner alias",
+				file: "tests/e2e/settings.spec.ts",
+				source: `import { test } from "@playwright/test";
+let first = test;
+let second = first;
+first = second;
+second.fail("${expectedTitle}", async () => {
+	expect(true).toBe(false);
+});`,
+			},
+		] as const;
+
+		for (const entry of forbiddenCases) {
+			const result = scanRunnerPolicy(entry.source, entry.file);
+
+			expect(result.markers, entry.name).toEqual([]);
+			expect(result.problems.length, entry.name).toBeGreaterThan(0);
+			expect(result.markers.length + result.problems.length, entry.name).toBeGreaterThan(
+				0,
+			);
+			expect(
+				result.problems.map((problem) => problem.code),
+				entry.name,
+			).toContain("alias-marker");
+		}
+	});
+
+	test("does not treat unrelated identifier cycles as runner aliases", () => {
+		const result = scanRunnerPolicy(
+			`import { test } from "@playwright/test";
+let left = right;
+let right = left;
+left.fail("${expectedTitle}", async () => {
+	expect(true).toBe(false);
+});
+test("covered behavior", async () => {
+	expect(true).toBe(true);
+});`,
+			"tests/e2e/settings.spec.ts",
+		);
+
+		expect(result.markers).toEqual([]);
+		expect(result.problems).toEqual([]);
+	});
+
 	test("requires literal issue-linked marker titles", () => {
 		const missingIssue = scanRunnerPolicy(
 			`import { test } from "@playwright/test";
