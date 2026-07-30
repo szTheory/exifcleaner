@@ -111,6 +111,21 @@ declare module "*known_gap_gate.mjs" {
 		readonly records: readonly KnownGapRecord[];
 		readonly problems: readonly ManifestValidationProblem[];
 	};
+	export function buildKnownLimitationsBlock(
+		records: readonly KnownGapRecord[],
+		version: string,
+	): string;
+	export function validateKnownLimitationsBlock(
+		source: string,
+		records: readonly KnownGapRecord[],
+		version: string,
+	): readonly ManifestValidationProblem[];
+	export function getLiteralMarkerCounts(
+		sources: readonly string[],
+	): Record<string, number>;
+	export function formatLiteralMarkerCounts(
+		counts: Record<string, number>,
+	): readonly string[];
 	export function formatLocalDiagnostic(problem: KnownGapProblem): string;
 	export function formatGitHubAnnotation(problem: KnownGapProblem): string;
 	export function main(): number;

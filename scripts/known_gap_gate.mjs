@@ -12,10 +12,20 @@ import ts from "typescript";
 const TESTS_DIR = "tests";
 const MANIFEST_PATH = "docs/known-gaps.json";
 const PACKAGE_PATH = "package.json";
+const RELEASE_NOTES_PATH = "RELEASE_NOTES.md";
 const SOURCE_EXTENSIONS = ["ts", "tsx", "js", "jsx", "mjs", "cjs"];
 const SOURCE_SUFFIX = `(?:${SOURCE_EXTENSIONS.join("|")})`;
 const REMEDIATION =
 	"Move this known gap into a declaration-time expected-failure marker.";
+const KNOWN_LIMITATIONS_START =
+	"<!-- exifcleaner-known-limitations:start v1 -->";
+const KNOWN_LIMITATIONS_END = "<!-- exifcleaner-known-limitations:end -->";
+const RELEASE_COUNT_MARKERS = Object.freeze([
+	"test.fail(",
+	"it.fails(",
+	"test.skip(",
+	"test.fixme(",
+]);
 
 export const BANNED_PROSE_PHRASES = Object.freeze([
 	"deferred",
@@ -593,6 +603,15 @@ const MANIFEST_RECORD_KEYS = new Set([
 const VALID_RUNNERS = new Set(["playwright", "vitest"]);
 const VALID_MARKER_TYPES = new Set(["test.fail", "test.fails", "it.fails"]);
 const VALID_POLICIES = new Set(["block", "allow"]);
+const MANDATORY_BLOCK_PATTERNS = [
+	/data loss/i,
+	/false privacy claim/i,
+	/injection/i,
+	/\brce\b/i,
+	/remote code execution/i,
+	/target-release regression/i,
+	/non-executing coverage/i,
+];
 
 function isPlainObject(value) {
 	return (
@@ -763,6 +782,20 @@ function validateRecordShape(rawRecord, index, problems) {
 				),
 			);
 		}
+		const publicText = [
+			record.title,
+			record.affectedScope,
+			record.impact,
+			record.workaround,
+		].join("\n");
+		if (MANDATORY_BLOCK_PATTERNS.some((pattern) => pattern.test(publicText))) {
+			problems.push(
+				validationProblem(
+					"blocked-category",
+					`records[${index}] describes a mandatory block category and cannot be allow.`,
+				),
+			);
+		}
 	}
 
 	return record;
@@ -927,6 +960,150 @@ function readJsonFile(relPath) {
 	return JSON.parse(fs.readFileSync(path.join(process.cwd(), relPath), "utf8"));
 }
 
+function allowedRecords(records) {
+	return records
+		.filter((record) => record.releasePolicy === "allow")
+		.sort((left, right) => {
+			const issueOrder = left.issue - right.issue;
+			if (issueOrder !== 0) {
+				return issueOrder;
+			}
+			return left.id.localeCompare(right.id);
+		});
+}
+
+function requireDisclosureField(record, key) {
+	const value = record[key];
+	if (typeof value !== "string" || value.length === 0) {
+		throw new Error(`allow record ${record.id} is missing ${key}`);
+	}
+	return value;
+}
+
+export function buildKnownLimitationsBlock(records, version) {
+	const lines = [
+		KNOWN_LIMITATIONS_START,
+		`## Known limitations in ${version}`,
+		"",
+	];
+	const allowed = allowedRecords(records);
+
+	if (allowed.length === 0) {
+		lines.push("No known limitations are approved for this release.");
+	} else {
+		for (const record of allowed) {
+			lines.push(
+				`- Impact: ${requireDisclosureField(record, "impact")}`,
+				`  Scope: ${record.affectedScope}`,
+				`  Workaround: ${requireDisclosureField(record, "workaround")}`,
+				`  Target fix: ${requireDisclosureField(record, "targetFixVersion")}.`,
+				`  Issue: https://github.com/szTheory/exifcleaner/issues/${record.issue}`,
+			);
+		}
+	}
+
+	lines.push(KNOWN_LIMITATIONS_END, "");
+	return lines.join("\n");
+}
+
+function replaceKnownLimitationsBlock(source, block) {
+	const start = source.indexOf(KNOWN_LIMITATIONS_START);
+	const end = source.indexOf(KNOWN_LIMITATIONS_END);
+	if (start === -1 || end === -1 || end < start) {
+		return `${block}\n${source}`;
+	}
+	const afterEnd = end + KNOWN_LIMITATIONS_END.length;
+	const suffix = source.slice(afterEnd).replace(/^\r?\n/, "");
+	return `${source.slice(0, start)}${block}\n${suffix}`;
+}
+
+function readManifestAndPackage(release, inventory) {
+	if (!fs.existsSync(MANIFEST_PATH)) {
+		return {
+			packageVersion: "",
+			records: [],
+			problems: [
+				validationProblem(
+					"manifest-missing",
+					`${MANIFEST_PATH} is required for exact known-gap inventory validation.`,
+				),
+			],
+		};
+	}
+
+	const manifest = readJsonFile(MANIFEST_PATH);
+	const packageJson = readJsonFile(PACKAGE_PATH);
+	const packageVersion =
+		typeof packageJson.version === "string" ? packageJson.version : "";
+	const manifestResult = validateKnownGapsManifest(manifest, inventory, {
+		packageVersion,
+		release,
+	});
+
+	return {
+		packageVersion,
+		records: manifestResult.records,
+		problems: manifestResult.problems,
+	};
+}
+
+export function validateKnownLimitationsBlock(source, records, version) {
+	const expected = buildKnownLimitationsBlock(records, version);
+	const start = source.indexOf(KNOWN_LIMITATIONS_START);
+	const end = source.indexOf(KNOWN_LIMITATIONS_END);
+	if (start === -1 || end === -1 || end < start) {
+		return [
+			validationProblem(
+				"release-notes-missing",
+				"RELEASE_NOTES.md known limitations block is missing. Run yarn known-gaps:write.",
+			),
+		];
+	}
+	const actual = source.slice(start, end + KNOWN_LIMITATIONS_END.length);
+	if (actual !== expected.trimEnd()) {
+		return [
+			validationProblem(
+				"release-notes-drift",
+				"RELEASE_NOTES.md known limitations block is not current. Run yarn known-gaps:write.",
+			),
+		];
+	}
+	return [];
+}
+
+export function getLiteralMarkerCounts(sources) {
+	const counts = Object.fromEntries(
+		RELEASE_COUNT_MARKERS.map((marker) => [marker, 0]),
+	);
+	for (const source of sources) {
+		for (const marker of RELEASE_COUNT_MARKERS) {
+			counts[marker] += String(source).split(marker).length - 1;
+		}
+	}
+	return counts;
+}
+
+export function formatLiteralMarkerCounts(counts) {
+	return RELEASE_COUNT_MARKERS.map(
+		(marker) => `${marker}: ${counts[marker] ?? 0}`,
+	);
+}
+
+function getCollectedSourceTexts(files) {
+	return files.map((relPath) =>
+		fs.readFileSync(path.join(process.cwd(), relPath), "utf8"),
+	);
+}
+
+function printReleaseCounts(files) {
+	console.log("Known-gap marker count evidence:");
+	for (const line of formatLiteralMarkerCounts(
+		getLiteralMarkerCounts(getCollectedSourceTexts(files)),
+	)) {
+		console.log(line);
+	}
+}
+
 function escapeMessage(value) {
 	return String(value)
 		.replaceAll("%", "%25")
@@ -968,29 +1145,41 @@ function fail(problems) {
 export function main() {
 	const args = process.argv.slice(2);
 	const release = args.includes("--release");
+	const writeReleaseNotes = args.includes("--write-release-notes");
+	const checkReleaseNotes = args.includes("--check-release-notes");
 	const files = collectTestSourceFiles(process.cwd());
 	const proseProblems = scanCollectedTestSources(process.cwd());
 	const runnerPolicy = scanCollectedRunnerPolicy(process.cwd());
 	const problems = [...proseProblems, ...runnerPolicy.problems];
+	const manifestState = readManifestAndPackage(release, runnerPolicy.markers);
+	problems.push(...manifestState.problems);
 
-	if (!fs.existsSync(MANIFEST_PATH)) {
-		problems.push(
-			validationProblem(
-				"manifest-missing",
-				`${MANIFEST_PATH} is required for exact known-gap inventory validation.`,
-			),
-		);
-	} else {
-		const manifest = readJsonFile(MANIFEST_PATH);
-		const packageJson = readJsonFile(PACKAGE_PATH);
-		const packageVersion =
-			typeof packageJson.version === "string" ? packageJson.version : "";
-		const manifestResult = validateKnownGapsManifest(
-			manifest,
-			runnerPolicy.markers,
-			{ packageVersion, release },
-		);
-		problems.push(...manifestResult.problems);
+	if (writeReleaseNotes || checkReleaseNotes) {
+		const releaseNotes = fs.existsSync(RELEASE_NOTES_PATH)
+			? fs.readFileSync(RELEASE_NOTES_PATH, "utf8")
+			: "";
+		if (writeReleaseNotes) {
+			const block = buildKnownLimitationsBlock(
+				manifestState.records,
+				manifestState.packageVersion,
+			);
+			fs.writeFileSync(
+				RELEASE_NOTES_PATH,
+				replaceKnownLimitationsBlock(releaseNotes, block),
+			);
+		} else {
+			problems.push(
+				...validateKnownLimitationsBlock(
+					releaseNotes,
+					manifestState.records,
+					manifestState.packageVersion,
+				),
+			);
+		}
+	}
+
+	if (release) {
+		printReleaseCounts(files);
 	}
 
 	if (problems.length > 0) {
@@ -1001,6 +1190,12 @@ export function main() {
 	console.log(
 		`\n✓ KNOWN-GAP GATE PASSED — ${files.length} collected test source file(s) scanned, ${runnerPolicy.markers.length} expected-failure marker(s) inventoried.\n`,
 	);
+	if (writeReleaseNotes) {
+		console.log(`✓ RELEASE_NOTES.md known limitations block written.`);
+	}
+	if (checkReleaseNotes) {
+		console.log(`✓ RELEASE_NOTES.md known limitations block is current.`);
+	}
 	return 0;
 }
 

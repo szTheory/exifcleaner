@@ -72,7 +72,7 @@ the checksum below if you want certainty.
 
 **Windows**
 
-Windows Defender SmartScreen shows *"Windows protected your PC"*. Click **More info** →
+Windows Defender SmartScreen shows _"Windows protected your PC"_. Click **More info** →
 **Run anyway**.
 
 **Linux**
@@ -284,18 +284,19 @@ yarn dev --lang=es
 
 Releases are built by GitHub Actions. To publish:
 
-1. Make sure `RELEASE_NOTES.md` is current — it becomes the release body verbatim
-2. Trigger the [Release workflow](../../actions/workflows/release.yml) via `workflow_dispatch` in the GitHub Actions UI
-3. CI builds all platforms unsigned, then **installs and smoke-tests each packaged
+1. Run `yarn verify:release`. If it reports known-gap release blockers, fix or remove the blocking marker before publishing; if it reports release-note drift, run `yarn known-gaps:write` and review the managed block.
+2. Make sure `RELEASE_NOTES.md` is current — it becomes the release body verbatim
+3. Trigger the [Release workflow](../../actions/workflows/release.yml) via `workflow_dispatch` in the GitHub Actions UI
+4. CI builds all platforms unsigned, then **installs and smoke-tests each packaged
    artifact** — mounts the DMG / runs the NSIS installer / extracts the AppImage,
    launches the installed binary, and strips metadata from a test image. macOS
    additionally runs the Gatekeeper regression gate. A build that fails any of these
    cannot reach the release page.
-4. A draft GitHub release is created with all artifacts and SHASUMS256.txt
-5. Download the DMG **through a browser** and confirm it opens (this is the one check CI
+5. A draft GitHub release is created with all artifacts and SHASUMS256.txt
+6. Download the DMG **through a browser** and confirm it opens (this is the one check CI
    cannot do — neither `codesign` nor `spctl` can tell "shows a dialog you click through"
    from "launches cleanly")
-6. Review the draft and publish when ready
+7. Review the draft and publish when ready
 
 ### Contributors
 

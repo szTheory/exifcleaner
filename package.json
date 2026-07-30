@@ -41,6 +41,9 @@
 		"verify:gatekeeper": "node scripts/gatekeeper_check.mjs",
 		"verify:direffect": "node scripts/dir_effect_gate.mjs",
 		"verify:known-gaps": "node scripts/known_gap_gate.mjs",
+		"known-gaps:write": "node scripts/known_gap_gate.mjs --write-release-notes",
+		"known-gaps:check": "node scripts/known_gap_gate.mjs --check-release-notes",
+		"verify:release": "yarn verify:known-gaps --release && yarn known-gaps:check && yarn lint && yarn typecheck && yarn test && yarn verify:direffect && yarn check:deps",
 		"verify:contents": "node scripts/verify_artifact_contents.mjs",
 		"screenshots": "tsx scripts/generate-screenshots.ts",
 		"check:deps": "madge --circular --extensions ts,tsx src/"
