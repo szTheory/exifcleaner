@@ -1,0 +1,16 @@
+{
+	"schemaVersion": 1,
+	"targetVersion": "4.0.0",
+	"records": [
+		{
+			"id": "KG-304-save-as-copy",
+			"issue": 304,
+			"runner": "playwright",
+			"type": "test.fail",
+			"path": "tests/e2e/settings.spec.ts",
+			"title": "#304 save-as-copy on: original survives, a cleaned copy appears",
+			"affectedScope": "save-as-copy cleaning writes the original file instead of preserving it and creating a cleaned copy",
+			"releasePolicy": "block"
+		}
+	]
+}

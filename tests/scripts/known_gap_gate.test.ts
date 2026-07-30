@@ -220,7 +220,8 @@ describe("diagnostic formatting", () => {
 });
 
 describe("scanRunnerPolicy", () => {
-	const expectedTitle = "#304 save-as-copy on: original survives, a cleaned copy appears";
+	const expectedTitle =
+		"#304 save-as-copy on: original survives, a cleaned copy appears";
 
 	test("inventories direct declaration-time Playwright and Vitest expected-failure markers", () => {
 		const cases = [
@@ -455,9 +456,9 @@ describe("validateKnownGapsManifest", () => {
 	});
 
 	test("release mode rejects target-version drift and every block record", () => {
-		expect(
-			codesFor({ ...manifest, targetVersion: "4.0.1" }, true),
-		).toContain("target-version");
+		expect(codesFor({ ...manifest, targetVersion: "4.0.1" }, true)).toContain(
+			"target-version",
+		);
 		expect(codesFor(manifest, true)).toContain("release-block");
 	});
 
@@ -476,9 +477,12 @@ describe("validateKnownGapsManifest", () => {
 			],
 		};
 
-		expect(codesFor({ ...allowed, records: [{ ...allowed.records[0], impact: "" }] })).toContain(
-			"allow-disclosure",
-		);
+		expect(
+			codesFor({
+				...allowed,
+				records: [{ ...allowed.records[0], impact: "" }],
+			}),
+		).toContain("allow-disclosure");
 		expect(
 			codesFor({
 				...allowed,

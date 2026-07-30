@@ -10,6 +10,8 @@ import path from "node:path";
 import ts from "typescript";
 
 const TESTS_DIR = "tests";
+const MANIFEST_PATH = "docs/known-gaps.json";
+const PACKAGE_PATH = "package.json";
 const SOURCE_EXTENSIONS = ["ts", "tsx", "js", "jsx", "mjs", "cjs"];
 const SOURCE_SUFFIX = `(?:${SOURCE_EXTENSIONS.join("|")})`;
 const REMEDIATION =
@@ -107,7 +109,9 @@ function compareRunnerProblems(left, right) {
 }
 
 function lineOf(sourceFile, node) {
-	return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
+	return (
+		sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1
+	);
 }
 
 function problem(sourceFile, node, code, message) {
@@ -370,7 +374,11 @@ function inspectRunnerCall(sourceFile, node, aliases, problems, markers) {
 		const [titleArg] = node.arguments;
 		if (titleArg !== undefined && !isStringLiteralLike(titleArg)) {
 			const firstText = titleArg.getText(sourceFile);
-			if (firstText === "true" || firstText === "false" || firstText.includes("process.")) {
+			if (
+				firstText === "true" ||
+				firstText === "false" ||
+				firstText.includes("process.")
+			) {
 				const last = problems.pop();
 				if (last !== undefined) {
 					problems.push({
@@ -564,6 +572,361 @@ export function scanCollectedRunnerPolicy(rootDir = process.cwd()) {
 	};
 }
 
+const MANIFEST_TOP_LEVEL_KEYS = new Set([
+	"schemaVersion",
+	"targetVersion",
+	"records",
+]);
+const MANIFEST_RECORD_KEYS = new Set([
+	"id",
+	"issue",
+	"runner",
+	"type",
+	"path",
+	"title",
+	"affectedScope",
+	"releasePolicy",
+	"impact",
+	"workaround",
+	"targetFixVersion",
+]);
+const VALID_RUNNERS = new Set(["playwright", "vitest"]);
+const VALID_MARKER_TYPES = new Set(["test.fail", "test.fails", "it.fails"]);
+const VALID_POLICIES = new Set(["block", "allow"]);
+
+function isPlainObject(value) {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		!Array.isArray(value) &&
+		Object.getPrototypeOf(value) === Object.prototype
+	);
+}
+
+function validationProblem(code, message) {
+	return { code, message };
+}
+
+function identityForMarker(marker) {
+	return [
+		marker.runner,
+		marker.type,
+		normalizePath(marker.file ?? marker.path),
+		marker.title,
+		String(marker.issue),
+	].join("\u0000");
+}
+
+function identityForRecord(record) {
+	return [
+		record.runner,
+		record.type,
+		normalizePath(record.path),
+		record.title,
+		String(record.issue),
+	].join("\u0000");
+}
+
+function expectedStableId(record) {
+	if (
+		record.issue === 304 &&
+		record.title ===
+			"#304 save-as-copy on: original survives, a cleaned copy appears"
+	) {
+		return "KG-304-save-as-copy";
+	}
+	const title = String(record.title).replace(/^#[1-9][0-9]*\s+/, "");
+	const slug = title
+		.toLocaleLowerCase("en-US")
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-+|-+$/g, "")
+		.split("-")
+		.slice(0, 4)
+		.join("-");
+	return `KG-${record.issue}-${slug}`;
+}
+
+function hasInvalidPathSyntax(value) {
+	return (
+		typeof value !== "string" ||
+		value.length === 0 ||
+		value.startsWith("/") ||
+		value.includes("\\") ||
+		value.includes("..") ||
+		value.includes("*") ||
+		value.includes("?") ||
+		value.includes("[") ||
+		value.includes("]") ||
+		value.includes("{") ||
+		value.includes("}") ||
+		value.includes(":")
+	);
+}
+
+function validateRecordShape(rawRecord, index, problems) {
+	if (!isPlainObject(rawRecord)) {
+		problems.push(
+			validationProblem(
+				"record-shape",
+				`records[${index}] must be a strict object.`,
+			),
+		);
+		return undefined;
+	}
+
+	for (const key of Object.keys(rawRecord)) {
+		if (!MANIFEST_RECORD_KEYS.has(key)) {
+			problems.push(
+				validationProblem(
+					"unknown-field",
+					`records[${index}] contains unknown field "${key}".`,
+				),
+			);
+		}
+	}
+
+	const record = rawRecord;
+	if (typeof record.id !== "string" || record.id.length === 0) {
+		problems.push(
+			validationProblem("record-shape", `records[${index}].id is invalid.`),
+		);
+	}
+	if (!Number.isInteger(record.issue) || record.issue <= 0) {
+		problems.push(
+			validationProblem("record-shape", `records[${index}].issue is invalid.`),
+		);
+	}
+	if (!VALID_RUNNERS.has(record.runner)) {
+		problems.push(
+			validationProblem("record-shape", `records[${index}].runner is invalid.`),
+		);
+	}
+	if (!VALID_MARKER_TYPES.has(record.type)) {
+		problems.push(
+			validationProblem(
+				"record-shape",
+				`records[${index}].type is not a canonical marker type.`,
+			),
+		);
+	}
+	if (hasInvalidPathSyntax(record.path)) {
+		problems.push(
+			validationProblem(
+				"invalid-path",
+				`records[${index}].path must be one normalized repository-relative file path.`,
+			),
+		);
+	}
+	if (
+		typeof record.title !== "string" ||
+		markerFromLiteralTitle(record.title) === undefined
+	) {
+		problems.push(
+			validationProblem(
+				"record-shape",
+				`records[${index}].title must be a literal issue-linked title.`,
+			),
+		);
+	}
+	if (
+		typeof record.affectedScope !== "string" ||
+		record.affectedScope.length === 0
+	) {
+		problems.push(
+			validationProblem(
+				"record-shape",
+				`records[${index}].affectedScope is required.`,
+			),
+		);
+	}
+	if (!VALID_POLICIES.has(record.releasePolicy)) {
+		problems.push(
+			validationProblem(
+				"record-shape",
+				`records[${index}].releasePolicy is invalid.`,
+			),
+		);
+	}
+	if (record.releasePolicy === "allow") {
+		if (
+			typeof record.impact !== "string" ||
+			record.impact.length === 0 ||
+			typeof record.workaround !== "string" ||
+			record.workaround.length === 0 ||
+			typeof record.targetFixVersion !== "string" ||
+			!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(record.targetFixVersion)
+		) {
+			problems.push(
+				validationProblem(
+					"allow-disclosure",
+					`records[${index}] allow policy requires impact, workaround, and three-part targetFixVersion.`,
+				),
+			);
+		}
+	}
+
+	return record;
+}
+
+export function validateKnownGapsManifest(manifest, inventory, options) {
+	const problems = [];
+	const records = [];
+
+	if (!isPlainObject(manifest)) {
+		return {
+			records,
+			problems: [
+				validationProblem(
+					"manifest-shape",
+					"Manifest must be a strict object.",
+				),
+			],
+		};
+	}
+
+	for (const key of Object.keys(manifest)) {
+		if (!MANIFEST_TOP_LEVEL_KEYS.has(key)) {
+			problems.push(
+				validationProblem(
+					"unknown-field",
+					`Manifest contains unknown field "${key}".`,
+				),
+			);
+		}
+	}
+
+	if (manifest.schemaVersion !== 1) {
+		problems.push(
+			validationProblem("schema-version", "Manifest schemaVersion must be 1."),
+		);
+	}
+	if (
+		typeof manifest.targetVersion !== "string" ||
+		!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(manifest.targetVersion)
+	) {
+		problems.push(
+			validationProblem(
+				"target-version",
+				"Manifest targetVersion must be a three-part version.",
+			),
+		);
+	}
+	if (!Array.isArray(manifest.records)) {
+		problems.push(
+			validationProblem("manifest-shape", "Manifest records must be an array."),
+		);
+	}
+
+	const rawRecords = Array.isArray(manifest.records) ? manifest.records : [];
+	for (const [index, rawRecord] of rawRecords.entries()) {
+		const record = validateRecordShape(rawRecord, index, problems);
+		if (record !== undefined) {
+			records.push(record);
+		}
+	}
+
+	const ids = new Set();
+	const identities = new Set();
+	const inventoryIdentities = new Set(inventory.map(identityForMarker));
+	const inventoryIssueTitleKeys = new Set(
+		inventory.map((marker) => `${marker.issue}\u0000${marker.title}`),
+	);
+	for (const record of records) {
+		if (ids.has(record.id)) {
+			problems.push(
+				validationProblem(
+					"duplicate-id",
+					`Duplicate known-gap ID "${record.id}".`,
+				),
+			);
+		}
+		ids.add(record.id);
+
+		const identity = identityForRecord(record);
+		if (identities.has(identity)) {
+			problems.push(
+				validationProblem(
+					"duplicate-identity",
+					`Duplicate known-gap identity for ${record.path}.`,
+				),
+			);
+		}
+		identities.add(identity);
+
+		if (
+			inventoryIssueTitleKeys.has(`${record.issue}\u0000${record.title}`) &&
+			record.id !== expectedStableId(record)
+		) {
+			problems.push(
+				validationProblem(
+					"stable-id",
+					`Known-gap record ${record.path} must keep stable ID ${expectedStableId(record)}.`,
+				),
+			);
+		}
+
+		if (record.issue === 304 && record.releasePolicy !== "block") {
+			problems.push(
+				validationProblem(
+					"policy-downgrade",
+					"#304 is data-loss user-facing coverage and must stay block until fixed.",
+				),
+			);
+		}
+	}
+
+	for (const record of records) {
+		if (!inventoryIdentities.has(identityForRecord(record))) {
+			problems.push(
+				validationProblem(
+					"stale-manifest-record",
+					`${record.path} ${record.type} "${record.title}" no longer matches source inventory.`,
+				),
+			);
+		}
+	}
+	for (const marker of inventory) {
+		if (!identities.has(identityForMarker(marker))) {
+			problems.push(
+				validationProblem(
+					"missing-source-marker",
+					`${marker.file} ${marker.type} "${marker.title}" is not present in docs/known-gaps.json.`,
+				),
+			);
+		}
+	}
+
+	if (options.release === true) {
+		if (manifest.targetVersion !== options.packageVersion) {
+			problems.push(
+				validationProblem(
+					"target-version",
+					`Manifest targetVersion ${manifest.targetVersion} must equal package.json version ${options.packageVersion}.`,
+				),
+			);
+		}
+		for (const record of records) {
+			if (record.releasePolicy === "block") {
+				problems.push(
+					validationProblem(
+						"release-block",
+						`#${record.issue} ${record.id} blocks release ${options.packageVersion}.`,
+					),
+				);
+			}
+		}
+	}
+
+	return {
+		records,
+		problems,
+	};
+}
+
+function readJsonFile(relPath) {
+	return JSON.parse(fs.readFileSync(path.join(process.cwd(), relPath), "utf8"));
+}
+
 function escapeMessage(value) {
 	return String(value)
 		.replaceAll("%", "%25")
@@ -588,7 +951,9 @@ function fail(problems) {
 	const localDiagnostics = problems.map((entry) =>
 		"phrase" in entry
 			? formatLocalDiagnostic(entry)
-			: `${entry.file}:${entry.line}: ${entry.message}`,
+			: "file" in entry && "line" in entry
+				? `${entry.file}:${entry.line}: ${entry.message}`
+				: entry.message,
 	);
 	if (process.env["GITHUB_ACTIONS"] === "true") {
 		for (const problem of problems) {
@@ -601,10 +966,32 @@ function fail(problems) {
 }
 
 export function main() {
+	const args = process.argv.slice(2);
+	const release = args.includes("--release");
 	const files = collectTestSourceFiles(process.cwd());
 	const proseProblems = scanCollectedTestSources(process.cwd());
 	const runnerPolicy = scanCollectedRunnerPolicy(process.cwd());
 	const problems = [...proseProblems, ...runnerPolicy.problems];
+
+	if (!fs.existsSync(MANIFEST_PATH)) {
+		problems.push(
+			validationProblem(
+				"manifest-missing",
+				`${MANIFEST_PATH} is required for exact known-gap inventory validation.`,
+			),
+		);
+	} else {
+		const manifest = readJsonFile(MANIFEST_PATH);
+		const packageJson = readJsonFile(PACKAGE_PATH);
+		const packageVersion =
+			typeof packageJson.version === "string" ? packageJson.version : "";
+		const manifestResult = validateKnownGapsManifest(
+			manifest,
+			runnerPolicy.markers,
+			{ packageVersion, release },
+		);
+		problems.push(...manifestResult.problems);
+	}
 
 	if (problems.length > 0) {
 		fail(problems);
