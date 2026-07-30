@@ -34,10 +34,27 @@ if ($null -eq $setup) {
 [Console]::Error.WriteLine("==> installing $($setup.Name) silently")
 
 # /S is a native NSIS switch, not an electron-builder extension.
-$installProcess = Start-Process -FilePath $setup.FullName -ArgumentList "/S" -Wait -PassThru
-if ($installProcess.ExitCode -ne 0) {
-	Write-Error "NSIS installer exited with code $($installProcess.ExitCode)"
-	exit 1
+$accessViolationExitCode = -1073741819 # 0xC0000005
+$maxInstallAttempts = 2
+
+for ($attempt = 1; $attempt -le $maxInstallAttempts; $attempt++) {
+	$installProcess = Start-Process -FilePath $setup.FullName -ArgumentList "/S" -Wait -PassThru
+	if ($installProcess.ExitCode -eq 0) {
+		break
+	}
+
+	# Hosted Windows runners can transiently terminate the freshly built NSIS
+	# bootstrapper with an access violation while security scanning settles.
+	# Retry only that exact failure once; every other installer error remains fatal.
+	if ($installProcess.ExitCode -ne $accessViolationExitCode -or $attempt -eq $maxInstallAttempts) {
+		Write-Error "NSIS installer exited with code $($installProcess.ExitCode) on attempt $attempt"
+		exit 1
+	}
+
+	[Console]::Error.WriteLine(
+		"==> NSIS installer hit access violation on attempt $attempt; retrying once after 5 seconds"
+	)
+	Start-Sleep -Seconds 5
 }
 
 # build.nsis sets runAfterFinish:false so nothing should be running, but stop any
