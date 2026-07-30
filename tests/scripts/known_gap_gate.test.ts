@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import type { KnownGapProblem } from "../../scripts/known_gap_gate.mjs";
+import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import {
 	BANNED_PROSE_PHRASES,
 	buildKnownLimitationsBlock,
@@ -150,6 +151,8 @@ describe("collectTestSourceFiles", () => {
 	test("collects only runner-owned test source paths", () => {
 		const root = mkdtempSync(path.join(tmpdir(), "known-gap-gate-"));
 		try {
+			const before = snapshotDir(root);
+
 			mkdirSync(path.join(root, "docs/evidence"), { recursive: true });
 			mkdirSync(path.join(root, "tests/e2e/helpers"), { recursive: true });
 			mkdirSync(path.join(root, "tests/e2e/fixtures"), { recursive: true });
@@ -164,6 +167,25 @@ describe("collectTestSourceFiles", () => {
 				"utf8",
 			);
 			writeFileSync(path.join(root, "docs/evidence/proof.test.ts"), "", "utf8");
+			const after = snapshotDir(root);
+
+			assertDirEffect(before, after, {
+				added: [
+					"docs",
+					"docs/evidence",
+					"docs/evidence/proof.test.ts",
+					"tests",
+					"tests/e2e",
+					"tests/e2e/fixtures",
+					"tests/e2e/fixtures/fixture_integrity.test.ts",
+					"tests/e2e/helpers",
+					"tests/e2e/helpers/helper.ts",
+					"tests/e2e/settings.spec.ts",
+					"tests/example.test.ts",
+					"tests/smoke",
+					"tests/smoke/app.smoke.ts",
+				],
+			});
 
 			expect(collectTestSourceFiles(root)).toEqual([
 				"tests/e2e/settings.spec.ts",
@@ -181,20 +203,34 @@ describe("scanCollectedTestSources", () => {
 		const phrase = phraseAt(0);
 		const root = mkdtempSync(path.join(tmpdir(), "known-gap-negative-"));
 		try {
+			const beforeCleanFixture = snapshotDir(root);
+
 			mkdirSync(path.join(root, "tests/e2e"), { recursive: true });
 			writeFileSync(
 				path.join(root, "tests/e2e/clean.spec.ts"),
 				makeSource("covered by an executable marker"),
 				"utf8",
 			);
+			const afterCleanFixture = snapshotDir(root);
+
+			assertDirEffect(beforeCleanFixture, afterCleanFixture, {
+				added: ["tests", "tests/e2e", "tests/e2e/clean.spec.ts"],
+			});
 
 			expect(scanCollectedTestSources(root)).toEqual([]);
 
+			const beforeFreshViolation = snapshotDir(root);
 			writeFileSync(
 				path.join(root, "tests/e2e/fresh.spec.ts"),
 				makeSource(phrase),
 				"utf8",
 			);
+			const afterFreshViolation = snapshotDir(root);
+
+			assertDirEffect(beforeFreshViolation, afterFreshViolation, {
+				added: ["tests/e2e/fresh.spec.ts"],
+				unchanged: ["tests/e2e/clean.spec.ts"],
+			});
 
 			const problems = scanCollectedTestSources(root);
 			expect(problems).toHaveLength(1);
