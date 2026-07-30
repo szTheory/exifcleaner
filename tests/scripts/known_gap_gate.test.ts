@@ -311,7 +311,10 @@ test.fails("${expectedTitle}", { retry: 0 }, () => {
 		] as const;
 
 		for (const entry of cases) {
-			const result = scanRunnerPolicy(entry.source, "tests/e2e/settings.spec.ts");
+			const result = scanRunnerPolicy(
+				entry.source,
+				"tests/e2e/settings.spec.ts",
+			);
 
 			expect(result.markers).toEqual([]);
 			expect(result.problems.map((problem) => problem.code)).toEqual([

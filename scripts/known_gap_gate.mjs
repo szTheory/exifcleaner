@@ -216,6 +216,20 @@ function runnerForMarker(type, filename) {
 	return "vitest";
 }
 
+function isInlineExecutableBody(node) {
+	return (
+		node !== undefined &&
+		(ts.isArrowFunction(node) || ts.isFunctionExpression(node))
+	);
+}
+
+function markerBodyArgument(type, args) {
+	if (type === "test.fail") {
+		return [args[1], args[2]].find(isInlineExecutableBody);
+	}
+	return isInlineExecutableBody(args[1]) ? args[1] : undefined;
+}
+
 function inspectKnownGapMarker(sourceFile, node, chain, problems, markers) {
 	const type = directKnownGapType(chain);
 	if (type === undefined) {
@@ -259,6 +273,20 @@ function inspectKnownGapMarker(sourceFile, node, chain, problems, markers) {
 				node,
 				"marker-title",
 				"Known-gap marker titles must begin with a positive GitHub issue token.",
+			),
+		);
+		return true;
+	}
+
+	if (markerBodyArgument(type, node.arguments) === undefined) {
+		problems.push(
+			problem(
+				sourceFile,
+				node,
+				"marker-body",
+				type === "test.fail"
+					? "Playwright known-gap markers must include an inline executable function body as the second or third argument."
+					: "Vitest known-gap markers must include an inline executable function body as the second argument.",
 			),
 		);
 		return true;
