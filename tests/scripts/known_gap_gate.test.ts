@@ -342,6 +342,98 @@ it.fails("${expectedTitle}", () => {
 		);
 	});
 
+	test("admits direct markers only from unshadowed runner imports", () => {
+		const forbiddenCases = [
+			{
+				name: "no runner import",
+				code: "untrusted-marker-receiver",
+				file: "tests/e2e/settings.spec.ts",
+				source: `const test = { fail() {} };
+test.fail("${expectedTitle}", async () => {
+	expect(true).toBe(false);
+});`,
+			},
+			{
+				name: "local fake receiver",
+				code: "untrusted-marker-receiver",
+				file: "tests/e2e/settings.spec.ts",
+				source: `import { test as runner } from "@playwright/test";
+const test = { fail() {} };
+test.fail("${expectedTitle}", async () => {
+	expect(true).toBe(false);
+});
+runner("covered behavior", async () => {
+	expect(true).toBe(true);
+});`,
+			},
+			{
+				name: "block shadow",
+				code: "untrusted-marker-receiver",
+				file: "tests/e2e/settings.spec.ts",
+				source: `import { test } from "@playwright/test";
+{
+	const test = { fail() {} };
+	test.fail("${expectedTitle}", async () => {
+		expect(true).toBe(false);
+	});
+}`,
+			},
+			{
+				name: "parameter shadow",
+				code: "untrusted-marker-receiver",
+				file: "tests/e2e/settings.spec.ts",
+				source: `import { test } from "@playwright/test";
+function register(test: { fail(title: string, body: () => void): void }) {
+	test.fail("${expectedTitle}", () => {
+		expect(true).toBe(false);
+	});
+}`,
+			},
+			{
+				name: "Playwright fails spelling",
+				code: "untrusted-marker-receiver",
+				file: "tests/e2e/settings.spec.ts",
+				source: `import { test } from "@playwright/test";
+test.fails("${expectedTitle}", async () => {
+	expect(true).toBe(false);
+});`,
+			},
+			{
+				name: "Vitest fail spelling",
+				code: "untrusted-marker-receiver",
+				file: "tests/domain/example.test.ts",
+				source: `import { test } from "vitest";
+test.fail("${expectedTitle}", () => {
+	expect(true).toBe(false);
+});`,
+			},
+			{
+				name: "Vitest it.fail spelling",
+				code: "untrusted-marker-receiver",
+				file: "tests/domain/example.test.ts",
+				source: `import { it } from "vitest";
+it.fail("${expectedTitle}", () => {
+	expect(true).toBe(false);
+});`,
+			},
+		] as const;
+
+		for (const entry of forbiddenCases) {
+			const result = scanRunnerPolicy(entry.source, entry.file);
+
+			expect(result.markers, entry.name).toEqual([]);
+			expect(result.problems.length, entry.name).toBeGreaterThan(0);
+			expect(
+				result.markers.length + result.problems.length,
+				entry.name,
+			).toBeGreaterThan(0);
+			expect(
+				result.problems.map((problem) => problem.code),
+				entry.name,
+			).toContain(entry.code);
+		}
+	});
+
 	test("rejects expected-failure declarations without executable function bodies", () => {
 		const cases = [
 			{
@@ -679,6 +771,91 @@ spec("covered behavior", { only: true }, () => {});`,
 			"options-object-control",
 			"tests/domain/example.test.ts",
 		);
+	});
+
+	test("classifies Vitest todo and fails options without touching helper data", () => {
+		const forbiddenCases = [
+			{
+				name: "canonical test todo",
+				code: "disabled-test",
+				source: `import { test } from "vitest";
+test("covered behavior", { todo: true }, () => {});`,
+			},
+			{
+				name: "canonical it todo string key",
+				code: "disabled-test",
+				source: `import { it } from "vitest";
+it("covered behavior", { "todo": true }, () => {});`,
+			},
+			{
+				name: "canonical test fails",
+				code: "options-object-marker",
+				source: `import { test } from "vitest";
+test("${expectedTitle}", { fails: true }, () => {});`,
+			},
+			{
+				name: "canonical it fails string key",
+				code: "options-object-marker",
+				source: `import { it } from "vitest";
+it("${expectedTitle}", { "fails": true }, () => {});`,
+			},
+			{
+				name: "trusted runner alias todo",
+				code: "disabled-test",
+				source: `import { test as base } from "vitest";
+const spec = base;
+spec("covered behavior", { todo: true }, () => {});`,
+			},
+			{
+				name: "trusted runner alias fails",
+				code: "options-object-marker",
+				source: `import { it as base } from "vitest";
+const spec = base;
+spec("${expectedTitle}", { fails: true }, () => {});`,
+			},
+		] as const;
+
+		for (const entry of forbiddenCases) {
+			const result = scanRunnerPolicy(
+				entry.source,
+				"tests/domain/example.test.ts",
+			);
+
+			expect(result.markers, entry.name).toEqual([]);
+			expect(result.problems.length, entry.name).toBeGreaterThan(0);
+			expect(
+				result.markers.length + result.problems.length,
+				entry.name,
+			).toBeGreaterThan(0);
+			expect(
+				result.problems.map((problem) => problem.code),
+				entry.name,
+			).toContain(entry.code);
+		}
+
+		const falseValued = scanRunnerPolicy(
+			`import { test } from "vitest";
+test("covered behavior", { todo: false, fails: false }, () => {});`,
+			"tests/domain/example.test.ts",
+		);
+		const helper = scanRunnerPolicy(
+			`import { test } from "vitest";
+fixture({ todo: true, fails: true });
+test("covered behavior", () => {});`,
+			"tests/domain/example.test.ts",
+		);
+		const fakeReceiver = scanRunnerPolicy(
+			`const test = (title: string, options: unknown, body: () => void) => {};
+test("covered behavior", { todo: true, fails: true }, () => {});`,
+			"tests/domain/example.test.ts",
+		);
+
+		expect(falseValued.markers).toEqual([]);
+		expect(falseValued.problems).toEqual([]);
+		expect(helper.markers).toEqual([]);
+		expect(helper.problems).toEqual([]);
+		expect(fakeReceiver.markers).toEqual([]);
+		expect(fakeReceiver.problems).toEqual([]);
 	});
 
 	test("requires literal issue-linked marker titles", () => {
