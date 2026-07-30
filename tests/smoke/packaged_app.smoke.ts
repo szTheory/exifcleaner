@@ -197,12 +197,18 @@ test.describe("Packaged artifact", () => {
 		const macosAttributesSwitch = drawer.getByRole("switch", {
 			name: "Remove macOS attributes",
 		});
+		const macosAttributesLabel = drawer.getByText("Remove macOS attributes", {
+			exact: true,
+		});
 
 		if (process.platform === "darwin") {
 			await expect(macosAttributesSwitch).toBeVisible();
 			await expect(macosAttributesSwitch).not.toBeChecked();
 
-			await macosAttributesSwitch.click();
+			// The semantic input is visually clipped beneath the styled track.
+			// Click the visible label, as a user does, while keeping state assertions
+			// on the role= switch input.
+			await macosAttributesLabel.click();
 			await expect(macosAttributesSwitch).toBeChecked();
 
 			await drawer.getByRole("button", { name: "Close settings" }).click();
@@ -211,7 +217,7 @@ test.describe("Packaged artifact", () => {
 			await window.getByRole("button", { name: "Open settings" }).click();
 			await expect(macosAttributesSwitch).toBeChecked();
 
-			await macosAttributesSwitch.click();
+			await macosAttributesLabel.click();
 			await expect(macosAttributesSwitch).not.toBeChecked();
 		} else {
 			await expect(macosAttributesSwitch).toHaveCount(0);

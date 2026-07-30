@@ -34,7 +34,11 @@ if ($null -eq $setup) {
 [Console]::Error.WriteLine("==> installing $($setup.Name) silently")
 
 # /S is a native NSIS switch, not an electron-builder extension.
-Start-Process -FilePath $setup.FullName -ArgumentList "/S" -Wait
+$installProcess = Start-Process -FilePath $setup.FullName -ArgumentList "/S" -Wait -PassThru
+if ($installProcess.ExitCode -ne 0) {
+	Write-Error "NSIS installer exited with code $($installProcess.ExitCode)"
+	exit 1
+}
 
 # build.nsis sets runAfterFinish:false so nothing should be running, but stop any
 # stray instance anyway. The cost of this redundancy is two seconds; the cost of the
