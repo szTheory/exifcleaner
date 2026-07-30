@@ -165,6 +165,18 @@ function isStringLiteralLike(node) {
 	return ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node);
 }
 
+function expectedFailurePropertyText(node) {
+	if (ts.isIdentifier(node) || isStringLiteralLike(node)) {
+		return node.text;
+	}
+	return undefined;
+}
+
+function isExpectedFailureProperty(node) {
+	const text = expectedFailurePropertyText(node);
+	return text === "fail" || text === "fails";
+}
+
 function markerFromLiteralTitle(title) {
 	const match = /^#([1-9][0-9]*)\s+\S/.exec(title);
 	if (match === null) {
@@ -513,6 +525,41 @@ export function scanRunnerPolicy(source, filename) {
 		) {
 			const chain = propertyChain(node.initializer);
 			if (directKnownGapType(chain) !== undefined) {
+				aliases.add(node.name.text);
+			}
+		}
+
+		if (
+			ts.isVariableDeclaration(node) &&
+			ts.isObjectBindingPattern(node.name) &&
+			node.initializer !== undefined &&
+			(isIdentifier(node.initializer, "test") ||
+				isIdentifier(node.initializer, "it"))
+		) {
+			for (const element of node.name.elements) {
+				const extractedProperty = element.propertyName ?? element.name;
+				if (
+					isExpectedFailureProperty(extractedProperty) &&
+					ts.isIdentifier(element.name)
+				) {
+					aliases.add(element.name.text);
+				}
+			}
+		}
+
+		if (
+			ts.isVariableDeclaration(node) &&
+			ts.isIdentifier(node.name) &&
+			node.initializer !== undefined &&
+			ts.isElementAccessExpression(node.initializer)
+		) {
+			const receiver = node.initializer.expression;
+			const argument = node.initializer.argumentExpression;
+			if (
+				(isIdentifier(receiver, "test") || isIdentifier(receiver, "it")) &&
+				argument !== undefined &&
+				isExpectedFailureProperty(argument)
+			) {
 				aliases.add(node.name.text);
 			}
 		}

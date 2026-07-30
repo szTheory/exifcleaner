@@ -764,8 +764,12 @@ describe("release workflow enforcement", () => {
 		const verifyRelease = scripts["verify:release"];
 		const knownGapsCheck = scripts["known-gaps:check"];
 
-		expect(typeof verifyRelease).toBe("string");
-		expect(typeof knownGapsCheck).toBe("string");
+		if (typeof verifyRelease !== "string") {
+			throw new Error("package.json scripts.verify:release must be a string");
+		}
+		if (typeof knownGapsCheck !== "string") {
+			throw new Error("package.json scripts.known-gaps:check must be a string");
+		}
 
 		const releaseCommands = verifyRelease
 			.split("&&")
