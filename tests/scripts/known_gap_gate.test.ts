@@ -554,6 +554,64 @@ test("covered behavior", async () => {
 		expect(codes).toEqual(forbiddenCases.map((entry) => entry.code));
 	});
 
+	test("rejects Playwright suite controls from the leftmost runner receiver", () => {
+		const forbiddenCases = [
+			{
+				name: "suite skip",
+				code: "disabled-test",
+				source: `import { test } from "@playwright/test";
+test.describe.skip("covered suite", () => {
+	test("covered behavior", async () => {
+		expect(true).toBe(true);
+	});
+});`,
+			},
+			{
+				name: "suite only",
+				code: "focused-test",
+				source: `import { test } from "@playwright/test";
+test.describe.only("covered suite", () => {
+	test("covered behavior", async () => {
+		expect(true).toBe(true);
+	});
+});`,
+			},
+		] as const;
+
+		for (const entry of forbiddenCases) {
+			const result = scanRunnerPolicy(
+				entry.source,
+				"tests/e2e/settings.spec.ts",
+			);
+
+			expect(result.markers, entry.name).toEqual([]);
+			expect(result.problems.length, entry.name).toBeGreaterThan(0);
+			expect(
+				result.markers.length + result.problems.length,
+				entry.name,
+			).toBeGreaterThan(0);
+			expect(
+				result.problems.map((problem) => problem.code),
+				entry.name,
+			).toContain(entry.code);
+		}
+	});
+
+	test("does not trust suite-control property chains on local receivers", () => {
+		const result = scanRunnerPolicy(
+			`const test = {
+	describe: {
+		skip(_title: string, _body: () => void) {},
+	},
+};
+test.describe.skip("covered suite", () => {});`,
+			"tests/e2e/settings.spec.ts",
+		);
+
+		expect(result.markers).toEqual([]);
+		expect(result.problems).toEqual([]);
+	});
+
 	test("rejects object-binding expected-failure aliases without inventorying markers", () => {
 		const result = scanRunnerPolicy(
 			`import { test } from "@playwright/test";
