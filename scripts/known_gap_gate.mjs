@@ -60,6 +60,11 @@ const RUNNER_CONTROL_PROBLEMS = Object.freeze({
 			"Conditional runner controls can omit product coverage and are forbidden.",
 	}),
 });
+const OPTIONS_OBJECT_MARKER_PROBLEM = Object.freeze({
+	code: "options-object-marker",
+	message:
+		"Options-object expected failures are forbidden; use direct test.fails/it.fails declarations so the gate can inventory them.",
+});
 
 export const BANNED_PROSE_PHRASES = Object.freeze([
 	"deferred",
@@ -227,31 +232,76 @@ function markerFromLiteralTitle(title) {
 	return Number(match[1]);
 }
 
-function hasOnlyOrSkipProperty(objectLiteral) {
-	return objectLiteral.properties.some((property) => {
+function booleanLiteralValue(node) {
+	if (node.kind === ts.SyntaxKind.TrueKeyword) {
+		return true;
+	}
+	if (node.kind === ts.SyntaxKind.FalseKeyword) {
+		return false;
+	}
+	return undefined;
+}
+
+function runnerOptionControl(objectLiteral, runnerIdentity) {
+	for (const property of objectLiteral.properties) {
 		if (!ts.isPropertyAssignment(property)) {
-			return false;
+			continue;
 		}
 		const name = property.name;
 		if (!ts.isIdentifier(name) && !ts.isStringLiteral(name)) {
-			return false;
+			continue;
 		}
-		return name.text === "only" || name.text === "skip";
-	});
+		if (name.text === "only" || name.text === "skip") {
+			return {
+				code: "options-object-control",
+				message: "Runner options objects must not select or omit coverage.",
+			};
+		}
+		if (
+			runnerIdentity.runner === "vitest" &&
+			name.text === "todo" &&
+			booleanLiteralValue(property.initializer) === true
+		) {
+			return RUNNER_CONTROL_PROBLEMS.todo;
+		}
+		if (
+			runnerIdentity.runner === "vitest" &&
+			name.text === "fails" &&
+			booleanLiteralValue(property.initializer) === true
+		) {
+			return OPTIONS_OBJECT_MARKER_PROBLEM;
+		}
+	}
+	return undefined;
 }
 
-function directKnownGapType(chain) {
+function directKnownGapType(chain, runnerIdentity) {
 	if (chain.length !== 2) {
 		return undefined;
 	}
-	const [receiver, modifier] = chain;
-	if (receiver === "test" && modifier === "fail") {
+	const [, modifier] = chain;
+	if (
+		runnerIdentity.direct &&
+		runnerIdentity.runner === "playwright" &&
+		runnerIdentity.canonical === "test" &&
+		modifier === "fail"
+	) {
 		return "test.fail";
 	}
-	if (receiver === "test" && modifier === "fails") {
+	if (
+		runnerIdentity.direct &&
+		runnerIdentity.runner === "vitest" &&
+		runnerIdentity.canonical === "test" &&
+		modifier === "fails"
+	) {
 		return "test.fails";
 	}
-	if (receiver === "it" && modifier === "fails") {
+	if (
+		runnerIdentity.direct &&
+		runnerIdentity.runner === "vitest" &&
+		runnerIdentity.canonical === "it" &&
+		modifier === "fails"
+	) {
 		return "it.fails";
 	}
 	return undefined;
@@ -284,9 +334,54 @@ function markerBodyArgument(type, args) {
 	return isInlineExecutableBody(args[1]) ? args[1] : undefined;
 }
 
-function inspectKnownGapMarker(sourceFile, node, chain, problems, markers) {
-	const type = directKnownGapType(chain);
+function hasIssueShapedLiteralTitle(node) {
+	const [titleArg] = node.arguments;
+	return (
+		titleArg !== undefined &&
+		isStringLiteralLike(titleArg) &&
+		markerFromLiteralTitle(titleArg.text) !== undefined
+	);
+}
+
+function isCanonicalExpectedFailureChain(chain) {
+	if (chain.length !== 2) {
+		return false;
+	}
+	const [receiver, modifier] = chain;
+	return (
+		((receiver === "test" || receiver === "it") &&
+			(modifier === "fail" || modifier === "fails")) ||
+		false
+	);
+}
+
+function inspectKnownGapMarker(
+	sourceFile,
+	node,
+	chain,
+	runnerIdentity,
+	problems,
+	markers,
+) {
+	const type =
+		runnerIdentity === undefined
+			? undefined
+			: directKnownGapType(chain, runnerIdentity);
 	if (type === undefined) {
+		if (
+			isCanonicalExpectedFailureChain(chain) &&
+			hasIssueShapedLiteralTitle(node)
+		) {
+			problems.push(
+				problem(
+					sourceFile,
+					node,
+					"untrusted-marker-receiver",
+					"Expected-failure marker receivers must resolve to unshadowed Playwright/Vitest named imports with runner-compatible spelling.",
+				),
+			);
+			return true;
+		}
 		return false;
 	}
 
@@ -364,6 +459,19 @@ function addAliasEdge(aliasEdges, localName, sourceName) {
 
 function resolveRunnerAliases(sourceFile) {
 	const aliasEdges = new Map();
+	const runnerSeeds = new Map();
+
+	function seedRunner(localName, canonical, runner, direct, bindingStart) {
+		if (runnerSeeds.has(localName)) {
+			return;
+		}
+		runnerSeeds.set(localName, {
+			canonical,
+			runner,
+			direct,
+			bindingStart,
+		});
+	}
 
 	function visit(node) {
 		if (
@@ -374,10 +482,20 @@ function resolveRunnerAliases(sourceFile) {
 			node.importClause?.namedBindings !== undefined &&
 			ts.isNamedImports(node.importClause.namedBindings)
 		) {
+			const runner =
+				node.moduleSpecifier.text === "@playwright/test"
+					? "playwright"
+					: "vitest";
 			for (const element of node.importClause.namedBindings.elements) {
 				const importedName = element.propertyName?.text ?? element.name.text;
 				if (importedName === "test" || importedName === "it") {
-					addAliasEdge(aliasEdges, element.name.text, importedName);
+					seedRunner(
+						element.name.text,
+						importedName,
+						runner,
+						element.name.text === importedName,
+						element.name.getStart(sourceFile),
+					);
 				}
 			}
 		}
@@ -407,8 +525,9 @@ function resolveRunnerAliases(sourceFile) {
 
 	const runnerAliases = new Map();
 	function resolve(name, seen = new Set()) {
-		if (name === "test" || name === "it") {
-			return name;
+		const seeded = runnerSeeds.get(name);
+		if (seeded !== undefined) {
+			return seeded;
 		}
 		if (seen.has(name)) {
 			return undefined;
@@ -425,33 +544,195 @@ function resolveRunnerAliases(sourceFile) {
 		return undefined;
 	}
 
-	for (const name of aliasEdges.keys()) {
-		const canonical = resolve(name);
-		if (canonical !== undefined && name !== canonical) {
-			runnerAliases.set(name, canonical);
+	for (const name of new Set([...runnerSeeds.keys(), ...aliasEdges.keys()])) {
+		const resolved = resolve(name);
+		if (resolved !== undefined) {
+			const seed = runnerSeeds.get(name);
+			runnerAliases.set(name, {
+				...resolved,
+				direct: seed?.direct ?? false,
+				bindingStart:
+					seed?.bindingStart ?? bindingStartForName(sourceFile, name),
+			});
 		}
 	}
 
 	return runnerAliases;
 }
 
-function isTrustedRunnerReceiver(expression, runnerAliases) {
-	return (
-		(ts.isIdentifier(expression) &&
-			(expression.text === "test" ||
-				expression.text === "it" ||
-				runnerAliases.has(expression.text))) ||
-		false
+function bindingStartForName(sourceFile, name) {
+	let bindingStart;
+
+	function visit(node) {
+		if (
+			bindingStart === undefined &&
+			ts.isVariableDeclaration(node) &&
+			ts.isIdentifier(node.name) &&
+			node.name.text === name
+		) {
+			bindingStart = node.name.getStart(sourceFile);
+			return;
+		}
+		ts.forEachChild(node, visit);
+	}
+
+	visit(sourceFile);
+	return bindingStart ?? -1;
+}
+
+function extractBindingNames(name, out = []) {
+	if (ts.isIdentifier(name)) {
+		out.push(name);
+		return out;
+	}
+	if (ts.isObjectBindingPattern(name) || ts.isArrayBindingPattern(name)) {
+		for (const element of name.elements) {
+			if (ts.isBindingElement(element)) {
+				extractBindingNames(element.name, out);
+			}
+		}
+	}
+	return out;
+}
+
+function nearestScope(node, blockScoped) {
+	let current = node.parent;
+	while (current !== undefined) {
+		if (
+			blockScoped &&
+			(ts.isBlock(current) ||
+				ts.isSourceFile(current) ||
+				ts.isCaseBlock(current) ||
+				ts.isModuleBlock(current))
+		) {
+			return current;
+		}
+		if (
+			!blockScoped &&
+			(ts.isFunctionLike(current) || ts.isSourceFile(current))
+		) {
+			return current;
+		}
+		current = current.parent;
+	}
+	return node.getSourceFile();
+}
+
+function addLocalBinding(localBindings, sourceFile, identifier, scope) {
+	const entries = localBindings.get(identifier.text) ?? [];
+	entries.push({
+		start: identifier.getStart(sourceFile),
+		end: scope.getEnd(),
+	});
+	localBindings.set(identifier.text, entries);
+}
+
+function collectLocalBindings(sourceFile) {
+	const localBindings = new Map();
+
+	function addName(name, scope) {
+		for (const identifier of extractBindingNames(name)) {
+			addLocalBinding(localBindings, sourceFile, identifier, scope);
+		}
+	}
+
+	function visit(node) {
+		if (ts.isImportDeclaration(node)) {
+			const namedBindings = node.importClause?.namedBindings;
+			if (namedBindings !== undefined && ts.isNamedImports(namedBindings)) {
+				for (const element of namedBindings.elements) {
+					addLocalBinding(localBindings, sourceFile, element.name, sourceFile);
+				}
+			}
+		}
+
+		if (ts.isVariableDeclaration(node)) {
+			const declarationList = node.parent;
+			const blockScoped =
+				ts.isVariableDeclarationList(declarationList) &&
+				(declarationList.flags & ts.NodeFlags.BlockScoped) !== 0;
+			addName(node.name, nearestScope(node, blockScoped));
+		}
+
+		if (ts.isParameter(node)) {
+			const scope = ts.isFunctionLike(node.parent) ? node.parent : sourceFile;
+			addName(node.name, scope);
+		}
+
+		if (
+			(ts.isFunctionDeclaration(node) ||
+				ts.isClassDeclaration(node) ||
+				ts.isCatchClause(node)) &&
+			node.name !== undefined
+		) {
+			addLocalBinding(
+				localBindings,
+				sourceFile,
+				node.name,
+				nearestScope(node, true),
+			);
+		}
+
+		if (ts.isCatchClause(node)) {
+			const name = node.variableDeclaration?.name;
+			if (name !== undefined) {
+				addName(name, node.block);
+			}
+		}
+
+		ts.forEachChild(node, visit);
+	}
+
+	visit(sourceFile);
+	for (const entries of localBindings.values()) {
+		entries.sort((left, right) => right.start - left.start);
+	}
+	return localBindings;
+}
+
+function nearestVisibleBinding(expression, localBindings) {
+	if (!ts.isIdentifier(expression)) {
+		return undefined;
+	}
+	const useStart = expression.getStart(expression.getSourceFile());
+	return (localBindings.get(expression.text) ?? []).find(
+		(binding) => binding.start <= useStart && useStart <= binding.end,
 	);
 }
 
-function runnerControlFromReceiverCall(expression, runnerAliases) {
+function runnerIdentityForReceiver(expression, runnerAliases, localBindings) {
+	if (!ts.isIdentifier(expression)) {
+		return undefined;
+	}
+	const identity = runnerAliases.get(expression.text);
+	if (identity === undefined) {
+		return undefined;
+	}
+	const binding = nearestVisibleBinding(expression, localBindings);
+	if (binding === undefined || binding.start !== identity.bindingStart) {
+		return undefined;
+	}
+	return identity;
+}
+
+function isTrustedRunnerReceiver(expression, runnerAliases, localBindings) {
+	return (
+		runnerIdentityForReceiver(expression, runnerAliases, localBindings) !==
+		undefined
+	);
+}
+
+function runnerControlFromReceiverCall(
+	expression,
+	runnerAliases,
+	localBindings,
+) {
 	if (ts.isPropertyAccessExpression(expression)) {
 		const receiver = expression.expression;
 		const control = runnerControlPropertyText(expression.name);
 		if (
 			control !== undefined &&
-			isTrustedRunnerReceiver(receiver, runnerAliases)
+			isTrustedRunnerReceiver(receiver, runnerAliases, localBindings)
 		) {
 			return control;
 		}
@@ -464,7 +745,7 @@ function runnerControlFromReceiverCall(expression, runnerAliases) {
 			argument === undefined ? undefined : runnerControlPropertyText(argument);
 		if (
 			control !== undefined &&
-			isTrustedRunnerReceiver(receiver, runnerAliases)
+			isTrustedRunnerReceiver(receiver, runnerAliases, localBindings)
 		) {
 			return control;
 		}
@@ -479,7 +760,7 @@ function addControlAliasEdge(aliasEdges, localName, sourceName) {
 	aliasEdges.set(localName, sources);
 }
 
-function resolveRunnerControlAliases(sourceFile, runnerAliases) {
+function resolveRunnerControlAliases(sourceFile, runnerAliases, localBindings) {
 	const aliasEdges = new Map();
 	const controlSeeds = new Map();
 
@@ -499,6 +780,7 @@ function resolveRunnerControlAliases(sourceFile, runnerAliases) {
 			const control = runnerControlFromReceiverCall(
 				node.initializer,
 				runnerAliases,
+				localBindings,
 			);
 			if (control !== undefined) {
 				seedAlias(node.name.text, control);
@@ -513,7 +795,7 @@ function resolveRunnerControlAliases(sourceFile, runnerAliases) {
 			ts.isVariableDeclaration(node) &&
 			ts.isObjectBindingPattern(node.name) &&
 			node.initializer !== undefined &&
-			isTrustedRunnerReceiver(node.initializer, runnerAliases)
+			isTrustedRunnerReceiver(node.initializer, runnerAliases, localBindings)
 		) {
 			for (const element of node.name.elements) {
 				const extractedProperty = element.propertyName ?? element.name;
@@ -569,12 +851,21 @@ function resolveRunnerControlAliases(sourceFile, runnerAliases) {
 	return aliases;
 }
 
-function isAliasedExpectedFailureReceiver(expression, runnerAliases) {
+function isAliasedExpectedFailureReceiver(
+	expression,
+	runnerAliases,
+	localBindings,
+) {
 	if (ts.isPropertyAccessExpression(expression)) {
 		const receiver = expression.expression;
+		const identity = runnerIdentityForReceiver(
+			receiver,
+			runnerAliases,
+			localBindings,
+		);
 		return (
-			ts.isIdentifier(receiver) &&
-			runnerAliases.has(receiver.text) &&
+			identity !== undefined &&
+			!identity.direct &&
 			isExpectedFailureProperty(expression.name)
 		);
 	}
@@ -582,9 +873,14 @@ function isAliasedExpectedFailureReceiver(expression, runnerAliases) {
 	if (ts.isElementAccessExpression(expression)) {
 		const receiver = expression.expression;
 		const argument = expression.argumentExpression;
+		const identity = runnerIdentityForReceiver(
+			receiver,
+			runnerAliases,
+			localBindings,
+		);
 		return (
-			ts.isIdentifier(receiver) &&
-			runnerAliases.has(receiver.text) &&
+			identity !== undefined &&
+			!identity.direct &&
 			argument !== undefined &&
 			isExpectedFailureProperty(argument)
 		);
@@ -598,6 +894,7 @@ function inspectRunnerCall(
 	node,
 	aliases,
 	runnerAliases,
+	localBindings,
 	runnerControlAliases,
 	problems,
 	markers,
@@ -643,6 +940,7 @@ function inspectRunnerCall(
 	const receiverControl = runnerControlFromReceiverCall(
 		expression,
 		runnerAliases,
+		localBindings,
 	);
 	if (receiverControl !== undefined) {
 		const diagnostic = RUNNER_CONTROL_PROBLEMS[receiverControl];
@@ -652,7 +950,9 @@ function inspectRunnerCall(
 		return;
 	}
 
-	if (isAliasedExpectedFailureReceiver(expression, runnerAliases)) {
+	if (
+		isAliasedExpectedFailureReceiver(expression, runnerAliases, localBindings)
+	) {
 		problems.push(
 			problem(
 				sourceFile,
@@ -686,21 +986,24 @@ function inspectRunnerCall(
 	}
 
 	if (!ts.isPropertyAccessExpression(expression)) {
-		if (isTrustedRunnerReceiver(expression, runnerAliases)) {
+		const runnerIdentity = runnerIdentityForReceiver(
+			expression,
+			runnerAliases,
+			localBindings,
+		);
+		if (runnerIdentity !== undefined) {
 			const optionsArg = node.arguments.find(ts.isObjectLiteralExpression);
-			if (optionsArg !== undefined && hasOnlyOrSkipProperty(optionsArg)) {
+			const diagnostic =
+				optionsArg === undefined
+					? undefined
+					: runnerOptionControl(optionsArg, runnerIdentity);
+			if (diagnostic !== undefined) {
 				problems.push(
-					problem(
-						sourceFile,
-						node,
-						"options-object-control",
-						"Runner options objects must not select or omit coverage.",
-					),
+					problem(sourceFile, node, diagnostic.code, diagnostic.message),
 				);
 			}
 			if (
-				ts.isIdentifier(expression) &&
-				(expression.text === "test" || expression.text === "it") &&
+				runnerIdentity.direct &&
 				node.arguments.length === 1 &&
 				node.arguments[0] !== undefined &&
 				isStringLiteralLike(node.arguments[0])
@@ -739,7 +1042,24 @@ function inspectRunnerCall(
 		return;
 	}
 
-	if (inspectKnownGapMarker(sourceFile, node, chain, problems, markers)) {
+	const runnerIdentity = ts.isPropertyAccessExpression(expression)
+		? runnerIdentityForReceiver(
+				expression.expression,
+				runnerAliases,
+				localBindings,
+			)
+		: undefined;
+
+	if (
+		inspectKnownGapMarker(
+			sourceFile,
+			node,
+			chain,
+			runnerIdentity,
+			problems,
+			markers,
+		)
+	) {
 		const [titleArg] = node.arguments;
 		if (titleArg !== undefined && !isStringLiteralLike(titleArg)) {
 			const firstText = titleArg.getText(sourceFile);
@@ -764,7 +1084,9 @@ function inspectRunnerCall(
 
 	const last = chain.at(-1);
 	const receiver = chain[0];
+	const trustedReceiver = runnerIdentity !== undefined;
 	if (
+		trustedReceiver &&
 		(receiver === "test" || receiver === "it") &&
 		(last === "skip" || last === "fixme" || last === "todo")
 	) {
@@ -779,7 +1101,11 @@ function inspectRunnerCall(
 		return;
 	}
 
-	if ((receiver === "test" || receiver === "it") && last === "only") {
+	if (
+		trustedReceiver &&
+		(receiver === "test" || receiver === "it") &&
+		last === "only"
+	) {
 		problems.push(
 			problem(
 				sourceFile,
@@ -793,6 +1119,7 @@ function inspectRunnerCall(
 
 	if (
 		(receiver === "test" || receiver === "it") &&
+		trustedReceiver &&
 		(last === "skipIf" || last === "runIf")
 	) {
 		problems.push(
@@ -832,9 +1159,11 @@ export function scanRunnerPolicy(source, filename) {
 		ts.ScriptKind.TSX,
 	);
 	const runnerAliases = resolveRunnerAliases(sourceFile);
+	const localBindings = collectLocalBindings(sourceFile);
 	const runnerControlAliases = resolveRunnerControlAliases(
 		sourceFile,
 		runnerAliases,
+		localBindings,
 	);
 	const aliases = new Set();
 	const markers = [];
@@ -848,7 +1177,15 @@ export function scanRunnerPolicy(source, filename) {
 			ts.isPropertyAccessExpression(node.initializer)
 		) {
 			const chain = propertyChain(node.initializer);
-			if (directKnownGapType(chain) !== undefined) {
+			const runnerIdentity = runnerIdentityForReceiver(
+				node.initializer.expression,
+				runnerAliases,
+				localBindings,
+			);
+			if (
+				runnerIdentity !== undefined &&
+				directKnownGapType(chain, runnerIdentity) !== undefined
+			) {
 				aliases.add(node.name.text);
 			}
 		}
@@ -857,8 +1194,7 @@ export function scanRunnerPolicy(source, filename) {
 			ts.isVariableDeclaration(node) &&
 			ts.isObjectBindingPattern(node.name) &&
 			node.initializer !== undefined &&
-			(isIdentifier(node.initializer, "test") ||
-				isIdentifier(node.initializer, "it"))
+			isTrustedRunnerReceiver(node.initializer, runnerAliases, localBindings)
 		) {
 			for (const element of node.name.elements) {
 				const extractedProperty = element.propertyName ?? element.name;
@@ -880,7 +1216,7 @@ export function scanRunnerPolicy(source, filename) {
 			const receiver = node.initializer.expression;
 			const argument = node.initializer.argumentExpression;
 			if (
-				(isIdentifier(receiver, "test") || isIdentifier(receiver, "it")) &&
+				isTrustedRunnerReceiver(receiver, runnerAliases, localBindings) &&
 				argument !== undefined &&
 				isExpectedFailureProperty(argument)
 			) {
@@ -894,6 +1230,7 @@ export function scanRunnerPolicy(source, filename) {
 				node,
 				aliases,
 				runnerAliases,
+				localBindings,
 				runnerControlAliases,
 				problems,
 				markers,

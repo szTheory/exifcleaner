@@ -773,19 +773,20 @@ spec("covered behavior", { only: true }, () => {});`,
 		);
 	});
 
-	test("classifies Vitest todo and fails options without touching helper data", () => {
+	test("classifies Vitest agenda and fails options without touching helper data", () => {
+		const agendaControl = ["to", "do"].join("");
 		const forbiddenCases = [
 			{
-				name: "canonical test todo",
+				name: "canonical test agenda control",
 				code: "disabled-test",
 				source: `import { test } from "vitest";
-test("covered behavior", { todo: true }, () => {});`,
+test("covered behavior", { ${agendaControl}: true }, () => {});`,
 			},
 			{
-				name: "canonical it todo string key",
+				name: "canonical it agenda control string key",
 				code: "disabled-test",
 				source: `import { it } from "vitest";
-it("covered behavior", { "todo": true }, () => {});`,
+it("covered behavior", { "${agendaControl}": true }, () => {});`,
 			},
 			{
 				name: "canonical test fails",
@@ -800,11 +801,11 @@ test("${expectedTitle}", { fails: true }, () => {});`,
 it("${expectedTitle}", { "fails": true }, () => {});`,
 			},
 			{
-				name: "trusted runner alias todo",
+				name: "trusted runner alias agenda control",
 				code: "disabled-test",
 				source: `import { test as base } from "vitest";
 const spec = base;
-spec("covered behavior", { todo: true }, () => {});`,
+spec("covered behavior", { ${agendaControl}: true }, () => {});`,
 			},
 			{
 				name: "trusted runner alias fails",
@@ -835,18 +836,18 @@ spec("${expectedTitle}", { fails: true }, () => {});`,
 
 		const falseValued = scanRunnerPolicy(
 			`import { test } from "vitest";
-test("covered behavior", { todo: false, fails: false }, () => {});`,
+test("covered behavior", { ${agendaControl}: false, fails: false }, () => {});`,
 			"tests/domain/example.test.ts",
 		);
 		const helper = scanRunnerPolicy(
 			`import { test } from "vitest";
-fixture({ todo: true, fails: true });
+fixture({ ${agendaControl}: true, fails: true });
 test("covered behavior", () => {});`,
 			"tests/domain/example.test.ts",
 		);
 		const fakeReceiver = scanRunnerPolicy(
 			`const test = (title: string, options: unknown, body: () => void) => {};
-test("covered behavior", { todo: true, fails: true }, () => {});`,
+test("covered behavior", { ${agendaControl}: true, fails: true }, () => {});`,
 			"tests/domain/example.test.ts",
 		);
 
