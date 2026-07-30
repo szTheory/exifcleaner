@@ -43,6 +43,8 @@ const WRITABLE_FIXTURES = [
 	"sample.webp",
 	"sample.pdf",
 	"sample.mp4",
+	"issue240.mp4",
+	"orientation.jpg",
 	"no_metadata.jpg",
 ];
 
@@ -93,6 +95,29 @@ function stripInTempCopy(name: string): { ok: boolean; output: string } {
 	}
 }
 
+function readFixtureMetadata(name: string): Record<string, unknown> {
+	const output = execFileSync(
+		EXIFTOOL,
+		["-G1", "-s", "-json", path.join(FIXTURES_DIR, name)],
+		{ encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+	);
+	const parsed = JSON.parse(output) as unknown;
+	if (!Array.isArray(parsed) || parsed.length !== 1) {
+		throw new Error(`Expected one ExifTool result for ${name}`);
+	}
+
+	const first = parsed[0];
+	if (first === null || typeof first !== "object" || Array.isArray(first)) {
+		throw new Error(`Expected ExifTool object result for ${name}`);
+	}
+
+	const metadata: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(first)) {
+		metadata[key.replace(/^[^:]+:/, "")] = value;
+	}
+	return metadata;
+}
+
 describe("E2E fixture integrity", () => {
 	it.each(WRITABLE_FIXTURES)(
 		"%s is a file ExifTool can actually strip",
@@ -122,5 +147,19 @@ describe("E2E fixture integrity", () => {
 			"no CRLF-terminated xref entries found -- git likely normalized the fixture; " +
 				"check that .gitattributes marks *.pdf as binary",
 		).toBeGreaterThan(0);
+	});
+
+	it("#240 fixture pins the measured create-date precondition", () => {
+		const metadata = readFixtureMetadata("issue240.mp4");
+
+		expect(metadata.CreateDate).toBe("2019:10:02 00:49:04");
+		expect(metadata.TrackCreateDate).toBe("2019:10:02 00:49:04");
+		expect(metadata.MediaCreateDate).toBe("2019:10:02 00:49:04");
+	});
+
+	it("orientation fixture pins exact Orientation before processing", () => {
+		const metadata = readFixtureMetadata("orientation.jpg");
+
+		expect(metadata.Orientation).toBe("Rotate 90 CW");
 	});
 });

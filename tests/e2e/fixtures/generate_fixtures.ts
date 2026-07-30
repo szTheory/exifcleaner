@@ -444,6 +444,11 @@ function generateFixtures(): void {
 	// issue240.mp4 - MP4 with the measured create-date family that survives stripping
 	const issue240Path = path.join(FIXTURES_DIR, "issue240.mp4");
 	fs.writeFileSync(issue240Path, movieHeaderMp4());
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-Title=Issue 240 synthetic strip marker",
+		issue240Path,
+	]);
 	assertIssue240Metadata(issue240Path);
 	console.log("  Created issue240.mp4 (measured create-date family)");
 
