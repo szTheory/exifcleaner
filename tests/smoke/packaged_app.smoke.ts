@@ -187,4 +187,34 @@ test.describe("Packaged artifact", () => {
 			cleanup();
 		}
 	});
+
+	test("shows the macOS attributes control only where supported", async () => {
+		await window.getByRole("button", { name: "Open settings" }).click();
+
+		const drawer = window.getByRole("dialog", { name: "Settings" });
+		await expect(drawer).toBeVisible();
+
+		const macosAttributesSwitch = drawer.getByRole("switch", {
+			name: "Remove macOS attributes",
+		});
+
+		if (process.platform === "darwin") {
+			await expect(macosAttributesSwitch).toBeVisible();
+			await expect(macosAttributesSwitch).not.toBeChecked();
+
+			await macosAttributesSwitch.click();
+			await expect(macosAttributesSwitch).toBeChecked();
+
+			await drawer.getByRole("button", { name: "Close settings" }).click();
+			await expect(drawer).not.toHaveClass(/settings-drawer--open/);
+
+			await window.getByRole("button", { name: "Open settings" }).click();
+			await expect(macosAttributesSwitch).toBeChecked();
+
+			await macosAttributesSwitch.click();
+			await expect(macosAttributesSwitch).not.toBeChecked();
+		} else {
+			await expect(macosAttributesSwitch).toHaveCount(0);
+		}
+	});
 });
