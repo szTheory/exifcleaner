@@ -10,9 +10,8 @@ export default defineConfig({
 	// The app holds an OS-level single-instance lock, so two workers launching
 	// it concurrently would deadlock. This is a constraint, not a tuning knob.
 	workers: 1,
-	// forbidOnly on CI: a stray test.only otherwise reports green while
-	// silently skipping the rest of the suite.
-	forbidOnly: isCI,
+	// A stray test.only reports green while silently skipping the rest of the suite.
+	forbidOnly: true,
 	// "list" so CI logs show which test failed — the HTML report is not
 	// readable from a workflow log.
 	reporter: isCI

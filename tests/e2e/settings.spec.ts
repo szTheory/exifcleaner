@@ -114,32 +114,35 @@ test.describe("Settings", () => {
 	});
 
 	test("toggles xattr removal switch", async () => {
-		test.skip(process.platform !== "darwin", "xattr is macOS-only");
-
 		// Open settings
 		const gearButton = page.locator(".gear-icon");
 		await gearButton.click();
 
-		// Get initial state
-		const initialSettings = await page.evaluate(() =>
-			window.api.settings.get(),
-		);
-		expect(initialSettings.removeXattrs).toBe(false);
-
-		// Toggle on via settings API
-		await page.evaluate(() => {
-			window.api.settings.set({ removeXattrs: true });
-		});
-		await page.waitForTimeout(300);
-
 		const xattrInput = page.locator("#toggle-remove-xattrs");
-		const afterToggle = await xattrInput.isChecked();
-		expect(afterToggle).toBe(true);
 
-		// Reset
-		await page.evaluate(() => {
-			window.api.settings.set({ removeXattrs: false });
-		});
+		if (process.platform === "darwin") {
+			// Get initial state
+			const initialSettings = await page.evaluate(() =>
+				window.api.settings.get(),
+			);
+			expect(initialSettings.removeXattrs).toBe(false);
+
+			// Toggle on via settings API
+			await page.evaluate(() => {
+				window.api.settings.set({ removeXattrs: true });
+			});
+			await page.waitForTimeout(300);
+
+			const afterToggle = await xattrInput.isChecked();
+			expect(afterToggle).toBe(true);
+
+			// Reset
+			await page.evaluate(() => {
+				window.api.settings.set({ removeXattrs: false });
+			});
+		} else {
+			await expect(xattrInput).toHaveCount(0);
+		}
 	});
 
 	test("preserves orientation metadata when toggle is enabled", async () => {
