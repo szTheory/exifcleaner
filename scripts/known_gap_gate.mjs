@@ -268,14 +268,14 @@ function runnerOptionControl(objectLiteral, runnerIdentity) {
 		if (
 			runnerIdentity.runner === "vitest" &&
 			name.text === "todo" &&
-			booleanLiteralValue(property.initializer) === true
+			booleanLiteralValue(property.initializer) !== false
 		) {
 			return RUNNER_CONTROL_PROBLEMS.todo;
 		}
 		if (
 			runnerIdentity.runner === "vitest" &&
 			name.text === "fails" &&
-			booleanLiteralValue(property.initializer) === true
+			booleanLiteralValue(property.initializer) !== false
 		) {
 			return OPTIONS_OBJECT_MARKER_PROBLEM;
 		}
