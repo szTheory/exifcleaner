@@ -314,7 +314,117 @@ function inspectKnownGapMarker(sourceFile, node, chain, problems, markers) {
 	return true;
 }
 
-function inspectRunnerCall(sourceFile, node, aliases, problems, markers) {
+function addAliasEdge(aliasEdges, localName, sourceName) {
+	const sources = aliasEdges.get(localName) ?? new Set();
+	sources.add(sourceName);
+	aliasEdges.set(localName, sources);
+}
+
+function resolveRunnerAliases(sourceFile) {
+	const aliasEdges = new Map();
+
+	function visit(node) {
+		if (
+			ts.isImportDeclaration(node) &&
+			isStringLiteralLike(node.moduleSpecifier) &&
+			(node.moduleSpecifier.text === "@playwright/test" ||
+				node.moduleSpecifier.text === "vitest") &&
+			node.importClause?.namedBindings !== undefined &&
+			ts.isNamedImports(node.importClause.namedBindings)
+		) {
+			for (const element of node.importClause.namedBindings.elements) {
+				const importedName = element.propertyName?.text ?? element.name.text;
+				if (importedName === "test" || importedName === "it") {
+					addAliasEdge(aliasEdges, element.name.text, importedName);
+				}
+			}
+		}
+
+		if (
+			ts.isVariableDeclaration(node) &&
+			ts.isIdentifier(node.name) &&
+			node.initializer !== undefined &&
+			ts.isIdentifier(node.initializer)
+		) {
+			addAliasEdge(aliasEdges, node.name.text, node.initializer.text);
+		}
+
+		if (
+			ts.isBinaryExpression(node) &&
+			node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+			ts.isIdentifier(node.left) &&
+			ts.isIdentifier(node.right)
+		) {
+			addAliasEdge(aliasEdges, node.left.text, node.right.text);
+		}
+
+		ts.forEachChild(node, visit);
+	}
+
+	visit(sourceFile);
+
+	const runnerAliases = new Map();
+	function resolve(name, seen = new Set()) {
+		if (name === "test" || name === "it") {
+			return name;
+		}
+		if (seen.has(name)) {
+			return undefined;
+		}
+		seen.add(name);
+
+		const sources = aliasEdges.get(name) ?? [];
+		for (const source of sources) {
+			const resolved = resolve(source, seen);
+			if (resolved !== undefined) {
+				return resolved;
+			}
+		}
+		return undefined;
+	}
+
+	for (const name of aliasEdges.keys()) {
+		const canonical = resolve(name);
+		if (canonical !== undefined && name !== canonical) {
+			runnerAliases.set(name, canonical);
+		}
+	}
+
+	return runnerAliases;
+}
+
+function isAliasedExpectedFailureReceiver(expression, runnerAliases) {
+	if (ts.isPropertyAccessExpression(expression)) {
+		const receiver = expression.expression;
+		return (
+			ts.isIdentifier(receiver) &&
+			runnerAliases.has(receiver.text) &&
+			isExpectedFailureProperty(expression.name)
+		);
+	}
+
+	if (ts.isElementAccessExpression(expression)) {
+		const receiver = expression.expression;
+		const argument = expression.argumentExpression;
+		return (
+			ts.isIdentifier(receiver) &&
+			runnerAliases.has(receiver.text) &&
+			argument !== undefined &&
+			isExpectedFailureProperty(argument)
+		);
+	}
+
+	return false;
+}
+
+function inspectRunnerCall(
+	sourceFile,
+	node,
+	aliases,
+	runnerAliases,
+	problems,
+	markers,
+) {
 	const expression = node.expression;
 
 	if (ts.isIdentifier(expression) && aliases.has(expression.text)) {
@@ -336,6 +446,18 @@ function inspectRunnerCall(sourceFile, node, aliases, problems, markers) {
 				node,
 				"wrapper-marker",
 				"Known-gap wrappers hide the runner/type/path/title inventory.",
+			),
+		);
+		return;
+	}
+
+	if (isAliasedExpectedFailureReceiver(expression, runnerAliases)) {
+		problems.push(
+			problem(
+				sourceFile,
+				node,
+				"alias-marker",
+				"Known-gap markers must not be extracted or called through aliases.",
 			),
 		);
 		return;
@@ -512,6 +634,7 @@ export function scanRunnerPolicy(source, filename) {
 		true,
 		ts.ScriptKind.TSX,
 	);
+	const runnerAliases = resolveRunnerAliases(sourceFile);
 	const aliases = new Set();
 	const markers = [];
 	const problems = [];
@@ -565,7 +688,14 @@ export function scanRunnerPolicy(source, filename) {
 		}
 
 		if (ts.isCallExpression(node)) {
-			inspectRunnerCall(sourceFile, node, aliases, problems, markers);
+			inspectRunnerCall(
+				sourceFile,
+				node,
+				aliases,
+				runnerAliases,
+				problems,
+				markers,
+			);
 		}
 
 		ts.forEachChild(node, visit);
