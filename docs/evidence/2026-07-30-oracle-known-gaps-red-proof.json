@@ -1,0 +1,180 @@
+{
+  "config": {
+    "argv": [
+      "/Users/jon/.asdf/installs/nodejs/22.14.0/bin/node",
+      "/Users/jon/projects/exifcleaner/exifcleaner-electron/node_modules/.bin/playwright",
+      "test",
+      "--project=dev",
+      "tests/e2e/oracle-accountability.spec.ts",
+      "--grep",
+      "#240",
+      "--reporter=list,json"
+    ],
+    "configFile": "/Users/jon/projects/exifcleaner/exifcleaner-electron/playwright.config.ts",
+    "rootDir": "/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/jon/projects/exifcleaner/exifcleaner-electron/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "dev",
+        "name": "dev",
+        "testDir": "/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "*.spec.ts"
+        ],
+        "timeout": 15000
+      },
+      {
+        "outputDir": "/Users/jon/projects/exifcleaner/exifcleaner-electron/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "smoke",
+        "name": "smoke",
+        "testDir": "/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/smoke",
+        "testIgnore": [],
+        "testMatch": [
+          "*.smoke.ts"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "oracle-accountability.spec.ts",
+      "file": "oracle-accountability.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Oracle accountability",
+          "file": "oracle-accountability.spec.ts",
+          "line": 41,
+          "column": 6,
+          "specs": [
+            {
+              "title": "#240 stripped MP4 does not retain create-date metadata",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "dev",
+                  "projectName": "dev",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 756,
+                      "error": {
+                        "message": "Error: #240 residual create-date metadata after stripping: CreateDate, TrackCreateDate, MediaCreateDate\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"CreateDate\",\u001b[39m\n\u001b[31m+   \"TrackCreateDate\",\u001b[39m\n\u001b[31m+   \"MediaCreateDate\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: #240 residual create-date metadata after stripping: CreateDate, TrackCreateDate, MediaCreateDate\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"CreateDate\",\u001b[39m\n\u001b[31m+   \"TrackCreateDate\",\u001b[39m\n\u001b[31m+   \"MediaCreateDate\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /Users/jon/projects/exifcleaner/exifcleaner-electron/tests/e2e/oracle-accountability.spec.ts:115:6",
+                        "location": {
+                          "file": "/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/e2e/oracle-accountability.spec.ts",
+                          "column": 6,
+                          "line": 115
+                        },
+                        "snippet": "  113 | \t\t\t\tresidualCreateDateTags,\n  114 | \t\t\t\t`#240 residual create-date metadata after stripping: ${residualCreateDateTags.join(\", \")}`,\n> 115 | \t\t\t).toEqual([]);\n      | \t\t\t  ^\n  116 | \t\t\tawait assertMetadataStripped(tempFile);\n  117 | \t\t} finally {\n  118 | \t\t\tcleanup();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/e2e/oracle-accountability.spec.ts",
+                            "column": 6,
+                            "line": 115
+                          },
+                          "message": "Error: #240 residual create-date metadata after stripping: CreateDate, TrackCreateDate, MediaCreateDate\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"CreateDate\",\u001b[39m\n\u001b[31m+   \"TrackCreateDate\",\u001b[39m\n\u001b[31m+   \"MediaCreateDate\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  113 | \t\t\t\tresidualCreateDateTags,\n  114 | \t\t\t\t`#240 residual create-date metadata after stripping: ${residualCreateDateTags.join(\", \")}`,\n> 115 | \t\t\t).toEqual([]);\n      | \t\t\t  ^\n  116 | \t\t\tawait assertMetadataStripped(tempFile);\n  117 | \t\t} finally {\n  118 | \t\t\tcleanup();\n    at /Users/jon/projects/exifcleaner/exifcleaner-electron/tests/e2e/oracle-accountability.spec.ts:115:6"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-30T21:22:32.462Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/jon/projects/exifcleaner/exifcleaner-electron/test-results/oracle-accountability-Orac-84edc-retain-create-date-metadata-dev/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/jon/projects/exifcleaner/exifcleaner-electron/test-results/oracle-accountability-Orac-84edc-retain-create-date-metadata-dev/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/jon/projects/exifcleaner/exifcleaner-electron/tests/e2e/oracle-accountability.spec.ts",
+                        "column": 6,
+                        "line": 115
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d92d246b5303b57d6afb-45ebb4c64a3840569ca0",
+              "file": "oracle-accountability.spec.ts",
+              "line": 75,
+              "column": 2
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-30T21:22:32.077Z",
+    "duration": 1173.092,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}
