@@ -1,8 +1,14 @@
 <!-- exifcleaner-known-limitations:start v1 -->
 ## Known limitations in 4.0.0
 
-No known limitations are approved for this release.
+- Impact: A cleaned MP4 may still include original create-date metadata values.
+  Scope: MP4 files with QuickTime CreateDate, TrackCreateDate, or MediaCreateDate values processed through ExifCleaner 4.0.0
+  Workaround: For sensitive MP4s, run ExifTool manually with -CreateDate= -TrackCreateDate= -MediaCreateDate= after cleaning, then verify those tags are absent.
+  Target fix: 4.1.0.
+  Issue: https://github.com/szTheory/exifcleaner/issues/240
 <!-- exifcleaner-known-limitations:end -->
+
+
 
 
 The first major release in 5 years — a complete rebuild from the ground up. Same privacy-first philosophy, everything else modernized.
