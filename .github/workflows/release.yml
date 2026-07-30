@@ -24,7 +24,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Known-gap release gate
-        run: yarn verify:known-gaps --release
+        run: yarn verify:release
 
       - name: Lint (Prettier)
         run: yarn lint
