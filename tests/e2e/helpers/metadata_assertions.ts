@@ -15,8 +15,8 @@ const EXIFTOOL_PATH =
 		: path.resolve(__dirname, "../../../.resources/nix/bin/exiftool");
 
 // Tags that ExifTool always returns (computed / structural, not user EXIF data)
-const COMPUTED_TAG_PREFIXES = ["File", "Source", "ExifTool"];
-const COMPUTED_TAG_NAMES = new Set(["Directory", "FileName"]);
+const COMPUTED_TAG_PREFIXES = ["File", "ExifTool"];
+const COMPUTED_TAG_NAMES = new Set(["Directory", "FileName", "SourceFile"]);
 const STRUCTURAL_TAG_NAMES = new Set([
 	"MIMEType",
 	"ImageWidth",
@@ -58,19 +58,14 @@ const STRUCTURAL_TAG_NAMES = new Set([
 	"CompressorID",
 	"SourceImageWidth",
 	"SourceImageHeight",
-	"XResolution",
-	"YResolution",
 	"BitDepth",
 	"PixelAspectRatio",
 	"VideoFrameRate",
 	"CompatibleBrands",
 	"MajorBrand",
 	"MinorVersion",
-	"MediaCreateDate",
 	"MediaModifyDate",
-	"TrackCreateDate",
 	"TrackModifyDate",
-	"CreateDate",
 	"ModifyDate",
 	"MovieDataSize",
 	"MovieDataOffset",

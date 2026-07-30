@@ -20,7 +20,11 @@ const EXIFTOOL_PATH =
 		: path.resolve(__dirname, "../../.resources/nix/bin/exiftool");
 
 async function stripAllMetadata(filePath: string): Promise<void> {
-	await execFileAsync(EXIFTOOL_PATH, ["-all=", "-overwrite_original", filePath]);
+	await execFileAsync(EXIFTOOL_PATH, [
+		"-all=",
+		"-overwrite_original",
+		filePath,
+	]);
 }
 
 test.describe("Oracle accountability", () => {
