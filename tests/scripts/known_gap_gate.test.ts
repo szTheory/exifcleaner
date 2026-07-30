@@ -538,9 +538,10 @@ second.fail("${expectedTitle}", async () => {
 
 			expect(result.markers, entry.name).toEqual([]);
 			expect(result.problems.length, entry.name).toBeGreaterThan(0);
-			expect(result.markers.length + result.problems.length, entry.name).toBeGreaterThan(
-				0,
-			);
+			expect(
+				result.markers.length + result.problems.length,
+				entry.name,
+			).toBeGreaterThan(0);
 			expect(
 				result.problems.map((problem) => problem.code),
 				entry.name,
