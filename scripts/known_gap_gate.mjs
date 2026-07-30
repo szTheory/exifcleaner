@@ -200,6 +200,14 @@ function propertyChain(expression) {
 	return names;
 }
 
+function leftmostPropertyReceiver(expression) {
+	let current = expression;
+	while (ts.isPropertyAccessExpression(current)) {
+		current = current.expression;
+	}
+	return ts.isIdentifier(current) ? current : undefined;
+}
+
 function isStringLiteralLike(node) {
 	return ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node);
 }
@@ -701,7 +709,7 @@ function nearestVisibleBinding(expression, localBindings) {
 }
 
 function runnerIdentityForReceiver(expression, runnerAliases, localBindings) {
-	if (!ts.isIdentifier(expression)) {
+	if (expression === undefined || !ts.isIdentifier(expression)) {
 		return undefined;
 	}
 	const identity = runnerAliases.get(expression.text);
@@ -1044,7 +1052,7 @@ function inspectRunnerCall(
 
 	const runnerIdentity = ts.isPropertyAccessExpression(expression)
 		? runnerIdentityForReceiver(
-				expression.expression,
+				leftmostPropertyReceiver(expression),
 				runnerAliases,
 				localBindings,
 			)
