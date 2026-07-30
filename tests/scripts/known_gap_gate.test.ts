@@ -597,19 +597,134 @@ test.describe.only("covered suite", () => {
 		}
 	});
 
+	test("rejects Vitest describe suite controls from trusted receivers", () => {
+		const forbiddenCases = [
+			{
+				name: "canonical suite skip",
+				code: "disabled-test",
+				source: `import { describe } from "vitest";
+describe.skip("covered suite", () => {
+	it("covered behavior", () => {
+		expect(true).toBe(true);
+	});
+});`,
+			},
+			{
+				name: "canonical suite only",
+				code: "focused-test",
+				source: `import { describe } from "vitest";
+describe.only("covered suite", () => {
+	it("covered behavior", () => {
+		expect(true).toBe(true);
+	});
+});`,
+			},
+			{
+				name: "canonical conditional skip",
+				code: "conditional-control",
+				source: `import { describe } from "vitest";
+describe.skipIf(process.platform === "darwin")("covered suite", () => {
+	it("covered behavior", () => {
+		expect(true).toBe(true);
+	});
+});`,
+			},
+			{
+				name: "canonical conditional run",
+				code: "conditional-control",
+				source: `import { describe } from "vitest";
+describe.runIf(process.platform === "darwin")("covered suite", () => {
+	it("covered behavior", () => {
+		expect(true).toBe(true);
+	});
+});`,
+			},
+			{
+				name: "import-alias suite control",
+				code: "disabled-test",
+				source: `import { describe as suite } from "vitest";
+suite.skip("covered suite", () => {
+	it("covered behavior", () => {
+		expect(true).toBe(true);
+	});
+});`,
+			},
+			{
+				name: "assignment-alias suite control",
+				code: "focused-test",
+				source: `import { describe } from "vitest";
+const suite = describe;
+suite.only("covered suite", () => {
+	it("covered behavior", () => {
+		expect(true).toBe(true);
+	});
+});`,
+			},
+		] as const;
+
+		for (const entry of forbiddenCases) {
+			const result = scanRunnerPolicy(
+				entry.source,
+				"tests/domain/example.test.ts",
+			);
+
+			expect(result.markers, entry.name).toEqual([]);
+			expect(result.problems.length, entry.name).toBeGreaterThan(0);
+			expect(
+				result.markers.length + result.problems.length,
+				entry.name,
+			).toBeGreaterThan(0);
+			expect(
+				result.problems.map((problem) => problem.code),
+				entry.name,
+			).toContain(entry.code);
+		}
+	});
+
 	test("does not trust suite-control property chains on local receivers", () => {
-		const result = scanRunnerPolicy(
-			`const test = {
+		const controls = [
+			{
+				name: "local test receiver",
+				source: `const test = {
 	describe: {
 		skip(_title: string, _body: () => void) {},
 	},
 };
 test.describe.skip("covered suite", () => {});`,
-			"tests/e2e/settings.spec.ts",
-		);
+			},
+			{
+				name: "local describe receiver",
+				source: `const describe = {
+	skip(_title: string, _body: () => void) {},
+};
+describe.skip("covered suite", () => {});`,
+			},
+			{
+				name: "foreign describe import",
+				source: `import { describe } from "not-a-runner";
+describe.skip("covered suite", () => {});`,
+			},
+			{
+				name: "shadowed Vitest describe receiver",
+				source: `import { describe } from "vitest";
+{
+	const describe = {
+		skip(_title: string, _body: () => void) {},
+	};
+	describe.skip("covered suite", () => {});
+}`,
+			},
+		] as const;
 
-		expect(result.markers).toEqual([]);
-		expect(result.problems).toEqual([]);
+		for (const entry of controls) {
+			const result = scanRunnerPolicy(
+				entry.source,
+				"tests/domain/example.test.ts",
+			);
+
+			expect(result.markers, entry.name).toEqual([]);
+			expect(result.problems, entry.name).toEqual([]);
+		}
 	});
 
 	test("rejects object-binding expected-failure aliases without inventorying markers", () => {
