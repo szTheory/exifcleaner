@@ -5,12 +5,16 @@ import { describe, expect, test } from "vitest";
 import type { KnownGapProblem } from "../../scripts/known_gap_gate.mjs";
 import {
 	BANNED_PROSE_PHRASES,
+	buildKnownLimitationsBlock,
 	collectTestSourceFiles,
 	formatGitHubAnnotation,
+	formatLiteralMarkerCounts,
 	formatLocalDiagnostic,
+	getLiteralMarkerCounts,
 	scanBannedProse,
 	scanCollectedTestSources,
 	scanRunnerPolicy,
+	validateKnownLimitationsBlock,
 	validateKnownGapsManifest,
 } from "../../scripts/known_gap_gate.mjs";
 
@@ -489,5 +493,90 @@ describe("validateKnownGapsManifest", () => {
 				records: [{ ...allowed.records[0], targetFixVersion: "4.1" }],
 			}),
 		).toContain("allow-disclosure");
+	});
+
+	test("allow records cannot be used for mandatory block categories", () => {
+		const allowedDataLoss = {
+			...manifest,
+			records: [
+				{
+					...record,
+					releasePolicy: "allow",
+					affectedScope: "data loss in the release path",
+					impact: "Original files can be overwritten.",
+					workaround: "None.",
+					targetFixVersion: "4.0.1",
+				},
+			],
+		};
+
+		expect(codesFor(allowedDataLoss)).toContain("blocked-category");
+	});
+});
+
+describe("release-note known limitations block", () => {
+	const allowedRecord = {
+		id: "KG-217-source-tag",
+		issue: 217,
+		runner: "playwright",
+		type: "test.fail",
+		path: "tests/e2e/metadata.spec.ts",
+		title: "#217 stripped files do not retain Source metadata",
+		affectedScope: "JPEG metadata stripping can leave the Source tag behind.",
+		releasePolicy: "allow",
+		impact: "A cleaned JPEG may still contain a non-sensitive Source tag.",
+		workaround: "Remove the tag with ExifTool manually when that field matters.",
+		targetFixVersion: "4.0.1",
+	} as const;
+
+	test("renders a versioned sentinel block for zero allowed records", () => {
+		const block = buildKnownLimitationsBlock([], "4.0.0");
+
+		expect(block).toContain("<!-- exifcleaner-known-limitations:start v1 -->");
+		expect(block).toContain("## Known limitations in 4.0.0");
+		expect(block).toContain("No known limitations are approved for this release.");
+		expect(block).toContain("<!-- exifcleaner-known-limitations:end -->");
+	});
+
+	test("renders user-language allow records without marker titles or backend mechanics", () => {
+		const block = buildKnownLimitationsBlock([allowedRecord], "4.0.0");
+
+		expect(block).toContain("Impact: A cleaned JPEG may still contain a non-sensitive Source tag.");
+		expect(block).toContain("Scope: JPEG metadata stripping can leave the Source tag behind.");
+		expect(block).toContain("Workaround: Remove the tag with ExifTool manually when that field matters.");
+		expect(block).toContain("Target fix: 4.0.1.");
+		expect(block).toContain("Issue: https://github.com/szTheory/exifcleaner/issues/217");
+		expect(block).not.toContain(allowedRecord.title);
+		expect(block).not.toContain(allowedRecord.path);
+		expect(block).not.toContain(allowedRecord.type);
+	});
+
+	test("detects a tampered managed release-note block", () => {
+		const expected = buildKnownLimitationsBlock([allowedRecord], "4.0.0");
+		const tampered = expected.replace("Target fix: 4.0.1.", "Target fix: later.");
+
+		expect(validateKnownLimitationsBlock(expected, [allowedRecord], "4.0.0")).toEqual([]);
+		expect(validateKnownLimitationsBlock(tampered, [allowedRecord], "4.0.0")).toEqual([
+			{
+				code: "release-notes-drift",
+				message: "RELEASE_NOTES.md known limitations block is not current. Run yarn known-gaps:write.",
+			},
+		]);
+	});
+});
+
+describe("release marker count evidence", () => {
+	test("counts the four literal marker strings for release output", () => {
+		const counts = getLiteralMarkerCounts([
+			'test.fail("issue", async () => {}); test.fail("issue 2", async () => {});',
+			'it.fails("issue", () => {}); test.skip("omitted", () => {}); test.fixme("future", () => {});',
+		]);
+
+		expect(formatLiteralMarkerCounts(counts)).toEqual([
+			"test.fail(: 2",
+			"it.fails(: 1",
+			"test.skip(: 1",
+			"test.fixme(: 1",
+		]);
 	});
 });
