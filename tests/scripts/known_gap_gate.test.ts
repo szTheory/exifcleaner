@@ -50,6 +50,19 @@ const onlyProblem = (problems: readonly KnownGapProblem[]): KnownGapProblem => {
 	return problem;
 };
 
+const expectNoVacuousGreen = (
+	source: string,
+	code: string,
+	file = "tests/e2e/settings.spec.ts",
+): void => {
+	const result = scanRunnerPolicy(source, file);
+
+	expect(result.markers).toEqual([]);
+	expect(result.problems.length).toBeGreaterThan(0);
+	expect(result.markers.length + result.problems.length).toBeGreaterThan(0);
+	expect(result.problems.map((problem) => problem.code)).toContain(code);
+};
+
 const readRepoText = (relativePath: string): string =>
 	readFileSync(path.join(process.cwd(), relativePath), "utf8");
 
@@ -565,6 +578,104 @@ test("covered behavior", async () => {
 
 		expect(result.markers).toEqual([]);
 		expect(result.problems).toEqual([]);
+	});
+
+	test("rejects runner-control aliases with semantic policy problems", () => {
+		const agendaControl = ["to", "do"].join("");
+		const forbiddenCases = [
+			{
+				name: "property skip",
+				code: "disabled-test",
+				source: `import { test } from "@playwright/test";
+const hidden = test.skip;
+hidden("covered behavior", async () => {});`,
+			},
+			{
+				name: "destructured fixme",
+				code: "disabled-test",
+				source: `import { test } from "@playwright/test";
+const { fixme: hidden } = test;
+hidden("covered behavior", async () => {});`,
+			},
+			{
+				name: "computed control",
+				code: "disabled-test",
+				source: `import { test } from "vitest";
+const hidden = test["${agendaControl}"];
+hidden("covered behavior", () => {});`,
+				file: "tests/domain/example.test.ts",
+			},
+			{
+				name: "transitive only",
+				code: "focused-test",
+				source: `import { test } from "vitest";
+const first = test.only;
+const second = first;
+second("covered behavior", () => {});`,
+				file: "tests/domain/example.test.ts",
+			},
+			{
+				name: "cycle-connected skipIf",
+				code: "conditional-control",
+				source: `import { test } from "vitest";
+let first = test.skipIf;
+let second = first;
+first = second;
+second(process.platform === "darwin")("covered behavior", () => {});`,
+				file: "tests/domain/example.test.ts",
+			},
+			{
+				name: "runner alias runIf",
+				code: "conditional-control",
+				source: `import { test as base } from "vitest";
+const spec = base;
+spec["runIf"](process.platform === "darwin")("covered behavior", () => {});`,
+				file: "tests/domain/example.test.ts",
+			},
+		] as const;
+
+		for (const entry of forbiddenCases) {
+			expectNoVacuousGreen(entry.source, entry.code, entry.file);
+		}
+	});
+
+	test("keeps helper option data clean while runner options fail closed", () => {
+		const helperResult = scanRunnerPolicy(
+			`import { test } from "@playwright/test";
+fixture({ skip: true });
+test("covered behavior", async () => {
+	expect(true).toBe(true);
+});`,
+			"tests/e2e/settings.spec.ts",
+		);
+		const helperCycleResult = scanRunnerPolicy(
+			`import { test } from "@playwright/test";
+let left = right;
+let right = left;
+left({ skip: true });
+test("covered behavior", async () => {
+	expect(true).toBe(true);
+});`,
+			"tests/e2e/settings.spec.ts",
+		);
+
+		expect(helperResult.markers).toEqual([]);
+		expect(helperResult.problems).toEqual([]);
+		expect(helperCycleResult.markers).toEqual([]);
+		expect(helperCycleResult.problems).toEqual([]);
+		expectNoVacuousGreen(
+			`import { test } from "vitest";
+test("covered behavior", { skip: true }, () => {});`,
+			"options-object-control",
+			"tests/domain/example.test.ts",
+		);
+		expectNoVacuousGreen(
+			`import { test as base } from "vitest";
+const spec = base;
+spec("covered behavior", { only: true }, () => {});`,
+			"options-object-control",
+			"tests/domain/example.test.ts",
+		);
 	});
 
 	test("requires literal issue-linked marker titles", () => {
