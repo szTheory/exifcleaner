@@ -1,4 +1,10 @@
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import {
+	mkdtempSync,
+	mkdirSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
@@ -43,6 +49,9 @@ const onlyProblem = (problems: readonly KnownGapProblem[]): KnownGapProblem => {
 	}
 	return problem;
 };
+
+const readRepoText = (relativePath: string): string =>
+	readFileSync(path.join(process.cwd(), relativePath), "utf8");
 
 describe("scanBannedProse", () => {
 	test("reports every locked phrase without embedding policy text in this test file", () => {
@@ -682,5 +691,59 @@ describe("release marker count evidence", () => {
 			"test.skip(: 1",
 			`${disabledMarker}: 1`,
 		]);
+	});
+});
+
+describe("release workflow enforcement", () => {
+	test("runs the composed release gate before expensive release work", () => {
+		const workflow = readRepoText(".github/workflows/release.yml");
+		const runLines = workflow
+			.split("\n")
+			.map((line, index) => ({ index, text: line.trim() }));
+		const releaseGateRuns = runLines.filter(
+			(line) => line.text === "run: yarn verify:release",
+		);
+		const installIndex = runLines.findIndex(
+			(line) => line.text === "run: yarn install --frozen-lockfile",
+		);
+		const gateIndex = releaseGateRuns[0]?.index ?? -1;
+		const lintIndex = runLines.findIndex(
+			(line) => line.text === "run: yarn lint",
+		);
+		const compileIndex = runLines.findIndex(
+			(line) => line.text === "run: yarn compile",
+		);
+
+		expect(releaseGateRuns).toHaveLength(1);
+		expect(installIndex).toBeGreaterThanOrEqual(0);
+		expect(gateIndex).toBeGreaterThan(installIndex);
+		expect(gateIndex).toBeLessThan(lintIndex);
+		expect(gateIndex).toBeLessThan(compileIndex);
+		expect(workflow).toMatch(/build-macos:[\s\S]*?needs: test/);
+		expect(workflow).toMatch(/build-windows:[\s\S]*?needs: test/);
+		expect(workflow).toMatch(/build-linux:[\s\S]*?needs: test/);
+	});
+
+	test("traces verify:release through the managed release-note checker", () => {
+		const packageJson = JSON.parse(readRepoText("package.json")) as {
+			scripts?: Record<string, string>;
+		};
+		const scripts = packageJson.scripts ?? {};
+		const verifyRelease = scripts["verify:release"];
+		const knownGapsCheck = scripts["known-gaps:check"];
+
+		expect(typeof verifyRelease).toBe("string");
+		expect(typeof knownGapsCheck).toBe("string");
+
+		const releaseCommands = verifyRelease
+			.split("&&")
+			.map((command) => command.trim());
+		expect(releaseCommands.slice(0, 2)).toEqual([
+			"yarn verify:known-gaps --release",
+			"yarn known-gaps:check",
+		]);
+		expect(knownGapsCheck).toBe(
+			"node scripts/known_gap_gate.mjs --check-release-notes",
+		);
 	});
 });
