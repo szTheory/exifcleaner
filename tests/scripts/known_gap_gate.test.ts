@@ -586,6 +586,7 @@ test("covered behavior", async () => {
 			{
 				name: "property skip",
 				code: "disabled-test",
+				file: "tests/e2e/settings.spec.ts",
 				source: `import { test } from "@playwright/test";
 const hidden = test.skip;
 hidden("covered behavior", async () => {});`,
@@ -593,6 +594,7 @@ hidden("covered behavior", async () => {});`,
 			{
 				name: "destructured fixme",
 				code: "disabled-test",
+				file: "tests/e2e/settings.spec.ts",
 				source: `import { test } from "@playwright/test";
 const { fixme: hidden } = test;
 hidden("covered behavior", async () => {});`,
