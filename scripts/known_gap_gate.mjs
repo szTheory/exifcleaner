@@ -26,6 +26,40 @@ const RELEASE_COUNT_MARKERS = Object.freeze([
 	"test.skip(",
 	"test.fixme(",
 ]);
+const FORBIDDEN_RUNNER_CONTROL_PROPERTIES = Object.freeze(
+	new Set(["skip", "fixme", "todo", "only", "skipIf", "runIf"]),
+);
+const RUNNER_CONTROL_PROBLEMS = Object.freeze({
+	skip: Object.freeze({
+		code: "disabled-test",
+		message:
+			"Disabled runner coverage is forbidden; use executable expected failure for reviewed gaps.",
+	}),
+	fixme: Object.freeze({
+		code: "disabled-test",
+		message:
+			"Disabled runner coverage is forbidden; use executable expected failure for reviewed gaps.",
+	}),
+	todo: Object.freeze({
+		code: "disabled-test",
+		message:
+			"Disabled runner coverage is forbidden; use executable expected failure for reviewed gaps.",
+	}),
+	only: Object.freeze({
+		code: "focused-test",
+		message: "Focused runner coverage is forbidden.",
+	}),
+	skipIf: Object.freeze({
+		code: "conditional-control",
+		message:
+			"Conditional runner controls can omit product coverage and are forbidden.",
+	}),
+	runIf: Object.freeze({
+		code: "conditional-control",
+		message:
+			"Conditional runner controls can omit product coverage and are forbidden.",
+	}),
+});
 
 export const BANNED_PROSE_PHRASES = Object.freeze([
 	"deferred",
@@ -175,6 +209,14 @@ function expectedFailurePropertyText(node) {
 function isExpectedFailureProperty(node) {
 	const text = expectedFailurePropertyText(node);
 	return text === "fail" || text === "fails";
+}
+
+function runnerControlPropertyText(node) {
+	const text = expectedFailurePropertyText(node);
+	if (text !== undefined && FORBIDDEN_RUNNER_CONTROL_PROPERTIES.has(text)) {
+		return text;
+	}
+	return undefined;
 }
 
 function markerFromLiteralTitle(title) {
@@ -393,6 +435,140 @@ function resolveRunnerAliases(sourceFile) {
 	return runnerAliases;
 }
 
+function isTrustedRunnerReceiver(expression, runnerAliases) {
+	return (
+		(ts.isIdentifier(expression) &&
+			(expression.text === "test" ||
+				expression.text === "it" ||
+				runnerAliases.has(expression.text))) ||
+		false
+	);
+}
+
+function runnerControlFromReceiverCall(expression, runnerAliases) {
+	if (ts.isPropertyAccessExpression(expression)) {
+		const receiver = expression.expression;
+		const control = runnerControlPropertyText(expression.name);
+		if (
+			control !== undefined &&
+			isTrustedRunnerReceiver(receiver, runnerAliases)
+		) {
+			return control;
+		}
+	}
+
+	if (ts.isElementAccessExpression(expression)) {
+		const receiver = expression.expression;
+		const argument = expression.argumentExpression;
+		const control =
+			argument === undefined ? undefined : runnerControlPropertyText(argument);
+		if (
+			control !== undefined &&
+			isTrustedRunnerReceiver(receiver, runnerAliases)
+		) {
+			return control;
+		}
+	}
+
+	return undefined;
+}
+
+function addControlAliasEdge(aliasEdges, localName, sourceName) {
+	const sources = aliasEdges.get(localName) ?? new Set();
+	sources.add(sourceName);
+	aliasEdges.set(localName, sources);
+}
+
+function resolveRunnerControlAliases(sourceFile, runnerAliases) {
+	const aliasEdges = new Map();
+	const controlSeeds = new Map();
+
+	function seedAlias(localName, control) {
+		if (controlSeeds.has(localName)) {
+			return;
+		}
+		controlSeeds.set(localName, control);
+	}
+
+	function visit(node) {
+		if (
+			ts.isVariableDeclaration(node) &&
+			ts.isIdentifier(node.name) &&
+			node.initializer !== undefined
+		) {
+			const control = runnerControlFromReceiverCall(
+				node.initializer,
+				runnerAliases,
+			);
+			if (control !== undefined) {
+				seedAlias(node.name.text, control);
+			}
+
+			if (ts.isIdentifier(node.initializer)) {
+				addControlAliasEdge(aliasEdges, node.name.text, node.initializer.text);
+			}
+		}
+
+		if (
+			ts.isVariableDeclaration(node) &&
+			ts.isObjectBindingPattern(node.name) &&
+			node.initializer !== undefined &&
+			isTrustedRunnerReceiver(node.initializer, runnerAliases)
+		) {
+			for (const element of node.name.elements) {
+				const extractedProperty = element.propertyName ?? element.name;
+				const control = runnerControlPropertyText(extractedProperty);
+				if (control !== undefined && ts.isIdentifier(element.name)) {
+					seedAlias(element.name.text, control);
+				}
+			}
+		}
+
+		if (
+			ts.isBinaryExpression(node) &&
+			node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+			ts.isIdentifier(node.left) &&
+			ts.isIdentifier(node.right)
+		) {
+			addControlAliasEdge(aliasEdges, node.left.text, node.right.text);
+		}
+
+		ts.forEachChild(node, visit);
+	}
+
+	visit(sourceFile);
+
+	const aliases = new Map();
+	function resolve(name, seen = new Set()) {
+		const seeded = controlSeeds.get(name);
+		if (seeded !== undefined) {
+			return seeded;
+		}
+		if (seen.has(name)) {
+			return undefined;
+		}
+		seen.add(name);
+
+		const sources = aliasEdges.get(name) ?? [];
+		for (const source of sources) {
+			const resolved = resolve(source, seen);
+			if (resolved !== undefined) {
+				return resolved;
+			}
+		}
+		return undefined;
+	}
+
+	for (const name of new Set([...controlSeeds.keys(), ...aliasEdges.keys()])) {
+		const control = resolve(name);
+		if (control !== undefined) {
+			aliases.set(name, control);
+		}
+	}
+
+	return aliases;
+}
+
 function isAliasedExpectedFailureReceiver(expression, runnerAliases) {
 	if (ts.isPropertyAccessExpression(expression)) {
 		const receiver = expression.expression;
@@ -422,6 +598,7 @@ function inspectRunnerCall(
 	node,
 	aliases,
 	runnerAliases,
+	runnerControlAliases,
 	problems,
 	markers,
 ) {
@@ -447,6 +624,30 @@ function inspectRunnerCall(
 				"wrapper-marker",
 				"Known-gap wrappers hide the runner/type/path/title inventory.",
 			),
+		);
+		return;
+	}
+
+	if (
+		ts.isIdentifier(expression) &&
+		runnerControlAliases.has(expression.text)
+	) {
+		const control = runnerControlAliases.get(expression.text);
+		const diagnostic = RUNNER_CONTROL_PROBLEMS[control];
+		problems.push(
+			problem(sourceFile, node, diagnostic.code, diagnostic.message),
+		);
+		return;
+	}
+
+	const receiverControl = runnerControlFromReceiverCall(
+		expression,
+		runnerAliases,
+	);
+	if (receiverControl !== undefined) {
+		const diagnostic = RUNNER_CONTROL_PROBLEMS[receiverControl];
+		problems.push(
+			problem(sourceFile, node, diagnostic.code, diagnostic.message),
 		);
 		return;
 	}
@@ -485,11 +686,7 @@ function inspectRunnerCall(
 	}
 
 	if (!ts.isPropertyAccessExpression(expression)) {
-		if (
-			(ts.isIdentifier(expression) &&
-				(expression.text === "test" || expression.text === "it")) ||
-			ts.isIdentifier(expression)
-		) {
+		if (isTrustedRunnerReceiver(expression, runnerAliases)) {
 			const optionsArg = node.arguments.find(ts.isObjectLiteralExpression);
 			if (optionsArg !== undefined && hasOnlyOrSkipProperty(optionsArg)) {
 				problems.push(
@@ -635,6 +832,10 @@ export function scanRunnerPolicy(source, filename) {
 		ts.ScriptKind.TSX,
 	);
 	const runnerAliases = resolveRunnerAliases(sourceFile);
+	const runnerControlAliases = resolveRunnerControlAliases(
+		sourceFile,
+		runnerAliases,
+	);
 	const aliases = new Set();
 	const markers = [];
 	const problems = [];
@@ -693,6 +894,7 @@ export function scanRunnerPolicy(source, filename) {
 				node,
 				aliases,
 				runnerAliases,
+				runnerControlAliases,
 				problems,
 				markers,
 			);
