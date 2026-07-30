@@ -239,6 +239,15 @@ test.fail("${expectedTitle}", async () => {
 				runner: "playwright",
 			},
 			{
+				file: "tests/e2e/settings.spec.ts",
+				source: `import { test } from "@playwright/test";
+test.fail("${expectedTitle}", { tag: "@known-gap" }, function () {
+	expect(true).toBe(false);
+});`,
+				type: "test.fail",
+				runner: "playwright",
+			},
+			{
 				file: "tests/application/example.test.ts",
 				source: `import { test } from "vitest";
 test.fails("${expectedTitle}", () => {
@@ -273,6 +282,42 @@ it.fails("${expectedTitle}", () => {
 				issue: 304,
 			})),
 		);
+	});
+
+	test("rejects expected-failure declarations without executable function bodies", () => {
+		const cases = [
+			{
+				source: `import { test } from "@playwright/test";
+test.fail("${expectedTitle}");`,
+			},
+			{
+				source: `import { test } from "vitest";
+test.fails("${expectedTitle}");`,
+			},
+			{
+				source: `import { it } from "vitest";
+it.fails("${expectedTitle}");`,
+			},
+			{
+				source: `import { test } from "@playwright/test";
+test.fail("${expectedTitle}", { tag: "@known-gap" });`,
+			},
+			{
+				source: `import { test } from "vitest";
+test.fails("${expectedTitle}", { retry: 0 }, () => {
+	expect(true).toBe(false);
+});`,
+			},
+		] as const;
+
+		for (const entry of cases) {
+			const result = scanRunnerPolicy(entry.source, "tests/e2e/settings.spec.ts");
+
+			expect(result.markers).toEqual([]);
+			expect(result.problems.map((problem) => problem.code)).toEqual([
+				"marker-body",
+			]);
+		}
 	});
 
 	test("rejects malformed expected-failure markers and runner controls fail closed", () => {
