@@ -232,6 +232,26 @@ function runnerControlPropertyText(node) {
 	return undefined;
 }
 
+function runnerIdentitySupportsControl(runnerIdentity, control) {
+	if (runnerIdentity === undefined || control === undefined) {
+		return false;
+	}
+	if (
+		runnerIdentity.canonical === "test" ||
+		runnerIdentity.canonical === "it"
+	) {
+		return true;
+	}
+	return (
+		runnerIdentity.runner === "vitest" &&
+		runnerIdentity.canonical === "describe" &&
+		(control === "skip" ||
+			control === "only" ||
+			control === "skipIf" ||
+			control === "runIf")
+	);
+}
+
 function markerFromLiteralTitle(title) {
 	const match = /^#([1-9][0-9]*)\s+\S/.exec(title);
 	if (match === null) {
@@ -496,7 +516,11 @@ function resolveRunnerAliases(sourceFile) {
 					: "vitest";
 			for (const element of node.importClause.namedBindings.elements) {
 				const importedName = element.propertyName?.text ?? element.name.text;
-				if (importedName === "test" || importedName === "it") {
+				if (
+					importedName === "test" ||
+					importedName === "it" ||
+					(runner === "vitest" && importedName === "describe")
+				) {
 					seedRunner(
 						element.name.text,
 						importedName,
@@ -740,7 +764,10 @@ function runnerControlFromReceiverCall(
 		const control = runnerControlPropertyText(expression.name);
 		if (
 			control !== undefined &&
-			isTrustedRunnerReceiver(receiver, runnerAliases, localBindings)
+			runnerIdentitySupportsControl(
+				runnerIdentityForReceiver(receiver, runnerAliases, localBindings),
+				control,
+			)
 		) {
 			return control;
 		}
@@ -753,7 +780,10 @@ function runnerControlFromReceiverCall(
 			argument === undefined ? undefined : runnerControlPropertyText(argument);
 		if (
 			control !== undefined &&
-			isTrustedRunnerReceiver(receiver, runnerAliases, localBindings)
+			runnerIdentitySupportsControl(
+				runnerIdentityForReceiver(receiver, runnerAliases, localBindings),
+				control,
+			)
 		) {
 			return control;
 		}
@@ -1091,11 +1121,10 @@ function inspectRunnerCall(
 	}
 
 	const last = chain.at(-1);
-	const receiver = chain[0];
 	const trustedReceiver = runnerIdentity !== undefined;
 	if (
 		trustedReceiver &&
-		(receiver === "test" || receiver === "it") &&
+		runnerIdentitySupportsControl(runnerIdentity, last) &&
 		(last === "skip" || last === "fixme" || last === "todo")
 	) {
 		problems.push(
@@ -1111,7 +1140,7 @@ function inspectRunnerCall(
 
 	if (
 		trustedReceiver &&
-		(receiver === "test" || receiver === "it") &&
+		runnerIdentitySupportsControl(runnerIdentity, last) &&
 		last === "only"
 	) {
 		problems.push(
@@ -1126,8 +1155,8 @@ function inspectRunnerCall(
 	}
 
 	if (
-		(receiver === "test" || receiver === "it") &&
 		trustedReceiver &&
+		runnerIdentitySupportsControl(runnerIdentity, last) &&
 		(last === "skipIf" || last === "runIf")
 	) {
 		problems.push(
