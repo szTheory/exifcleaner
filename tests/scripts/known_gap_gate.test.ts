@@ -449,6 +449,38 @@ test("covered behavior", async () => {
 		expect(codes).toEqual(forbiddenCases.map((entry) => entry.code));
 	});
 
+	test("rejects object-binding expected-failure aliases without inventorying markers", () => {
+		const result = scanRunnerPolicy(
+			`import { test } from "@playwright/test";
+const { fail } = test;
+fail("${expectedTitle}", async () => {
+	expect(true).toBe(false);
+});`,
+			"tests/e2e/settings.spec.ts",
+		);
+
+		expect(result.markers).toEqual([]);
+		expect(result.problems.map((problem) => problem.code)).toEqual([
+			"alias-marker",
+		]);
+	});
+
+	test("rejects computed-property expected-failure aliases without inventorying markers", () => {
+		const result = scanRunnerPolicy(
+			`import { test } from "@playwright/test";
+const fail = test["fail"];
+fail("${expectedTitle}", async () => {
+	expect(true).toBe(false);
+});`,
+			"tests/e2e/settings.spec.ts",
+		);
+
+		expect(result.markers).toEqual([]);
+		expect(result.problems.map((problem) => problem.code)).toEqual([
+			"alias-marker",
+		]);
+	});
+
 	test("requires literal issue-linked marker titles", () => {
 		const missingIssue = scanRunnerPolicy(
 			`import { test } from "@playwright/test";
