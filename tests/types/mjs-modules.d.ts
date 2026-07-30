@@ -61,6 +61,26 @@ declare module "*known_gap_gate.mjs" {
 	export function scanCollectedTestSources(
 		rootDir?: string,
 	): readonly KnownGapProblem[];
+	export type KnownGapMarker = {
+		readonly runner: "playwright" | "vitest";
+		readonly type: "test.fail" | "test.fails" | "it.fails";
+		readonly file: string;
+		readonly title: string;
+		readonly issue: number;
+	};
+	export type RunnerPolicyProblem = {
+		readonly file: string;
+		readonly line: number;
+		readonly code: string;
+		readonly message: string;
+	};
+	export function scanRunnerPolicy(
+		source: string,
+		filename: string,
+	): {
+		readonly markers: readonly KnownGapMarker[];
+		readonly problems: readonly RunnerPolicyProblem[];
+	};
 	export function formatLocalDiagnostic(problem: KnownGapProblem): string;
 	export function formatGitHubAnnotation(problem: KnownGapProblem): string;
 	export function main(): number;

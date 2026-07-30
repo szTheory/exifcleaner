@@ -10,6 +10,7 @@ import {
 	formatLocalDiagnostic,
 	scanBannedProse,
 	scanCollectedTestSources,
+	scanRunnerPolicy,
 } from "../../scripts/known_gap_gate.mjs";
 
 const makeSource = (phrase: string): string =>
@@ -214,5 +215,158 @@ describe("diagnostic formatting", () => {
 		expect(formatGitHubAnnotation(problem)).toContain(
 			"file=tests/e2e/weird%3Apath%2Cspec.spec.ts,line=3",
 		);
+	});
+});
+
+describe("scanRunnerPolicy", () => {
+	const expectedTitle = "#304 save-as-copy on: original survives, a cleaned copy appears";
+
+	test("inventories direct declaration-time Playwright and Vitest expected-failure markers", () => {
+		const cases = [
+			{
+				file: "tests/e2e/settings.spec.ts",
+				source: `import { test } from "@playwright/test";
+test.fail("${expectedTitle}", async () => {
+	expect(true).toBe(false);
+});`,
+				type: "test.fail",
+				runner: "playwright",
+			},
+			{
+				file: "tests/application/example.test.ts",
+				source: `import { test } from "vitest";
+test.fails("${expectedTitle}", () => {
+	expect(true).toBe(false);
+});`,
+				type: "test.fails",
+				runner: "vitest",
+			},
+			{
+				file: "tests/domain/example.test.ts",
+				source: `import { it } from "vitest";
+it.fails("${expectedTitle}", () => {
+	expect(true).toBe(false);
+});`,
+				type: "it.fails",
+				runner: "vitest",
+			},
+		] as const;
+
+		const markers = cases.flatMap((entry) => {
+			const result = scanRunnerPolicy(entry.source, entry.file);
+			expect(result.problems).toEqual([]);
+			return result.markers;
+		});
+
+		expect(markers).toEqual(
+			cases.map((entry) => ({
+				runner: entry.runner,
+				type: entry.type,
+				file: entry.file,
+				title: expectedTitle,
+				issue: 304,
+			})),
+		);
+	});
+
+	test("rejects malformed expected-failure markers and runner controls fail closed", () => {
+		const forbiddenCases = [
+			{
+				code: "dynamic-title",
+				source: `import { test } from "@playwright/test";
+const title = "${expectedTitle}";
+test.fail(title, async () => {});`,
+			},
+			{
+				code: "wrapper-marker",
+				source: `import { test } from "@playwright/test";
+knownGap("${expectedTitle}", async () => {});`,
+			},
+			{
+				code: "alias-marker",
+				source: `import { test } from "@playwright/test";
+const mark = test.fail;
+mark("${expectedTitle}", async () => {});`,
+			},
+			{
+				code: "computed-marker",
+				source: `import { test } from "@playwright/test";
+test["fail"]("${expectedTitle}", async () => {});`,
+			},
+			{
+				code: "runtime-marker",
+				source: `import { test } from "@playwright/test";
+test("${expectedTitle}", async () => {
+	test.fail(true, "platform-specific");
+});`,
+			},
+			{
+				code: "suite-marker",
+				source: `import { test } from "@playwright/test";
+test.describe("suite", () => {
+	test.fail();
+});`,
+			},
+			{
+				code: "chained-marker",
+				source: `import { test } from "@playwright/test";
+test.fail.only("${expectedTitle}", async () => {});`,
+			},
+			{
+				code: "disabled-test",
+				source: `import { test } from "@playwright/test";
+test.skip("covered behavior", async () => {});`,
+			},
+			{
+				code: "focused-test",
+				source: `import { test } from "vitest";
+test.only("covered behavior", () => {});`,
+			},
+			{
+				code: "conditional-control",
+				source: `import { test } from "vitest";
+test.skipIf(process.platform === "darwin")("covered behavior", () => {});`,
+			},
+			{
+				code: "options-object-control",
+				source: `import { test } from "vitest";
+test("covered behavior", { only: true }, () => {});`,
+			},
+			{
+				code: "step-skip",
+				source: `import { test } from "@playwright/test";
+test("covered behavior", async () => {
+	await test.step("step", async (step) => step.skip());
+});`,
+			},
+		] as const;
+
+		const codes = forbiddenCases.flatMap((entry) =>
+			scanRunnerPolicy(entry.source, "tests/e2e/settings.spec.ts").problems.map(
+				(problem) => problem.code,
+			),
+		);
+
+		expect(codes).toEqual(forbiddenCases.map((entry) => entry.code));
+	});
+
+	test("requires literal issue-linked marker titles", () => {
+		const missingIssue = scanRunnerPolicy(
+			`import { test } from "@playwright/test";
+test.fail("save-as-copy on: original survives", async () => {});`,
+			"tests/e2e/settings.spec.ts",
+		);
+		const nonLiteral = scanRunnerPolicy(
+			`import { test } from "vitest";
+test.fails(\`#304 ${"${"}String("save-as-copy")}\`, () => {});`,
+			"tests/application/example.test.ts",
+		);
+
+		expect(missingIssue.problems.map((problem) => problem.code)).toEqual([
+			"marker-title",
+		]);
+		expect(nonLiteral.problems.map((problem) => problem.code)).toEqual([
+			"marker-title",
+		]);
 	});
 });
