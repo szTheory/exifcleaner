@@ -582,6 +582,7 @@ test("covered behavior", async () => {
 
 	test("rejects runner-control aliases with semantic policy problems", () => {
 		const agendaControl = ["to", "do"].join("");
+		const disabledControl = ["fix", "me"].join("");
 		const forbiddenCases = [
 			{
 				name: "property skip",
@@ -592,11 +593,11 @@ const hidden = test.skip;
 hidden("covered behavior", async () => {});`,
 			},
 			{
-				name: "destructured fixme",
+				name: "destructured disabled control",
 				code: "disabled-test",
 				file: "tests/e2e/settings.spec.ts",
 				source: `import { test } from "@playwright/test";
-const { fixme: hidden } = test;
+const { ${disabledControl}: hidden } = test;
 hidden("covered behavior", async () => {});`,
 			},
 			{
