@@ -872,6 +872,50 @@ spec("covered behavior", { ${agendaControl}: true }, () => {});`,
 const spec = base;
 spec("${expectedTitle}", { fails: true }, () => {});`,
 			},
+			{
+				name: "canonical test dynamic agenda control",
+				code: "disabled-test",
+				source: `import { test } from "vitest";
+const disabled = true;
+test("covered behavior", { ${agendaControl}: disabled }, () => {});`,
+			},
+			{
+				name: "canonical it dynamic agenda string key",
+				code: "disabled-test",
+				source: `import { it } from "vitest";
+const disabled = true;
+it("covered behavior", { "${agendaControl}": disabled }, () => {});`,
+			},
+			{
+				name: "canonical test dynamic fails",
+				code: "options-object-marker",
+				source: `import { test } from "vitest";
+const expected = true;
+test("${expectedTitle}", { fails: expected }, () => {});`,
+			},
+			{
+				name: "canonical it dynamic fails string key",
+				code: "options-object-marker",
+				source: `import { it } from "vitest";
+const expected = true;
+it("${expectedTitle}", { "fails": expected }, () => {});`,
+			},
+			{
+				name: "trusted runner alias dynamic agenda control",
+				code: "disabled-test",
+				source: `import { test as base } from "vitest";
+const disabled = true;
+const spec = base;
+spec("covered behavior", { ${agendaControl}: disabled }, () => {});`,
+			},
+			{
+				name: "trusted runner alias dynamic fails",
+				code: "options-object-marker",
+				source: `import { it as base } from "vitest";
+const expected = true;
+const spec = base;
+spec("${expectedTitle}", { fails: expected }, () => {});`,
+			},
 		] as const;
 
 		for (const entry of forbiddenCases) {
@@ -897,6 +941,12 @@ spec("${expectedTitle}", { fails: true }, () => {});`,
 test("covered behavior", { ${agendaControl}: false, fails: false }, () => {});`,
 			"tests/domain/example.test.ts",
 		);
+		const falseValuedAlias = scanRunnerPolicy(
+			`import { it as base } from "vitest";
+const spec = base;
+spec("covered behavior", { "${agendaControl}": false, "fails": false }, () => {});`,
+			"tests/domain/example.test.ts",
+		);
 		const helper = scanRunnerPolicy(
 			`import { test } from "vitest";
 fixture({ ${agendaControl}: true, fails: true });
@@ -911,6 +961,8 @@ test("covered behavior", { ${agendaControl}: true, fails: true }, () => {});`,
 
 		expect(falseValued.markers).toEqual([]);
 		expect(falseValued.problems).toEqual([]);
+		expect(falseValuedAlias.markers).toEqual([]);
+		expect(falseValuedAlias.problems).toEqual([]);
 		expect(helper.markers).toEqual([]);
 		expect(helper.problems).toEqual([]);
 		expect(fakeReceiver.markers).toEqual([]);
