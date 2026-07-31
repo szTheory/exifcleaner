@@ -129,6 +129,40 @@ describe("exif:remove handler", () => {
 		});
 	});
 
+	it.each([
+		["raf", "/tmp/sample_cleaned.raf"],
+		["cr2", "/tmp/sample_cleaned.cr2"],
+		["cr3", "/tmp/sample_cleaned.cr3"],
+		["nef", "/tmp/sample_cleaned.nef"],
+		["arw", "/tmp/sample_cleaned.arw"],
+		["orf", "/tmp/sample_cleaned.orf"],
+		["rw2", "/tmp/sample_cleaned.rw2"],
+		["dng", "/tmp/sample_cleaned.dng"],
+		["pef", "/tmp/sample_cleaned.pef"],
+		["srw", "/tmp/sample_cleaned.srw"],
+		["RAF", "/tmp/sample_cleaned.RAF"],
+		["Cr3", "/tmp/sample_cleaned.Cr3"],
+	])("returns the exact generated RAW copy for .%s", async (extension, outputPath) => {
+		const { container, stripMetadata } = makeContainer({ saveAsCopy: false });
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), `/tmp/sample.${extension}`);
+
+		expect(stripMetadata.execute).toHaveBeenCalledWith(
+			expect.objectContaining({
+				filePath: `/tmp/sample.${extension}`,
+				saveAsCopy: true,
+				outputPath,
+			}),
+		);
+		expect(result).toEqual({
+			success: true,
+			outputPath,
+			wasForcedCopy: true,
+		});
+	});
+
 	it("passes and returns an absolute root copy path", async () => {
 		const { container, stripMetadata } = makeContainer({ saveAsCopy: true });
 		setupExifHandlers({ container });

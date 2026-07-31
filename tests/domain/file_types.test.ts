@@ -2,7 +2,9 @@ import { it, expect } from "vitest";
 import {
 	isRawFile,
 	isSupportedFile,
+	isVideoFile,
 	RAW_EXTENSIONS,
+	VIDEO_EXTENSIONS,
 } from "../../src/domain/files/file_types";
 
 it("returns true for supported image extensions", () => {
@@ -52,4 +54,19 @@ it("classifies exactly the supported RAW extensions case-insensitively", () => {
 	expect(isRawFile({ filename: "sample.raf" })).toBe(true);
 	expect(isRawFile({ filename: "sample.RAF" })).toBe(true);
 	expect(isRawFile({ filename: "sample.jpg" })).toBe(false);
+});
+
+it("classifies exactly the seven supported video extensions case-insensitively", () => {
+	expect([...VIDEO_EXTENSIONS]).toEqual([
+		".mp4",
+		".mov",
+		".avi",
+		".mkv",
+		".m4v",
+		".3gp",
+		".wmv",
+	]);
+	expect(isVideoFile({ filename: "sample.mp4" })).toBe(true);
+	expect(isVideoFile({ filename: "sample.MOV" })).toBe(true);
+	expect(isVideoFile({ filename: "sample.jpg" })).toBe(false);
 });

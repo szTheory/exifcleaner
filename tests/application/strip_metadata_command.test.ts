@@ -131,6 +131,35 @@ describe("arg assembly", () => {
 		expect(args).not.toContain("-overwrite_original");
 	});
 
+	it.each([
+		["raf", "/tmp/sample_cleaned.raf"],
+		["cr2", "/tmp/sample_cleaned.cr2"],
+		["cr3", "/tmp/sample_cleaned.cr3"],
+		["nef", "/tmp/sample_cleaned.nef"],
+		["arw", "/tmp/sample_cleaned.arw"],
+		["orf", "/tmp/sample_cleaned.orf"],
+		["rw2", "/tmp/sample_cleaned.rw2"],
+		["dng", "/tmp/sample_cleaned.dng"],
+		["pef", "/tmp/sample_cleaned.pef"],
+		["srw", "/tmp/sample_cleaned.srw"],
+		["RAF", "/tmp/sample_cleaned.RAF"],
+		["Cr3", "/tmp/sample_cleaned.Cr3"],
+	])("uses the exact copy destination for RAW .%s", async (extension, outputPath) => {
+		await command.execute({
+			filePath: `/tmp/sample.${extension}`,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveTimestamps: false,
+			saveAsCopy: false,
+			outputPath,
+		});
+
+		const args = exiftool.calls[0]!.args[1] as string[];
+		expect(args).toContain("-o");
+		expect(args[args.indexOf("-o") + 1]).toBe(outputPath);
+		expect(args).not.toContain("-overwrite_original");
+	});
+
 	it("with saveAsCopy=false: args contain -overwrite_original and NOT -o", async () => {
 		await command.execute({
 			filePath: "/tmp/photo.jpg",
