@@ -20,6 +20,7 @@ function makeFile(overrides: Partial<FileEntry> = {}): FileEntry {
 		afterTags: null,
 		beforeMetadata: null,
 		afterMetadata: null,
+		outputPath: undefined,
 		error: null,
 		...overrides,
 	};
@@ -85,6 +86,7 @@ describe("appReducer", () => {
 			expect(added!.afterTags).toBeNull();
 			expect(added!.beforeMetadata).toBeNull();
 			expect(added!.afterMetadata).toBeNull();
+			expect(added!.outputPath).toBeUndefined();
 			expect(added!.error).toBeNull();
 		});
 	});
@@ -147,12 +149,46 @@ describe("appReducer", () => {
 				afterTags: 3,
 				beforeMetadata: beforeMeta,
 				afterMetadata: afterMeta,
+				outputPath: "/Users/test/photos/image_cleaned_2.jpg",
 			});
 
 			expect(result.files[0]!.beforeTags).toBe(42);
 			expect(result.files[0]!.afterTags).toBe(3);
 			expect(result.files[0]!.beforeMetadata).toEqual(beforeMeta);
 			expect(result.files[0]!.afterMetadata).toEqual(afterMeta);
+		});
+
+		it("stores outputPath while preserving submitted row identity", () => {
+			const file = makeFile({
+				id: "file-1",
+				path: "/Users/test/photos/image.jpg",
+				name: "image.jpg",
+				extension: "JPG",
+				size: 4096,
+				folder: "/Users/test/photos",
+				status: FileProcessingStatus.Processing,
+				beforeMetadata: { make: "Canon" },
+			});
+			const state = makeInitialState({ files: [file] });
+
+			const result = appReducer(state, {
+				type: "UPDATE_FILE_METADATA",
+				id: "file-1",
+				beforeTags: 1,
+				afterTags: 0,
+				beforeMetadata: { make: "Canon" },
+				afterMetadata: {},
+				outputPath: "/Users/test/photos/image_cleaned_2.jpg",
+			} as AppAction);
+
+			expect(result.files[0]).toEqual({
+				...file,
+				beforeTags: 1,
+				afterTags: 0,
+				beforeMetadata: { make: "Canon" },
+				afterMetadata: {},
+				outputPath: "/Users/test/photos/image_cleaned_2.jpg",
+			});
 		});
 	});
 
