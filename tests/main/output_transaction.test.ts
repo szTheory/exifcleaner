@@ -1,3 +1,7 @@
+import { createHash } from "node:crypto";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
 	OutputTransaction,
@@ -121,6 +125,79 @@ describe("OutputTransaction", () => {
 			`verify:${generatedPath}`,
 			`unlink:${generatedPath}`,
 		]);
+	});
+
+	it("materializes a generated output, verifies only it, then discards it before publishing failure", async () => {
+		const fixtureDir = await mkdtemp(join(tmpdir(), "exifcleaner-output-"));
+		const sourcePath = join(fixtureDir, "original.mp4");
+		const outputPath = join(fixtureDir, "generated.mp4");
+		const originalBytes = Buffer.from("preserved original bytes");
+		const events: string[] = [];
+		await writeFile(sourcePath, originalBytes);
+
+		try {
+			const transaction = new OutputTransaction({
+				stripMetadata: {
+					execute: async ({ outputPath: writtenPath }) => {
+						await writeFile(writtenPath, "generated but unreadable bytes");
+						events.push(`write:${writtenPath}`);
+						return { ok: true, value: { tagsRemoved: 1 } };
+					},
+				},
+				verifyGeneratedOutput: {
+					execute: async ({ generatedPath: verifiedPath }) => {
+						expect(verifiedPath).toBe(outputPath);
+						expect(await readFile(verifiedPath, "utf8")).toContain(
+							"unreadable",
+						);
+						events.push(`verify:${verifiedPath}`);
+						return {
+							ok: false,
+							error: {
+								code: "output-verification-failed",
+								detail: "re-open failed",
+							},
+						};
+					},
+				},
+				unlink: async (path) => {
+					events.push(`unlink:${path}`);
+					await rm(path);
+				},
+				rename: async () => undefined,
+				delay: async () => undefined,
+			});
+
+			const result = await transaction.execute({
+				filePath: sourcePath,
+				generatedPath: outputPath,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			});
+			events.push("result-published");
+
+			expect(result).toEqual({
+				ok: false,
+				error: { code: "verification-failed" },
+			});
+			expect(events).toEqual([
+				`write:${outputPath}`,
+				`verify:${outputPath}`,
+				`unlink:${outputPath}`,
+				"result-published",
+			]);
+			await expect(readFile(outputPath)).rejects.toMatchObject({
+				code: "ENOENT",
+			});
+			expect(
+				createHash("sha256")
+					.update(await readFile(sourcePath))
+					.digest("hex"),
+			).toBe(createHash("sha256").update(originalBytes).digest("hex"));
+		} finally {
+			await rm(fixtureDir, { recursive: true, force: true });
+		}
 	});
 
 	it("treats ENOENT cleanup as a successful discard", async () => {

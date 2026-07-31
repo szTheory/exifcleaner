@@ -331,6 +331,37 @@ describe("processFileEntries", () => {
 		},
 	);
 
+	it("keeps a verification failure as an error row without AFTER or revealable output state", async () => {
+		const entry = makeFileEntry();
+		mockApi.exif.readMetadata.mockResolvedValueOnce({ before: "metadata" });
+		mockApi.exif.removeMetadata.mockResolvedValue({
+			success: false,
+			failureKind: "verification",
+			detail: "Generated output verification failed",
+		});
+
+		await processFileEntries([entry], mockDispatch);
+
+		expect(mockApi.exif.readMetadata).toHaveBeenCalledTimes(1);
+		expect(dispatches).toContainEqual({
+			type: "UPDATE_FILE_ERROR",
+			id: entry.id,
+			error: "Generated output verification failed",
+			failureKind: "verification",
+			detail: "Generated output verification failed",
+		});
+		expect(
+			dispatches.some((action) => action.type === "UPDATE_FILE_METADATA"),
+		).toBe(false);
+		expect(
+			dispatches.some(
+				(action) =>
+					action.type === "UPDATE_FILE_STATUS" &&
+					action.status === FileProcessingStatus.Complete,
+			),
+		).toBe(false);
+	});
+
 	it("dispatches UPDATE_FILE_ERROR on IPC failure", async () => {
 		const entry = makeFileEntry();
 		mockApi.exif.readMetadata.mockRejectedValue(new Error("ExifTool crashed"));

@@ -359,6 +359,28 @@ describe("exif:remove handler", () => {
 		expect(result).not.toHaveProperty("outputPath");
 	});
 
+	it("returns a verification terminal failure without publishing an output path", async () => {
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+			transactionResult: {
+				ok: false,
+				error: { code: "verification-failed" },
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(outputTransaction.execute).toHaveBeenCalledOnce();
+		expect(result).toEqual({
+			success: false,
+			failureKind: "verification",
+			detail: "Generated output verification failed",
+		});
+		expect(result).not.toHaveProperty("outputPath");
+	});
+
 	it("rejects an empty string before executing the command", async () => {
 		const { container, stripMetadata } = makeContainer({ saveAsCopy: true });
 		setupExifHandlers({ container });
