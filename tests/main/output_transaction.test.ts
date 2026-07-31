@@ -7,12 +7,19 @@ import {
 const originalPath = "/tmp/original.mp4";
 const generatedPath = "/tmp/.original.exifcleaner-stage.mp4";
 
+type TransactionTestOptions = {
+	writeResult?: Awaited<ReturnType<OutputTransactionDependencies["stripMetadata"]["execute"]>>;
+	verifyResult?: Awaited<ReturnType<OutputTransactionDependencies["verifyGeneratedOutput"]["execute"]>>;
+	unlink?: OutputTransactionDependencies["unlink"];
+	rename?: OutputTransactionDependencies["rename"];
+};
+
 function createTransaction({
 	writeResult = { ok: true, value: { tagsRemoved: 0 } },
 	verifyResult = { ok: true, value: undefined },
 	unlink = async () => undefined,
 	rename = async () => undefined,
-}: Partial<OutputTransactionDependencies> = {}): {
+	}: TransactionTestOptions = {}): {
 	transaction: OutputTransaction;
 	events: string[];
 } {
