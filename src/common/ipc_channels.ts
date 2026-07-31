@@ -50,7 +50,7 @@ type ThemeChannel = `theme:${string}`;
 export type { ExifChannel, SettingsChannel, ThemeChannel };
 
 export type RemoveMetadataResult =
-	| { success: true; outputPath: string }
+	| { success: true; outputPath: string; wasForcedCopy: boolean }
 	| { success: false; error: string };
 
 // Invoke channels (request-response via ipcRenderer.invoke / ipcMain.handle)

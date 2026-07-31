@@ -24,7 +24,7 @@ export const SUPPORTED_EXTENSIONS: ReadonlySet<string> = new Set([
 	".raf",
 	".dng",
 	".pef",
-	".srw",
+".srw",
 	// Videos
 	".mp4",
 	".mov",
@@ -35,6 +35,19 @@ export const SUPPORTED_EXTENSIONS: ReadonlySet<string> = new Set([
 	".wmv",
 	// Documents
 	".pdf",
+]);
+
+export const RAW_EXTENSIONS: ReadonlySet<string> = new Set([
+	".raf",
+	".cr2",
+	".cr3",
+	".nef",
+	".arw",
+	".orf",
+	".rw2",
+	".dng",
+	".pef",
+	".srw",
 ]);
 
 interface IsSupportedFileParams {
@@ -48,4 +61,13 @@ export function isSupportedFile({ filename }: IsSupportedFileParams): boolean {
 	}
 	const ext = filename.substring(lastDot).toLowerCase();
 	return SUPPORTED_EXTENSIONS.has(ext);
+}
+
+export function isRawFile({ filename }: IsSupportedFileParams): boolean {
+	const lastDot = filename.lastIndexOf(".");
+	if (lastDot === -1) {
+		return false;
+	}
+	const ext = filename.substring(lastDot).toLowerCase();
+	return RAW_EXTENSIONS.has(ext);
 }
