@@ -16,15 +16,6 @@ const TOAST_AUTO_HIDE_DELAY_MS = 2000;
 export function FileTable(): React.JSX.Element {
 	const { state, dispatch } = useAppContext();
 	const animatedCheckRef = useRef(new Set<string>());
-	const [saveAsCopy, setSaveAsCopy] = useState(false);
-
-	useEffect(() => {
-		window.api.settings.get().then((s) => setSaveAsCopy(s.saveAsCopy));
-		const unsub = window.api.settings.onChanged((s) =>
-			setSaveAsCopy(s.saveAsCopy),
-		);
-		return unsub;
-	}, []);
 
 	const [toastVisible, setToastVisible] = useState(false);
 	const [toastMessage, setToastMessage] = useState("");
@@ -89,7 +80,6 @@ export function FileTable(): React.JSX.Element {
 							staggerIndex={idx}
 							animatedCheckRef={animatedCheckRef}
 							onCopyToast={handleCopyToast}
-							saveAsCopy={saveAsCopy}
 							onRevealError={handleRevealError}
 						/>
 					);
@@ -133,7 +123,6 @@ export function FileTable(): React.JSX.Element {
 											staggerIndex={idx}
 											animatedCheckRef={animatedCheckRef}
 											onCopyToast={handleCopyToast}
-											saveAsCopy={saveAsCopy}
 											onRevealError={handleRevealError}
 										/>
 									);

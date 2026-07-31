@@ -7,6 +7,7 @@ import { createFixtureDir } from "../helpers/fixture_copier";
 import { readMetadataTags } from "./helpers/metadata_assertions";
 import { waitForProcessing } from "./helpers/wait_for_processing";
 import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
+import { cleanExifData } from "../../src/domain/exif/exif";
 test.describe("Settings", () => {
 	let app: ElectronApplication;
 	let page: Page;
@@ -306,7 +307,7 @@ test.describe("Settings", () => {
 			});
 
 			const expectedAfterCount = Object.keys(
-				await readMetadataTags(collisionOutput),
+				cleanExifData({ raw: await readMetadataTags(collisionOutput) }),
 			).length;
 			const afterCell = page
 				.locator(".file-table__row")
@@ -316,6 +317,8 @@ test.describe("Settings", () => {
 			await expect(afterCell).toContainText(String(expectedAfterCount));
 
 			const revealButton = page.locator(".file-table__reveal").first();
+			await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
+			await page.waitForTimeout(300);
 			await revealButton.click();
 			await revealButton.press("Enter");
 
@@ -323,13 +326,13 @@ test.describe("Settings", () => {
 				return Reflect.get(globalThis, "__issue304RevealCalls") as string[];
 			});
 			expect(revealCalls).toEqual([collisionOutput, collisionOutput]);
+		} finally {
 			await app.evaluate(() => {
 				const restore = Reflect.get(globalThis, "__issue304RestoreReveal") as
 					| (() => void)
 					| undefined;
 				restore?.();
 			});
-		} finally {
 			await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
 			cleanup();
 		}

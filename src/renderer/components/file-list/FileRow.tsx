@@ -11,22 +11,8 @@ import { ChevronIcon } from "../icons/ChevronIcon";
 import { ErrorExpansion } from "./ErrorExpansion";
 import { MetadataExpansion } from "./MetadataExpansion";
 import { formatFileSize } from "../../utils/format_file_size";
+import { resolveRevealTargets } from "../../utils/reveal_paths";
 import { useI18n } from "../../hooks/use_i18n";
-
-function computeCleanedPath(filePath: string): string {
-	const lastSep = Math.max(
-		filePath.lastIndexOf("/"),
-		filePath.lastIndexOf("\\"),
-	);
-	const dir = lastSep >= 0 ? filePath.slice(0, lastSep) : "";
-	const filename = lastSep >= 0 ? filePath.slice(lastSep + 1) : filePath;
-	const dotIndex = filename.lastIndexOf(".");
-	const base = dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
-	const ext = dotIndex > 0 ? filename.slice(dotIndex) : "";
-	const sep = lastSep >= 0 ? filePath[lastSep] : "/";
-	const prefix = dir ? `${dir}${sep}` : "";
-	return `${prefix}${base}_cleaned${ext}`;
-}
 
 export function FileRow({
 	file,
@@ -35,7 +21,6 @@ export function FileRow({
 	staggerIndex,
 	animatedCheckRef,
 	onCopyToast,
-	saveAsCopy,
 	onRevealError,
 }: {
 	file: FileEntry;
@@ -44,11 +29,11 @@ export function FileRow({
 	staggerIndex: number;
 	animatedCheckRef: React.RefObject<Set<string>>;
 	onCopyToast: () => void;
-	saveAsCopy?: boolean;
 	onRevealError?: (message: string) => void;
 }): React.JSX.Element {
 	const enteringRef = useRef(true);
 	const { t } = useI18n();
+	const revealTargets = resolveRevealTargets(file);
 
 	const isComplete =
 		file.status === FileProcessingStatus.Complete ||
@@ -83,9 +68,7 @@ export function FileRow({
 	}
 
 	function handleRevealClick(): void {
-		const targetPath =
-			saveAsCopy === true ? computeCleanedPath(file.path) : file.path;
-		window.api.reveal.showInFolder(targetPath).then((result) => {
+		window.api.reveal.showInFolder(revealTargets.primaryPath).then((result) => {
 			if (!result.success && result.error !== undefined) {
 				onRevealError?.(result.error);
 			}
@@ -93,11 +76,8 @@ export function FileRow({
 	}
 
 	function handleRevealContextMenu(): void {
-		if (saveAsCopy !== true) return;
-		window.api.reveal.showContextMenu({
-			cleanedPath: computeCleanedPath(file.path),
-			originalPath: file.path,
-		});
+		if (revealTargets.contextPaths === null) return;
+		window.api.reveal.showContextMenu(revealTargets.contextPaths);
 	}
 
 	const progressStyle: React.CSSProperties = {
@@ -160,10 +140,15 @@ export function FileRow({
 							onKeyDown={(e) => {
 								if (e.key === "Enter" || e.key === " ") {
 									e.preventDefault();
+									e.stopPropagation();
 									handleRevealClick();
 								}
 							}}
-							aria-label="Reveal in file manager"
+							aria-label={
+								revealTargets.contextPaths === null
+									? "Reveal in file manager"
+									: "Reveal cleaned copy in file manager"
+							}
 							role="button"
 							tabIndex={0}
 						>
