@@ -101,6 +101,31 @@ describe("exif:remove handler", () => {
 		expect(result).toEqual({
 			success: true,
 			outputPath: "/dir/photo_cleaned.jpg",
+			wasForcedCopy: false,
+		});
+	});
+
+	it("forces a collision-safe copy for RAW when save-as-copy is disabled", async () => {
+		const { container, stripMetadata } = makeContainer({ saveAsCopy: false });
+		existsSyncMock.mockImplementation((candidate: string) => {
+			return candidate === "/tmp/sample_cleaned.raf";
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/tmp/sample.raf");
+
+		expect(stripMetadata.execute).toHaveBeenCalledWith(
+			expect.objectContaining({
+				filePath: "/tmp/sample.raf",
+				saveAsCopy: true,
+				outputPath: "/tmp/sample_cleaned_2.raf",
+			}),
+		);
+		expect(result).toEqual({
+			success: true,
+			outputPath: "/tmp/sample_cleaned_2.raf",
+			wasForcedCopy: true,
 		});
 	});
 
@@ -120,6 +145,7 @@ describe("exif:remove handler", () => {
 		expect(result).toEqual({
 			success: true,
 			outputPath: "/photo_cleaned.jpg",
+			wasForcedCopy: false,
 		});
 	});
 
@@ -143,6 +169,7 @@ describe("exif:remove handler", () => {
 		expect(result).toEqual({
 			success: true,
 			outputPath: "/dir/photo_cleaned_2.jpg",
+			wasForcedCopy: false,
 		});
 	});
 
@@ -154,13 +181,17 @@ describe("exif:remove handler", () => {
 		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
 
 		expect(stripMetadata.execute).toHaveBeenCalledWith(
-			expect.objectContaining({
+				expect.objectContaining({
 				filePath: "/dir/photo.jpg",
 				saveAsCopy: false,
-				outputPath: "/dir/photo.jpg",
+				outputPath: undefined,
 			}),
 		);
-		expect(result).toEqual({ success: true, outputPath: "/dir/photo.jpg" });
+		expect(result).toEqual({
+			success: true,
+			outputPath: "/dir/photo.jpg",
+			wasForcedCopy: false,
+		});
 	});
 
 	it("returns explicit error without a success output path when stripping fails", async () => {

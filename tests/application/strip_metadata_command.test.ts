@@ -114,6 +114,23 @@ describe("arg assembly", () => {
 		expect(args).not.toContain("-overwrite_original");
 	});
 
+	it("uses explicit outputPath as copy intent regardless of saveAsCopy", async () => {
+		const outputPath = "/tmp/sample_cleaned.raf";
+		await command.execute({
+			filePath: "/tmp/sample.raf",
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveTimestamps: false,
+			saveAsCopy: false,
+			outputPath,
+		});
+
+		const args = exiftool.calls[0]!.args[1] as string[];
+		expect(args.filter((arg) => arg === "-o")).toHaveLength(1);
+		expect(args[args.indexOf("-o") + 1]).toBe(outputPath);
+		expect(args).not.toContain("-overwrite_original");
+	});
+
 	it("with saveAsCopy=false: args contain -overwrite_original and NOT -o", async () => {
 		await command.execute({
 			filePath: "/tmp/photo.jpg",
