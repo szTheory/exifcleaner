@@ -50,10 +50,12 @@ function captureInvokeHandler(channel: string): {
 
 function makeContainer({
 	saveAsCopy,
+	removeXattrs = false,
 	executeResult = { ok: true, value: { tagsRemoved: 0 } },
 	transactionResult,
 }: {
 	saveAsCopy: boolean;
+	removeXattrs?: boolean;
 	executeResult?: Awaited<ReturnType<Container["stripMetadata"]["execute"]>>;
 	transactionResult?: Awaited<
 		ReturnType<Container["outputTransaction"]["execute"]>
@@ -62,6 +64,7 @@ function makeContainer({
 	container: Container;
 	stripMetadata: { execute: ReturnType<typeof vi.fn> };
 	outputTransaction: { execute: ReturnType<typeof vi.fn> };
+	xattrCommand: { execute: ReturnType<typeof vi.fn> };
 } {
 	const stripMetadata = {
 		execute: vi.fn(async () => executeResult),
@@ -76,11 +79,13 @@ function makeContainer({
 			);
 		}),
 	};
+	const xattrCommand = { execute: vi.fn(async () => undefined) };
 	const container = {
 		settings: {
 			get: () => ({
 				...DEFAULT_SETTINGS,
 				saveAsCopy,
+				removeXattrs,
 			}),
 		},
 		readMetadata: {
@@ -88,8 +93,9 @@ function makeContainer({
 		},
 		stripMetadata,
 		outputTransaction,
+		xattrCommand,
 	} as unknown as Container;
-	return { container, stripMetadata, outputTransaction };
+	return { container, stripMetadata, outputTransaction, xattrCommand };
 }
 
 function makePortCountContainer({ saveAsCopy }: { saveAsCopy: boolean }): {
@@ -229,6 +235,48 @@ describe("exif:remove handler", () => {
 			outputPath: "/dir/photo_cleaned.jpg",
 			wasForcedCopy: false,
 		});
+	});
+
+	it("awaits xattr clearing on the main-owned output path only when enabled", async () => {
+		const { container, xattrCommand } = makeContainer({
+			saveAsCopy: true,
+			removeXattrs: true,
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+
+		expect(xattrCommand.execute).toHaveBeenCalledTimes(1);
+		expect(xattrCommand.execute).toHaveBeenCalledWith({
+			filePath: "/dir/photo_cleaned.jpg",
+		});
+		expect(result).toEqual({
+			success: true,
+			outputPath: "/dir/photo_cleaned.jpg",
+			wasForcedCopy: false,
+		});
+	});
+
+	it("returns a truthful terminal xattr failure without a success output path", async () => {
+		const { container, xattrCommand } = makeContainer({
+			saveAsCopy: false,
+			removeXattrs: true,
+		});
+		xattrCommand.execute.mockRejectedValue(new Error("permission denied"));
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+
+		expect(result).toEqual({
+			success: false,
+			failureKind: "xattr",
+			detail:
+				"Embedded metadata was removed, but macOS extended attributes could not be cleared: permission denied",
+			residualPath: "/dir/photo.jpg",
+		});
+		expect(result).not.toHaveProperty("outputPath");
 	});
 
 	it("forces a collision-safe copy for RAW when save-as-copy is disabled", async () => {

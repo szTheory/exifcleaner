@@ -42,6 +42,7 @@ export async function processFileEntries(
 						case "verification":
 						case "cleanup":
 						case "commit":
+						case "xattr":
 							dispatch({
 								type: "UPDATE_FILE_ERROR",
 								id: entry.id,

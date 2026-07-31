@@ -50,11 +50,12 @@ export function setupExifHandlers({
 					preserveTimestamps: settings.preserveTimestamps,
 				});
 				if (transactionResult.ok) {
-					return {
-						success: true,
-						outputPath: transactionResult.value.outputPath,
+					return applyXattrPostcondition({
+						container,
+						actualOutputPath: transactionResult.value.outputPath,
 						wasForcedCopy,
-					};
+						removeXattrs: settings.removeXattrs,
+					});
 				}
 				return transactionFailureResult(transactionResult.error);
 			}
@@ -68,15 +69,64 @@ export function setupExifHandlers({
 				outputPath,
 			});
 			if (result.ok) {
-				return {
-					success: true,
-					outputPath: outputPath ?? filePath,
+				return applyXattrPostcondition({
+					container,
+					actualOutputPath: outputPath ?? filePath,
 					wasForcedCopy,
-				};
+					removeXattrs: settings.removeXattrs,
+				});
 			}
 			return { success: false, error: formatExifError(result.error) };
 		}),
 	);
+}
+
+async function applyXattrPostcondition({
+	container,
+	actualOutputPath,
+	wasForcedCopy,
+	removeXattrs,
+}: {
+	container: Container;
+	actualOutputPath: string;
+	wasForcedCopy: boolean;
+	removeXattrs: boolean;
+}) {
+	if (!removeXattrs) {
+		return {
+			success: true as const,
+			outputPath: actualOutputPath,
+			wasForcedCopy,
+		};
+	}
+
+	try {
+		await container.xattrCommand.execute({ filePath: actualOutputPath });
+	} catch (error) {
+		return xattrFailureResult({ actualOutputPath, error });
+	}
+
+	return {
+		success: true as const,
+		outputPath: actualOutputPath,
+		wasForcedCopy,
+	};
+}
+
+function xattrFailureResult({
+	actualOutputPath,
+	error,
+}: {
+	actualOutputPath: string;
+	error: unknown;
+}) {
+	const reason = error instanceof Error ? error.message : String(error);
+	return {
+		success: false as const,
+		failureKind: "xattr" as const,
+		detail: `Embedded metadata was removed, but macOS extended attributes could not be cleared: ${reason}`,
+		residualPath: actualOutputPath,
+	};
 }
 
 function generateVideoStagePath({ filePath }: { filePath: string }): string {

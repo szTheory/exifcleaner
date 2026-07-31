@@ -91,6 +91,9 @@ jobs:
       - name: Build macOS artifacts
         run: yarn packmac
 
+      - name: macOS xattr E2E
+        run: yarn playwright test tests/e2e/xattr.spec.ts --project=dev
+
       # Smoke runs in the SAME job as the build: upload-artifact normalizes file
       # modes to 644 and drops symlinks, so an unpacked .app cannot cross a job
       # boundary intact. Only the sealed .dmg does.

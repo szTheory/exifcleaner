@@ -30,7 +30,13 @@ export interface FileEntry {
 	outputPath?: string | undefined;
 	wasForcedCopy?: boolean | undefined;
 	error: string | null;
-	failureKind?: "write" | "verification" | "cleanup" | "commit" | undefined;
+	failureKind?:
+		| "write"
+		| "verification"
+		| "cleanup"
+		| "commit"
+		| "xattr"
+		| undefined;
 	detail?: string | undefined;
 	residualPath?: string | undefined;
 }
@@ -60,7 +66,7 @@ export type AppAction =
 			type: "UPDATE_FILE_ERROR";
 			id: string;
 			error: string;
-			failureKind?: "write" | "verification" | "cleanup" | "commit";
+			failureKind?: "write" | "verification" | "cleanup" | "commit" | "xattr";
 			detail?: string;
 			residualPath?: string;
 	  }

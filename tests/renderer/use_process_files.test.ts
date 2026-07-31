@@ -303,6 +303,7 @@ describe("processFileEntries", () => {
 	it.each([
 		["verification", undefined],
 		["cleanup", "/path/to/incomplete-output.jpg"],
+		["xattr", "/path/to/cleaned.jpg"],
 	] as const)(
 		"stores %s terminal failure details without reading AFTER metadata",
 		async (failureKind, residualPath) => {

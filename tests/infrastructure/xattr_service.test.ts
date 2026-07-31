@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { FakeLogger } from "../fakes/fake_logger";
 
 // We need to mock platform and child_process before importing
-const mockExec = vi.fn();
+const mockExecFile = vi.fn();
 const mockIsMac = vi.fn();
 
 vi.mock("node:child_process", () => ({
-	exec: mockExec,
+	execFile: mockExecFile,
 }));
 
 vi.mock("../../src/common/platform", () => ({
@@ -28,40 +28,53 @@ describe("removeXattrs", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("resolves immediately on non-macOS without calling exec", async () => {
+	it("resolves immediately on non-macOS without calling execFile", async () => {
 		mockIsMac.mockReturnValue(false);
 
 		await removeXattrs({ filePath: "/tmp/photo.jpg", logger });
 
-		expect(mockExec).not.toHaveBeenCalled();
+		expect(mockExecFile).not.toHaveBeenCalled();
 	});
 
-	it("calls exec with xattr -cr on macOS", async () => {
+	it("calls the fixed xattr executable with a separated hostile pathname", async () => {
 		mockIsMac.mockReturnValue(true);
-		mockExec.mockImplementation(
-			(_cmd: string, callback: (error: Error | null) => void) => {
+		const hostilePath = '/tmp/foo"; touch sentinel; echo ".jpg';
+		mockExecFile.mockImplementation(
+			(
+				_executable: string,
+				_args: string[],
+				callback: (error: Error | null) => void,
+			) => {
 				callback(null);
 			},
 		);
 
-		await removeXattrs({ filePath: "/tmp/photo.jpg", logger });
+		await removeXattrs({ filePath: hostilePath, logger });
 
-		expect(mockExec).toHaveBeenCalledTimes(1);
-		const cmd = mockExec.mock.calls[0]![0] as string;
-		expect(cmd).toContain("xattr -cr");
-		expect(cmd).toContain("/tmp/photo.jpg");
+		expect(mockExecFile).toHaveBeenCalledTimes(1);
+		expect(mockExecFile).toHaveBeenCalledWith(
+			"/usr/bin/xattr",
+			["-c", "--", hostilePath],
+			expect.any(Function),
+		);
+		expect(mockExecFile.mock.calls[0]).toHaveLength(3);
 	});
 
-	it("logs warning on exec error but still resolves (non-fatal)", async () => {
+	it("logs warning and rejects on xattr errors", async () => {
 		mockIsMac.mockReturnValue(true);
-		mockExec.mockImplementation(
-			(_cmd: string, callback: (error: Error | null) => void) => {
+		mockExecFile.mockImplementation(
+			(
+				_executable: string,
+				_args: string[],
+				callback: (error: Error | null) => void,
+			) => {
 				callback(new Error("xattr: No such file"));
 			},
 		);
 
-		// Should not throw
-		await removeXattrs({ filePath: "/tmp/missing.jpg", logger });
+		await expect(
+			removeXattrs({ filePath: "/tmp/missing.jpg", logger }),
+		).rejects.toThrow("xattr: No such file");
 
 		expect(logger.messages.some((m) => m.level === "warn")).toBe(true);
 	});

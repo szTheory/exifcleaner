@@ -46,9 +46,11 @@ export function FileRow({
 			? t("verificationFailedSummary")
 			: file.failureKind === "cleanup"
 				? t("cleanupFailedSummary")
-				: undefined;
+				: file.failureKind === "xattr"
+					? t("xattrFailedSummary")
+					: undefined;
 	const errorDetail =
-		file.failureKind === "cleanup" &&
+		(file.failureKind === "cleanup" || file.failureKind === "xattr") &&
 		file.detail !== undefined &&
 		file.residualPath !== undefined
 			? `${file.detail}: ${file.residualPath}`

@@ -11,6 +11,17 @@ import { createFixtureDir } from "../helpers/fixture_copier";
 import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
 import { waitForProcessing } from "../e2e/helpers/wait_for_processing";
 import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
+import {
+	expectNoXattrs,
+	expectSeededXattrs,
+	seedXattrs,
+} from "../e2e/helpers/xattr_assertions";
+
+const SEEDED_XATTRS = [
+	{ name: "com.apple.quarantine", valueHex: "303038313b" },
+	{ name: "com.apple.metadata:kMDItemWhereFroms", valueHex: "706c616e" },
+	{ name: "com.apple.metadata:_kMDItemUserTags", valueHex: "746167" },
+];
 
 // Smoke tests for the PACKAGED artifact — the .dmg/.exe/.AppImage a user downloads,
 // installed the way a user installs it, not the dev build from out/.
@@ -221,6 +232,41 @@ test.describe("Packaged artifact", () => {
 			await expect(macosAttributesSwitch).not.toBeChecked();
 		} else {
 			await expect(macosAttributesSwitch).toHaveCount(0);
+		}
+	});
+
+	test("clears macOS extended attributes from the installed artifact", async () => {
+		if (process.platform !== "darwin") return;
+		const { copyFixture, cleanup } = createFixtureDir();
+		try {
+			await window.getByRole("button", { name: "Open settings" }).click();
+			await window.evaluate(() =>
+				globalThis.window.api.settings.set({ removeXattrs: true }),
+			);
+			await window.waitForTimeout(300);
+			expect(await window.locator("#toggle-remove-xattrs").isChecked()).toBe(
+				true,
+			);
+
+			const filePath = copyFixture("sample.jpg");
+			await seedXattrs(filePath, SEEDED_XATTRS);
+			await expectSeededXattrs(filePath, SEEDED_XATTRS);
+			await app.evaluate(
+				({ BrowserWindow }, paths) => {
+					BrowserWindow.getAllWindows()[0]?.webContents.send(
+						"file-open-add-files",
+						paths,
+					);
+				},
+				[filePath],
+			);
+			await waitForProcessing(window);
+
+			await expect(window.locator(".file-table__row--complete")).toHaveCount(1);
+			await assertMetadataStripped(filePath);
+			await expectNoXattrs(filePath);
+		} finally {
+			cleanup();
 		}
 	});
 });

@@ -54,7 +54,7 @@ export type RemoveMetadataResult =
 	| { success: false; error: string }
 	| {
 			success: false;
-			failureKind: "write" | "verification" | "cleanup" | "commit";
+			failureKind: "write" | "verification" | "cleanup" | "commit" | "xattr";
 			detail: string;
 			residualPath?: string;
 	  };
