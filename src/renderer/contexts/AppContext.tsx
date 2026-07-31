@@ -28,6 +28,7 @@ export interface FileEntry {
 	beforeMetadata: Record<string, unknown> | null;
 	afterMetadata: Record<string, unknown> | null;
 	outputPath?: string | undefined;
+	wasForcedCopy?: boolean | undefined;
 	error: string | null;
 }
 
@@ -50,6 +51,7 @@ export type AppAction =
 			beforeMetadata: Record<string, unknown> | null;
 			afterMetadata: Record<string, unknown> | null;
 			outputPath: string;
+			wasForcedCopy: boolean;
 	  }
 	| { type: "UPDATE_FILE_ERROR"; id: string; error: string }
 	| { type: "TOGGLE_FOLDER"; folder: string }
@@ -94,6 +96,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 								beforeMetadata: action.beforeMetadata,
 								afterMetadata: action.afterMetadata,
 								outputPath: action.outputPath,
+								wasForcedCopy: action.wasForcedCopy,
 							}
 						: file,
 				),

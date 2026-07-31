@@ -40,12 +40,14 @@ export function FileRow({
 		file.status === FileProcessingStatus.NoMetadataFound;
 	const isError = file.status === FileProcessingStatus.Error;
 	const isExpandable = isComplete || isError;
+	const isForcedCopy = isComplete && file.wasForcedCopy === true;
 
 	const rowClasses = [
 		"file-table__row",
 		isComplete ? "file-table__row--complete" : "",
 		isError ? "file-table__row--error" : "",
 		isExpandable ? "file-table__row--expandable" : "",
+		isForcedCopy ? "file-table__row--forced-copy" : "",
 		enteringRef.current ? "file-table__row--entering" : "",
 	]
 		.filter(Boolean)
@@ -100,6 +102,7 @@ export function FileRow({
 				style={progressStyle}
 				tabIndex={0}
 				role="row"
+				aria-label={isForcedCopy ? `${t("complete")}. ${t("writtenToCopy")}.` : undefined}
 				onClick={isExpandable ? onToggleExpand : undefined}
 				onKeyDown={handleKeyDown}
 			>
@@ -114,7 +117,14 @@ export function FileRow({
 					)}
 				</div>
 				<div className="file-table__cell file-table__cell--name">
-					{file.name}
+					<div className="file-table__name-stack">
+						<span className="file-table__name-text">{file.name}</span>
+						{isForcedCopy && (
+							<span className="file-table__copy-disclosure">
+								{t("writtenToCopy")}
+							</span>
+						)}
+					</div>
 				</div>
 				<div className="file-table__cell">
 					<TypePill extension={file.extension} />

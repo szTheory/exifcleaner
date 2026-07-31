@@ -13,7 +13,14 @@ vi.mock("react", async (importOriginal) => {
 });
 
 vi.mock("../../src/renderer/hooks/use_i18n", () => ({
-	useI18n: () => ({ t: (key: string) => key }),
+	useI18n: () => ({
+		t: (key: string) =>
+			key === "complete"
+				? "Complete"
+				: key === "writtenToCopy"
+					? "Written to a copy"
+					: key,
+	}),
 }));
 
 const showContextMenu = vi.fn();
@@ -121,7 +128,7 @@ describe("FileRow copy reveal context menu", () => {
 		const disclosure = findElementByClass(row, "file-table__copy-disclosure");
 
 		expect(forcedRow.props["aria-label"]).toBe("Complete. Written to a copy.");
-		expect(disclosure.props.children).toBe("writtenToCopy");
+	expect(disclosure.props.children).toBe("Written to a copy");
 	});
 
 	it("does not disclose copy mode for ordinary completed rows", () => {

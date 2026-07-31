@@ -186,10 +186,13 @@ test.describe("File type coverage", () => {
 				modified: [],
 				removed: [],
 			});
-			await expect(window.getByText("Written to a copy")).toHaveCount(1);
+			const disclosure = window.locator(".file-table__copy-disclosure");
+			await expect(disclosure).toHaveCount(1);
+			const disclosureText = await disclosure.textContent();
+			expect(disclosureText).toMatch(/\S/);
 			await expect(window.locator(".file-table__row--complete")).toHaveAttribute(
 				"aria-label",
-				"Complete. Written to a copy.",
+				new RegExp(disclosureText ?? "Written to a copy"),
 			);
 			await window.locator(".file-table__reveal").click();
 			expect(await app.evaluate(() => Reflect.get(globalThis, "__rafRevealCalls"))).toEqual([

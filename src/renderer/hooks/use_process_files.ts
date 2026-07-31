@@ -52,6 +52,7 @@ export async function processFileEntries(
 				beforeMetadata,
 				afterMetadata,
 				outputPath: removeResult.outputPath,
+				wasForcedCopy: removeResult.wasForcedCopy,
 			});
 
 			const finalStatus =
