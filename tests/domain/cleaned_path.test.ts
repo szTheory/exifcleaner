@@ -31,6 +31,27 @@ describe("generateCleanedPath", () => {
 		expect(result).toBe("/dir/photo_cleaned_3.jpg");
 	});
 
+	it("uses the first absent suffix across sequential repeats", () => {
+		const existing = new Set([
+			"/dir/photo_cleaned.jpg",
+			"/dir/photo_cleaned_2.jpg",
+			"/dir/photo_cleaned_3.jpg",
+		]);
+		const result = generateCleanedPath({
+			filePath: "/dir/photo.jpg",
+			exists: (p) => existing.has(p),
+		});
+		expect(result).toBe("/dir/photo_cleaned_4.jpg");
+	});
+
+	it("preserves Unicode basename and extension content exactly", () => {
+		const result = generateCleanedPath({
+			filePath: "/dir/café.旅行.final.画像",
+			exists: () => false,
+		});
+		expect(result).toBe("/dir/café.旅行.final_cleaned.画像");
+	});
+
 	it("handles filenames with multiple dots", () => {
 		const result = generateCleanedPath({
 			filePath: "/dir/file.name.jpg",
