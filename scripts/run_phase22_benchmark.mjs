@@ -24,7 +24,6 @@ const PRODUCTION_PATHS = [
 	"yarn.lock",
 ];
 export const HOST_REQUIREMENTS = Object.freeze({
-	minimumIdleSeconds: 60,
 	maximumNormalizedLoad: 0.5,
 	stableSamples: 6,
 	sampleIntervalMs: 10_000,
@@ -62,11 +61,6 @@ export function evaluateHostProbe(raw) {
 	const reasons = [];
 	if (raw.platform !== "darwin") reasons.push("unsupported-platform");
 	if (!acPower) reasons.push("not-on-ac-power");
-	if (
-		!Number.isFinite(hidIdleSeconds) ||
-		hidIdleSeconds < HOST_REQUIREMENTS.minimumIdleSeconds
-	)
-		reasons.push("insufficient-input-idle");
 	if (
 		!Number.isFinite(normalizedLoad) ||
 		normalizedLoad > HOST_REQUIREMENTS.maximumNormalizedLoad
@@ -173,7 +167,7 @@ export function parseArgs(argv) {
 }
 function help() {
 	console.log(
-		`Phase 22 local audit collector\n\nnode scripts/run_phase22_benchmark.mjs --baseline ${BASELINE} --candidate HEAD --output ../.planning/phases/22-raw-guard-verify-after-write/22-BENCHMARK.json [--host-wait-timeout-ms ${HOST_REQUIREMENTS.waitTimeoutMs}]\n\nUses detached worktrees, byte-pinned injected harness/configuration and fixture identity. Timing begins at submission and stops at 200 terminal rows; build, launch, fixture creation and cleanup are excluded. Before measured collection it automatically requires macOS, AC power, ${HOST_REQUIREMENTS.minimumIdleSeconds}s of input idle, normalized load <= ${HOST_REQUIREMENTS.maximumNormalizedLoad}, and no thermal/performance pressure for ${HOST_REQUIREMENTS.stableSamples} consecutive ${HOST_REQUIREMENTS.sampleIntervalMs / 1000}s samples. It records every host probe, production-path integrity, harness hashes, raw/normalized invocation records and host metadata. No human confirmation or override is accepted.`,
+		`Phase 22 local audit collector\n\nnode scripts/run_phase22_benchmark.mjs --baseline ${BASELINE} --candidate HEAD --output ../.planning/phases/22-raw-guard-verify-after-write/22-BENCHMARK.json [--host-wait-timeout-ms ${HOST_REQUIREMENTS.waitTimeoutMs}]\n\nUses detached worktrees, byte-pinned injected harness/configuration and fixture identity. Timing begins at submission and stops at 200 terminal rows; build, launch, fixture creation and cleanup are excluded. Before measured collection it automatically requires macOS, AC power, normalized load <= ${HOST_REQUIREMENTS.maximumNormalizedLoad}, and no thermal/performance pressure for ${HOST_REQUIREMENTS.stableSamples} consecutive ${HOST_REQUIREMENTS.sampleIntervalMs / 1000}s samples. HID idle time is recorded diagnostically but is not authoritative because desktop automation resets it. It records every host probe, production-path integrity, harness hashes, raw/normalized invocation records and host metadata. No human confirmation or override is accepted.`,
 	);
 }
 function protocolBundle() {
@@ -430,7 +424,7 @@ export function renderBenchmarkMarkdown(evidence, verdict) {
 		"## Automated Host Qualification",
 		"",
 		`- Platform: ${evidence.hostEligibility.platform}`,
-		`- Policy: AC power, ${HOST_REQUIREMENTS.minimumIdleSeconds}s input idle, normalized load <= ${HOST_REQUIREMENTS.maximumNormalizedLoad}, no thermal/performance pressure`,
+		`- Policy: AC power, normalized load <= ${HOST_REQUIREMENTS.maximumNormalizedLoad}, no thermal/performance pressure; HID idle recorded diagnostically`,
 		`- Stable preflight samples: ${evidence.hostEligibility.initial.stableSamples}/${HOST_REQUIREMENTS.stableSamples}`,
 		`- Per-child checks: ${evidence.hostEligibility.checks.length} passed`,
 		"- Human confirmation: none",

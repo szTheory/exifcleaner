@@ -25,6 +25,24 @@ describe("Phase 22 benchmark protocol", () => {
 		expect(verdict.reasons).toEqual([]);
 	});
 
+	test("records HID activity without treating desktop automation as benchmark pressure", async () => {
+		// @ts-expect-error benchmark CLI is intentionally dependency-free JavaScript.
+		const collector = await import("../../scripts/run_phase22_benchmark.mjs");
+		const verdict = collector.evaluateHostProbe({
+			platform: "darwin",
+			power: "Now drawing from 'AC Power'",
+			hid: '"HIDIdleTime" = 1000000000',
+			load: "{ 1.0 1.0 1.0 }",
+			logicalCpu: "10",
+			thermal:
+				"No thermal warning level has been recorded\n" +
+				"No performance warning level has been recorded",
+		});
+
+		expect(verdict.hidIdleSeconds).toBe(1);
+		expect(verdict.eligible).toBe(true);
+	});
+
 	test("waits through transient activity and requires a fresh stable window", async () => {
 		// @ts-expect-error benchmark CLI is intentionally dependency-free JavaScript.
 		const collector = await import("../../scripts/run_phase22_benchmark.mjs");
