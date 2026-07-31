@@ -24,7 +24,7 @@ export const SUPPORTED_EXTENSIONS: ReadonlySet<string> = new Set([
 	".raf",
 	".dng",
 	".pef",
-".srw",
+	".srw",
 	// Videos
 	".mp4",
 	".mov",
