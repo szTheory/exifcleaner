@@ -229,6 +229,38 @@ describe("appReducer", () => {
 			expect(result.files[0]!.error).toBe("File may be corrupted");
 			expect(result.files[0]!.status).toBe(FileProcessingStatus.Error);
 		});
+
+		it("clears stale success artifacts and preserves structured terminal failure facts", () => {
+			const state = makeInitialState({
+				files: [
+					makeFile({
+						status: FileProcessingStatus.Complete,
+						afterTags: 0,
+						afterMetadata: {},
+						outputPath: "/Users/test/photos/image_cleaned.jpg",
+						wasForcedCopy: true,
+					}),
+				],
+			});
+
+			const result = appReducer(state, {
+				type: "UPDATE_FILE_ERROR",
+				id: "file-1",
+				error: "Verification found remaining metadata",
+				failureKind: "verification",
+				detail: "ExifTool: DateTimeOriginal remains",
+			});
+
+			expect(result.files[0]).toMatchObject({
+				status: FileProcessingStatus.Error,
+				failureKind: "verification",
+				detail: "ExifTool: DateTimeOriginal remains",
+				afterTags: null,
+				afterMetadata: null,
+				outputPath: undefined,
+				wasForcedCopy: undefined,
+			});
+		});
 	});
 
 	describe("TOGGLE_FOLDER", () => {

@@ -300,6 +300,37 @@ describe("processFileEntries", () => {
 		).toBe(false);
 	});
 
+	it.each([
+		["verification", undefined],
+		["cleanup", "/path/to/incomplete-output.jpg"],
+	] as const)(
+		"stores %s terminal failure details without reading AFTER metadata",
+		async (failureKind, residualPath) => {
+			const entry = makeFileEntry();
+			mockApi.exif.readMetadata.mockResolvedValueOnce({ before: "metadata" });
+			mockApi.exif.removeMetadata.mockResolvedValue({
+				success: false,
+				failureKind,
+				detail: "Verification could not prove output safety",
+				...(residualPath === undefined ? {} : { residualPath }),
+			});
+
+			await processFileEntries([entry], mockDispatch);
+
+			expect(mockApi.exif.readMetadata).toHaveBeenCalledTimes(1);
+			expect(dispatches).toContainEqual({
+				type: "UPDATE_FILE_ERROR",
+				id: "test-id-1",
+				error: "Verification could not prove output safety",
+				failureKind,
+				detail: "Verification could not prove output safety",
+				...(residualPath === undefined ? {} : { residualPath }),
+			});
+			expect(dispatches.some((action) => action.type === "UPDATE_FILE_METADATA")).toBe(false);
+			expect(mockApi.files.notifyFileProcessed).toHaveBeenCalledTimes(1);
+		},
+	);
+
 	it("dispatches UPDATE_FILE_ERROR on IPC failure", async () => {
 		const entry = makeFileEntry();
 		mockApi.exif.readMetadata.mockRejectedValue(new Error("ExifTool crashed"));
