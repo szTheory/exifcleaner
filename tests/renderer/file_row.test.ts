@@ -2,6 +2,7 @@ import * as React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FileProcessingStatus } from "../../src/domain";
 import { FileRow } from "../../src/renderer/components/file-list/FileRow";
+import { ErrorExpansion } from "../../src/renderer/components/file-list/ErrorExpansion";
 import type { FileEntry } from "../../src/renderer/contexts/AppContext";
 
 vi.mock("react", async (importOriginal) => {
@@ -19,6 +20,10 @@ vi.mock("../../src/renderer/hooks/use_i18n", () => ({
 				? "Complete"
 				: key === "writtenToCopy"
 					? "Written to a copy"
+					: key === "verificationFailedSummary"
+						? "Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged."
+						: key === "cleanupFailedSummary"
+							? "Couldn’t verify cleaned output, and the incomplete output could not be removed. Your original is unchanged."
 					: key,
 	}),
 }));
@@ -98,6 +103,29 @@ function findElementByClass(
 	return found;
 }
 
+function findElementByType(
+	node: unknown,
+	type: React.ElementType,
+): React.ReactElement {
+	if (!React.isValidElement(node)) {
+		throw new Error("Requested component was not rendered");
+	}
+	if (node.type === type) return node;
+
+	const props = node.props as { children?: unknown };
+	let found: React.ReactElement | undefined;
+	React.Children.forEach(props.children, (child) => {
+		if (found !== undefined) return;
+		try {
+			found = findElementByType(child, type);
+		} catch {
+			// Keep traversing siblings until the requested component is found.
+		}
+	});
+	if (found === undefined) throw new Error("Requested component was not rendered");
+	return found;
+}
+
 beforeEach(() => {
 	showContextMenu.mockReset();
 	(globalThis as Record<string, unknown>).window = {
@@ -111,6 +139,65 @@ beforeEach(() => {
 });
 
 describe("FileRow copy reveal context menu", () => {
+	it("renders the exact localized verification failure summary with no successful-output affordance", () => {
+		const row = FileRow({
+			file: makeCompletedFile({
+				status: FileProcessingStatus.Error,
+				afterTags: null,
+				afterMetadata: null,
+				outputPath: undefined,
+				failureKind: "verification",
+				error: "ExifTool verification failed",
+				detail: "ExifTool verification failed",
+			}),
+			isExpanded: true,
+			onToggleExpand: vi.fn(),
+			staggerIndex: 0,
+			animatedCheckRef: { current: new Set<string>() },
+			onCopyToast: vi.fn(),
+		});
+
+		const summary = findElementByClass(row, "file-table__error-summary");
+		const errorRow = findElementByClass(row, "file-table__row--error");
+		expect((summary.props as { children?: unknown }).children).toBe(
+			"Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged.",
+		);
+		expect((errorRow.props as { "aria-label"?: string })["aria-label"]).toBe(
+			"Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged.",
+		);
+		expect(() => findRevealControl(row)).toThrow();
+		expect(() => findElementByClass(row, "file-table__after-done")).toThrow();
+	});
+
+	it("uses distinct cleanup copy and exposes only the main-returned residual path in detail", () => {
+		const row = FileRow({
+			file: makeCompletedFile({
+				status: FileProcessingStatus.Error,
+				afterTags: null,
+				afterMetadata: null,
+				outputPath: undefined,
+				failureKind: "cleanup",
+				error: "Removal failed",
+				detail: "Could not remove incomplete output",
+				residualPath: "/photos/.sample-incomplete.jpg",
+			}),
+			isExpanded: true,
+			onToggleExpand: vi.fn(),
+			staggerIndex: 0,
+			animatedCheckRef: { current: new Set<string>() },
+			onCopyToast: vi.fn(),
+		});
+
+		const summary = findElementByClass(row, "file-table__error-summary");
+		const detail = findElementByType(row, ErrorExpansion);
+		expect((summary.props as { children?: unknown }).children).toBe(
+			"Couldn’t verify cleaned output, and the incomplete output could not be removed. Your original is unchanged.",
+		);
+		expect((detail.props as { error?: string }).error).toBe(
+			"Could not remove incomplete output: /photos/.sample-incomplete.jpg",
+		);
+	});
+
 	it("discloses one localized forced-copy result with the 60px row contract", () => {
 		const row = FileRow({
 			file: makeCompletedFile({
