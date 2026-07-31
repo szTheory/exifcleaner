@@ -33,7 +33,12 @@ export async function processFileEntries(
 				dispatch({
 					type: "UPDATE_FILE_ERROR",
 					id: entry.id,
-					error: removeResult.error,
+					error:
+						"error" in removeResult
+							? removeResult.error
+							: removeResult.residualPath === undefined
+								? removeResult.detail
+								: `${removeResult.detail}: ${removeResult.residualPath}`,
 				});
 				window.api.files.notifyFileProcessed();
 				continue;

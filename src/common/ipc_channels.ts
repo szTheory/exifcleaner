@@ -51,7 +51,13 @@ export type { ExifChannel, SettingsChannel, ThemeChannel };
 
 export type RemoveMetadataResult =
 	| { success: true; outputPath: string; wasForcedCopy: boolean }
-	| { success: false; error: string };
+	| { success: false; error: string }
+	| {
+			success: false;
+			failureKind: "write" | "verification" | "cleanup" | "commit";
+			detail: string;
+			residualPath?: string;
+	  };
 
 // Invoke channels (request-response via ipcRenderer.invoke / ipcMain.handle)
 export interface IpcInvokeMap {

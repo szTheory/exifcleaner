@@ -8,8 +8,14 @@ const originalPath = "/tmp/original.mp4";
 const generatedPath = "/tmp/.original.exifcleaner-stage.mp4";
 
 type TransactionTestOptions = {
-	writeResult?: Awaited<ReturnType<OutputTransactionDependencies["stripMetadata"]["execute"]>>;
-	verifyResult?: Awaited<ReturnType<OutputTransactionDependencies["verifyGeneratedOutput"]["execute"]>>;
+	writeResult?: Awaited<
+		ReturnType<OutputTransactionDependencies["stripMetadata"]["execute"]>
+	>;
+	verifyResult?: Awaited<
+		ReturnType<
+			OutputTransactionDependencies["verifyGeneratedOutput"]["execute"]
+		>
+	>;
 	unlink?: OutputTransactionDependencies["unlink"];
 	rename?: OutputTransactionDependencies["rename"];
 };
@@ -19,7 +25,7 @@ function createTransaction({
 	verifyResult = { ok: true, value: undefined },
 	unlink = async () => undefined,
 	rename = async () => undefined,
-	}: TransactionTestOptions = {}): {
+}: TransactionTestOptions = {}): {
 	transaction: OutputTransaction;
 	events: string[];
 } {
@@ -71,7 +77,10 @@ describe("OutputTransaction", () => {
 
 	it("returns write-failed before verification", async () => {
 		const { transaction, events } = createTransaction({
-			writeResult: { ok: false, error: { code: "exiftool-error", detail: "write failed" } },
+			writeResult: {
+				ok: false,
+				error: { code: "exiftool-error", detail: "write failed" },
+			},
 		});
 
 		const result = await transaction.execute({
@@ -102,13 +111,22 @@ describe("OutputTransaction", () => {
 			preserveTimestamps: false,
 		});
 
-		expect(result).toEqual({ ok: false, error: { code: "verification-failed" } });
+		expect(result).toEqual({
+			ok: false,
+			error: { code: "verification-failed" },
+		});
 		expect(result).not.toHaveProperty("outputPath");
-		expect(events).toEqual(["write", `verify:${generatedPath}`, `unlink:${generatedPath}`]);
+		expect(events).toEqual([
+			"write",
+			`verify:${generatedPath}`,
+			`unlink:${generatedPath}`,
+		]);
 	});
 
 	it("treats ENOENT cleanup as a successful discard", async () => {
-		const enoent = Object.assign(new Error("already removed"), { code: "ENOENT" });
+		const enoent = Object.assign(new Error("already removed"), {
+			code: "ENOENT",
+		});
 		const { transaction, events } = createTransaction({
 			verifyResult: {
 				ok: false,
@@ -118,9 +136,19 @@ describe("OutputTransaction", () => {
 		});
 
 		await expect(
-			transaction.execute({ filePath: originalPath, generatedPath, preserveOrientation: false, preserveColorProfile: false, preserveTimestamps: false }),
+			transaction.execute({
+				filePath: originalPath,
+				generatedPath,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			}),
 		).resolves.toEqual({ ok: false, error: { code: "verification-failed" } });
-		expect(events).toEqual(["write", `verify:${generatedPath}`, `unlink:${generatedPath}`]);
+		expect(events).toEqual([
+			"write",
+			`verify:${generatedPath}`,
+			`unlink:${generatedPath}`,
+		]);
 	});
 
 	it("reports the exact residual path after three transient cleanup failures", async () => {
@@ -134,8 +162,17 @@ describe("OutputTransaction", () => {
 		});
 
 		await expect(
-			transaction.execute({ filePath: originalPath, generatedPath, preserveOrientation: false, preserveColorProfile: false, preserveTimestamps: false }),
-		).resolves.toEqual({ ok: false, error: { code: "cleanup-failed", residualPath: generatedPath } });
+			transaction.execute({
+				filePath: originalPath,
+				generatedPath,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			}),
+		).resolves.toEqual({
+			ok: false,
+			error: { code: "cleanup-failed", residualPath: generatedPath },
+		});
 		expect(events).toEqual([
 			"write",
 			`verify:${generatedPath}`,

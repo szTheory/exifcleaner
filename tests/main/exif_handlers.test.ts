@@ -47,11 +47,13 @@ function captureInvokeHandler(channel: string): {
 function makeContainer({
 	saveAsCopy,
 	executeResult = { ok: true, value: { tagsRemoved: 0 } },
-	transactionResult = { ok: true, value: { outputPath: "/dir/video_cleaned.mp4" } },
+	transactionResult,
 }: {
 	saveAsCopy: boolean;
 	executeResult?: Awaited<ReturnType<Container["stripMetadata"]["execute"]>>;
-	transactionResult?: Awaited<ReturnType<Container["outputTransaction"]["execute"]>>;
+	transactionResult?: Awaited<
+		ReturnType<Container["outputTransaction"]["execute"]>
+	>;
 }): {
 	container: Container;
 	stripMetadata: { execute: ReturnType<typeof vi.fn> };
@@ -61,7 +63,14 @@ function makeContainer({
 		execute: vi.fn(async () => executeResult),
 	};
 	const outputTransaction = {
-		execute: vi.fn(async () => transactionResult),
+		execute: vi.fn(async (request) => {
+			return (
+				transactionResult ?? {
+					ok: true,
+					value: { outputPath: request.commitPath ?? request.generatedPath },
+				}
+			);
+		}),
 	};
 	const container = {
 		settings: {
@@ -118,7 +127,9 @@ describe("exif:remove handler", () => {
 	});
 
 	it("forces a collision-safe copy for RAW when save-as-copy is disabled", async () => {
-		const { container, stripMetadata } = makeContainer({ saveAsCopy: false });
+		const { container, stripMetadata, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+		});
 		existsSyncMock.mockImplementation((candidate: string) => {
 			return candidate === "/tmp/sample_cleaned.raf";
 		});
@@ -127,11 +138,12 @@ describe("exif:remove handler", () => {
 		const { handler } = captureInvokeHandler("exif:remove");
 		const result = await handler(makeAuthorizedEvent(), "/tmp/sample.raf");
 
-		expect(stripMetadata.execute).toHaveBeenCalledWith(
+		expect(stripMetadata.execute).not.toHaveBeenCalled();
+		expect(outputTransaction.execute).toHaveBeenCalledWith(
 			expect.objectContaining({
 				filePath: "/tmp/sample.raf",
-				saveAsCopy: true,
-				outputPath: "/tmp/sample_cleaned_2.raf",
+				generatedPath: "/tmp/sample_cleaned_2.raf",
+				commitPath: undefined,
 			}),
 		);
 		expect(result).toEqual({
@@ -154,26 +166,35 @@ describe("exif:remove handler", () => {
 		["srw", "/tmp/sample_cleaned.srw"],
 		["RAF", "/tmp/sample_cleaned.RAF"],
 		["Cr3", "/tmp/sample_cleaned.Cr3"],
-	])("returns the exact generated RAW copy for .%s", async (extension, outputPath) => {
-		const { container, stripMetadata } = makeContainer({ saveAsCopy: false });
-		setupExifHandlers({ container });
+	])(
+		"returns the exact generated RAW copy for .%s",
+		async (extension, outputPath) => {
+			const { container, stripMetadata, outputTransaction } = makeContainer({
+				saveAsCopy: false,
+			});
+			setupExifHandlers({ container });
 
-		const { handler } = captureInvokeHandler("exif:remove");
-		const result = await handler(makeAuthorizedEvent(), `/tmp/sample.${extension}`);
+			const { handler } = captureInvokeHandler("exif:remove");
+			const result = await handler(
+				makeAuthorizedEvent(),
+				`/tmp/sample.${extension}`,
+			);
 
-		expect(stripMetadata.execute).toHaveBeenCalledWith(
-			expect.objectContaining({
-				filePath: `/tmp/sample.${extension}`,
-				saveAsCopy: true,
+			expect(stripMetadata.execute).not.toHaveBeenCalled();
+			expect(outputTransaction.execute).toHaveBeenCalledWith(
+				expect.objectContaining({
+					filePath: `/tmp/sample.${extension}`,
+					generatedPath: outputPath,
+					commitPath: undefined,
+				}),
+			);
+			expect(result).toEqual({
+				success: true,
 				outputPath,
-			}),
-		);
-		expect(result).toEqual({
-			success: true,
-			outputPath,
-			wasForcedCopy: true,
-		});
-	});
+				wasForcedCopy: true,
+			});
+		},
+	);
 
 	it("passes and returns an absolute root copy path", async () => {
 		const { container, stripMetadata } = makeContainer({ saveAsCopy: true });
@@ -227,7 +248,7 @@ describe("exif:remove handler", () => {
 		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
 
 		expect(stripMetadata.execute).toHaveBeenCalledWith(
-				expect.objectContaining({
+			expect.objectContaining({
 				filePath: "/dir/photo.jpg",
 				saveAsCopy: false,
 				outputPath: undefined,
