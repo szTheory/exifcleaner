@@ -1,4 +1,4 @@
-import { ipcMain } from "electron";
+import { app, ipcMain } from "electron";
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { dirname, join, parse } from "node:path";
@@ -10,11 +10,23 @@ import { generateCleanedPath } from "../domain/files/cleaned_path";
 import { isRawFile, isVideoFile } from "../domain/files/file_types";
 import type { OutputTransactionFailure } from "./output_transaction";
 
+const DEV_XATTR_FAILURE_EVENT = "exifcleaner:dev-xattr-failure-path";
+
+let devXattrFailurePath: string | undefined;
+let devXattrFailureListener: ((filePath: unknown) => void) | undefined;
+
+interface DevXattrFailureEventEmitter {
+	on(event: string, listener: (filePath: unknown) => void): unknown;
+	removeListener(event: string, listener: (filePath: unknown) => void): unknown;
+}
+
 export function setupExifHandlers({
 	container,
 }: {
 	container: Container;
 }): void {
+	setupDevXattrFailureBridge();
+
 	ipcMain.handle(
 		"exif:read",
 		createValidatedHandler(exifReadSchema, async (filePath) => {
@@ -100,6 +112,14 @@ async function applyXattrPostcondition({
 		};
 	}
 
+	if (devXattrFailurePath === actualOutputPath) {
+		devXattrFailurePath = undefined;
+		return xattrFailureResult({
+			actualOutputPath,
+			error: new Error("deterministic development failure"),
+		});
+	}
+
 	try {
 		await container.xattrCommand.execute({ filePath: actualOutputPath });
 	} catch (error) {
@@ -111,6 +131,29 @@ async function applyXattrPostcondition({
 		outputPath: actualOutputPath,
 		wasForcedCopy,
 	};
+}
+
+function setupDevXattrFailureBridge(): void {
+	const eventEmitter = app as unknown as DevXattrFailureEventEmitter;
+	devXattrFailurePath = undefined;
+	if (devXattrFailureListener !== undefined) {
+		eventEmitter.removeListener(
+			DEV_XATTR_FAILURE_EVENT,
+			devXattrFailureListener,
+		);
+		devXattrFailureListener = undefined;
+	}
+
+	if (app.isPackaged !== false || process.env.NODE_ENV !== "development") {
+		return;
+	}
+
+	devXattrFailureListener = (filePath: unknown): void => {
+		if (typeof filePath === "string") {
+			devXattrFailurePath = filePath;
+		}
+	};
+	eventEmitter.on(DEV_XATTR_FAILURE_EVENT, devXattrFailureListener);
 }
 
 function xattrFailureResult({

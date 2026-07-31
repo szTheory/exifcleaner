@@ -15,7 +15,28 @@ import { FakeExifTool } from "../fakes/fake_exiftool";
 const ipcHandleMock = vi.hoisted(() => vi.fn());
 const existsSyncMock = vi.hoisted(() => vi.fn());
 const randomUUIDMock = vi.hoisted(() => vi.fn(() => "test-uuid"));
-const appMock = vi.hoisted(() => ({ isPackaged: false }));
+const appMock = vi.hoisted(() => {
+	const listeners = new Map<string, Set<(value: unknown) => void>>();
+	return {
+		isPackaged: false,
+		on(event: string, listener: (value: unknown) => void): void {
+			const eventListeners = listeners.get(event) ?? new Set();
+			eventListeners.add(listener);
+			listeners.set(event, eventListeners);
+		},
+		removeListener(event: string, listener: (value: unknown) => void): void {
+			listeners.get(event)?.delete(listener);
+		},
+		emit(event: string, value: unknown): void {
+			for (const listener of listeners.get(event) ?? []) {
+				listener(value);
+			}
+		},
+		listenerCount(event: string): number {
+			return listeners.get(event)?.size ?? 0;
+		},
+	};
+});
 
 vi.mock("electron", () => ({
 	app: appMock,
@@ -33,6 +54,7 @@ vi.mock("node:crypto", () => ({
 }));
 
 const TEST_SENDER_ID = 304;
+const originalNodeEnv = process.env.NODE_ENV;
 
 function captureInvokeHandler(channel: string): {
 	handler: (event: IpcMainInvokeEvent, payload: unknown) => Promise<unknown>;
@@ -146,12 +168,19 @@ beforeEach(() => {
 	existsSyncMock.mockReturnValue(false);
 	appMock.isPackaged = false;
 	process.env.NODE_ENV = "test";
-	Reflect.deleteProperty(globalThis, "__EXIFCLEANER_DEV_XATTR_FAILURE_PATH__");
 });
 
 afterEach(() => {
 	unregisterSender(TEST_SENDER_ID);
-	Reflect.deleteProperty(globalThis, "__EXIFCLEANER_DEV_XATTR_FAILURE_PATH__");
+	process.env.NODE_ENV = "test";
+	setupExifHandlers({
+		container: makeContainer({ saveAsCopy: false }).container,
+	});
+	if (originalNodeEnv === undefined) {
+		delete process.env.NODE_ENV;
+	} else {
+		process.env.NODE_ENV = originalNodeEnv;
+	}
 });
 
 describe("exif:remove handler", () => {
@@ -304,16 +333,12 @@ describe("exif:remove handler", () => {
 	])("leaves the dev xattr failure seam inert for $name", async (scenario) => {
 		appMock.isPackaged = scenario.isPackaged;
 		process.env.NODE_ENV = scenario.nodeEnv;
-		Reflect.set(
-			globalThis,
-			"__EXIFCLEANER_DEV_XATTR_FAILURE_PATH__",
-			scenario.marker,
-		);
 		const { container, xattrCommand } = makeContainer({
 			saveAsCopy: false,
 			removeXattrs: true,
 		});
 		setupExifHandlers({ container });
+		appMock.emit("exifcleaner:dev-xattr-failure-path", scenario.marker);
 
 		const { handler } = captureInvokeHandler("exif:remove");
 		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
@@ -330,16 +355,12 @@ describe("exif:remove handler", () => {
 
 	it("returns the native-shaped xattr failure for an exact dev marker match", async () => {
 		process.env.NODE_ENV = "development";
-		Reflect.set(
-			globalThis,
-			"__EXIFCLEANER_DEV_XATTR_FAILURE_PATH__",
-			"/dir/photo.jpg",
-		);
 		const { container, xattrCommand } = makeContainer({
 			saveAsCopy: false,
 			removeXattrs: true,
 		});
 		setupExifHandlers({ container });
+		appMock.emit("exifcleaner:dev-xattr-failure-path", "/dir/photo.jpg");
 
 		const { handler } = captureInvokeHandler("exif:remove");
 		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
@@ -352,6 +373,33 @@ describe("exif:remove handler", () => {
 			residualPath: "/dir/photo.jpg",
 		});
 		expect(xattrCommand.execute).not.toHaveBeenCalled();
+	});
+
+	it("consumes an exact dev failure path once without accumulating listeners", async () => {
+		process.env.NODE_ENV = "development";
+		const { container, xattrCommand } = makeContainer({
+			saveAsCopy: false,
+			removeXattrs: true,
+		});
+		setupExifHandlers({ container });
+		setupExifHandlers({ container });
+		expect(appMock.listenerCount("exifcleaner:dev-xattr-failure-path")).toBe(1);
+		appMock.emit("exifcleaner:dev-xattr-failure-path", "/dir/photo.jpg");
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		await expect(
+			handler(makeAuthorizedEvent(), "/dir/photo.jpg"),
+		).resolves.toMatchObject({
+			success: false,
+			failureKind: "xattr",
+		});
+		await expect(
+			handler(makeAuthorizedEvent(), "/dir/photo.jpg"),
+		).resolves.toMatchObject({
+			success: true,
+			outputPath: "/dir/photo.jpg",
+		});
+		expect(xattrCommand.execute).toHaveBeenCalledOnce();
 	});
 
 	it("returns a truthful terminal xattr failure without a success output path", async () => {
