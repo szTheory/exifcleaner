@@ -197,6 +197,7 @@ if (process.platform === "darwin") {
 				expect(rowFacts.failedHasAfter).toBe(false);
 				expect(rowFacts.failedHasReveal).toBe(false);
 				expect(fs.existsSync(failedPath)).toBe(true);
+				await assertMetadataStripped(failedPath);
 				expect(rowFacts.completedClass).toMatch(/file-table__row--complete/);
 			} finally {
 				cleanup();
