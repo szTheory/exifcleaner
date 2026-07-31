@@ -1,9 +1,22 @@
+import { execFile } from "node:child_process";
+import fs from "node:fs";
+import { promisify } from "node:util";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { test, expect } from "@playwright/test";
 import type { ElectronApplication, Page } from "playwright";
 import { launchApp, closeApp } from "./helpers/app_launcher";
 import { createFixtureDir } from "../helpers/fixture_copier";
 import { waitForProcessing } from "./helpers/wait_for_processing";
 import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
+
+const execFileAsync = promisify(execFile);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const EXIFTOOL_PATH =
+	process.platform === "win32"
+		? path.resolve(__dirname, "../../.resources/win/bin/exiftool.exe")
+		: path.resolve(__dirname, "../../.resources/nix/bin/exiftool");
 
 /**
  * Asserts every advertised file type actually processes.
@@ -56,7 +69,11 @@ test.describe("File type coverage", () => {
 	];
 
 	for (const fixture of SUPPORTED) {
-		test(`${fixture} processes without error`, async () => {
+		const testName =
+			fixture === "sample.mp4"
+				? "MP4 valid control processes without error"
+				: `${fixture} processes without error`;
+		test(testName, async () => {
 			const { dir, copyFixture, cleanup } = createFixtureDir();
 			try {
 				const filePath = copyFixture(fixture);
@@ -154,6 +171,47 @@ test.describe("File type coverage", () => {
 
 			await expect(window.locator(".file-table__row--error")).toHaveCount(1);
 			await expect(window.locator(".file-table__row--complete")).toHaveCount(0);
+		} finally {
+			cleanup();
+		}
+	});
+
+	test("MP4 pre-write negative control rejects truncated input without an output", async () => {
+		const { dir, copyFixture, cleanup } = createFixtureDir();
+		try {
+			const filePath = copyFixture("sample.mp4");
+			// This is deliberately a pre-write control: removing the moov atom means
+			// ExifTool rejects the submitted input before it can create an output. It
+			// must never be cited as verifier-cleanup evidence.
+			fs.truncateSync(filePath, 1);
+			await expect(
+				execFileAsync(EXIFTOOL_PATH, ["-json", filePath]),
+			).rejects.toMatchObject({
+				code: expect.any(Number),
+			});
+			const before = snapshotDir(dir);
+
+			await addFiles([filePath]);
+			await waitForProcessing(window);
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				unchanged: ["sample.mp4"],
+				added: [],
+				modified: [],
+				removed: [],
+			});
+			// This visible error row is the wrong-direction guard: filtering or failing
+			// to submit the malformed MP4 leaves no terminal row and fails this test.
+			const errorRow = window.locator(".file-table__row--error");
+			await expect(errorRow).toHaveCount(1);
+			await expect(window.locator(".file-table__row--complete")).toHaveCount(0);
+			await errorRow.click();
+			await expect(window.locator(".file-table__error-text")).toContainText(
+				/\S/,
+			);
+			await expect(window.locator(".file-table__after-done")).toHaveCount(0);
+			await expect(window.locator(".file-table__reveal")).toHaveCount(0);
 		} finally {
 			cleanup();
 		}
