@@ -41,6 +41,16 @@ export function FileRow({
 	const isError = file.status === FileProcessingStatus.Error;
 	const isExpandable = isComplete || isError;
 	const isForcedCopy = isComplete && file.wasForcedCopy === true;
+	const failureSummary =
+		file.failureKind === "verification"
+			? t("verificationFailedSummary")
+			: file.failureKind === "cleanup"
+				? t("cleanupFailedSummary")
+				: undefined;
+	const errorDetail =
+		file.failureKind === "cleanup" && file.detail !== undefined && file.residualPath !== undefined
+			? `${file.detail}: ${file.residualPath}`
+			: (file.detail ?? file.error);
 
 	const rowClasses = [
 		"file-table__row",
@@ -102,12 +112,24 @@ export function FileRow({
 				style={progressStyle}
 				tabIndex={0}
 				role="row"
-				aria-label={isForcedCopy ? `${t("complete")}. ${t("writtenToCopy")}.` : undefined}
+				aria-label={
+					isForcedCopy
+						? `${t("complete")}. ${t("writtenToCopy")}.`
+						: failureSummary
+				}
 				onClick={isExpandable ? onToggleExpand : undefined}
 				onKeyDown={handleKeyDown}
 			>
 				<div className="file-table__cell file-table__cell--status">
-					{isExpandable ? (
+					{isError ? (
+						<StatusIcon
+							status={file.status}
+							shouldAnimate={false}
+							{...(failureSummary === undefined
+								? {}
+								: { accessibleLabel: failureSummary })}
+						/>
+					) : isExpandable ? (
 						<ChevronIcon expanded={isExpanded} />
 					) : (
 						<StatusIcon
@@ -123,6 +145,9 @@ export function FileRow({
 							<span className="file-table__copy-disclosure">
 								{t("writtenToCopy")}
 							</span>
+						)}
+						{failureSummary !== undefined && (
+							<span className="file-table__error-summary">{failureSummary}</span>
 						)}
 					</div>
 				</div>
@@ -180,8 +205,8 @@ export function FileRow({
 					)}
 				</div>
 			</div>
-			{isExpanded && isError && file.error !== null && (
-				<ErrorExpansion error={file.error} onCopy={onCopyToast} />
+			{isExpanded && isError && errorDetail !== null && (
+				<ErrorExpansion error={errorDetail} onCopy={onCopyToast} />
 			)}
 			{isExpanded &&
 				isComplete &&
