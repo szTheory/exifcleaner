@@ -30,16 +30,22 @@ export class VerifyGeneratedOutputQuery {
 		}
 
 		if (result.value.length !== 1) {
-			return verificationFailure("Expected exactly one ExifTool metadata record");
+			return verificationFailure(
+				"Expected exactly one ExifTool metadata record",
+			);
 		}
 
 		const record = result.value[0]!;
 		if (typeof record.FileType !== "string" || record.FileType.length === 0) {
-			return verificationFailure("Generated output has no recognized file type");
+			return verificationFailure(
+				"Generated output has no recognized file type",
+			);
 		}
 
 		if (record.Error !== undefined) {
-			return verificationFailure("ExifTool reported an error for the generated output");
+			return verificationFailure(
+				"ExifTool reported an error for the generated output",
+			);
 		}
 
 		return { ok: true, value: undefined };

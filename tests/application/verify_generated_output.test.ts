@@ -31,18 +31,54 @@ describe("VerifyGeneratedOutputQuery", () => {
 		{
 			description: "port failure",
 			setResult: () => {
-				exiftool.readResult = { ok: false, error: { code: "exiftool-error", detail: "cannot read" } };
+				exiftool.readResult = {
+					ok: false,
+					error: { code: "exiftool-error", detail: "cannot read" },
+				};
 			},
 		},
-		{ description: "no records", setResult: () => { exiftool.readResult = { ok: true, value: [] }; } },
-		{ description: "multiple records", setResult: () => { exiftool.readResult = { ok: true, value: [{ FileType: "RAF" }, { FileType: "RAF" }] }; } },
-		{ description: "missing file type", setResult: () => { exiftool.readResult = { ok: true, value: [{ FileName: "sample.raf" }] }; } },
-		{ description: "empty file type", setResult: () => { exiftool.readResult = { ok: true, value: [{ FileType: "" }] }; } },
-		{ description: "ExifTool Error", setResult: () => { exiftool.readResult = { ok: true, value: [{ FileType: "RAF", Error: "bad output" }] }; } },
+		{
+			description: "no records",
+			setResult: () => {
+				exiftool.readResult = { ok: true, value: [] };
+			},
+		},
+		{
+			description: "multiple records",
+			setResult: () => {
+				exiftool.readResult = {
+					ok: true,
+					value: [{ FileType: "RAF" }, { FileType: "RAF" }],
+				};
+			},
+		},
+		{
+			description: "missing file type",
+			setResult: () => {
+				exiftool.readResult = { ok: true, value: [{ FileName: "sample.raf" }] };
+			},
+		},
+		{
+			description: "empty file type",
+			setResult: () => {
+				exiftool.readResult = { ok: true, value: [{ FileType: "" }] };
+			},
+		},
+		{
+			description: "ExifTool Error",
+			setResult: () => {
+				exiftool.readResult = {
+					ok: true,
+					value: [{ FileType: "RAF", Error: "bad output" }],
+				};
+			},
+		},
 	])("rejects $description", async ({ setResult }) => {
 		setResult();
 
-		const result = await query.execute({ generatedPath: "/tmp/sample_cleaned.raf" });
+		const result = await query.execute({
+			generatedPath: "/tmp/sample_cleaned.raf",
+		});
 
 		expect(result.ok).toBe(false);
 		if (!result.ok) {

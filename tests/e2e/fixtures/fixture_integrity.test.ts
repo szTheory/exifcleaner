@@ -14,7 +14,8 @@ const EXIFTOOL =
 		? path.resolve(__dirname, "../../../.resources/win/bin/exiftool.exe")
 		: path.resolve(__dirname, "../../../.resources/nix/bin/exiftool");
 const RAF_FIXTURE = "sample.raf";
-const RAF_SHA256 = "e12e30bd0cf5f160b82b93f043696c04d1d5f4628f1fdd19abdab9f8328d8bf0";
+const RAF_SHA256 =
+	"e12e30bd0cf5f160b82b93f043696c04d1d5f4628f1fdd19abdab9f8328d8bf0";
 const RAF_SIZE_BYTES = 38_452;
 
 /**
@@ -193,16 +194,24 @@ describe("E2E fixture integrity", () => {
 
 		try {
 			fs.copyFileSync(sourcePath, copiedPath);
-			execFileSync(EXIFTOOL, ["-DateTimeOriginal=", "-overwrite_original", copiedPath], {
-				encoding: "utf8",
-			});
+			execFileSync(
+				EXIFTOOL,
+				["-DateTimeOriginal=", "-overwrite_original", copiedPath],
+				{
+					encoding: "utf8",
+				},
+			);
 
 			expect(readFixtureMetadata(RAF_FIXTURE).DateTimeOriginal).toBe(
 				"2007:05:22 13:58:30",
 			);
-			const output = execFileSync(EXIFTOOL, ["-G1", "-s", "-json", copiedPath], {
-				encoding: "utf8",
-			});
+			const output = execFileSync(
+				EXIFTOOL,
+				["-G1", "-s", "-json", copiedPath],
+				{
+					encoding: "utf8",
+				},
+			);
 			expect(output).not.toContain("DateTimeOriginal");
 			expect(sha256(sourcePath)).toBe(sourceHashBefore);
 			expect(sourceHashBefore).toBe(RAF_SHA256);

@@ -248,14 +248,16 @@ test.describe("File type coverage", () => {
 			await expect(disclosure).toHaveCount(1);
 			const disclosureText = await disclosure.textContent();
 			expect(disclosureText).toMatch(/\S/);
-			await expect(window.locator(".file-table__row--complete")).toHaveAttribute(
+			await expect(
+				window.locator(".file-table__row--complete"),
+			).toHaveAttribute(
 				"aria-label",
 				new RegExp(disclosureText ?? "Written to a copy"),
 			);
 			await window.locator(".file-table__reveal").click();
-			expect(await app.evaluate(() => Reflect.get(globalThis, "__rafRevealCalls"))).toEqual([
-				`${dir}/sample_cleaned.raf`,
-			]);
+			expect(
+				await app.evaluate(() => Reflect.get(globalThis, "__rafRevealCalls")),
+			).toEqual([`${dir}/sample_cleaned.raf`]);
 		} finally {
 			await app.evaluate(() => {
 				const restore = Reflect.get(globalThis, "__rafRestoreReveal") as

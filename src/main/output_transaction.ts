@@ -71,9 +71,10 @@ export class OutputTransaction {
 			return { ok: false, error: { code: "write-failed" } };
 		}
 
-		const verificationResult = await this.dependencies.verifyGeneratedOutput.execute({
-			generatedPath,
-		});
+		const verificationResult =
+			await this.dependencies.verifyGeneratedOutput.execute({
+				generatedPath,
+			});
 		if (!verificationResult.ok) {
 			const cleanupFailure = await this.cleanup({ generatedPath });
 			return {
@@ -124,7 +125,11 @@ export class OutputTransaction {
 }
 
 function isTransientFileLock(error: unknown): boolean {
-	return hasCode(error, "EBUSY") || hasCode(error, "EPERM") || hasCode(error, "EACCES");
+	return (
+		hasCode(error, "EBUSY") ||
+		hasCode(error, "EPERM") ||
+		hasCode(error, "EACCES")
+	);
 }
 
 function hasCode(error: unknown, code: string): boolean {

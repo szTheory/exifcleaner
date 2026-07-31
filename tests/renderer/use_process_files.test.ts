@@ -326,7 +326,9 @@ describe("processFileEntries", () => {
 				detail: "Verification could not prove output safety",
 				...(residualPath === undefined ? {} : { residualPath }),
 			});
-			expect(dispatches.some((action) => action.type === "UPDATE_FILE_METADATA")).toBe(false);
+			expect(
+				dispatches.some((action) => action.type === "UPDATE_FILE_METADATA"),
+			).toBe(false);
 			expect(mockApi.files.notifyFileProcessed).toHaveBeenCalledTimes(1);
 		},
 	);

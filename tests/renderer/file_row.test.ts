@@ -24,7 +24,7 @@ vi.mock("../../src/renderer/hooks/use_i18n", () => ({
 						? "Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged."
 						: key === "cleanupFailedSummary"
 							? "Couldn’t verify cleaned output, and the incomplete output could not be removed. Your original is unchanged."
-					: key,
+							: key,
 	}),
 }));
 
@@ -122,7 +122,8 @@ function findElementByType(
 			// Keep traversing siblings until the requested component is found.
 		}
 	});
-	if (found === undefined) throw new Error("Requested component was not rendered");
+	if (found === undefined)
+		throw new Error("Requested component was not rendered");
 	return found;
 }
 
@@ -216,9 +217,7 @@ describe("FileRow copy reveal context menu", () => {
 		const forcedRowProps = forcedRow.props as { "aria-label"?: string };
 		const disclosureProps = disclosure.props as { children?: unknown };
 
-		expect(forcedRowProps["aria-label"]).toBe(
-			"Complete. Written to a copy.",
-		);
+		expect(forcedRowProps["aria-label"]).toBe("Complete. Written to a copy.");
 		expect(disclosureProps.children).toBe("Written to a copy");
 	});
 
@@ -232,7 +231,9 @@ describe("FileRow copy reveal context menu", () => {
 			onCopyToast: vi.fn(),
 		});
 
-		expect(() => findElementByClass(row, "file-table__copy-disclosure")).toThrow();
+		expect(() =>
+			findElementByClass(row, "file-table__copy-disclosure"),
+		).toThrow();
 	});
 
 	it("sends the completed row's exact stored copy and submitted original paths on context-menu gesture", () => {

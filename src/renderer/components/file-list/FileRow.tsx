@@ -48,7 +48,9 @@ export function FileRow({
 				? t("cleanupFailedSummary")
 				: undefined;
 	const errorDetail =
-		file.failureKind === "cleanup" && file.detail !== undefined && file.residualPath !== undefined
+		file.failureKind === "cleanup" &&
+		file.detail !== undefined &&
+		file.residualPath !== undefined
 			? `${file.detail}: ${file.residualPath}`
 			: (file.detail ?? file.error);
 
@@ -147,7 +149,9 @@ export function FileRow({
 							</span>
 						)}
 						{failureSummary !== undefined && (
-							<span className="file-table__error-summary">{failureSummary}</span>
+							<span className="file-table__error-summary">
+								{failureSummary}
+							</span>
 						)}
 					</div>
 				</div>
