@@ -1,12 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { IpcMainInvokeEvent } from "electron";
 import type { Container } from "../../src/main/container";
+import { StripMetadataCommand } from "../../src/application/commands/strip_metadata_command";
+import { VerifyGeneratedOutputQuery } from "../../src/application/queries/verify_generated_output";
 import { DEFAULT_SETTINGS } from "../../src/domain/settings_schema";
 import {
 	registerAllowedSender,
 	unregisterSender,
 } from "../../src/main/ipc/ipc_validation";
 import { setupExifHandlers } from "../../src/main/exif_handlers";
+import { OutputTransaction } from "../../src/main/output_transaction";
+import { FakeExifTool } from "../fakes/fake_exiftool";
 
 const ipcHandleMock = vi.hoisted(() => vi.fn());
 const existsSyncMock = vi.hoisted(() => vi.fn());
@@ -88,6 +92,41 @@ function makeContainer({
 	return { container, stripMetadata, outputTransaction };
 }
 
+function makePortCountContainer({ saveAsCopy }: { saveAsCopy: boolean }): {
+	container: Container;
+	exiftool: FakeExifTool;
+} {
+	const exiftool = new FakeExifTool();
+	exiftool.readResult = {
+		ok: true,
+		value: [{ FileType: "JPEG" }],
+	};
+	const stripMetadata = new StripMetadataCommand({ exiftool });
+	const verifyGeneratedOutput = new VerifyGeneratedOutputQuery({ exiftool });
+	const outputTransaction = new OutputTransaction({
+		stripMetadata,
+		verifyGeneratedOutput,
+		unlink: vi.fn(async () => undefined),
+		rename: vi.fn(async () => undefined),
+		delay: vi.fn(async () => undefined),
+	});
+	const container = {
+		settings: {
+			get: () => ({
+				...DEFAULT_SETTINGS,
+				saveAsCopy,
+			}),
+		},
+		readMetadata: {
+			execute: vi.fn(),
+		},
+		stripMetadata,
+		outputTransaction,
+	} as unknown as Container;
+
+	return { container, exiftool };
+}
+
 function makeAuthorizedEvent(): IpcMainInvokeEvent {
 	registerAllowedSender(TEST_SENDER_ID);
 	return { sender: { id: TEST_SENDER_ID } } as IpcMainInvokeEvent;
@@ -104,6 +143,72 @@ afterEach(() => {
 });
 
 describe("exif:remove handler", () => {
+	it.each([
+		{
+			name: "JPEG",
+			filePath: "/tmp/sample.jpg",
+			saveAsCopy: false,
+			verifierPath: undefined,
+		},
+		{
+			name: "JPEG alias",
+			filePath: "/tmp/sample.jpeg",
+			saveAsCopy: false,
+			verifierPath: undefined,
+		},
+		{
+			name: "mixed-case JPEG",
+			filePath: "/tmp/sample.JpG",
+			saveAsCopy: false,
+			verifierPath: undefined,
+		},
+		{
+			name: "PNG",
+			filePath: "/tmp/sample.png",
+			saveAsCopy: false,
+			verifierPath: undefined,
+		},
+		{
+			name: "RAW copy",
+			filePath: "/tmp/sample.raf",
+			saveAsCopy: false,
+			verifierPath: "/tmp/sample_cleaned.raf",
+		},
+		{
+			name: "copy-mode video",
+			filePath: "/tmp/sample.mp4",
+			saveAsCopy: true,
+			verifierPath: "/tmp/sample_cleaned.mp4",
+		},
+		{
+			name: "overwrite-mode video",
+			filePath: "/tmp/sample.mp4",
+			saveAsCopy: false,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.mp4",
+		},
+	])(
+		"uses the exact main-process port count for $name",
+		async ({ filePath, saveAsCopy, verifierPath }) => {
+			const { container, exiftool } = makePortCountContainer({ saveAsCopy });
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			await handler(makeAuthorizedEvent(), filePath);
+
+			const removeCalls = exiftool.calls.filter(
+				(call) => call.method === "removeMetadata",
+			);
+			const verifierReads = exiftool.calls.filter(
+				(call) => call.method === "readMetadata",
+			);
+			expect(removeCalls).toHaveLength(1);
+			expect(verifierReads).toHaveLength(verifierPath === undefined ? 0 : 1);
+			if (verifierPath !== undefined) {
+				expect(verifierReads[0]?.args[0]).toBe(verifierPath);
+			}
+		},
+	);
+
 	it("returns and writes generated copy path when save-as-copy has no collision", async () => {
 		const { container, stripMetadata } = makeContainer({ saveAsCopy: true });
 		setupExifHandlers({ container });
