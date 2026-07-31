@@ -104,6 +104,25 @@ describe("exif:remove handler", () => {
 		});
 	});
 
+	it("passes and returns an absolute root copy path", async () => {
+		const { container, stripMetadata } = makeContainer({ saveAsCopy: true });
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/photo.jpg");
+
+		expect(stripMetadata.execute).toHaveBeenCalledWith(
+			expect.objectContaining({
+				filePath: "/photo.jpg",
+				outputPath: "/photo_cleaned.jpg",
+			}),
+		);
+		expect(result).toEqual({
+			success: true,
+			outputPath: "/photo_cleaned.jpg",
+		});
+	});
+
 	it("returns and writes collision suffix without mutating the request path", async () => {
 		const { container, stripMetadata } = makeContainer({ saveAsCopy: true });
 		existsSyncMock.mockImplementation((candidate: string) => {

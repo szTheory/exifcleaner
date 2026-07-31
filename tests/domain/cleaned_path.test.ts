@@ -1,4 +1,4 @@
-import { it, expect, describe } from "vitest";
+import { it, expect, describe, vi } from "vitest";
 import { generateCleanedPath } from "../../src/domain/files/cleaned_path";
 
 describe("generateCleanedPath", () => {
@@ -8,6 +8,18 @@ describe("generateCleanedPath", () => {
 			exists: () => false,
 		});
 		expect(result).toBe("/dir/photo_cleaned.jpg");
+	});
+
+	it("preserves the POSIX root in the generated path and collision lookup", () => {
+		const exists = vi.fn(() => false);
+
+		const result = generateCleanedPath({
+			filePath: "/photo.jpg",
+			exists,
+		});
+
+		expect(result).toBe("/photo_cleaned.jpg");
+		expect(exists).toHaveBeenCalledWith("/photo_cleaned.jpg");
 	});
 
 	it("increments counter on collision", () => {
