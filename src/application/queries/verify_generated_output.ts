@@ -20,7 +20,7 @@ export class VerifyGeneratedOutputQuery {
 	}): Promise<Result<void, OutputVerificationError>> {
 		const result = await this.exiftool.readMetadata({
 			filePath: generatedPath,
-			args: ["-G2", "-File:FileType", "-File:Error"],
+			args: ["-File:FileType", "-File:Error"],
 		});
 
 		if (!result.ok) {

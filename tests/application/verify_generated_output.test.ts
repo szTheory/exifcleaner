@@ -22,10 +22,7 @@ describe("VerifyGeneratedOutputQuery", () => {
 		expect(exiftool.calls).toEqual([
 			{
 				method: "readMetadata",
-				args: [
-					generatedPath,
-					["-G2", "-File:FileType", "-File:Error"],
-				],
+				args: [generatedPath, ["-File:FileType", "-File:Error"]],
 			},
 		]);
 	});
