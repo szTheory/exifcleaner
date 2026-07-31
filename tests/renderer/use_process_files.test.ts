@@ -409,6 +409,48 @@ describe("processFileEntries", () => {
 		]);
 	});
 
+	it("keeps 200 JPEGs at exactly two renderer reads and one write each", async () => {
+		const entries = Array.from({ length: 200 }, (_, index) => {
+			const number = index + 1;
+			return makeFileEntry({
+				id: `jpeg-${number}`,
+				path: `/batch/jpeg-${number}.jpg`,
+				name: `jpeg-${number}.jpg`,
+			});
+		});
+		mockApi.exif.readMetadata.mockResolvedValue({ metadata: "present" });
+		mockApi.exif.removeMetadata.mockImplementation(async (path: string) => {
+			return {
+				success: true,
+				outputPath: path.replace(/\.jpg$/, "_cleaned.jpg"),
+			};
+		});
+
+		await processFileEntries(entries, mockDispatch);
+
+		expect(mockApi.exif.readMetadata).toHaveBeenCalledTimes(400);
+		expect(mockApi.exif.removeMetadata).toHaveBeenCalledTimes(200);
+		expect(mockApi.files.notifyFileProcessed).toHaveBeenCalledTimes(200);
+		expect(mockApi.files.notifyAllFilesProcessed).toHaveBeenCalledTimes(1);
+		const completeDispatches = dispatches.filter(
+			(action) =>
+				action.type === "UPDATE_FILE_STATUS" &&
+				action.status === FileProcessingStatus.Complete,
+		);
+		expect(completeDispatches).toHaveLength(200);
+
+		for (const [index, entry] of entries.entries()) {
+			expect(mockApi.exif.readMetadata).toHaveBeenNthCalledWith(
+				index * 2 + 1,
+				entry.path,
+			);
+			expect(mockApi.exif.readMetadata).toHaveBeenNthCalledWith(
+				index * 2 + 2,
+				entry.path.replace(/\.jpg$/, "_cleaned.jpg"),
+			);
+		}
+	});
+
 	it("stores each returned output path while processing two files sequentially", async () => {
 		const entry1 = makeFileEntry({ id: "id-1", path: "/a.jpg" });
 		const entry2 = makeFileEntry({ id: "id-2", path: "/b.jpg" });
