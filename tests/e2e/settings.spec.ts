@@ -186,48 +186,41 @@ test.describe("Settings", () => {
 		await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
 	});
 
-	test.fail(
-		"#304 save-as-copy on: original survives, a cleaned copy appears",
-		async () => {
-			const { dir, copyFixture, cleanup } = createFixtureDir();
-			try {
-				const tempFile = copyFixture("sample.jpg");
+	test("#304 save-as-copy on: original survives, a cleaned copy appears", async () => {
+		const { dir, copyFixture, cleanup } = createFixtureDir();
+		try {
+			const tempFile = copyFixture("sample.jpg");
 
-				await page.evaluate(() =>
-					window.api.settings.set({ saveAsCopy: true }),
-				);
-				await page.waitForTimeout(300);
+			await page.evaluate(() => window.api.settings.set({ saveAsCopy: true }));
+			await page.waitForTimeout(300);
 
-				const before = snapshotDir(dir);
+			const before = snapshotDir(dir);
 
-				await app.evaluate(
-					({ BrowserWindow }, filePaths) => {
-						const win = BrowserWindow.getAllWindows()[0];
-						if (win) {
-							win.webContents.send("file-open-add-files", filePaths);
-						}
-					},
-					[tempFile],
-				);
+			await app.evaluate(
+				({ BrowserWindow }, filePaths) => {
+					const win = BrowserWindow.getAllWindows()[0];
+					if (win) {
+						win.webContents.send("file-open-add-files", filePaths);
+					}
+				},
+				[tempFile],
+			);
 
-				await waitForProcessing(page, { timeout: 15000 });
+			await waitForProcessing(page, { timeout: 15000 });
 
-				const after = snapshotDir(dir);
+			const after = snapshotDir(dir);
 
-				assertDirEffect(before, after, {
-					added: ["sample_cleaned.jpg"],
-					unchanged: ["sample.jpg"],
-					modified: [],
-					removed: [],
-				});
-			} finally {
-				await page.evaluate(() =>
-					window.api.settings.set({ saveAsCopy: false }),
-				);
-				cleanup();
-			}
-		},
-	);
+			assertDirEffect(before, after, {
+				added: ["sample_cleaned.jpg"],
+				unchanged: ["sample.jpg"],
+				modified: [],
+				removed: [],
+			});
+		} finally {
+			await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
+			cleanup();
+		}
+	});
 
 	// Characterization test (D-05 test 2): pins TODAY's broken behavior — save-as-copy
 	// currently OVERWRITES the original instead of creating a copy. This test MUST BE

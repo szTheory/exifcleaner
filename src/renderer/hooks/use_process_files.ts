@@ -29,7 +29,7 @@ export async function processFileEntries(
 			});
 			const removeResult = await window.api.exif.removeMetadata(entry.path);
 
-			if (removeResult.error !== null) {
+			if (!removeResult.success) {
 				dispatch({
 					type: "UPDATE_FILE_ERROR",
 					id: entry.id,
@@ -39,7 +39,9 @@ export async function processFileEntries(
 				continue;
 			}
 
-			const afterMetadata = await window.api.exif.readMetadata(entry.path);
+			const afterMetadata = await window.api.exif.readMetadata(
+				removeResult.outputPath,
+			);
 			const afterTags = Object.keys(afterMetadata).length;
 
 			dispatch({
@@ -49,6 +51,7 @@ export async function processFileEntries(
 				afterTags,
 				beforeMetadata,
 				afterMetadata,
+				outputPath: removeResult.outputPath,
 			});
 
 			const finalStatus =

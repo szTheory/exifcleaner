@@ -27,6 +27,7 @@ export interface FileEntry {
 	afterTags: number | null;
 	beforeMetadata: Record<string, unknown> | null;
 	afterMetadata: Record<string, unknown> | null;
+	outputPath?: string | undefined;
 	error: string | null;
 }
 
@@ -48,6 +49,7 @@ export type AppAction =
 			afterTags: number;
 			beforeMetadata: Record<string, unknown> | null;
 			afterMetadata: Record<string, unknown> | null;
+			outputPath: string;
 	  }
 	| { type: "UPDATE_FILE_ERROR"; id: string; error: string }
 	| { type: "TOGGLE_FOLDER"; folder: string }
@@ -91,6 +93,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 								afterTags: action.afterTags,
 								beforeMetadata: action.beforeMetadata,
 								afterMetadata: action.afterMetadata,
+								outputPath: action.outputPath,
 							}
 						: file,
 				),

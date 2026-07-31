@@ -1,8 +1,10 @@
 import { ipcMain } from "electron";
+import { existsSync } from "node:fs";
 import type { Container } from "./container";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import { exifReadSchema, exifRemoveSchema } from "./ipc/ipc_schemas";
 import { formatExifError } from "../domain";
+import { generateCleanedPath } from "../domain/files/cleaned_path";
 
 export function setupExifHandlers({
 	container,
@@ -24,17 +26,21 @@ export function setupExifHandlers({
 		"exif:remove",
 		createValidatedHandler(exifRemoveSchema, async (filePath) => {
 			const settings = container.settings.get();
+			const outputPath = settings.saveAsCopy
+				? generateCleanedPath({ filePath, exists: existsSync })
+				: filePath;
 			const result = await container.stripMetadata.execute({
 				filePath,
 				preserveOrientation: settings.preserveOrientation,
 				preserveColorProfile: settings.preserveColorProfile,
 				preserveTimestamps: settings.preserveTimestamps,
 				saveAsCopy: settings.saveAsCopy,
+				outputPath,
 			});
 			if (result.ok) {
-				return { data: null, error: null };
+				return { success: true, outputPath };
 			}
-			return { data: null, error: formatExifError(result.error) };
+			return { success: false, error: formatExifError(result.error) };
 		}),
 	);
 }

@@ -1,6 +1,9 @@
 import type { I18nStringsDictionary } from "../domain";
 import type { Settings } from "../domain";
-import type { ClassifiedFile } from "../common/ipc_channels";
+import type {
+	ClassifiedFile,
+	RemoveMetadataResult,
+} from "../common/ipc_channels";
 
 export type { I18nStringsDictionary, ClassifiedFile };
 
@@ -10,9 +13,7 @@ export interface ExifData {
 
 export interface ExifApi {
 	readMetadata: (filePath: string) => Promise<ExifData>;
-	removeMetadata: (
-		filePath: string,
-	) => Promise<{ data: null; error: string | null }>;
+	removeMetadata: (filePath: string) => Promise<RemoveMetadataResult>;
 }
 
 export interface I18nApi {
