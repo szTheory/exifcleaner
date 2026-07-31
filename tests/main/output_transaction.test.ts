@@ -166,4 +166,28 @@ describe("OutputTransaction", () => {
 			`rename:${generatedPath}:${originalPath}`,
 		]);
 	});
+
+	it("cleans a failed commit stage before publishing a terminal failure", async () => {
+		const { transaction, events } = createTransaction({
+			rename: async () => Promise.reject(new Error("rename failed")),
+		});
+
+		const result = await transaction.execute({
+			filePath: originalPath,
+			generatedPath,
+			commitPath: originalPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveTimestamps: false,
+		});
+
+		expect(result).toEqual({ ok: false, error: { code: "commit-failed" } });
+		expect(result).not.toHaveProperty("outputPath");
+		expect(events).toEqual([
+			"write",
+			`verify:${generatedPath}`,
+			`rename:${generatedPath}:${originalPath}`,
+			`unlink:${generatedPath}`,
+		]);
+	});
 });

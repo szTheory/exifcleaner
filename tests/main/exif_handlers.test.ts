@@ -10,6 +10,7 @@ import { setupExifHandlers } from "../../src/main/exif_handlers";
 
 const ipcHandleMock = vi.hoisted(() => vi.fn());
 const existsSyncMock = vi.hoisted(() => vi.fn());
+const randomUUIDMock = vi.hoisted(() => vi.fn(() => "test-uuid"));
 
 vi.mock("electron", () => ({
 	ipcMain: {
@@ -19,6 +20,10 @@ vi.mock("electron", () => ({
 
 vi.mock("node:fs", () => ({
 	existsSync: existsSyncMock,
+}));
+
+vi.mock("node:crypto", () => ({
+	randomUUID: randomUUIDMock,
 }));
 
 const TEST_SENDER_ID = 304;
@@ -42,15 +47,21 @@ function captureInvokeHandler(channel: string): {
 function makeContainer({
 	saveAsCopy,
 	executeResult = { ok: true, value: { tagsRemoved: 0 } },
+	transactionResult = { ok: true, value: { outputPath: "/dir/video_cleaned.mp4" } },
 }: {
 	saveAsCopy: boolean;
 	executeResult?: Awaited<ReturnType<Container["stripMetadata"]["execute"]>>;
+	transactionResult?: Awaited<ReturnType<Container["outputTransaction"]["execute"]>>;
 }): {
 	container: Container;
 	stripMetadata: { execute: ReturnType<typeof vi.fn> };
+	outputTransaction: { execute: ReturnType<typeof vi.fn> };
 } {
 	const stripMetadata = {
 		execute: vi.fn(async () => executeResult),
+	};
+	const outputTransaction = {
+		execute: vi.fn(async () => transactionResult),
 	};
 	const container = {
 		settings: {
@@ -63,8 +74,9 @@ function makeContainer({
 			execute: vi.fn(),
 		},
 		stripMetadata,
+		outputTransaction,
 	} as unknown as Container;
-	return { container, stripMetadata };
+	return { container, stripMetadata, outputTransaction };
 }
 
 function makeAuthorizedEvent(): IpcMainInvokeEvent {
@@ -245,6 +257,83 @@ describe("exif:remove handler", () => {
 		expect(result).toEqual({
 			success: false,
 			error: "ExifTool error: Permission denied",
+		});
+		expect(result).not.toHaveProperty("outputPath");
+	});
+
+	it("routes copy-mode video through one verified final transaction", async () => {
+		const { container, stripMetadata, outputTransaction } = makeContainer({
+			saveAsCopy: true,
+			transactionResult: {
+				ok: true,
+				value: { outputPath: "/dir/video_cleaned.mp4" },
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(stripMetadata.execute).not.toHaveBeenCalled();
+		expect(outputTransaction.execute).toHaveBeenCalledWith(
+			expect.objectContaining({
+				filePath: "/dir/video.mp4",
+				generatedPath: "/dir/video_cleaned.mp4",
+				commitPath: undefined,
+			}),
+		);
+		expect(result).toEqual({
+			success: true,
+			outputPath: "/dir/video_cleaned.mp4",
+			wasForcedCopy: false,
+		});
+	});
+
+	it("stages overwrite-mode video beside the original before publishing it", async () => {
+		const { container, stripMetadata, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+			transactionResult: { ok: true, value: { outputPath: "/dir/video.mp4" } },
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(stripMetadata.execute).not.toHaveBeenCalled();
+		expect(outputTransaction.execute).toHaveBeenCalledWith(
+			expect.objectContaining({
+				filePath: "/dir/video.mp4",
+				generatedPath: "/dir/.video.exifcleaner-stage-test-uuid.mp4",
+				commitPath: "/dir/video.mp4",
+			}),
+		);
+		expect(result).toEqual({
+			success: true,
+			outputPath: "/dir/video.mp4",
+			wasForcedCopy: false,
+		});
+	});
+
+	it("returns a cleanup failure with only the exact residual path", async () => {
+		const residualPath = "/dir/.video.exifcleaner-stage-test-uuid.mp4";
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+			transactionResult: {
+				ok: false,
+				error: { code: "cleanup-failed", residualPath },
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(outputTransaction.execute).toHaveBeenCalledOnce();
+		expect(result).toEqual({
+			success: false,
+			failureKind: "cleanup",
+			detail: "Generated output cleanup failed",
+			residualPath,
 		});
 		expect(result).not.toHaveProperty("outputPath");
 	});
