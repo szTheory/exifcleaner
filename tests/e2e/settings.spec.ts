@@ -222,47 +222,6 @@ test.describe("Settings", () => {
 		}
 	});
 
-	// Characterization test (D-05 test 2): pins TODAY's broken behavior — save-as-copy
-	// currently OVERWRITES the original instead of creating a copy. This test MUST BE
-	// DELETED WHEN #304 IS FIXED (Phase 21). It exists as a second, unmaskable tripwire:
-	// an xfail modifier only asserts *that* test 1 fails, never *why*. If the harness
-	// itself breaks (a broken beforeEach, a changed selector), this test fails too —
-	// proving test 1's red is attributable to #304 and not to harness rot.
-	test("#304 characterization (DELETE WITH THE FIX): save-as-copy currently overwrites the original", async () => {
-		const { dir, copyFixture, cleanup } = createFixtureDir();
-		try {
-			const tempFile = copyFixture("sample.jpg");
-
-			await page.evaluate(() => window.api.settings.set({ saveAsCopy: true }));
-			await page.waitForTimeout(300);
-
-			const before = snapshotDir(dir);
-
-			await app.evaluate(
-				({ BrowserWindow }, filePaths) => {
-					const win = BrowserWindow.getAllWindows()[0];
-					if (win) {
-						win.webContents.send("file-open-add-files", filePaths);
-					}
-				},
-				[tempFile],
-			);
-
-			await waitForProcessing(page, { timeout: 15000 });
-
-			const after = snapshotDir(dir);
-
-			assertDirEffect(before, after, {
-				modified: ["sample.jpg"],
-				added: [],
-				removed: [],
-			});
-		} finally {
-			await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
-			cleanup();
-		}
-	});
-
 	// Regression guard (D-05 test 3): this is NOT a #304 proof and must STAY GREEN after
 	// Phase 21. Overwrite mode (save-as-copy off) is measured GREEN today because #304
 	// collapses both settings onto the same code path and both modes produce
