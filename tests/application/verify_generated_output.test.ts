@@ -31,14 +31,19 @@ describe("VerifyGeneratedOutputQuery", () => {
 	});
 
 	it.each([
-		["port failure", { ok: false, error: { code: "exiftool-error", detail: "cannot read" } }],
-		["no records", { ok: true, value: [] }],
-		["multiple records", { ok: true, value: [{ FileType: "RAF" }, { FileType: "RAF" }] }],
-		["missing file type", { ok: true, value: [{ FileName: "sample.raf" }] }],
-		["empty file type", { ok: true, value: [{ FileType: "" }] }],
-		["ExifTool Error", { ok: true, value: [{ FileType: "RAF", Error: "bad output" }] }],
-	] as const)("rejects %s", async (_description, readResult) => {
-		exiftool.readResult = readResult;
+		{
+			description: "port failure",
+			setResult: () => {
+				exiftool.readResult = { ok: false, error: { code: "exiftool-error", detail: "cannot read" } };
+			},
+		},
+		{ description: "no records", setResult: () => { exiftool.readResult = { ok: true, value: [] }; } },
+		{ description: "multiple records", setResult: () => { exiftool.readResult = { ok: true, value: [{ FileType: "RAF" }, { FileType: "RAF" }] }; } },
+		{ description: "missing file type", setResult: () => { exiftool.readResult = { ok: true, value: [{ FileName: "sample.raf" }] }; } },
+		{ description: "empty file type", setResult: () => { exiftool.readResult = { ok: true, value: [{ FileType: "" }] }; } },
+		{ description: "ExifTool Error", setResult: () => { exiftool.readResult = { ok: true, value: [{ FileType: "RAF", Error: "bad output" }] }; } },
+	])("rejects $description", async ({ setResult }) => {
+		setResult();
 
 		const result = await query.execute({ generatedPath: "/tmp/sample_cleaned.raf" });
 

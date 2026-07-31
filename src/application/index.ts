@@ -8,4 +8,8 @@ export type { XattrPort } from "./commands/xattr_command";
 export { XattrCommand } from "./commands/xattr_command";
 export { StripMetadataCommand } from "./commands/strip_metadata_command";
 export { ReadMetadataQuery } from "./queries/read_metadata_query";
+export {
+	VerifyGeneratedOutputQuery,
+	type OutputVerificationError,
+} from "./queries/verify_generated_output";
 export { ExpandFolderCommand } from "./commands/expand_folder_command";
