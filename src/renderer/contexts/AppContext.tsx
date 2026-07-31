@@ -30,6 +30,9 @@ export interface FileEntry {
 	outputPath?: string | undefined;
 	wasForcedCopy?: boolean | undefined;
 	error: string | null;
+	failureKind?: "write" | "verification" | "cleanup" | "commit" | undefined;
+	detail?: string | undefined;
+	residualPath?: string | undefined;
 }
 
 export interface AppState {
@@ -53,7 +56,14 @@ export type AppAction =
 			outputPath: string;
 			wasForcedCopy: boolean;
 	  }
-	| { type: "UPDATE_FILE_ERROR"; id: string; error: string }
+	| {
+			type: "UPDATE_FILE_ERROR";
+			id: string;
+			error: string;
+			failureKind?: "write" | "verification" | "cleanup" | "commit";
+			detail?: string;
+			residualPath?: string;
+	  }
 	| { type: "TOGGLE_FOLDER"; folder: string }
 	| { type: "TOGGLE_ROW_EXPANSION"; id: string }
 	| { type: "ADD_FOLDER_SCANNING"; folder: string }
@@ -109,6 +119,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 						? {
 								...file,
 								error: action.error,
+								failureKind: action.failureKind,
+								detail: action.detail,
+								residualPath: action.residualPath,
+								afterTags: null,
+								afterMetadata: null,
+								outputPath: undefined,
+								wasForcedCopy: undefined,
 								status: FileProcessingStatus.Error,
 							}
 						: file,

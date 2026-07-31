@@ -30,16 +30,31 @@ export async function processFileEntries(
 			const removeResult = await window.api.exif.removeMetadata(entry.path);
 
 			if (!removeResult.success) {
-				dispatch({
-					type: "UPDATE_FILE_ERROR",
-					id: entry.id,
-					error:
-						"error" in removeResult
-							? removeResult.error
-							: removeResult.residualPath === undefined
-								? removeResult.detail
-								: `${removeResult.detail}: ${removeResult.residualPath}`,
-				});
+				if ("error" in removeResult) {
+					dispatch({
+						type: "UPDATE_FILE_ERROR",
+						id: entry.id,
+						error: removeResult.error,
+					});
+				} else {
+					switch (removeResult.failureKind) {
+						case "write":
+						case "verification":
+						case "cleanup":
+						case "commit":
+							dispatch({
+								type: "UPDATE_FILE_ERROR",
+								id: entry.id,
+								error: removeResult.detail,
+								failureKind: removeResult.failureKind,
+								detail: removeResult.detail,
+								...(removeResult.residualPath === undefined
+									? {}
+									: { residualPath: removeResult.residualPath }),
+							});
+							break;
+					}
+				}
 				window.api.files.notifyFileProcessed();
 				continue;
 			}
