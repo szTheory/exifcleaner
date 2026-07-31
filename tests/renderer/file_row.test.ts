@@ -66,6 +66,31 @@ function findRevealControl(node: unknown): React.ReactElement {
 	return found;
 }
 
+function findElementByClass(
+	node: unknown,
+	className: string,
+): React.ReactElement {
+	if (!React.isValidElement(node)) {
+		throw new Error(`Element with ${className} was not rendered`);
+	}
+	const props = node.props as { children?: unknown; className?: string };
+	if (props.className?.split(" ").includes(className)) return node;
+
+	let found: React.ReactElement | undefined;
+	React.Children.forEach(props.children, (child) => {
+		if (found !== undefined) return;
+		try {
+			found = findElementByClass(child, className);
+		} catch {
+			// Keep traversing siblings until the requested element is found.
+		}
+	});
+	if (found === undefined) {
+		throw new Error(`Element with ${className} was not rendered`);
+	}
+	return found;
+}
+
 beforeEach(() => {
 	showContextMenu.mockReset();
 	(globalThis as Record<string, unknown>).window = {
@@ -79,6 +104,39 @@ beforeEach(() => {
 });
 
 describe("FileRow copy reveal context menu", () => {
+	it("discloses one localized forced-copy result with the 60px row contract", () => {
+		const row = FileRow({
+			file: makeCompletedFile({
+				extension: "raf",
+				outputPath: "/photos/sample_cleaned.raf",
+				wasForcedCopy: true,
+			}),
+			isExpanded: false,
+			onToggleExpand: vi.fn(),
+			staggerIndex: 0,
+			animatedCheckRef: { current: new Set<string>() },
+			onCopyToast: vi.fn(),
+		});
+		const forcedRow = findElementByClass(row, "file-table__row--forced-copy");
+		const disclosure = findElementByClass(row, "file-table__copy-disclosure");
+
+		expect(forcedRow.props["aria-label"]).toBe("Complete. Written to a copy.");
+		expect(disclosure.props.children).toBe("writtenToCopy");
+	});
+
+	it("does not disclose copy mode for ordinary completed rows", () => {
+		const row = FileRow({
+			file: makeCompletedFile({ outputPath: "/photos/sample_cleaned.jpg" }),
+			isExpanded: false,
+			onToggleExpand: vi.fn(),
+			staggerIndex: 0,
+			animatedCheckRef: { current: new Set<string>() },
+			onCopyToast: vi.fn(),
+		});
+
+		expect(() => findElementByClass(row, "file-table__copy-disclosure")).toThrow();
+	});
+
 	it("sends the completed row's exact stored copy and submitted original paths on context-menu gesture", () => {
 		const row = FileRow({
 			file: makeCompletedFile({

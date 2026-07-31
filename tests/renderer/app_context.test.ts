@@ -136,6 +136,23 @@ describe("appReducer", () => {
 	});
 
 	describe("UPDATE_FILE_METADATA", () => {
+		it("persists only the main-returned forced-copy fact with terminal metadata", () => {
+			const state = makeInitialState({ files: [makeFile()] });
+
+			const result = appReducer(state, {
+				type: "UPDATE_FILE_METADATA",
+				id: "file-1",
+				beforeTags: 4,
+				afterTags: 0,
+				beforeMetadata: { DateTimeOriginal: "2024:01:01 00:00:00" },
+				afterMetadata: {},
+				outputPath: "/Users/test/photos/image_cleaned.raf",
+				wasForcedCopy: true,
+			} as AppAction);
+
+			expect(result.files[0]!.wasForcedCopy).toBe(true);
+		});
+
 		it("sets beforeTags, afterTags, and metadata objects for matching file id", () => {
 			const file = makeFile({ id: "file-1" });
 			const state = makeInitialState({ files: [file] });

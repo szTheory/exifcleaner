@@ -195,6 +195,31 @@ describe("processFileEntries", () => {
 		});
 	});
 
+	it("copies the main-returned forced-copy fact only after the successful AFTER read", async () => {
+		const entry = makeFileEntry({ path: "/path/to/sample.raf" });
+		mockApi.exif.readMetadata
+			.mockResolvedValueOnce({ DateTimeOriginal: "2024:01:01 00:00:00" })
+			.mockResolvedValueOnce({});
+		mockApi.exif.removeMetadata.mockResolvedValue({
+			success: true,
+			outputPath: "/path/to/sample_cleaned.raf",
+			wasForcedCopy: true,
+		});
+
+		await processFileEntries([entry], mockDispatch);
+
+		expect(dispatches).toContainEqual({
+			type: "UPDATE_FILE_METADATA",
+			id: "test-id-1",
+			beforeTags: 1,
+			afterTags: 0,
+			beforeMetadata: { DateTimeOriginal: "2024:01:01 00:00:00" },
+			afterMetadata: {},
+			outputPath: "/path/to/sample_cleaned.raf",
+			wasForcedCopy: true,
+		});
+	});
+
 	it("dispatches UPDATE_FILE_STATUS 'complete' on success", async () => {
 		const entry = makeFileEntry();
 		mockApi.exif.readMetadata

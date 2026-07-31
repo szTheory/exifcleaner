@@ -158,4 +158,51 @@ test.describe("File type coverage", () => {
 			cleanup();
 		}
 	});
+
+	test("RAF forced copy preserves the source, discloses the result, and reveals the written artifact", async () => {
+		const { dir, copyFixture, cleanup } = createFixtureDir();
+		try {
+			const sourcePath = copyFixture("sample.raf");
+			const before = snapshotDir(dir);
+			await app.evaluate(({ shell }) => {
+				const calls: string[] = [];
+				const originalShowItemInFolder = shell.showItemInFolder;
+				Reflect.set(globalThis, "__rafRevealCalls", calls);
+				Reflect.set(globalThis, "__rafRestoreReveal", () => {
+					shell.showItemInFolder = originalShowItemInFolder;
+				});
+				shell.showItemInFolder = (filePath) => {
+					calls.push(filePath);
+				};
+			});
+
+			await addFiles([sourcePath]);
+			await waitForProcessing(window);
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				unchanged: ["sample.raf"],
+				added: ["sample_cleaned.raf"],
+				modified: [],
+				removed: [],
+			});
+			await expect(window.getByText("Written to a copy")).toHaveCount(1);
+			await expect(window.locator(".file-table__row--complete")).toHaveAttribute(
+				"aria-label",
+				"Complete. Written to a copy.",
+			);
+			await window.locator(".file-table__reveal").click();
+			expect(await app.evaluate(() => Reflect.get(globalThis, "__rafRevealCalls"))).toEqual([
+				`${dir}/sample_cleaned.raf`,
+			]);
+		} finally {
+			await app.evaluate(() => {
+				const restore = Reflect.get(globalThis, "__rafRestoreReveal") as
+					| (() => void)
+					| undefined;
+				restore?.();
+			});
+			cleanup();
+		}
+	});
 });
