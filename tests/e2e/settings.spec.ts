@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 import type { ElectronApplication, Page } from "playwright";
+import fs from "node:fs";
+import path from "node:path";
 import { launchApp, closeApp } from "./helpers/app_launcher";
 import { createFixtureDir } from "../helpers/fixture_copier";
 import { readMetadataTags } from "./helpers/metadata_assertions";
@@ -302,6 +304,81 @@ test.describe("Settings", () => {
 				removed: [],
 			});
 		} finally {
+			cleanup();
+		}
+	});
+
+	test("#304 collision: save-as-copy writes _cleaned_2 and reveals that artifact", async () => {
+		const { dir, copyFixture, cleanup } = createFixtureDir();
+		try {
+			const tempFile = copyFixture("sample.jpg");
+			const preExistingCleaned = path.join(dir, "sample_cleaned.jpg");
+			const collisionOutput = path.join(dir, "sample_cleaned_2.jpg");
+			fs.copyFileSync(tempFile, preExistingCleaned);
+
+			await page.evaluate(() => window.api.settings.set({ saveAsCopy: true }));
+			await page.waitForTimeout(300);
+
+			await app.evaluate(({ shell }) => {
+				const calls: string[] = [];
+				const originalShowItemInFolder = shell.showItemInFolder;
+				Reflect.set(globalThis, "__issue304RevealCalls", calls);
+				Reflect.set(globalThis, "__issue304RestoreReveal", () => {
+					shell.showItemInFolder = originalShowItemInFolder;
+				});
+				shell.showItemInFolder = (filePath: string): void => {
+					calls.push(filePath);
+				};
+			});
+
+			const before = snapshotDir(dir);
+
+			await app.evaluate(
+				({ BrowserWindow }, filePaths) => {
+					const win = BrowserWindow.getAllWindows()[0];
+					if (win) {
+						win.webContents.send("file-open-add-files", filePaths);
+					}
+				},
+				[tempFile],
+			);
+
+			await waitForProcessing(page, { timeout: 15000 });
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				added: ["sample_cleaned_2.jpg"],
+				unchanged: ["sample.jpg", "sample_cleaned.jpg"],
+				modified: [],
+				removed: [],
+			});
+
+			const expectedAfterCount = Object.keys(
+				await readMetadataTags(collisionOutput),
+			).length;
+			const afterCell = page
+				.locator(".file-table__row")
+				.first()
+				.locator(".file-table__cell")
+				.nth(5);
+			await expect(afterCell).toContainText(String(expectedAfterCount));
+
+			const revealButton = page.locator(".file-table__reveal").first();
+			await revealButton.click();
+			await revealButton.press("Enter");
+
+			const revealCalls = await app.evaluate(() => {
+				return Reflect.get(globalThis, "__issue304RevealCalls") as string[];
+			});
+			expect(revealCalls).toEqual([collisionOutput, collisionOutput]);
+			await app.evaluate(() => {
+				const restore = Reflect.get(globalThis, "__issue304RestoreReveal") as
+					| (() => void)
+					| undefined;
+				restore?.();
+			});
+		} finally {
+			await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
 			cleanup();
 		}
 	});
