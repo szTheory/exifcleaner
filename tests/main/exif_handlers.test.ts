@@ -15,8 +15,10 @@ import { FakeExifTool } from "../fakes/fake_exiftool";
 const ipcHandleMock = vi.hoisted(() => vi.fn());
 const existsSyncMock = vi.hoisted(() => vi.fn());
 const randomUUIDMock = vi.hoisted(() => vi.fn(() => "test-uuid"));
+const appMock = vi.hoisted(() => ({ isPackaged: false }));
 
 vi.mock("electron", () => ({
+	app: appMock,
 	ipcMain: {
 		handle: ipcHandleMock,
 	},
@@ -142,10 +144,14 @@ beforeEach(() => {
 	ipcHandleMock.mockClear();
 	existsSyncMock.mockReset();
 	existsSyncMock.mockReturnValue(false);
+	appMock.isPackaged = false;
+	process.env.NODE_ENV = "test";
+	Reflect.deleteProperty(globalThis, "__EXIFCLEANER_DEV_XATTR_FAILURE_PATH__");
 });
 
 afterEach(() => {
 	unregisterSender(TEST_SENDER_ID);
+	Reflect.deleteProperty(globalThis, "__EXIFCLEANER_DEV_XATTR_FAILURE_PATH__");
 });
 
 describe("exif:remove handler", () => {
@@ -256,6 +262,96 @@ describe("exif:remove handler", () => {
 			outputPath: "/dir/photo_cleaned.jpg",
 			wasForcedCopy: false,
 		});
+	});
+
+	it("does not explicitly clear xattrs when remove-xattrs is disabled", async () => {
+		const { container, xattrCommand } = makeContainer({
+			saveAsCopy: false,
+			removeXattrs: false,
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+
+		expect(result).toEqual({
+			success: true,
+			outputPath: "/dir/photo.jpg",
+			wasForcedCopy: false,
+		});
+		expect(xattrCommand.execute).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		{
+			name: "packaged app",
+			isPackaged: true,
+			nodeEnv: "development",
+			marker: "/dir/photo.jpg",
+		},
+		{
+			name: "non-development app",
+			isPackaged: false,
+			nodeEnv: "test",
+			marker: "/dir/photo.jpg",
+		},
+		{
+			name: "non-equal path marker",
+			isPackaged: false,
+			nodeEnv: "development",
+			marker: "/dir/other.jpg",
+		},
+	])("leaves the dev xattr failure seam inert for $name", async (scenario) => {
+		appMock.isPackaged = scenario.isPackaged;
+		process.env.NODE_ENV = scenario.nodeEnv;
+		Reflect.set(
+			globalThis,
+			"__EXIFCLEANER_DEV_XATTR_FAILURE_PATH__",
+			scenario.marker,
+		);
+		const { container, xattrCommand } = makeContainer({
+			saveAsCopy: false,
+			removeXattrs: true,
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+
+		expect(result).toEqual({
+			success: true,
+			outputPath: "/dir/photo.jpg",
+			wasForcedCopy: false,
+		});
+		expect(xattrCommand.execute).toHaveBeenCalledWith({
+			filePath: "/dir/photo.jpg",
+		});
+	});
+
+	it("returns the native-shaped xattr failure for an exact dev marker match", async () => {
+		process.env.NODE_ENV = "development";
+		Reflect.set(
+			globalThis,
+			"__EXIFCLEANER_DEV_XATTR_FAILURE_PATH__",
+			"/dir/photo.jpg",
+		);
+		const { container, xattrCommand } = makeContainer({
+			saveAsCopy: false,
+			removeXattrs: true,
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+
+		expect(result).toEqual({
+			success: false,
+			failureKind: "xattr",
+			detail:
+				"Embedded metadata was removed, but macOS extended attributes could not be cleared: deterministic development failure",
+			residualPath: "/dir/photo.jpg",
+		});
+		expect(xattrCommand.execute).not.toHaveBeenCalled();
 	});
 
 	it("returns a truthful terminal xattr failure without a success output path", async () => {
