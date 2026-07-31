@@ -126,9 +126,13 @@ describe("FileRow copy reveal context menu", () => {
 		});
 		const forcedRow = findElementByClass(row, "file-table__row--forced-copy");
 		const disclosure = findElementByClass(row, "file-table__copy-disclosure");
+		const forcedRowProps = forcedRow.props as { "aria-label"?: string };
+		const disclosureProps = disclosure.props as { children?: unknown };
 
-		expect(forcedRow.props["aria-label"]).toBe("Complete. Written to a copy.");
-	expect(disclosure.props.children).toBe("Written to a copy");
+		expect(forcedRowProps["aria-label"]).toBe(
+			"Complete. Written to a copy.",
+		);
+		expect(disclosureProps.children).toBe("Written to a copy");
 	});
 
 	it("does not disclose copy mode for ordinary completed rows", () => {

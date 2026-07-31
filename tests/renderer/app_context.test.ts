@@ -167,6 +167,7 @@ describe("appReducer", () => {
 				beforeMetadata: beforeMeta,
 				afterMetadata: afterMeta,
 				outputPath: "/Users/test/photos/image_cleaned_2.jpg",
+				wasForcedCopy: false,
 			});
 
 			expect(result.files[0]!.beforeTags).toBe(42);
@@ -196,6 +197,7 @@ describe("appReducer", () => {
 				beforeMetadata: { make: "Canon" },
 				afterMetadata: {},
 				outputPath: "/Users/test/photos/image_cleaned_2.jpg",
+				wasForcedCopy: false,
 			} as AppAction);
 
 			expect(result.files[0]).toEqual({
@@ -205,6 +207,7 @@ describe("appReducer", () => {
 				beforeMetadata: { make: "Canon" },
 				afterMetadata: {},
 				outputPath: "/Users/test/photos/image_cleaned_2.jpg",
+				wasForcedCopy: false,
 			});
 		});
 	});
