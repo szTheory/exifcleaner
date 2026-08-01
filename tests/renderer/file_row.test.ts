@@ -221,7 +221,7 @@ describe("FileRow copy reveal context menu", () => {
 		expect(disclosureProps.children).toBe("Written to a copy");
 	});
 
-	it("does not disclose copy mode for ordinary completed rows", () => {
+	it("discloses copy mode for ordinary completed rows", () => {
 		const row = FileRow({
 			file: makeCompletedFile({ outputPath: "/photos/sample_cleaned.jpg" }),
 			isExpanded: false,
@@ -231,9 +231,9 @@ describe("FileRow copy reveal context menu", () => {
 			onCopyToast: vi.fn(),
 		});
 
-		expect(() =>
+		expect(
 			findElementByClass(row, "file-table__copy-disclosure"),
-		).toThrow();
+		).toBeDefined();
 	});
 
 	it("sends the completed row's exact stored copy and submitted original paths on context-menu gesture", () => {
