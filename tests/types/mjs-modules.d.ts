@@ -45,6 +45,17 @@ declare module "*dir_effect_gate.mjs" {
 	};
 }
 
+declare module "*release_notes_gate.mjs" {
+\texport function expectedReleaseHeading(packageJson: {
+\t\tversion?: unknown;
+\t}): string;
+\texport function classifyReleaseNotes(subject: {
+\t\tpackageJson: { version?: unknown };
+\t\tnotes: string;
+\t}): { ok: boolean; reason?: string };
+\texport function main(): number;
+}
+
 declare module "*known_gap_gate.mjs" {
 	export const BANNED_PROSE_PHRASES: readonly string[];
 	export type KnownGapProblem = {
