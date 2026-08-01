@@ -24,5 +24,27 @@
 				"status": "absent"
 			}
 		}
+	},
+	"cleanup": {
+		"completedAt": "2026-08-01T01:51:31Z",
+		"local": {
+			"precondition": "v4.0 and v4.1 re-resolved to their locked full peeled targets immediately before deletion",
+			"deleted": [
+				"refs/tags/v4.0",
+				"refs/tags/v4.1"
+			],
+			"command": "git tag -d v4.0 v4.1"
+		},
+		"remote": {
+			"lookup": "git ls-remote --tags origin refs/tags/v4.0 refs/tags/v4.1",
+			"status": "absent",
+			"action": "no-op",
+			"push": null
+		},
+		"postState": {
+			"localTwoPartPublicTags": [],
+			"remoteTwoPartPublicTags": [],
+			"replacementTagsCreated": []
+		}
 	}
 }
