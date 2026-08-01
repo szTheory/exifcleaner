@@ -46,14 +46,14 @@ declare module "*dir_effect_gate.mjs" {
 }
 
 declare module "*release_notes_gate.mjs" {
-\texport function expectedReleaseHeading(packageJson: {
-\t\tversion?: unknown;
-\t}): string;
-\texport function classifyReleaseNotes(subject: {
-\t\tpackageJson: { version?: unknown };
-\t\tnotes: string;
-\t}): { ok: boolean; reason?: string };
-\texport function main(): number;
+	export function expectedReleaseHeading(packageJson: {
+		version?: unknown;
+	}): string;
+	export function classifyReleaseNotes(subject: {
+		packageJson: { version?: unknown };
+		notes: string;
+	}): { ok: boolean; reason?: string };
+	export function main(): number;
 }
 
 declare module "*known_gap_gate.mjs" {
