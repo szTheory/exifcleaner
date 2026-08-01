@@ -1,64 +1,84 @@
 {
-	"schema_version": 1,
-	"recorded_at": "2026-08-01T01:04:48Z",
-	"upstream": {
-		"repository": "Homebrew/homebrew-cask",
-		"base_ref": "main",
-		"base_commit": "33be848b3d814716ebd2bad0872d6a6a6399376c",
-		"base_cask_blob": "91530ef5129c30c489ccbdecd7276c3dc10221c6",
-		"fork": "szTheory/homebrew-cask",
-		"branch": "exifcleaner-gatekeeper-caveats",
-		"proposed_commit": "dc9165fcd3e2202879d26784243fcc6269a3087b",
-		"proposed_cask_blob": "4cfadc8427eff9fb1a7ab4e6d2004cf6870a98d"
-	},
-	"integrity": {
-		"scheduled_disable_marker": "disable! date: \"2026-09-01\", because: :fails_gatekeeper_check",
-		"scheduled_disable_marker_sha256": "5e6d7b4b9c70c57632ba662ca4c7798661c4f8fed05de64f937849fe3dac6356",
-		"caveats_sha256": "5422b747950ebd334cdde53d3d8b1b8d965c490065130d95168249854538baba",
-		"proposed_cask_sha256": "4cfadc8427eff9fb1a7ab4e6d2004cf6870a98d3ae81f84365c391cc5c13192c"
-	},
-	"caveat_contract": {
-		"unsigned_build_disclosed": true,
-		"macos_14_or_earlier": "right-click or Control-click ExifCleaner, choose Open, then confirm Open",
-		"macos_15_or_later": "allow the initial blocked launch, then use System Settings > Privacy & Security > Open Anyway",
-		"global_quarantine_removal_recommended": false,
-		"signing_or_notarization_claimed": false
-	},
-	"validation": {
-		"formatter": {
-			"command": "brew style /tmp/exifcleaner-homebrew-cask.NjRLAZ/homebrew-cask-caveats/Casks/e/exifcleaner.rb",
-			"exit_code": 0
-		},
-		"audit": {
-			"command": "brew audit --cask sztheory/exifcleaner-caveats/exifcleaner",
-			"exit_code": 0,
-			"stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-		},
-		"info": {
-			"command": "brew info --cask sztheory/exifcleaner-caveats/exifcleaner",
-			"exit_code": 0,
-			"stdout_sha256": "68c84feb3ba7c4978b5c61bbb04ff989cfdf9f8754fedf04376a146389e43938",
-			"contains_open_anyway": true,
-			"contains_control_click_or_right_click": true,
-			"source_override": "local custom-remote tap; no installation or app launch",
-			"cleanup": "Homebrew refused to untap because installed basictex and chromium casks are associated with this source; preserved to avoid uninstalling user casks."
-		}
-	},
-	"pull_request": {
-		"url": "https://github.com/Homebrew/homebrew-cask/pull/278491",
-		"number": 278491,
-		"base_commit": "33be848b3d814716ebd2bad0872d6a6a6399376c",
-		"head_commit": "dc9165fcd3e2202879d26784243fcc6269a3087b",
-		"state": "CLOSED",
-		"review_decision": "REVIEW_REQUIRED",
-		"changed_files": ["Casks/e/exifcleaner.rb"],
-		"closed_at": "2026-08-01T01:04:48Z",
-		"closure_reason": "Homebrew's automated template check closed the PR because the current pull-request template was not completed. It instructs the contributor to edit the same PR; it will reopen automatically after completion."
-	},
-	"acceptance": {
-		"state": "blocked_template_attestation_required",
-		"merged_at": null,
-		"merge_commit": null,
-		"blocker": "REL-04 remains blocked. Completing Homebrew's required AI-use attestation includes a personal promise to answer maintainer questions without AI/LLM, which requires maintainer confirmation before the same PR can reopen; a merge is still required afterward."
-	}
+  "schema_version": 1,
+  "recorded_at": "2026-08-01T01:15:57Z",
+  "upstream": {
+    "repository": "Homebrew/homebrew-cask",
+    "base_ref": "main",
+    "base_commit": "33be848b3d814716ebd2bad0872d6a6a6399376c",
+    "base_cask_blob": "91530ef5129c30c489ccbdecd7276c3dc10221c6",
+    "fork": "szTheory/homebrew-cask",
+    "branch": "exifcleaner-gatekeeper-caveats",
+    "fork_branch_commit": "298a15e299511652da4409d186abcfdcb4fe99e4",
+    "fork_branch_cask_blob": "26ff7e411e47c2340ddd6a2c91476246caebd1dd",
+    "pull_request_head_commit": "dc9165fcd3e2202879d26784243fcc6269a3087b",
+    "pull_request_head_sync": "pending while the pull request remains closed"
+  },
+  "integrity": {
+    "scheduled_disable_marker": "disable! date: \"2026-09-01\", because: :fails_gatekeeper_check",
+    "scheduled_disable_marker_sha256": "5e6d7b4b9c70c57632ba662ca4c7798661c4f8fed05de64f937849fe3dac6356",
+    "caveats_sha256": "5422b747950ebd334cdde53d3d8b1b8d965c490065130d95168249854538baba",
+    "fork_branch_cask_sha256": "4cfadc8427eff9fb1a7ab4e6d2004cf6870a98d3ae81f84365c391cc5c13192c"
+  },
+  "caveat_contract": {
+    "unsigned_build_disclosed": true,
+    "macos_14_or_earlier": "right-click or Control-click ExifCleaner, choose Open, then confirm Open",
+    "macos_15_or_later": "allow the initial blocked launch, then use System Settings > Privacy & Security > Open Anyway",
+    "global_quarantine_removal_recommended": false,
+    "signing_or_notarization_claimed": false
+  },
+  "validation": {
+    "formatter": {
+      "command": "cd <isolated fork clone> && HOMEBREW_NO_INSTALL_FROM_API=1 brew style --fix Casks/e/exifcleaner.rb",
+      "exit_code": 0,
+      "result": "1 file inspected, no offenses detected"
+    },
+    "audit": {
+      "prior_identical_cask_blob": {
+        "command": "brew audit --cask sztheory/exifcleaner-caveats/exifcleaner",
+        "exit_code": 0,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "current_online_attempt": {
+        "command": "HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_FROM_API=1 brew audit --cask --online sztheory/exifcleaner-caveats-current/exifcleaner",
+        "exit_code": 1,
+        "blocker": "Homebrew rejected unrelated Casks/a/ankerwork.rb before auditing ExifCleaner: no_autobump! can only be used in official Homebrew taps.",
+        "target_audit_pass_claimed": false
+      }
+    },
+    "info": {
+      "command": "HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_FROM_API=1 brew info --cask sztheory/exifcleaner-caveats-current/exifcleaner",
+      "exit_code": 0,
+      "stdout_sha256": "68c84feb3ba7c4978b5c61bbb04ff989cfdf9f8754fedf04376a146389e43938",
+      "contains_open_anyway": true,
+      "contains_control_click_or_right_click": true,
+      "source_override": "isolated custom-remote tap; no app launch",
+      "cleanup": "Homebrew refused to untap because installed basictex and chromium casks are associated with this source; preserved to avoid uninstalling user casks."
+    }
+  },
+  "pull_request": {
+    "url": "https://github.com/Homebrew/homebrew-cask/pull/278491",
+    "number": 278491,
+    "state": "CLOSED",
+    "closed_at": "2026-08-01T01:04:48Z",
+    "changed_files": ["Casks/e/exifcleaner.rb"],
+    "body_sha256": "f200a0daf9fa16f2f31a3d39346f4b27248637973cd2fd35a0ed48580e8ca0e9",
+    "template": {
+      "stable_version_checked": true,
+      "style_checked": true,
+      "online_audit_checked": false,
+      "ai_disclosure_present": true,
+      "personal_ai_attestation_checked": false,
+      "reason": "The required checkbox promises that the contributor will answer maintainers without AI/LLM; no such personal attestation was supplied."
+    },
+    "checks": {
+      "template_manage": "SUCCESS after the truthful partial template update; PR remains closed because the template checker requires every checkbox",
+      "commit_style": "The original PR head still reports the earlier conventional-commit failure. Fork branch 298a15e2 replaces it with 'exifcleaner: add Gatekeeper recovery caveats', but GitHub has not synchronized that head while the PR is closed."
+    }
+  },
+  "acceptance": {
+    "state": "blocked_template_attestation_and_unverified_online_audit",
+    "merged_at": null,
+    "merge_commit": null,
+    "blocker": "REL-04 remains blocked. The PR cannot reopen without the contributor's personal AI/LLM-attestation checkbox, the exact current online audit is not yet passable through a custom tap because an unrelated upstream cask fails official-tap validation, and upstream merge is still required afterward."
+  }
 }
