@@ -4,7 +4,10 @@ import { FileProcessingStatus } from "../../domain";
 import { assertNever } from "../../common/types";
 
 export type FolderDiscoveryStatus =
-	"scanning" | "discovering" | "complete" | "empty";
+	| "scanning"
+	| "discovering"
+	| "complete"
+	| "empty";
 
 export interface FolderState {
 	path: string;
@@ -28,7 +31,12 @@ export interface FileEntry {
 	wasForcedCopy?: boolean | undefined;
 	error: string | null;
 	failureKind?:
-		"write" | "verification" | "cleanup" | "commit" | "xattr" | undefined;
+		| "write"
+		| "verification"
+		| "cleanup"
+		| "commit"
+		| "xattr"
+		| undefined;
 	detail?: string | undefined;
 	residualPath?: string | undefined;
 }

@@ -277,7 +277,8 @@ export async function runForcedCopyScenario(
 	});
 	const outputPath = path.join(dir, "sample_cleaned.raf");
 	let reveal:
-		Awaited<ReturnType<ProcessingDriver["interceptReveal"]>> | undefined;
+		| Awaited<ReturnType<ProcessingDriver["interceptReveal"]>>
+		| undefined;
 
 	try {
 		const sourcePath = copyFixture("sample.raf");
