@@ -238,38 +238,43 @@ test.describe("Packaged artifact", () => {
 		}
 	});
 
-	test("clears macOS extended attributes from the installed artifact", async () => {
-		if (process.platform !== "darwin") return;
-		const { copyFixture, cleanup } = createFixtureDir();
-		try {
-			await window.getByRole("button", { name: "Open settings" }).click();
-			await window.evaluate(() =>
-				globalThis.window.api.settings.set({ removeXattrs: true }),
-			);
-			await window.waitForTimeout(300);
-			expect(await window.locator("#toggle-remove-xattrs").isChecked()).toBe(
-				true,
-			);
+	const xattrTest = process.platform === "darwin" ? test : test.skip;
+	xattrTest(
+		"clears macOS extended attributes from the installed artifact",
+		async () => {
+			const { copyFixture, cleanup } = createFixtureDir();
+			try {
+				await window.getByRole("button", { name: "Open settings" }).click();
+				await window.evaluate(() =>
+					globalThis.window.api.settings.set({ removeXattrs: true }),
+				);
+				await window.waitForTimeout(300);
+				expect(await window.locator("#toggle-remove-xattrs").isChecked()).toBe(
+					true,
+				);
 
-			const filePath = copyFixture("sample.jpg");
-			await seedXattrs(filePath, SEEDED_XATTRS);
-			await expectSeededXattrs(filePath, SEEDED_XATTRS);
-			await app.evaluate(
-				({ BrowserWindow }, paths) => {
-					BrowserWindow.getAllWindows()[0]?.webContents.send(
-						"file-open-add-files",
-						paths,
-					);
-				},
-				[filePath],
-			);
-			await waitForProcessing(window);
+				const filePath = copyFixture("sample.jpg");
+				await seedXattrs(filePath, SEEDED_XATTRS);
+				await expectSeededXattrs(filePath, SEEDED_XATTRS);
+				await app.evaluate(
+					({ BrowserWindow }, paths) => {
+						BrowserWindow.getAllWindows()[0]?.webContents.send(
+							"file-open-add-files",
+							paths,
+						);
+					},
+					[filePath],
+				);
+				await waitForProcessing(window);
 
-			await expect(window.locator(".file-table__row--complete")).toHaveCount(1);
-			await assertMetadataStripped(filePath);
-			await expectNoXattrs(filePath);
-		} finally {
-			cleanup();
-		}
-	});
+				await expect(window.locator(".file-table__row--complete")).toHaveCount(
+					1,
+				);
+				await assertMetadataStripped(filePath);
+				await expectNoXattrs(filePath);
+			} finally {
+				cleanup();
+			}
+		},
+	);
 });
