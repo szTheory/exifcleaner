@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_at": "2026-08-01T01:15:57Z",
+  "recorded_at": "2026-08-01T01:19:24Z",
   "upstream": {
     "repository": "Homebrew/homebrew-cask",
     "base_ref": "main",
@@ -38,11 +38,12 @@
         "exit_code": 0,
         "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "current_online_attempt": {
-        "command": "HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_FROM_API=1 brew audit --cask --online sztheory/exifcleaner-caveats-current/exifcleaner",
-        "exit_code": 1,
-        "blocker": "Homebrew rejected unrelated Casks/a/ankerwork.rb before auditing ExifCleaner: no_autobump! can only be used in official Homebrew taps.",
-        "target_audit_pass_claimed": false
+      "exact_online_pass": {
+        "command": "HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_FROM_API=1 brew audit --cask --online homebrew/cask-pr278491-audit/exifcleaner",
+        "source": "fork commit 298a15e299511652da4409d186abcfdcb4fe99e4 mounted through a temporary official-user tap path /opt/homebrew/Library/Taps/homebrew/homebrew-cask-pr278491-audit",
+        "exit_code": 0,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "cleanup": "The detached temporary worktree was removed by its trap after the audit completed."
       }
     },
     "info": {
@@ -61,11 +62,11 @@
     "state": "CLOSED",
     "closed_at": "2026-08-01T01:04:48Z",
     "changed_files": ["Casks/e/exifcleaner.rb"],
-    "body_sha256": "f200a0daf9fa16f2f31a3d39346f4b27248637973cd2fd35a0ed48580e8ca0e9",
+    "body_sha256": "fb7cad4719e09dc4e12e27dfc9944afe82e1c92de2c5d8d32289ddb1ae87ec2a",
     "template": {
       "stable_version_checked": true,
       "style_checked": true,
-      "online_audit_checked": false,
+      "online_audit_checked": true,
       "ai_disclosure_present": true,
       "personal_ai_attestation_checked": false,
       "reason": "The required checkbox promises that the contributor will answer maintainers without AI/LLM; no such personal attestation was supplied."
@@ -76,9 +77,9 @@
     }
   },
   "acceptance": {
-    "state": "blocked_template_attestation_and_unverified_online_audit",
+    "state": "blocked_template_attestation_required",
     "merged_at": null,
     "merge_commit": null,
-    "blocker": "REL-04 remains blocked. The PR cannot reopen without the contributor's personal AI/LLM-attestation checkbox, the exact current online audit is not yet passable through a custom tap because an unrelated upstream cask fails official-tap validation, and upstream merge is still required afterward."
+    "blocker": "REL-04 remains blocked. The PR cannot reopen without the contributor's personal AI/LLM-attestation checkbox, and upstream merge is still required afterward."
   }
 }
