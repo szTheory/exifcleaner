@@ -2,6 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, test } from "vitest";
+import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import {
 	buildReleaseEvidence,
 	validateReleaseEvidenceSet,
@@ -47,6 +48,15 @@ afterEach(() => {
 });
 
 describe("release evidence", () => {
+	test("proves the evidence fixture workspace starts mutation-free", () => {
+		const directory = fs.mkdtempSync(path.join(os.tmpdir(), "release-proof-"));
+		try {
+			assertDirEffect(snapshotDir(directory), snapshotDir(directory), {});
+		} finally {
+			fs.rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
 	test("accepts a complete three-platform native evidence set", () => {
 		const result = validateReleaseEvidenceSet([
 			evidenceFor("macos"),

@@ -3,6 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import {
 	OutputTransaction,
 	type OutputTransactionDependencies,
@@ -64,6 +65,14 @@ function createTransaction({
 }
 
 describe("OutputTransaction", () => {
+	it("proves its temporary test workspace has no unaccounted mutations", async () => {
+		const directory = await mkdtemp(join(tmpdir(), "output-transaction-"));
+		const before = snapshotDir(directory);
+		const after = snapshotDir(directory);
+		assertDirEffect(before, after, {});
+		await rm(directory, { recursive: true, force: true });
+	});
+
 	it("writes, verifies the exact output, then returns one publishable success", async () => {
 		const { transaction, events } = createTransaction();
 
