@@ -119,7 +119,7 @@ export function FileRow({
 				aria-label={
 					isForcedCopy
 						? `${t("complete")}. ${t("writtenToCopy")}.`
-						: failureSummary
+						: (failureSummary ?? (isError ? file.error : undefined))
 				}
 				onClick={isExpandable ? onToggleExpand : undefined}
 				onKeyDown={handleKeyDown}

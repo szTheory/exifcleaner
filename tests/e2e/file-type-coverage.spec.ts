@@ -6,6 +6,8 @@ import { closeApp, launchApp } from "./helpers/app_launcher";
 import {
 	runMixedFormatScenario,
 	runPositiveFormatScenario,
+	runErrorFormatScenario,
+	runForcedCopyScenario,
 	SUPPORTED_FORMAT_FIXTURES,
 	type ProcessingLaunchContext,
 } from "../helpers/processing_driver";
@@ -47,5 +49,17 @@ test.describe("File type coverage", () => {
 
 	test("mixed batch strips metadata from every advertised format", async () => {
 		await runMixedFormatScenario(context());
+	});
+
+	test("corrupted JPEG reports detailed error output", async () => {
+		await runErrorFormatScenario(context(), "corrupted.jpg");
+	});
+
+	test("truncated MP4 rejects before output", async () => {
+		await runErrorFormatScenario(context(), "truncated.mp4");
+	});
+
+	test("RAF forced copy preserves, discloses, and reveals the artifact", async () => {
+		await runForcedCopyScenario(context());
 	});
 });

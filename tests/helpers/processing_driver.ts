@@ -1,9 +1,18 @@
 import { expect } from "@playwright/test";
+import { execFile } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { promisify } from "node:util";
 import { createFixtureDir } from "./fixture_copier";
 import { assertDirEffect, snapshotDir } from "./dir_effect";
-import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
+import {
+	assertMetadataStripped,
+	readMetadataTags,
+} from "../e2e/helpers/metadata_assertions";
 import type { ElectronApplication, Page } from "playwright";
 import { waitForProcessing } from "../e2e/helpers/wait_for_processing";
+
+const execFileAsync = promisify(execFile);
 
 export interface ProcessingLaunchContext {
 	readonly app: ElectronApplication;
@@ -20,6 +29,7 @@ export const SUPPORTED_FORMAT_FIXTURES = [
 ] as const;
 
 export type SupportedFormatFixture = (typeof SUPPORTED_FORMAT_FIXTURES)[number];
+export type ErrorFormatFixture = "corrupted.jpg" | "truncated.mp4";
 
 export interface ProcessingDriver {
 	readonly submitFiles: (filePaths: readonly string[]) => Promise<void>;
@@ -192,6 +202,119 @@ export async function runMixedFormatScenario(
 			error: 0,
 		});
 	} finally {
+		cleanup();
+	}
+
+	expect(consoleErrors).toEqual([]);
+}
+
+export async function runErrorFormatScenario(
+	context: ProcessingLaunchContext,
+	fixture: ErrorFormatFixture,
+): Promise<void> {
+	const driver = createProcessingDriver(context);
+	const { dir, copyFixture, cleanup } = createFixtureDir();
+	const consoleErrors: string[] = [];
+	context.window.on("console", (message) => {
+		if (message.type() === "error") consoleErrors.push(message.text());
+	});
+
+	try {
+		const fileName = fixture === "truncated.mp4" ? "sample.mp4" : fixture;
+		const filePath = copyFixture(fileName);
+		if (fixture === "truncated.mp4") {
+			fs.truncateSync(filePath, 1);
+			await expect(
+				execFileAsync(context.exiftoolPath, ["-json", filePath]),
+			).rejects.toMatchObject({ code: expect.any(Number) });
+		}
+		const before = snapshotDir(dir);
+		await driver.submitFiles([filePath]);
+		await driver.waitForTerminal();
+		const after = snapshotDir(dir);
+
+		assertDirEffect(before, after, {
+			unchanged: [fileName],
+			added: [],
+			modified: [],
+			removed: [],
+		});
+		const errorRow = context.window.locator(".file-table__row--error");
+		expect(await driver.terminalRowCounts()).toEqual({
+			total: 1,
+			complete: 0,
+			error: 1,
+		});
+		await expect(errorRow).toHaveAttribute("aria-label", /\S/);
+		await errorRow.click();
+		await expect(
+			context.window.locator(".file-table__error-text"),
+		).toContainText(/\S/);
+
+		if (fixture === "truncated.mp4") {
+			await expect(
+				context.window.locator(".file-table__after-done"),
+			).toHaveCount(0);
+			await expect(context.window.locator(".file-table__reveal")).toHaveCount(
+				0,
+			);
+		}
+	} finally {
+		cleanup();
+	}
+
+	expect(consoleErrors).toEqual([]);
+}
+
+export async function runForcedCopyScenario(
+	context: ProcessingLaunchContext,
+): Promise<void> {
+	const driver = createProcessingDriver(context);
+	const { dir, copyFixture, cleanup } = createFixtureDir();
+	const consoleErrors: string[] = [];
+	context.window.on("console", (message) => {
+		if (message.type() === "error") consoleErrors.push(message.text());
+	});
+	const outputPath = path.join(dir, "sample_cleaned.raf");
+	let reveal:
+		| Awaited<ReturnType<ProcessingDriver["interceptReveal"]>>
+		| undefined;
+
+	try {
+		const sourcePath = copyFixture("sample.raf");
+		const before = snapshotDir(dir);
+		reveal = await driver.interceptReveal();
+		await driver.submitFiles([sourcePath]);
+		await driver.waitForTerminal();
+		const after = snapshotDir(dir);
+
+		assertDirEffect(before, after, {
+			unchanged: ["sample.raf"],
+			added: ["sample_cleaned.raf"],
+			modified: [],
+			removed: [],
+		});
+		expect(
+			await readMetadataTags(outputPath, context.exiftoolPath),
+		).not.toHaveProperty("DateTimeOriginal");
+		expect(await driver.terminalRowCounts()).toEqual({
+			total: 1,
+			complete: 1,
+			error: 0,
+		});
+		const disclosure = context.window.locator(".file-table__copy-disclosure");
+		await expect(disclosure).toHaveCount(1);
+		const disclosureText = await driver.outputDisclosure();
+		expect(disclosureText).toMatch(/\S/);
+		await expect(
+			context.window.locator(".file-table__row--complete"),
+		).toHaveAttribute("aria-label", new RegExp(disclosureText));
+		const revealButton = context.window.locator(".file-table__reveal");
+		await revealButton.click();
+		await revealButton.press("Enter");
+		expect(await reveal.calls()).toEqual([outputPath, outputPath]);
+	} finally {
+		await reveal?.restore();
 		cleanup();
 	}
 
