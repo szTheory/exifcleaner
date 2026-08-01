@@ -101,7 +101,7 @@ test("#300 installed payload reports its stat-derived non-empty SIZE", async () 
 
 test("#301 installed settings retain semantic keyboard and pointer paths", async () => {
 	const context = await launchPackagedApp();
-	const trigger = context.window.getByRole("button", { name: "Open settings" });
+	const trigger = context.window.locator(".gear-icon");
 	const dialog = context.window.getByRole("dialog", { name: "Settings" });
 
 	try {
