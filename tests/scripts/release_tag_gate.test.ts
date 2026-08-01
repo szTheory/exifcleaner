@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
 	buildTagEvidence,
 	classifyTagRef,
+	parseRemoteTagRefs,
 	parseRemoteTags,
 	verifyCleanupTargets,
 } from "../../scripts/release_tag_gate.mjs";
@@ -60,6 +61,18 @@ describe("release tag gate", () => {
 			object: "1e8ea1c3112fc90794777ba1fadda79832ee0dd9",
 			peeled: V40_TARGET,
 		});
+	});
+
+	test("retains every advertised remote tag once for namespace validation", () => {
+		const refs = parseRemoteTagRefs(
+			[
+				`${V40_TARGET}\trefs/tags/v4.0`,
+				`${V40_TARGET}\trefs/tags/v4.0^{}`,
+				`${V41_TARGET}\trefs/tags/v4.1.0`,
+			].join("\n"),
+		);
+
+		expect(refs).toEqual(["refs/tags/v4.0", "refs/tags/v4.1.0"]);
 	});
 
 	test("builds immutable evidence with explicit absent remote refs", () => {

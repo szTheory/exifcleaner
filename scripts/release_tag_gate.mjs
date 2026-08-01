@@ -77,6 +77,27 @@ export function parseRemoteTags(text) {
 }
 
 /**
+ * Return the advertised remote tag refs, dropping peeled duplicates while retaining every
+ * tag name for namespace-policy validation.
+ *
+ * @param {string} text `git ls-remote --tags` output
+ * @returns {string[]}
+ */
+export function parseRemoteTagRefs(text) {
+	const refs = new Set();
+
+	for (const line of String(text).split(/\r?\n/)) {
+		const [sha, ref] = line.split("\t");
+		if (sha === undefined || ref === undefined || !FULL_SHA.test(sha)) {
+			continue;
+		}
+		refs.add(ref.endsWith("^{}") ? ref.slice(0, -3) : ref);
+	}
+
+	return [...refs];
+}
+
+/**
  * Fail closed unless both local refs resolve to their full, locked peeled commits.
  *
  * @param {Record<string, string | {peeled?: string}>} refMap
@@ -173,16 +194,29 @@ function resolveLocalRefs(rootDirectory) {
 	return refs;
 }
 
+function assertCleanNamespace(refs, source) {
+	const blocked = refs.map(classifyTagRef).filter((result) => !result.ok);
+	if (blocked.length > 0) {
+		throw new Error(
+			`${source} namespace contains prohibited tags:\n${blocked
+				.map((result) => result.reason)
+				.join("\n")}`,
+		);
+	}
+}
+
 function checkNamespace(rootDirectory) {
-	const refs = runGit(rootDirectory, [
+	const localRefs = runGit(rootDirectory, [
 		"for-each-ref",
 		"--format=%(refname)",
 		"refs/tags",
 	]).split(/\r?\n/);
-	const blocked = refs.map(classifyTagRef).filter((result) => !result.ok);
-	if (blocked.length > 0) {
-		throw new Error(blocked.map((result) => result.reason).join("\n"));
-	}
+	assertCleanNamespace(localRefs, "Local");
+
+	const remoteRefs = parseRemoteTagRefs(
+		runGit(rootDirectory, ["ls-remote", "--tags", "origin"]),
+	);
+	assertCleanNamespace(remoteRefs, "Origin");
 }
 
 /**
