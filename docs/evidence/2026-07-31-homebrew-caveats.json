@@ -1,6 +1,6 @@
 {
 	"schema_version": 1,
-	"recorded_at": "2026-08-01T01:04:40Z",
+	"recorded_at": "2026-08-01T01:04:48Z",
 	"upstream": {
 		"repository": "Homebrew/homebrew-cask",
 		"base_ref": "main",
@@ -49,14 +49,16 @@
 		"number": 278491,
 		"base_commit": "33be848b3d814716ebd2bad0872d6a6a6399376c",
 		"head_commit": "dc9165fcd3e2202879d26784243fcc6269a3087b",
-		"state": "OPEN",
+		"state": "CLOSED",
 		"review_decision": "REVIEW_REQUIRED",
-		"changed_files": ["Casks/e/exifcleaner.rb"]
+		"changed_files": ["Casks/e/exifcleaner.rb"],
+		"closed_at": "2026-08-01T01:04:48Z",
+		"closure_reason": "Homebrew's automated template check closed the PR because the current pull-request template was not completed. It instructs the contributor to edit the same PR; it will reopen automatically after completion."
 	},
 	"acceptance": {
-		"state": "open_not_accepted",
+		"state": "blocked_template_attestation_required",
 		"merged_at": null,
 		"merge_commit": null,
-		"blocker": "REL-04 remains blocked until Homebrew merges this direct upstream PR with the scheduled disable marker and both caveat paths intact."
+		"blocker": "REL-04 remains blocked. Completing Homebrew's required AI-use attestation includes a personal promise to answer maintainer questions without AI/LLM, which requires maintainer confirmation before the same PR can reopen; a merge is still required afterward."
 	}
 }
