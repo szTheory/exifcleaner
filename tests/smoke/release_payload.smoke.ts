@@ -129,9 +129,7 @@ test("#301 installed settings retain semantic keyboard and pointer paths", async
 
 		await trigger.press(" ");
 		await expect(dialog).toBeVisible();
-		await context.window
-			.locator(".settings-drawer__backdrop")
-			.click({ force: true });
+		await dialog.getByRole("button", { name: "Close settings" }).click();
 		await expect(dialog).not.toHaveClass(/settings-drawer--open/);
 		await expect(trigger).toBeFocused();
 
