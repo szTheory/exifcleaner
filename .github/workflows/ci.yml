@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Verify release-note identity
+        run: yarn verify:release-notes
+
       - name: Known-gap gate
         run: yarn verify:known-gaps
 
