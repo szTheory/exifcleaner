@@ -2,6 +2,9 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 
+const REVIEWED_ACTION_COMMIT = "445c42390d790569d938f9068d01af39ca030feb";
+const ANNOTATED_TAG_OBJECT = "229d336f8a17b26de07e886317ba5f214ce5650c";
+
 const GUARDED_JOB = `
   bump-cask:
     name: Update Homebrew Cask
@@ -9,7 +12,7 @@ const GUARDED_JOB = `
     runs-on: macos-latest
     steps:
       - name: Update Homebrew cask
-        uses: macauley/action-homebrew-bump-cask@445c42390d790569d938f9068d01af39ca030feb
+        uses: macauley/action-homebrew-bump-cask@${REVIEWED_ACTION_COMMIT}
         with:
           token: \${{ secrets.HOMEBREW_TOKEN }}
           cask: exifcleaner
@@ -36,8 +39,14 @@ function bumpCaskJob(workflow: string): string {
 		return "";
 	}
 
-	const nextJob = workflow.indexOf("\n  [a-zA-Z0-9_-]+:", jobStart + 1);
-	return workflow.slice(jobStart, nextJob === -1 ? undefined : nextJob);
+	const remainingJobs = workflow.slice(jobStart + "  bump-cask:".length);
+	const nextJobOffset = remainingJobs.search(/\n  [a-zA-Z0-9_-]+:\n/);
+	return workflow.slice(
+		jobStart,
+		nextJobOffset === -1
+			? undefined
+			: jobStart + "  bump-cask:".length + nextJobOffset,
+	);
 }
 
 function workflowPolicy(workflow: string): PolicyResult {
@@ -71,6 +80,23 @@ function workflowPolicy(workflow: string): PolicyResult {
 	const outsideJob = workflow.replace(job, "");
 	if (outsideJob.includes("HOMEBREW_TOKEN")) {
 		return { ok: false, reason: "HOMEBREW_TOKEN must stay in bump-cask" };
+	}
+
+	const actionRef = job.match(
+		/macauley\/action-homebrew-bump-cask@([^\s]+)/,
+	)?.[1];
+	if (actionRef !== REVIEWED_ACTION_COMMIT) {
+		return {
+			ok: false,
+			reason: "bump-cask must use the reviewed peeled action commit",
+		};
+	}
+
+	if (!/^permissions:\n\s+contents:\s+read$/m.test(workflow)) {
+		return {
+			ok: false,
+			reason: "workflow GITHUB_TOKEN permissions must be contents: read",
+		};
 	}
 
 	return { ok: true };
@@ -148,6 +174,55 @@ describe("Homebrew workflow prerelease policy", () => {
 		).toEqual({
 			ok: false,
 			reason: expect.stringContaining("HOMEBREW_TOKEN"),
+		});
+	});
+
+	test("rejects a PAT use in another unguarded job", () => {
+		expect(
+			workflowPolicy(
+				`${COMPLIANT_WORKFLOW}
+  another-job:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo \${{ secrets.HOMEBREW_TOKEN }}`,
+			),
+		).toEqual({
+			ok: false,
+			reason: expect.stringContaining("HOMEBREW_TOKEN"),
+		});
+	});
+
+	test("rejects a floating action reference", () => {
+		expect(
+			workflowPolicy(COMPLIANT_WORKFLOW.replace(REVIEWED_ACTION_COMMIT, "v1")),
+		).toEqual({
+			ok: false,
+			reason: expect.stringContaining("reviewed peeled action commit"),
+		});
+	});
+
+	test("rejects the annotated tag object even though it has 40 hex characters", () => {
+		expect(
+			workflowPolicy(
+				COMPLIANT_WORKFLOW.replace(
+					REVIEWED_ACTION_COMMIT,
+					ANNOTATED_TAG_OBJECT,
+				),
+			),
+		).toEqual({
+			ok: false,
+			reason: expect.stringContaining("reviewed peeled action commit"),
+		});
+	});
+
+	test("rejects writable workflow-token permissions", () => {
+		expect(
+			workflowPolicy(
+				COMPLIANT_WORKFLOW.replace("contents: read", "contents: write"),
+			),
+		).toEqual({
+			ok: false,
+			reason: expect.stringContaining("GITHUB_TOKEN permissions"),
 		});
 	});
 
