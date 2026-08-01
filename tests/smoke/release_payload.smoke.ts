@@ -124,7 +124,7 @@ test("#301 installed settings retain semantic keyboard and pointer paths", async
 		await trigger.press("Enter");
 		await expect(dialog).toBeVisible();
 		await context.window.keyboard.press("Escape");
-		await expect(dialog).not.toBeVisible();
+		await expect(dialog).not.toHaveClass(/settings-drawer--open/);
 		await expect(trigger).toBeFocused();
 
 		await trigger.press(" ");
@@ -132,13 +132,13 @@ test("#301 installed settings retain semantic keyboard and pointer paths", async
 		await context.window
 			.locator(".settings-drawer__backdrop")
 			.click({ force: true });
-		await expect(dialog).not.toBeVisible();
+		await expect(dialog).not.toHaveClass(/settings-drawer--open/);
 		await expect(trigger).toBeFocused();
 
 		await trigger.click();
 		await expect(dialog).toBeVisible();
 		await trigger.click({ force: true });
-		await expect(dialog).not.toBeVisible();
+		await expect(dialog).not.toHaveClass(/settings-drawer--open/);
 		await expect(trigger).toBeFocused();
 	} finally {
 		await closePackagedApp(context);
