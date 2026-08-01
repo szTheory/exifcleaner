@@ -1409,7 +1409,8 @@ describe("release workflow enforcement", () => {
 		const releaseCommands = verifyRelease
 			.split("&&")
 			.map((command) => command.trim());
-		expect(releaseCommands.slice(0, 2)).toEqual([
+		expect(releaseCommands.slice(0, 3)).toEqual([
+			"yarn verify:release-notes",
 			"yarn verify:known-gaps --release",
 			"yarn known-gaps:check",
 		]);
