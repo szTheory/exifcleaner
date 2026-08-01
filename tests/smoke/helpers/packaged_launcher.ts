@@ -1,6 +1,7 @@
 import { _electron as electron } from "playwright";
 import type { ElectronApplication, Page } from "playwright";
 import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -9,7 +10,8 @@ const EXECUTABLE_ENV_VAR = "EXIFCLEANER_PACKAGED_APP";
 // Cold-starting a packaged bundle on a hosted CI runner is materially slower than
 // electron-vite dev, and the DMG/AppImage path adds first-launch work the dev build
 // never does.
-const LAUNCH_TIMEOUT_MS = 120000;
+const LAUNCH_TIMEOUT_MS = 30000;
+const LAUNCH_ATTEMPTS = 3;
 const MOUNT_TIMEOUT_MS = 30000;
 
 export interface PackagedLaunchContext {
@@ -128,13 +130,32 @@ export async function launchPackagedApp(): Promise<PackagedLaunchContext> {
 	}
 
 	try {
-		const app = await electron.launch({
-			executablePath,
-			args: [userDataArg],
-			cwd: neutralCwd,
-			env: { ...definedEnv, ...appImageEnv(executablePath) },
-			timeout: LAUNCH_TIMEOUT_MS,
-		});
+		let app: ElectronApplication | undefined;
+		let lastError: unknown;
+		for (let attempt = 1; attempt <= LAUNCH_ATTEMPTS; attempt += 1) {
+			try {
+				app = await electron.launch({
+					executablePath,
+					args: [userDataArg],
+					cwd: neutralCwd,
+					env: { ...definedEnv, ...appImageEnv(executablePath) },
+					timeout: LAUNCH_TIMEOUT_MS,
+				});
+				break;
+			} catch (error) {
+				lastError = error;
+				if (process.platform === "linux") {
+					try {
+						execFileSync("pkill", ["-f", executablePath], {
+							stdio: "ignore",
+						});
+					} catch {
+						// No stale process is also a valid cleanup result.
+					}
+				}
+			}
+		}
+		if (app === undefined) throw lastError;
 
 		try {
 			const window = await app.firstWindow();
