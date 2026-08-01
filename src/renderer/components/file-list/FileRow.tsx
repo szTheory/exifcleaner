@@ -40,7 +40,10 @@ export function FileRow({
 		file.status === FileProcessingStatus.NoMetadataFound;
 	const isError = file.status === FileProcessingStatus.Error;
 	const isExpandable = isComplete || isError;
-	const isForcedCopy = isComplete && file.wasForcedCopy === true;
+	const isForcedCopy =
+		isComplete &&
+		(file.wasForcedCopy === true ||
+			(file.outputPath !== undefined && file.outputPath !== file.path));
 	const failureSummary =
 		file.failureKind === "verification"
 			? t("verificationFailedSummary")

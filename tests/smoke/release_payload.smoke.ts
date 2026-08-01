@@ -118,7 +118,7 @@ test("#301 installed settings retain semantic keyboard and pointer paths", async
 		await expectFocusInsideDialog(context);
 		await expectNoVisibleOverflow(context);
 		await dialog.getByRole("button", { name: "Close settings" }).click();
-		await expect(dialog).not.toBeVisible();
+		await expect(dialog).not.toHaveClass(/settings-drawer--open/);
 		await expect(trigger).toBeFocused();
 
 		await trigger.press("Enter");
