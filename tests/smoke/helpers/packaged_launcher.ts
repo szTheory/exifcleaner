@@ -9,7 +9,7 @@ const EXECUTABLE_ENV_VAR = "EXIFCLEANER_PACKAGED_APP";
 // Cold-starting a packaged bundle on a hosted CI runner is materially slower than
 // electron-vite dev, and the DMG/AppImage path adds first-launch work the dev build
 // never does.
-const LAUNCH_TIMEOUT_MS = 60000;
+const LAUNCH_TIMEOUT_MS = 120000;
 const MOUNT_TIMEOUT_MS = 30000;
 
 export interface PackagedLaunchContext {
