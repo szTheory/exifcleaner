@@ -7,6 +7,7 @@ on:
 jobs:
   bump-cask:
     name: Update Homebrew Cask
+    if: ${{ !github.event.release.prerelease }}
     runs-on: macos-latest
     steps:
       - name: Update Homebrew cask

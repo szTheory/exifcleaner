@@ -58,7 +58,10 @@ function workflowPolicy(workflow: string): PolicyResult {
 		job.indexOf(guard) > job.indexOf(runsOn) ||
 		job.indexOf(guard) > job.indexOf(steps)
 	) {
-		return { ok: false, reason: "bump-cask must have the job-level prerelease guard" };
+		return {
+			ok: false,
+			reason: "bump-cask must have the job-level prerelease guard",
+		};
 	}
 
 	if (!job.includes("secrets.HOMEBREW_TOKEN")) {
@@ -79,35 +82,70 @@ describe("Homebrew workflow prerelease policy", () => {
 	});
 
 	test("rejects a missing job guard", () => {
-		expect(workflowPolicy(COMPLIANT_WORKFLOW.replace("    if: ${{ !github.event.release.prerelease }}\n", ""))).toEqual({
+		expect(
+			workflowPolicy(
+				COMPLIANT_WORKFLOW.replace(
+					"    if: ${{ !github.event.release.prerelease }}\n",
+					"",
+				),
+			),
+		).toEqual({
 			ok: false,
 			reason: expect.stringContaining("job-level prerelease guard"),
 		});
 	});
 
 	test("rejects a guard moved into the action step", () => {
-		expect(workflowPolicy(COMPLIANT_WORKFLOW.replace("    if: ${{ !github.event.release.prerelease }}\n", "").replace("      - name: Update", "      - if: ${{ !github.event.release.prerelease }}\n        name: Update"))).toEqual({
+		expect(
+			workflowPolicy(
+				COMPLIANT_WORKFLOW.replace(
+					"    if: ${{ !github.event.release.prerelease }}\n",
+					"",
+				).replace(
+					"      - name: Update",
+					"      - if: ${{ !github.event.release.prerelease }}\n        name: Update",
+				),
+			),
+		).toEqual({
 			ok: false,
 			reason: expect.stringContaining("job-level prerelease guard"),
 		});
 	});
 
 	test("rejects an inverted job guard", () => {
-		expect(workflowPolicy(COMPLIANT_WORKFLOW.replace("!github.event.release.prerelease", "github.event.release.prerelease"))).toEqual({
+		expect(
+			workflowPolicy(
+				COMPLIANT_WORKFLOW.replace(
+					"!github.event.release.prerelease",
+					"github.event.release.prerelease",
+				),
+			),
+		).toEqual({
 			ok: false,
 			reason: expect.stringContaining("job-level prerelease guard"),
 		});
 	});
 
 	test("rejects a non-published release trigger", () => {
-		expect(workflowPolicy(COMPLIANT_WORKFLOW.replace("[published]", "[prereleased]"))).toEqual({
+		expect(
+			workflowPolicy(
+				COMPLIANT_WORKFLOW.replace("[published]", "[prereleased]"),
+			),
+		).toEqual({
 			ok: false,
 			reason: expect.stringContaining("published"),
 		});
 	});
 
 	test("rejects a PAT use outside the guarded job", () => {
-		expect(workflowPolicy(COMPLIANT_WORKFLOW.replace("jobs:", "env:\n  TOKEN: ${{ secrets.HOMEBREW_TOKEN }}\n\njobs:"))).toEqual({
+		expect(
+			workflowPolicy(
+				COMPLIANT_WORKFLOW.replace(
+					"jobs:",
+					"env:\n  TOKEN: ${{ secrets.HOMEBREW_TOKEN }}\n\njobs:",
+				),
+			),
+		).toEqual({
 			ok: false,
 			reason: expect.stringContaining("HOMEBREW_TOKEN"),
 		});
@@ -115,7 +153,10 @@ describe("Homebrew workflow prerelease policy", () => {
 
 	test("requires the checked-in workflow to uphold the policy", () => {
 		const workflow = readFileSync(
-			path.resolve(import.meta.dirname, "../../.github/workflows/homebrew-cask.yml"),
+			path.resolve(
+				import.meta.dirname,
+				"../../.github/workflows/homebrew-cask.yml",
+			),
 			"utf8",
 		);
 		expect(workflowPolicy(workflow)).toEqual({ ok: true });
