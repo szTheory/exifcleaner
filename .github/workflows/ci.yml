@@ -4,6 +4,7 @@ on:
   push:
     branches: [master]
   pull_request:
+  workflow_dispatch:
 
 # Cancel in-progress runs for same branch/PR
 concurrency:
@@ -284,3 +285,25 @@ jobs:
             dist/*.deb
             dist/*.rpm
           retention-days: 7
+
+  verify-native-evidence:
+    name: Verify Native Release Evidence
+    needs: [build-macos, build-windows, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download native release evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-evidence-*
+          path: release-evidence
+          merge-multiple: true
+
+      - name: Validate complete native evidence set
+        run: node scripts/release_evidence.mjs --validate-set release-evidence
