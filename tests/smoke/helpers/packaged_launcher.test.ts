@@ -10,6 +10,6 @@ describe("packagedExiftoolPath", () => {
 		expect(exiftoolPath).toBe(
 			path.join(resourcesPath, "nix", "bin", "exiftool"),
 		);
-		expect(exiftoolPath).toStartWith(resourcesPath);
+		expect(exiftoolPath.startsWith(resourcesPath)).toBe(true);
 	});
 });

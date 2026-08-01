@@ -6,6 +6,7 @@ import path from "node:path";
 import {
 	launchPackagedApp,
 	closePackagedApp,
+	type PackagedLaunchContext,
 } from "./helpers/packaged_launcher";
 import { createFixtureDir } from "../helpers/fixture_copier";
 import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
@@ -45,11 +46,13 @@ test.describe.configure({ mode: "serial" });
 test.describe("Packaged artifact", () => {
 	let app: ElectronApplication;
 	let window: Page;
+	let context: PackagedLaunchContext | undefined;
 	let consoleErrors: string[];
 
 	test.beforeEach(async () => {
 		consoleErrors = [];
 		const launched = await launchPackagedApp();
+		context = launched;
 		app = launched.app;
 		window = launched.window;
 
@@ -61,8 +64,8 @@ test.describe("Packaged artifact", () => {
 	});
 
 	test.afterEach(async () => {
-		if (app) {
-			await closePackagedApp(app);
+		if (context) {
+			await closePackagedApp(context);
 		}
 		expect(
 			consoleErrors,
