@@ -158,6 +158,19 @@ describe("E2E fixture integrity", () => {
 		).toBeGreaterThan(0);
 	});
 
+	it("classifies sample.pdf as a binary checkout fixture", () => {
+		const output = execFileSync(
+			"git",
+			["check-attr", "binary", "--", "tests/e2e/fixtures/sample.pdf"],
+			{
+				cwd: path.resolve(__dirname, "../../.."),
+				encoding: "utf8",
+			},
+		);
+
+		expect(output.trim()).toBe("tests/e2e/fixtures/sample.pdf: binary: set");
+	});
+
 	it("#240 fixture pins the measured create-date precondition", () => {
 		const metadata = readFixtureMetadata("issue240.mp4");
 
