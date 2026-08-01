@@ -2,7 +2,6 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, test } from "vitest";
-// @ts-expect-error This dependency-free Node ESM script is type-covered by its Vitest contract.
 import {
 	buildReleaseEvidence,
 	validateReleaseEvidenceSet,
