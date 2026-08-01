@@ -14,7 +14,13 @@ function createArtifact(contents: string) {
 	const directory = fs.mkdtempSync(path.join(os.tmpdir(), "release-evidence-"));
 	temporaryDirectories.push(directory);
 	const artifactPath = path.join(directory, "ExifCleaner-4.0.1.dmg");
-	const executablePath = path.join(directory, "ExifCleaner.app", "Contents", "MacOS", "ExifCleaner");
+	const executablePath = path.join(
+		directory,
+		"ExifCleaner.app",
+		"Contents",
+		"MacOS",
+		"ExifCleaner",
+	);
 	fs.mkdirSync(path.dirname(executablePath), { recursive: true });
 	fs.writeFileSync(artifactPath, contents);
 	fs.writeFileSync(executablePath, "installed executable");
@@ -22,7 +28,9 @@ function createArtifact(contents: string) {
 }
 
 function evidenceFor(runnerOs: "macos" | "windows" | "linux") {
-	const { artifactPath, executablePath } = createArtifact(`${runnerOs} installer bytes`);
+	const { artifactPath, executablePath } = createArtifact(
+		`${runnerOs} installer bytes`,
+	);
 	return buildReleaseEvidence({
 		sourceCommit: "a".repeat(40),
 		runnerOs,
@@ -51,7 +59,9 @@ describe("release evidence", () => {
 	});
 
 	test("records the package version and hashes the artifact bytes itself", () => {
-		const { artifactPath, executablePath } = createArtifact("original installer bytes");
+		const { artifactPath, executablePath } = createArtifact(
+			"original installer bytes",
+		);
 		const record = buildReleaseEvidence({
 			sourceCommit: "a".repeat(40),
 			runnerOs: "macos",
@@ -76,11 +86,19 @@ describe("release evidence", () => {
 	});
 
 	test.each([
-		["missing platform", () => [evidenceFor("macos"), evidenceFor("windows")], "platform"],
+		[
+			"missing platform",
+			() => [evidenceFor("macos"), evidenceFor("windows")],
+			"platform",
+		],
 		[
 			"source mismatch",
 			() => {
-				const records = [evidenceFor("macos"), evidenceFor("windows"), evidenceFor("linux")];
+				const records = [
+					evidenceFor("macos"),
+					evidenceFor("windows"),
+					evidenceFor("linux"),
+				];
 				records[2] = { ...records[2], sourceCommit: "b".repeat(40) };
 				return records;
 			},
@@ -89,7 +107,11 @@ describe("release evidence", () => {
 		[
 			"version mismatch",
 			() => {
-				const records = [evidenceFor("macos"), evidenceFor("windows"), evidenceFor("linux")];
+				const records = [
+					evidenceFor("macos"),
+					evidenceFor("windows"),
+					evidenceFor("linux"),
+				];
 				records[2] = { ...records[2], packageVersion: "4.0.0" };
 				return records;
 			},
@@ -98,7 +120,11 @@ describe("release evidence", () => {
 		[
 			"missing checksum",
 			() => {
-				const records = [evidenceFor("macos"), evidenceFor("windows"), evidenceFor("linux")];
+				const records = [
+					evidenceFor("macos"),
+					evidenceFor("windows"),
+					evidenceFor("linux"),
+				];
 				records[2] = { ...records[2], artifactSha256: "" };
 				return records;
 			},
@@ -107,7 +133,11 @@ describe("release evidence", () => {
 		[
 			"failed smoke",
 			() => {
-				const records = [evidenceFor("macos"), evidenceFor("windows"), evidenceFor("linux")];
+				const records = [
+					evidenceFor("macos"),
+					evidenceFor("windows"),
+					evidenceFor("linux"),
+				];
 				records[1] = { ...records[1], smokeResult: "failed" };
 				return records;
 			},
