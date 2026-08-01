@@ -68,8 +68,14 @@ describe("release tag gate", () => {
 			repository: "github:szTheory/exifcleaner",
 			origin: "https://github.com/szTheory/exifcleaner.git",
 			localRefs: {
-				v4_0: { object: "1e8ea1c3112fc90794777ba1fadda79832ee0dd9", peeled: V40_TARGET },
-				v4_1: { object: "888f3770a3e9af6c9b7ce628b5b7b700f6ba40dc", peeled: V41_TARGET },
+				v4_0: {
+					object: "1e8ea1c3112fc90794777ba1fadda79832ee0dd9",
+					peeled: V40_TARGET,
+				},
+				v4_1: {
+					object: "888f3770a3e9af6c9b7ce628b5b7b700f6ba40dc",
+					peeled: V41_TARGET,
+				},
 			},
 			remoteTags: {},
 		});

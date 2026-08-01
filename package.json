@@ -42,6 +42,8 @@
 		"verify:direffect": "node scripts/dir_effect_gate.mjs",
 		"verify:known-gaps": "node scripts/known_gap_gate.mjs",
 		"verify:release-notes": "node scripts/release_notes_gate.mjs",
+\t\t"verify:release-tags": "node scripts/release_tag_gate.mjs",
+\t\t"release-tags:capture-evidence": "node scripts/release_tag_gate.mjs --capture-evidence",
 		"known-gaps:write": "node scripts/known_gap_gate.mjs --write-release-notes",
 		"known-gaps:check": "node scripts/known_gap_gate.mjs --check-release-notes",
 		"verify:release": "yarn verify:release-notes && yarn verify:known-gaps --release && yarn known-gaps:check && yarn lint && yarn typecheck && yarn test && yarn verify:direffect && yarn check:deps",
