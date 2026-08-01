@@ -94,8 +94,9 @@ const STRUCTURAL_TAG_NAMES = new Set([
 
 export async function readMetadataTags(
 	filePath: string,
+	exiftoolPath = EXIFTOOL_PATH,
 ): Promise<Record<string, unknown>> {
-	const { stdout } = await execFileAsync(EXIFTOOL_PATH, ["-json", filePath]);
+	const { stdout } = await execFileAsync(exiftoolPath, ["-json", filePath]);
 	const parsed = JSON.parse(stdout) as Record<string, unknown>[];
 	const first = parsed[0];
 	if (first === undefined) {
@@ -104,8 +105,11 @@ export async function readMetadataTags(
 	return first;
 }
 
-export async function assertMetadataStripped(filePath: string): Promise<void> {
-	const tags = await readMetadataTags(filePath);
+export async function assertMetadataStripped(
+	filePath: string,
+	exiftoolPath?: string,
+): Promise<void> {
+	const tags = await readMetadataTags(filePath, exiftoolPath);
 	const userExifKeys = Object.keys(tags).filter((key) => {
 		if (COMPUTED_TAG_NAMES.has(key)) return false;
 		if (STRUCTURAL_TAG_NAMES.has(key)) return false;
