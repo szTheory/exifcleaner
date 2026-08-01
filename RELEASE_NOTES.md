@@ -1,3 +1,5 @@
+# ExifCleaner 4.0.1
+
 <!-- exifcleaner-known-limitations:start v1 -->
 ## Known limitations in 4.0.0
 
