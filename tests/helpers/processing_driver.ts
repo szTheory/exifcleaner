@@ -1,10 +1,25 @@
+import { expect } from "@playwright/test";
+import { createFixtureDir } from "./fixture_copier";
+import { assertDirEffect, snapshotDir } from "./dir_effect";
+import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
 import type { ElectronApplication, Page } from "playwright";
 import { waitForProcessing } from "../e2e/helpers/wait_for_processing";
 
 export interface ProcessingLaunchContext {
 	readonly app: ElectronApplication;
 	readonly window: Page;
+	readonly exiftoolPath: string;
 }
+
+export const SUPPORTED_FORMAT_FIXTURES = [
+	"sample.jpg",
+	"sample.png",
+	"sample.webp",
+	"sample.pdf",
+	"sample.mp4",
+] as const;
+
+export type SupportedFormatFixture = (typeof SUPPORTED_FORMAT_FIXTURES)[number];
 
 export interface ProcessingDriver {
 	readonly submitFiles: (filePaths: readonly string[]) => Promise<void>;
@@ -103,4 +118,82 @@ export function createProcessingDriver(
 			};
 		},
 	};
+}
+
+export async function runPositiveFormatScenario(
+	context: ProcessingLaunchContext,
+	fixture: SupportedFormatFixture,
+): Promise<void> {
+	const driver = createProcessingDriver(context);
+	const { dir, copyFixture, cleanup } = createFixtureDir();
+	const consoleErrors: string[] = [];
+	context.window.on("console", (message) => {
+		if (message.type() === "error") consoleErrors.push(message.text());
+	});
+
+	try {
+		const filePath = copyFixture(fixture);
+		const before = snapshotDir(dir);
+		await driver.submitFiles([filePath]);
+		await driver.waitForTerminal();
+		const after = snapshotDir(dir);
+
+		assertDirEffect(before, after, {
+			modified: [fixture],
+			added: [],
+			removed: [],
+			unchanged: [],
+		});
+		await assertMetadataStripped(filePath, context.exiftoolPath);
+		expect(await driver.terminalRowCounts()).toEqual({
+			total: 1,
+			complete: 1,
+			error: 0,
+		});
+	} finally {
+		cleanup();
+	}
+
+	expect(consoleErrors).toEqual([]);
+}
+
+export async function runMixedFormatScenario(
+	context: ProcessingLaunchContext,
+): Promise<void> {
+	const driver = createProcessingDriver(context);
+	const { dir, copyFixtures, cleanup } = createFixtureDir();
+	const consoleErrors: string[] = [];
+	context.window.on("console", (message) => {
+		if (message.type() === "error") consoleErrors.push(message.text());
+	});
+
+	try {
+		const filePaths = copyFixtures([...SUPPORTED_FORMAT_FIXTURES]);
+		const before = snapshotDir(dir);
+		await driver.submitFiles(filePaths);
+		await driver.waitForTerminal({
+			timeout: 30000,
+			expectedFiles: SUPPORTED_FORMAT_FIXTURES.length,
+		});
+		const after = snapshotDir(dir);
+
+		assertDirEffect(before, after, {
+			modified: SUPPORTED_FORMAT_FIXTURES,
+			added: [],
+			removed: [],
+			unchanged: [],
+		});
+		for (const filePath of filePaths) {
+			await assertMetadataStripped(filePath, context.exiftoolPath);
+		}
+		expect(await driver.terminalRowCounts()).toEqual({
+			total: SUPPORTED_FORMAT_FIXTURES.length,
+			complete: SUPPORTED_FORMAT_FIXTURES.length,
+			error: 0,
+		});
+	} finally {
+		cleanup();
+	}
+
+	expect(consoleErrors).toEqual([]);
 }
