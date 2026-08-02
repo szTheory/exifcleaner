@@ -14,7 +14,6 @@ export class StripMetadataCommand {
 		preserveOrientation,
 		preserveColorProfile,
 		preserveTimestamps,
-		saveAsCopy,
 		outputPath,
 		signal,
 	}: {
@@ -49,7 +48,7 @@ export class StripMetadataCommand {
 			args.push("-P");
 		}
 
-		if (saveAsCopy && outputPath) {
+		if (outputPath) {
 			args.push("-o", outputPath);
 		} else {
 			args.push("-overwrite_original");

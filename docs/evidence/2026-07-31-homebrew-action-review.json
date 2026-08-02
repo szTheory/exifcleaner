@@ -1,0 +1,58 @@
+{
+	"reviewedAt": "2026-08-01T00:35:43Z",
+	"repository": "https://github.com/macauley/action-homebrew-bump-cask",
+	"majorTag": "v1",
+	"annotatedTagObject": "229d336f8a17b26de07e886317ba5f214ce5650c",
+	"peeledCommit": "445c42390d790569d938f9068d01af39ca030feb",
+	"reviewedFiles": [
+		{
+			"path": "action.yml",
+			"sha256": "0ef6f27c32d471eab3fa399e07d940d195ee93c7c5e2d4265ce45ba270439d78",
+			"purpose": "Composite action definition, inputs, and environment mapping"
+		},
+		{
+			"path": "main.rb",
+			"sha256": "92f45484ba53daf66cba04106137d9c86cfcd1c4974a21ca4139d3d6e72403fd",
+			"purpose": "Invoked Homebrew Ruby script"
+		},
+		{
+			"path": "README.md",
+			"sha256": "33d067a385014d3db83a738c6606302639d7f22d72c18c74a432f0d624b9e6c4",
+			"purpose": "Usage and token-scope documentation"
+		},
+		{
+			"path": "LICENSE",
+			"sha256": "1979ae16a4f4bd9210c9f27f27b0e2abb5c80631f90f5519db11d6ad2b2a7c5e",
+			"purpose": "Repository license"
+		}
+	],
+	"inputs": {
+		"required": ["token"],
+		"optional": [
+			"message",
+			"org",
+			"tap",
+			"cask",
+			"tag",
+			"revision",
+			"force",
+			"livecheck",
+			"dryrun"
+		],
+		"workflowSupplied": {
+			"token": "secrets.HOMEBREW_TOKEN",
+			"cask": "exifcleaner"
+		}
+	},
+	"secretHandling": {
+		"actionBehavior": "The composite action maps only its token input to HOMEBREW_GITHUB_API_TOKEN before running brew ruby main.rb.",
+		"workflowBoundary": "HOMEBREW_TOKEN is supplied only to the job-level prerelease-guarded bump-cask job; the workflow GITHUB_TOKEN is restricted to contents: read."
+	},
+	"networkBehavior": [
+		"brew update-reset refreshes Homebrew state.",
+		"main.rb calls the GitHub REST /user endpoint through Homebrew's GitHub API with the supplied Homebrew token.",
+		"main.rb can invoke brew tap, brew livecheck, and brew bump-cask-pr, which may access Homebrew/GitHub and create the cask pull request."
+	],
+	"reviewConclusion": "The reviewed composite action has no additional bundled executable scripts beyond main.rb. Its token-consuming Homebrew operations are acceptable only behind the stable published-release job guard, with the separate PAT input retained. The workflow pins the reviewed peeled commit rather than the annotated v1 tag object.",
+	"conclusion": "approved"
+}

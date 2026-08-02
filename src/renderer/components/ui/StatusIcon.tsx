@@ -6,9 +6,11 @@ import { assertNever } from "../../../common/types";
 export function StatusIcon({
 	status,
 	shouldAnimate,
+	accessibleLabel,
 }: {
 	status: FileProcessingStatus;
 	shouldAnimate: boolean;
+	accessibleLabel?: string;
 }): React.JSX.Element {
 	switch (status) {
 		case FileProcessingStatus.Pending:
@@ -77,7 +79,7 @@ export function StatusIcon({
 						viewBox="0 0 16 16"
 						fill="none"
 						role="img"
-						aria-label="Error"
+						aria-label={accessibleLabel ?? "Error"}
 					>
 						<circle
 							cx="8"

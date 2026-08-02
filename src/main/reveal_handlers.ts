@@ -30,6 +30,7 @@ export function setupRevealHandlers(): void {
 
 				const menu = Menu.buildFromTemplate([
 					{
+						id: "reveal-cleaned-copy",
 						label: "Reveal Cleaned Copy",
 						click: () => {
 							if (existsSync(cleanedPath)) {
@@ -38,6 +39,7 @@ export function setupRevealHandlers(): void {
 						},
 					},
 					{
+						id: "reveal-original",
 						label: "Reveal Original",
 						click: () => {
 							if (existsSync(originalPath)) {

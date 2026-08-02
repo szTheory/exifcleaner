@@ -1435,6 +1435,12 @@ function expectedStableId(record) {
 	) {
 		return "KG-304-save-as-copy";
 	}
+	if (
+		record.issue === 240 &&
+		record.title === "#240 stripped MP4 does not retain create-date metadata"
+	) {
+		return "KG-240-mp4-create-dates";
+	}
 	const title = String(record.title).replace(/^#[1-9][0-9]*\s+/, "");
 	const slug = title
 		.toLocaleLowerCase("en-US")

@@ -11,22 +11,8 @@ import { ChevronIcon } from "../icons/ChevronIcon";
 import { ErrorExpansion } from "./ErrorExpansion";
 import { MetadataExpansion } from "./MetadataExpansion";
 import { formatFileSize } from "../../utils/format_file_size";
+import { resolveRevealTargets } from "../../utils/reveal_paths";
 import { useI18n } from "../../hooks/use_i18n";
-
-function computeCleanedPath(filePath: string): string {
-	const lastSep = Math.max(
-		filePath.lastIndexOf("/"),
-		filePath.lastIndexOf("\\"),
-	);
-	const dir = lastSep >= 0 ? filePath.slice(0, lastSep) : "";
-	const filename = lastSep >= 0 ? filePath.slice(lastSep + 1) : filePath;
-	const dotIndex = filename.lastIndexOf(".");
-	const base = dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
-	const ext = dotIndex > 0 ? filename.slice(dotIndex) : "";
-	const sep = lastSep >= 0 ? filePath[lastSep] : "/";
-	const prefix = dir ? `${dir}${sep}` : "";
-	return `${prefix}${base}_cleaned${ext}`;
-}
 
 export function FileRow({
 	file,
@@ -35,7 +21,6 @@ export function FileRow({
 	staggerIndex,
 	animatedCheckRef,
 	onCopyToast,
-	saveAsCopy,
 	onRevealError,
 }: {
 	file: FileEntry;
@@ -44,23 +29,42 @@ export function FileRow({
 	staggerIndex: number;
 	animatedCheckRef: React.RefObject<Set<string>>;
 	onCopyToast: () => void;
-	saveAsCopy?: boolean;
 	onRevealError?: (message: string) => void;
 }): React.JSX.Element {
 	const enteringRef = useRef(true);
 	const { t } = useI18n();
+	const revealTargets = resolveRevealTargets(file);
 
 	const isComplete =
 		file.status === FileProcessingStatus.Complete ||
 		file.status === FileProcessingStatus.NoMetadataFound;
 	const isError = file.status === FileProcessingStatus.Error;
 	const isExpandable = isComplete || isError;
+	const isForcedCopy =
+		isComplete &&
+		(file.wasForcedCopy === true ||
+			(file.outputPath !== undefined && file.outputPath !== file.path));
+	const failureSummary =
+		file.failureKind === "verification"
+			? t("verificationFailedSummary")
+			: file.failureKind === "cleanup"
+				? t("cleanupFailedSummary")
+				: file.failureKind === "xattr"
+					? t("xattrFailedSummary")
+					: undefined;
+	const errorDetail =
+		(file.failureKind === "cleanup" || file.failureKind === "xattr") &&
+		file.detail !== undefined &&
+		file.residualPath !== undefined
+			? `${file.detail}: ${file.residualPath}`
+			: (file.detail ?? file.error);
 
 	const rowClasses = [
 		"file-table__row",
 		isComplete ? "file-table__row--complete" : "",
 		isError ? "file-table__row--error" : "",
 		isExpandable ? "file-table__row--expandable" : "",
+		isForcedCopy ? "file-table__row--forced-copy" : "",
 		enteringRef.current ? "file-table__row--entering" : "",
 	]
 		.filter(Boolean)
@@ -83,9 +87,7 @@ export function FileRow({
 	}
 
 	function handleRevealClick(): void {
-		const targetPath =
-			saveAsCopy === true ? computeCleanedPath(file.path) : file.path;
-		window.api.reveal.showInFolder(targetPath).then((result) => {
+		window.api.reveal.showInFolder(revealTargets.primaryPath).then((result) => {
 			if (!result.success && result.error !== undefined) {
 				onRevealError?.(result.error);
 			}
@@ -93,11 +95,8 @@ export function FileRow({
 	}
 
 	function handleRevealContextMenu(): void {
-		if (saveAsCopy !== true) return;
-		window.api.reveal.showContextMenu({
-			cleanedPath: computeCleanedPath(file.path),
-			originalPath: file.path,
-		});
+		if (revealTargets.contextPaths === null) return;
+		window.api.reveal.showContextMenu(revealTargets.contextPaths);
 	}
 
 	const progressStyle: React.CSSProperties = {
@@ -120,11 +119,25 @@ export function FileRow({
 				style={progressStyle}
 				tabIndex={0}
 				role="row"
+				aria-label={
+					isForcedCopy
+						? `${t("complete")}. ${t("writtenToCopy")}.`
+						: (failureSummary ??
+							(isError ? (file.error ?? undefined) : undefined))
+				}
 				onClick={isExpandable ? onToggleExpand : undefined}
 				onKeyDown={handleKeyDown}
 			>
 				<div className="file-table__cell file-table__cell--status">
-					{isExpandable ? (
+					{isError ? (
+						<StatusIcon
+							status={file.status}
+							shouldAnimate={false}
+							{...(failureSummary === undefined
+								? {}
+								: { accessibleLabel: failureSummary })}
+						/>
+					) : isExpandable ? (
 						<ChevronIcon expanded={isExpanded} />
 					) : (
 						<StatusIcon
@@ -134,7 +147,19 @@ export function FileRow({
 					)}
 				</div>
 				<div className="file-table__cell file-table__cell--name">
-					{file.name}
+					<div className="file-table__name-stack">
+						<span className="file-table__name-text">{file.name}</span>
+						{isForcedCopy && (
+							<span className="file-table__copy-disclosure">
+								{t("writtenToCopy")}
+							</span>
+						)}
+						{failureSummary !== undefined && (
+							<span className="file-table__error-summary">
+								{failureSummary}
+							</span>
+						)}
+					</div>
 				</div>
 				<div className="file-table__cell">
 					<TypePill extension={file.extension} />
@@ -160,10 +185,15 @@ export function FileRow({
 							onKeyDown={(e) => {
 								if (e.key === "Enter" || e.key === " ") {
 									e.preventDefault();
+									e.stopPropagation();
 									handleRevealClick();
 								}
 							}}
-							aria-label="Reveal in file manager"
+							aria-label={
+								revealTargets.contextPaths === null
+									? "Reveal in file manager"
+									: "Reveal cleaned copy in file manager"
+							}
 							role="button"
 							tabIndex={0}
 						>
@@ -185,8 +215,8 @@ export function FileRow({
 					)}
 				</div>
 			</div>
-			{isExpanded && isError && file.error !== null && (
-				<ErrorExpansion error={file.error} onCopy={onCopyToast} />
+			{isExpanded && isError && errorDetail !== null && (
+				<ErrorExpansion error={errorDetail} onCopy={onCopyToast} />
 			)}
 			{isExpanded &&
 				isComplete &&

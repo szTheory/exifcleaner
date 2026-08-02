@@ -1,0 +1,50 @@
+{
+	"schemaVersion": 1,
+	"capturedAt": "2026-08-01T00:55:57.301Z",
+	"repository": "git@github.com:szTheory/exifcleaner.git",
+	"origin": "git@github.com:szTheory/exifcleaner.git",
+	"refs": {
+		"v4_0": {
+			"ref": "refs/tags/v4.0",
+			"object": "1e8ea1c3112fc90794777ba1fadda79832ee0dd9",
+			"peeled": "0d625e9a84b9697844fe2ef139e4105a192a1179",
+			"expected": "0d625e9a84b9697844fe2ef139e4105a192a1179",
+			"reason": "Stale two-part internal milestone marker; public v* names are reserved for application releases (D-23).",
+			"remote": {
+				"status": "absent"
+			}
+		},
+		"v4_1": {
+			"ref": "refs/tags/v4.1",
+			"object": "888f3770a3e9af6c9b7ce628b5b7b700f6ba40dc",
+			"peeled": "0a9af3179730ba735a405ba41cf57fecf7923743",
+			"expected": "0a9af3179730ba735a405ba41cf57fecf7923743",
+			"reason": "Stale two-part internal milestone marker; public v* names are reserved for application releases (D-23).",
+			"remote": {
+				"status": "absent"
+			}
+		}
+	},
+	"cleanup": {
+		"completedAt": "2026-08-01T01:51:31Z",
+		"local": {
+			"precondition": "v4.0 and v4.1 re-resolved to their locked full peeled targets immediately before deletion",
+			"deleted": [
+				"refs/tags/v4.0",
+				"refs/tags/v4.1"
+			],
+			"command": "git tag -d v4.0 v4.1"
+		},
+		"remote": {
+			"lookup": "git ls-remote --tags origin refs/tags/v4.0 refs/tags/v4.1",
+			"status": "absent",
+			"action": "no-op",
+			"push": null
+		},
+		"postState": {
+			"localTwoPartPublicTags": [],
+			"remoteTwoPartPublicTags": [],
+			"replacementTagsCreated": []
+		}
+	}
+}

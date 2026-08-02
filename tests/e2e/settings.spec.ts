@@ -1,10 +1,13 @@
 import { test, expect } from "@playwright/test";
 import type { ElectronApplication, Page } from "playwright";
+import fs from "node:fs";
+import path from "node:path";
 import { launchApp, closeApp } from "./helpers/app_launcher";
 import { createFixtureDir } from "../helpers/fixture_copier";
 import { readMetadataTags } from "./helpers/metadata_assertions";
 import { waitForProcessing } from "./helpers/wait_for_processing";
 import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
+import { cleanExifData } from "../../src/domain/exif/exif";
 test.describe("Settings", () => {
 	let app: ElectronApplication;
 	let page: Page;
@@ -116,11 +119,16 @@ test.describe("Settings", () => {
 	test("preserves orientation metadata when toggle is enabled", async () => {
 		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
-			const tempFile = copyFixture("sample.jpg");
+			const expectedOrientation = "Rotate 90 CW";
+			const tempFile = copyFixture("orientation.jpg");
+			const tagsBefore = await readMetadataTags(tempFile);
+			expect(tagsBefore.Orientation).toBe(expectedOrientation);
+
 			// Ensure orientation preservation is enabled (default: true)
 			const settings = await page.evaluate(() => window.api.settings.get());
 			expect(settings.preserveOrientation).toBe(true);
 			const before = snapshotDir(dir);
+
 			// Process the file
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
@@ -134,14 +142,10 @@ test.describe("Settings", () => {
 
 			await waitForProcessing(page, { timeout: 15000 });
 			const after = snapshotDir(dir);
-			// Only sample.jpg changes on disk (additive to the checks below).
-			assertDirEffect(before, after, { modified: ["sample.jpg"] });
-			// Read the processed file's metadata
-			const tags = await readMetadataTags(tempFile);
-			// When preserveOrientation is enabled, the file processes without errors.
-			// Verify the file was processed (has at least structural tags).
-			const tagKeys = Object.keys(tags);
-			expect(tagKeys.length).toBeGreaterThan(0);
+			assertDirEffect(before, after, { modified: ["orientation.jpg"] });
+
+			const tagsAfter = await readMetadataTags(tempFile);
+			expect(tagsAfter.Orientation).toBe(expectedOrientation);
 		} finally {
 			cleanup();
 		}
@@ -183,56 +187,7 @@ test.describe("Settings", () => {
 		await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
 	});
 
-	test.fail(
-		"#304 save-as-copy on: original survives, a cleaned copy appears",
-		async () => {
-			const { dir, copyFixture, cleanup } = createFixtureDir();
-			try {
-				const tempFile = copyFixture("sample.jpg");
-
-				await page.evaluate(() =>
-					window.api.settings.set({ saveAsCopy: true }),
-				);
-				await page.waitForTimeout(300);
-
-				const before = snapshotDir(dir);
-
-				await app.evaluate(
-					({ BrowserWindow }, filePaths) => {
-						const win = BrowserWindow.getAllWindows()[0];
-						if (win) {
-							win.webContents.send("file-open-add-files", filePaths);
-						}
-					},
-					[tempFile],
-				);
-
-				await waitForProcessing(page, { timeout: 15000 });
-
-				const after = snapshotDir(dir);
-
-				assertDirEffect(before, after, {
-					added: ["sample_cleaned.jpg"],
-					unchanged: ["sample.jpg"],
-					modified: [],
-					removed: [],
-				});
-			} finally {
-				await page.evaluate(() =>
-					window.api.settings.set({ saveAsCopy: false }),
-				);
-				cleanup();
-			}
-		},
-	);
-
-	// Characterization test (D-05 test 2): pins TODAY's broken behavior — save-as-copy
-	// currently OVERWRITES the original instead of creating a copy. This test MUST BE
-	// DELETED WHEN #304 IS FIXED (Phase 21). It exists as a second, unmaskable tripwire:
-	// an xfail modifier only asserts *that* test 1 fails, never *why*. If the harness
-	// itself breaks (a broken beforeEach, a changed selector), this test fails too —
-	// proving test 1's red is attributable to #304 and not to harness rot.
-	test("#304 characterization (DELETE WITH THE FIX): save-as-copy currently overwrites the original", async () => {
+	test("#304 save-as-copy on: original survives, a cleaned copy appears", async () => {
 		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("sample.jpg");
@@ -257,8 +212,9 @@ test.describe("Settings", () => {
 			const after = snapshotDir(dir);
 
 			assertDirEffect(before, after, {
-				modified: ["sample.jpg"],
-				added: [],
+				added: ["sample_cleaned.jpg"],
+				unchanged: ["sample.jpg"],
+				modified: [],
 				removed: [],
 			});
 		} finally {
@@ -301,6 +257,83 @@ test.describe("Settings", () => {
 				removed: [],
 			});
 		} finally {
+			cleanup();
+		}
+	});
+
+	test("#304 collision: save-as-copy writes _cleaned_2 and reveals that artifact", async () => {
+		const { dir, copyFixture, cleanup } = createFixtureDir();
+		try {
+			const tempFile = copyFixture("sample.jpg");
+			const preExistingCleaned = path.join(dir, "sample_cleaned.jpg");
+			const collisionOutput = path.join(dir, "sample_cleaned_2.jpg");
+			fs.copyFileSync(tempFile, preExistingCleaned);
+
+			await page.evaluate(() => window.api.settings.set({ saveAsCopy: true }));
+			await page.waitForTimeout(300);
+
+			await app.evaluate(({ shell }) => {
+				const calls: string[] = [];
+				const originalShowItemInFolder = shell.showItemInFolder;
+				Reflect.set(globalThis, "__issue304RevealCalls", calls);
+				Reflect.set(globalThis, "__issue304RestoreReveal", () => {
+					shell.showItemInFolder = originalShowItemInFolder;
+				});
+				shell.showItemInFolder = (filePath: string): void => {
+					calls.push(filePath);
+				};
+			});
+
+			const before = snapshotDir(dir);
+
+			await app.evaluate(
+				({ BrowserWindow }, filePaths) => {
+					const win = BrowserWindow.getAllWindows()[0];
+					if (win) {
+						win.webContents.send("file-open-add-files", filePaths);
+					}
+				},
+				[tempFile],
+			);
+
+			await waitForProcessing(page, { timeout: 15000 });
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				added: ["sample_cleaned_2.jpg"],
+				unchanged: ["sample.jpg", "sample_cleaned.jpg"],
+				modified: [],
+				removed: [],
+			});
+
+			const expectedAfterCount = Object.keys(
+				cleanExifData({ raw: await readMetadataTags(collisionOutput) }),
+			).length;
+			const afterCell = page
+				.locator(".file-table__row")
+				.first()
+				.locator(".file-table__cell")
+				.nth(5);
+			await expect(afterCell).toContainText(String(expectedAfterCount));
+
+			const revealButton = page.locator(".file-table__reveal").first();
+			await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
+			await page.waitForTimeout(300);
+			await revealButton.click();
+			await revealButton.press("Enter");
+
+			const revealCalls = await app.evaluate(() => {
+				return Reflect.get(globalThis, "__issue304RevealCalls") as string[];
+			});
+			expect(revealCalls).toEqual([collisionOutput, collisionOutput]);
+		} finally {
+			await app.evaluate(() => {
+				const restore = Reflect.get(globalThis, "__issue304RestoreReveal") as
+					| (() => void)
+					| undefined;
+				restore?.();
+			});
+			await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
 			cleanup();
 		}
 	});

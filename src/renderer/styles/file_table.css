@@ -62,6 +62,10 @@
 .file-table__row--complete {
 }
 
+.file-table__row--forced-copy {
+	min-height: 60px;
+}
+
 .file-table__row--error {
 	background: var(--ec-color-error-bg);
 }
@@ -90,6 +94,25 @@
 	display: flex;
 	align-items: center;
 	font-size: var(--ec-font-size-body);
+}
+
+.file-table__name-stack {
+	min-width: 0;
+	width: 100%;
+}
+
+.file-table__name-text,
+.file-table__copy-disclosure {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.file-table__copy-disclosure {
+	color: var(--ec-color-text-secondary);
+	font-size: var(--ec-font-size-small);
+	line-height: var(--ec-line-height-normal);
 }
 
 /* Reveal icon — appears on row hover for completed files */

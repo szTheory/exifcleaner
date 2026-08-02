@@ -1,14 +1,32 @@
-import { ipcMain } from "electron";
+import { app, ipcMain } from "electron";
+import { randomUUID } from "node:crypto";
+import { existsSync } from "node:fs";
+import { dirname, join, parse } from "node:path";
 import type { Container } from "./container";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import { exifReadSchema, exifRemoveSchema } from "./ipc/ipc_schemas";
 import { formatExifError } from "../domain";
+import { generateCleanedPath } from "../domain/files/cleaned_path";
+import { isRawFile, isVideoFile } from "../domain/files/file_types";
+import type { OutputTransactionFailure } from "./output_transaction";
+
+const DEV_XATTR_FAILURE_EVENT = "exifcleaner:dev-xattr-failure-path";
+
+let devXattrFailurePath: string | undefined;
+let devXattrFailureListener: ((filePath: unknown) => void) | undefined;
+
+interface DevXattrFailureEventEmitter {
+	on(event: string, listener: (filePath: unknown) => void): unknown;
+	removeListener(event: string, listener: (filePath: unknown) => void): unknown;
+}
 
 export function setupExifHandlers({
 	container,
 }: {
 	container: Container;
 }): void {
+	setupDevXattrFailureBridge();
+
 	ipcMain.handle(
 		"exif:read",
 		createValidatedHandler(exifReadSchema, async (filePath) => {
@@ -24,17 +42,175 @@ export function setupExifHandlers({
 		"exif:remove",
 		createValidatedHandler(exifRemoveSchema, async (filePath) => {
 			const settings = container.settings.get();
+			const isRaw = isRawFile({ filename: filePath });
+			const isVideo = isVideoFile({ filename: filePath });
+			const wasForcedCopy = isRaw && !settings.saveAsCopy;
+			const saveAsCopy = settings.saveAsCopy || wasForcedCopy;
+			const outputPath = saveAsCopy
+				? generateCleanedPath({ filePath, exists: existsSync })
+				: undefined;
+
+			if (isRaw || isVideo) {
+				const generatedPath =
+					outputPath ?? generateVideoStagePath({ filePath });
+				const transactionResult = await container.outputTransaction.execute({
+					filePath,
+					generatedPath,
+					commitPath: outputPath === undefined ? filePath : undefined,
+					preserveOrientation: settings.preserveOrientation,
+					preserveColorProfile: settings.preserveColorProfile,
+					preserveTimestamps: settings.preserveTimestamps,
+				});
+				if (transactionResult.ok) {
+					return applyXattrPostcondition({
+						container,
+						actualOutputPath: transactionResult.value.outputPath,
+						wasForcedCopy,
+						removeXattrs: settings.removeXattrs,
+					});
+				}
+				return transactionFailureResult(transactionResult.error);
+			}
+
 			const result = await container.stripMetadata.execute({
 				filePath,
 				preserveOrientation: settings.preserveOrientation,
 				preserveColorProfile: settings.preserveColorProfile,
 				preserveTimestamps: settings.preserveTimestamps,
-				saveAsCopy: settings.saveAsCopy,
+				saveAsCopy,
+				outputPath,
 			});
 			if (result.ok) {
-				return { data: null, error: null };
+				return applyXattrPostcondition({
+					container,
+					actualOutputPath: outputPath ?? filePath,
+					wasForcedCopy,
+					removeXattrs: settings.removeXattrs,
+				});
 			}
-			return { data: null, error: formatExifError(result.error) };
+			return { success: false, error: formatExifError(result.error) };
 		}),
 	);
+}
+
+async function applyXattrPostcondition({
+	container,
+	actualOutputPath,
+	wasForcedCopy,
+	removeXattrs,
+}: {
+	container: Container;
+	actualOutputPath: string;
+	wasForcedCopy: boolean;
+	removeXattrs: boolean;
+}) {
+	if (!removeXattrs) {
+		return {
+			success: true as const,
+			outputPath: actualOutputPath,
+			wasForcedCopy,
+		};
+	}
+
+	if (devXattrFailurePath === actualOutputPath) {
+		devXattrFailurePath = undefined;
+		return xattrFailureResult({
+			actualOutputPath,
+			error: new Error("deterministic development failure"),
+		});
+	}
+
+	try {
+		await container.xattrCommand.execute({ filePath: actualOutputPath });
+	} catch (error) {
+		return xattrFailureResult({ actualOutputPath, error });
+	}
+
+	return {
+		success: true as const,
+		outputPath: actualOutputPath,
+		wasForcedCopy,
+	};
+}
+
+function setupDevXattrFailureBridge(): void {
+	const eventEmitter = app as unknown as DevXattrFailureEventEmitter;
+	devXattrFailurePath = undefined;
+	if (devXattrFailureListener !== undefined) {
+		eventEmitter.removeListener(
+			DEV_XATTR_FAILURE_EVENT,
+			devXattrFailureListener,
+		);
+		devXattrFailureListener = undefined;
+	}
+
+	if (app.isPackaged !== false || process.env.NODE_ENV !== "development") {
+		return;
+	}
+
+	devXattrFailureListener = (filePath: unknown): void => {
+		if (typeof filePath === "string") {
+			devXattrFailurePath = filePath;
+		}
+	};
+	eventEmitter.on(DEV_XATTR_FAILURE_EVENT, devXattrFailureListener);
+}
+
+function xattrFailureResult({
+	actualOutputPath,
+	error,
+}: {
+	actualOutputPath: string;
+	error: unknown;
+}) {
+	const reason = error instanceof Error ? error.message : String(error);
+	return {
+		success: false as const,
+		failureKind: "xattr" as const,
+		detail: `Embedded metadata was removed, but macOS extended attributes could not be cleared: ${reason}`,
+		residualPath: actualOutputPath,
+	};
+}
+
+function generateVideoStagePath({ filePath }: { filePath: string }): string {
+	const parsedPath = parse(filePath);
+	return join(
+		dirname(filePath),
+		`.${parsedPath.name}.exifcleaner-stage-${randomUUID()}${parsedPath.ext}`,
+	);
+}
+
+function transactionFailureResult(error: OutputTransactionFailure): {
+	success: false;
+	failureKind: "write" | "verification" | "cleanup" | "commit";
+	detail: string;
+	residualPath?: string;
+} {
+	switch (error.code) {
+		case "write-failed":
+			return {
+				success: false,
+				failureKind: "write",
+				detail: "Generated output write failed",
+			};
+		case "verification-failed":
+			return {
+				success: false,
+				failureKind: "verification",
+				detail: "Generated output verification failed",
+			};
+		case "cleanup-failed":
+			return {
+				success: false,
+				failureKind: "cleanup",
+				detail: "Generated output cleanup failed",
+				residualPath: error.residualPath,
+			};
+		case "commit-failed":
+			return {
+				success: false,
+				failureKind: "commit",
+				detail: "Generated output commit failed",
+			};
+	}
 }

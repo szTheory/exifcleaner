@@ -1,6 +1,7 @@
 import { _electron as electron } from "playwright";
 import type { ElectronApplication, Page } from "playwright";
-import { existsSync, mkdtempSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -9,8 +10,28 @@ const EXECUTABLE_ENV_VAR = "EXIFCLEANER_PACKAGED_APP";
 // Cold-starting a packaged bundle on a hosted CI runner is materially slower than
 // electron-vite dev, and the DMG/AppImage path adds first-launch work the dev build
 // never does.
-const LAUNCH_TIMEOUT_MS = 60000;
+const LAUNCH_TIMEOUT_MS = 30000;
+const LAUNCH_ATTEMPTS = 3;
 const MOUNT_TIMEOUT_MS = 30000;
+
+export interface PackagedLaunchContext {
+	readonly app: ElectronApplication;
+	readonly window: Page;
+	readonly executablePath: string;
+	readonly userDataDir: string;
+	readonly neutralCwd: string;
+	readonly resourcesPath: string;
+	readonly exiftoolPath: string;
+}
+
+export function packagedExiftoolPath(
+	resourcesPath: string,
+	platform: NodeJS.Platform,
+): string {
+	const subdir = platform === "win32" ? "win" : "nix";
+	const filename = platform === "win32" ? "exiftool.exe" : "exiftool";
+	return path.join(resourcesPath, subdir, "bin", filename);
+}
 
 /**
  * Absolute path to the packaged executable under test, from EXIFCLEANER_PACKAGED_APP.
@@ -91,12 +112,13 @@ function appImageEnv(executablePath: string): Record<string, string> {
  * exist. Pointing cwd at an empty temp dir reproduces that, so a mis-resolved path
  * fails here the same way it fails for a user.
  */
-export async function launchPackagedApp(): Promise<{
-	app: ElectronApplication;
-	window: Page;
-}> {
+export async function launchPackagedApp(): Promise<PackagedLaunchContext> {
 	const neutralCwd = mkdtempSync(path.join(tmpdir(), "exifcleaner-smoke-cwd-"));
+	const userDataDir = mkdtempSync(
+		path.join(tmpdir(), "exifcleaner-smoke-profile-"),
+	);
 	const executablePath = packagedExecutablePath();
+	const userDataArg = `--user-data-dir=${userDataDir}`;
 
 	// process.env values are typed string | undefined; filter the undefined ones out
 	// before spreading, since Playwright's env option requires Record<string, string>.
@@ -107,23 +129,91 @@ export async function launchPackagedApp(): Promise<{
 		}
 	}
 
-	const app = await electron.launch({
-		executablePath,
-		args: [],
-		cwd: neutralCwd,
-		env: { ...definedEnv, ...appImageEnv(executablePath) },
-		timeout: LAUNCH_TIMEOUT_MS,
-	});
+	try {
+		let app: ElectronApplication | undefined;
+		let lastError: unknown;
+		for (let attempt = 1; attempt <= LAUNCH_ATTEMPTS; attempt += 1) {
+			try {
+				app = await electron.launch({
+					executablePath,
+					args: [userDataArg],
+					cwd: neutralCwd,
+					env: { ...definedEnv, ...appImageEnv(executablePath) },
+					timeout: LAUNCH_TIMEOUT_MS,
+				});
+				break;
+			} catch (error) {
+				lastError = error;
+				if (process.platform === "linux") {
+					try {
+						execFileSync("pkill", ["-f", executablePath], {
+							stdio: "ignore",
+						});
+					} catch {
+						// No stale process is also a valid cleanup result.
+					}
+				}
+			}
+		}
+		if (app === undefined) throw lastError;
 
-	const window = await app.firstWindow();
-	await window.waitForLoadState("domcontentloaded");
-	await window.waitForSelector("[role='main']", { timeout: MOUNT_TIMEOUT_MS });
+		try {
+			const window = await app.firstWindow();
+			await window.waitForLoadState("domcontentloaded");
+			await window.waitForSelector("[role='main']", {
+				timeout: MOUNT_TIMEOUT_MS,
+			});
+			const identity = await app.evaluate(({ app: electronApp }) => ({
+				isPackaged: electronApp.isPackaged,
+				argv: process.argv,
+				resourcesPath: process.resourcesPath,
+			}));
+			if (!identity.isPackaged) {
+				throw new Error(
+					"Packaged launcher started an unpackaged Electron process",
+				);
+			}
+			if (!identity.argv.includes(userDataArg)) {
+				throw new Error(
+					`Packaged launcher lost its exact profile argument: ${userDataArg}`,
+				);
+			}
+			if (identity.resourcesPath === "") {
+				throw new Error(
+					"Packaged launcher reported an empty process.resourcesPath",
+				);
+			}
 
-	return { app, window };
+			return {
+				app,
+				window,
+				executablePath,
+				userDataDir,
+				neutralCwd,
+				resourcesPath: identity.resourcesPath,
+				exiftoolPath: packagedExiftoolPath(
+					identity.resourcesPath,
+					process.platform,
+				),
+			};
+		} catch (error) {
+			await app.close().catch(() => undefined);
+			throw error;
+		}
+	} catch (error) {
+		rmSync(userDataDir, { recursive: true, force: true });
+		rmSync(neutralCwd, { recursive: true, force: true });
+		throw error;
+	}
 }
 
 export async function closePackagedApp(
-	app: ElectronApplication,
+	context: PackagedLaunchContext,
 ): Promise<void> {
-	await app.close();
+	try {
+		await context.app.close();
+	} finally {
+		rmSync(context.userDataDir, { recursive: true, force: true });
+		rmSync(context.neutralCwd, { recursive: true, force: true });
+	}
 }

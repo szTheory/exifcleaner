@@ -20,6 +20,7 @@ function makeFile(overrides: Partial<FileEntry> = {}): FileEntry {
 		afterTags: null,
 		beforeMetadata: null,
 		afterMetadata: null,
+		outputPath: undefined,
 		error: null,
 		...overrides,
 	};
@@ -85,6 +86,7 @@ describe("appReducer", () => {
 			expect(added!.afterTags).toBeNull();
 			expect(added!.beforeMetadata).toBeNull();
 			expect(added!.afterMetadata).toBeNull();
+			expect(added!.outputPath).toBeUndefined();
 			expect(added!.error).toBeNull();
 		});
 	});
@@ -134,6 +136,23 @@ describe("appReducer", () => {
 	});
 
 	describe("UPDATE_FILE_METADATA", () => {
+		it("persists only the main-returned forced-copy fact with terminal metadata", () => {
+			const state = makeInitialState({ files: [makeFile()] });
+
+			const result = appReducer(state, {
+				type: "UPDATE_FILE_METADATA",
+				id: "file-1",
+				beforeTags: 4,
+				afterTags: 0,
+				beforeMetadata: { DateTimeOriginal: "2024:01:01 00:00:00" },
+				afterMetadata: {},
+				outputPath: "/Users/test/photos/image_cleaned.raf",
+				wasForcedCopy: true,
+			} as AppAction);
+
+			expect(result.files[0]!.wasForcedCopy).toBe(true);
+		});
+
 		it("sets beforeTags, afterTags, and metadata objects for matching file id", () => {
 			const file = makeFile({ id: "file-1" });
 			const state = makeInitialState({ files: [file] });
@@ -147,12 +166,49 @@ describe("appReducer", () => {
 				afterTags: 3,
 				beforeMetadata: beforeMeta,
 				afterMetadata: afterMeta,
+				outputPath: "/Users/test/photos/image_cleaned_2.jpg",
+				wasForcedCopy: false,
 			});
 
 			expect(result.files[0]!.beforeTags).toBe(42);
 			expect(result.files[0]!.afterTags).toBe(3);
 			expect(result.files[0]!.beforeMetadata).toEqual(beforeMeta);
 			expect(result.files[0]!.afterMetadata).toEqual(afterMeta);
+		});
+
+		it("stores outputPath while preserving submitted row identity", () => {
+			const file = makeFile({
+				id: "file-1",
+				path: "/Users/test/photos/image.jpg",
+				name: "image.jpg",
+				extension: "JPG",
+				size: 4096,
+				folder: "/Users/test/photos",
+				status: FileProcessingStatus.Processing,
+				beforeMetadata: { make: "Canon" },
+			});
+			const state = makeInitialState({ files: [file] });
+
+			const result = appReducer(state, {
+				type: "UPDATE_FILE_METADATA",
+				id: "file-1",
+				beforeTags: 1,
+				afterTags: 0,
+				beforeMetadata: { make: "Canon" },
+				afterMetadata: {},
+				outputPath: "/Users/test/photos/image_cleaned_2.jpg",
+				wasForcedCopy: false,
+			} as AppAction);
+
+			expect(result.files[0]).toEqual({
+				...file,
+				beforeTags: 1,
+				afterTags: 0,
+				beforeMetadata: { make: "Canon" },
+				afterMetadata: {},
+				outputPath: "/Users/test/photos/image_cleaned_2.jpg",
+				wasForcedCopy: false,
+			});
 		});
 	});
 
@@ -172,6 +228,38 @@ describe("appReducer", () => {
 
 			expect(result.files[0]!.error).toBe("File may be corrupted");
 			expect(result.files[0]!.status).toBe(FileProcessingStatus.Error);
+		});
+
+		it("clears stale success artifacts and preserves structured terminal failure facts", () => {
+			const state = makeInitialState({
+				files: [
+					makeFile({
+						status: FileProcessingStatus.Complete,
+						afterTags: 0,
+						afterMetadata: {},
+						outputPath: "/Users/test/photos/image_cleaned.jpg",
+						wasForcedCopy: true,
+					}),
+				],
+			});
+
+			const result = appReducer(state, {
+				type: "UPDATE_FILE_ERROR",
+				id: "file-1",
+				error: "Verification found remaining metadata",
+				failureKind: "verification",
+				detail: "ExifTool: DateTimeOriginal remains",
+			});
+
+			expect(result.files[0]).toMatchObject({
+				status: FileProcessingStatus.Error,
+				failureKind: "verification",
+				detail: "ExifTool: DateTimeOriginal remains",
+				afterTags: null,
+				afterMetadata: null,
+				outputPath: undefined,
+				wasForcedCopy: undefined,
+			});
 		});
 	});
 

@@ -21,6 +21,13 @@ const EXIFTOOL =
 		: path.resolve(__dirname, "../../../.resources/nix/bin/exiftool");
 
 const FIXTURES_DIR = __dirname;
+const QUICKTIME_DATE = "2019:10:02 00:49:04";
+const QUICKTIME_EPOCH_OFFSET_SECONDS = 2082844800;
+const ISSUE_240_TAGS = {
+	CreateDate: QUICKTIME_DATE,
+	TrackCreateDate: QUICKTIME_DATE,
+	MediaCreateDate: QUICKTIME_DATE,
+} as const;
 
 // Minimal valid 1x1 white JPEG (JFIF)
 function createMinimalJpeg(): Buffer {
@@ -175,6 +182,145 @@ function createMinimalMp4(): Buffer {
 	return Buffer.concat([ftyp, moov]);
 }
 
+function mp4Box(type: string, payload: Buffer): Buffer {
+	const box = Buffer.alloc(8);
+	box.writeUInt32BE(8 + payload.length, 0);
+	box.write(type, 4, "ascii");
+	return Buffer.concat([box, payload]);
+}
+
+function mp4FullBox(
+	type: string,
+	version: number,
+	flags: number,
+	payload: Buffer,
+): Buffer {
+	const header = Buffer.alloc(4);
+	header.writeUInt8(version, 0);
+	header.writeUIntBE(flags, 1, 3);
+	return mp4Box(type, Buffer.concat([header, payload]));
+}
+
+function quickTimeSeconds(date: string): number {
+	const match = /^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})$/.exec(date);
+	if (match === null) {
+		throw new Error(`Invalid QuickTime timestamp: ${date}`);
+	}
+	const [, year, month, day, hour, minute, second] = match;
+	return (
+		Date.UTC(
+			Number(year),
+			Number(month) - 1,
+			Number(day),
+			Number(hour),
+			Number(minute),
+			Number(second),
+		) /
+			1000 +
+		QUICKTIME_EPOCH_OFFSET_SECONDS
+	);
+}
+
+function movieHeaderMp4(): Buffer {
+	const createdAt = quickTimeSeconds(QUICKTIME_DATE);
+	const timescale = 1000;
+	const duration = 1000;
+
+	const ftyp = mp4Box(
+		"ftyp",
+		Buffer.from([
+			0x69,
+			0x73,
+			0x6f,
+			0x6d, // major brand: isom
+			0x00,
+			0x00,
+			0x02,
+			0x00, // minor version
+			0x69,
+			0x73,
+			0x6f,
+			0x6d, // compatible: isom
+			0x6d,
+			0x70,
+			0x34,
+			0x32, // compatible: mp42
+		]),
+	);
+
+	const mvhdPayload = Buffer.alloc(96);
+	mvhdPayload.writeUInt32BE(createdAt, 0);
+	mvhdPayload.writeUInt32BE(createdAt, 4);
+	mvhdPayload.writeUInt32BE(timescale, 8);
+	mvhdPayload.writeUInt32BE(duration, 12);
+	mvhdPayload.writeUInt32BE(0x00010000, 16); // rate 1.0
+	mvhdPayload.writeUInt16BE(0x0100, 20); // volume 1.0
+	mvhdPayload.writeUInt32BE(0x00010000, 32);
+	mvhdPayload.writeUInt32BE(0x00010000, 48);
+	mvhdPayload.writeUInt32BE(0x40000000, 64);
+	mvhdPayload.writeUInt32BE(2, 92); // next track id
+
+	const tkhdPayload = Buffer.alloc(80);
+	tkhdPayload.writeUInt32BE(createdAt, 0);
+	tkhdPayload.writeUInt32BE(createdAt, 4);
+	tkhdPayload.writeUInt32BE(1, 8); // track id
+	tkhdPayload.writeUInt32BE(duration, 16);
+	tkhdPayload.writeUInt16BE(0x0100, 32); // volume 1.0
+	tkhdPayload.writeUInt32BE(0x00010000, 36);
+	tkhdPayload.writeUInt32BE(0x00010000, 52);
+	tkhdPayload.writeUInt32BE(0x40000000, 68);
+
+	const mdhdPayload = Buffer.alloc(20);
+	mdhdPayload.writeUInt32BE(createdAt, 0);
+	mdhdPayload.writeUInt32BE(createdAt, 4);
+	mdhdPayload.writeUInt32BE(timescale, 8);
+	mdhdPayload.writeUInt32BE(duration, 12);
+	mdhdPayload.writeUInt16BE(0x55c4, 16); // undetermined language
+
+	const mdia = mp4Box("mdia", mp4FullBox("mdhd", 0, 0, mdhdPayload));
+	const trak = mp4Box(
+		"trak",
+		Buffer.concat([mp4FullBox("tkhd", 0, 0x000007, tkhdPayload), mdia]),
+	);
+	const moov = mp4Box(
+		"moov",
+		Buffer.concat([mp4FullBox("mvhd", 0, 0, mvhdPayload), trak]),
+	);
+
+	return Buffer.concat([ftyp, moov]);
+}
+
+function readFixtureMetadata(filePath: string): Record<string, unknown> {
+	const output = execFileSync(EXIFTOOL, ["-G1", "-s", "-json", filePath], {
+		encoding: "utf8",
+		stdio: ["ignore", "pipe", "pipe"],
+	});
+	const parsed = JSON.parse(output) as unknown;
+	if (!Array.isArray(parsed) || parsed.length !== 1) {
+		throw new Error(`Expected one ExifTool result for ${filePath}`);
+	}
+	const first = parsed[0];
+	if (first === null || typeof first !== "object" || Array.isArray(first)) {
+		throw new Error(`Expected ExifTool object result for ${filePath}`);
+	}
+	return first as Record<string, unknown>;
+}
+
+function assertIssue240Metadata(filePath: string): void {
+	const metadata = readFixtureMetadata(filePath);
+	for (const [tag, expected] of Object.entries(ISSUE_240_TAGS)) {
+		const actual =
+			metadata[tag] ??
+			metadata[`QuickTime:${tag}`] ??
+			metadata[`Track1:${tag}`];
+		if (actual !== expected) {
+			throw new Error(
+				`issue240.mp4 ${tag} expected ${expected}, got ${String(actual)}`,
+			);
+		}
+	}
+}
+
 // Minimal valid WebP (VP8 lossy) — a proper 1x1 keyframe
 // VP8 spec: frame tag (3 bytes) + start code (3 bytes) + frame header
 function createMinimalWebp(): Buffer {
@@ -295,6 +441,17 @@ function generateFixtures(): void {
 	]);
 	console.log("  Created sample.mp4 (MP4 container)");
 
+	// issue240.mp4 - MP4 with the measured create-date family that survives stripping
+	const issue240Path = path.join(FIXTURES_DIR, "issue240.mp4");
+	fs.writeFileSync(issue240Path, movieHeaderMp4());
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-Title=Issue 240 synthetic strip marker",
+		issue240Path,
+	]);
+	assertIssue240Metadata(issue240Path);
+	console.log("  Created issue240.mp4 (measured create-date family)");
+
 	// sample.webp - WebP with metadata
 	const webpPath = path.join(FIXTURES_DIR, "sample.webp");
 	fs.writeFileSync(webpPath, createMinimalWebp());
@@ -314,7 +471,7 @@ function generateFixtures(): void {
 	corruptedData[1] = 0xd8;
 	corruptedData[2] = 0xff;
 	for (let i = 3; i < 50; i++) {
-		corruptedData[i] = Math.floor(Math.random() * 256);
+		corruptedData[i] = (i * 37 + 11) % 256;
 	}
 	fs.writeFileSync(corruptedPath, corruptedData);
 	console.log("  Created corrupted.jpg (garbled content)");
@@ -334,7 +491,17 @@ function generateFixtures(): void {
 	fs.writeFileSync(noMetaPath, createMinimalJpeg());
 	console.log("  Created no_metadata.jpg (JPEG without EXIF)");
 
-	console.log("\nAll 9 fixture files generated successfully.");
+	// orientation.jpg - JPEG with exact pre-strip Orientation value
+	const orientationPath = path.join(FIXTURES_DIR, "orientation.jpg");
+	fs.writeFileSync(orientationPath, createMinimalJpeg());
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-Orientation#=6",
+		orientationPath,
+	]);
+	console.log("  Created orientation.jpg (Rotate 90 CW)");
+
+	console.log("\nAll 11 fixture files generated successfully.");
 }
 
 generateFixtures();

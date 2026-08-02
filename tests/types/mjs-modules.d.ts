@@ -45,6 +45,32 @@ declare module "*dir_effect_gate.mjs" {
 	};
 }
 
+declare module "*release_notes_gate.mjs" {
+	export function expectedReleaseHeading(packageJson: {
+		version?: unknown;
+	}): string;
+	export function classifyReleaseNotes(subject: {
+		packageJson: { version?: unknown };
+		notes: string;
+	}): { ok: boolean; reason?: string };
+	export function main(): number;
+}
+
+declare module "*release_evidence.mjs" {
+	export function buildReleaseEvidence(...args: any[]): any;
+	export function validateReleaseEvidenceSet(...args: any[]): any;
+	export function main(...args: any[]): any;
+}
+
+declare module "*release_tag_gate.mjs" {
+	export function buildTagEvidence(...args: any[]): any;
+	export function classifyTagRef(...args: any[]): any;
+	export function parseRemoteTags(...args: any[]): any;
+	export function parseRemoteTagRefs(...args: any[]): any;
+	export function verifyCleanupTargets(...args: any[]): any;
+	export function main(...args: any[]): any;
+}
+
 declare module "*known_gap_gate.mjs" {
 	export const BANNED_PROSE_PHRASES: readonly string[];
 	export type KnownGapProblem = {

@@ -4,13 +4,17 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+
 jobs:
   bump-cask:
     name: Update Homebrew Cask
+    if: ${{ !github.event.release.prerelease }}
     runs-on: macos-latest
     steps:
       - name: Update Homebrew cask
-        uses: macauley/action-homebrew-bump-cask@v1
+        uses: macauley/action-homebrew-bump-cask@445c42390d790569d938f9068d01af39ca030feb
         with:
           token: ${{ secrets.HOMEBREW_TOKEN }}
           cask: exifcleaner

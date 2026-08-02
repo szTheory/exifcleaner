@@ -1187,6 +1187,38 @@ describe("validateKnownGapsManifest", () => {
 		expect(codesFor(wildcard)).toContain("invalid-path");
 	});
 
+	test("accepts the reviewed #240 stable ID", () => {
+		const issue240Marker = {
+			runner: "playwright",
+			type: "test.fail",
+			file: "tests/e2e/oracle-accountability.spec.ts",
+			title: "#240 stripped MP4 does not retain create-date metadata",
+			issue: 240,
+		} as const;
+		const issue240Record = {
+			id: "KG-240-mp4-create-dates",
+			issue: 240,
+			runner: issue240Marker.runner,
+			type: issue240Marker.type,
+			path: issue240Marker.file,
+			title: issue240Marker.title,
+			affectedScope: "MP4 create-date metadata can remain after stripping.",
+			releasePolicy: "allow",
+			impact: "A cleaned MP4 may still include original create-date metadata.",
+			workaround:
+				"Run ExifTool manually for the three create-date tags and verify the result.",
+			targetFixVersion: "4.1.0",
+		} as const;
+
+		expect(
+			validateKnownGapsManifest(
+				{ ...manifest, records: [issue240Record] },
+				[issue240Marker],
+				{ packageVersion: "4.0.0", release: false },
+			).problems,
+		).toEqual([]);
+	});
+
 	test("release mode rejects target-version drift and every block record", () => {
 		expect(codesFor({ ...manifest, targetVersion: "4.0.1" }, true)).toContain(
 			"target-version",
@@ -1377,7 +1409,9 @@ describe("release workflow enforcement", () => {
 		const releaseCommands = verifyRelease
 			.split("&&")
 			.map((command) => command.trim());
-		expect(releaseCommands.slice(0, 2)).toEqual([
+		expect(releaseCommands.slice(0, 4)).toEqual([
+			"yarn verify:release-notes",
+			"yarn verify:release-tags",
 			"yarn verify:known-gaps --release",
 			"yarn known-gaps:check",
 		]);

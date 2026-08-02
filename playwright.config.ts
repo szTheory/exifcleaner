@@ -33,10 +33,9 @@ export default defineConfig({
 			// Cold-starting a packaged bundle on a hosted runner is materially
 			// slower than electron-vite dev, and the x64 leg adds Rosetta.
 			timeout: 120000,
-			// Packaged first-launch has real environmental surface (install
-			// settling, AppImage extraction). One retry absorbs a slow start
-			// without masking a genuine regression, which fails twice.
-			retries: isCI ? 1 : 0,
+			// Semantic installed-artifact assertions are never retried. Any needed
+			// install/cold-launch stabilization belongs in a separate readiness step.
+			retries: 0,
 		},
 	],
 });

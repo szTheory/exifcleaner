@@ -49,6 +49,16 @@ type ThemeChannel = `theme:${string}`;
 // Branded channel categories for documentation and future narrowing
 export type { ExifChannel, SettingsChannel, ThemeChannel };
 
+export type RemoveMetadataResult =
+	| { success: true; outputPath: string; wasForcedCopy: boolean }
+	| { success: false; error: string }
+	| {
+			success: false;
+			failureKind: "write" | "verification" | "cleanup" | "commit" | "xattr";
+			detail: string;
+			residualPath?: string;
+	  };
+
 // Invoke channels (request-response via ipcRenderer.invoke / ipcMain.handle)
 export interface IpcInvokeMap {
 	[IPC_CHANNELS.EXIF_READ]: {
@@ -57,7 +67,7 @@ export interface IpcInvokeMap {
 	};
 	[IPC_CHANNELS.EXIF_REMOVE]: {
 		args: [filePath: string];
-		return: { data: null; error: string | null };
+		return: RemoveMetadataResult;
 	};
 	[IPC_CHANNELS.SETTINGS_GET]: { args: []; return: Settings };
 	[IPC_CHANNELS.SETTINGS_SET]: {

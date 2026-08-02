@@ -1,5 +1,6 @@
 import { app } from "electron";
 import path from "node:path";
+import { rename, unlink } from "node:fs/promises";
 import {
 	ExiftoolProcess,
 	ExifToolAdapter,
@@ -13,7 +14,9 @@ import {
 	ReadMetadataQuery,
 	ExpandFolderCommand,
 	XattrCommand,
+	VerifyGeneratedOutputQuery,
 } from "../application";
+import { OutputTransaction } from "./output_transaction";
 
 export function createContainer(): {
 	exiftoolProcess: ExiftoolProcess;
@@ -24,6 +27,8 @@ export function createContainer(): {
 	readMetadata: ReadMetadataQuery;
 	expandFolder: ExpandFolderCommand;
 	xattrCommand: XattrCommand;
+	verifyGeneratedOutput: VerifyGeneratedOutputQuery;
+	outputTransaction: OutputTransaction;
 } {
 	const logger = new ConsoleLogger();
 	const exiftoolProcess = new ExiftoolProcess({ binPath: exiftoolBinPath });
@@ -32,6 +37,16 @@ export function createContainer(): {
 	const settings = new SettingsService({ filePath: settingsPath, logger });
 	const stripMetadata = new StripMetadataCommand({ exiftool });
 	const readMetadata = new ReadMetadataQuery({ exiftool });
+	const verifyGeneratedOutput = new VerifyGeneratedOutputQuery({ exiftool });
+	const outputTransaction = new OutputTransaction({
+		stripMetadata,
+		verifyGeneratedOutput,
+		unlink,
+		rename,
+		delay: async (milliseconds) => {
+			await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
+		},
+	});
 	const expandFolder = new ExpandFolderCommand();
 	const xattrAdapter = { removeXattrs };
 	const xattrCommand = new XattrCommand({ xattr: xattrAdapter, logger });
@@ -43,6 +58,8 @@ export function createContainer(): {
 		logger,
 		stripMetadata,
 		readMetadata,
+		verifyGeneratedOutput,
+		outputTransaction,
 		expandFolder,
 		xattrCommand,
 	};

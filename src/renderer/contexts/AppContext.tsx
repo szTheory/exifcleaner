@@ -27,7 +27,18 @@ export interface FileEntry {
 	afterTags: number | null;
 	beforeMetadata: Record<string, unknown> | null;
 	afterMetadata: Record<string, unknown> | null;
+	outputPath?: string | undefined;
+	wasForcedCopy?: boolean | undefined;
 	error: string | null;
+	failureKind?:
+		| "write"
+		| "verification"
+		| "cleanup"
+		| "commit"
+		| "xattr"
+		| undefined;
+	detail?: string | undefined;
+	residualPath?: string | undefined;
 }
 
 export interface AppState {
@@ -48,8 +59,17 @@ export type AppAction =
 			afterTags: number;
 			beforeMetadata: Record<string, unknown> | null;
 			afterMetadata: Record<string, unknown> | null;
+			outputPath: string;
+			wasForcedCopy: boolean;
 	  }
-	| { type: "UPDATE_FILE_ERROR"; id: string; error: string }
+	| {
+			type: "UPDATE_FILE_ERROR";
+			id: string;
+			error: string;
+			failureKind?: "write" | "verification" | "cleanup" | "commit" | "xattr";
+			detail?: string;
+			residualPath?: string;
+	  }
 	| { type: "TOGGLE_FOLDER"; folder: string }
 	| { type: "TOGGLE_ROW_EXPANSION"; id: string }
 	| { type: "ADD_FOLDER_SCANNING"; folder: string }
@@ -91,6 +111,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 								afterTags: action.afterTags,
 								beforeMetadata: action.beforeMetadata,
 								afterMetadata: action.afterMetadata,
+								outputPath: action.outputPath,
+								wasForcedCopy: action.wasForcedCopy,
 							}
 						: file,
 				),
@@ -103,6 +125,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 						? {
 								...file,
 								error: action.error,
+								failureKind: action.failureKind,
+								detail: action.detail,
+								residualPath: action.residualPath,
+								afterTags: null,
+								afterMetadata: null,
+								outputPath: undefined,
+								wasForcedCopy: undefined,
 								status: FileProcessingStatus.Error,
 							}
 						: file,

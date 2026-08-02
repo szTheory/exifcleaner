@@ -24,7 +24,7 @@ export function generateCleanedPath({
 	const ext = dotIndex > 0 ? filename.slice(dotIndex) : "";
 
 	const sep = lastSep >= 0 ? filePath[lastSep] : "/";
-	const prefix = dir ? `${dir}${sep}` : "";
+	const prefix = lastSep >= 0 ? `${dir}${sep}` : "";
 
 	let candidate = `${prefix}${base}_cleaned${ext}`;
 	let counter = 2;
