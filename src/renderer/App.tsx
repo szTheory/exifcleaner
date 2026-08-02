@@ -37,21 +37,10 @@ function AppContent(): React.JSX.Element {
 	// Compute file stats for status bar
 	const totalCount = state.files.length;
 	const completedCount = state.files.filter(
-		(f) =>
-			f.status === FileProcessingStatus.Complete ||
-			f.status === FileProcessingStatus.NoMetadataFound ||
-			f.status === FileProcessingStatus.Error,
+		(f) => f.outcomeKind === "cleaned",
 	).length;
 	const totalTagsRemoved = state.files.reduce((sum, f) => {
-		if (
-			(f.status === FileProcessingStatus.Complete ||
-				f.status === FileProcessingStatus.NoMetadataFound) &&
-			f.beforeTags !== null &&
-			f.afterTags !== null
-		) {
-			return sum + (f.beforeTags - f.afterTags);
-		}
-		return sum;
+		return sum + (f.removedFields ?? 0);
 	}, 0);
 	const allDone =
 		totalCount > 0 &&

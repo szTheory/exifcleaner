@@ -1,20 +1,26 @@
-name: Update Homebrew Cask
+name: Homebrew Cask Status
 
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  bump-cask:
-    name: Update Homebrew Cask
-    if: ${{ !github.event.release.prerelease }}
-    runs-on: macos-latest
+  report-cask-status:
+    name: Report upstream cask status
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    runs-on: macos-15
+    timeout-minutes: 10
     steps:
-      - name: Update Homebrew cask
-        uses: macauley/action-homebrew-bump-cask@445c42390d790569d938f9068d01af39ca030feb
-        with:
-          token: ${{ secrets.HOMEBREW_TOKEN }}
-          cask: exifcleaner
+      - name: Query Homebrew's supported cask metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          brew update
+          brew info --cask --json=v2 exifcleaner
+          echo "ExifCleaner does not mutate homebrew-cask automatically."
+          echo "After a stable release, use Homebrew's supported bump flow:"
+          echo "https://docs.brew.sh/How-To-Open-a-Homebrew-Pull-Request"

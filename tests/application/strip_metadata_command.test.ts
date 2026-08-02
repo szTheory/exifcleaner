@@ -98,6 +98,28 @@ describe("arg assembly", () => {
 		expect(args).toContain("-P");
 	});
 
+	it("explicitly clears measured QuickTime create and modify date fields for MP4", async () => {
+		await command.execute({
+			filePath: "/tmp/measured.mp4",
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveTimestamps: false,
+			saveAsCopy: false,
+		});
+
+		const args = exiftool.calls[0]!.args[1] as string[];
+		expect(args).toEqual(
+			expect.arrayContaining([
+				"-QuickTime:CreateDate=",
+				"-QuickTime:ModifyDate=",
+				"-TrackCreateDate=",
+				"-TrackModifyDate=",
+				"-MediaCreateDate=",
+				"-MediaModifyDate=",
+			]),
+		);
+	});
+
 	it("with saveAsCopy=true: args contain -o and output path, NOT -overwrite_original", async () => {
 		await command.execute({
 			filePath: "/tmp/photo.jpg",

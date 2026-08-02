@@ -18,25 +18,27 @@ export const IPC_CHANNELS = {
 	GET_I18N_STRINGS: "get-i18n-strings",
 	EXIF_READ: "exif:read",
 	EXIF_REMOVE: "exif:remove",
-	// New channels for Phase 2
+	// Persisted settings
 	SETTINGS_GET: "settings:get",
 	SETTINGS_SET: "settings:set",
 	SETTINGS_CHANGED: "settings:changed",
 	SETTINGS_TOGGLE: "settings:toggle",
-	// Theme channels for Phase 3
+	// System theme observation
 	THEME_GET: "theme:get",
 	THEME_CHANGED: "theme:changed",
-	// Theme channels for Phase 6 (dark mode control)
+	// Explicit appearance control
 	THEME_SET: "theme:set",
 	THEME_ACCENT_COLOR: "theme:accent-color",
 	THEME_ACCENT_COLOR_CHANGED: "theme:accent-color-changed",
 	THEME_MODE_CHANGED_FROM_MENU: "theme:mode-changed-from-menu",
-	// Language channels for Phase 7
+	// Live language changes
 	LANGUAGE_CHANGED: "language:changed",
-	// Folder recursion channels for Phase 7
+	// Native intake and folder recursion
 	FOLDER_CLASSIFY: "folder:classify",
 	FOLDER_EXPAND: "folder:expand",
-	// File reveal channels for Phase 7
+	FILES_CHOOSE: "files:choose",
+	FOLDER_CHOOSE: "folder:choose",
+	// Reveal written artifacts
 	FILE_REVEAL: "file:reveal",
 	FILE_REVEAL_CONTEXT_MENU: "file:reveal-context-menu",
 } as const;
@@ -50,13 +52,26 @@ type ThemeChannel = `theme:${string}`;
 export type { ExifChannel, SettingsChannel, ThemeChannel };
 
 export type RemoveMetadataResult =
-	| { success: true; outputPath: string; wasForcedCopy: boolean }
+	| {
+			success: true;
+			outputPath: string;
+			wasForcedCopy: boolean;
+			wroteFile: boolean;
+			outputSize: number;
+	  }
 	| { success: false; error: string }
 	| {
 			success: false;
 			failureKind: "write" | "verification" | "cleanup" | "commit" | "xattr";
 			detail: string;
 			residualPath?: string;
+	  }
+	| {
+			success: false;
+			failureKind: "refused";
+			refusalReason: "unsafe-raf-write";
+			detail: string;
+			originalPath: string;
 	  };
 
 // Invoke channels (request-response via ipcRenderer.invoke / ipcMain.handle)
@@ -98,6 +113,8 @@ export interface IpcInvokeMap {
 		args: [dirPath: string];
 		return: { files: string[]; skippedCount: number; error?: string };
 	};
+	[IPC_CHANNELS.FILES_CHOOSE]: { args: []; return: string[] };
+	[IPC_CHANNELS.FOLDER_CHOOSE]: { args: []; return: string | null };
 	[IPC_CHANNELS.FILE_REVEAL]: {
 		args: [filePath: string];
 		return: { success: boolean; error?: string };

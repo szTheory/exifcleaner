@@ -26,7 +26,7 @@ export enum Locale {
 	Swedish = "sv",
 	Turkish = "tr",
 	Ukrainian = "uk",
-	Vietnamese = "vn",
+	Vietnamese = "vi",
 }
 
 export type I18nStringSet = {
@@ -98,7 +98,7 @@ export function fallbackLocale({ locale }: FallbackLocaleParams): string {
 		case "hr-HR": // Croatian (Croatia)
 			return Locale.Croatian;
 
-		case "vi": // Vietnamese (Electron reports "vi", strings.json uses "vn")
+		case "vi":
 			return Locale.Vietnamese;
 
 		default:

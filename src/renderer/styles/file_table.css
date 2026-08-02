@@ -30,6 +30,30 @@
 	text-align: left;
 }
 
+.file-table__sort-button {
+	appearance: none;
+	background: transparent;
+	border: 0;
+	color: inherit;
+	cursor: pointer;
+	font: inherit;
+	font-weight: inherit;
+	letter-spacing: inherit;
+	padding: 0;
+	text-align: left;
+	text-transform: inherit;
+}
+
+.file-table__sort-button:hover {
+	color: var(--ec-color-text);
+}
+
+.file-table__sort-button:focus-visible {
+	border-radius: 2px;
+	outline: 2px solid var(--ec-color-accent);
+	outline-offset: 2px;
+}
+
 .file-table__body {
 	flex: 1;
 	overflow-y: auto;

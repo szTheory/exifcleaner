@@ -29,7 +29,9 @@ if (process.platform === "darwin") {
 		let window: Page;
 
 		test.beforeEach(async () => {
-			({ app, window } = await launchApp());
+			({ app, window } = await launchApp({
+				settings: { saveAsCopy: false },
+			}));
 			await window.locator(".gear-icon").click();
 			await window.evaluate(() =>
 				globalThis.window.api.settings.set({ removeXattrs: true }),
@@ -38,10 +40,7 @@ if (process.platform === "darwin") {
 			expect(await window.locator("#toggle-remove-xattrs").isChecked()).toBe(
 				true,
 			);
-			await window
-				.getByRole("dialog", { name: "Settings" })
-				.getByRole("button", { name: "Close settings" })
-				.click();
+			await window.locator(".settings-drawer__close").click();
 		});
 
 		test.afterEach(async () => {

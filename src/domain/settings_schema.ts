@@ -3,7 +3,7 @@
 
 import type { Result } from "../common/result";
 
-export const CURRENT_SCHEMA_VERSION = 3;
+export const CURRENT_SCHEMA_VERSION = 4;
 
 export type ThemeMode = "light" | "dark" | "system";
 
@@ -20,7 +20,7 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
 	preserveOrientation: true,
 	preserveColorProfile: true,
-	saveAsCopy: false,
+	saveAsCopy: true,
 	removeXattrs: false,
 	preserveTimestamps: false,
 	language: null,
@@ -129,6 +129,16 @@ export function migrateSettings({ file }: MigrateSettingsParams): {
 	// v2 -> v3: Add themeMode field
 	if (file.version < 3) {
 		settings = { ...settings, themeMode: "system" };
+		didMigrate = true;
+	}
+
+	// v3 -> v4: Electron reports Vietnamese as "vi". Preserve every other
+	// stored preference, including the user's existing Save as Copy choice.
+	if (file.version < 4) {
+		settings = {
+			...settings,
+			language: settings.language === "vn" ? "vi" : settings.language,
+		};
 		didMigrate = true;
 	}
 

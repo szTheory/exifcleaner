@@ -1,0 +1,40 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/New_York
+    open-pull-requests-limit: 10
+    groups:
+      electron-runtime:
+        patterns:
+          - electron
+      electron-packaging:
+        patterns:
+          - electron-builder
+          - electron-builder-squirrel-windows
+      application-dependencies:
+        dependency-type: production
+        exclude-patterns:
+          - electron
+          - electron-builder
+      development-dependencies:
+        dependency-type: development
+        exclude-patterns:
+          - electron
+          - electron-builder
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:30"
+      timezone: America/New_York
+    groups:
+      reviewed-actions:
+        patterns:
+          - "*"

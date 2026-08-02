@@ -36,23 +36,35 @@ function setupUserModelId(): void {
 	app.setAppUserModelId(packageJson.build.appId);
 }
 
-interface InitParams {
-	browserWindow: BrowserWindow | null;
+let activeBrowserWindow: BrowserWindow | null = null;
+let processInitialization: Promise<Container> | null = null;
+
+function getActiveBrowserWindow(): BrowserWindow | null {
+	if (activeBrowserWindow?.isDestroyed()) {
+		activeBrowserWindow = null;
+	}
+	return activeBrowserWindow;
 }
 
-export async function init({ browserWindow }: InitParams): Promise<Container> {
+/** Attach security and sender state that belongs to one window lifetime. */
+export function attachWindow(browserWindow: BrowserWindow): void {
+	activeBrowserWindow = browserWindow;
+	registerAllowedSender(browserWindow.webContents.id);
+	browserWindow.webContents.once("destroyed", () => {
+		unregisterSender(browserWindow.webContents.id);
+		if (activeBrowserWindow === browserWindow) {
+			activeBrowserWindow = null;
+		}
+	});
+	hardenNavigation(browserWindow);
+}
+
+async function initializeProcess(): Promise<Container> {
 	const container = createContainer();
 	await initContainer(container);
 
 	// Install security hardening before any IPC handlers fire
 	installPermissionGate();
-	if (browserWindow) {
-		registerAllowedSender(browserWindow.webContents.id);
-		browserWindow.webContents.on("destroyed", () => {
-			unregisterSender(browserWindow.webContents.id);
-		});
-		hardenNavigation(browserWindow);
-	}
 
 	setContainer(container);
 
@@ -81,23 +93,34 @@ export async function init({ browserWindow }: InitParams): Promise<Container> {
 	preloadI18nStrings();
 	setupI18nHandlers();
 	setupExifHandlers({ container });
-	setupFolderHandlers({ container });
+	setupFolderHandlers({ container, getWindow: getActiveBrowserWindow });
 	setupSettingsHandlers({
 		container,
-		getWindow: () => browserWindow,
+		getWindow: getActiveBrowserWindow,
 	});
 	setupThemeHandlers({
-		getWindow: () => browserWindow,
+		getWindow: getActiveBrowserWindow,
 		settingsService: container.settings,
 	});
 	setupRevealHandlers();
 	setupContextMenu();
-	setupDockEventHandlers({ browserWindow });
+	setupDockEventHandlers({ getWindow: getActiveBrowserWindow });
 	setupUserModelId();
 	setupApp({
-		browserWindow,
+		getWindow: getActiveBrowserWindow,
 		onQuit: () => container.exiftoolProcess.close(),
 	});
 
 	return container;
+}
+
+/** Initialize process-wide services and handlers exactly once. */
+export function initProcess(): Promise<Container> {
+	if (processInitialization === null) {
+		processInitialization = initializeProcess().catch((error: unknown) => {
+			processInitialization = null;
+			throw error;
+		});
+	}
+	return processInitialization;
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { ExifToolAdapter } from "../../src/infrastructure/exiftool/exiftool_adapter";
 import type { ExiftoolProcess } from "../../src/infrastructure/exiftool/ExiftoolProcess";
+import { UnsafeExifToolPathError } from "../../src/infrastructure/exiftool/ExiftoolProcess";
 
 function makeFakeProcess(overrides: Partial<Record<string, unknown>> = {}) {
 	return {
@@ -46,6 +47,26 @@ describe("ExifToolAdapter.readMetadata", () => {
 		if (!result.ok) {
 			expect(result.error.code).toBe("process-not-open");
 		}
+	});
+
+	it("returns a safe typed error for a protocol-unsafe path", async () => {
+		const fakeProcess = makeFakeProcess({
+			readMetadata: vi.fn().mockRejectedValue(new UnsafeExifToolPathError()),
+		});
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		const result = await adapter.readMetadata({
+			filePath: "/tmp/private\n-execute99.jpg",
+			args: [],
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			error: {
+				code: "exiftool-error",
+				detail: "The selected file path is not supported",
+			},
+		});
 	});
 
 	it("returns exiftool-error when process result has non-null error", async () => {
@@ -135,6 +156,26 @@ describe("ExifToolAdapter.removeMetadata", () => {
 		if (!result.ok) {
 			expect(result.error.code).toBe("process-not-open");
 		}
+	});
+
+	it("returns a safe typed error for an unsafe generated output path", async () => {
+		const fakeProcess = makeFakeProcess({
+			writeMetadata: vi.fn().mockRejectedValue(new UnsafeExifToolPathError()),
+		});
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		const result = await adapter.removeMetadata({
+			filePath: "/tmp/photo_cleaned.jpg\r-overwrite_original",
+			args: ["-all="],
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			error: {
+				code: "exiftool-error",
+				detail: "The selected file path is not supported",
+			},
+		});
 	});
 
 	it("returns exiftool-error when process result has non-null error", async () => {

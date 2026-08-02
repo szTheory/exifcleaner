@@ -11,6 +11,9 @@ import {
 	themeGetSchema,
 	fileProcessedSchema,
 	allFilesProcessedSchema,
+	folderClassifySchema,
+	folderExpandSchema,
+	fileRevealContextMenuSchema,
 } from "../../../src/main/ipc/ipc_schemas";
 
 describe("exifReadSchema", () => {
@@ -25,6 +28,15 @@ describe("exifReadSchema", () => {
 	it("rejects non-string", () => {
 		expect(() => exifReadSchema.parse(123)).toThrow(ZodError);
 	});
+
+	it.each(["/tmp/photo\n-execute99.jpg", "/tmp/photo\r-stay_open.jpg"])(
+		"rejects a path containing a protocol line break",
+		(filePath) => {
+			expect(() => exifReadSchema.parse(filePath)).toThrow(
+				"Paths containing line breaks are not supported",
+			);
+		},
+	);
 });
 
 describe("exifRemoveSchema", () => {
@@ -36,6 +48,35 @@ describe("exifRemoveSchema", () => {
 
 	it("rejects undefined", () => {
 		expect(() => exifRemoveSchema.parse(undefined)).toThrow(ZodError);
+	});
+
+	it("rejects a direct-clean path containing CRLF", () => {
+		expect(() =>
+			exifRemoveSchema.parse("/tmp/photo\r\n-overwrite_original"),
+		).toThrow("Paths containing line breaks are not supported");
+	});
+});
+
+describe("path-bearing folder and generated-output schemas", () => {
+	it("rejects any unsafe entry in folder classification", () => {
+		expect(() =>
+			folderClassifySchema.parse(["/safe/photo.jpg", "/unsafe\nphoto.jpg"]),
+		).toThrow("Paths containing line breaks are not supported");
+	});
+
+	it("rejects an unsafe folder expansion root", () => {
+		expect(() => folderExpandSchema.parse("/unsafe\rfolder")).toThrow(
+			"Paths containing line breaks are not supported",
+		);
+	});
+
+	it("rejects an unsafe generated copy path at the reveal boundary", () => {
+		expect(() =>
+			fileRevealContextMenuSchema.parse({
+				originalPath: "/safe/photo.jpg",
+				cleanedPath: "/unsafe/photo_cleaned.jpg\n-overwrite_original",
+			}),
+		).toThrow("Paths containing line breaks are not supported");
 	});
 });
 

@@ -1296,7 +1296,7 @@ describe("release-note known limitations block", () => {
 		expect(block).toContain("<!-- exifcleaner-known-limitations:start v1 -->");
 		expect(block).toContain("## Known limitations in 4.0.0");
 		expect(block).toContain(
-			"No known limitations are approved for this release.",
+			"No executable release-blocking known gaps are approved for this release; documented format constraints follow below.",
 		);
 		expect(block).toContain("<!-- exifcleaner-known-limitations:end -->");
 	});
@@ -1374,9 +1374,6 @@ describe("release workflow enforcement", () => {
 			(line) => line.text === "run: yarn install --frozen-lockfile",
 		);
 		const gateIndex = releaseGateRuns[0]?.index ?? -1;
-		const lintIndex = runLines.findIndex(
-			(line) => line.text === "run: yarn lint",
-		);
 		const compileIndex = runLines.findIndex(
 			(line) => line.text === "run: yarn compile",
 		);
@@ -1384,8 +1381,19 @@ describe("release workflow enforcement", () => {
 		expect(releaseGateRuns).toHaveLength(1);
 		expect(installIndex).toBeGreaterThanOrEqual(0);
 		expect(gateIndex).toBeGreaterThan(installIndex);
-		expect(gateIndex).toBeLessThan(lintIndex);
 		expect(gateIndex).toBeLessThan(compileIndex);
+		expect(
+			runLines.filter((line) => line.text === "run: yarn lint"),
+		).toHaveLength(0);
+		expect(
+			runLines.filter((line) => line.text === "run: yarn typecheck"),
+		).toHaveLength(0);
+		expect(
+			runLines.filter((line) => line.text === "run: yarn test"),
+		).toHaveLength(0);
+		expect(
+			runLines.filter((line) => line.text === "run: yarn check:deps"),
+		).toHaveLength(0);
 		expect(workflow).toMatch(/build-macos:[\s\S]*?needs: test/);
 		expect(workflow).toMatch(/build-windows:[\s\S]*?needs: test/);
 		expect(workflow).toMatch(/build-linux:[\s\S]*?needs: test/);

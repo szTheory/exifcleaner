@@ -7,7 +7,6 @@ import { createFixtureDir } from "../helpers/fixture_copier";
 import { readMetadataTags } from "./helpers/metadata_assertions";
 import { waitForProcessing } from "./helpers/wait_for_processing";
 import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
-import { cleanExifData } from "../../src/domain/exif/exif";
 test.describe("Settings", () => {
 	let app: ElectronApplication;
 	let page: Page;
@@ -43,19 +42,19 @@ test.describe("Settings", () => {
 		await gearButton.click();
 
 		// Verify settings drawer is visible
-		const drawer = page.locator('[role="dialog"][aria-label="Settings"]');
+		const drawer = page.locator('[role="dialog"]');
 		await expect(drawer).toBeVisible();
 
-		// Verify drawer has the Settings title
+		// Verify the localized drawer has a non-empty title.
 		const title = drawer.locator("h2");
-		await expect(title).toHaveText("Settings");
+		await expect(title).toHaveText(/\S/);
 
 		// Close via the close button
-		const closeButton = drawer.locator('[aria-label="Close settings"]');
+		const closeButton = drawer.locator(".settings-drawer__close");
 		await closeButton.click();
 
 		// Verify drawer closes (no longer has --open class)
-		await expect(drawer).not.toHaveClass(/settings-drawer--open/);
+		await expect(drawer).toHaveCount(0);
 	});
 
 	test("toggles preserve orientation switch", async () => {
@@ -117,6 +116,7 @@ test.describe("Settings", () => {
 	});
 
 	test("preserves orientation metadata when toggle is enabled", async () => {
+		await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
 		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const expectedOrientation = "Rotate 90 CW";
@@ -183,8 +183,8 @@ test.describe("Settings", () => {
 		// The executable #304 marker below owns the full pipeline contract.
 		// This test only verifies settings propagation.
 
-		// Reset to default (false)
-		await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
+		// Restore the new-install default.
+		await page.evaluate(() => window.api.settings.set({ saveAsCopy: true }));
 	});
 
 	test("#304 save-as-copy on: original survives, a cleaned copy appears", async () => {
@@ -306,9 +306,10 @@ test.describe("Settings", () => {
 				removed: [],
 			});
 
-			const expectedAfterCount = Object.keys(
-				cleanExifData({ raw: await readMetadataTags(collisionOutput) }),
-			).length;
+			const expectedAfterCount = await page.evaluate(async (filePath) => {
+				const metadata = await window.api.exif.readMetadata(filePath);
+				return Object.keys(metadata).length;
+			}, collisionOutput);
 			const afterCell = page
 				.locator(".file-table__row")
 				.first()

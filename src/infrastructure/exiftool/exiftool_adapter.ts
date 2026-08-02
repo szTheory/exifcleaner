@@ -1,7 +1,12 @@
 import type { ExifToolPort } from "../../application";
 import type { Result } from "../../common";
 import type { ExifError } from "../../domain";
-import type { ExiftoolProcess } from "./ExiftoolProcess";
+import {
+	UnsafeExifToolPathError,
+	type ExiftoolProcess,
+} from "./ExiftoolProcess";
+
+const UNSAFE_PATH_MESSAGE = "The selected file path is not supported";
 
 // Adapter pattern: wraps the existing ExiftoolProcess with the clean ExifToolPort
 // interface. Does NOT modify ExiftoolProcess.ts (working infrastructure code).
@@ -54,7 +59,13 @@ export class ExifToolAdapter implements ExifToolPort {
 			}
 
 			return { ok: true, value: result.data };
-		} catch {
+		} catch (error) {
+			if (error instanceof UnsafeExifToolPathError) {
+				return {
+					ok: false,
+					error: { code: "exiftool-error", detail: UNSAFE_PATH_MESSAGE },
+				};
+			}
 			return { ok: false, error: { code: "process-not-open" } };
 		}
 	}
@@ -85,7 +96,13 @@ export class ExifToolAdapter implements ExifToolPort {
 			}
 
 			return { ok: true, value: undefined };
-		} catch {
+		} catch (error) {
+			if (error instanceof UnsafeExifToolPathError) {
+				return {
+					ok: false,
+					error: { code: "exiftool-error", detail: UNSAFE_PATH_MESSAGE },
+				};
+			}
 			return { ok: false, error: { code: "process-not-open" } };
 		}
 	}

@@ -31,7 +31,7 @@ test.describe("File size display", () => {
 	let window: Page;
 
 	test.beforeEach(async () => {
-		const launched = await launchApp();
+		const launched = await launchApp({ settings: { saveAsCopy: false } });
 		app = launched.app;
 		window = launched.window;
 	});
@@ -89,7 +89,9 @@ test.describe("File size display", () => {
 			});
 
 			const sizeCell = window.locator(".file-table__cell--size").first();
-			await expect(sizeCell).toHaveText(`${sizeWhenAdded} B`);
+			await expect(sizeCell).toHaveText(
+				new RegExp(`^${sizeWhenAdded} B → [1-9][0-9]* B$`),
+			);
 		} finally {
 			cleanup();
 		}

@@ -113,14 +113,12 @@ test.describe("Accessibility", () => {
 		await gearButton.click();
 
 		// Verify settings drawer is open
-		const drawer = page.locator('[role="dialog"][aria-label="Settings"]');
+		const drawer = page.locator('[role="dialog"]');
 		await expect(drawer).toBeVisible();
 
 		// Get all focusable elements inside the drawer
 		const focusableCount = await page.evaluate(() => {
-			const dialog = document.querySelector(
-				'[role="dialog"][aria-label="Settings"]',
-			);
+			const dialog = document.querySelector('[role="dialog"]');
 			if (!dialog) return 0;
 			const focusable = dialog.querySelectorAll(
 				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
@@ -137,9 +135,7 @@ test.describe("Accessibility", () => {
 				const el = document.activeElement;
 				if (!el) return "null";
 				// Check if active element is inside the dialog
-				const dialog = document.querySelector(
-					'[role="dialog"][aria-label="Settings"]',
-				);
+				const dialog = document.querySelector('[role="dialog"]');
 				const isInsideDialog = dialog?.contains(el) ?? false;
 				return isInsideDialog ? "inside" : "outside";
 			});
@@ -154,6 +150,6 @@ test.describe("Accessibility", () => {
 		await page.keyboard.press("Escape");
 
 		// Verify drawer is closed
-		await expect(drawer).not.toHaveClass(/settings-drawer--open/);
+		await expect(drawer).toHaveCount(0);
 	});
 });

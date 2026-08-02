@@ -15,6 +15,7 @@ import { FakeExifTool } from "../fakes/fake_exiftool";
 const ipcHandleMock = vi.hoisted(() => vi.fn());
 const existsSyncMock = vi.hoisted(() => vi.fn());
 const randomUUIDMock = vi.hoisted(() => vi.fn(() => "test-uuid"));
+const statMock = vi.hoisted(() => vi.fn(async () => ({ size: 4096 })));
 const appMock = vi.hoisted(() => {
 	const listeners = new Map<string, Set<(value: unknown) => void>>();
 	return {
@@ -53,6 +54,10 @@ vi.mock("node:crypto", () => ({
 	randomUUID: randomUUIDMock,
 }));
 
+vi.mock("node:fs/promises", () => ({
+	stat: statMock,
+}));
+
 const TEST_SENDER_ID = 304;
 const originalNodeEnv = process.env.NODE_ENV;
 
@@ -77,12 +82,16 @@ function makeContainer({
 	removeXattrs = false,
 	executeResult = { ok: true, value: { tagsRemoved: 0 } },
 	transactionResult,
+	readMetadataResult = { ok: true, value: { Make: "camera" } },
 }: {
 	saveAsCopy: boolean;
 	removeXattrs?: boolean;
 	executeResult?: Awaited<ReturnType<Container["stripMetadata"]["execute"]>>;
 	transactionResult?: Awaited<
 		ReturnType<Container["outputTransaction"]["execute"]>
+	>;
+	readMetadataResult?: Awaited<
+		ReturnType<Container["readMetadata"]["execute"]>
 	>;
 }): {
 	container: Container;
@@ -113,7 +122,7 @@ function makeContainer({
 			}),
 		},
 		readMetadata: {
-			execute: vi.fn(),
+			execute: vi.fn(async () => readMetadataResult),
 		},
 		stripMetadata,
 		outputTransaction,
@@ -167,6 +176,7 @@ beforeEach(() => {
 	existsSyncMock.mockReset();
 	existsSyncMock.mockReturnValue(false);
 	appMock.isPackaged = false;
+	statMock.mockClear();
 	process.env.NODE_ENV = "test";
 });
 
@@ -181,6 +191,25 @@ afterEach(() => {
 	} else {
 		process.env.NODE_ENV = originalNodeEnv;
 	}
+});
+
+describe("exif:read handler", () => {
+	it("rejects a failed metadata read instead of reporting an empty file", async () => {
+		const { container } = makeContainer({
+			saveAsCopy: false,
+			readMetadataResult: {
+				ok: false,
+				error: { code: "exiftool-error", detail: "corrupt input" },
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:read");
+
+		await expect(
+			handler(makeAuthorizedEvent(), "/tmp/corrupt.jpg"),
+		).rejects.toThrow("ExifTool error: corrupt input");
+	});
 });
 
 describe("exif:remove handler", () => {
@@ -210,10 +239,10 @@ describe("exif:remove handler", () => {
 			verifierPath: undefined,
 		},
 		{
-			name: "RAW copy",
-			filePath: "/tmp/sample.raf",
+			name: "supported RAW copy",
+			filePath: "/tmp/sample.cr2",
 			saveAsCopy: false,
-			verifierPath: "/tmp/sample_cleaned.raf",
+			verifierPath: "/tmp/sample_cleaned.cr2",
 		},
 		{
 			name: "copy-mode video",
@@ -269,6 +298,8 @@ describe("exif:remove handler", () => {
 			success: true,
 			outputPath: "/dir/photo_cleaned.jpg",
 			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
 		});
 	});
 
@@ -290,6 +321,64 @@ describe("exif:remove handler", () => {
 			success: true,
 			outputPath: "/dir/photo_cleaned.jpg",
 			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
+		});
+	});
+
+	it("clears only xattrs without rewriting an already-clean file", async () => {
+		const { container, stripMetadata, outputTransaction, xattrCommand } =
+			makeContainer({
+				saveAsCopy: false,
+				removeXattrs: true,
+				readMetadataResult: { ok: true, value: {} },
+			});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/clean.jpg");
+
+		expect(xattrCommand.execute).toHaveBeenCalledWith({
+			filePath: "/dir/clean.jpg",
+		});
+		expect(stripMetadata.execute).not.toHaveBeenCalled();
+		expect(outputTransaction.execute).not.toHaveBeenCalled();
+		expect(result).toEqual({
+			success: true,
+			outputPath: "/dir/clean.jpg",
+			wasForcedCopy: false,
+			wroteFile: false,
+			outputSize: 4096,
+		});
+	});
+
+	it("preserves copy-mode semantics for an already-clean xattr request", async () => {
+		const { container, stripMetadata, xattrCommand } = makeContainer({
+			saveAsCopy: true,
+			removeXattrs: true,
+			readMetadataResult: { ok: true, value: {} },
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/clean.jpg");
+
+		expect(stripMetadata.execute).toHaveBeenCalledWith(
+			expect.objectContaining({
+				filePath: "/dir/clean.jpg",
+				saveAsCopy: true,
+				outputPath: "/dir/clean_cleaned.jpg",
+			}),
+		);
+		expect(xattrCommand.execute).toHaveBeenCalledWith({
+			filePath: "/dir/clean_cleaned.jpg",
+		});
+		expect(result).toEqual({
+			success: true,
+			outputPath: "/dir/clean_cleaned.jpg",
+			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
 		});
 	});
 
@@ -307,6 +396,8 @@ describe("exif:remove handler", () => {
 			success: true,
 			outputPath: "/dir/photo.jpg",
 			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
 		});
 		expect(xattrCommand.execute).not.toHaveBeenCalled();
 	});
@@ -347,6 +438,8 @@ describe("exif:remove handler", () => {
 			success: true,
 			outputPath: "/dir/photo.jpg",
 			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
 		});
 		expect(xattrCommand.execute).toHaveBeenCalledWith({
 			filePath: "/dir/photo.jpg",
@@ -423,35 +516,61 @@ describe("exif:remove handler", () => {
 		expect(result).not.toHaveProperty("outputPath");
 	});
 
-	it("forces a collision-safe copy for RAW when save-as-copy is disabled", async () => {
+	it("forces a collision-safe copy for supported RAW when save-as-copy is disabled", async () => {
 		const { container, stripMetadata, outputTransaction } = makeContainer({
 			saveAsCopy: false,
 		});
 		existsSyncMock.mockImplementation((candidate: string) => {
-			return candidate === "/tmp/sample_cleaned.raf";
+			return candidate === "/tmp/sample_cleaned.cr2";
 		});
 		setupExifHandlers({ container });
 
 		const { handler } = captureInvokeHandler("exif:remove");
-		const result = await handler(makeAuthorizedEvent(), "/tmp/sample.raf");
+		const result = await handler(makeAuthorizedEvent(), "/tmp/sample.cr2");
 
 		expect(stripMetadata.execute).not.toHaveBeenCalled();
 		expect(outputTransaction.execute).toHaveBeenCalledWith(
 			expect.objectContaining({
-				filePath: "/tmp/sample.raf",
-				generatedPath: "/tmp/sample_cleaned_2.raf",
+				filePath: "/tmp/sample.cr2",
+				generatedPath: "/tmp/sample_cleaned_2.cr2",
 				commitPath: undefined,
 			}),
 		);
 		expect(result).toEqual({
 			success: true,
-			outputPath: "/tmp/sample_cleaned_2.raf",
+			outputPath: "/tmp/sample_cleaned_2.cr2",
 			wasForcedCopy: true,
+			wroteFile: true,
+			outputSize: 4096,
 		});
 	});
 
+	it("refuses RAF before any write and identifies the unchanged original", async () => {
+		const { container, stripMetadata, outputTransaction, xattrCommand } =
+			makeContainer({ saveAsCopy: false, removeXattrs: true });
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(
+			makeAuthorizedEvent(),
+			"/tmp/irreplaceable.RAF",
+		);
+
+		expect(result).toEqual({
+			success: false,
+			failureKind: "refused",
+			refusalReason: "unsafe-raf-write",
+			detail:
+				"RAF metadata removal is disabled because writing this format can damage the original. The file was left unchanged.",
+			originalPath: "/tmp/irreplaceable.RAF",
+		});
+		expect(stripMetadata.execute).not.toHaveBeenCalled();
+		expect(outputTransaction.execute).not.toHaveBeenCalled();
+		expect(xattrCommand.execute).not.toHaveBeenCalled();
+		expect(statMock).not.toHaveBeenCalled();
+	});
+
 	it.each([
-		["raf", "/tmp/sample_cleaned.raf"],
 		["cr2", "/tmp/sample_cleaned.cr2"],
 		["cr3", "/tmp/sample_cleaned.cr3"],
 		["nef", "/tmp/sample_cleaned.nef"],
@@ -461,7 +580,6 @@ describe("exif:remove handler", () => {
 		["dng", "/tmp/sample_cleaned.dng"],
 		["pef", "/tmp/sample_cleaned.pef"],
 		["srw", "/tmp/sample_cleaned.srw"],
-		["RAF", "/tmp/sample_cleaned.RAF"],
 		["Cr3", "/tmp/sample_cleaned.Cr3"],
 	])(
 		"returns the exact generated RAW copy for .%s",
@@ -489,6 +607,8 @@ describe("exif:remove handler", () => {
 				success: true,
 				outputPath,
 				wasForcedCopy: true,
+				wroteFile: true,
+				outputSize: 4096,
 			});
 		},
 	);
@@ -510,6 +630,8 @@ describe("exif:remove handler", () => {
 			success: true,
 			outputPath: "/photo_cleaned.jpg",
 			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
 		});
 	});
 
@@ -534,6 +656,8 @@ describe("exif:remove handler", () => {
 			success: true,
 			outputPath: "/dir/photo_cleaned_2.jpg",
 			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
 		});
 	});
 
@@ -555,6 +679,8 @@ describe("exif:remove handler", () => {
 			success: true,
 			outputPath: "/dir/photo.jpg",
 			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
 		});
 	});
 
@@ -604,6 +730,8 @@ describe("exif:remove handler", () => {
 			success: true,
 			outputPath: "/dir/video_cleaned.mp4",
 			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
 		});
 	});
 
@@ -629,6 +757,8 @@ describe("exif:remove handler", () => {
 			success: true,
 			outputPath: "/dir/video.mp4",
 			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
 		});
 	});
 

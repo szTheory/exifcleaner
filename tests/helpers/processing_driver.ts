@@ -1,14 +1,10 @@
 import { expect } from "@playwright/test";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
-import path from "node:path";
 import { promisify } from "node:util";
 import { createFixtureDir } from "./fixture_copier";
 import { assertDirEffect, snapshotDir } from "./dir_effect";
-import {
-	assertMetadataStripped,
-	readMetadataTags,
-} from "../e2e/helpers/metadata_assertions";
+import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
 import type { ElectronApplication, Page } from "playwright";
 import { waitForProcessing } from "../e2e/helpers/wait_for_processing";
 
@@ -266,7 +262,7 @@ export async function runErrorFormatScenario(
 	expect(consoleErrors).toEqual([]);
 }
 
-export async function runForcedCopyScenario(
+export async function runRafRefusalScenario(
 	context: ProcessingLaunchContext,
 ): Promise<void> {
 	const driver = createProcessingDriver(context);
@@ -275,46 +271,32 @@ export async function runForcedCopyScenario(
 	context.window.on("console", (message) => {
 		if (message.type() === "error") consoleErrors.push(message.text());
 	});
-	const outputPath = path.join(dir, "sample_cleaned.raf");
-	let reveal:
-		| Awaited<ReturnType<ProcessingDriver["interceptReveal"]>>
-		| undefined;
-
 	try {
 		const sourcePath = copyFixture("sample.raf");
 		const before = snapshotDir(dir);
-		reveal = await driver.interceptReveal();
 		await driver.submitFiles([sourcePath]);
 		await driver.waitForTerminal();
 		const after = snapshotDir(dir);
 
 		assertDirEffect(before, after, {
 			unchanged: ["sample.raf"],
-			added: ["sample_cleaned.raf"],
+			added: [],
 			modified: [],
 			removed: [],
 		});
-		expect(
-			await readMetadataTags(outputPath, context.exiftoolPath),
-		).not.toHaveProperty("DateTimeOriginal");
 		expect(await driver.terminalRowCounts()).toEqual({
 			total: 1,
-			complete: 1,
-			error: 0,
+			complete: 0,
+			error: 1,
 		});
-		const disclosure = context.window.locator(".file-table__copy-disclosure");
-		await expect(disclosure).toHaveCount(1);
-		const disclosureText = await driver.outputDisclosure();
-		expect(disclosureText).toMatch(/\S/);
+		const row = context.window.locator(".file-table__row--error");
+		await expect(row).toHaveAttribute("aria-label", /RAF|write safely/i);
+		await row.click();
 		await expect(
-			context.window.locator(".file-table__row--complete"),
-		).toHaveAttribute("aria-label", new RegExp(disclosureText));
-		const revealButton = context.window.locator(".file-table__reveal");
-		await revealButton.click();
-		await revealButton.press("Enter");
-		expect(await reveal.calls()).toEqual([outputPath, outputPath]);
+			context.window.locator(".file-table__error-text"),
+		).toContainText(/RAF|write safely/i);
+		await expect(context.window.locator(".file-table__reveal")).toHaveCount(0);
 	} finally {
-		await reveal?.restore();
 		cleanup();
 	}
 

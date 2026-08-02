@@ -1,82 +1,76 @@
-# ExifCleaner 4.0.1
+# ExifCleaner 4.1.0
 
-ExifCleaner 4.0.1 is a focused data-safety and release-reliability update.
+ExifCleaner 4.1.0 makes batch cleaning safer to understand and harder to misread.
 
-## Data safety
+## Clearer results
 
-- **Save as copy now preserves the original.** The app writes to the actual collision-safe `_cleaned` path and Reveal follows that returned path.
-- **RAW files always use a copy.** Supported RAW formats never overwrite the submitted original, even when Save as copy is disabled.
-- **RAW and video output is verified before success.** Failed generated output is removed instead of being reported as complete.
+- Each file now reports what actually happened: metadata removed, already clean, unchanged, or refused.
+- Metadata details open with removed fields visible immediately. Fields that remain are kept in one secondary disclosure.
+- Files can be sorted by name, type, source size, and before/after metadata counts while folder groups stay intact.
+- The size column shows the original and resulting sizes instead of implying they are the same value.
 
-## Privacy
+## Safer processing
 
-- **Remove macOS attributes is now connected to the processing path.** When enabled, it clears extended attributes from the artifact that was actually written.
-- The macOS attribute command now passes filenames as fixed arguments rather than through a shell.
+- New installs default to **Save as copy**. Existing preferences are preserved during migration.
+- RAF files are refused without writing because ExifTool cannot safely produce the requested cleaned RAF artifact. The rest of the batch continues.
+- Already-clean files avoid an unnecessary rewrite. When macOS attribute removal is requested, only that requested operation runs.
+- MP4 and MOV processing now explicitly clears movie, track, and media create/modify dates and verifies the generated artifact before success.
+- File paths containing carriage returns or line feeds are rejected at both the IPC and ExifTool boundaries.
 
-## Release reliability
+## Easier intake and navigation
 
-- Installed builds now exercise the save-as-copy and advertised-format contracts on macOS, Windows, and Linux before release artifacts are accepted.
-- Release notes must match the package version, known gaps must remain machine-readable, and two-part internal tags are rejected from the public release namespace.
-- The release also includes the previously unreleased SIZE display, settings icon, PDF fixture, per-launch test-profile, and release-gate fixes from #300, #301, #305, #306, and #292.
+- Native **Choose files** and **Choose folder** actions complement drag and drop.
+- Unsupported files are summarized once instead of disappearing silently.
+- The drop area shows whether output will be written as cleaned copies or in place.
+- Filenames and paths display safely in right-to-left locales, and Vietnamese now uses the standard `vi` locale code.
+
+## Engineering and contributor experience
+
+- Electron, Vite, Vitest, Playwright, and electron-builder were upgraded within the supported Node 22 toolchain.
+- CI and release workflows use pinned actions, explicit permissions and timeouts, deterministic runners, and a fixed seven-artifact release inventory.
+- The Homebrew workflow is now read-only; third-party tap updates remain an explicit maintainer action.
+- Architecture, code-walkthrough, subsystem, translation, and contribution guides are now maintained in the repository with automated drift checks.
 
 <!-- exifcleaner-known-limitations:start v1 -->
-## Known limitations in 4.0.1
+## Known limitations in 4.1.0
 
-- Impact: A cleaned MP4 may still include original create-date metadata values.
-  Scope: MP4 files with QuickTime CreateDate, TrackCreateDate, or MediaCreateDate values processed through ExifCleaner 4.0.0 or 4.0.1
-  Workaround: For sensitive MP4s, run ExifTool manually with -CreateDate= -TrackCreateDate= -MediaCreateDate= after cleaning, then verify those tags are absent.
-  Target fix: 4.1.0.
-  Issue: https://github.com/szTheory/exifcleaner/issues/240
+No executable release-blocking known gaps are approved for this release; documented format constraints follow below.
 <!-- exifcleaner-known-limitations:end -->
 
 
+### Format constraints
 
-See the README's [known limitations by format](https://github.com/szTheory/exifcleaner#known-limitations-by-format) before relying on irreversible removal from PDF or MKV files.
+- **RAF:** cleaning is refused and the source is left unchanged because a safe cleaned RAF artifact cannot currently be guaranteed.
+- **PDF:** ExifTool uses reversible updates, so prior metadata may remain recoverable.
+- **MKV:** ExifTool does not expose a complete writable removal path.
+- **TIFF and AVIF:** user-reported partial-removal behavior remains under investigation.
+
 
 ## Downloads
 
 | Platform | File |
 | --- | --- |
-| **Windows portable (recommended)** | `ExifCleaner.4.0.1.exe` |
-| Windows installer | `ExifCleaner.Setup.4.0.1.exe` |
-| macOS (Apple Silicon) | `ExifCleaner-4.0.1-arm64.dmg` |
-| macOS (Intel) | `ExifCleaner-4.0.1.dmg` |
-| Linux (AppImage) | `ExifCleaner-4.0.1.AppImage` |
-| Linux (Debian/Ubuntu) | `exifcleaner_4.0.1_amd64.deb` |
-| Linux (Fedora/RHEL) | `exifcleaner-4.0.1.x86_64.rpm` |
+| **Windows portable (recommended)** | `ExifCleaner.4.1.0.exe` |
+| Windows installer | `ExifCleaner.Setup.4.1.0.exe` |
+| macOS (Apple Silicon) | `ExifCleaner-4.1.0-arm64.dmg` |
+| macOS (Intel) | `ExifCleaner-4.1.0.dmg` |
+| Linux (AppImage) | `ExifCleaner-4.1.0.AppImage` |
+| Linux (Debian/Ubuntu) | `exifcleaner_4.1.0_amd64.deb` |
+| Linux (Fedora/RHEL) | `exifcleaner-4.1.0.x86_64.rpm` |
 
 Verify downloads against the release's `SHASUMS256.txt` file.
-
-<!-- exifcleaner-windows-security:start v1 -->
-## Windows security checks
-
-Exact VirusTotal links and Microsoft false-positive submission status will be added to the draft after the release artifacts are built.
-<!-- exifcleaner-windows-security:end -->
 
 ## Opening unsigned builds
 
 ExifCleaner remains unsigned. Signing would require publishing the maintainer's verified legal identity; no signed build is being promised.
 
-### macOS
+- **macOS 14 and earlier:** right-click or Control-click the app, choose **Open**, then choose **Open** again.
+- **macOS 15 and later:** open the app once, then use **System Settings → Privacy & Security → Open Anyway**.
+- **Windows:** if SmartScreen appears, choose **More info → Run anyway** after verifying the checksum.
+- **Linux:** make the AppImage executable with `chmod +x ExifCleaner-4.1.0.AppImage`; `.deb` and `.rpm` packages install normally.
 
-- **macOS 14 (Sonoma) and earlier:** right-click or Control-click the app, choose **Open**, then choose **Open** again.
-- **macOS 15 (Sequoia) and later:** open the app once, then use **System Settings → Privacy & Security → Open Anyway**.
-
-### Windows
-
-The portable build is the primary Windows download. If SmartScreen displays “Windows protected your PC,” choose **More info → Run anyway** after verifying the checksum.
-
-### Linux
-
-Make the AppImage executable with `chmod +x ExifCleaner-4.0.1.AppImage`. The `.deb` and `.rpm` packages install normally.
-
-## Verification
-
-- Every artifact is built publicly from tagged source by GitHub Actions.
-- CI installs and exercises the native DMG, NSIS installer, and AppImage before assembling the draft.
-- `SHASUMS256.txt` identifies the exact bytes published with this release.
-- No automatic-update manifests are published; ExifCleaner continues to make zero network requests during normal use.
+Every artifact is built publicly from tagged source by GitHub Actions. ExifCleaner makes no network requests during normal use.
 
 Only download ExifCleaner from the [GitHub releases page](https://github.com/szTheory/exifcleaner/releases).
 
-**Full changelog:** https://github.com/szTheory/exifcleaner/compare/v4.0.0...v4.0.1
+**Full changelog:** https://github.com/szTheory/exifcleaner/compare/v4.0.1...v4.1.0

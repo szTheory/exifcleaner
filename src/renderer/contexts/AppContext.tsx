@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer } from "react";
 import type { Dispatch, ReactNode } from "react";
+import type { FileProcessingOutcomeKind } from "../../domain";
 import { FileProcessingStatus } from "../../domain";
 import { assertNever } from "../../common/types";
 
@@ -29,6 +30,11 @@ export interface FileEntry {
 	afterMetadata: Record<string, unknown> | null;
 	outputPath?: string | undefined;
 	wasForcedCopy?: boolean | undefined;
+	outcomeKind?: FileProcessingOutcomeKind | undefined;
+	removedFields?: number | undefined;
+	stillPresentFields?: number | undefined;
+	wroteFile?: boolean | undefined;
+	outputSize?: number | undefined;
 	error: string | null;
 	failureKind?:
 		| "write"
@@ -36,6 +42,7 @@ export interface FileEntry {
 		| "cleanup"
 		| "commit"
 		| "xattr"
+		| "refused"
 		| undefined;
 	detail?: string | undefined;
 	residualPath?: string | undefined;
@@ -61,14 +68,26 @@ export type AppAction =
 			afterMetadata: Record<string, unknown> | null;
 			outputPath: string;
 			wasForcedCopy: boolean;
+			outcomeKind?: FileProcessingOutcomeKind;
+			removedFields?: number;
+			stillPresentFields?: number;
+			wroteFile?: boolean;
+			outputSize?: number;
 	  }
 	| {
 			type: "UPDATE_FILE_ERROR";
 			id: string;
 			error: string;
-			failureKind?: "write" | "verification" | "cleanup" | "commit" | "xattr";
+			failureKind?:
+				| "write"
+				| "verification"
+				| "cleanup"
+				| "commit"
+				| "xattr"
+				| "refused";
 			detail?: string;
 			residualPath?: string;
+			outcomeKind?: "failed" | "refused";
 	  }
 	| { type: "TOGGLE_FOLDER"; folder: string }
 	| { type: "TOGGLE_ROW_EXPANSION"; id: string }
@@ -113,6 +132,11 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 								afterMetadata: action.afterMetadata,
 								outputPath: action.outputPath,
 								wasForcedCopy: action.wasForcedCopy,
+								outcomeKind: action.outcomeKind,
+								removedFields: action.removedFields,
+								stillPresentFields: action.stillPresentFields,
+								wroteFile: action.wroteFile,
+								outputSize: action.outputSize,
 							}
 						: file,
 				),
@@ -128,6 +152,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 								failureKind: action.failureKind,
 								detail: action.detail,
 								residualPath: action.residualPath,
+								outcomeKind: action.outcomeKind ?? "failed",
 								afterTags: null,
 								afterMetadata: null,
 								outputPath: undefined,

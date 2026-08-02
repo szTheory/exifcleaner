@@ -50,6 +50,8 @@ export const RAW_EXTENSIONS: ReadonlySet<string> = new Set([
 	".srw",
 ]);
 
+const RAF_EXTENSIONS: ReadonlySet<string> = new Set([".raf"]);
+
 export const VIDEO_EXTENSIONS: ReadonlySet<string> = new Set([
 	".mp4",
 	".mov",
@@ -75,6 +77,10 @@ export function isSupportedFile({ filename }: IsSupportedFileParams): boolean {
 
 export function isRawFile({ filename }: IsSupportedFileParams): boolean {
 	return hasExtension({ filename, extensions: RAW_EXTENSIONS });
+}
+
+export function isRafFile({ filename }: IsSupportedFileParams): boolean {
+	return hasExtension({ filename, extensions: RAF_EXTENSIONS });
 }
 
 export function isVideoFile({ filename }: IsSupportedFileParams): boolean {

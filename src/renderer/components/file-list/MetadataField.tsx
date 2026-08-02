@@ -5,8 +5,10 @@ import type { MetadataDiffField } from "../../../domain";
 
 export function MetadataField({
 	field,
+	i18nLookup,
 }: {
 	field: MetadataDiffField;
+	i18nLookup: (key: string) => string;
 }): React.JSX.Element {
 	const valueStr = formatFieldValue(field.value);
 	const truncated = valueStr.length > 80;
@@ -15,18 +17,25 @@ export function MetadataField({
 	return (
 		<div
 			className={`metadata-field${field.removed ? " metadata-field--removed" : " metadata-field--preserved"}`}
-			aria-label={`${field.name}: ${field.removed ? "removed" : "preserved"}`}
+			aria-label={`${field.name}: ${
+				field.removed
+					? i18nLookup("metadata.field.removed")
+					: i18nLookup("metadata.field.preserved")
+			}`}
 		>
 			<span className="metadata-field__icon" aria-hidden="true">
 				{field.removed ? "\u2212" : "\u2713"}
 			</span>
-			<span className="metadata-field__name">{field.name}</span>
-			<span
+			<bdi className="metadata-field__name" dir="auto">
+				{field.name}
+			</bdi>
+			<bdi
 				className="metadata-field__value"
+				dir="auto"
 				title={truncated ? valueStr : undefined}
 			>
 				{displayValue}
-			</span>
+			</bdi>
 		</div>
 	);
 }

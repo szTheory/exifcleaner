@@ -40,6 +40,21 @@ describe("cleanExifData", () => {
 		expect(result).toEqual({ "Camera:Make": "Canon" });
 	});
 
+	it("strips structural origins and normalizes retained G1:G2:Tag keys", () => {
+		const result = cleanExifData({
+			raw: {
+				"System:Other:FileName": "photo.jpg",
+				"System:Other:FileSize": "711 bytes",
+				"JFIF:Image:JFIFVersion": 1.01,
+				"ExifTool:ExifToolVersion": 13.5,
+				"Composite:Image:ImageSize": "1x1",
+				"IFD0:Author:Artist": "Ada",
+			},
+		});
+
+		expect(result).toEqual({ "Author:Artist": "Ada" });
+	});
+
 	it("preserves grouped keys that are not computed fields", () => {
 		const result = cleanExifData({
 			raw: {

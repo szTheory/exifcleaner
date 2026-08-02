@@ -1,8 +1,15 @@
 import { z } from "zod";
 
+const filePathSchema = z
+	.string()
+	.min(1)
+	.refine((filePath) => !/[\r\n]/u.test(filePath), {
+		message: "Paths containing line breaks are not supported",
+	});
+
 // invoke channels (renderer -> main, request-response)
-export const exifReadSchema = z.string().min(1);
-export const exifRemoveSchema = z.string().min(1);
+export const exifReadSchema = filePathSchema;
+export const exifRemoveSchema = filePathSchema;
 export const getLocaleSchema = z.undefined();
 export const getI18nStringsSchema = z.undefined();
 export const settingsGetSchema = z.undefined();
@@ -19,16 +26,18 @@ export const themeGetSchema = z.undefined();
 export const themeSetSchema = z.enum(["light", "dark", "system"]);
 export const themeAccentColorSchema = z.undefined();
 
-// File reveal channels (Phase 7)
-export const fileRevealSchema = z.string().min(1);
+// File reveal channels accept one validated local path.
+export const fileRevealSchema = filePathSchema;
 export const fileRevealContextMenuSchema = z.object({
-	cleanedPath: z.string().min(1),
-	originalPath: z.string().min(1),
+	cleanedPath: filePathSchema,
+	originalPath: filePathSchema,
 });
 
-// Folder recursion channels (Phase 7)
-export const folderClassifySchema = z.array(z.string().min(1));
-export const folderExpandSchema = z.string().min(1);
+// Folder intake validates each path before filesystem traversal.
+export const folderClassifySchema = z.array(filePathSchema);
+export const folderExpandSchema = filePathSchema;
+export const filesChooseSchema = z.undefined();
+export const folderChooseSchema = z.undefined();
 
 // send channels (fire-and-forget, renderer -> main)
 export const filesAddedSchema = z.number().int().positive();

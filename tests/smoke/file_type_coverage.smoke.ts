@@ -1,7 +1,7 @@
 import { test } from "@playwright/test";
 import {
 	runErrorFormatScenario,
-	runForcedCopyScenario,
+	runRafRefusalScenario,
 	runMixedFormatScenario,
 	runPositiveFormatScenario,
 } from "../helpers/processing_driver";
@@ -56,10 +56,10 @@ test("truncated MP4 is rejected by the bundled installed ExifTool", async () => 
 	}
 });
 
-test("RAF forces a copy and reveals the written installed-artifact output", async () => {
+test("RAF is refused without modifying the original or writing an artifact", async () => {
 	const context = await launchPackagedApp();
 	try {
-		await runForcedCopyScenario(context);
+		await runRafRefusalScenario(context);
 	} finally {
 		await closePackagedApp(context);
 	}

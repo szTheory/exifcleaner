@@ -15,16 +15,19 @@ vi.mock("react", async (importOriginal) => {
 
 vi.mock("../../src/renderer/hooks/use_i18n", () => ({
 	useI18n: () => ({
-		t: (key: string) =>
-			key === "complete"
-				? "Complete"
-				: key === "writtenToCopy"
-					? "Written to a copy"
-					: key === "verificationFailedSummary"
-						? "Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged."
-						: key === "cleanupFailedSummary"
-							? "Couldn’t verify cleaned output, and the incomplete output could not be removed. Your original is unchanged."
-							: key,
+		t: (key: string) => {
+			const strings: Record<string, string> = {
+				complete: "Complete",
+				writtenToCopy: "Written to a copy",
+				verificationFailedSummary:
+					"Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged.",
+				cleanupFailedSummary:
+					"Couldn’t verify cleaned output, and the incomplete output could not be removed. Your original is unchanged.",
+				"reveal.cleanedCopy": "Reveal cleaned copy in file manager",
+				"reveal.original": "Reveal in file manager",
+			};
+			return strings[key] ?? key;
+		},
 	}),
 }));
 
@@ -164,7 +167,7 @@ describe("FileRow copy reveal context menu", () => {
 			"Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged.",
 		);
 		expect((errorRow.props as { "aria-label"?: string })["aria-label"]).toBe(
-			"Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged.",
+			"sample.jpg. Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged.",
 		);
 		expect(() => findRevealControl(row)).toThrow();
 		expect(() => findElementByClass(row, "file-table__after-done")).toThrow();
@@ -202,8 +205,8 @@ describe("FileRow copy reveal context menu", () => {
 	it("discloses one localized forced-copy result with the 60px row contract", () => {
 		const row = FileRow({
 			file: makeCompletedFile({
-				extension: "raf",
-				outputPath: "/photos/sample_cleaned.raf",
+				extension: "cr2",
+				outputPath: "/photos/sample_cleaned.cr2",
 				wasForcedCopy: true,
 			}),
 			isExpanded: false,
@@ -217,7 +220,9 @@ describe("FileRow copy reveal context menu", () => {
 		const forcedRowProps = forcedRow.props as { "aria-label"?: string };
 		const disclosureProps = disclosure.props as { children?: unknown };
 
-		expect(forcedRowProps["aria-label"]).toBe("Complete. Written to a copy.");
+		expect(forcedRowProps["aria-label"]).toBe(
+			"sample.jpg. Complete. Written to a copy.",
+		);
 		expect(disclosureProps.children).toBe("Written to a copy");
 	});
 

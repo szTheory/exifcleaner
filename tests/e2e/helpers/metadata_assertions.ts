@@ -43,6 +43,11 @@ const STRUCTURAL_TAG_NAMES = new Set([
 	"TrackDuration",
 	"MediaDuration",
 	"MovieHeaderVersion",
+	"NextTrackID",
+	"TrackHeaderVersion",
+	"TrackID",
+	"TrackLayer",
+	"TrackVolume",
 	"TimeScale",
 	"PreferredRate",
 	"PreferredVolume",
@@ -64,9 +69,6 @@ const STRUCTURAL_TAG_NAMES = new Set([
 	"CompatibleBrands",
 	"MajorBrand",
 	"MinorVersion",
-	"MediaModifyDate",
-	"TrackModifyDate",
-	"ModifyDate",
 	"MovieDataSize",
 	"MovieDataOffset",
 	"AvgBitrate",
@@ -91,6 +93,15 @@ const STRUCTURAL_TAG_NAMES = new Set([
 	"Warning",
 	"Error",
 ]);
+const MANDATORY_QUICKTIME_ZERO_DATE_TAG_NAMES = new Set([
+	"CreateDate",
+	"ModifyDate",
+	"TrackCreateDate",
+	"TrackModifyDate",
+	"MediaCreateDate",
+	"MediaModifyDate",
+]);
+const QUICKTIME_ZERO_DATE = "0000:00:00 00:00:00";
 
 export async function readMetadataTags(
 	filePath: string,
@@ -113,6 +124,12 @@ export async function assertMetadataStripped(
 	const userExifKeys = Object.keys(tags).filter((key) => {
 		if (COMPUTED_TAG_NAMES.has(key)) return false;
 		if (STRUCTURAL_TAG_NAMES.has(key)) return false;
+		if (
+			MANDATORY_QUICKTIME_ZERO_DATE_TAG_NAMES.has(key) &&
+			tags[key] === QUICKTIME_ZERO_DATE
+		) {
+			return false;
+		}
 		for (const prefix of COMPUTED_TAG_PREFIXES) {
 			if (key.startsWith(prefix)) return false;
 		}
