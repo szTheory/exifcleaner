@@ -231,6 +231,23 @@ test.describe("Settings", () => {
 		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("sample.jpg");
+			await app.evaluate(({ Menu }) => {
+				const originalBuildFromTemplate = Menu.buildFromTemplate;
+				Reflect.set(globalThis, "__issue304OverwriteMenuBuilds", 0);
+				Reflect.set(globalThis, "__issue304RestoreOverwriteMenu", () => {
+					Menu.buildFromTemplate = originalBuildFromTemplate;
+				});
+				Menu.buildFromTemplate = ((template) => {
+					const builds = Reflect.get(
+						globalThis,
+						"__issue304OverwriteMenuBuilds",
+					) as number;
+					Reflect.set(globalThis, "__issue304OverwriteMenuBuilds", builds + 1);
+					return { popup: () => undefined } as ReturnType<
+						typeof Menu.buildFromTemplate
+					>;
+				}) as typeof Menu.buildFromTemplate;
+			});
 
 			await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
 			await page.waitForTimeout(300);
@@ -256,7 +273,26 @@ test.describe("Settings", () => {
 				added: [],
 				removed: [],
 			});
+
+			await page
+				.locator(".file-table__reveal")
+				.first()
+				.click({ button: "right" });
+			const menuBuilds = await app.evaluate(() => {
+				return Reflect.get(
+					globalThis,
+					"__issue304OverwriteMenuBuilds",
+				) as number;
+			});
+			expect(menuBuilds).toBe(0);
 		} finally {
+			await app.evaluate(() => {
+				const restore = Reflect.get(
+					globalThis,
+					"__issue304RestoreOverwriteMenu",
+				) as (() => void) | undefined;
+				restore?.();
+			});
 			cleanup();
 		}
 	});
@@ -272,16 +308,34 @@ test.describe("Settings", () => {
 			await page.evaluate(() => window.api.settings.set({ saveAsCopy: true }));
 			await page.waitForTimeout(300);
 
-			await app.evaluate(({ shell }) => {
+			await app.evaluate(({ Menu, shell }) => {
 				const calls: string[] = [];
+				const menuBuilds: string[][] = [];
+				const selections = ["reveal-cleaned-copy", "reveal-original"];
 				const originalShowItemInFolder = shell.showItemInFolder;
+				const originalBuildFromTemplate = Menu.buildFromTemplate;
 				Reflect.set(globalThis, "__issue304RevealCalls", calls);
+				Reflect.set(globalThis, "__issue304MenuBuilds", menuBuilds);
 				Reflect.set(globalThis, "__issue304RestoreReveal", () => {
 					shell.showItemInFolder = originalShowItemInFolder;
+					Menu.buildFromTemplate = originalBuildFromTemplate;
 				});
 				shell.showItemInFolder = (filePath: string): void => {
 					calls.push(filePath);
 				};
+				Menu.buildFromTemplate = ((template) => {
+					const items = template as Array<{
+						id?: string;
+						click?: () => void;
+					}>;
+					menuBuilds.push(items.map(({ id }) => id ?? ""));
+					return {
+						popup: () => {
+							const selection = selections[menuBuilds.length - 1];
+							items.find(({ id }) => id === selection)?.click?.();
+						},
+					} as ReturnType<typeof Menu.buildFromTemplate>;
+				}) as typeof Menu.buildFromTemplate;
 			});
 
 			const before = snapshotDir(dir);
@@ -327,6 +381,31 @@ test.describe("Settings", () => {
 				return Reflect.get(globalThis, "__issue304RevealCalls") as string[];
 			});
 			expect(revealCalls).toEqual([collisionOutput, collisionOutput]);
+
+			await app.evaluate(() => {
+				const calls = Reflect.get(
+					globalThis,
+					"__issue304RevealCalls",
+				) as string[];
+				calls.length = 0;
+			});
+			await revealButton.click({ button: "right" });
+			await revealButton.click({ button: "right" });
+
+			await expect
+				.poll(async () => {
+					return app.evaluate(() => {
+						return Reflect.get(globalThis, "__issue304RevealCalls") as string[];
+					});
+				})
+				.toEqual([collisionOutput, tempFile]);
+			const menuBuilds = await app.evaluate(() => {
+				return Reflect.get(globalThis, "__issue304MenuBuilds") as string[][];
+			});
+			expect(menuBuilds).toEqual([
+				["reveal-cleaned-copy", "reveal-original"],
+				["reveal-cleaned-copy", "reveal-original"],
+			]);
 		} finally {
 			await app.evaluate(() => {
 				const restore = Reflect.get(globalThis, "__issue304RestoreReveal") as

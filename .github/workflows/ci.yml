@@ -34,6 +34,9 @@ jobs:
       - name: Verify release-note identity
         run: yarn verify:release-notes
 
+      - name: Oracle accountability policy
+        run: yarn verify:accountability:policy
+
       - name: Known-gap gate
         run: yarn verify:known-gaps
 
@@ -78,6 +81,9 @@ jobs:
 
       - name: Disable AppArmor restriction (Ubuntu 24.04)
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      - name: Orientation mutation accountability
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" yarn verify:accountability:mutation
 
       - name: E2E tests (Playwright)
         run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" yarn test:e2e

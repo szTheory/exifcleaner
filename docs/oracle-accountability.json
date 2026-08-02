@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"issues": [
+		{
+			"issue": 217,
+			"outcome": "synthetic_probe_stripped_cleanly",
+			"causality": "unknown",
+			"completion": "unclaimed",
+			"evidence": [
+				"docs/evidence/2026-07-30-oracle-fixture-discovery.md"
+			]
+		},
+		{
+			"issue": 240,
+			"outcome": "real_app_dates_explicitly_zeroed",
+			"causality": "unknown",
+			"completion": "unclaimed",
+			"evidence": [
+				"tests/e2e/oracle-accountability.spec.ts",
+				"docs/evidence/2026-07-30-oracle-known-gaps-red-proof.json",
+				"tests/application/strip_metadata_command.test.ts"
+			]
+		},
+		{
+			"issue": 255,
+			"outcome": "synthetic_probe_stripped_cleanly",
+			"causality": "unknown",
+			"completion": "unclaimed",
+			"evidence": [
+				"docs/evidence/2026-07-30-oracle-fixture-discovery.md"
+			]
+		}
+	]
+}

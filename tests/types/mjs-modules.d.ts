@@ -101,6 +101,56 @@ declare module "*release_tag_gate.mjs" {
 	export function main(...args: any[]): any;
 }
 
+declare module "*oracle_accountability_gate.mjs" {
+	export type AccountabilityClaim = {
+		issue: number;
+		outcome: string;
+		causality: string;
+		completion: string;
+		evidence: string[];
+	};
+	export type AccountabilitySubject = {
+		metadataOracleSource: string;
+		consumerSources: Record<string, string>;
+		fixtureGeneratorSource: string;
+		orientationCommandSource: string;
+		artifactPaths: string[];
+		claims: {
+			schemaVersion: number;
+			issues: AccountabilityClaim[];
+		};
+		knownGaps: {
+			records: Array<{
+				issue: number;
+				releasePolicy: string;
+				path: string;
+			}>;
+		};
+	};
+	export function evaluateAccountabilitySubject(
+		subject: AccountabilitySubject,
+	): string[];
+	export function renderAccountabilityClaims(claims: {
+		schemaVersion: number;
+		issues: AccountabilityClaim[];
+	}): string;
+	export function evaluateCiWiring(
+		workflowSource: string,
+		scripts: Record<string, string>,
+	): string[];
+}
+
+declare module "*orientation_mutation_gate.mjs" {
+	export function applyOrientationMutation(source: string): string;
+	export function executeOrientationMutation(dependencies: {
+		readSource: () => string;
+		writeSource: (source: string) => void;
+		run: (
+			step: "compile" | "orientation-test",
+		) => Promise<{ status: number | null; output: string }>;
+	}): Promise<void>;
+}
+
 declare module "*known_gap_gate.mjs" {
 	export const BANNED_PROSE_PHRASES: readonly string[];
 	export type KnownGapProblem = {

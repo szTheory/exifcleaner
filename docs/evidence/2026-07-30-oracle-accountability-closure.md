@@ -3,6 +3,8 @@
 Date: 2026-07-31
 Purpose: close Phase 20 against the amended measured-evidence boundary without changing application behavior or inventing issue artifacts.
 
+> Historical evidence note: this document records the Phase 20 boundary as measured on 2026-07-31. The 4.1.0 work subsequently added explicit QuickTime date clearing and converted #240 into a normal passing real-app regression test. The generated claim boundary at the end reflects that current repository behavior; the dated transcript below remains unchanged as provenance.
+
 ## Environment
 
 | Field | Value |
@@ -115,3 +117,17 @@ Phase 20 is sealed against the amended measured-evidence contract:
 - `#217` and `#255` remain evidence-first investigations with no fabricated marker, fixture manifest, or allow record.
 - The strict shared oracle, two-sided GATE-06 proof, and exact GATE-07 RED/GREEN evidence remain linked and current.
 - No application source, fixture, schema, UI, dependency, network behavior, release-note hand edit, or external issue state changed for this closure task.
+
+<!-- oracle-accountability:claims:start -->
+## Generated Issue Claim Boundary
+
+Generated from `docs/oracle-accountability.json`; do not hand-edit this block.
+
+| Issue | Measured outcome | Causality | Completion |
+|---|---|---|---|
+| #217 | not reproduced: synthetic candidate stripped cleanly through the real app flow | unknown | unclaimed |
+| #240 | verified: real app explicitly zeroed the measured QuickTime date family | unknown | unclaimed |
+| #255 | not reproduced: synthetic candidate stripped cleanly through the real app flow | unknown | unclaimed |
+
+Only the measured outcomes above are authorized. `unknown` causality and `unclaimed` completion prohibit root-cause, fixed, or nonexistent conclusions.
+<!-- oracle-accountability:claims:end -->
