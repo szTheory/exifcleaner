@@ -1373,11 +1373,13 @@ describe("release workflow enforcement", () => {
 		expect(workflow).not.toMatch(/\bgit\s+push\b/);
 		expect(guardIndex).toBeGreaterThanOrEqual(0);
 		expect(draftIndex).toBeGreaterThan(guardIndex);
-		expect(workflow).toContain('git fetch --tags --force');
+		expect(workflow).toContain("git fetch --tags --force");
 		expect(workflow).toContain('git rev-parse -q --verify "refs/tags/$V"');
 		expect(workflow).toContain('git rev-parse "$V^{commit}"');
-		expect(workflow).toContain('[ "$EXISTING" = "$GITHUB_SHA" ]');
-		expect(workflow).toMatch(/release:[\s\S]*?if: github\.ref == 'refs\/heads\/master'/);
+		expect(workflow).toMatch(/\[ "\$EXISTING" (?:=|!=) "\$GITHUB_SHA" \]/);
+		expect(workflow).toMatch(
+			/release:[\s\S]*?if: github\.ref == 'refs\/heads\/master'/,
+		);
 		expect(workflow).toContain("draft: true");
 		expect(workflow).toContain("fail_on_unmatched_files: true");
 		expect(workflow).toContain("artifacts/release-macos/*");

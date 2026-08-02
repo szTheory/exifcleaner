@@ -341,27 +341,25 @@ jobs:
         id: version
         run: echo "version=v$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
 
-      # Idempotent. The previous unconditional `git tag && git push` hard-fails on
-      # any re-run, which matters a great deal when you are on release attempt
-      # five. Re-running on the same commit is now a no-op; re-running on a
-      # different commit under the same version is a loud, explanatory red.
-      - name: Create git tag
+      # Tag creation is deliberately outside workflow authority. The maintainer
+      # must create the version tag at this exact commit before dispatching this
+      # workflow, so a rerun can only draft a release for reviewed tagged source.
+      - name: Verify pre-existing release tag
         run: |
           V="${{ steps.version.outputs.version }}"
           git fetch --tags --force
-          if git rev-parse -q --verify "refs/tags/$V" >/dev/null; then
-            EXISTING=$(git rev-parse "$V^{commit}")
-            if [ "$EXISTING" = "$GITHUB_SHA" ]; then
-              echo "Tag $V already points at $GITHUB_SHA — reusing."
-            else
-              echo "::error::Tag $V exists at $EXISTING but this run is $GITHUB_SHA."
-              echo "::error::Delete the stale tag or bump the version in package.json."
-              exit 1
-            fi
-          else
-            git tag "$V"
-            git push origin "$V"
+          if ! git rev-parse -q --verify "refs/tags/$V" >/dev/null; then
+            echo "::error::Required release tag $V does not exist."
+            exit 1
           fi
+
+          EXISTING=$(git rev-parse "$V^{commit}")
+          if [ "$EXISTING" != "$GITHUB_SHA" ]; then
+            echo "::error::Tag $V exists at $EXISTING but this run is $GITHUB_SHA."
+            exit 1
+          fi
+
+          echo "Verified tag $V at $GITHUB_SHA."
 
       - name: Create draft release
         uses: softprops/action-gh-release@fe965f7af51af5f2602596916f38a38df2e33de0 # v3.0.2
