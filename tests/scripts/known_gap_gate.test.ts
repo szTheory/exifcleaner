@@ -1362,6 +1362,32 @@ describe("release marker count evidence", () => {
 });
 
 describe("release workflow enforcement", () => {
+	test("requires a pre-existing version tag before creating the seven-asset draft", () => {
+		const workflow = readRepoText(".github/workflows/release.yml");
+		const guard = "Verify pre-existing release tag";
+		const draft = "Create draft release";
+		const guardIndex = workflow.indexOf(guard);
+		const draftIndex = workflow.indexOf(draft);
+
+		expect(workflow).not.toMatch(/\bgit\s+tag\b/);
+		expect(workflow).not.toMatch(/\bgit\s+push\b/);
+		expect(guardIndex).toBeGreaterThanOrEqual(0);
+		expect(draftIndex).toBeGreaterThan(guardIndex);
+		expect(workflow).toContain('git fetch --tags --force');
+		expect(workflow).toContain('git rev-parse -q --verify "refs/tags/$V"');
+		expect(workflow).toContain('git rev-parse "$V^{commit}"');
+		expect(workflow).toContain('[ "$EXISTING" = "$GITHUB_SHA" ]');
+		expect(workflow).toMatch(/release:[\s\S]*?if: github\.ref == 'refs\/heads\/master'/);
+		expect(workflow).toContain("draft: true");
+		expect(workflow).toContain("fail_on_unmatched_files: true");
+		expect(workflow).toContain("artifacts/release-macos/*");
+		expect(workflow).toContain("artifacts/release-windows/*");
+		expect(workflow).toContain("artifacts/release-linux/*");
+
+		const assetInventory = workflow.match(/expected=\([\s\S]*?\)/)?.[0] ?? "";
+		expect(assetInventory.match(/^\s*"artifacts\/release-/gm)).toHaveLength(7);
+	});
+
 	test("runs the composed release gate before expensive release work", () => {
 		const workflow = readRepoText(".github/workflows/release.yml");
 		const runLines = workflow
