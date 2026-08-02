@@ -42,7 +42,7 @@ See the [CHANGELOG](CHANGELOG.md) for the full list of changes.
 macOS 10.15+, Windows 10+, and Linux are supported (64-bit).
 
 - **macOS**: [Download the .dmg file](https://github.com/szTheory/exifcleaner/releases/latest) — pick the `arm64` build for Apple Silicon, the other for Intel
-- **Windows**: [Download the .exe installer or portable version](https://github.com/szTheory/exifcleaner/releases/latest)
+- **Windows**: [Download the portable `.exe` (recommended) or installer](https://github.com/szTheory/exifcleaner/releases/latest)
 - **Linux**: [Download the .AppImage, .deb, or .rpm file](https://github.com/szTheory/exifcleaner/releases/latest)
 
 For Linux, the AppImage needs to be [made executable](https://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download.
@@ -184,6 +184,25 @@ Below is a full list of supported file types that ExifCleaner will remove metada
 - **WEBP** – WebP image format
 - **X3F** – Sigma/Foveon RAW
 - **XMP** – Extensible Metadata Platform sidecar file
+
+## Known limitations by format
+
+ExifCleaner relies on ExifTool's writer support. Some formats impose structural limits
+that prevent ExifCleaner from making an irreversible-removal guarantee:
+
+| Format | What ExifCleaner can guarantee | Status |
+| --- | --- | --- |
+| PDF | ExifTool writes a reversible PDF update; the original metadata remains recoverable, so ExifCleaner cannot securely erase PDF metadata. | Documented limitation — [#216](https://github.com/szTheory/exifcleaner/issues/216) |
+| MKV / Matroska | ExifTool exposes Matroska metadata for reading but does not provide writable tags, so ExifCleaner cannot reliably remove it without a separate remuxing engine. | Documented limitation — [#182](https://github.com/szTheory/exifcleaner/issues/182) |
+| TIFF | Removal may be partial because some metadata can remain in IFD0. | Open investigation — [#199](https://github.com/szTheory/exifcleaner/issues/199) |
+| AVIF | A user-reported partial-removal case remains under investigation. | Open investigation — [#215](https://github.com/szTheory/exifcleaner/issues/215) |
+
+The PDF behavior is documented in the
+[ExifTool application documentation](https://exiftool.org/exiftool_pod2.html), and
+ExifTool's [Matroska tag table](https://exiftool.org/TagNames/Matroska.html) marks the
+container's extracted tags as non-writable. TIFF and AVIF remain open because their
+reported behavior may still be addressable without introducing a separate file-format
+engine.
 
 ## File writer limitations
 

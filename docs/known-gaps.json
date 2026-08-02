@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"targetVersion": "4.0.0",
+	"targetVersion": "4.0.1",
 	"records": [
 		{
 			"id": "KG-240-mp4-create-dates",
@@ -9,7 +9,7 @@
 			"type": "test.fail",
 			"path": "tests/e2e/oracle-accountability.spec.ts",
 			"title": "#240 stripped MP4 does not retain create-date metadata",
-			"affectedScope": "MP4 files with QuickTime CreateDate, TrackCreateDate, or MediaCreateDate values processed through ExifCleaner 4.0.0",
+			"affectedScope": "MP4 files with QuickTime CreateDate, TrackCreateDate, or MediaCreateDate values processed through ExifCleaner 4.0.0 or 4.0.1",
 			"releasePolicy": "allow",
 			"impact": "A cleaned MP4 may still include original create-date metadata values.",
 			"workaround": "For sensitive MP4s, run ExifTool manually with -CreateDate= -TrackCreateDate= -MediaCreateDate= after cleaning, then verify those tags are absent.",

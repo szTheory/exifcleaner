@@ -56,6 +56,36 @@ declare module "*release_notes_gate.mjs" {
 	export function main(): number;
 }
 
+declare module "*finalize_release_notes.mjs" {
+	export function parseChecksums(source: string): Map<string, string>;
+	export function buildFinalReleaseNotes(subject: {
+		notes: string;
+		shas: string;
+		evidence: unknown;
+	}): string;
+	export function main(argv?: string[]): number;
+}
+
+declare module "*phase25_issue_actions.mjs" {
+	export const PHASE25_MARKERS: Readonly<Record<number, string>>;
+	export type IssueAction = {
+		issue: number;
+		close: boolean;
+		body: string;
+	};
+	export function buildIssueActions(subject: {
+		stage?: string;
+		releaseUrl?: string;
+		publishedAt?: string;
+	}): IssueAction[];
+	export function main(argv?: string[]): number;
+}
+
+declare module "*phase25_public_state_gate.mjs" {
+	export function evaluatePhase25State(snapshot: unknown): string[];
+	export function main(argv?: string[]): number;
+}
+
 declare module "*release_evidence.mjs" {
 	export function buildReleaseEvidence(...args: any[]): any;
 	export function validateReleaseEvidenceSet(...args: any[]): any;
