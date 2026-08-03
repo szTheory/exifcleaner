@@ -1,6 +1,6 @@
 # ExifCleaner engineering guide
 
-Current app version: 4.1.0
+Current app version: 4.2.0
 
 This is the shortest useful path through the codebase. It explains ExifCleaner’s own
 constraints and seams; it does not reteach Electron, React, or TypeScript.
@@ -29,4 +29,3 @@ constraints and seams; it does not reteach Electron, React, or TypeScript.
 
 Historical release proofs live in `docs/evidence/`. They are evidence, not onboarding
 material, and are intentionally outside this reading path.
-

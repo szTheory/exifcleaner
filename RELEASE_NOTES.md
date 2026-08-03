@@ -1,38 +1,28 @@
-# ExifCleaner 4.1.0
+# ExifCleaner 4.2.0
 
-ExifCleaner 4.1.0 makes batch cleaning safer to understand and harder to misread.
+ExifCleaner 4.2.0 makes the first run calmer and keeps the packaged privacy toolchain current without adding background network activity.
 
-## Clearer results
+## A clearer first run
 
-- Each file now reports what actually happened: metadata removed, already clean, unchanged, or refused.
-- Metadata details open with removed fields visible immediately. Fields that remain are kept in one secondary disclosure.
-- Files can be sorted by name, type, source size, and before/after metadata counts while folder groups stay intact.
-- The size column shows the original and resulting sizes instead of implying they are the same value.
+- The empty intake is now centered as one responsive composition instead of feeling split between copy and controls.
+- **Choose files** is the clear primary action, with **Choose folder** available beside it and drag and drop unchanged.
+- The intake explains whether ExifCleaner will save cleaned copies or modify originals, using the current setting rather than a generic promise.
+- Help now includes **New Releases**, which opens the GitHub Releases page only when you click it. ExifCleaner does not poll for updates.
 
-## Safer processing
+## Localization with provenance
 
-- New installs default to **Save as copy**. Existing preferences are preserved during migration.
-- RAF files are refused without writing because ExifTool cannot safely produce the requested cleaned RAF artifact. The rest of the batch continues.
-- Already-clean files avoid an unnecessary rewrite. When macOS attribute removal is requested, only that requested operation runs.
-- MP4 and MOV processing now explicitly clears movie, track, and media create/modify dates and verifies the generated artifact before success.
-- File paths containing carriage returns or line feeds are rejected at both the IPC and ExifTool boundaries.
+- Romanian is now fully supported. The 70 strings contributed in PR #297 are preserved exactly and credited to their contributor.
+- Every supported locale covers the first-run and New Releases vocabulary.
+- Translation records now distinguish existing community work from assisted drafts, track the English source each string translates, and expose stale or missing work without silently overwriting it.
 
-## Easier intake and navigation
+## Runtime and release maintenance
 
-- Native **Choose files** and **Choose folder** actions complement drag and drop.
-- Unsupported files are summarized once instead of disappearing silently.
-- The drop area shows whether output will be written as cleaned copies or in place.
-- Filenames and paths display safely in right-to-left locales, and Vietnamese now uses the standard `vi` locale code.
-
-## Engineering and contributor experience
-
-- Electron, Vite, Vitest, Playwright, and electron-builder were upgraded within the supported Node 22 toolchain.
-- CI and release workflows use pinned actions, explicit permissions and timeouts, deterministic runners, and a fixed seven-artifact release inventory.
-- The Homebrew workflow is now read-only; third-party tap updates remain an explicit maintainer action.
-- Architecture, code-walkthrough, subsystem, translation, and contribution guides are now maintained in the repository with automated drift checks.
+- The bundled ExifTool is updated from 13.50 to 13.59 for Unix and 32-bit-compatible Windows packages, with pinned upstream SHA-256 verification.
+- Packaged Electron disables RunAsNode, `NODE_OPTIONS`, and Node CLI inspection. Cookie encryption remains disabled because ExifCleaner does not need cookie storage.
+- Release automation treats a verified already-published version as a quiet no-op while retaining the full evidence gates for a new release.
 
 <!-- exifcleaner-known-limitations:start v1 -->
-## Known limitations in 4.1.0
+## Known limitations in 4.2.0
 
 No executable release-blocking known gaps are approved for this release; documented format constraints follow below.
 <!-- exifcleaner-known-limitations:end -->
@@ -50,13 +40,13 @@ No executable release-blocking known gaps are approved for this release; documen
 
 | Platform | File |
 | --- | --- |
-| **Windows portable (recommended)** | `ExifCleaner.4.1.0.exe` |
-| Windows installer | `ExifCleaner.Setup.4.1.0.exe` |
-| macOS (Apple Silicon) | `ExifCleaner-4.1.0-arm64.dmg` |
-| macOS (Intel) | `ExifCleaner-4.1.0.dmg` |
-| Linux (AppImage) | `ExifCleaner-4.1.0.AppImage` |
-| Linux (Debian/Ubuntu) | `exifcleaner_4.1.0_amd64.deb` |
-| Linux (Fedora/RHEL) | `exifcleaner-4.1.0.x86_64.rpm` |
+| **Windows portable (recommended)** | `ExifCleaner.4.2.0.exe` |
+| Windows installer | `ExifCleaner.Setup.4.2.0.exe` |
+| macOS (Apple Silicon) | `ExifCleaner-4.2.0-arm64.dmg` |
+| macOS (Intel) | `ExifCleaner-4.2.0.dmg` |
+| Linux (AppImage) | `ExifCleaner-4.2.0.AppImage` |
+| Linux (Debian/Ubuntu) | `exifcleaner_4.2.0_amd64.deb` |
+| Linux (Fedora/RHEL) | `exifcleaner-4.2.0.x86_64.rpm` |
 
 Verify downloads against the release's `SHASUMS256.txt` file.
 
@@ -67,10 +57,10 @@ ExifCleaner remains unsigned. Signing would require publishing the maintainer's 
 - **macOS 14 and earlier:** right-click or Control-click the app, choose **Open**, then choose **Open** again.
 - **macOS 15 and later:** open the app once, then use **System Settings → Privacy & Security → Open Anyway**.
 - **Windows:** if SmartScreen appears, choose **More info → Run anyway** after verifying the checksum.
-- **Linux:** make the AppImage executable with `chmod +x ExifCleaner-4.1.0.AppImage`; `.deb` and `.rpm` packages install normally.
+- **Linux:** make the AppImage executable with `chmod +x ExifCleaner-4.2.0.AppImage`; `.deb` and `.rpm` packages install normally.
 
 Every artifact is built publicly from tagged source by GitHub Actions. ExifCleaner makes no network requests during normal use.
 
 Only download ExifCleaner from the [GitHub releases page](https://github.com/szTheory/exifcleaner/releases).
 
-**Full changelog:** https://github.com/szTheory/exifcleaner/compare/v4.0.1...v4.1.0
+**Full changelog:** https://github.com/szTheory/exifcleaner/compare/v4.1.0...v4.2.0
