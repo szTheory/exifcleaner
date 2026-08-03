@@ -1,5 +1,6 @@
-// After electron-builder packs the app, re-sign the entire bundle with
-// a consistent ad-hoc identity. Electron 35 ships with pre-signed
+// After electron-builder flips its configured fuses and runs its signing
+// stage, re-sign the entire bundle with a consistent ad-hoc identity.
+// Electron 35 ships with pre-signed
 // frameworks; leaving them signed inside an otherwise-unsigned app causes
 // macOS Gatekeeper to report the app as "damaged." A uniform ad-hoc
 // signature produces the bypassable "unidentified developer" dialog instead.
@@ -9,7 +10,7 @@ const { execSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
-exports.default = async function afterPack(context) {
+exports.default = async function afterSign(context) {
 	if (context.electronPlatformName !== "darwin") return;
 
 	// Skip if real signing identity is configured

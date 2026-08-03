@@ -12,7 +12,7 @@ require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = '1.14';
+$VERSION = '1.15';
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(ReadCSV ReadJSON);
 
@@ -100,19 +100,22 @@ sub ReadCSV($$;$$)
                 # terminate at first blank tag name (eg. extra comma at end of line)
                 last unless length $_;
                 @tags or s/^\xef\xbb\xbf//; # remove UTF-8 BOM if it exists
-                /^([-_0-9A-Z]+:)*[-_0-9A-Z]+#?$/i or $err = "Invalid tag name '${_}'", last;
+                unless (/^([-_0-9A-Z]+:)*[-_0-9A-Z]+#?$/i) {
+                    /\0/ and $err = "Format error in $file (doesn't look like UTF-8)", last;
+                    $err = "Invalid tag name '${_}' in $file", last;
+                }
                 push(@tags, $_);
             }
             last if $err;
-            @tags or $err = 'No tags found', last;
+            @tags or $err = "No tags found in $file", last;
             # fix "SourceFile" case if necessary
             $tags[0] = 'SourceFile' if lc $tags[0] eq 'sourcefile';
         }
     }
     close CSVFILE if $openedFile;
     undef $raf;
-    $err = 'No SourceFile column' unless $found or $err;
-    return $err ? "$err in $file" : undef;
+    $err = "No SourceFile column in $file" unless $found or $err;
+    return $err || undef;
 }
 
 #------------------------------------------------------------------------------
@@ -248,7 +251,7 @@ sub ReadJSON($$;$$)
 {
     local $_;
     my ($file, $database, $missingValue, $chset) = @_;
-    my ($raf, $openedFile);
+    my ($raf, $openedFile, $buff);
 
     # initialize character set for converting "\uHHHH" chars
     $charset = $chset || 'UTF8';
@@ -260,7 +263,7 @@ sub ReadJSON($$;$$)
         $file = 'JSON file';
     } elsif (ref $file eq 'SCALAR') {
         $raf = File::RandomAccess->new($file);
-        $file = 'in memory';
+        $file = 'JSON in memory';
     } else {
         open JSONFILE, $file or return "Error opening JSON file '${file}'";
         binmode JSONFILE;
@@ -270,7 +273,13 @@ sub ReadJSON($$;$$)
     my $obj = ReadJSONObject($raf);
     close JSONFILE if $openedFile;
     unless (ref $obj eq 'ARRAY') {
-        ref $obj eq 'HASH' or return "Format error in JSON file '${file}'";
+        unless (ref $obj eq 'HASH') {
+            my $err = "Format error in $file";
+            if ($raf->Seek(0,0) and $raf->Read($buff, 64) and $buff =~ /\0/) {
+                $err .= " (doesn't look like UTF-8)";
+            }
+            return $err;
+        }
         $obj = [ $obj ];
     }
     my ($info, $found);
@@ -292,7 +301,7 @@ sub ReadJSON($$;$$)
         $$database{$$info{SourceFile}} = $info;
         $found = 1;
     }
-    return $found ? undef : "No valid JSON objects in '${file}'";
+    return $found ? undef : "No valid JSON objects in $file";
 }
 
 

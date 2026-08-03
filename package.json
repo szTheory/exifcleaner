@@ -86,8 +86,13 @@
 		"vitest": "3.2.7"
 	},
 	"build": {
-		"afterPack": "./scripts/afterPack.cjs",
+		"afterSign": "./scripts/afterPack.cjs",
 		"appId": "com.exifcleaner",
+		"electronFuses": {
+			"runAsNode": false,
+			"enableNodeOptionsEnvironmentVariable": false,
+			"enableNodeCliInspectArguments": false
+		},
 		"mac": {
 			"category": "public.app-category.graphics-and-images",
 			"minimumSystemVersion": "12.0",

@@ -35,7 +35,7 @@ use Image::ExifTool::Sony;
 use Image::ExifTool::Validate;
 use Image::ExifTool::MacOS;
 
-$VERSION = '3.65';
+$VERSION = '3.69';
 @ISA = qw(Exporter);
 
 sub NumbersFirst($$);
@@ -273,11 +273,11 @@ tags remain.
 
 The table below lists all EXIF tags.  Also listed are TIFF, DNG, HDP and
 other tags which are not part of the EXIF specification, but may co-exist
-with EXIF tags in some images.  Tags which are part of the EXIF 3.0
+with EXIF tags in some images.  Tags which are part of the EXIF 3.1
 specification have an underlined B<Tag Name> in the HTML version of this
 documentation.  See
-L<https://www.cipa.jp/std/documents/download_e.html?CIPA_DC-008-2024-E>
-for the official EXIF 3.0 specification.
+L<https://www.cipa.jp/std/documents/download_e.html?CIPA_DC-008-2026-E>
+for the official EXIF 3.1 specification.
 },
     GPS => q{
 These GPS tags are part of the EXIF standard, and are stored in a separate
@@ -481,7 +481,7 @@ assume these values are properly stored as UTC, and will convert them to
 local time when extracting.
 
 When writing string-based date/time tags, the system time zone is added if
-the PrintConv option is enabled and no time zone is specified.  This is
+the L<PrintConv|../ExifTool.html#PrintConv> option is enabled and no time zone is specified.  This is
 because Apple software may display crazy values if the time zone is missing
 for some tags.
 
@@ -962,6 +962,9 @@ TagID:  foreach $tagID (@keys) {
                 # validate list type
                 if ($$tagInfo{List} and $$tagInfo{List} !~ /^(1|Alt|Bag|Seq|array|string)$/) {
                     warn "Warning: Unknown List type ($$tagInfo{List}) for $name in $tableName\n";
+                }
+                if ($$tagInfo{Hook} and $$tagInfo{Unknown}) {
+                    warn "Warning: Unknown tag with Hook - $short $name\n"
                 }
                 # accumulate information for consistency check of BinaryData tables
                 if ($processBinaryData and $$table{WRITABLE}) {
@@ -2262,22 +2265,33 @@ sub WriteTagNames($$)
                 print HTMLFILE "<table class='inner sep' cellspacing=1>\n";
                 my $align = ' class=r';
                 my $wid = 0;
-                my @keys;
+                my (@keys, @bits);
                 foreach (sort { NumbersFirst($a,$b) } keys %$printConv) {
-                    next if /^(Notes|PrintHex|PrintInt|PrintString|OTHER)$/;
+                    next if /^(Notes|PrintHex|PrintInt|PrintString|OTHER|BITMASK)$/;
                     $align = '' if $align and /[^\d]/;
                     my $w = length($_) + length($$printConv{$_});
                     $wid = $w if $wid < $w;
                     push @keys, $_;
-                    if ($$printConv{$_} =~ /[\0-\x1f\x7f-\xff]/) {
-                        warn "Warning: Special characters in $tableName PrintConv ($$printConv{$_})\n";
+                    next unless $$printConv{$_} =~ /[\0-\x1f\x7f-\xff]/;
+                    warn "Warning: Special characters in $tableName PrintConv ($$printConv{$_})\n";
+                }
+                my $bits = $$printConv{BITMASK};
+                if ($bits) {
+                    $align = '';
+                    foreach (sort { NumbersFirst($a,$b) } keys %$bits) {
+                        my $w = length($_) + length($$bits{$_}) + 4;
+                        $wid = $w if $wid < $w;
+                        push @bits, $_;
+                        next unless $$bits{$_} =~ /[\0-\x1f\x7f-\xff]/;
+                        warn "Warning: Special characters in $tableName PrintConv BITMASK ($$bits{$_})\n";
                     }
                 }
                 $wid = length($tableName)+7 if $wid < length($tableName)+7;
                 # print in multiple columns if there is room
                 my $cols = int(110 / ($wid + 4));
-                $cols = 1 if $cols < 1 or $cols > @keys or @keys < 4;
-                my $rows = int((scalar(@keys) + $cols - 1) / $cols);
+                my $items = @keys + @bits;
+                $cols = 1 if $cols < 1 or $cols > $items or $items < 4;
+                my $rows = int(($items + $cols - 1) / $cols);
                 my ($r, $c);
                 print HTMLFILE '<tr class=h>';
                 for ($c=0; $c<$cols; ++$c) {
@@ -2287,11 +2301,19 @@ sub WriteTagNames($$)
                 for ($r=0; $r<$rows; ++$r) {
                     print HTMLFILE '<tr>';
                     for ($c=0; $c<$cols; ++$c) {
-                        my $key = $keys[$r + $c*$rows];
-                        my ($index, $prt);
+                        my ($key, $val, $index, $prt, $bit);
+                        my $n = $r + $c * $rows;
+                        if ($n < @keys) {
+                            $key = $keys[$n];
+                            $val = $$printConv{$key};
+                        } elsif ($n < $items) {
+                            $bit = 1;
+                            $key = 'Bit ' . $bits[$n - @keys];
+                            $val = $$bits{$bits[$n - @keys]};
+                        }
                         if (defined $key) {
                             $index = $key;
-                            $prt = '= ' . EscapeHTML($$printConv{$key});
+                            $prt = '= ' . EscapeHTML($val);
                             $index =~ s/\.\d+$// if $$printConv{PrintInt};
                             if ($$printConv{PrintHex}) {
                                 $index =~ s/(\.\d+)$//; # remove decimal
@@ -2300,7 +2322,8 @@ sub WriteTagNames($$)
                             } elsif ($$printConv{PrintString} or
                                 $index !~ /^[+-]?(?=\d|\.\d)\d*(\.\d*)?$/)
                             {
-                                $index = "'" . EscapeHTML($index) . "'";
+                                $index = EscapeHTML($index);
+                                $index = "'${index}'" unless $bit;
                             }
                         } else {
                             $index = $prt = '&nbsp;';

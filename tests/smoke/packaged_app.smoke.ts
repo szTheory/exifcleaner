@@ -1,4 +1,9 @@
 import { test, expect } from "@playwright/test";
+import {
+	FuseV1Options,
+	FuseVersion,
+	getCurrentFuseWire,
+} from "@electron/fuses";
 import type { ElectronApplication, Page } from "playwright";
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -93,6 +98,27 @@ test.describe("Packaged artifact", () => {
 		).toBe(true);
 	});
 
+	test("ships the approved Electron fuse values in the native executable", async () => {
+		const executablePath = await app.evaluate(() => process.execPath);
+		const fuses = await getCurrentFuseWire(executablePath);
+		const disabled = "0".charCodeAt(0);
+
+		expect(fuses.version).toBe(FuseVersion.V1);
+		expect(fuses[FuseV1Options.RunAsNode]).toBe(disabled);
+		// ExifCleaner has no cookie-backed state; enabling this would needlessly
+		// access the platform's secure-storage service during startup.
+		expect(fuses[FuseV1Options.EnableCookieEncryption]).toBe(disabled);
+		expect(fuses[FuseV1Options.EnableNodeOptionsEnvironmentVariable]).toBe(
+			disabled,
+		);
+		expect(fuses[FuseV1Options.EnableNodeCliInspectArguments]).toBe(disabled);
+		// These are deliberately deferred while ExifTool remains an external resource.
+		expect(fuses[FuseV1Options.EnableEmbeddedAsarIntegrityValidation]).toBe(
+			disabled,
+		);
+		expect(fuses[FuseV1Options.OnlyLoadAppFromAsar]).toBe(disabled);
+	});
+
 	test("bundles a working ExifTool binary inside the app", async () => {
 		// Proves the binary survived extraResources packaging, sits outside the asar,
 		// and kept its executable bit. A lost exec bit fails at runtime with a
@@ -119,7 +145,7 @@ test.describe("Packaged artifact", () => {
 			encoding: "utf8",
 		}).trim();
 
-		expect(version).toMatch(/^\d+\.\d+/);
+		expect(version).toBe("13.59");
 	});
 
 	test("strips metadata from a JPEG using the bundled ExifTool", async () => {

@@ -313,15 +313,16 @@ numerical, and generated automatically otherwise.
                   table entries through a %val hash (read-only tags), the data
                   size via $size, or the ExifTool object via $self.  For
                   example, 'string[$val{3}]' defines a string with length given
-                  by the table entry with tag index '3'.  An initial "var_" may
-                  be added to the Format name of any BinaryData tag with a size
-                  in brackets.  In this case, subsequent offsets are adjusted by
-                  the value length minus the size of the default table FORMAT
-                  (eg. "var_int16u[10]" causes subsequent offsets to be
-                  incremented by sizeof(int16u) * 10 - sizeof(int8u) if the
-                  default table FORMAT is "int8u").  Note that all "var_" Format
-                  tags (as well as tags with values used within "var_" Format
-                  expressions) must have corresponding DATAMEMBER entries.
+                  by the table entry with tag index '3' (which may be a Hidden
+                  tag). An initial "var_" may be added to the Format name of any
+                  BinaryData tag with a size in brackets.  In this case,
+                  subsequent offsets are adjusted by the value length minus the
+                  size of the default table FORMAT (eg. "var_int16u[10]" causes
+                  subsequent offsets to be incremented by sizeof(int16u) * 10 -
+                  sizeof(int8u) if the default table FORMAT is "int8u").  Note
+                  that all "var_" Format tags (as well as tags with values used
+                  within "var_" Format expressions) must have corresponding
+                  DATAMEMBER entries.
 
   Count         : Used when writing EXIF information to specify the number
                   values to write, or the number of characters in a fixed-length
@@ -756,16 +757,18 @@ numerical, and generated automatically otherwise.
                   expression may use $self to access the ExifTool object. The
                   first 128 bytes of the binary data value are accessible
                   through the reference $valPt for EXIF, Jpeg2000, QuickTime,
-                  FLAC and BinaryData tags only (note that for BinaryData tags,
-                  the binary data of $$valPt is always 'undef' type, and may not
-                  be used when writing except for SubDirectory tags).  EXIF tags
-                  (and maybe some other types) may also reference the format
-                  string and value count through $format and $count.  Note that
-                  if the value is writable and $valPt is used, the tag must have
-                  a Format (unless 'undef' or 'string'), and a Count (unless 1
-                  or length of the 'undef' or 'string'), so the binary data may
-                  be generated for evaluating the Condition.  When writing,
-                  $valPt, $format and $count refer to the new value, except for
+                  FLAC and BinaryData tags only. (Note that for BinaryData tags,
+                  the binary data of $$valPt is always 'undef' type and consists
+                  of the bytes from the start of the value to the end of the
+                  BinaryData block.  Also, it may not be used when writing
+                  except for SubDirectory tags.)  EXIF tags (and maybe some
+                  other types) may also reference the format string and value
+                  count through $format and $count.  Note that if the value is
+                  writable and $valPt is used, the tag must have a Format
+                  (unless 'undef' or 'string'), and a Count (unless 1 or length
+                  of the 'undef' or 'string'), so the binary data may be
+                  generated for evaluating the Condition.  When writing, $valPt,
+                  $format and $count refer to the new value, except for
                   MakerNotes tags where $format and $count refer to the old tag
                   if it existed.
 

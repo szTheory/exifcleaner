@@ -14,7 +14,7 @@ proved with real RAF bytes rather than extension-renamed data.
 | Local filename | `sample.raf` |
 | Size | 38,452 bytes |
 | SHA-256 | `e12e30bd0cf5f160b82b93f043696c04d1d5f4628f1fdd19abdab9f8328d8bf0` |
-| Bundled reader | ExifTool 13.50 |
+| Bundled reader | ExifTool 13.59 |
 | Required precondition | ExifTool reports `FileType=RAF` and `DateTimeOriginal=2007:05:22 13:58:30` before stripping. |
 
 The executable assertions in `fixture_integrity.test.ts` verify the upstream

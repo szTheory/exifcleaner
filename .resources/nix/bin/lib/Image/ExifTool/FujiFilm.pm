@@ -31,13 +31,13 @@ use vars qw($VERSION);
 use Image::ExifTool qw(:DataAccess :Utils);
 use Image::ExifTool::Exif;
 
-$VERSION = '2.00';
+$VERSION = '2.02';
 
 sub ProcessFujiDir($$$);
 sub ProcessFaceRec($$$);
 sub ProcessMRAW($$$);
 
-# the following RAF version numbers have been tested for writing:
+# the following firmware version numbers have been tested for writing:
 # (as of ExifTool 11.70, this lookup is no longer used if the version number is numerical)
 my %testedRAF = (
     '0100' => 'E550, E900, F770, S5600, S6000fd, S6500fd, HS10/HS11, HS30, S200EXR, X100, XF1, X-Pro1, X-S1, XQ2 Ver1.00, X-T100, GFX 50R, XF10',
@@ -67,7 +67,7 @@ my %testedRAF = (
    # 0400  - expect to see this for X-T1
     '0540' => 'X-T1 Ver5.40',
     '0712' => 'S5000 Ver3.00',
-    '0716' => 'S5000 Ver3.00', # (yes, 2 RAF versions with the same Software version)
+    '0716' => 'S5000 Ver3.00', # (yes, 2 firmware versions with the same Software version)
     '0Dgi' => 'X-A10 Ver1.01 and X-A3 Ver1.02', # (yes, non-digits in the firmware number)
 );
 
@@ -1226,7 +1226,7 @@ my %faceCategories = (
     NOTES => 'Tags extracted from the header of RAF images.',
   # 0x00 - eg. "FUJIFILMCCD-RAW 0201FA392001FinePix S3Pro"
     0x3c => { #PH
-        Name => 'RAFVersion',
+        Name => 'FirmwareVersion', #forum17969
         Format => 'undef[4]',
     },
     # (all int32u values)
@@ -1373,37 +1373,37 @@ my %faceCategories = (
         Count => 4, # (ignore the duplicate values)
     },
     0x2100 => { #IB
-        Name => 'WB_GRGBLevelsDaylight',
+        Name => 'WB_GRGBLevelsDaylight', # (EXIF Fine Weather)
         Format => 'int16u',
         Count => 4,
     },
     0x2200 => { #IB
-        Name => 'WB_GRGBLevelsCloudy',
+        Name => 'WB_GRGBLevelsCloudy', # (EXIF Shade)
         Format => 'int16u',
         Count => 4,
     },
     0x2300 => { #IB
-        Name => 'WB_GRGBLevelsDaylightFluor',
+        Name => 'WB_GRGBLevelsDaylightFluor', # (EXIF FL_D)
         Format => 'int16u',
         Count => 4,
     },
     0x2301 => { #IB
-        Name => 'WB_GRGBLevelsDayWhiteFluor',
+        Name => 'WB_GRGBLevelsDayWhiteFluor', # (EXIF FL_N)
         Format => 'int16u',
         Count => 4,
     },
     0x2302 => { #IB
-        Name => 'WB_GRGBLevelsWhiteFluorescent',
+        Name => 'WB_GRGBLevelsWhiteFluorescent', # (EXIF FL_W)
         Format => 'int16u',
         Count => 4,
     },
     0x2310 => { #IB
-        Name => 'WB_GRGBLevelsWarmWhiteFluor',
+        Name => 'WB_GRGBLevelsWarmWhiteFluor', # (EXIF FL_WW)
         Format => 'int16u',
         Count => 4,
     },
     0x2311 => { #IB
-        Name => 'WB_GRGBLevelsLivingRoomWarmWhiteFluor',
+        Name => 'WB_GRGBLevelsLivingRoomWarmWhiteFluor', # (EXIF FL_L)
         Format => 'int16u',
         Count => 4,
     },
@@ -1412,9 +1412,14 @@ my %faceCategories = (
         Format => 'int16u',
         Count => 4,
     },
+    0x2410 => { #IB
+        Name => 'WB_GRGBLevelsFlash',
+        Format => 'int16u',
+        Count => 4,
+    },
     # 0x2f00 => WB_GRGBLevelsCustom: int32u count, then count * (int16u GRGBGRGB), ref IB
     0x2ff0 => {
-        Name => 'WB_GRGBLevels',
+        Name => 'WB_GRGBLevels', # (as shot)
         Format => 'int16u',
         Count => 4,
     },

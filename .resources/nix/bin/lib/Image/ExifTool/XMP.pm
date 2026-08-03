@@ -50,7 +50,7 @@ use Image::ExifTool::Exif;
 use Image::ExifTool::GPS;
 require Exporter;
 
-$VERSION = '3.77';
+$VERSION = '3.79';
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(EscapeXML UnescapeXML);
 
@@ -1377,10 +1377,30 @@ my %sPantryItem = (
                     RadialDistortParam1  => { Writable => 'real' },
                     RadialDistortParam2  => { Writable => 'real' },
                     RadialDistortParam3  => { Writable => 'real' },
+                    VignetteModel => {
+                        Namespace       => 'crlcp',
+                        Struct => {
+                            NAMESPACE   => 'stCamera',
+                            STRUCT_NAME => 'VignetteModel',
+                            ImageXCenter         => { Writable => 'real' },
+                            ImageYCenter         => { Writable => 'real' },
+                            VignetteModelParam1    => { Writable => 'real' },
+                            VignetteModelPiecewiseParam => { List => 'Seq' },
+                        },
+                    },
                 },
             },
         },
     },
+    CameraProfilesPerspectiveModelVignetteModelVignetteModelPiecewiseParam => {
+        Name => 'CameraProfilesPerspectiveModelVignetteModelPiecewiseParam',
+        Flat => 1,
+    },
+    CameraProfilesPerspectiveModelVignetteModelVignetteModelParam1 => {
+        Name => 'CameraProfilesPerspectiveModelVignetteModelParam1',
+        Flat => 1,
+    },
+    LabelColor => { },
 );
 
 # Photoshop Camera Raw namespace properties (crs) - (ref 8,PH)
@@ -1867,6 +1887,9 @@ my %sPantryItem = (
     },
     # more new stuff
     PointColors => { List => 'Seq' },
+    ColorVariance             => { Writable => 'real', List => 'Seq' },
+    CropConstrainToUnitSquare => { Writable => 'integer' },
+    HDRMaxValue               => { Writable => 'real' },
 );
 
 # Tiff namespace properties (tiff)
@@ -2419,13 +2442,16 @@ my %sPantryItem = (
         PrintConvInv => '$val=~s/\s*m$//; $val',
     },
     NativeDigest => { }, #PH
-    # the following written incorrectly by ACR 15.1
+    # --- the following written incorrectly by ACR 15.1
     # SubSecTime (should not be written according to Exif4XMP 2.32 specification)
     # SubSecTimeOriginal (should not be written according to Exif4XMP 2.32 specification)
     # SubSecTimeDigitized (should not be written according to Exif4XMP 2.32 specification)
     # SerialNumber (should be BodySerialNumber)
     # Lens (should be XMP-aux)
     # LensInfo (should be XMP-aux)
+    # --- these written incorrectly by Adobe too:
+    # LensMake (should be XMP-exifEX)
+    # SensitivityType (should be XMP-exifEX)
 );
 
 # Exif extended properties (exifEX, ref 12)
@@ -2629,7 +2655,7 @@ my %sPantryItem = (
     EnhanceDenoiseAlreadyApplied    => { Writable => 'boolean' }, #forum14760
     EnhanceDenoiseVersion           => { }, #forum14760 integer?
     EnhanceDenoiseLumaAmount        => { }, #forum14760 integer?
-    # FujiRatingAlreadyApplied - boolean written by LR classic 13.2 (forum15815)
+    FujiRatingAlreadyApplied        => { Writable => 'boolean' }, #forum15815 (LR classic 13.2)
 );
 
 # IPTC Core namespace properties (Iptc4xmpCore) (ref 4)
@@ -3635,7 +3661,7 @@ NoLoop:
         my $v = UnescapeXML(substr($val, 0, $p - length($1) - 12)) . $1;
         while ($val =~ /<!\[CDATA\[(.*?)\]\]>/sg) {
             my $p1 = pos $val;
-            $v .= UnescapeXML(substr($val, $p, $p1 - length($1) - 12)) . $1;
+            $v .= UnescapeXML(substr($val, $p, $p1 - $p - length($1) - 12)) . $1;
             $p = $p1;
         }
         $val = $v . UnescapeXML(substr($val, $p));
@@ -3748,6 +3774,7 @@ sub ParseXMPElement($$$;$$$$)
     my $isSVG = $$et{XMP_IS_SVG};
     my $saveNS;     # save xlatNS lookup if changed for the scope of this element
     my (%definedNS, %usedNS);  # namespaces defined and used in this scope
+    my $err;
 
     # get our parse procs
     my ($attrProc, $foundProc);
@@ -3777,11 +3804,16 @@ sub ParseXMPElement($$$;$$$$)
         last if pos($$dataPt) > $end - 4;
         # reset nodeID before processing each element
         my $nodeID = $$blankInfo{NodeID} = $oldNodeID;
-        # get next element
-        last if $$dataPt !~ m{<([?/]?)([-\w:.\x80-\xff]+|!--)([^>]*)>}sg or pos($$dataPt) > $end;
+        # find start of next element, skipping over "<![CDATA[xxx]]>" sections
+        last if $$dataPt !~ m{<([?/]?)([-\w:.\x80-\xff]+|!--)([^>]*)>|(<!\[CDATA\[)}sg or pos($$dataPt) > $end;
         # (the only reason we match '<[?/]' is to keep from scanning past the
         #  "<?xpacket end..." terminator or other closing token, so
         next if $1;
+        if ($4) { # skip CDATA
+            next if $$dataPt =~ /\]\]>/sg and pos($$dataPt) <= $end;
+            $err = "Missing CDATA terminator";
+            last Element;
+        }
         my ($prop, $attrs) = ($2, $3);
         # skip comments
         if ($prop eq '!--') {
@@ -3789,7 +3821,7 @@ sub ParseXMPElement($$$;$$$$)
             last;
         }
         my $valStart = pos($$dataPt);
-        my $valEnd;
+        my ($valEnd, $wasComment);
         # only look for closing token if this is not an empty element
         # (empty elements end with '/', eg. <a:b/>)
         if ($attrs !~ s/\/$//) {
@@ -3801,11 +3833,22 @@ sub ParseXMPElement($$$;$$$$)
 #                my $val2 = $1;
                 # find next matching closing token, or the next opening token
                 # of a nested same-named element
-                if ($$dataPt !~ m{<(/?)$prop([-\w:.\x80-\xff]*)(.*?(/?))>}sg or
+                if ($$dataPt !~ m{<(?:(/?)\Q$prop\E([-\w:.\x80-\xff]*)(.*?(/?))>|(!\[CDATA\[|!--))}sg or
                     pos($$dataPt) > $end)
                 {
-                    $et->Warn("XMP format error (no closing tag for $prop)");
+                    $err = "XMP format error (no closing tag for $prop)";
                     last Element;
+                }
+                if ($5) { # find end of CDATA or comment section
+                    if ($5 eq '![CDATA[') {
+                        next if $$dataPt =~ /\]\]>/sg and pos($$dataPt) <= $end;
+                        $err = 'Missing CDATA terminator';
+                        last Element;
+                    } else {
+                        $$dataPt =~ /-->/sg and pos($$dataPt) <= $end and $wasComment = 1, next;
+                        $err = 'Missing comment terminator';
+                        last Element;
+                    }
                 }
                 next if $2; # ignore opening properties with different names
                 if ($1) {
@@ -4135,6 +4178,8 @@ sub ParseXMPElement($$$;$$$$)
                     # remove comments and whitespace from rdf:Description only
                     if ($prop eq 'rdf:Description' and $val) {
                         $val =~ s/<!--.*?-->//g; $val =~ s/^\s+//; $val =~ s/\s+$//;
+                    } elsif ($wasComment and $val) {
+                        $val =~ s/<!--.*?-->//g;
                     }
                     # if element value is empty, take value from RDF 'value' or 'resource' attribute
                     # (preferentially) or 'about' attribute (if no 'value' or 'resource')
@@ -4188,6 +4233,8 @@ sub ParseXMPElement($$$;$$$$)
         pos($$dataPt) = $start;
         $$dataPt =~ /\G\s+/gc;  # skip white space after closing token
     }
+    # handle any error which aborted processing
+    $isWriting ? $et->Error($err) : $et->Warn($err) if $err;
 #
 # process resources referenced by blank nodeID's
 #
