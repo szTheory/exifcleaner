@@ -20,27 +20,30 @@ it("finds supported files recursively", async () => {
 	await writeFile(path.join(tmpDir, "test.jpg"), "fake-jpg");
 	await mkdir(path.join(tmpDir, "subdir"));
 	await writeFile(path.join(tmpDir, "subdir", "photo.png"), "fake-png");
+	await writeFile(path.join(tmpDir, "notes.txt"), "unsupported");
+	await writeFile(path.join(tmpDir, "subdir", "details.md"), "unsupported");
+	await mkdir(path.join(tmpDir, "unsupported-directory.txt"));
 
 	const result = await command.execute({ dirPath: tmpDir });
 
 	expect(result.ok).toBe(true);
 	if (result.ok) {
-		expect(result.value).toHaveLength(2);
-		const basenames = result.value.map((p) => path.basename(p)).sort();
+		expect(result.value.files).toHaveLength(2);
+		const basenames = result.value.files.map((p) => path.basename(p)).sort();
 		expect(basenames).toEqual(["photo.png", "test.jpg"]);
+		expect(result.value.skippedCount).toBe(2);
 	}
 });
 
-it("filters out unsupported files", async () => {
-	await writeFile(path.join(tmpDir, "test.jpg"), "fake-jpg");
+it("reports unsupported-only folders without supported paths", async () => {
 	await writeFile(path.join(tmpDir, "readme.txt"), "hello");
 
 	const result = await command.execute({ dirPath: tmpDir });
 
 	expect(result.ok).toBe(true);
 	if (result.ok) {
-		expect(result.value).toHaveLength(1);
-		expect(path.basename(result.value[0]!)).toBe("test.jpg");
+		expect(result.value.files).toEqual([]);
+		expect(result.value.skippedCount).toBe(1);
 	}
 });
 
@@ -49,7 +52,8 @@ it("returns empty array for empty directory", async () => {
 
 	expect(result.ok).toBe(true);
 	if (result.ok) {
-		expect(result.value).toEqual([]);
+		expect(result.value.files).toEqual([]);
+		expect(result.value.skippedCount).toBe(0);
 	}
 });
 
