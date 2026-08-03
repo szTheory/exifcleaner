@@ -54,12 +54,18 @@ export async function launchApp(options?: {
 	await window.waitForLoadState("domcontentloaded");
 	// Wait for the React app to mount (main element with role="main")
 	await window.waitForSelector("[role='main']", { timeout: 10000 });
-	if (options?.settings !== undefined) {
-		await window.evaluate(
-			(settings) => globalThis.window.api.settings.set(settings),
-			options.settings,
-		);
-	}
+	// Most E2E assertions intentionally use English copy. A fresh profile still
+	// defaults to the host OS language, so pin English unless a test explicitly
+	// requests another locale. This keeps the suite deterministic on non-English
+	// developer machines and runners.
+	const settings = {
+		language: "en",
+		...options?.settings,
+	} satisfies Partial<Settings>;
+	await window.evaluate(
+		(nextSettings) => globalThis.window.api.settings.set(nextSettings),
+		settings,
+	);
 	return { app, window };
 }
 

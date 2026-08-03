@@ -21,16 +21,28 @@ When adding a setting:
 ## Translation sources
 
 `.resources/locales/en.json` is the canonical key set. Each other locale is a simple
-key/value JSON file containing only translations it actually has. Running
-`yarn i18n:write` generates the legacy bundled `strings.json` plus a coverage report;
-`yarn i18n:check` fails on drift, unknown keys, or placeholder mismatch.
+key/value JSON file containing only translations it actually has. Romanian (`ro`, with
+`ro-RO` fallback) is complete; its first 70 strings retain credit to PR #297's contributor.
 
-English fallback is intentional. AI review may suggest wording with provenance, but it
-does not fill or overwrite contributor translations automatically.
+`.resources/translation-provenance.json` records a SHA-256 hash of the English source for
+every translated key, its origin (`existing-contribution` or `agent-assisted`), and review
+state. A changed English source therefore makes the translation stale until someone reviews
+it; running the generator never silently refreshes that hash. The glossary documents product
+terms and safety-sensitive context for translators.
+
+Running `yarn i18n:write` deterministically generates the legacy bundled `strings.json`,
+the coverage report, and `translation-worklist.json`. `yarn i18n:check` fails on generated
+drift, malformed data, unknown keys, placeholder mismatch, incomplete/stale Romanian, or an
+incomplete/stale protected first-run key in any locale. Missing or stale legacy strings
+outside that surface are reported in the worklist but remain nonblocking.
+
+English fallback is intentional. Agent-assisted translations are drafted outside the app
+and CI, labeled in provenance, and independently reviewed. The application and build have
+no translation service or model client. Existing nonblank contributor text is never
+overwritten by the generator.
 
 The renderer updates `<html lang>` and `dir` when the selected locale changes. Arabic and
 Persian use RTL layout; filenames, paths, and metadata values isolate their own direction.
 Count messages select plural categories with `Intl.PluralRules` before lookup.
 
 See [CONTRIBUTING](../../CONTRIBUTING.md) for the small translation-PR workflow.
-

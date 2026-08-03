@@ -54,6 +54,18 @@ test.describe("Accessibility", () => {
 		expect(gearFocused).toBe(true);
 	});
 
+	test("uses file, folder, then settings focus order", async () => {
+		const primary = page.locator(".empty-state__button--primary");
+		await primary.focus();
+		await expect(primary).toBeFocused();
+
+		await page.keyboard.press("Tab");
+		await expect(page.locator(".empty-state__button--secondary")).toBeFocused();
+
+		await page.keyboard.press("Tab");
+		await expect(page.locator(".gear-icon")).toBeFocused();
+	});
+
 	test("shows visible focus indicator on focused elements", async () => {
 		// Reset focus
 		await page.evaluate(() => {

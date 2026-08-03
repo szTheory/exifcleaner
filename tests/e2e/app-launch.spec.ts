@@ -57,16 +57,65 @@ test.describe("App Launch", () => {
 	});
 
 	test("shows the empty drop zone state", async () => {
-		// The empty state section should be visible with i18n-populated text
 		const emptyState = window.locator("section.empty-state");
 		await expect(emptyState).toBeVisible();
+		await expect(emptyState.locator("h1")).toHaveText("Add files to clean");
+		await expect(
+			emptyState.locator('.empty-state__instruction[aria-hidden="false"]'),
+		).toHaveText("Drop images, videos, or PDFs here, or choose an option.");
+		await expect(
+			emptyState.locator(".empty-state__button--primary"),
+		).toHaveText("Choose files…");
+		await expect(
+			emptyState.locator(".empty-state__button--secondary"),
+		).toHaveText("Choose folder…");
 
-		// The title (h1) should have non-empty i18n text
-		const title = emptyState.locator("h1");
-		await expect(title).toBeVisible();
-		const titleText = await title.textContent();
-		expect(titleText).toBeTruthy();
-		expect(titleText!.length).toBeGreaterThan(0);
+		const outputMode = emptyState.locator(".empty-state__output-mode");
+		await expect(outputMode).toHaveText(
+			/Cleaned copies will be created — originals stay untouched\.|Files will be cleaned in place\./,
+		);
+
+		const metrics = await emptyState.evaluate((section) => {
+			const buttons = Array.from(section.querySelectorAll("button"));
+			const styles = buttons.map((button) => getComputedStyle(button));
+			const actions = section.querySelector(".empty-state__actions");
+			return {
+				buttonHeights: buttons.map(
+					(button) => button.getBoundingClientRect().height,
+				),
+				buttonBackgrounds: styles.map((style) => style.backgroundColor),
+				gap: actions ? Number.parseFloat(getComputedStyle(actions).gap) : 0,
+			};
+		});
+		expect(metrics.buttonHeights.every((height) => height >= 40)).toBe(true);
+		expect(metrics.gap).toBeGreaterThanOrEqual(8);
+		expect(metrics.buttonBackgrounds[0]).not.toBe(metrics.buttonBackgrounds[1]);
+	});
+
+	test("keeps first-run content usable at 200% zoom", async () => {
+		await app.evaluate(({ BrowserWindow }) => {
+			const win = BrowserWindow.getAllWindows()[0];
+			win?.setSize(580, 337);
+			win?.webContents.setZoomFactor(2);
+		});
+
+		await expect(window.locator(".empty-state__button--primary")).toBeVisible();
+		const layout = await window.evaluate(() => {
+			const dropZone = document.querySelector(".drop-zone");
+			const content = document.querySelector(".app__content");
+			const status = document.querySelector(".status-bar");
+			if (!dropZone || !content || !status) return null;
+			return {
+				canScroll: dropZone.scrollHeight > dropZone.clientHeight,
+				contentBottom: content.getBoundingClientRect().bottom,
+				statusTop: status.getBoundingClientRect().top,
+			};
+		});
+		expect(layout).not.toBeNull();
+		expect(layout?.canScroll).toBe(true);
+		expect(layout?.statusTop).toBeGreaterThanOrEqual(
+			layout?.contentBottom ?? 0,
+		);
 	});
 
 	test("has DevTools closed on launch", async () => {

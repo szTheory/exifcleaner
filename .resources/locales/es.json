@@ -1,6 +1,6 @@
 {
-	"empty.title": "No hay archivos seleccionados",
-	"empty.subtitle": "Arrastre y suelte imágenes, videos, o documentos PDF para automáticamente eliminar metadatos.",
+	"empty.title": "Añade archivos para limpiarlos",
+	"empty.subtitle": "Suelta aquí imágenes, vídeos o archivos PDF, o elige una opción.",
 	"table.header.filename": "Archivos seleccionados",
 	"table.header.exif-before": "Exif antes",
 	"table.header.exif-after": "Exif después",
@@ -48,5 +48,14 @@
 	"verificationFailedSummary": "No se pudo verificar la salida limpia. La copia incompleta se eliminó; el original no ha cambiado.",
 	"cleanupFailedSummary": "No se pudo verificar la salida limpia ni eliminar la salida incompleta. El original no ha cambiado.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Completado"
+	"complete": "Completado",
+	"empty.dropActive": "Suelta los archivos para limpiarlos.",
+	"menu.help.new-releases": "Nuevas versiones…",
+	"intake.chooseFiles": "Elegir archivos…",
+	"intake.chooseFolder": "Elegir carpeta…",
+	"intake.dropZone": "Zona para soltar archivos",
+	"intake.unsupportedSkipped": "Se omitieron {count} archivos no compatibles",
+	"intake.foldersUnreadable": "No se pudieron leer {count} carpetas",
+	"intake.outputCopy": "Se crearán copias limpias; los originales no se modificarán.",
+	"intake.outputOverwrite": "Los archivos se limpiarán en su ubicación."
 }

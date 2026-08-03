@@ -1,6 +1,6 @@
 {
-	"empty.title": "Немає вибраних файлів",
-	"empty.subtitle": "Перетягніть зображення, відео або PDF-файли для автоматичного видалення метаданих.",
+	"empty.title": "Додайте файли для очищення",
+	"empty.subtitle": "Перетягніть сюди зображення, відео чи PDF-файли або виберіть потрібний варіант.",
 	"table.header.filename": "Вибрані файли",
 	"table.header.exif-before": "# Exif до",
 	"table.header.exif-after": "# Exif після",
@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "Не вдалося перевірити очищений результат. Неповну копію видалено; оригінал не змінено.",
 	"cleanupFailedSummary": "Не вдалося перевірити очищений результат, і неповний результат не вдалося видалити. Оригінал не змінено.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Завершено"
+	"complete": "Завершено",
+	"empty.dropActive": "Перетягніть файли для очищення.",
+	"menu.help.new-releases": "Нові випуски…",
+	"intake.chooseFiles": "Вибрати файли…",
+	"intake.chooseFolder": "Вибрати папку…",
+	"intake.dropZone": "Область перетягування файлів",
+	"intake.unsupportedSkipped": "Пропущено непідтримуваних файлів: {count}",
+	"intake.foldersUnreadable": "Не вдалося прочитати папки: {count}",
+	"intake.outputCopy": "Буде створено очищені копії — оригінали залишаться без змін.",
+	"intake.outputOverwrite": "Файли буде очищено на місці."
 }

@@ -3,8 +3,8 @@ import { LANGUAGE_NAMES } from "../../src/domain/i18n/language_names";
 import { Locale } from "../../src/domain/i18n/i18n_lookup";
 
 describe("LANGUAGE_NAMES", () => {
-	it("has exactly 25 entries", () => {
-		expect(LANGUAGE_NAMES).toHaveLength(25);
+	it("has exactly 26 entries", () => {
+		expect(LANGUAGE_NAMES).toHaveLength(26);
 	});
 
 	it("is sorted alphabetically by nativeName", () => {

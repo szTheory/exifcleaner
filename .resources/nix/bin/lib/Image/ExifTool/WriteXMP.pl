@@ -33,6 +33,9 @@ my %extendedRes = (
     'crss' => 1,
 );
 
+# namespaces to validate more completely when Validate option is used
+my %validateNS = ( tiff => 1, exif => 1, exifEX => 1 );
+
 my $rdfDesc = 'rdf:Description';
 #
 # packet/xmp/rdf headers and trailers
@@ -117,6 +120,12 @@ sub ValidateProperty($$;$)
                                 $$valLang{$langPath}{$lang} = 1;
                             }
                         }
+                    }
+                    if ($$propList[-1] =~ /^(\w+):(\w+)/ and $validateNS{$1} or
+                        $$propList[-1] eq 'rdf:li' and $$propList[-3] =~ /^(\w+):(\w+)/ and $validateNS{$1})
+                    {
+                        my $tbl = GetTagTable("Image::ExifTool::XMP::$1");
+                        $et->Warn("Non-standard XMP property: $1:$2") if $tbl and not $$tbl{$2};
                     }
                     my $xmpValidate = $$et{XmpValidate};
                     my $path = join('/', @$propList[3..$#$propList]);

@@ -191,7 +191,7 @@ describe("E2E fixture integrity", () => {
 		expect(fs.statSync(fixturePath).size).toBe(RAF_SIZE_BYTES);
 		expect(sha256(fixturePath)).toBe(RAF_SHA256);
 		expect(execFileSync(EXIFTOOL, ["-ver"], { encoding: "utf8" }).trim()).toBe(
-			"13.50",
+			"13.59",
 		);
 
 		const metadata = readFixtureMetadata(RAF_FIXTURE);

@@ -1,6 +1,6 @@
 {
-	"empty.title": "Nie wybrano plików",
-	"empty.subtitle": "Przeciągnij i upuść zdjęcia, filmy lub pliki PDF, aby automatycznie usunąć z nich metadane.",
+	"empty.title": "Dodaj pliki do wyczyszczenia",
+	"empty.subtitle": "Upuść tutaj obrazy, filmy lub pliki PDF albo wybierz opcję.",
 	"table.header.filename": "Wybrane pliki",
 	"table.header.exif-before": "# Exif przed",
 	"table.header.exif-after": "# Exif po",
@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "Nie można było zweryfikować oczyszczonego wyniku. Niekompletna kopia została usunięta; oryginał pozostał bez zmian.",
 	"cleanupFailedSummary": "Nie można było zweryfikować oczyszczonego wyniku, a niekompletnego wyniku nie udało się usunąć. Oryginał pozostał bez zmian.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Ukończono"
+	"complete": "Ukończono",
+	"empty.dropActive": "Upuść pliki, aby je wyczyścić.",
+	"menu.help.new-releases": "Nowe wydania…",
+	"intake.chooseFiles": "Wybierz pliki…",
+	"intake.chooseFolder": "Wybierz folder…",
+	"intake.dropZone": "Obszar upuszczania plików",
+	"intake.unsupportedSkipped": "Pominięto {count} nieobsługiwanych plików",
+	"intake.foldersUnreadable": "Nie można odczytać {count} folderów",
+	"intake.outputCopy": "Zostaną utworzone wyczyszczone kopie — oryginały pozostaną nienaruszone.",
+	"intake.outputOverwrite": "Pliki zostaną wyczyszczone w miejscu."
 }

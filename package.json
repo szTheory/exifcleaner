@@ -1,7 +1,7 @@
 {
 	"name": "exifcleaner",
 	"productName": "ExifCleaner",
-	"version": "4.1.0",
+	"version": "4.2.0",
 	"description": "Clean exif metadata from images, videos, and PDF documents",
 	"license": "MIT",
 	"repository": "github:szTheory/exifcleaner",
@@ -86,8 +86,13 @@
 		"vitest": "3.2.7"
 	},
 	"build": {
-		"afterPack": "./scripts/afterPack.cjs",
+		"afterSign": "./scripts/afterPack.cjs",
 		"appId": "com.exifcleaner",
+		"electronFuses": {
+			"runAsNode": false,
+			"enableNodeOptionsEnvironmentVariable": false,
+			"enableNodeCliInspectArguments": false
+		},
 		"mac": {
 			"category": "public.app-category.graphics-and-images",
 			"minimumSystemVersion": "12.0",

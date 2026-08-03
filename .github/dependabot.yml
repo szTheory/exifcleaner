@@ -9,23 +9,52 @@ updates:
       timezone: America/New_York
     open-pull-requests-limit: 10
     groups:
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
       electron-runtime:
+        applies-to: version-updates
         patterns:
           - electron
+        update-types:
+          - "minor"
+          - "patch"
       electron-packaging:
+        applies-to: version-updates
         patterns:
           - electron-builder
           - electron-builder-squirrel-windows
+        update-types:
+          - "minor"
+          - "patch"
       application-dependencies:
+        applies-to: version-updates
         dependency-type: production
         exclude-patterns:
           - electron
           - electron-builder
+        update-types:
+          - "minor"
+          - "patch"
       development-dependencies:
+        applies-to: version-updates
         dependency-type: development
         exclude-patterns:
           - electron
           - electron-builder
+        update-types:
+          - "minor"
+          - "patch"
+    # Compatibility ceilings are version-update policy only. Dependabot alerts remain
+    # enabled, and the security group above keeps actionable in-range fixes visible.
+    ignore:
+      - dependency-name: "@types/node"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "vite"
+        versions:
+          - ">=8"
 
   - package-ecosystem: github-actions
     directory: /

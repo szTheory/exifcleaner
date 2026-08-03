@@ -20,6 +20,7 @@ export enum Locale {
 	Polish = "pl",
 	Portuguese = "pt",
 	PortugueseBR = "pt-BR",
+	Romanian = "ro",
 	Russian = "ru",
 	Slovak = "sk",
 	Spanish = "es",
@@ -87,6 +88,8 @@ export function fallbackLocale({ locale }: FallbackLocaleParams): string {
 			return Locale.PortugueseBR;
 		case "pt-PT": // Portuguese (Portugal)
 			return Locale.Portuguese;
+		case "ro-RO": // Romanian (Romania)
+			return Locale.Romanian;
 
 		case "it-CH": //Italian (Switzerland)
 		case "it-IT": //Italian (Italy)

@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 import type { ElectronApplication, Page } from "playwright";
 import { launchApp, closeApp } from "./helpers/app_launcher";
+import { createFixtureDir } from "../helpers/fixture_copier";
+import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 
 test.describe("Internationalization", () => {
 	let app: ElectronApplication;
@@ -44,8 +46,7 @@ test.describe("Internationalization", () => {
 		const title = window.locator(".empty-state__title");
 		await expect(title).toBeVisible();
 		const titleText = await title.textContent();
-		// English: "No files selected" (from strings.json empty.title.en)
-		expect(titleText).toContain("No files selected");
+		expect(titleText).toContain("Add files to clean");
 	});
 
 	test("switches language via IPC and updates UI text", async () => {
@@ -62,7 +63,7 @@ test.describe("Internationalization", () => {
 		const title = window.locator(".empty-state__title");
 		await expect(title).toBeVisible();
 		const englishText = await title.textContent();
-		expect(englishText).toContain("No files selected");
+		expect(englishText).toContain("Add files to clean");
 
 		// Send language change via IPC to French
 		await app.evaluate(({ BrowserWindow }, locale) => {
@@ -77,8 +78,7 @@ test.describe("Internationalization", () => {
 
 		// Verify the title now shows French text
 		const frenchText = await title.textContent();
-		// French: "Aucun fichier sélectionné" (from strings.json empty.title.fr)
-		expect(frenchText).toContain("Aucun fichier");
+		expect(frenchText).toContain("Ajoutez des fichiers");
 		expect(frenchText).not.toBe(englishText);
 	});
 
@@ -101,6 +101,69 @@ test.describe("Internationalization", () => {
 		// Japanese: "ファイルが選択されていません" (from strings.json empty.title.ja)
 		expect(japaneseText).toContain("ファイル");
 		// Verify it is not the English text
-		expect(japaneseText).not.toContain("No files selected");
+		expect(japaneseText).not.toContain("Add files to clean");
+	});
+
+	test("switches to Romanian", async () => {
+		await app.evaluate(({ BrowserWindow }, locale) => {
+			const win = BrowserWindow.getAllWindows()[0];
+			if (win) {
+				win.webContents.send("language:changed", locale);
+			}
+		}, "ro");
+
+		const title = window.locator(".empty-state__title");
+		await expect(title).toHaveText("Adaugă fișiere pentru curățare");
+		await expect(
+			window.getByRole("button", { name: "Alege fișiere…" }),
+		).toBeVisible();
+	});
+
+	test("uses RTL direction, visual action order, and a localized count in Arabic", async () => {
+		await app.evaluate(({ BrowserWindow }, locale) => {
+			const win = BrowserWindow.getAllWindows()[0];
+			if (win) {
+				win.webContents.send("language:changed", locale);
+			}
+		}, "ar");
+
+		await expect(window.locator("html")).toHaveAttribute("dir", "rtl");
+		const chooseFiles = window.getByRole("button", { name: "اختر ملفات…" });
+		const chooseFolder = window.getByRole("button", { name: "اختر مجلدًا…" });
+		const [filesBox, folderBox] = await Promise.all([
+			chooseFiles.boundingBox(),
+			chooseFolder.boundingBox(),
+		]);
+		expect(filesBox).not.toBeNull();
+		expect(folderBox).not.toBeNull();
+		expect(filesBox?.x).toBeGreaterThan(
+			folderBox?.x ?? Number.POSITIVE_INFINITY,
+		);
+
+		const { dir, copyFixture, cleanup } = createFixtureDir();
+		try {
+			const unsupported = copyFixture("unsupported.txt");
+			const before = snapshotDir(dir);
+			await app.evaluate(
+				({ BrowserWindow }, filePaths) => {
+					const win = BrowserWindow.getAllWindows()[0];
+					if (win) {
+						win.webContents.send("file-open-add-files", filePaths);
+					}
+				},
+				[unsupported],
+			);
+			await expect(window.locator(".toast")).toContainText(
+				"ملفات غير مدعومة تم تخطيها: 1",
+			);
+			assertDirEffect(before, snapshotDir(dir), {
+				unchanged: ["unsupported.txt"],
+				added: [],
+				modified: [],
+				removed: [],
+			});
+		} finally {
+			cleanup();
+		}
 	});
 });

@@ -1,6 +1,6 @@
 {
-	"empty.title": "Nincs kiválasztva fájl",
-	"empty.subtitle": "Húzd át a képeket, videókat vagy PDF fájlokat a metaadatatok automatikus eltávolításához.",
+	"empty.title": "Adjon hozzá tisztítandó fájlokat",
+	"empty.subtitle": "Dobjon ide képeket, videókat vagy PDF-fájlokat, vagy válasszon egy lehetőséget.",
 	"table.header.filename": "Kiválasztott fájlok",
 	"table.header.exif-before": "# Exif előtt",
 	"table.header.exif-after": "# Exif után",
@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "A megtisztított kimenetet nem sikerült ellenőrizni. A hiányos másolat el lett távolítva; az eredeti változatlan.",
 	"cleanupFailedSummary": "A megtisztított kimenetet nem sikerült ellenőrizni, és a hiányos kimenet nem távolítható el. Az eredeti változatlan.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Befejezve"
+	"complete": "Befejezve",
+	"empty.dropActive": "Ejtse ide a tisztítandó fájlokat.",
+	"menu.help.new-releases": "Új kiadások…",
+	"intake.chooseFiles": "Fájlok kiválasztása…",
+	"intake.chooseFolder": "Mappa kiválasztása…",
+	"intake.dropZone": "Fájlledobási terület",
+	"intake.unsupportedSkipped": "{count} nem támogatott fájl kihagyva",
+	"intake.foldersUnreadable": "{count} mappa nem olvasható",
+	"intake.outputCopy": "Tisztított másolatok készülnek — az eredetik érintetlenek maradnak.",
+	"intake.outputOverwrite": "A fájlok helyben lesznek megtisztítva."
 }

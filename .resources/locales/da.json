@@ -1,6 +1,6 @@
 {
-	"empty.title": "Ingen filer valgt",
-	"empty.subtitle": "Træk og slip billeder, videoer eller PDF filer for automatisk at fjerne metadata",
+	"empty.title": "Tilføj filer, der skal renses",
+	"empty.subtitle": "Slip billeder, videoer eller PDF-filer her, eller vælg en mulighed.",
 	"table.header.filename": "Valgte filer",
 	"table.header.exif-before": "Exif Før",
 	"table.header.exif-after": "Exif Efter",
@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "Kunne ikke bekræfte det rensede output. Den ufuldstændige kopi blev fjernet; originalen er uændret.",
 	"cleanupFailedSummary": "Kunne ikke bekræfte det rensede output, og det ufuldstændige output kunne ikke fjernes. Originalen er uændret.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Fuldført"
+	"complete": "Fuldført",
+	"empty.dropActive": "Slip filer for at rense dem.",
+	"menu.help.new-releases": "Nye udgivelser…",
+	"intake.chooseFiles": "Vælg filer…",
+	"intake.chooseFolder": "Vælg mappe…",
+	"intake.dropZone": "Område til at slippe filer",
+	"intake.unsupportedSkipped": "{count} ikke-understøttede filer blev sprunget over",
+	"intake.foldersUnreadable": "{count} mapper kunne ikke læses",
+	"intake.outputCopy": "Der oprettes rensede kopier — originalerne forbliver urørte.",
+	"intake.outputOverwrite": "Filerne renses på stedet."
 }

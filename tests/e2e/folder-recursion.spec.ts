@@ -40,7 +40,7 @@ test.describe("Folder Recursion", () => {
 		expect(unexpectedErrors, "Unexpected console.error messages").toEqual([]);
 	});
 
-	test("processes files from a nested folder structure via folder:expand IPC", async () => {
+	test("reports one skipped unsupported file and processes supported files from a nested folder", async () => {
 		// Create a nested temporary directory with fixture files
 		const tempRoot = fs.mkdtempSync(
 			path.join(os.tmpdir(), "exifcleaner-folder-e2e-"),
@@ -65,31 +65,34 @@ test.describe("Folder Recursion", () => {
 				path.join(fixturesDir, "sample.png"),
 				path.join(photosDir, "sample.png"),
 			);
-
-			// Use folder:expand IPC via the renderer's window.api
-			const expandResult = await page.evaluate(
-				(rootDir) => window.api.folder.expand(rootDir),
-				photosDir,
+			fs.writeFileSync(
+				path.join(vacationDir, "unsupported.txt"),
+				"not supported",
 			);
-
-			// Verify folder expansion found both files
-			expect(expandResult.files).toBeDefined();
-			expect(expandResult.files.length).toBe(2);
 
 			// Snapshot the temp root (not a leaf directory) so the recursive walk
 			// observes the whole tree -- a format handler that quietly wrote into
 			// photos/ instead of photos/vacation/ would otherwise be invisible.
 			const before = snapshotDir(tempRoot);
 
-			// Now send the discovered files via IPC for processing
-			await app.evaluate(({ BrowserWindow }, filePaths) => {
-				const win = BrowserWindow.getAllWindows()[0];
-				if (win) {
-					win.webContents.send("file-open-add-files", filePaths);
-				}
-			}, expandResult.files);
+			// Send the folder root through the production intake event. The renderer
+			// must expand it through validated IPC rather than receiving pre-expanded
+			// paths from this test.
+			await app.evaluate(
+				({ BrowserWindow }, filePaths) => {
+					const win = BrowserWindow.getAllWindows()[0];
+					if (win) {
+						win.webContents.send("file-open-add-files", filePaths);
+					}
+				},
+				[photosDir],
+			);
 
-			await waitForProcessing(page, { timeout: 15000 });
+			const visibleToasts = page.locator(".toast--visible");
+			await expect(visibleToasts).toHaveCount(1);
+			await expect(visibleToasts).toContainText("1 unsupported files skipped");
+
+			await waitForProcessing(page, { timeout: 15000, expectedFiles: 2 });
 
 			const after = snapshotDir(tempRoot);
 
@@ -100,7 +103,11 @@ test.describe("Folder Recursion", () => {
 				modified: ["photos/vacation/sample.jpg", "photos/sample.png"],
 				added: [],
 				removed: [],
-				unchanged: ["photos", "photos/vacation"],
+				unchanged: [
+					"photos",
+					"photos/vacation",
+					"photos/vacation/unsupported.txt",
+				],
 			});
 
 			// Verify 2 file rows appear

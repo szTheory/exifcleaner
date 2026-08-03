@@ -4587,7 +4587,15 @@ sub VerboseInfo($$$%)
 
     # generate hex number if tagID is numerical
     if (defined $tagID) {
-        $tagID =~ /^\d+$/ and $hexID = sprintf("0x%.4x", $tagID);
+        if ($tagID =~ /^\d+$/) {
+            if ($parms{Table} and $parms{Table}{VARS} and
+                $parms{Table}{ID_FMT} and $parms{Table}{VARS}{ID_FMT} eq 'dec')
+            {
+                $hexID = $tagID;
+            } else {
+                $hexID = sprintf("0x%.4x", $tagID);
+            }
+        }
     } else {
         $tagID = 'Unknown';
     }
@@ -4600,9 +4608,9 @@ sub VerboseInfo($$$%)
     } else {
         my $prefix;
         $prefix = $parms{Table}{TAG_PREFIX} if $parms{Table};
-        if ($prefix or $hexID) {
+        if ($prefix or defined $hexID) {
             $prefix = 'Unknown' unless $prefix;
-            $tag = $prefix . '_' . ($hexID ? $hexID : $tagID);
+            $tag = $prefix . '_' . (defined $hexID ? $hexID : $tagID);
         } else {
             $tag = $tagID;
         }
@@ -4641,7 +4649,7 @@ sub VerboseInfo($$$%)
         $parms{DataPt} or defined $size or $tagID =~ /\//))
     {
         $line = $indent . '- Tag ';
-        if ($hexID) {
+        if (defined $hexID) {
             $line .= $hexID;
         } else {
             $tagID =~ s/([\0-\x1f\x7f-\xff])/sprintf('\\x%.2x',ord $1)/ge;
@@ -4919,6 +4927,18 @@ sub NewGUID()
     return sprintf('%.4d%.2d%.2d%.2d%.2d%.2d%.2X%.4X%.4X%.4X%.4X',
                    $tm[5]+1900, $tm[4]+1, $tm[3], $tm[2], $tm[1], $tm[0], $guidCount,
                    $$ & 0xffff, rand(0x10000), rand(0x10000), rand(0x10000));
+}
+
+#------------------------------------------------------------------------------
+# Generate a version 4 ("random"), variant 1 UUID (RFC 9562, Section 5.4) (github #421)
+# Inputs: <none>
+# Returns: UUID string
+sub NewUUID()
+{
+    my @rnd = map {int(rand(256))} 1 .. 16;
+    $rnd[6] = ($rnd[6] & 0x0f) | 0x40;
+    $rnd[8] = ($rnd[8] & 0x3f) | 0x80;
+    return uc scalar unpack('H32', join '', map {chr} @rnd);
 }
 
 #------------------------------------------------------------------------------

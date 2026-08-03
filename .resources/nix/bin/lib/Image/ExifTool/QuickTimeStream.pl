@@ -111,7 +111,7 @@ my %insvLimit = (
         The tags below are extracted from timed metadata in QuickTime and other
         formats of video files when the ExtractEmbedded option is used.  Although
         most of these tags are combined into the single table below, ExifTool
-        currently reads 117 different types of timed GPS metadata from video files.
+        currently reads 124 different types of timed GPS metadata.
     },
     GPSLatitude  => { PrintConv => 'Image::ExifTool::GPS::ToDMS($self, $val, 1, "N")', RawConv => '$$self{FoundGPSLatitude} = 1; $val' },
     GPSLongitude => { PrintConv => 'Image::ExifTool::GPS::ToDMS($self, $val, 1, "E")' },
@@ -164,17 +164,7 @@ my %insvLimit = (
     KiloCalories => { Groups => { 2 => 'Other' } },
     SampleDateTime => {
         Groups => { 2 => 'Time' },
-        ValueConv => q{
-            my $str = ConvertUnixTime($val);
-            my $frac = $val - int($val);
-            if ($frac != 0) {
-                $frac = sprintf('%.6f', $frac);
-                $frac =~ s/^0//;
-                $frac =~ s/0+$//;
-                $str .= $frac;
-            }
-            return $str;
-        },
+        ValueConv => 'ConvertUnixTime($val, 0, -6)',
         PrintConv => '$self->ConvertDateTime($val)',
     },
 #
@@ -529,14 +519,7 @@ my %insvLimit = (
             if ($$self{CreateDate} and $$self{CreateDate} - $val > 24 * 3600 * 365 * 5) {
                 $val += $offset;
             }
-            my $str = ConvertUnixTime($val);
-            my $frac = $val - int($val);
-            if ($frac != 0) {
-                $frac = sprintf('%.6f', $frac);
-                $frac =~ s/^0//;
-                $frac =~ s/0+$//;
-                $str .= $frac;
-            }
+            my $str = ConvertUnixTime($val, 0, -6);
             return $str . 'Z';
         },
         PrintConv => '$self->ConvertDateTime($val)',
@@ -847,6 +830,34 @@ my %insvLimit = (
     10 => { Name => 'FusionYPR', Format => 'float[3]' },
 );
 
+# found in live photo .mov files
+%Image::ExifTool::QuickTime::setu = (
+    PROCESS_PROC => \&Image::ExifTool::QuickTime::ProcessMOV,
+    cfgv => {
+        Name => 'CFGV',
+        SubDirectory => {
+            TagTable => 'Image::ExifTool::PLIST::Main',
+            ProcessProc => 'Image::ExifTool::PLIST::ProcessBinaryPLIST',
+        },
+    },
+    dims => {
+        Name => 'Dimensions',
+        Format => 'int32u',
+        Count => 2,
+        PrintConv => '$val =~ tr/ /x/; $val',
+    },
+);
+
+# found in live photo .mov files
+%Image::ExifTool::QuickTime::sdpd = (
+    PROCESS_PROC => \&Image::ExifTool::QuickTime::ProcessMOV,
+    sdpi => {
+        Name => 'SDPI',
+        Unknown => 1,
+        Format => 'int32u',
+    },
+);
+
 #------------------------------------------------------------------------------
 # Convert unsigned 32-bit integer to signed
 # Inputs: <none> (uses value in $_)
@@ -896,6 +907,7 @@ sub SaveMetaKeys($$$)
             last if $len < 8 or $pos + $len > $end;
             my $tag = substr($$dataPt, $pos + 4, 4);
             $pos += 8;  $len -= 8;
+            my $base = $$dirInfo{Base} + $pos;
             my $val = substr($$dataPt, $pos, $len);
             $pos += $len;
             my $str;
@@ -919,6 +931,12 @@ sub SaveMetaKeys($$$)
                     }
                     $str .= " ($format)" if $verbose and defined $str;
                 }
+            } else {
+                $et->HandleTag($tagTbl, $tag, undef,
+                    DataPt => \$val,
+                    Base => $base,
+                );
+                next;
             }
             if ($verbose > 1) {
                 if (defined $str) {
@@ -928,7 +946,7 @@ sub SaveMetaKeys($$$)
                     $str = '';
                 }
                 $et->VPrint(1, $$et{INDENT}."- Tag '".PrintableTagID($tag,2)."' ($len bytes)$str\n");
-                $et->VerboseDump(\$val);
+                $et->VerboseDump(\$val, Base => $base);
             }
         }
         if (defined $tagID and defined $format) {
@@ -1731,9 +1749,21 @@ sub ProcessFreeGPS($$$)
             @acc = map { SignedInt32 / 256 } unpack('x68V3', $$dataPt);
         }
 
-    } elsif ($$dataPt =~ /^.{37}\0\0\0A([NS])([EW])\0/s) {
+    } elsif ($$dataPt =~ /^(.{37}|.{85})\0\0\0A([NS])([EW])\0/s) {
 
-        ($latRef, $lonRef) = ($1, $2);
+        if (length($1) == 85) {
+            # Kenwood DRV-A510W (header is 48 bytes longer)
+            # 0000: 00 00 40 00 66 72 65 65 47 50 53 20 f0 03 00 00 [..@.freeGPS ....]
+            # 0010: 4d 4e 3a 44 52 56 2d 41 35 31 30 57 40 56 31 2e [MN:DRV-A510W@V1.]
+            # 0020: 37 5f 42 44 5a 49 43 5a 5f 43 00 00 00 00 00 00 [7_BDZICZ_C......]
+            # 0030: 00 00 00 00 00 00 00 00 3a 3a 73 74 61 72 74 40 [........::start@]
+            # 0040: 0c 00 00 00 10 00 00 00 16 00 00 00 ea 07 00 00 [................]
+            # 0050: 02 00 00 00 1c 00 00 00 41 4e 57 00 55 e7 a5 45 [........ANW.U..E]
+            # 0060: d7 84 52 43 52 b8 d8 41 48 21 9a 43 f9 ff ff ff [..RCR..AH!.C....]
+            # 0070: ff ff ff ff 01 00 00 00 00 00 00 00 00 00 00 00 [................]
+            $$dataPt = substr($$dataPt, 48);
+        }
+        ($latRef, $lonRef) = ($2, $3);
         ($hr,$min,$sec,$yr,$mon,$day) = unpack('x16V6', $$dataPt);
         # test for base64-encoded and encrypted lucky gps strings
         my ($notEnc, $notStr, $lt, $ln);

@@ -1,6 +1,6 @@
 {
-	"empty.title": "Geen bestanden geselecteerd",
-	"empty.subtitle": "Sleep en plaats afbeeldingen, video's of PDF-bestanden om metagegevens automatisch te verwijderen.",
+	"empty.title": "Voeg bestanden toe om op te schonen",
+	"empty.subtitle": "Zet hier afbeeldingen, video's of pdf's neer, of kies een optie.",
 	"table.header.filename": "Geselecteerde bestanden",
 	"table.header.exif-before": "# Exif Voor",
 	"table.header.exif-after": "# Exif Na",
@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "De opgeschoonde uitvoer kon niet worden gecontroleerd. De onvolledige kopie is verwijderd; uw origineel is ongewijzigd.",
 	"cleanupFailedSummary": "De opgeschoonde uitvoer kon niet worden gecontroleerd en de onvolledige uitvoer kon niet worden verwijderd. Uw origineel is ongewijzigd.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Voltooid"
+	"complete": "Voltooid",
+	"empty.dropActive": "Zet bestanden neer om ze op te schonen.",
+	"menu.help.new-releases": "Nieuwe versies…",
+	"intake.chooseFiles": "Bestanden kiezen…",
+	"intake.chooseFolder": "Map kiezen…",
+	"intake.dropZone": "Bestandsdropzone",
+	"intake.unsupportedSkipped": "{count} niet-ondersteunde bestanden overgeslagen",
+	"intake.foldersUnreadable": "{count} mappen konden niet worden gelezen",
+	"intake.outputCopy": "Er worden opgeschoonde kopieën gemaakt — originelen blijven onaangeroerd.",
+	"intake.outputOverwrite": "Bestanden worden op hun huidige locatie opgeschoond."
 }

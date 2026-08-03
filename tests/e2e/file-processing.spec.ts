@@ -306,6 +306,15 @@ test.describe("File Processing", () => {
 	});
 
 	test("applies drag-over CSS class on dragenter", async () => {
+		const emptyState = window.locator(".empty-state__inner");
+		await emptyState.waitFor();
+		await emptyState.evaluate(async (element) => {
+			await Promise.all(
+				element.getAnimations().map((animation) => animation.finished),
+			);
+		});
+		const before = await emptyState.boundingBox();
+
 		// Dispatch dragenter event on the drop zone
 		await window.evaluate(() => {
 			const dropZone = document.querySelector(".drop-zone");
@@ -322,6 +331,11 @@ test.describe("File Processing", () => {
 		// Verify the drag-over active class is applied
 		const activeDropZone = window.locator(".drop-zone--active");
 		await expect(activeDropZone).toBeVisible();
+		await expect(
+			window.locator('.empty-state__instruction[aria-hidden="false"]'),
+		).toHaveText("Drop files to clean.");
+		const during = await emptyState.boundingBox();
+		expect(during).toEqual(before);
 
 		// Dispatch dragleave to remove it
 		await window.evaluate(() => {

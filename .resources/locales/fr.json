@@ -1,6 +1,6 @@
 {
-	"empty.title": "Aucun fichier sélectionné",
-	"empty.subtitle": "Faites glisser-déposer des images, des vidéos ou des fichiers PDF pour supprimer automatiquement les métadonnées.",
+	"empty.title": "Ajoutez des fichiers à nettoyer",
+	"empty.subtitle": "Déposez ici des images, des vidéos ou des PDF, ou choisissez une option.",
 	"table.header.filename": "Fichiers sélectionnés",
 	"table.header.exif-before": "# Exif Avant",
 	"table.header.exif-after": "# Exif Après",
@@ -73,5 +73,14 @@
 	"verificationFailedSummary": "Impossible de vérifier le résultat nettoyé. La copie incomplète a été supprimée ; votre original est inchangé.",
 	"cleanupFailedSummary": "Impossible de vérifier le résultat nettoyé et la sortie incomplète n'a pas pu être supprimée. Votre original est inchangé.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Terminé"
+	"complete": "Terminé",
+	"empty.dropActive": "Déposez les fichiers à nettoyer.",
+	"menu.help.new-releases": "Nouvelles versions…",
+	"intake.chooseFiles": "Choisir des fichiers…",
+	"intake.chooseFolder": "Choisir un dossier…",
+	"intake.dropZone": "Zone de dépôt de fichiers",
+	"intake.unsupportedSkipped": "{count} fichiers non pris en charge ignorés",
+	"intake.foldersUnreadable": "Impossible de lire {count} dossiers",
+	"intake.outputCopy": "Des copies nettoyées seront créées — les originaux resteront intacts.",
+	"intake.outputOverwrite": "Les fichiers seront nettoyés sur place."
 }

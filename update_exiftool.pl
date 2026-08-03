@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
-# Download the latest version of ExifTool for Unix and Windows
-# and verify their checksums.
+# Download the pinned version of ExifTool for Unix and 32-bit Windows
+# and verify both archives against upstream SHA2-256 checksums.
 #
 # The Unix version is taken from the source archive, removes
 # extra help files to reduce filesize, and squashes it down into
@@ -18,8 +18,12 @@ use autodie;    #functions throw exception on failure instead of returning false
 use utf8;       #enable UTF-8 in source code
 use open qw(:std :utf8);    #set default encoding of filehandles to UTF-8
 
+use constant EXIFTOOL_VERSION      => '13.59';
 use constant EXIFTOOL_BASE_URL     => 'https://exiftool.org/';
-use constant CHECKSUMS_URL         => EXIFTOOL_BASE_URL . 'checksums.txt';
+use constant CHECKSUMS_URL         => EXIFTOOL_BASE_URL
+  . 'checksums-' . EXIFTOOL_VERSION . '.txt';
+use constant DOWNLOAD_BASE_URL =>
+  'https://downloads.sourceforge.net/project/exiftool/';
 use constant DOWNLOADS_WORKING_DIR => 'exiftool_downloads';
 use constant RESOURCES_DIR         => '.resources';
 use constant BIN_DIR_UNIX          => RESOURCES_DIR . '/nix/bin';
@@ -127,43 +131,57 @@ sub remove_dir {
 
 # Example checksum file output:
 #
-# SHA1(Image-ExifTool-12.01.tar.gz)= 140f014e7686ed80528b919d64c4de0a869e59aa
-# SHA1(exiftool-12.01.zip)= a28c3f943165d1eec3ff69bb665390e340686ec6
-# SHA1(ExifTool-12.01.dmg)= 327fd67f60fd7f62742d4ddb2f9999da13dc785f
-# MD5 (Image-ExifTool-12.01.tar.gz) = 6980a6d435f83c0af060148a354acf24
-# MD5 (exiftool-12.01.zip) = e11260548ebff70a3ce27d48e46dfe94
-# MD5 (ExifTool-12.01.dmg) = 7a41e56901564f9bd4eb3f907846c118
+# SHA2-256(Image-ExifTool-13.59.tar.gz)= 668ea3...8fd65a
+# SHA2-256(exiftool-13.59_32.zip)= fe9a55...f05af
 sub get_checksum_file_text {
-  my $command = 'curl ' . CHECKSUMS_URL;
+  my @command = ( 'curl', '--fail', '--silent', '--show-error', CHECKSUMS_URL );
 
-  print_command($command);
-  return qx($command);
+  print_command(@command);
+  open my $curl, '-|', @command;
+  local $/;
+  my $text = <$curl>;
+  close $curl;
+  defined($text) && length($text)
+    or die "Empty checksum response from " . CHECKSUMS_URL . "\n";
+
+  return $text;
 }
 
-sub get_code_zip_info {
-  my $checksum_file_text = shift;
+sub get_sha256_for_filename {
+  my ( $checksum_file_text, $filename ) = @_;
+  my $quoted_filename = quotemeta($filename);
+  my @matches =
+    $checksum_file_text =~ /^SHA2-256\($quoted_filename\)= ([a-f0-9]{64})$/mg;
 
-  my ( $filename, $sha1 ) =
-    $checksum_file_text =~ /SHA1\((Image-ExifTool-[\w.]+tar[.]gz)\)= (\w+)/m;
+  @matches == 1
+    or die "Expected exactly one SHA2-256 checksum for $filename\n";
 
-  return ( $filename, $sha1 );
+  return $matches[0];
 }
 
-sub get_windows_exe_info {
+sub get_code_archive_info {
   my $checksum_file_text = shift;
+  my $filename = 'Image-ExifTool-' . EXIFTOOL_VERSION . '.tar.gz';
 
-  my ( $filename, $sha1 ) =
-    $checksum_file_text =~ /SHA1\((exiftool-[\w.]+zip)\)= (\w+)/m;
+  return ( $filename, get_sha256_for_filename( $checksum_file_text, $filename ) );
+}
 
-  return ( $filename, $sha1 );
+sub get_windows_archive_info {
+  my $checksum_file_text = shift;
+  # The 32-bit distribution also runs on 64-bit Windows, so one bundle serves
+  # both Windows architectures configured in package.json.
+  my $filename = 'exiftool-' . EXIFTOOL_VERSION . '_32.zip';
+
+  return ( $filename, get_sha256_for_filename( $checksum_file_text, $filename ) );
 }
 
 sub download_file {
   my $filename = shift;
 
-  my $url     = EXIFTOOL_BASE_URL . $filename;
+  my $url = DOWNLOAD_BASE_URL . $filename;
   my @command = (
-    'wget', '--no-clobber', '--directory-prefix', DOWNLOADS_WORKING_DIR, $url
+    'curl', '--fail', '--location', '--show-error', '--retry', '3',
+    '--output', DOWNLOADS_WORKING_DIR . "/$filename", $url
   );
   run_command(@command);
 
@@ -171,21 +189,27 @@ sub download_file {
 }
 
 sub verify_checksum {
-  my ( $filename, $sha1 ) = @_;
+  my ( $filename, $expected_sha256 ) = @_;
 
-  my $command = 'shasum ' . DOWNLOADS_WORKING_DIR . "/$filename";
-  print_command($command);
-  my $output = qx($command);
-  my ($calculated_sha1) = split( ' ', $output );
+  my @command =
+    ( 'shasum', '-a', '256', DOWNLOADS_WORKING_DIR . "/$filename" );
+  print_command(@command);
+  open my $shasum, '-|', @command;
+  my $output = <$shasum>;
+  close $shasum;
+  defined($output)
+    or die "No SHA2-256 output for $filename\n";
+  my ($calculated_sha256) = $output =~ /^([a-f0-9]{64})\s/;
+  defined($calculated_sha256)
+    or die "Malformed SHA2-256 output for $filename\n";
 
-  print $calculated_sha1;
-  my $is_match = $sha1 eq $calculated_sha1;
+  print $calculated_sha256;
 
-  if ( $sha1 eq $calculated_sha1 ) {
+  if ( $expected_sha256 eq $calculated_sha256 ) {
     print_success(" ... Match!\n");
   }
   else {
-    die "\n!!! Did NOT match SHA1 from ExifTool website: $sha1 !!!\n";
+    die "\n!!! Did NOT match upstream SHA2-256: $expected_sha256 !!!\n";
   }
 
   return;
@@ -270,16 +294,21 @@ sub copy_unix_binary {
 }
 
 sub verify_successful_install {
-  my $command = BIN_DIR_UNIX . '/exiftool -ver';
-  my $version = qx($command);
-  if ($version) {
-    print "\n";
-    print_success("Success! Updated to ExifTool $version\n");
-  }
-  else {
-    print_error(
-      "Error while attempting to verify ExifTool install with $command\n");
-  }
+  my $exiftool = BIN_DIR_UNIX . '/exiftool';
+  open my $version_output, '-|', $exiftool, '-ver'
+    or die "Unable to run $exiftool -ver: $!\n";
+  my $version = <$version_output>;
+  close $version_output
+    or die "ExifTool version check failed for $exiftool\n";
+
+  die "ExifTool version check returned no output for $exiftool\n"
+    if !defined $version;
+  chomp $version;
+  die "Expected ExifTool " . EXIFTOOL_VERSION . ", got '$version'\n"
+    if $version ne EXIFTOOL_VERSION;
+
+  print "\n";
+  print_success("Success! Updated to ExifTool $version\n");
 
   return;
 }
@@ -329,15 +358,16 @@ sub is_exiftool_already_downloaded {
 sub run {
   my $cache_downloads_working_dir = shift;
 
-  header('Fetching ExifTool SHA1 checksums from website');
+  header('Fetching ExifTool SHA2-256 checksums from website');
   my $checksum_file_text = get_checksum_file_text();
-  my ( $code_filename, $code_sha1 ) = get_code_zip_info($checksum_file_text);
-  my ( $windows_version_filename, $windows_sha1 ) =
-    get_windows_exe_info($checksum_file_text);
+  my ( $code_filename, $code_sha256 ) =
+    get_code_archive_info($checksum_file_text);
+  my ( $windows_version_filename, $windows_sha256 ) =
+    get_windows_archive_info($checksum_file_text);
   my $exiftool_already_downloaded =
     is_exiftool_already_downloaded( $code_filename, $windows_version_filename );
-  print_output("$code_filename - $code_sha1\n");
-  print_output("$windows_version_filename - $windows_sha1\n");
+  print_output("$code_filename - $code_sha256\n");
+  print_output("$windows_version_filename - $windows_sha256\n");
 
   header('Recreate downloads working directory');
   if ( $cache_downloads_working_dir && $exiftool_already_downloaded ) {
@@ -362,9 +392,9 @@ sub run {
     download_file($windows_version_filename);
   }
 
-  header('Verifying SHA1 checksums');
-  verify_checksum( $code_filename,            $code_sha1 );
-  verify_checksum( $windows_version_filename, $windows_sha1 );
+  header('Verifying SHA2-256 checksums');
+  verify_checksum( $code_filename,            $code_sha256 );
+  verify_checksum( $windows_version_filename, $windows_sha256 );
 
   header('Extracting archives');
   extract_source_code($code_filename);
@@ -392,10 +422,12 @@ sub run {
 # Pass the command line argument --cache-downloads-working-dir
 # to cache the downloads working directory to avoid repeated
 # downloads from the exiftool server. Useful for CI
-my $cache_downloads_working_dir = defined($ARGV[0]) && $ARGV[0] eq "--cache-downloads-working-dir";
+unless (caller) {
+  my $cache_downloads_working_dir =
+    defined($ARGV[0]) && $ARGV[0] eq "--cache-downloads-working-dir";
 
-run($cache_downloads_working_dir);
-verify_successful_install();
+  run($cache_downloads_working_dir);
+  verify_successful_install();
+}
 
 1;
-

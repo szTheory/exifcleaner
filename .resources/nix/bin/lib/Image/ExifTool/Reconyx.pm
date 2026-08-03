@@ -16,7 +16,7 @@ package Image::ExifTool::Reconyx;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '1.07';
+$VERSION = '1.08';
 
 # info for Type2 version tags
 my %versionInfo = (
@@ -60,8 +60,8 @@ my %sunday1 = (
 );
 
 my %convUnicode = (
-    ValueConv => '$self->Decode($val, "UCS2", "II")',
-    ValueConvInv => '$self->Encode($val, "UCS2", "II")',
+    ValueConv => '$self->Decode($val, "UTF16", "II")',
+    ValueConvInv => '$self->Encode($val, "UTF16", "II")',
 );
 
 # maker notes for Reconyx HyperFire cameras (ref PH)
@@ -697,6 +697,8 @@ my %convUnicode = (
     0x93 => { Name => 'DirectoryNumber',    Format => 'int16u' },
     0x95 => { Name => 'FileNumber',         Format => 'int16u' },
 );
+
+1; # end
 
 __END__
 

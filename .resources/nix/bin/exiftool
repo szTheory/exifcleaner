@@ -11,7 +11,7 @@ use strict;
 use warnings;
 require 5.004;
 
-my $version = '13.50';
+my $version = '13.59';
 
 $^W = 1;    # enable global warnings
 
@@ -202,6 +202,7 @@ my $progressIncr;   # increment for progress counter
 my $progressMax;    # total number of files to process
 my $progressNext;   # next progress count to output
 my $progStr;        # progress message string
+my $purge;          # flag to purge memory
 my $quiet;          # flag to disable printing of informational messages / warnings
 my $rafStdin;       # File::RandomAccess for stdin (if necessary to rewind)
 my $recurse;        # recurse into subdirectories (2=also hidden directories)
@@ -308,6 +309,7 @@ my @recommends = qw(
     POSIX::strptime
     Time::Local
     Unicode::LineBreak
+    File::StatX
     Compress::Raw::Lzma
     IO::Compress::RawDeflate
     IO::Uncompress::RawInflate
@@ -521,6 +523,7 @@ undef $progressCount;
 undef $progressIncr;
 undef $progressMax;
 undef $progressNext;
+undef $purge;
 undef $rafStdin;
 undef $recurse;
 undef $scanWritable;
@@ -791,6 +794,7 @@ for (;;) {
             print "Optional libraries:\n";
             foreach (@recommends) {
                 next if /^Win32/ and $^O ne 'MSWin32';
+                next if /StatX/ and $^O ne 'linux';
                 my $ver = eval "require $_ and \$${_}::VERSION";
                 my $alt = $altRecommends{$_};
                 # check for alternative if primary not available
@@ -876,6 +880,11 @@ for (;;) {
             $val = undef unless $opt =~ s/\^$// or length $val;
             $mt->Options($opt => $val);
         } else {
+            unless ($pass) {
+                push @nextPass, '-api';
+                push @nextPass, $opt if defined $opt;
+                next;
+            }
             print "Available API Options:\n";
             my $availableOptions = Image::ExifTool::AvailableOptions();
             $$_[3] or printf("  %-17s - %s\n", $$_[0], $$_[2]) foreach @$availableOptions;
@@ -898,7 +907,11 @@ for (;;) {
     if ($a eq 'charset') {
         my $charset = (@ARGV and $ARGV[0] !~ /^(-|\xe2\x88\x92)/) ? shift : undef;
         if (not $charset) {
-            $pass or push(@nextPass, '-charset'), next;
+            unless ($pass) {
+                push @nextPass, '-charset' ;
+                push @nextPass, $charset if defined $charset;
+                next;
+            }
             my %charsets;
             $charsets{$_} = 1 foreach values %Image::ExifTool::charsetName;
             PrintTagList('Available character sets', sort keys %charsets);
@@ -996,7 +1009,8 @@ for (;;) {
     /^list_dir$/i and $listDir = 1, next;
     (/^e$/ or $a eq '-composite') and $mt->Options(Composite => 0), next;
     (/^-e$/ or $a eq 'composite') and $mt->Options(Composite => 1), next;
-    (/^E$/ or $a eq 'escapehtml') and require Image::ExifTool::HTML and $escapeHTML = 1, next;
+    # (-eh is undocumented)
+    (/^E$/ or $a eq 'escapehtml' or $a eq 'eh') and require Image::ExifTool::HTML and $escapeHTML = 1, next;
     ($a eq 'ec' or $a eq 'escapec') and $escapeC = 1, next;
     ($a eq 'ex' or $a eq 'escapexml') and $escapeXML = 1, next;
     if (/^echo(\d)?$/i) {
@@ -1140,8 +1154,10 @@ for (;;) {
             $langOpt =~ tr/-A-Z/_a-z/;
             $mt->Options(Lang => $langOpt);
             next if $langOpt eq $mt->Options('Lang');
-        } else {
-            $pass or push(@nextPass, '-lang'), next;
+        } elsif (not $pass) {
+            push @nextPass, '-lang';
+            push @nextPass, $langOpt if defined $langOpt;
+            next;
         }
         my $langs = $quiet ? '' : "Available languages:\n";
         $langs .= "  $_ - $Image::ExifTool::langName{$_}\n" foreach @Image::ExifTool::langs;
@@ -1172,9 +1188,9 @@ for (;;) {
         $vout = \*STDERR if $vout =~ /^-(\.\w+)?$/;
         next;
     }
-    /^overwrite_original$/i and $overwriteOrig = 1, next;
-    /^overwrite_original_in_place$/i and $overwriteOrig = 2, next;
-    /^plot$/i and require Image::ExifTool::Plot and $plot = Image::ExifTool::Plot->new, next;
+    $a eq 'overwrite_original' and $overwriteOrig = 1, next;
+    $a eq 'overwrite_original_in_place' and $overwriteOrig = 2, next;
+    $a eq 'plot' and require Image::ExifTool::Plot and $plot = Image::ExifTool::Plot->new, next;
     if (/^p(-?)$/ or /^printformat(-?)$/i) {
         my $fmt = shift;
         if ($pass) {
@@ -1192,7 +1208,7 @@ for (;;) {
         next;
     }
     (/^P$/ or $a eq 'preserve') and $preserveTime = 1, next;
-    /^password$/i and $mt->Options(Password => shift), next;
+    $a eq 'password' and $mt->Options(Password => shift), next;
     if (/^progress(\d*)(:.*)?$/i) {
         $progressIncr = $1 || 1;
         $progressNext = 0; # start showing progress at the first file
@@ -1207,6 +1223,7 @@ for (;;) {
         $progressCount = 0;
         next;
     }
+    /^purge(\d*)$/i and $purge = $1||1, Image::ExifTool::Purge($purge), next; # (undocumented) added in 13.53
     /^q(uiet)?$/i and ++$quiet, next;
     /^r(ecurse)?(\.?)$/i and $recurse = ($2 ? 2 : 1), next;
     if ($a eq 'require') { # (undocumented) added in version 8.65
@@ -1222,10 +1239,10 @@ for (;;) {
         }
         next;
     }
-    /^restore_original$/i and $deleteOrig = 0, next;
+    $a eq 'restore_original' and $deleteOrig = 0, next;
     (/^S$/ or $a eq 'veryshort') and $outFormat+=2, next;
     /^s(hort)?(\d*)$/i and $outFormat = $2 eq '' ? $outFormat + 1 : $2, next;
-    /^scanforxmp$/i and $mt->Options(ScanForXMP => 1), next;
+    $a eq 'scanforxmp' and $mt->Options(ScanForXMP => 1), next;
     if (/^sep(arator)?$/i) {
         my $sep = $listSep = shift;
         defined $listSep or Error("Expecting list item separator for -sep option\n"), $badCmd=1, next;
@@ -1360,7 +1377,7 @@ for (;;) {
         next;
     }
     (/^X$/ or $a eq 'xmlformat') and $xml = 1, $html = $json = 0, $mt->Options(Duplicates => 1), next;
-    if (/^php$/i) {
+    if ($a eq 'php') {
         $json = 2;
         $html = $xml = 0;
         $mt->Options(Duplicates => 1);
@@ -2074,6 +2091,8 @@ if ($countBadWr or $countBadCr or $countBad) {
     $rtnVal = 2;
 }
 
+Image::ExifTool::Purge(0) if $purge;    # do final purging
+
 # clean up after each command
 Cleanup();
 
@@ -2418,7 +2437,8 @@ sub GetImageInfo($$)
             if (defined $tag) {
                 $done{$tag} = 1;
                 $g = $et->GetGroup($tag, $showGroup);
-            } else {
+            }
+            unless ($g) { # ($g could be '' if requesting non-existent tag, and this will sort last)
                 for (;;) {
                     $tag2 = shift @found2;
                     defined $tag2 or $g = '', last;
@@ -4198,7 +4218,8 @@ sub SetWindowTitle($)
     if ($curTitle ne $title) {
         $curTitle = $title;
         if ($^O eq 'MSWin32') {
-            $title =~ s/([&\/\?:|"<>])/^$1/g;   # escape special chars
+            # allow only safe characters
+            $title =~ tr(-_a-zA-Z0-9 \(\)[]{}%.+/:;,=?*!@#$~')()dc;
             eval { system qq{title $title} };
         } else {
             # (this only works for XTerm terminals, and STDERR must go to the console)
@@ -4253,6 +4274,7 @@ sub ProcessFiles($;$)
                     next if $endDir{$d};
                 }
                 GetImageInfo($et, $file);
+                Image::ExifTool::Purge($purge) if $purge;
                 $end and Warn("End called - $file\n");
                 if ($endDir) {
                     Warn("EndDir called - $file\n");
@@ -4382,6 +4404,7 @@ sub ScanDir($$;$)
             push(@$list, $path);
         } else {
             GetImageInfo($et, $path);
+            Image::ExifTool::Purge($purge) if $purge;
             if ($end) {
                 Warn("End called - $file\n");
                 last;
@@ -4642,6 +4665,7 @@ sub FilenameSPrintf($;$@)
     $part{F} = $part{f} . $part{E};
     ($part{D} = $part{d}) =~ s{/+$}{};
     @part{qw(t g s o)} = @extra;
+    $part{o} =~ s(^.*[/\\])()s if $part{o}; # remove directory if it exists
     my ($filename, $pos) = ('', 0);
     while ($fmt =~ /(%([-+]?)(\d*)([.:]?)(\d*)([lu]?)([dDfFeEtgso]))/g) {
         $filename .= substr($fmt, $pos, pos($fmt) - $pos - length($1));
@@ -5108,52 +5132,52 @@ supported by ExifTool (r = read, w = write, c = create):
 
   File Types
   ------------+-------------+-------------+-------------+------------
-  360   r/w   | DR4   r/w/c | JP2   r/w   | ODS   r     | RW2   r/w
-  3FR   r     | DSF   r     | JPEG  r/w   | ODT   r     | RWL   r/w
-  3G2   r/w   | DSS   r     | JSON  r     | OFR   r     | RWZ   r
-  3GP   r/w   | DV    r     | JXL   r/w   | OGG   r     | RM    r
-  7Z    r     | DVB   r/w   | K25   r     | OGV   r     | SEQ   r
-  A     r     | DVR-MS r    | KDC   r     | ONP   r     | SKETCH r
-  AA    r     | DYLIB r     | KEY   r     | OPUS  r     | SO    r
-  AAC   r     | EIP   r     | KVAR  r     | ORF   r/w   | SR2   r/w
-  AAE   r     | EPS   r/w   | LA    r     | ORI   r/w   | SRF   r
-  AAX   r/w   | EPUB  r     | LFP   r     | OTF   r     | SRW   r/w
-  ACR   r     | ERF   r/w   | LIF   r     | PAC   r     | SVG   r
-  AFM   r     | EXE   r     | LNK   r     | PAGES r     | SWF   r
-  AI    r/w   | EXIF  r/w/c | LRV   r/w   | PBM   r/w   | THM   r/w
-  AIFF  r     | EXR   r     | M2TS  r     | PCAP  r     | TIFF  r/w
-  APE   r     | EXV   r/w/c | M4A/V r/w   | PCAPNG r    | TNEF  r
-  ARQ   r/w   | F4A/V r/w   | MACOS r     | PCD   r     | TORRENT r
-  ARW   r/w   | FFF   r/w   | MAX   r     | PCX   r     | TTC   r
-  ASF   r     | FITS  r     | MEF   r/w   | PDB   r     | TTF   r
-  AVI   r     | FLA   r     | MIE   r/w/c | PDF   r/w   | TXT   r
-  AVIF  r/w   | FLAC  r     | MIFF  r     | PEF   r/w   | URL   r
-  AZW   r     | FLIF  r/w   | MKA   r     | PFA   r     | VCF   r
-  BMP   r     | FLV   r     | MKS   r     | PFB   r     | VNT   r
-  BPG   r     | FPF   r     | MKV   r     | PFM   r     | VRD   r/w/c
-  BTF   r     | FPX   r     | MNG   r/w   | PGF   r     | VSD   r
-  C2PA  r     | GIF   r/w   | MOBI  r     | PGM   r/w   | VSDX  r
-  CHM   r     | GLV   r/w   | MODD  r     | PLIST r     | WAV   r
-  COS   r     | GPR   r/w   | MOI   r     | PICT  r     | WDP   r/w
-  CR2   r/w   | GZ    r     | MOS   r/w   | PMP   r     | WEBP  r/w
-  CR3   r/w   | HDP   r/w   | MOV   r/w   | PNG   r/w   | WEBM  r
-  CRM   r/w   | HDR   r     | MP3   r     | PPM   r/w   | WMA   r
-  CRW   r/w   | HEIC  r/w   | MP4   r/w   | PPT   r     | WMV   r
-  CS1   r/w   | HEIF  r/w   | MPC   r     | PPTX  r     | WOFF  r
-  CSV   r     | HTML  r     | MPG   r     | PS    r/w   | WOFF2 r
-  CUR   r     | ICC   r/w/c | MPO   r/w   | PSB   r/w   | WPG   r
-  CZI   r     | ICO   r     | MQV   r/w   | PSD   r/w   | WTV   r
-  DCM   r     | ICS   r     | MRC   r     | PSP   r     | WV    r
-  DCP   r/w   | IDML  r     | MRW   r/w   | QTIF  r/w   | X3F   r/w
-  DCR   r     | IIQ   r/w   | MXF   r     | R3D   r     | XCF   r
-  DFONT r     | IND   r/w   | NEF   r/w   | RA    r     | XISF  r
-  DIVX  r     | INSP  r/w   | NKA   r     | RAF   r/w   | XLS   r
-  DJVU  r     | INSV  r     | NKSC  r/w   | RAM   r     | XLSX  r
-  DLL   r     | INX   r     | NRW   r/w   | RAR   r     | XMP   r/w/c
-  DNG   r/w   | ISO   r     | NUMBERS r   | RAW   r/w   | ZIP   r
-  DOC   r     | ITC   r     | NXD   r     | RIFF  r     |
-  DOCX  r     | J2C   r     | O     r     | RSRC  r     |
-  DPX   r     | JNG   r/w   | ODP   r     | RTF   r     |
+  360   r/w   | DR4   r/w/c | JNG   r/w   | ODP   r     | RTF   r
+  3FR   r     | DSF   r     | JP2   r/w   | ODS   r     | RW2   r/w
+  3G2   r/w   | DSS   r     | JPEG  r/w   | ODT   r     | RWL   r/w
+  3GP   r/w   | DV    r     | JSON  r     | OFR   r     | RWZ   r
+  7Z    r     | DVB   r/w   | JXL   r/w   | OGG   r     | RM    r
+  A     r     | DVR-MS r    | K25   r     | OGV   r     | SEQ   r
+  AA    r     | DYLIB r     | KDC   r     | ONP   r     | SKETCH r
+  AAC   r     | EIP   r     | KEY   r     | OPUS  r     | SO    r
+  AAE   r     | EPS   r/w   | KVAR  r     | ORF   r/w   | SR2   r/w
+  AAX   r/w   | EPUB  r     | LA    r     | ORI   r/w   | SRF   r
+  ACR   r     | ERF   r/w   | LFP   r     | OTF   r     | SRW   r/w
+  AFM   r     | EXE   r     | LIF   r     | PAC   r     | SVG   r
+  AI    r/w   | EXIF  r/w/c | LNK   r     | PAGES r     | SWF   r
+  AIFF  r     | EXR   r     | LRV   r/w   | PBM   r/w   | THM   r/w
+  APE   r     | EXV   r/w/c | M2TS  r     | PCAP  r     | TIFF  r/w
+  ARQ   r/w   | F4A/V r/w   | M4A/V r/w   | PCAPNG r    | TNEF  r
+  ARW   r/w   | FFF   r/w   | MACOS r     | PCD   r     | TORRENT r
+  ASF   r     | FIT   r     | MAX   r     | PCX   r     | TTC   r
+  AVI   r     | FITS  r     | MEF   r/w   | PDB   r     | TTF   r
+  AVIF  r/w   | FLA   r     | MIE   r/w/c | PDF   r/w   | TXT   r
+  AZW   r     | FLAC  r     | MIFF  r     | PEF   r/w   | URL   r
+  BMP   r     | FLIF  r/w   | MKA   r     | PFA   r     | VCF   r
+  BPG   r     | FLV   r     | MKS   r     | PFB   r     | VNT   r
+  BTF   r     | FPF   r     | MKV   r     | PFM   r     | VRD   r/w/c
+  C2PA  r     | FPX   r     | MNG   r/w   | PGF   r     | VSD   r
+  CHM   r     | GIF   r/w   | MOBI  r     | PGM   r/w   | VSDX  r
+  COS   r     | GLV   r/w   | MODD  r     | PLIST r     | WAV   r
+  CR2   r/w   | GPR   r/w   | MOI   r     | PICT  r     | WDP   r/w
+  CR3   r/w   | GZ    r     | MOS   r/w   | PMP   r     | WEBP  r/w
+  CRM   r/w   | HDP   r/w   | MOV   r/w   | PNG   r/w   | WEBM  r
+  CRW   r/w   | HDR   r     | MP3   r     | PPM   r/w   | WMA   r
+  CS1   r/w   | HEIC  r/w   | MP4   r/w   | PPT   r     | WMV   r
+  CSV   r     | HEIF  r/w   | MPC   r     | PPTX  r     | WOFF  r
+  CUR   r     | HTML  r     | MPG   r     | PS    r/w   | WOFF2 r
+  CZI   r     | ICC   r/w/c | MPO   r/w   | PSB   r/w   | WPG   r
+  DCM   r     | ICO   r     | MQV   r/w   | PSD   r/w   | WTV   r
+  DCP   r/w   | ICS   r     | MRC   r     | PSP   r     | WV    r
+  DCR   r     | IDML  r     | MRW   r/w   | QTIF  r/w   | X3F   r/w
+  DFONT r     | IIQ   r/w   | MXF   r     | R3D   r     | XCF   r
+  DIVX  r     | IND   r/w   | NEF   r/w   | RA    r     | XISF  r
+  DJVU  r     | INSP  r/w   | NKA   r     | RAF   r/w   | XLS   r
+  DLL   r     | INSV  r     | NKSC  r/w   | RAM   r     | XLSX  r
+  DNG   r/w   | INX   r     | NRW   r/w   | RAR   r     | XMP   r/w/c
+  DOC   r     | ISO   r     | NUMBERS r   | RAW   r/w   | ZIP   r
+  DOCX  r     | ITC   r     | NXD   r     | RIFF  r     |
+  DPX   r     | J2C   r     | O     r     | RSRC  r     |
 
   Meta Information
   ----------------------+----------------------+---------------------
@@ -5265,7 +5289,7 @@ L<Other options|/Other options>
 
   -@ ARGFILE                       Read command-line arguments from file
   -k          (-pause)             Pause before terminating
-  -list[w|f|wf|g[NUM]|d|x]         List various exiftool capabilities
+  -list[w|f|r|wf|g[NUM]|d|x|geo]   List various exiftool capabilities
   -ver                             Print exiftool version number
   --                               End of options
 
@@ -5283,7 +5307,7 @@ L<Utilities|/Utilities>
 
 L<Advanced options|/Advanced options>
 
-  -api OPT[[^]=[VAL]]              Set ExifTool API option
+  -api [OPT[[^]=[VAL]]]            Set ExifTool API option
   -common_args                     Define common arguments
   -config CFGFILE                  Specify configuration file name
   -echo[NUM] TEXT                  Echo text to stdout or stderr
@@ -5341,9 +5365,10 @@ information.  Use the B<-s> option to see the tag names instead.
 Exclude specified tag from extracted information.  Same as the B<-x> option.
 Group names and wildcards are permitted as described above for B<->I<TAG>.
 Once excluded from the output, a tag may not be re-included by a subsequent
-option.  May also be used following a B<-tagsFromFile> option to exclude
-tags from being copied (when redirecting to another tag, it is the source
-tag that should be excluded), or to exclude groups from being deleted when
+option.  Also note that this excludes the tag from being used in a C<-if>
+condition.  May be used following a B<-tagsFromFile> option to exclude tags
+from being copied (when redirecting to another tag, it is the source tag
+that should be excluded), or to exclude groups from being deleted when
 deleting all information (eg. C<-all= --exif:all> deletes all but EXIF
 information).  But note that this will not exclude individual tags from a
 group delete (unless a family 2 group is specified, see note 4 below).
@@ -5530,7 +5555,7 @@ C<E<lt>> to avoid confusion with the C<E<lt>=> operator which sets the tag
 value from the contents of a file.  A single space at the start of the
 string is removed if it exists, but all other whitespace in the string is
 preserved.  See note 8 below about using the redirection feature with
-list-type stags, shortcuts or when using wildcards in tag names.
+list-type tags, shortcuts or when using wildcards in tag names.
 
 See L</COPYING EXAMPLES> for examples using B<-tagsFromFile>.
 
@@ -5601,7 +5626,7 @@ wildcards.  When copying directly, the values of each matching source tag
 are copied individually to the destination tag (as if they were separate
 assignments).  However, when interpolated inside a string, list items and
 the values of shortcut tags are concatenated (with a separator set by the
-B<-sep> option), and wildcards are not allowed.Another difference is that a
+B<-sep> option), and wildcards are not allowed. Another difference is that a
 minor warning is generated if a tag doesn't exist when interpolating its
 value in a string (with C<$>), but isn't when copying the tag directly.
 
@@ -5875,9 +5900,10 @@ Escape characters in output tag values for HTML (B<-E>), XML (B<-ex>) or C
 (B<-ec>).  For HTML, all characters with Unicode code points above U+007F
 are escaped as well as the following 5 characters: & (&amp;) E<39> (&#39;)
 E<quot> (&quot;) E<gt> (&gt;) and E<lt> (&lt;).  For XML, only these 5
-characters are escaped.  The B<-E> option is implied with B<-h>, and B<-ex>
-is implied with B<-X>.  For C, all control characters and the backslash are
-escaped.  The inverse conversion is applied when writing tags.
+characters are escaped.  The B<-E> option is implied with B<-h>, B<-ex> is
+implied with B<-X>, B<-ec> is implied with B<-json>, and none of these
+options apply to the B<-csv> output.  For C, all control characters and the
+backslash are escaped. The inverse conversion is applied when writing tags.
 
 =item B<-f> (B<-forcePrint>)
 
@@ -6136,7 +6162,7 @@ with this command:
 
 produces output like this:
 
-    -- Generated by ExifTool 13.50 --
+    -- Generated by ExifTool 13.59 --
     File: a.jpg - 2003:10:31 15:44:19
     (f/5.6, 1/60s, ISO 100)
     File: b.jpg - 2006:05:23 11:57:38
@@ -6286,7 +6312,7 @@ each processed file when writing and the new file name when renaming,
 moving or copying.  Verbose levels above B<-v0> do not flush after each
 line.  Also see the B<-progress> option.
 
-=item B<-w>[+|!] I<EXT> or I<FMT> (B<-textOut>)
+=item B<-w>[+][!] I<EXT> or I<FMT> (B<-textOut>)
 
 Write console output to files with names ending in I<EXT>, one for each
 source file.  The output file name is obtained by replacing the source file
@@ -6422,7 +6448,7 @@ natural numbers starting from 1, instead of 0 (see example F above).
 This same I<FMT> syntax is used with the B<-o> and B<-tagsFromFile> options,
 although %c and %C are only valid for output file names.
 
-=item B<-W>[+|!] I<FMT> (B<-tagOut>)
+=item B<-W>[+][!] I<FMT> (B<-tagOut>)
 
 This enhanced version of the B<-w> option allows a separate output file to
 be created for each extracted tag.  See the B<-w> option documentation above
@@ -6433,12 +6459,12 @@ between B<-W> and B<-w>:
 
 2) B<-W> supports four additional format codes:  %t, %g and %s represent the
 tag name, group name, and suggested extension for the output file (based on
-the format of the data), and %o represents the value of the
-OriginalRawFileName or OriginalFileName tag from the input file (including
-extension).  The %g code may be followed by a single digit to specify the
-group family number (eg. %g1), otherwise family 0 is assumed.  The substring
-width/position/case specifiers may be used with these format codes in
-exactly the same way as with %f and %e.
+the format of the data), and %o is the value of the OriginalRawFileName or
+OriginalFileName tag from the input file (without directory name, but
+including extension).  The %g code may be followed by a single digit to
+specify the group family number (eg. %g1), otherwise family 0 is assumed.
+The substring width/position/case specifiers may be used with these format
+codes in exactly the same way as with %f and %e.
 
 3) The argument for B<-W> is interpreted as a file name if it contains no
 format codes.  (For B<-w>, this would be a file extension.)  This change
@@ -7340,15 +7366,17 @@ necessary when using this technique.)
 Set user parameter.  I<PARAM> is an arbitrary user parameter name.  This is
 an interface to the API UserParam option (see the
 L<Image::ExifTool Options|Image::ExifTool/Options> documentation), and
-provides a method to access user-defined parameters in arguments to the
+provides a method to access user-defined parameters in arguments of the
 B<-if>, B<-p> and B<-fileNUM> options as if they were any other tag.
 Appending a hash tag (C<#>) to I<PARAM> (eg. C<-userParam MyTag#=yes>) also
 causes the parameter to be extracted as a normal tag in the UserParam group.
- Similar to the B<-api> option, the parameter value is set to 1 if I<=VAL>
+Similar to the B<-api> option, the parameter value is set to 1 if I<=VAL>
 is omitted, undef if just I<VAL> is omitted with C<=>, or an empty string if
-I<VAL> is omitted with C<^=>.
+I<VAL> is omitted with C<^=>.  Examples:
 
     exiftool -p '$test from $filename' -userparam test=Hello FILE
+
+    exiftool "-description<mytag" -userparam mytag#="test" FILE
 
 =back
 

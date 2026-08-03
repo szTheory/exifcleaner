@@ -59,7 +59,7 @@ use Image::ExifTool::Exif;
 use Image::ExifTool::GPS;
 use Image::ExifTool::HP;
 
-$VERSION = '3.60';
+$VERSION = '3.63';
 
 sub CryptShutterCount($$);
 sub PrintFilter($$$);
@@ -568,6 +568,7 @@ my %pentaxModelID = (
     0x132b8 => 'KF', #github322 (Ricoh)
     0x132d6 => 'K-3 Mark III Monochrome', #github226 (Ricoh)
     0x132e0 => 'GR IV', #github347 (Ricoh)
+    0x13330 => 'GR IV Monochrome', #forum17904 (Ricoh)
 );
 
 # Pentax city codes - (PH, Optio WP)
@@ -2231,6 +2232,7 @@ my %binaryDataAttrs = (
             32768 => 'Standard', #KG (K-3IIIm) (was "n/a" previously - PH)
             32769 => 'Hard', #KG (K-3IIIm)
             32770 => 'Soft', #KG (K-3IIIm)
+            33024 => 'Monochrome', #forum17904 (GR IV Monochrome)
         },
     },
     0x0050 => { #PH
@@ -2740,6 +2742,11 @@ my %binaryDataAttrs = (
                 }
             },
         },
+    },
+    0x009e => { #https://www.dpreview.com/forums/threads/gr-iv-hdf-dng-exif-data.4837151/#post-68693164
+        Name => 'HDF', # (Highlight Diffusion Filter)
+        Writable => 'int8u',
+        PrintConv => { 0 => 'Off', 1 => 'On' },
     },
     0x0200 => { #5
         Name => 'BlackPoint',
@@ -5880,7 +5887,7 @@ my %binaryDataAttrs = (
     DATAMEMBER => [ 2, 3 ],
     NOTES => 'AF tags written by the K-3 Mark III, GR III, GR IIIx and GR IV.',
     0 => {
-        Name => 'AFInfo',
+        Name => 'AFInfoK3III',
         Format => 'int16u[$size/2]',
         Notes => q{
             entire AFInfoK3III structure. Provides access to raw numerical values and

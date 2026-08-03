@@ -1,6 +1,6 @@
 {
-	"empty.title": "فایلی انتخاب نشده است",
-	"empty.subtitle": "تصاویر، ویدئو یا فایل‌های پی‌دی‌اف را اینجا بکشید تا متادیتا به صورت خودکار حذف شود.",
+	"empty.title": "فایل‌ها را برای پاک‌سازی اضافه کنید",
+	"empty.subtitle": "تصاویر، ویدیوها یا فایل‌های PDF را اینجا رها کنید، یا یک گزینه را انتخاب کنید.",
 	"table.header.filename": "فایل‌های انتخابی",
 	"table.header.exif-before": "# پیش از Exif",
 	"table.header.exif-after": "# پس از Exif",
@@ -49,6 +49,15 @@
 	"writtenToCopy": "در یک نسخه کپی شد",
 	"verificationFailedSummary": "تأیید خروجی پاک‌شده ممکن نشد. نسخهٔ ناقص حذف شد؛ فایل اصلی شما بدون تغییر است.",
 	"cleanupFailedSummary": "تأیید خروجی پاک‌شده ممکن نشد و خروجی ناقص نیز حذف نشد. فایل اصلی شما بدون تغییر است.",
-	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "تکمیل شد"
+	"xattrFailedSummary": "فراداده حذف شد، اما ویژگی‌های توسعه‌یافتهٔ macOS پاک نشد.",
+	"complete": "تکمیل شد",
+	"empty.dropActive": "فایل‌ها را برای پاک‌سازی رها کنید.",
+	"menu.help.new-releases": "نسخه‌های جدید…",
+	"intake.chooseFiles": "انتخاب فایل‌ها…",
+	"intake.chooseFolder": "انتخاب پوشه…",
+	"intake.dropZone": "ناحیهٔ رها کردن فایل",
+	"intake.unsupportedSkipped": "{count} فایل پشتیبانی‌نشده نادیده گرفته شد",
+	"intake.foldersUnreadable": "{count} پوشه قابل خواندن نبود",
+	"intake.outputCopy": "نسخه‌های پاک‌سازی‌شده ایجاد می‌شوند — فایل‌های اصلی دست‌نخورده می‌مانند.",
+	"intake.outputOverwrite": "فایل‌ها در جای خود پاک‌سازی می‌شوند."
 }

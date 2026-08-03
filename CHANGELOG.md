@@ -1,5 +1,25 @@
 # Changelog
 
+## 4.2.0
+
+### Added
+
+- Romanian translation with contributor-preserved wording and reviewable per-key provenance
+- A user-initiated **New Releases** item in the Help menu
+- Complete first-run vocabulary across every supported locale
+
+### Changed
+
+- The empty intake is now one centered, responsive composition with a clear primary file action, secondary folder action, and truthful output-mode reassurance
+- ExifTool is updated to 13.59 for Unix and 32-bit-compatible Windows packages with pinned upstream SHA-256 verification
+- Packaged Electron disables RunAsNode, `NODE_OPTIONS`, and Node CLI inspection while leaving cookie encryption disabled
+- Translation tooling reports legacy gaps without overwriting community strings or presenting assisted drafts as human-reviewed work
+
+### Fixed
+
+- Re-running release automation for an already-published version exits quietly without downloading artifacts or mutating release state
+- Folder intake reports unsupported files and unreadable folders instead of dropping that accounting at the IPC boundary
+
 ## 4.1.0
 
 ### Added

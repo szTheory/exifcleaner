@@ -38,7 +38,7 @@ use vars qw($VERSION);
 use Image::ExifTool qw(:DataAccess :Utils);
 use Image::ExifTool::GPS;
 
-$VERSION = '1.08';
+$VERSION = '1.09';
 
 sub ProcessPrimer($$$);
 sub ProcessLocalSet($$$);
@@ -2296,7 +2296,7 @@ my %componentDataDef = (
   # '060e2b34.0104.0101.03010602.00000000' => { Name => 'Minutes' },
   # '060e2b34.0104.0101.03010603.00000000' => { Name => 'Seconds' },
   # '060e2b34.0104.0101.03010604.00000000' => { Name => 'msBy4' },
-  # '060e2b34.0104.0101.03010700.00000000' => { Name => 'Timestamp' },
+  # '060e2b34.0104.0101.03010700.00000000' => { Name => 'TimeStamp' },
   # '060e2b34.0104.0101.04010100.00000000' => { Name => 'UInt8Array' },
   # '060e2b34.0104.0101.04010300.00000000' => { Name => 'Int32Array' },
   # '060e2b34.0104.0101.04010400.00000000' => { Name => 'Int64Array' },
@@ -2481,7 +2481,7 @@ sub ReadMXFValue($$$)
     local $_;
 
     if ($type eq 'UTF-16') {
-        $val = $et->Decode($val, 'UCS2'); # (until we handle UTF-16 properly)
+        $val = $et->Decode($val, 'UTF16');
     } elsif ($type eq 'ProductVersion') {
         my @a = unpack('n*', $val);
         push @a, 0 while @a < 5;

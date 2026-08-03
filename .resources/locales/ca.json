@@ -1,6 +1,6 @@
 {
-	"empty.title": "No s'ha seleccionat cap fitxer",
-	"empty.subtitle": "Arrossegueu i deixeu anar imatges, vídeos o fitxers PDF per a eliminar automàticament les metadades.",
+	"empty.title": "Afegiu fitxers per netejar",
+	"empty.subtitle": "Deixeu aquí imatges, vídeos o PDF, o trieu una opció.",
 	"table.header.filename": "Fitxers seleccionats",
 	"table.header.exif-before": "Exif avans",
 	"table.header.exif-after": "Exif després",
@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "No s'ha pogut verificar la sortida neta. S'ha eliminat la còpia incompleta; l'original no ha canviat.",
 	"cleanupFailedSummary": "No s'ha pogut verificar la sortida neta i no s'ha pogut eliminar la sortida incompleta. L'original no ha canviat.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Completat"
+	"complete": "Completat",
+	"empty.dropActive": "Deixeu anar els fitxers per netejar-los.",
+	"menu.help.new-releases": "Versions noves…",
+	"intake.chooseFiles": "Trieu fitxers…",
+	"intake.chooseFolder": "Trieu una carpeta…",
+	"intake.dropZone": "Zona per deixar anar fitxers",
+	"intake.unsupportedSkipped": "S'han omès {count} fitxers no compatibles",
+	"intake.foldersUnreadable": "No s'han pogut llegir {count} carpetes",
+	"intake.outputCopy": "Es crearan còpies netes — els originals no es modificaran.",
+	"intake.outputOverwrite": "Els fitxers es netejaran al mateix lloc."
 }
