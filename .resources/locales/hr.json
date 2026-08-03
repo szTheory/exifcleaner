@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "Nije moguće provjeriti očišćeni izlaz. Nepotpuna kopija je uklonjena; izvorna datoteka nije promijenjena.",
 	"cleanupFailedSummary": "Nije moguće provjeriti očišćeni izlaz, a nepotpuni izlaz nije moguće ukloniti. Izvorna datoteka nije promijenjena.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Dovršeno"
+	"complete": "Dovršeno",
+	"empty.dropActive": "Ispustite datoteke za čišćenje.",
+	"menu.help.new-releases": "Nova izdanja…",
+	"intake.chooseFiles": "Odaberite datoteke…",
+	"intake.chooseFolder": "Odaberite mapu…",
+	"intake.dropZone": "Područje za ispuštanje datoteka",
+	"intake.unsupportedSkipped": "Preskočeno je {count} nepodržanih datoteka",
+	"intake.foldersUnreadable": "Nije moguće pročitati {count} mapa",
+	"intake.outputCopy": "Izradit će se očišćene kopije — izvornici ostaju netaknuti.",
+	"intake.outputOverwrite": "Datoteke će se očistiti na mjestu."
 }

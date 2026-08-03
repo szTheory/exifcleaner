@@ -5,7 +5,7 @@
 		"cs": "Nejsou vybrány žádné soubory",
 		"da": "Ingen filer valgt",
 		"de": "Keine Datei ausgewählt",
-		"en": "No files selected",
+		"en": "Add files to clean",
 		"es": "No hay archivos seleccionados",
 		"fa": "فایلی انتخاب نشده است",
 		"fr": "Aucun fichier sélectionné",
@@ -17,6 +17,8 @@
 		"nl": "Geen bestanden geselecteerd",
 		"pl": "Nie wybrano plików",
 		"pt-BR": "Nenhum arquivo selecionado",
+		"pt": "Adicione ficheiros para limpar",
+		"ro": "Niciun fișier selectat",
 		"ru": "Нет выбранных файлов",
 		"sk": "Nie sú vybraté žiadne súbory",
 		"sv": "Inga filer valda",
@@ -31,7 +33,7 @@
 		"cs": "Přetáhněte sem fotografie, videa nebo soubory PDF a automaticky z nich odstraníte metadata.",
 		"da": "Træk og slip billeder, videoer eller PDF filer for automatisk at fjerne metadata",
 		"de": "Ziehen Sie Bilder, Videos oder PDF-Dateien per Drag & Drop, um Metadaten automatisch zu entfernen.",
-		"en": "Drag and drop images, videos, or PDF files to automatically remove metadata.",
+		"en": "Drop images, videos, or PDFs here, or choose an option.",
 		"es": "Arrastre y suelte imágenes, videos, o documentos PDF para automáticamente eliminar metadatos.",
 		"fa": "تصاویر، ویدئو یا فایل‌های پی‌دی‌اف را اینجا بکشید تا متادیتا به صورت خودکار حذف شود.",
 		"fr": "Faites glisser-déposer des images, des vidéos ou des fichiers PDF pour supprimer automatiquement les métadonnées.",
@@ -43,6 +45,8 @@
 		"nl": "Sleep en plaats afbeeldingen, video's of PDF-bestanden om metagegevens automatisch te verwijderen.",
 		"pl": "Przeciągnij i upuść zdjęcia, filmy lub pliki PDF, aby automatycznie usunąć z nich metadane.",
 		"pt-BR": "Arraste e solte imagens, vídeos ou arquivos PDF para remover metadados automaticamente.",
+		"pt": "Largue aqui imagens, vídeos ou PDFs, ou escolha uma opção.",
+		"ro": "Trage și plasează imagini, videoclipuri sau fișiere PDF pentru a elimina automat metadatele.",
 		"ru": "Перетащите изображения, видео или PDF-файлы для автоматического удаления метаданных.",
 		"sk": "Presuňte a pustite fotografie, videá alebo PDF súbory sem a automaticky z nich odstránia metadáta.",
 		"sv": "Dra och släpp bilder, videor eller PDF filer för att ta bort metadata automatiskt",
@@ -50,6 +54,34 @@
 		"uk": "Перетягніть зображення, відео або PDF-файли для автоматичного видалення метаданих.",
 		"vi": "Kéo và thả tập tin hình ảnh, video hoặc PDF để tự động xóa siêu dữ liệu.",
 		"zh": "拖放图像，视频或PDF文件以自动删除元数据。"
+	},
+	"empty.dropActive": {
+		"ar": "أفلِت الملفات لتنظيفها.",
+		"ca": "Deixeu anar els fitxers per netejar-los.",
+		"cs": "Přetažením soubory vyčistíte.",
+		"da": "Slip filer for at rense dem.",
+		"de": "Dateien zum Bereinigen ablegen.",
+		"en": "Drop files to clean.",
+		"es": "Suelta los archivos para limpiarlos.",
+		"fa": "فایل‌ها را برای پاک‌سازی رها کنید.",
+		"fr": "Déposez les fichiers à nettoyer.",
+		"hr": "Ispustite datoteke za čišćenje.",
+		"hu": "Ejtse ide a tisztítandó fájlokat.",
+		"it": "Rilascia i file per pulirli.",
+		"ja": "ファイルをドロップしてクリーニングします。",
+		"ml": "വൃത്തിയാക്കാൻ ഫയലുകൾ ഇവിടെ ഇടുക.",
+		"nl": "Zet bestanden neer om ze op te schonen.",
+		"pl": "Upuść pliki, aby je wyczyścić.",
+		"pt-BR": "Solte os arquivos para limpá-los.",
+		"pt": "Largue os ficheiros para os limpar.",
+		"ro": "Plasează fișierele pentru a le curăța.",
+		"ru": "Перетащите файлы для очистки.",
+		"sk": "Presunutím sem súbory vyčistíte.",
+		"sv": "Släpp filer för att rensa dem.",
+		"tr": "Temizlemek için dosyaları bırakın.",
+		"uk": "Перетягніть файли для очищення.",
+		"vi": "Thả tệp để làm sạch.",
+		"zh": "拖放文件以清理。"
 	},
 	"table.header.filename": {
 		"ar": "الملفَّات المُحدَّدة",
@@ -69,6 +101,7 @@
 		"nl": "Geselecteerde bestanden",
 		"pl": "Wybrane pliki",
 		"pt-BR": "Arquivos selecionados",
+		"ro": "Fișiere selectate",
 		"ru": "Выбранные файлы",
 		"sk": "Vybrané súbory",
 		"sv": "valda filer",
@@ -95,6 +128,7 @@
 		"nl": "# Exif Voor",
 		"pl": "# Exif przed",
 		"pt-BR": "# Exif antes",
+		"ro": "# Exif înainte",
 		"ru": "# Exif до",
 		"sk": "# Exif predtým",
 		"sv": "# Exif Innan",
@@ -121,6 +155,7 @@
 		"nl": "# Exif Na",
 		"pl": "# Exif po",
 		"pt-BR": "# Exif depois",
+		"ro": "# Exif după",
 		"ru": "# Exif после",
 		"sk": "# Exif po",
 		"sv": "# Exif Efter",
@@ -147,6 +182,7 @@
 		"nl": "Kopieer",
 		"pl": "Kopiuj",
 		"pt-BR": "Copiar",
+		"ro": "Copiază",
 		"ru": "Скопировать",
 		"sk": "Kopírovať",
 		"sv": "Kopiera",
@@ -173,6 +209,7 @@
 		"nl": "Alles Selecteren",
 		"pl": "Zaznacz wszystko",
 		"pt-BR": "Selecionar todos",
+		"ro": "Selectează tot",
 		"ru": "Выделить всё",
 		"sk": "Vybrať všetko",
 		"sv": "Välj Alla",
@@ -199,6 +236,7 @@
 		"nl": "Over ",
 		"pl": "O programie ",
 		"pt-BR": "Sobre ",
+		"ro": "Despre ",
 		"ru": "О программе ",
 		"sk": "O aplikácii ",
 		"sv": "Om",
@@ -225,6 +263,7 @@
 		"nl": "Services",
 		"pl": "Usługi",
 		"pt-BR": "Serviços",
+		"ro": "Servicii",
 		"ru": "Службы",
 		"sk": "Služby",
 		"sv": "Tjänster",
@@ -251,6 +290,7 @@
 		"nl": "Verbergen",
 		"pl": "Ukryj",
 		"pt-BR": "Ocultar",
+		"ro": "Ascunde",
 		"ru": "Скрыть",
 		"sk": "Skryť",
 		"sv": "Göm",
@@ -277,6 +317,7 @@
 		"nl": "Verbergen Andere",
 		"pl": "Ukryj pozostałe",
 		"pt-BR": "Ocultar outros",
+		"ro": "Ascunde celelalte",
 		"ru": "Скрыть остальные",
 		"sk": "Skryť ostatné",
 		"sv": "Göm Andra",
@@ -303,6 +344,7 @@
 		"nl": "Toon Alles",
 		"pl": "Pokaż wszystkie",
 		"pt-BR": "Mostrar todos",
+		"ro": "Afișează tot",
 		"ru": "Показать все",
 		"sk": "Ukázať všetko",
 		"sv": "Visa Alla",
@@ -313,7 +355,8 @@
 	},
 	"menu.app.settings": {
 		"en": "Settings",
-		"fr": "Préférences"
+		"fr": "Préférences",
+		"ro": "Preferințe"
 	},
 	"menu.app.quit": {
 		"ar": "خُروج",
@@ -333,6 +376,7 @@
 		"nl": "Afsluiten",
 		"pl": "Zakończ",
 		"pt-BR": "Sair",
+		"ro": "Închide",
 		"ru": "Завершить",
 		"sk": "Ukončiť",
 		"sv": "Avsluta",
@@ -359,6 +403,7 @@
 		"nl": "Bestand",
 		"pl": "Plik",
 		"pt-BR": "Arquivo",
+		"ro": "Fișier",
 		"ru": "Файл",
 		"sk": "Súbor",
 		"sv": "Fil",
@@ -385,6 +430,7 @@
 		"nl": "Openen",
 		"pl": "Otwórz",
 		"pt-BR": "Abrir arquivo",
+		"ro": "Deschide",
 		"ru": "Открыть",
 		"sk": "Otvoriť",
 		"sv": "Öppna",
@@ -411,6 +457,7 @@
 		"nl": "Sluiten",
 		"pl": "Zamknij",
 		"pt-BR": "Fechar",
+		"ro": "Închide",
 		"ru": "Закрыть",
 		"sk": "Zavrieť",
 		"sv": "Stäng",
@@ -437,6 +484,7 @@
 		"nl": "Afsluiten",
 		"pl": "Zakończ",
 		"pt-BR": "Sair",
+		"ro": "Ieșire",
 		"ru": "Завершить",
 		"sk": "Ukončiť",
 		"sv": "Avsluta",
@@ -463,6 +511,7 @@
 		"nl": "Bewerken",
 		"pl": "Edytuj",
 		"pt-BR": "Editar nome",
+		"ro": "Editare",
 		"ru": "Правка",
 		"sk": "Upraviť",
 		"sv": "Redigera",
@@ -489,6 +538,7 @@
 		"nl": "Kopiëren",
 		"pl": "Kopiuj",
 		"pt-BR": "Copiar",
+		"ro": "Copiază",
 		"ru": "Скопировать",
 		"sk": "Kopírovať",
 		"sv": "Kopiera",
@@ -515,6 +565,7 @@
 		"nl": "Alles Selecteren",
 		"pl": "Zaznacz wszystko",
 		"pt-BR": "Selecionar todos",
+		"ro": "Selectează tot",
 		"ru": "Выбрать все",
 		"sk": "Vybrať všetko",
 		"sv": "Välj Alla",
@@ -541,6 +592,7 @@
 		"nl": "Spraak",
 		"pl": "Mowa",
 		"pt-BR": "Discurso",
+		"ro": "Vorbire",
 		"ru": "Проговаривание текста",
 		"sk": "Reč",
 		"sv": "Diktera",
@@ -567,6 +619,7 @@
 		"nl": "Start Spraakuitvoer",
 		"pl": "Rozpocznij mówienie",
 		"pt-BR": "Comece a falar",
+		"ro": "Începe vorbirea",
 		"ru": "Начать",
 		"sk": "Začnite rozprávať",
 		"sv": "Börja Prata",
@@ -593,6 +646,7 @@
 		"nl": "Stop Spraakuitvoer",
 		"pl": "Zakończ mówienie",
 		"pt-BR": "Parar de falar",
+		"ro": "Oprește vorbirea",
 		"ru": "Остановить",
 		"sk": "Prestaňte hovoriť",
 		"sv": "Sluta Prata",
@@ -619,6 +673,7 @@
 		"nl": "Beeld",
 		"pl": "Widok",
 		"pt-BR": "Ver",
+		"ro": "Vizualizare",
 		"ru": "Вид",
 		"sk": "Zobrazenie",
 		"sv": "Visa",
@@ -645,6 +700,7 @@
 		"nl": "Open Developer Tools",
 		"pl": "Przełącz narzędzia developerskie",
 		"pt-BR": "Ativar modo do desenvolvedor",
+		"ro": "Comută la instrumentele pentru dezvoltatori",
 		"ru": "Переключить инструменты разработчика",
 		"sk": "Prepnúť vývojárske nástroje",
 		"sv": "Växla utvecklarverktyg",
@@ -671,6 +727,7 @@
 		"nl": "Originele grootte",
 		"pl": "Domyślny rozmiar",
 		"pt-BR": "Tamanho atual",
+		"ro": "Dimensiune reală",
 		"ru": "Исходный размер",
 		"sk": "Predvolená veľkosť",
 		"sv": "Riktig Storlek",
@@ -697,6 +754,7 @@
 		"nl": "Inzoomen",
 		"pl": "Powiększ",
 		"pt-BR": "Ampliar",
+		"ro": "Mărește",
 		"ru": "Увеличить масштаб",
 		"sk": "Priblížiť",
 		"sv": "Zooma in",
@@ -723,6 +781,7 @@
 		"nl": "Uitzoomen",
 		"pl": "Pomniejsz",
 		"pt-BR": "Reduzir",
+		"ro": "Micșorează",
 		"ru": "Уменьшить масштаб",
 		"sk": "Oddialiť",
 		"sv": "Zooma ut",
@@ -749,6 +808,7 @@
 		"nl": "Volledig Scherm",
 		"pl": "Przełącz tryb pełnoekranowy",
 		"pt-BR": "Tela cheia",
+		"ro": "Comută modul ecran complet",
 		"ru": "Перейти в полноэкранный режим",
 		"sk": "Prepnúť režim celej obrazovky",
 		"sv": "Växla Fullskärm",
@@ -775,6 +835,7 @@
 		"nl": "Venster",
 		"pl": "Okno",
 		"pt-BR": "Janela",
+		"ro": "Fereastră",
 		"ru": "Окно",
 		"sk": "Okno",
 		"sv": "Fönster",
@@ -801,6 +862,7 @@
 		"nl": "Minimaliseren",
 		"pl": "Minimalizuj",
 		"pt-BR": "Minimizar",
+		"ro": "Minimizează",
 		"ru": "Убрать в Dock",
 		"sk": "Minimalizovať",
 		"sv": "Förringa",
@@ -827,6 +889,7 @@
 		"nl": "Minimaliseren",
 		"pl": "Minimalizuj",
 		"pt-BR": "Minimizar",
+		"ro": "Minimizează",
 		"ru": "Свернуть",
 		"sk": "Minimalizovať",
 		"sv": "Förringa",
@@ -853,6 +916,7 @@
 		"nl": "Zoomen",
 		"pl": "Zoom",
 		"pt-BR": "Ampliar",
+		"ro": "Zoom",
 		"ru": "Изменить масштаб",
 		"sk": "Zväčšiť",
 		"sv": "Zooma",
@@ -879,6 +943,7 @@
 		"nl": "Zoomen",
 		"pl": "Zoom",
 		"pt-BR": "Ampliar",
+		"ro": "Zoom",
 		"ru": "Развернуть",
 		"sk": "Zväčšiť",
 		"sv": "Zooma",
@@ -905,6 +970,7 @@
 		"nl": "Breng alles naar de voorgrond",
 		"pl": "Umieść wszystko na wierzchu",
 		"pt-BR": "Trazer tudo para frente",
+		"ro": "Adu totul în față",
 		"ru": "Все окна — на передний план",
 		"sk": "Presunúť všetko do popredia",
 		"sv": "Ta alla fram",
@@ -931,6 +997,7 @@
 		"nl": "Venster",
 		"pl": "Okno",
 		"pt-BR": "Janela",
+		"ro": "Fereastră",
 		"ru": "Окно",
 		"sk": "Okno",
 		"sv": "Fönster",
@@ -957,6 +1024,7 @@
 		"nl": "Sluiten",
 		"pl": "Zamknij",
 		"pt-BR": "Fechar",
+		"ro": "Închide",
 		"ru": "Закрыть",
 		"sk": "Zavrieť",
 		"sv": "Stäng",
@@ -983,6 +1051,7 @@
 		"nl": "Help",
 		"pl": "Pomoc",
 		"pt-BR": "Ajuda",
+		"ro": "Ajutor",
 		"ru": "Справка",
 		"sk": "Pomoc",
 		"sv": "Hjälp",
@@ -1009,6 +1078,7 @@
 		"nl": "Website",
 		"pl": "Przejdź do strony internetowej",
 		"pt-BR": "Website",
+		"ro": "Website",
 		"ru": "Сайт",
 		"sk": "Webová stránka",
 		"sv": "Hemsida",
@@ -1035,6 +1105,7 @@
 		"nl": "Broncode",
 		"pl": "Przejdź do źródeł programu",
 		"pt-BR": "Código-fonte",
+		"ro": "Cod sursă",
 		"ru": "Исходный код",
 		"sk": "Zdrojový kód",
 		"sv": "Källkod",
@@ -1042,6 +1113,34 @@
 		"uk": "Програмний код",
 		"vi": "Mã nguồn của Exif Cleaner",
 		"zh": "源码"
+	},
+	"menu.help.new-releases": {
+		"ar": "الإصدارات الجديدة…",
+		"ca": "Versions noves…",
+		"cs": "Nové verze…",
+		"da": "Nye udgivelser…",
+		"de": "Neue Versionen…",
+		"en": "New Releases…",
+		"es": "Nuevas versiones…",
+		"fa": "نسخه‌های جدید…",
+		"fr": "Nouvelles versions…",
+		"hr": "Nova izdanja…",
+		"hu": "Új kiadások…",
+		"it": "Nuove versioni…",
+		"ja": "新しいリリース…",
+		"ml": "പുതിയ പതിപ്പുകൾ…",
+		"nl": "Nieuwe versies…",
+		"pl": "Nowe wydania…",
+		"pt-BR": "Novas versões…",
+		"pt": "Novas versões…",
+		"ro": "Versiuni noi…",
+		"ru": "Новые версии…",
+		"sk": "Nové vydania…",
+		"sv": "Nya versioner…",
+		"tr": "Yeni sürümler…",
+		"uk": "Нові випуски…",
+		"vi": "Bản phát hành mới…",
+		"zh": "新版本…"
 	},
 	"menu.help.report-issue": {
 		"ar": "الإبلاغ عن خطأ",
@@ -1061,6 +1160,7 @@
 		"nl": "Meld een Probleem",
 		"pl": "Zgłoś problem",
 		"pt-BR": "Informar um problema",
+		"ro": "Raportează o problemă",
 		"ru": "Сообщить о проблеме",
 		"sk": "Nahlásiť problém",
 		"sv": "Rappotera Ett Problem",
@@ -1087,6 +1187,7 @@
 		"nl": "Over ",
 		"pl": "O programie ",
 		"pt-BR": "Sobre ",
+		"ro": "Despre ",
 		"ru": "О ",
 		"sk": "O programe ",
 		"sv": "Om",
@@ -1113,6 +1214,7 @@
 		"nl": "Copyright",
 		"pl": "Copyright",
 		"pt-BR": "Direitos autorais",
+		"ro": "Drepturi de autor",
 		"ru": "Авторские права",
 		"sk": "Autorské práva",
 		"sv": "Copyright",
@@ -1137,6 +1239,7 @@
 		"nl": "Bestanden openen",
 		"pl": "Otwórz pliki",
 		"pt-BR": "Abrir arquivos",
+		"ro": "Deschide fișiere",
 		"ru": "Открыть файлы",
 		"sk": "Otvoriť súbory",
 		"sv": "Öppna Filer",
@@ -1161,6 +1264,7 @@
 		"nl": "Verwijder metagegevens van de geselecteerde bestanden",
 		"pl": "Usuń metadane z wybranych plików",
 		"pt-BR": "Remover metadados dos arquivos selecionados",
+		"ro": "Elimină metadatele din fișierele selectate",
 		"ru": "Удалить метаданные из выбранных файлов",
 		"sk": "Odstrániť metadáta z vybraných súborov",
 		"sv": "Ta bort metadata från valda filer",
@@ -1171,75 +1275,93 @@
 	},
 	"appearance": {
 		"en": "Appearance",
-		"fr": "Apparence"
+		"fr": "Apparence",
+		"ro": "Aspect"
 	},
 	"themeLight": {
 		"en": "Light",
-		"fr": "Clair"
+		"fr": "Clair",
+		"ro": "Luminos"
 	},
 	"themeAuto": {
 		"en": "Auto",
-		"fr": "Auto"
+		"fr": "Auto",
+		"ro": "Automat"
 	},
 	"themeDark": {
 		"en": "Dark",
-		"fr": "Sombre"
+		"fr": "Sombre",
+		"ro": "Întunecat"
 	},
 	"noMetadataFound": {
 		"en": "No metadata found",
-		"fr": "Aucune métadonnée trouvée"
+		"fr": "Aucune métadonnée trouvée",
+		"ro": "Nu s-au găsit metadate"
 	},
 	"copyAll": {
 		"en": "Copy all",
-		"fr": "Tout copier"
+		"fr": "Tout copier",
+		"ro": "Copiază tot"
 	},
 	"metadataGroupHeader": {
 		"en": "{groupName} ({removed} of {total} removed)",
-		"fr": "{groupName} ({removed} sur {total} supprimées)"
+		"fr": "{groupName} ({removed} sur {total} supprimées)",
+		"ro": "{groupName} ({removed} din {total} eliminate)"
 	},
 	"metaGroupCamera": {
 		"en": "Camera",
-		"fr": "Appareil photo"
+		"fr": "Appareil photo",
+		"ro": "Cameră"
 	},
 	"metaGroupLocation": {
 		"en": "Location",
-		"fr": "Localisation"
+		"fr": "Localisation",
+		"ro": "Locație"
 	},
 	"metaGroupTime": {
 		"en": "Time",
-		"fr": "Date et heure"
+		"fr": "Date et heure",
+		"ro": "Data și ora"
 	},
 	"metaGroupAuthor": {
 		"en": "Author",
-		"fr": "Auteur"
+		"fr": "Auteur",
+		"ro": "Autor"
 	},
 	"metaGroupImage": {
 		"en": "Image",
-		"fr": "Image"
+		"fr": "Image",
+		"ro": "Imagine"
 	},
 	"metaGroupVideo": {
 		"en": "Video",
-		"fr": "Vidéo"
+		"fr": "Vidéo",
+		"ro": "Video"
 	},
 	"metaGroupDocument": {
 		"en": "Document",
-		"fr": "Document"
+		"fr": "Document",
+		"ro": "Document"
 	},
 	"metaGroupPublishing": {
 		"en": "Publishing",
-		"fr": "Publication"
+		"fr": "Publication",
+		"ro": "Publicare"
 	},
 	"metaGroupColorProfile": {
 		"en": "Color Profile",
-		"fr": "Profil colorimétrique"
+		"fr": "Profil colorimétrique",
+		"ro": "Profil de culoare"
 	},
 	"metaGroupCameraInternals": {
 		"en": "Camera Internals",
-		"fr": "Paramètres internes"
+		"fr": "Paramètres internes",
+		"ro": "Parametri interni ai camerei"
 	},
 	"metaGroupOther": {
 		"en": "Other",
-		"fr": "Autre"
+		"fr": "Autre",
+		"ro": "Altele"
 	},
 	"language": {
 		"ar": "اللغة",
@@ -1260,6 +1382,7 @@
 		"pl": "Jezyk",
 		"pt-BR": "Idioma",
 		"pt": "Idioma",
+		"ro": "Limbă",
 		"ru": "Язык",
 		"sk": "Jazyk",
 		"sv": "Sprak",
@@ -1287,6 +1410,7 @@
 		"pl": "Systemowy",
 		"pt-BR": "Sistema",
 		"pt": "Sistema",
+		"ro": "Sistem",
 		"ru": "Система",
 		"sk": "Systemovy",
 		"sv": "System",
@@ -1297,19 +1421,23 @@
 	},
 	"statusBar.xOfYCleaned": {
 		"en": "{completed} of {total} cleaned",
-		"fr": "{completed} sur {total} nettoyé(s)"
+		"fr": "{completed} sur {total} nettoyé(s)",
+		"ro": "{completed} din {total} curățate"
 	},
 	"statusBar.tagsRemoved": {
 		"en": "{count} tags removed",
-		"fr": "{count} balises supprimées"
+		"fr": "{count} balises supprimées",
+		"ro": "{count} etichete eliminate"
 	},
 	"statusBar.elapsed": {
 		"en": "{seconds}s",
-		"fr": "{seconds}s"
+		"fr": "{seconds}s",
+		"ro": "{seconds}s"
 	},
 	"statusBar.clear": {
 		"en": "Clear",
-		"fr": "Effacer"
+		"fr": "Effacer",
+		"ro": "Golește"
 	},
 	"writtenToCopy": {
 		"ar": "تمت الكتابة إلى نسخة",
@@ -1329,6 +1457,7 @@
 		"nl": "Geschreven naar een kopie",
 		"pl": "Zapisano w kopii",
 		"pt-BR": "Gravado em uma cópia",
+		"ro": "Scris într-o copie",
 		"ru": "Записано в копию",
 		"sk": "Zapísané do kópie",
 		"sv": "Skrivet till en kopia",
@@ -1355,6 +1484,7 @@
 		"nl": "De opgeschoonde uitvoer kon niet worden gecontroleerd. De onvolledige kopie is verwijderd; uw origineel is ongewijzigd.",
 		"pl": "Nie można było zweryfikować oczyszczonego wyniku. Niekompletna kopia została usunięta; oryginał pozostał bez zmian.",
 		"pt-BR": "Não foi possível verificar a saída limpa. A cópia incompleta foi removida; seu original não foi alterado.",
+		"ro": "Rezultatul curățat nu a putut fi verificat. Copia incompletă a fost eliminată; originalul este neschimbat.",
 		"ru": "Не удалось проверить очищенный результат. Неполная копия удалена; оригинал не изменён.",
 		"sk": "Vyčistený výstup sa nepodarilo overiť. Neúplná kópia bola odstránená; originál zostal nezmenený.",
 		"sv": "Det gick inte att verifiera den rensade utdatafilen. Den ofullständiga kopian togs bort; originalet är oförändrat.",
@@ -1381,6 +1511,7 @@
 		"nl": "De opgeschoonde uitvoer kon niet worden gecontroleerd en de onvolledige uitvoer kon niet worden verwijderd. Uw origineel is ongewijzigd.",
 		"pl": "Nie można było zweryfikować oczyszczonego wyniku, a niekompletnego wyniku nie udało się usunąć. Oryginał pozostał bez zmian.",
 		"pt-BR": "Não foi possível verificar a saída limpa, e a saída incompleta não pôde ser removida. Seu original não foi alterado.",
+		"ro": "Rezultatul curățat nu a putut fi verificat, iar rezultatul incomplet nu a putut fi eliminat. Originalul este neschimbat.",
 		"ru": "Не удалось проверить очищенный результат, и неполный результат не удалось удалить. Оригинал не изменён.",
 		"sk": "Vyčistený výstup sa nepodarilo overiť a neúplný výstup nebolo možné odstrániť. Originál zostal nezmenený.",
 		"sv": "Det gick inte att verifiera den rensade utdatafilen och den ofullständiga utdatafilen kunde inte tas bort. Originalet är oförändrat.",
@@ -1407,6 +1538,7 @@
 		"nl": "Metadata was removed, but macOS extended attributes could not be cleared.",
 		"pl": "Metadata was removed, but macOS extended attributes could not be cleared.",
 		"pt-BR": "Metadata was removed, but macOS extended attributes could not be cleared.",
+		"ro": "Metadatele au fost eliminate, dar atributele extinse macOS nu au putut fi șterse.",
 		"ru": "Metadata was removed, but macOS extended attributes could not be cleared.",
 		"sk": "Metadata was removed, but macOS extended attributes could not be cleared.",
 		"sv": "Metadata was removed, but macOS extended attributes could not be cleared.",
@@ -1433,6 +1565,7 @@
 		"nl": "Voltooid",
 		"pl": "Ukończono",
 		"pt-BR": "Concluído",
+		"ro": "Finalizat",
 		"ru": "Готово",
 		"sk": "Dokončené",
 		"sv": "Klar",
@@ -1442,150 +1575,367 @@
 		"zh": "完成"
 	},
 	"status.pending": {
-		"en": "Pending"
+		"en": "Pending",
+		"ro": "În așteptare"
 	},
 	"status.error": {
-		"en": "Error"
+		"en": "Error",
+		"ro": "Eroare"
 	},
 	"table.label": {
-		"en": "File results"
+		"en": "File results",
+		"ro": "Rezultatele fișierelor"
 	},
 	"table.header.name": {
-		"en": "Name"
+		"en": "Name",
+		"ro": "Nume"
 	},
 	"table.header.type": {
-		"en": "Type"
+		"en": "Type",
+		"ro": "Tip"
 	},
 	"table.header.size": {
-		"en": "Size"
+		"en": "Size",
+		"ro": "Dimensiune"
 	},
 	"table.header.before": {
-		"en": "Before"
+		"en": "Before",
+		"ro": "Înainte"
 	},
 	"table.header.after": {
-		"en": "After"
+		"en": "After",
+		"ro": "După"
 	},
 	"table.sort.ascending": {
-		"en": "Sorted ascending"
+		"en": "Sorted ascending",
+		"ro": "Sortare ascendentă"
 	},
 	"table.sort.descending": {
-		"en": "Sorted descending"
+		"en": "Sorted descending",
+		"ro": "Sortare descendentă"
 	},
 	"metadata.summary": {
-		"en": "{removed} fields removed · {present} still present"
+		"en": "{removed} fields removed · {present} still present",
+		"ro": "{removed} câmpuri eliminate · {present} încă prezente"
 	},
 	"metadata.stillPresent": {
-		"en": "{count} fields still present"
+		"en": "{count} fields still present",
+		"ro": "{count} câmpuri încă prezente"
 	},
 	"metadata.removed.one": {
-		"en": "{count} field removed"
+		"en": "{count} field removed",
+		"ro": "{count} câmp eliminat"
 	},
 	"metadata.removed.other": {
-		"en": "{count} fields removed"
+		"en": "{count} fields removed",
+		"ro": "{count} câmpuri eliminate"
 	},
 	"metadata.present.one": {
-		"en": "{count} field still present"
+		"en": "{count} field still present",
+		"ro": "{count} câmp încă prezent"
 	},
 	"metadata.present.other": {
-		"en": "{count} fields still present"
+		"en": "{count} fields still present",
+		"ro": "{count} câmpuri încă prezente"
 	},
 	"metadata.field.removed": {
-		"en": "removed"
+		"en": "removed",
+		"ro": "eliminat"
 	},
 	"metadata.field.preserved": {
-		"en": "preserved"
+		"en": "preserved",
+		"ro": "păstrat"
 	},
 	"intake.chooseFiles": {
-		"en": "Choose files"
+		"ar": "اختر ملفات…",
+		"ca": "Trieu fitxers…",
+		"cs": "Vybrat soubory…",
+		"da": "Vælg filer…",
+		"de": "Dateien auswählen…",
+		"en": "Choose files…",
+		"es": "Elegir archivos…",
+		"fa": "انتخاب فایل‌ها…",
+		"fr": "Choisir des fichiers…",
+		"hr": "Odaberite datoteke…",
+		"hu": "Fájlok kiválasztása…",
+		"it": "Scegli file…",
+		"ja": "ファイルを選択…",
+		"ml": "ഫയലുകൾ തിരഞ്ഞെടുക്കുക…",
+		"nl": "Bestanden kiezen…",
+		"pl": "Wybierz pliki…",
+		"pt-BR": "Escolher arquivos…",
+		"pt": "Escolher ficheiros…",
+		"ro": "Alege fișiere…",
+		"ru": "Выбрать файлы…",
+		"sk": "Vybrať súbory…",
+		"sv": "Välj filer…",
+		"tr": "Dosya seç…",
+		"uk": "Вибрати файли…",
+		"vi": "Chọn tệp…",
+		"zh": "选择文件…"
 	},
 	"intake.chooseFolder": {
-		"en": "Choose folder"
+		"ar": "اختر مجلدًا…",
+		"ca": "Trieu una carpeta…",
+		"cs": "Vybrat složku…",
+		"da": "Vælg mappe…",
+		"de": "Ordner auswählen…",
+		"en": "Choose folder…",
+		"es": "Elegir carpeta…",
+		"fa": "انتخاب پوشه…",
+		"fr": "Choisir un dossier…",
+		"hr": "Odaberite mapu…",
+		"hu": "Mappa kiválasztása…",
+		"it": "Scegli cartella…",
+		"ja": "フォルダーを選択…",
+		"ml": "ഫോൾഡർ തിരഞ്ഞെടുക്കുക…",
+		"nl": "Map kiezen…",
+		"pl": "Wybierz folder…",
+		"pt-BR": "Escolher pasta…",
+		"pt": "Escolher pasta…",
+		"ro": "Alege un dosar…",
+		"ru": "Выбрать папку…",
+		"sk": "Vybrať priečinok…",
+		"sv": "Välj mapp…",
+		"tr": "Klasör seç…",
+		"uk": "Вибрати папку…",
+		"vi": "Chọn thư mục…",
+		"zh": "选择文件夹…"
 	},
 	"intake.dropZone": {
-		"en": "File drop zone"
+		"ar": "منطقة إفلات الملفات",
+		"ca": "Zona per deixar anar fitxers",
+		"cs": "Oblast pro přetažení souborů",
+		"da": "Område til at slippe filer",
+		"de": "Dateiablagebereich",
+		"en": "File drop zone",
+		"es": "Zona para soltar archivos",
+		"fa": "ناحیهٔ رها کردن فایل",
+		"fr": "Zone de dépôt de fichiers",
+		"hr": "Područje za ispuštanje datoteka",
+		"hu": "Fájlledobási terület",
+		"it": "Area di rilascio file",
+		"ja": "ファイルのドロップ領域",
+		"ml": "ഫയൽ ഇടാനുള്ള സ്ഥലം",
+		"nl": "Bestandsdropzone",
+		"pl": "Obszar upuszczania plików",
+		"pt-BR": "Área para soltar arquivos",
+		"pt": "Área para largar ficheiros",
+		"ro": "Zonă de plasare a fișierelor",
+		"ru": "Область перетаскивания файлов",
+		"sk": "Oblasť na presunutie súborov",
+		"sv": "Släppzon för filer",
+		"tr": "Dosya bırakma alanı",
+		"uk": "Область перетягування файлів",
+		"vi": "Vùng thả tệp",
+		"zh": "文件拖放区域"
 	},
 	"intake.unsupportedSkipped": {
-		"en": "{count} unsupported files skipped"
+		"ar": "تم تخطي {count} من الملفات غير المدعومة",
+		"ca": "S'han omès {count} fitxers no compatibles",
+		"cs": "Přeskočeno {count} nepodporovaných souborů",
+		"da": "{count} ikke-understøttede filer blev sprunget over",
+		"de": "{count} nicht unterstützte Dateien übersprungen",
+		"en": "{count} unsupported files skipped",
+		"es": "Se omitieron {count} archivos no compatibles",
+		"fa": "{count} فایل پشتیبانی‌نشده نادیده گرفته شد",
+		"fr": "{count} fichiers non pris en charge ignorés",
+		"hr": "Preskočeno je {count} nepodržanih datoteka",
+		"hu": "{count} nem támogatott fájl kihagyva",
+		"it": "{count} file non supportati ignorati",
+		"ja": "未対応のファイル {count} 件をスキップしました",
+		"ml": "പിന്തുണയില്ലാത്ത {count} ഫയലുകൾ ഒഴിവാക്കി",
+		"nl": "{count} niet-ondersteunde bestanden overgeslagen",
+		"pl": "Pominięto {count} nieobsługiwanych plików",
+		"pt-BR": "{count} arquivos não compatíveis ignorados",
+		"pt": "Foram ignorados {count} ficheiros não suportados",
+		"ro": "{count} fișiere neacceptate omise",
+		"ru": "Пропущено неподдерживаемых файлов: {count}",
+		"sk": "Preskočených nepodporovaných súborov: {count}",
+		"sv": "{count} filer som inte stöds hoppades över",
+		"tr": "Desteklenmeyen {count} dosya atlandı",
+		"uk": "Пропущено непідтримуваних файлів: {count}",
+		"vi": "Đã bỏ qua {count} tệp không được hỗ trợ",
+		"zh": "已跳过 {count} 个不支持的文件"
 	},
 	"intake.foldersUnreadable": {
-		"en": "{count} folders couldn't be read"
+		"ar": "تعذّرت قراءة {count} من المجلدات",
+		"ca": "No s'han pogut llegir {count} carpetes",
+		"cs": "Nelze přečíst {count} složek",
+		"da": "{count} mapper kunne ikke læses",
+		"de": "{count} Ordner konnten nicht gelesen werden",
+		"en": "{count} folders couldn't be read",
+		"es": "No se pudieron leer {count} carpetas",
+		"fa": "{count} پوشه قابل خواندن نبود",
+		"fr": "Impossible de lire {count} dossiers",
+		"hr": "Nije moguće pročitati {count} mapa",
+		"hu": "{count} mappa nem olvasható",
+		"it": "Impossibile leggere {count} cartelle",
+		"ja": "{count} 個のフォルダーを読み取れませんでした",
+		"ml": "{count} ഫോൾഡറുകൾ വായിക്കാനായില്ല",
+		"nl": "{count} mappen konden niet worden gelezen",
+		"pl": "Nie można odczytać {count} folderów",
+		"pt-BR": "Não foi possível ler {count} pastas",
+		"pt": "Não foi possível ler {count} pastas",
+		"ro": "{count} dosare nu au putut fi citite",
+		"ru": "Не удалось прочитать папки: {count}",
+		"sk": "Nepodarilo sa prečítať priečinky: {count}",
+		"sv": "{count} mappar kunde inte läsas",
+		"tr": "{count} klasör okunamadı",
+		"uk": "Не вдалося прочитати папки: {count}",
+		"vi": "Không thể đọc {count} thư mục",
+		"zh": "无法读取 {count} 个文件夹"
 	},
 	"intake.outputCopy": {
-		"en": "Output: cleaned copies; originals stay untouched"
+		"ar": "سيتم إنشاء نُسخ منظَّفة — وتبقى الملفات الأصلية دون تغيير.",
+		"ca": "Es crearan còpies netes — els originals no es modificaran.",
+		"cs": "Budou vytvořeny vyčištěné kopie — originály zůstanou nedotčené.",
+		"da": "Der oprettes rensede kopier — originalerne forbliver urørte.",
+		"de": "Bereinigte Kopien werden erstellt — Originale bleiben unverändert.",
+		"en": "Cleaned copies will be created — originals stay untouched.",
+		"es": "Se crearán copias limpias; los originales no se modificarán.",
+		"fa": "نسخه‌های پاک‌سازی‌شده ایجاد می‌شوند — فایل‌های اصلی دست‌نخورده می‌مانند.",
+		"fr": "Des copies nettoyées seront créées — les originaux resteront intacts.",
+		"hr": "Izradit će se očišćene kopije — izvornici ostaju netaknuti.",
+		"hu": "Tisztított másolatok készülnek — az eredetik érintetlenek maradnak.",
+		"it": "Verranno create copie pulite — gli originali resteranno intatti.",
+		"ja": "クリーニング済みのコピーが作成されます。元のファイルは変更されません。",
+		"ml": "വൃത്തിയാക്കിയ പകർപ്പുകൾ സൃഷ്ടിക്കും — യഥാർത്ഥ ഫയലുകൾ മാറ്റമില്ലാതെ തുടരും.",
+		"nl": "Er worden opgeschoonde kopieën gemaakt — originelen blijven onaangeroerd.",
+		"pl": "Zostaną utworzone wyczyszczone kopie — oryginały pozostaną nienaruszone.",
+		"pt-BR": "Cópias limpas serão criadas — os originais permanecerão intactos.",
+		"pt": "Serão criadas cópias limpas — os originais permanecem intactos.",
+		"ro": "Vor fi create copii curățate — originalele rămân neatinse.",
+		"ru": "Будут созданы очищенные копии — оригиналы останутся без изменений.",
+		"sk": "Vytvoria sa vyčistené kópie — originály zostanú nedotknuté.",
+		"sv": "Rensade kopior skapas — originalen lämnas orörda.",
+		"tr": "Temizlenmiş kopyalar oluşturulacak — orijinaller değişmeden kalacak.",
+		"uk": "Буде створено очищені копії — оригінали залишаться без змін.",
+		"vi": "Các bản sao đã làm sạch sẽ được tạo — tệp gốc không bị thay đổi.",
+		"zh": "将创建清理后的副本，原文件保持不变。"
 	},
 	"intake.outputOverwrite": {
-		"en": "Output: originals are replaced"
+		"ar": "سيتم تنظيف الملفات في مكانها.",
+		"ca": "Els fitxers es netejaran al mateix lloc.",
+		"cs": "Soubory budou vyčištěny na místě.",
+		"da": "Filerne renses på stedet.",
+		"de": "Dateien werden direkt bereinigt.",
+		"en": "Files will be cleaned in place.",
+		"es": "Los archivos se limpiarán en su ubicación.",
+		"fa": "فایل‌ها در جای خود پاک‌سازی می‌شوند.",
+		"fr": "Les fichiers seront nettoyés sur place.",
+		"hr": "Datoteke će se očistiti na mjestu.",
+		"hu": "A fájlok helyben lesznek megtisztítva.",
+		"it": "I file verranno puliti sul posto.",
+		"ja": "ファイルは元の場所でクリーニングされます。",
+		"ml": "ഫയലുകൾ അതേ സ്ഥാനത്ത് വൃത്തിയാക്കും.",
+		"nl": "Bestanden worden op hun huidige locatie opgeschoond.",
+		"pl": "Pliki zostaną wyczyszczone w miejscu.",
+		"pt-BR": "Os arquivos serão limpos no local.",
+		"pt": "Os ficheiros serão limpos no local.",
+		"ro": "Fișierele vor fi curățate pe loc.",
+		"ru": "Файлы будут очищены на месте.",
+		"sk": "Súbory sa vyčistia na mieste.",
+		"sv": "Filerna rensas på plats.",
+		"tr": "Dosyalar yerinde temizlenecek.",
+		"uk": "Файли буде очищено на місці.",
+		"vi": "Các tệp sẽ được làm sạch tại chỗ.",
+		"zh": "文件将在原位置清理。"
 	},
 	"settings.close": {
-		"en": "Close settings"
+		"en": "Close settings",
+		"ro": "Închide setările"
 	},
 	"settings.preserveOrientation.label": {
-		"en": "Preserve orientation"
+		"en": "Preserve orientation",
+		"ro": "Păstrează orientarea"
 	},
 	"settings.preserveOrientation.description": {
-		"en": "Keep photos upright after metadata removal"
+		"en": "Keep photos upright after metadata removal",
+		"ro": "Păstrează fotografiile în poziție verticală după eliminarea metadatelor"
 	},
 	"settings.preserveColorProfile.label": {
-		"en": "Preserve color profile"
+		"en": "Preserve color profile",
+		"ro": "Păstrează profilul de culoare"
 	},
 	"settings.preserveColorProfile.description": {
-		"en": "Keep the ICC profile for accurate color"
+		"en": "Keep the ICC profile for accurate color",
+		"ro": "Păstrează profilul ICC pentru culori precise"
 	},
 	"settings.saveAsCopy.label": {
-		"en": "Save as copy"
+		"en": "Save as copy",
+		"ro": "Salvează ca o copie"
 	},
 	"settings.saveAsCopy.description": {
-		"en": "Create a cleaned copy and leave the original untouched"
+		"en": "Create a cleaned copy and leave the original untouched",
+		"ro": "Creează o copie curățată și lasă originalul neatins"
 	},
 	"settings.preserveTimestamps.label": {
-		"en": "Preserve modification date"
+		"en": "Preserve modification date",
+		"ro": "Păstrează data modificării"
 	},
 	"settings.preserveTimestamps.description": {
-		"en": "Preserve the file modification date when supported"
+		"en": "Preserve the file modification date when supported",
+		"ro": "Păstrează data modificării fișierului când este acceptată"
 	},
 	"settings.removeXattrs.label": {
-		"en": "Remove macOS attributes"
+		"en": "Remove macOS attributes",
+		"ro": "Elimină atributele macOS"
 	},
 	"settings.removeXattrs.description": {
-		"en": "Remove quarantine, download origin, and Finder tags"
+		"en": "Remove quarantine, download origin, and Finder tags",
+		"ro": "Elimină carantina, originea descărcării și etichetele Finder"
 	},
 	"outcome.alreadyClean": {
-		"en": "No removable metadata found; the file was not rewritten"
+		"en": "No removable metadata found; the file was not rewritten",
+		"ro": "Nu s-au găsit metadate care pot fi eliminate; fișierul nu a fost rescris"
 	},
 	"outcome.unchanged": {
-		"en": "No measured metadata was removed"
+		"en": "No measured metadata was removed",
+		"ro": "Nu a fost eliminată nicio metadată măsurată"
 	},
 	"outcome.cleaned": {
-		"en": "Metadata removed"
+		"en": "Metadata removed",
+		"ro": "Metadate eliminate"
 	},
 	"outcome.refusedRaf": {
-		"en": "RAF cleaning is not currently safe; the original was left unchanged"
+		"en": "RAF cleaning is not currently safe; the original was left unchanged",
+		"ro": "Curățarea RAF nu este sigură în prezent; originalul a rămas neschimbat"
 	},
 	"toast.copied": {
-		"en": "Copied to clipboard"
+		"en": "Copied to clipboard",
+		"ro": "Copiat în clipboard"
 	},
 	"folder.expand": {
-		"en": "Expand {folder}"
+		"en": "Expand {folder}",
+		"ro": "Extinde {folder}"
 	},
 	"folder.collapse": {
-		"en": "Collapse {folder}"
+		"en": "Collapse {folder}",
+		"ro": "Restrânge {folder}"
 	},
 	"folder.scanning": {
-		"en": "Scanning…"
+		"en": "Scanning…",
+		"ro": "Se scanează…"
 	},
 	"folder.found": {
-		"en": "{count} found…"
+		"en": "{count} found…",
+		"ro": "{count} găsite…"
 	},
 	"folder.files": {
-		"en": "{count} files"
+		"en": "{count} files",
+		"ro": "{count} fișiere"
 	},
 	"folder.supportedFiles": {
-		"en": "{count} supported files"
+		"en": "{count} supported files",
+		"ro": "{count} fișiere acceptate"
 	},
 	"reveal.original": {
-		"en": "Reveal original in file manager"
+		"en": "Reveal original in file manager",
+		"ro": "Arată originalul în managerul de fișiere"
 	},
 	"reveal.cleanedCopy": {
-		"en": "Reveal cleaned copy in file manager"
+		"en": "Reveal cleaned copy in file manager",
+		"ro": "Arată copia curățată în managerul de fișiere"
 	}
 }

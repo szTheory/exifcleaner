@@ -48,5 +48,14 @@
 	"verificationFailedSummary": "No se pudo verificar la salida limpia. La copia incompleta se eliminó; el original no ha cambiado.",
 	"cleanupFailedSummary": "No se pudo verificar la salida limpia ni eliminar la salida incompleta. El original no ha cambiado.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Completado"
+	"complete": "Completado",
+	"empty.dropActive": "Suelta los archivos para limpiarlos.",
+	"menu.help.new-releases": "Nuevas versiones…",
+	"intake.chooseFiles": "Elegir archivos…",
+	"intake.chooseFolder": "Elegir carpeta…",
+	"intake.dropZone": "Zona para soltar archivos",
+	"intake.unsupportedSkipped": "Se omitieron {count} archivos no compatibles",
+	"intake.foldersUnreadable": "No se pudieron leer {count} carpetas",
+	"intake.outputCopy": "Se crearán copias limpias; los originales no se modificarán.",
+	"intake.outputOverwrite": "Los archivos se limpiarán en su ubicación."
 }

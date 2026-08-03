@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "تأیید خروجی پاک‌شده ممکن نشد. نسخهٔ ناقص حذف شد؛ فایل اصلی شما بدون تغییر است.",
 	"cleanupFailedSummary": "تأیید خروجی پاک‌شده ممکن نشد و خروجی ناقص نیز حذف نشد. فایل اصلی شما بدون تغییر است.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "تکمیل شد"
+	"complete": "تکمیل شد",
+	"empty.dropActive": "فایل‌ها را برای پاک‌سازی رها کنید.",
+	"menu.help.new-releases": "نسخه‌های جدید…",
+	"intake.chooseFiles": "انتخاب فایل‌ها…",
+	"intake.chooseFolder": "انتخاب پوشه…",
+	"intake.dropZone": "ناحیهٔ رها کردن فایل",
+	"intake.unsupportedSkipped": "{count} فایل پشتیبانی‌نشده نادیده گرفته شد",
+	"intake.foldersUnreadable": "{count} پوشه قابل خواندن نبود",
+	"intake.outputCopy": "نسخه‌های پاک‌سازی‌شده ایجاد می‌شوند — فایل‌های اصلی دست‌نخورده می‌مانند.",
+	"intake.outputOverwrite": "فایل‌ها در جای خود پاک‌سازی می‌شوند."
 }

@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "Det gick inte att verifiera den rensade utdatafilen. Den ofullständiga kopian togs bort; originalet är oförändrat.",
 	"cleanupFailedSummary": "Det gick inte att verifiera den rensade utdatafilen och den ofullständiga utdatafilen kunde inte tas bort. Originalet är oförändrat.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Klar"
+	"complete": "Klar",
+	"empty.dropActive": "Släpp filer för att rensa dem.",
+	"menu.help.new-releases": "Nya versioner…",
+	"intake.chooseFiles": "Välj filer…",
+	"intake.chooseFolder": "Välj mapp…",
+	"intake.dropZone": "Släppzon för filer",
+	"intake.unsupportedSkipped": "{count} filer som inte stöds hoppades över",
+	"intake.foldersUnreadable": "{count} mappar kunde inte läsas",
+	"intake.outputCopy": "Rensade kopior skapas — originalen lämnas orörda.",
+	"intake.outputOverwrite": "Filerna rensas på plats."
 }

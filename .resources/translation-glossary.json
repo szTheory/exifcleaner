@@ -1,0 +1,50 @@
+{
+	"schemaVersion": 1,
+	"terms": {
+		"ExifCleaner": {
+			"guidance": "Do not translate the product name.",
+			"context": "The desktop application's proper name. Keep it closed up and preserve capitalization."
+		},
+		"EXIF": {
+			"guidance": "Keep the standard uppercase acronym unless the surrounding language convention requires otherwise.",
+			"context": "A metadata format, not a synonym for every kind of metadata ExifCleaner can remove."
+		},
+		"metadata": {
+			"guidance": "Use the locale's established technical term.",
+			"context": "Information embedded in or attached to a file, including camera, location, author, and time data."
+		},
+		"original": {
+			"guidance": "Translate as the user's source file, not as 'authentic' or 'first edition'.",
+			"context": "The input file that remains untouched when Save as Copy is enabled."
+		},
+		"cleaned copy": {
+			"guidance": "Use wording that clearly means a separate copy after metadata removal.",
+			"context": "A newly created output file; never imply that the original was replaced."
+		},
+		"Save as Copy": {
+			"guidance": "Translate as a settings label using the platform's concise imperative style.",
+			"context": "The safe default mode that creates a cleaned copy and leaves the original untouched."
+		},
+		"ICC profile": {
+			"guidance": "Keep 'ICC' uppercase and translate only 'profile' where appropriate.",
+			"context": "Embedded color-management data that can be preserved for accurate color."
+		},
+		"orientation": {
+			"guidance": "Use the photographic image-orientation term.",
+			"context": "Metadata used to keep a photo visually upright after other metadata is removed."
+		},
+		"timestamps": {
+			"guidance": "Distinguish filesystem modification dates from capture-time EXIF fields.",
+			"context": "The file modification date preserved by the related setting when supported."
+		},
+		"macOS attributes": {
+			"guidance": "Keep 'macOS' unchanged; translate attributes using the filesystem term.",
+			"context": "Extended filesystem attributes such as quarantine, download origin, and Finder tags."
+		}
+	},
+	"protectedSurfaceContext": {
+		"empty": "A calm first-run prompt. Use concise, welcoming language and do not imply files have already changed.",
+		"intake": "File and folder picker controls plus safety reassurance. Preserve the distinction between copy mode and in-place cleaning.",
+		"menu.help.new-releases": "A Help-menu link that opens the project's release page only when selected; it is not an automatic update check."
+	}
+}

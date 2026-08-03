@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "A megtisztított kimenetet nem sikerült ellenőrizni. A hiányos másolat el lett távolítva; az eredeti változatlan.",
 	"cleanupFailedSummary": "A megtisztított kimenetet nem sikerült ellenőrizni, és a hiányos kimenet nem távolítható el. Az eredeti változatlan.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Befejezve"
+	"complete": "Befejezve",
+	"empty.dropActive": "Ejtse ide a tisztítandó fájlokat.",
+	"menu.help.new-releases": "Új kiadások…",
+	"intake.chooseFiles": "Fájlok kiválasztása…",
+	"intake.chooseFolder": "Mappa kiválasztása…",
+	"intake.dropZone": "Fájlledobási terület",
+	"intake.unsupportedSkipped": "{count} nem támogatott fájl kihagyva",
+	"intake.foldersUnreadable": "{count} mappa nem olvasható",
+	"intake.outputCopy": "Tisztított másolatok készülnek — az eredetik érintetlenek maradnak.",
+	"intake.outputOverwrite": "A fájlok helyben lesznek megtisztítva."
 }

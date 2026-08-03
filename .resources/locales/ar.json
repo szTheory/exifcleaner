@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "تعذّر التحقق من الناتج المنظَّف. أزيلت النسخة غير المكتملة؛ ولم يتغير ملفك الأصلي.",
 	"cleanupFailedSummary": "تعذّر التحقق من الناتج المنظَّف، وتعذّرت إزالة الناتج غير المكتمل. لم يتغير ملفك الأصلي.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "مكتمل"
+	"complete": "مكتمل",
+	"empty.dropActive": "أفلِت الملفات لتنظيفها.",
+	"menu.help.new-releases": "الإصدارات الجديدة…",
+	"intake.chooseFiles": "اختر ملفات…",
+	"intake.chooseFolder": "اختر مجلدًا…",
+	"intake.dropZone": "منطقة إفلات الملفات",
+	"intake.unsupportedSkipped": "تم تخطي {count} من الملفات غير المدعومة",
+	"intake.foldersUnreadable": "تعذّرت قراءة {count} من المجلدات",
+	"intake.outputCopy": "سيتم إنشاء نُسخ منظَّفة — وتبقى الملفات الأصلية دون تغيير.",
+	"intake.outputOverwrite": "سيتم تنظيف الملفات في مكانها."
 }

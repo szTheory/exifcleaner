@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "Die bereinigte Ausgabe konnte nicht überprüft werden. Die unvollständige Kopie wurde entfernt; Ihr Original blieb unverändert.",
 	"cleanupFailedSummary": "Die bereinigte Ausgabe konnte nicht überprüft und die unvollständige Ausgabe nicht entfernt werden. Ihr Original blieb unverändert.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Abgeschlossen"
+	"complete": "Abgeschlossen",
+	"empty.dropActive": "Dateien zum Bereinigen ablegen.",
+	"menu.help.new-releases": "Neue Versionen…",
+	"intake.chooseFiles": "Dateien auswählen…",
+	"intake.chooseFolder": "Ordner auswählen…",
+	"intake.dropZone": "Dateiablagebereich",
+	"intake.unsupportedSkipped": "{count} nicht unterstützte Dateien übersprungen",
+	"intake.foldersUnreadable": "{count} Ordner konnten nicht gelesen werden",
+	"intake.outputCopy": "Bereinigte Kopien werden erstellt — Originale bleiben unverändert.",
+	"intake.outputOverwrite": "Dateien werden direkt bereinigt."
 }

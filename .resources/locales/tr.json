@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "Temizlenmiş çıktı doğrulanamadı. Tamamlanmamış kopya kaldırıldı; orijinaliniz değişmedi.",
 	"cleanupFailedSummary": "Temizlenmiş çıktı doğrulanamadı ve tamamlanmamış çıktı kaldırılamadı. Orijinaliniz değişmedi.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Tamamlandı"
+	"complete": "Tamamlandı",
+	"empty.dropActive": "Temizlemek için dosyaları bırakın.",
+	"menu.help.new-releases": "Yeni sürümler…",
+	"intake.chooseFiles": "Dosya seç…",
+	"intake.chooseFolder": "Klasör seç…",
+	"intake.dropZone": "Dosya bırakma alanı",
+	"intake.unsupportedSkipped": "Desteklenmeyen {count} dosya atlandı",
+	"intake.foldersUnreadable": "{count} klasör okunamadı",
+	"intake.outputCopy": "Temizlenmiş kopyalar oluşturulacak — orijinaller değişmeden kalacak.",
+	"intake.outputOverwrite": "Dosyalar yerinde temizlenecek."
 }

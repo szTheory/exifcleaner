@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "无法验证清理后的输出。不完整副本已删除；原始文件未更改。",
 	"cleanupFailedSummary": "无法验证清理后的输出，也无法删除不完整的输出。原始文件未更改。",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "完成"
+	"complete": "完成",
+	"empty.dropActive": "拖放文件以清理。",
+	"menu.help.new-releases": "新版本…",
+	"intake.chooseFiles": "选择文件…",
+	"intake.chooseFolder": "选择文件夹…",
+	"intake.dropZone": "文件拖放区域",
+	"intake.unsupportedSkipped": "已跳过 {count} 个不支持的文件",
+	"intake.foldersUnreadable": "无法读取 {count} 个文件夹",
+	"intake.outputCopy": "将创建清理后的副本，原文件保持不变。",
+	"intake.outputOverwrite": "文件将在原位置清理。"
 }

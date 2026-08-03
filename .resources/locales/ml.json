@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "വൃത്തിയാക്കിയ ഔട്ട്‌പുട്ട് പരിശോധിക്കാനായില്ല. അപൂർണ്ണ പകർപ്പ് നീക്കം ചെയ്തു; നിങ്ങളുടെ ഒറിജിനൽ മാറ്റമില്ലാതെ തുടരുന്നു.",
 	"cleanupFailedSummary": "വൃത്തിയാക്കിയ ഔട്ട്‌പുട്ട് പരിശോധിക്കാനായില്ല, അപൂർണ്ണ ഔട്ട്‌പുട്ട് നീക്കം ചെയ്യാനുമായില്ല. നിങ്ങളുടെ ഒറിജിനൽ മാറ്റമില്ലാതെ തുടരുന്നു.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "പൂർത്തിയായി"
+	"complete": "പൂർത്തിയായി",
+	"empty.dropActive": "വൃത്തിയാക്കാൻ ഫയലുകൾ ഇവിടെ ഇടുക.",
+	"menu.help.new-releases": "പുതിയ പതിപ്പുകൾ…",
+	"intake.chooseFiles": "ഫയലുകൾ തിരഞ്ഞെടുക്കുക…",
+	"intake.chooseFolder": "ഫോൾഡർ തിരഞ്ഞെടുക്കുക…",
+	"intake.dropZone": "ഫയൽ ഇടാനുള്ള സ്ഥലം",
+	"intake.unsupportedSkipped": "പിന്തുണയില്ലാത്ത {count} ഫയലുകൾ ഒഴിവാക്കി",
+	"intake.foldersUnreadable": "{count} ഫോൾഡറുകൾ വായിക്കാനായില്ല",
+	"intake.outputCopy": "വൃത്തിയാക്കിയ പകർപ്പുകൾ സൃഷ്ടിക്കും — യഥാർത്ഥ ഫയലുകൾ മാറ്റമില്ലാതെ തുടരും.",
+	"intake.outputOverwrite": "ഫയലുകൾ അതേ സ്ഥാനത്ത് വൃത്തിയാക്കും."
 }

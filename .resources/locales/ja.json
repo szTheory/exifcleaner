@@ -48,5 +48,14 @@
 	"verificationFailedSummary": "クリーンな出力を検証できませんでした。不完全なコピーは削除され、元のファイルは変更されていません。",
 	"cleanupFailedSummary": "クリーンな出力を検証できず、不完全な出力を削除できませんでした。元のファイルは変更されていません。",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "完了"
+	"complete": "完了",
+	"empty.dropActive": "ファイルをドロップしてクリーニングします。",
+	"menu.help.new-releases": "新しいリリース…",
+	"intake.chooseFiles": "ファイルを選択…",
+	"intake.chooseFolder": "フォルダーを選択…",
+	"intake.dropZone": "ファイルのドロップ領域",
+	"intake.unsupportedSkipped": "未対応のファイル {count} 件をスキップしました",
+	"intake.foldersUnreadable": "{count} 個のフォルダーを読み取れませんでした",
+	"intake.outputCopy": "クリーニング済みのコピーが作成されます。元のファイルは変更されません。",
+	"intake.outputOverwrite": "ファイルは元の場所でクリーニングされます。"
 }

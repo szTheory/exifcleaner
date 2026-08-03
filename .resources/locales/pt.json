@@ -1,4 +1,15 @@
 {
 	"language": "Idioma",
-	"languageSystem": "Sistema"
+	"languageSystem": "Sistema",
+	"empty.title": "Adicione ficheiros para limpar",
+	"empty.subtitle": "Largue aqui imagens, vídeos ou PDFs, ou escolha uma opção.",
+	"empty.dropActive": "Largue os ficheiros para os limpar.",
+	"menu.help.new-releases": "Novas versões…",
+	"intake.chooseFiles": "Escolher ficheiros…",
+	"intake.chooseFolder": "Escolher pasta…",
+	"intake.dropZone": "Área para largar ficheiros",
+	"intake.unsupportedSkipped": "Foram ignorados {count} ficheiros não suportados",
+	"intake.foldersUnreadable": "Não foi possível ler {count} pastas",
+	"intake.outputCopy": "Serão criadas cópias limpas — os originais permanecem intactos.",
+	"intake.outputOverwrite": "Os ficheiros serão limpos no local."
 }

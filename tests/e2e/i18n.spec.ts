@@ -44,8 +44,7 @@ test.describe("Internationalization", () => {
 		const title = window.locator(".empty-state__title");
 		await expect(title).toBeVisible();
 		const titleText = await title.textContent();
-		// English: "No files selected" (from strings.json empty.title.en)
-		expect(titleText).toContain("No files selected");
+		expect(titleText).toContain("Add files to clean");
 	});
 
 	test("switches language via IPC and updates UI text", async () => {
@@ -62,7 +61,7 @@ test.describe("Internationalization", () => {
 		const title = window.locator(".empty-state__title");
 		await expect(title).toBeVisible();
 		const englishText = await title.textContent();
-		expect(englishText).toContain("No files selected");
+		expect(englishText).toContain("Add files to clean");
 
 		// Send language change via IPC to French
 		await app.evaluate(({ BrowserWindow }, locale) => {
@@ -101,6 +100,21 @@ test.describe("Internationalization", () => {
 		// Japanese: "ファイルが選択されていません" (from strings.json empty.title.ja)
 		expect(japaneseText).toContain("ファイル");
 		// Verify it is not the English text
-		expect(japaneseText).not.toContain("No files selected");
+		expect(japaneseText).not.toContain("Add files to clean");
+	});
+
+	test("switches to Romanian", async () => {
+		await app.evaluate(({ BrowserWindow }, locale) => {
+			const win = BrowserWindow.getAllWindows()[0];
+			if (win) {
+				win.webContents.send("language:changed", locale);
+			}
+		}, "ro");
+
+		const title = window.locator(".empty-state__title");
+		await expect(title).toHaveText("Niciun fișier selectat");
+		await expect(
+			window.getByRole("button", { name: "Alege fișiere…" }),
+		).toBeVisible();
 	});
 });

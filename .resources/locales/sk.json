@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "Vyčistený výstup sa nepodarilo overiť. Neúplná kópia bola odstránená; originál zostal nezmenený.",
 	"cleanupFailedSummary": "Vyčistený výstup sa nepodarilo overiť a neúplný výstup nebolo možné odstrániť. Originál zostal nezmenený.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Dokončené"
+	"complete": "Dokončené",
+	"empty.dropActive": "Presunutím sem súbory vyčistíte.",
+	"menu.help.new-releases": "Nové vydania…",
+	"intake.chooseFiles": "Vybrať súbory…",
+	"intake.chooseFolder": "Vybrať priečinok…",
+	"intake.dropZone": "Oblasť na presunutie súborov",
+	"intake.unsupportedSkipped": "Preskočených nepodporovaných súborov: {count}",
+	"intake.foldersUnreadable": "Nepodarilo sa prečítať priečinky: {count}",
+	"intake.outputCopy": "Vytvoria sa vyčistené kópie — originály zostanú nedotknuté.",
+	"intake.outputOverwrite": "Súbory sa vyčistia na mieste."
 }

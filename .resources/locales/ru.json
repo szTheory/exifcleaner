@@ -50,5 +50,14 @@
 	"verificationFailedSummary": "Не удалось проверить очищенный результат. Неполная копия удалена; оригинал не изменён.",
 	"cleanupFailedSummary": "Не удалось проверить очищенный результат, и неполный результат не удалось удалить. Оригинал не изменён.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
-	"complete": "Готово"
+	"complete": "Готово",
+	"empty.dropActive": "Перетащите файлы для очистки.",
+	"menu.help.new-releases": "Новые версии…",
+	"intake.chooseFiles": "Выбрать файлы…",
+	"intake.chooseFolder": "Выбрать папку…",
+	"intake.dropZone": "Область перетаскивания файлов",
+	"intake.unsupportedSkipped": "Пропущено неподдерживаемых файлов: {count}",
+	"intake.foldersUnreadable": "Не удалось прочитать папки: {count}",
+	"intake.outputCopy": "Будут созданы очищенные копии — оригиналы останутся без изменений.",
+	"intake.outputOverwrite": "Файлы будут очищены на месте."
 }
