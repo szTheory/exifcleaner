@@ -87,7 +87,10 @@ export function setupFolderHandlers({
 			const result = await container.expandFolder.execute({ dirPath });
 
 			if (result.ok) {
-				return { files: result.value, skippedCount: 0 };
+				return {
+					files: result.value.files,
+					skippedCount: result.value.skippedCount,
+				};
 			}
 
 			return {

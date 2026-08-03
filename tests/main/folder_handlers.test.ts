@@ -139,7 +139,8 @@ describe("folder expansion handler", () => {
 		expect(result).toEqual({
 			files: [],
 			skippedCount: 0,
-			error: "Could not read folder /photos: Permission denied. Check folder permissions.",
+			error:
+				"Could not read folder /photos: Permission denied. Check folder permissions.",
 		});
 	});
 
