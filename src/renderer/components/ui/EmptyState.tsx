@@ -1,9 +1,21 @@
 import { useI18n } from "../../hooks/use_i18n";
 
-export function EmptyState(): React.JSX.Element {
+interface EmptyStateProps {
+	dragActive: boolean;
+	onChooseFiles: () => void;
+	onChooseFolder: () => void;
+	saveAsCopy: boolean | null;
+}
+
+export function EmptyState({
+	dragActive,
+	onChooseFiles,
+	onChooseFolder,
+	saveAsCopy,
+}: EmptyStateProps): React.JSX.Element {
 	const { t } = useI18n();
 	return (
-		<section className="empty-state" aria-label={t("empty.title")}>
+		<section className="empty-state" aria-labelledby="empty-state-title">
 			<div className="empty-state__inner">
 				<svg
 					className="empty-state__icon"
@@ -22,8 +34,41 @@ export function EmptyState(): React.JSX.Element {
 						d="M4 2h10a1 1 0 011 1v8a1 1 0 01-1 1v1a2 2 0 002-2V3a2 2 0 00-2-2H4a2 2 0 00-2 2h1a1 1 0 011-1z"
 					/>
 				</svg>
-				<h1 className="empty-state__title">{t("empty.title")}</h1>
-				<p className="empty-state__subtitle">{t("empty.subtitle")}</p>
+				<h1 className="empty-state__title" id="empty-state-title">
+					{t("empty.title")}
+				</h1>
+				<div className="empty-state__instructions" aria-live="polite">
+					<p className="empty-state__instruction" aria-hidden={dragActive}>
+						{t("empty.subtitle")}
+					</p>
+					<p className="empty-state__instruction" aria-hidden={!dragActive}>
+						{t("empty.dropActive")}
+					</p>
+				</div>
+				<div className="empty-state__actions">
+					<button
+						type="button"
+						className="empty-state__button empty-state__button--primary"
+						onClick={onChooseFiles}
+					>
+						{t("intake.chooseFiles")}
+					</button>
+					<button
+						type="button"
+						className="empty-state__button empty-state__button--secondary"
+						onClick={onChooseFolder}
+					>
+						{t("intake.chooseFolder")}
+					</button>
+				</div>
+				<p
+					className="empty-state__output-mode"
+					aria-hidden={saveAsCopy === null}
+				>
+					{saveAsCopy === null
+						? "\u00a0"
+						: t(saveAsCopy ? "intake.outputCopy" : "intake.outputOverwrite")}
+				</p>
 			</div>
 		</section>
 	);

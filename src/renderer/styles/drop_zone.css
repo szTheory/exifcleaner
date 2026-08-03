@@ -4,46 +4,9 @@
 	flex: 1;
 	min-height: 0;
 	position: relative;
-}
-
-.drop-zone__actions {
-	position: absolute;
-	left: 50%;
-	top: calc(50% + 92px);
-	display: flex;
-	gap: var(--ec-space-2);
-	transform: translateX(-50%);
-	z-index: 1;
-	align-items: center;
-	flex-wrap: wrap;
-	justify-content: center;
-	max-width: 520px;
-}
-
-.drop-zone__output-mode {
-	color: var(--ec-color-text-secondary);
-	flex-basis: 100%;
-	font-size: var(--ec-font-size-small);
-	text-align: center;
-}
-
-.drop-zone__actions button {
-	background: var(--ec-color-surface);
-	border: 1px solid var(--ec-color-border);
-	border-radius: 6px;
-	color: var(--ec-color-text);
-	cursor: pointer;
-	font: inherit;
-	padding: var(--ec-space-2) var(--ec-space-3);
-}
-
-.drop-zone__actions button:hover {
-	border-color: var(--ec-color-accent);
-}
-
-.drop-zone__actions button:focus-visible {
-	outline: 2px solid var(--ec-color-accent);
-	outline-offset: 2px;
+	border: 2px solid transparent;
+	box-sizing: border-box;
+	overflow-y: auto;
 }
 
 .drop-zone--active {

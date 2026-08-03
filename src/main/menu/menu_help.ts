@@ -9,6 +9,7 @@ const WEBSITE_URL = "https://exifcleaner.com";
 const GITHUB_USERNAME = "szTheory";
 const GITHUB_PROJECTNAME = "exifcleaner";
 const SOURCE_CODE_URL = `https://github.com/${GITHUB_USERNAME}/${GITHUB_PROJECTNAME}`;
+const RELEASES_URL = `${SOURCE_CODE_URL}/releases`;
 
 export function helpMenuTemplate(): MenuItemConstructorOptions {
 	return {
@@ -27,6 +28,10 @@ function buildHelpSubmenu(): MenuItemConstructorOptions[] {
 		openUrlMenuItem({
 			label: i18n({ key: "menu.help.source-code" }),
 			url: SOURCE_CODE_URL,
+		}),
+		openUrlMenuItem({
+			label: i18n({ key: "menu.help.new-releases" }),
+			url: RELEASES_URL,
 		}),
 		{
 			label: `${i18n({ key: "menu.help.report-issue" })}…`,

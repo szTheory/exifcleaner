@@ -143,14 +143,19 @@ async function expandAndProcessFolder({
 export function DropZone({
 	children,
 }: {
-	children: ReactNode;
+	children: (controls: {
+		dragActive: boolean;
+		onChooseFiles: () => void;
+		onChooseFolder: () => void;
+		saveAsCopy: boolean | null;
+	}) => ReactNode;
 }): React.JSX.Element {
 	const [isDragOver, setIsDragOver] = useState(false);
 	const [saveAsCopy, setSaveAsCopy] = useState<boolean | null>(null);
 	const [skipToast, setSkipToast] = useState("");
 	const [skipToastVisible, setSkipToastVisible] = useState(false);
 	const skipToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const { state, dispatch } = useAppContext();
+	const { dispatch } = useAppContext();
 	const { processFiles } = useProcessFiles();
 	const { t } = useI18n();
 
@@ -267,22 +272,12 @@ export function DropZone({
 			role="region"
 			aria-label={t("intake.dropZone")}
 		>
-			{children}
-			{state.files.length === 0 && (
-				<div className="drop-zone__actions">
-					<button type="button" onClick={() => void chooseFiles()}>
-						{t("intake.chooseFiles")}
-					</button>
-					<button type="button" onClick={() => void chooseFolder()}>
-						{t("intake.chooseFolder")}
-					</button>
-					{saveAsCopy !== null && (
-						<span className="drop-zone__output-mode">
-							{t(saveAsCopy ? "intake.outputCopy" : "intake.outputOverwrite")}
-						</span>
-					)}
-				</div>
-			)}
+			{children({
+				dragActive: isDragOver,
+				onChooseFiles: () => void chooseFiles(),
+				onChooseFolder: () => void chooseFolder(),
+				saveAsCopy,
+			})}
 			<Toast message={skipToast} visible={skipToastVisible} />
 		</div>
 	);

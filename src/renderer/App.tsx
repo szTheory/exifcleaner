@@ -79,7 +79,11 @@ function AppContent(): React.JSX.Element {
 	return (
 		<>
 			<div className="app__content" aria-hidden={isSettingsOpen || undefined}>
-				<DropZone>{hasFiles ? <FileTable /> : <EmptyState />}</DropZone>
+				<DropZone>
+					{(controls) =>
+						hasFiles ? <FileTable /> : <EmptyState {...controls} />
+					}
+				</DropZone>
 			</div>
 			<StatusBar
 				gearIcon={gearIcon}
