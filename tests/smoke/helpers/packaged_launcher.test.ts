@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
 	packagedExiftoolPath,
 	packagedFuseExecutablePath,
+	packagedFuseWireTarget,
 } from "./packaged_launcher";
 
 describe("packagedExiftoolPath", () => {
@@ -14,6 +15,30 @@ describe("packagedExiftoolPath", () => {
 			path.join(resourcesPath, "nix", "bin", "exiftool"),
 		);
 		expect(exiftoolPath.startsWith(resourcesPath)).toBe(true);
+	});
+});
+
+describe("packagedFuseWireTarget", () => {
+	test("lets @electron/fuses resolve the macOS framework exactly once", () => {
+		const executable = path.join(
+			"/installed",
+			"ExifCleaner.app",
+			"Contents",
+			"MacOS",
+			"ExifCleaner",
+		);
+		expect(packagedFuseWireTarget(executable, "darwin")).toBe(executable);
+	});
+
+	test("uses the physical fuse-bearing executable on Linux and Windows", () => {
+		const appRun = path.join("/tmp", "squashfs-root", "AppRun");
+		expect(packagedFuseWireTarget(appRun, "linux")).toBe(
+			path.join("/tmp", "squashfs-root", "exifcleaner"),
+		);
+		const windowsExecutable = path.join("installed", "ExifCleaner.exe");
+		expect(packagedFuseWireTarget(windowsExecutable, "win32")).toBe(
+			windowsExecutable,
+		);
 	});
 });
 

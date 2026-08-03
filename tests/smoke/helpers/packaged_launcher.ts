@@ -32,6 +32,8 @@ export interface PackagedLaunchContext {
 	/** Untouched Electron Framework/native binary containing the production fuse wire. */
 	readonly originalFuseExecutablePath: string;
 	readonly originalFuseExecutableSha256: string;
+	/** Path shape accepted by @electron/fuses (macOS launcher, native binary elsewhere). */
+	readonly originalFuseWireTarget: string;
 	readonly originalFuseWire: Awaited<ReturnType<typeof getCurrentFuseWire>>;
 	readonly userDataDir: string;
 	readonly neutralCwd: string;
@@ -69,6 +71,14 @@ export function packagedFuseExecutablePath(
 	return executablePath;
 }
 
+export function packagedFuseWireTarget(
+	executablePath: string,
+	platform: NodeJS.Platform,
+): string {
+	if (platform === "darwin") return executablePath;
+	return packagedFuseExecutablePath(executablePath, platform);
+}
+
 function sha256(filePath: string): string {
 	return createHash("sha256").update(readFileSync(filePath)).digest("hex");
 }
@@ -79,6 +89,7 @@ interface InstrumentedPayload {
 	readonly originalExecutableSha256: string;
 	readonly originalFuseExecutablePath: string;
 	readonly originalFuseExecutableSha256: string;
+	readonly originalFuseWireTarget: string;
 	readonly originalFuseWire: Awaited<ReturnType<typeof getCurrentFuseWire>>;
 	readonly root: string;
 }
@@ -121,6 +132,10 @@ let cleanupRegistered = false;
 async function createInstrumentedPayload(): Promise<InstrumentedPayload> {
 	const originalExecutablePath = packagedExecutablePath();
 	const originalFuseExecutablePath = packagedFuseExecutablePath(
+		originalExecutablePath,
+		process.platform,
+	);
+	const originalFuseWireTarget = packagedFuseWireTarget(
 		originalExecutablePath,
 		process.platform,
 	);
@@ -172,18 +187,18 @@ async function createInstrumentedPayload(): Promise<InstrumentedPayload> {
 
 	let originalFuses: Awaited<ReturnType<typeof getCurrentFuseWire>>;
 	try {
-		originalFuses = await getCurrentFuseWire(originalFuseExecutablePath);
+		originalFuses = await getCurrentFuseWire(originalFuseWireTarget);
 		assertProductionHardeningFuses(originalFuses);
 		await flipFuses(fuseTarget, {
 			version: FuseVersion.V1,
 			[FuseV1Options.EnableNodeCliInspectArguments]: true,
 			resetAdHocDarwinSignature: process.platform === "darwin",
 		});
-		const clonedFuseExecutablePath = packagedFuseExecutablePath(
+		const clonedFuseWireTarget = packagedFuseWireTarget(
 			executablePath,
 			process.platform,
 		);
-		const clonedFuses = await getCurrentFuseWire(clonedFuseExecutablePath);
+		const clonedFuses = await getCurrentFuseWire(clonedFuseWireTarget);
 		for (const option of Object.values(FuseV1Options)) {
 			if (typeof option !== "number") continue;
 			const expected =
@@ -207,7 +222,7 @@ async function createInstrumentedPayload(): Promise<InstrumentedPayload> {
 			);
 		}
 		assertSameFuseWire(
-			await getCurrentFuseWire(originalFuseExecutablePath),
+			await getCurrentFuseWire(originalFuseWireTarget),
 			originalFuses,
 		);
 	} catch (error) {
@@ -221,6 +236,7 @@ async function createInstrumentedPayload(): Promise<InstrumentedPayload> {
 		originalExecutableSha256,
 		originalFuseExecutablePath,
 		originalFuseExecutableSha256,
+		originalFuseWireTarget,
 		originalFuseWire: originalFuses,
 		root,
 	};
@@ -435,6 +451,7 @@ export async function launchPackagedApp(
 				originalExecutableSha256: payload.originalExecutableSha256,
 				originalFuseExecutablePath: payload.originalFuseExecutablePath,
 				originalFuseExecutableSha256: payload.originalFuseExecutableSha256,
+				originalFuseWireTarget: payload.originalFuseWireTarget,
 				originalFuseWire: payload.originalFuseWire,
 				userDataDir,
 				neutralCwd,
@@ -475,7 +492,7 @@ export async function closePackagedApp(
 			);
 		}
 		const currentFuses = await getCurrentFuseWire(
-			context.originalFuseExecutablePath,
+			context.originalFuseWireTarget,
 		);
 		assertProductionHardeningFuses(currentFuses);
 		assertSameFuseWire(currentFuses, context.originalFuseWire);

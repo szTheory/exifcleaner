@@ -100,7 +100,7 @@ test.describe("Packaged artifact", () => {
 
 	test("ships the approved Electron fuse values in the native executable", async () => {
 		if (!context) throw new Error("packaged launch context is missing");
-		const fuses = await getCurrentFuseWire(context.originalFuseExecutablePath);
+		const fuses = await getCurrentFuseWire(context.originalFuseWireTarget);
 		const disabled = "0".charCodeAt(0);
 
 		expect(fuses.version).toBe(FuseVersion.V1);
