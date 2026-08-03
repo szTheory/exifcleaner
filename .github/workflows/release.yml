@@ -108,8 +108,8 @@ jobs:
           TAG: ${{ steps.version.outputs.tag }}
         run: |
           set -euo pipefail
-          if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" > existing-release.json 2>/dev/null; then
-            draft=$(jq -r .draft existing-release.json)
+          if gh release view "$TAG" --json isDraft > existing-release.json 2>/dev/null; then
+            draft=$(jq -r .isDraft existing-release.json)
             echo "already_published=$([ "$draft" = false ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           else
             echo "already_published=false" >> "$GITHUB_OUTPUT"
@@ -157,7 +157,7 @@ jobs:
         env:
           TAG: ${{ steps.version.outputs.tag }}
         run: |
-          release_id=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq .id)
+          release_id=$(gh release view "$TAG" --json databaseId --jq .databaseId)
           gh api "repos/$GITHUB_REPOSITORY/releases/$release_id" \
             --method PATCH \
             -F draft=false \

@@ -1403,6 +1403,9 @@ describe("release workflow enforcement", () => {
 		expect(workflow).toContain("release-assets/*");
 		expect(workflow).toContain("--expected-draft true");
 		expect(workflow).toContain("--expected-draft false");
+		expect(workflow).toContain(
+			'gh release view "$TAG" --json databaseId --jq .databaseId',
+		);
 	});
 
 	test("auto-merges only owner-controlled canonical release branches", () => {
