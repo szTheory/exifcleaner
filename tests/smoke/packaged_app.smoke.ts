@@ -231,7 +231,7 @@ test.describe("Packaged artifact", () => {
 			await expect(macosAttributesSwitch).toBeChecked();
 
 			await drawer.getByRole("button", { name: "Close settings" }).click();
-			await expect(drawer).not.toHaveClass(/settings-drawer--open/);
+			await expect(drawer).toHaveCount(0);
 
 			await window.getByRole("button", { name: "Open settings" }).click();
 			await expect(macosAttributesSwitch).toBeChecked();
@@ -251,7 +251,10 @@ test.describe("Packaged artifact", () => {
 			try {
 				await window.getByRole("button", { name: "Open settings" }).click();
 				await window.evaluate(() =>
-					globalThis.window.api.settings.set({ removeXattrs: true }),
+					globalThis.window.api.settings.set({
+						removeXattrs: true,
+						saveAsCopy: false,
+					}),
 				);
 				await window.waitForTimeout(300);
 				expect(await window.locator("#toggle-remove-xattrs").isChecked()).toBe(

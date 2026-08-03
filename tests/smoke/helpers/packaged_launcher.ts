@@ -24,6 +24,11 @@ export interface PackagedLaunchContext {
 	readonly exiftoolPath: string;
 }
 
+export interface PackagedLaunchOptions {
+	/** `null` preserves the product's system-language default. */
+	readonly language?: string | null;
+}
+
 export function packagedExiftoolPath(
 	resourcesPath: string,
 	platform: NodeJS.Platform,
@@ -112,7 +117,9 @@ function appImageEnv(executablePath: string): Record<string, string> {
  * exist. Pointing cwd at an empty temp dir reproduces that, so a mis-resolved path
  * fails here the same way it fails for a user.
  */
-export async function launchPackagedApp(): Promise<PackagedLaunchContext> {
+export async function launchPackagedApp(
+	options: PackagedLaunchOptions = {},
+): Promise<PackagedLaunchContext> {
 	const neutralCwd = mkdtempSync(path.join(tmpdir(), "exifcleaner-smoke-cwd-"));
 	const userDataDir = mkdtempSync(
 		path.join(tmpdir(), "exifcleaner-smoke-profile-"),
@@ -181,6 +188,22 @@ export async function launchPackagedApp(): Promise<PackagedLaunchContext> {
 			if (identity.resourcesPath === "") {
 				throw new Error(
 					"Packaged launcher reported an empty process.resourcesPath",
+				);
+			}
+			const language = options.language === undefined ? "en" : options.language;
+			if (language !== null) {
+				await window.evaluate(
+					(selectedLanguage) =>
+						globalThis.window.api.settings.set({
+							language: selectedLanguage,
+						}),
+					language,
+				);
+				await window.waitForFunction(
+					async (selectedLanguage) =>
+						(await globalThis.window.api.settings.get()).language ===
+						selectedLanguage,
+					language,
 				);
 			}
 

@@ -14,7 +14,7 @@ import {
 test.describe.configure({ mode: "serial" });
 
 test("fresh packaged profiles default to Save as Copy", async () => {
-	const context = await launchPackagedApp();
+	const context = await launchPackagedApp({ language: null });
 	try {
 		const settings = await context.window.evaluate(() =>
 			window.api.settings.get(),
@@ -22,7 +22,7 @@ test("fresh packaged profiles default to Save as Copy", async () => {
 		expect(settings.saveAsCopy).toBe(true);
 		await expect(
 			context.window.locator(".drop-zone__output-mode"),
-		).toContainText(/copy/i);
+		).toContainText(/cleaned copies/i);
 	} finally {
 		await closePackagedApp(context);
 	}
