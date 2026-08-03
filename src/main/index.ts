@@ -1,6 +1,6 @@
 import { BrowserWindow, app } from "electron";
 import { setupMenus } from "./menu/menu";
-import { init } from "./init";
+import { attachWindow, initProcess } from "./init";
 import { createMainWindow, setupMainWindow } from "./window/window_setup";
 import { currentBrowserWindow } from "../infrastructure";
 
@@ -10,7 +10,8 @@ let browserWindow: BrowserWindow | null = null;
 
 async function createAndShowWindow(): Promise<void> {
 	browserWindow = createMainWindow();
-	await init({ browserWindow });
+	attachWindow(browserWindow);
+	await initProcess();
 	setupMenus();
 	setupMainWindow(browserWindow);
 }

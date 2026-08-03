@@ -39,7 +39,7 @@ See the [CHANGELOG](CHANGELOG.md) for the full list of changes.
 
 ## Download and Install
 
-macOS 10.15+, Windows 10+, and Linux are supported (64-bit).
+macOS 12+, Windows 10+, and Linux are supported (64-bit).
 
 - **macOS**: [Download the .dmg file](https://github.com/szTheory/exifcleaner/releases/latest) — pick the `arm64` build for Apple Silicon, the other for Intel
 - **Windows**: [Download the portable `.exe` (recommended) or installer](https://github.com/szTheory/exifcleaner/releases/latest)
@@ -115,11 +115,12 @@ sha256sum -c SHASUMS256.txt 2>&1 | grep OK
 - [Download](https://github.com/szTheory/exifcleaner/releases)
 - [Source Code](https://github.com/szTheory/exifcleaner)
 - [Issue Tracker](https://github.com/szTheory/exifcleaner/issues)
-- [Translations file](https://github.com/szTheory/exifcleaner/blob/master/.resources/strings.json)
+- [Engineering guide](docs/README.md)
+- [Contributing and translations](CONTRIBUTING.md)
 
 ## Supported File Types
 
-Below is a full list of supported file types that ExifCleaner will remove metadata for. It's based on which file types [ExifTool](https://exiftool.org/) supports write operations for.
+Below is the intake list derived from formats for which [ExifTool](https://exiftool.org/) exposes write operations. Acceptance does not guarantee complete, irreversible removal for every container; the important exceptions are documented immediately after the list.
 
 - **3G2, 3GP2** – 3rd Gen. Partnership Project 2 a/v (QuickTime-based)
 - **3GP, 3GPP** – 3rd Gen. Partnership Project a/v (QuickTime-based)
@@ -172,7 +173,7 @@ Below is a full list of supported file types that ExifCleaner will remove metada
 - **PPM, PBM, PGM** – Portable Pixel/Bit/Gray Map
 - **PSD, PSB, PSDT** – PhotoShop Document / Large Document / Template
 - **QTIF, QTI, QIF** – QuickTime Image File
-- **RAF** – FujiFilm RAW Format
+- **RAF** – FujiFilm RAW Format (currently refused without writing; see limitations)
 - **RAW** – Panasonic RAW (TIFF-based)
 - **RW2** – Panasonic RAW 2 (TIFF-based)
 - **RWL** – Leica RAW (TIFF-based)
@@ -192,6 +193,7 @@ that prevent ExifCleaner from making an irreversible-removal guarantee:
 
 | Format | What ExifCleaner can guarantee | Status |
 | --- | --- | --- |
+| RAF | The operation is refused before writing because ExifCleaner cannot currently guarantee a safe cleaned RAF artifact. | Source is left unchanged |
 | PDF | ExifTool writes a reversible PDF update; the original metadata remains recoverable, so ExifCleaner cannot securely erase PDF metadata. | Documented limitation — [#216](https://github.com/szTheory/exifcleaner/issues/216) |
 | MKV / Matroska | ExifTool exposes Matroska metadata for reading but does not provide writable tags, so ExifCleaner cannot reliably remove it without a separate remuxing engine. | Documented limitation — [#182](https://github.com/szTheory/exifcleaner/issues/182) |
 | TIFF | Removal may be partial because some metadata can remain in IFD0. | Open investigation — [#199](https://github.com/szTheory/exifcleaner/issues/199) |
@@ -222,7 +224,7 @@ ExifCleaner has the same writer limitations as the underlying `exiftool` it depe
 
 ## Translations
 
-New translations and corrections to existing translations are welcome! See the [Adding a Translation](#adding-a-translation) section below. Current translation status:
+New translations and corrections are welcome. See [Contributing](CONTRIBUTING.md#translation-corrections) for the small-string workflow. Current translation status:
 
 - Arabic by [@ZER0-X](https://github.com/ZER0-X)
 - Catalan by [@marcarmengou](https://github.com/marcarmengou)
@@ -250,7 +252,7 @@ New translations and corrections to existing translations are welcome! See the [
 
 ## Development
 
-Built with [Electron 35](https://electronjs.org), [React 19](https://react.dev), and [TypeScript 5.7](https://www.typescriptlang.org/) (strict mode). Uses a hand-rolled [ExifTool](https://exiftool.org/) wrapper implementing the `-stay_open` protocol for fast batch processing.
+Built with [Electron](https://electronjs.org), [React 19](https://react.dev), and [TypeScript](https://www.typescriptlang.org/) in strict mode. A hand-rolled [ExifTool](https://exiftool.org/) adapter uses the `-stay_open` protocol for fast batch processing. The [engineering guide](docs/README.md) explains the architecture and traces a file end to end.
 
 ### Run the app in dev mode
 
@@ -281,23 +283,11 @@ yarn lint          # Prettier formatting check
 yarn typecheck     # TypeScript strict mode check
 ```
 
-### Adding a Translation
+### Adding or correcting a translation
 
-All translations live in [`.resources/strings.json`](https://github.com/szTheory/exifcleaner/blob/master/.resources/strings.json). Add an entry for the new language code ([list of codes](https://www.electronjs.org/docs/api/locales)) under each string:
-
-```json
-"empty.title": {
-  "en": "No files selected",
-  "fr": "Aucun fichier selectionne",
-  "es": "Your translation here"
-},
-```
-
-To test with a specific locale:
-
-```bash
-yarn dev --lang=es
-```
+Edit `.resources/locales/<locale>.json`, then run `yarn i18n:write` and
+`yarn i18n:check`. See [CONTRIBUTING.md](CONTRIBUTING.md#translation-corrections) for
+placeholder, review, and testing guidance.
 
 ### Publishing a new release
 
@@ -306,10 +296,11 @@ Releases are built by GitHub Actions. To publish:
 1. Run `yarn verify:release`. If it reports known-gap release blockers, fix or remove the blocking marker before publishing; if it reports release-note drift, run `yarn known-gaps:write` and review the managed block.
 2. Make sure `RELEASE_NOTES.md` is current — it becomes the release body verbatim
 3. Trigger the [Release workflow](../../actions/workflows/release.yml) via `workflow_dispatch` in the GitHub Actions UI
-4. CI builds all platforms unsigned, then **installs and smoke-tests each packaged
-   artifact** — mounts the DMG / runs the NSIS installer / extracts the AppImage,
+4. CI builds all platforms unsigned, then **installs and smoke-tests one representative
+   artifact per platform** — mounts the Apple Silicon DMG / runs the NSIS installer / extracts the AppImage,
    launches the installed binary, and strips metadata from a test image. macOS
-   additionally runs the Gatekeeper regression gate. A build that fails any of these
+   additionally runs the Gatekeeper regression gate. The remaining four binaries receive
+   exact-inventory, non-empty, and format-structure checks. A build that fails any of these
    cannot reach the release page.
 5. A draft GitHub release is created with all artifacts and SHASUMS256.txt
 6. Download the DMG **through a browser** and confirm it opens (this is the one check CI

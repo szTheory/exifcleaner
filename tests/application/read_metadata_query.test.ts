@@ -14,7 +14,11 @@ it("reads and cleans metadata from a file", async () => {
 	exiftool.readResult = {
 		ok: true,
 		value: [
-			{ FileName: "test.jpg", SourceFile: "/tmp/test.jpg", Make: "Canon" },
+			{
+				"System:Other:FileName": "test.jpg",
+				SourceFile: "/tmp/test.jpg",
+				"IFD0:Camera:Make": "Canon",
+			},
 		],
 	};
 
@@ -22,11 +26,14 @@ it("reads and cleans metadata from a file", async () => {
 
 	expect(result.ok).toBe(true);
 	if (result.ok) {
-		expect(result.value).toHaveProperty("FileName");
-		expect(result.value).toHaveProperty("Make");
+		expect(result.value).toEqual({ "Camera:Make": "Canon" });
 		// SourceFile is a computed field and should be filtered out
 		expect(result.value).not.toHaveProperty("SourceFile");
 	}
+	expect(exiftool.calls[0]).toEqual({
+		method: "readMetadata",
+		args: ["/tmp/test.jpg", ["-G1:2"]],
+	});
 });
 
 it("returns empty object when no metadata entries", async () => {
@@ -52,4 +59,21 @@ it("returns error when exiftool fails", async () => {
 	if (!result.ok) {
 		expect(result.error.code).toBe("exiftool-error");
 	}
+});
+
+it.each([
+	["ExifTool:Error", "File format error"],
+	["ExifTool:ExifTool:Warning", "JPEG format error"],
+])("returns an error for an embedded %s diagnostic", async (key, detail) => {
+	exiftool.readResult = {
+		ok: true,
+		value: [{ [key]: detail, "File:Other:FileType": "JPEG" }],
+	};
+
+	const result = await query.execute({ filePath: "/tmp/corrupt.jpg" });
+
+	expect(result).toEqual({
+		ok: false,
+		error: { code: "exiftool-error", detail },
+	});
 });

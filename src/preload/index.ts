@@ -83,6 +83,8 @@ const api: ElectronApi = {
 	files: {
 		basename,
 		getPathForFile: (file: File) => webUtils.getPathForFile(file),
+		chooseFiles: () => typedInvoke("files:choose"),
+		chooseFolder: () => typedInvoke("folder:choose"),
 		notifyFilesAdded: (count: number) => ipcRenderer.send("files-added", count),
 		notifyFileProcessed: () => ipcRenderer.send("file-processed"),
 		notifyAllFilesProcessed: () => ipcRenderer.send("all-files-processed"),

@@ -32,7 +32,7 @@ export function FileRow({
 	onRevealError?: (message: string) => void;
 }): React.JSX.Element {
 	const enteringRef = useRef(true);
-	const { t } = useI18n();
+	const { t, locale } = useI18n();
 	const revealTargets = resolveRevealTargets(file);
 
 	const isComplete =
@@ -45,13 +45,23 @@ export function FileRow({
 		(file.wasForcedCopy === true ||
 			(file.outputPath !== undefined && file.outputPath !== file.path));
 	const failureSummary =
-		file.failureKind === "verification"
-			? t("verificationFailedSummary")
-			: file.failureKind === "cleanup"
-				? t("cleanupFailedSummary")
-				: file.failureKind === "xattr"
-					? t("xattrFailedSummary")
-					: undefined;
+		file.failureKind === "refused"
+			? t("outcome.refusedRaf")
+			: file.failureKind === "verification"
+				? t("verificationFailedSummary")
+				: file.failureKind === "cleanup"
+					? t("cleanupFailedSummary")
+					: file.failureKind === "xattr"
+						? t("xattrFailedSummary")
+						: undefined;
+	const outcomeSummary =
+		file.outcomeKind === "already-clean"
+			? t("outcome.alreadyClean")
+			: file.outcomeKind === "unchanged"
+				? t("outcome.unchanged")
+				: file.outcomeKind === "cleaned"
+					? t("outcome.cleaned")
+					: failureSummary;
 	const errorDetail =
 		(file.failureKind === "cleanup" || file.failureKind === "xattr") &&
 		file.detail !== undefined &&
@@ -119,16 +129,19 @@ export function FileRow({
 				style={progressStyle}
 				tabIndex={0}
 				role="row"
-				aria-label={
+				aria-label={`${file.name}. ${
 					isForcedCopy
-						? `${t("complete")}. ${t("writtenToCopy")}.`
-						: (failureSummary ??
-							(isError ? (file.error ?? undefined) : undefined))
-				}
+						? `${outcomeSummary ?? t("complete")}. ${t("writtenToCopy")}.`
+						: (outcomeSummary ??
+							(isError
+								? (file.error ?? t("status.error"))
+								: t("status.pending")))
+				}`}
+				{...(isExpandable ? { "aria-expanded": isExpanded } : {})}
 				onClick={isExpandable ? onToggleExpand : undefined}
 				onKeyDown={handleKeyDown}
 			>
-				<div className="file-table__cell file-table__cell--status">
+				<div className="file-table__cell file-table__cell--status" role="cell">
 					{isError ? (
 						<StatusIcon
 							status={file.status}
@@ -146,29 +159,36 @@ export function FileRow({
 						/>
 					)}
 				</div>
-				<div className="file-table__cell file-table__cell--name">
+				<div className="file-table__cell file-table__cell--name" role="cell">
 					<div className="file-table__name-stack">
-						<span className="file-table__name-text">{file.name}</span>
+						<bdi className="file-table__name-text" dir="auto">
+							{file.name}
+						</bdi>
 						{isForcedCopy && (
 							<span className="file-table__copy-disclosure">
 								{t("writtenToCopy")}
 							</span>
 						)}
-						{failureSummary !== undefined && (
+						{outcomeSummary !== undefined && file.outcomeKind !== "cleaned" && (
 							<span className="file-table__error-summary">
-								{failureSummary}
+								{outcomeSummary}
 							</span>
 						)}
 					</div>
 				</div>
-				<div className="file-table__cell">
+				<div className="file-table__cell" role="cell">
 					<TypePill extension={file.extension} />
 				</div>
-				<div className="file-table__cell file-table__cell--size">
+				<div className="file-table__cell file-table__cell--size" role="cell">
 					{formatFileSize({ bytes: file.size })}
+					{file.outputSize !== undefined && file.outputSize !== file.size
+						? ` → ${formatFileSize({ bytes: file.outputSize })}`
+						: ""}
 				</div>
-				<div className="file-table__cell">{renderBeforeCell(file)}</div>
-				<div className="file-table__cell">
+				<div className="file-table__cell" role="cell">
+					{renderBeforeCell(file)}
+				</div>
+				<div className="file-table__cell" role="cell">
 					{renderAfterCell(file, shouldAnimateCheck)}
 					{isComplete && (
 						<span
@@ -191,8 +211,8 @@ export function FileRow({
 							}}
 							aria-label={
 								revealTargets.contextPaths === null
-									? "Reveal in file manager"
-									: "Reveal cleaned copy in file manager"
+									? t("reveal.original")
+									: t("reveal.cleanedCopy")
 							}
 							role="button"
 							tabIndex={0}
@@ -228,6 +248,7 @@ export function FileRow({
 						afterMetadata={file.afterMetadata}
 						onCopy={onCopyToast}
 						i18nLookup={t}
+						locale={locale}
 					/>
 				)}
 			{isExpanded &&
@@ -235,7 +256,7 @@ export function FileRow({
 				file.status === FileProcessingStatus.NoMetadataFound && (
 					<div className="file-table__expansion">
 						<span className="metadata-expansion__empty">
-							{t("noMetadataFound")}
+							{t("outcome.alreadyClean")}
 						</span>
 					</div>
 				)}

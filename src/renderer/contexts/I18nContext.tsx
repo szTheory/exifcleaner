@@ -56,6 +56,11 @@ export function I18nProvider({
 		};
 	}, []);
 
+	useEffect(() => {
+		document.documentElement.lang = locale;
+		document.documentElement.dir = isRightToLeft(locale) ? "rtl" : "ltr";
+	}, [locale]);
+
 	// Listen for language changes from main process (hot-swap)
 	useEffect(() => {
 		const unsubscribe = window.api.i18n.onLanguageChanged(
@@ -86,4 +91,9 @@ export function I18nProvider({
 	);
 
 	return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+}
+
+function isRightToLeft(locale: string): boolean {
+	const language = locale.toLowerCase().split("-")[0];
+	return language === "ar" || language === "fa";
 }

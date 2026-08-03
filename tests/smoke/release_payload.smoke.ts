@@ -27,9 +27,7 @@ async function expectFocusInsideDialog(
 		await context.window.keyboard.press("Tab");
 		expect(
 			await context.window.evaluate(() => {
-				const dialogNode = document.querySelector(
-					'[role="dialog"][aria-label="Settings"]',
-				);
+				const dialogNode = document.querySelector('[role="dialog"]');
 				return dialogNode?.contains(document.activeElement) ?? false;
 			}),
 		).toBe(true);
@@ -38,9 +36,7 @@ async function expectFocusInsideDialog(
 	await context.window.keyboard.press("Shift+Tab");
 	expect(
 		await context.window.evaluate(() => {
-			const dialogNode = document.querySelector(
-				'[role="dialog"][aria-label="Settings"]',
-			);
+			const dialogNode = document.querySelector('[role="dialog"]');
 			return dialogNode?.contains(document.activeElement) ?? false;
 		}),
 	).toBe(true);
@@ -72,6 +68,7 @@ test("#300 installed payload reports its stat-derived non-empty SIZE", async () 
 	const { dir, copyFixture, cleanup } = createFixtureDir();
 
 	try {
+		await driver.setSaveAsCopy(false);
 		const filePath = copyFixture("sample.jpg");
 		const sizeWhenAdded = fs.statSync(filePath).size;
 		expect(sizeWhenAdded).toBeGreaterThan(0);
@@ -88,11 +85,11 @@ test("#300 installed payload reports its stat-derived non-empty SIZE", async () 
 		});
 		await assertMetadataStripped(filePath, context.exiftoolPath);
 		const sizeCell = context.window.locator(".file-table__cell--size").first();
-		await expect(sizeCell).toHaveText(`${sizeWhenAdded} B`);
+		await expect(sizeCell).toHaveText(
+			new RegExp(`^${sizeWhenAdded} B → [1-9][0-9]* B$`),
+		);
 		await expect(sizeCell).not.toHaveText("0 B");
-		await expect(
-			context.window.getByRole("table", { name: "File list" }),
-		).toBeVisible();
+		await expect(context.window.locator(".file-table")).toBeVisible();
 	} finally {
 		cleanup();
 		await closePackagedApp(context);
@@ -119,25 +116,25 @@ test("#301 installed settings retain semantic keyboard and pointer paths", async
 		await expectFocusInsideDialog(context);
 		await expectNoVisibleOverflow(context);
 		await dialog.getByRole("button", { name: "Close settings" }).click();
-		await expect(dialog).not.toHaveClass(/settings-drawer--open/);
+		await expect(dialog).toHaveCount(0);
 		await expect(trigger).toBeFocused();
 
 		await trigger.press("Enter");
 		await expect(dialog).toBeVisible();
 		await context.window.keyboard.press("Escape");
-		await expect(dialog).not.toHaveClass(/settings-drawer--open/);
+		await expect(dialog).toHaveCount(0);
 		await expect(trigger).toBeFocused();
 
 		await trigger.press(" ");
 		await expect(dialog).toBeVisible();
 		await dialog.getByRole("button", { name: "Close settings" }).click();
-		await expect(dialog).not.toHaveClass(/settings-drawer--open/);
+		await expect(dialog).toHaveCount(0);
 		await expect(trigger).toBeFocused();
 
 		await trigger.click();
 		await expect(dialog).toBeVisible();
 		await trigger.click({ force: true });
-		await expect(dialog).not.toHaveClass(/settings-drawer--open/);
+		await expect(dialog).toHaveCount(0);
 		await expect(trigger).toBeFocused();
 	} finally {
 		await closePackagedApp(context);

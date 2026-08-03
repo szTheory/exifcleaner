@@ -73,7 +73,11 @@ describe("processFileEntries", () => {
 					onFileOpenAddFiles: vi.fn(),
 				},
 				theme: { get: vi.fn(), onChanged: vi.fn() },
-				settings: { get: vi.fn(), set: vi.fn(), onChanged: vi.fn() },
+				settings: {
+					get: vi.fn().mockResolvedValue({ removeXattrs: false }),
+					set: vi.fn(),
+					onChanged: vi.fn(),
+				},
 			},
 		};
 	});
@@ -161,6 +165,11 @@ describe("processFileEntries", () => {
 			beforeMetadata: { tag1: "v", tag2: "v", tag3: "v" },
 			afterMetadata: { tag1: "v" },
 			outputPath: "/path/to/test_cleaned.jpg",
+			wasForcedCopy: undefined,
+			outcomeKind: "cleaned",
+			removedFields: 2,
+			stillPresentFields: 1,
+			wroteFile: true,
 		});
 	});
 
@@ -192,18 +201,27 @@ describe("processFileEntries", () => {
 			beforeMetadata: { before: "metadata" },
 			afterMetadata: { after: "metadata" },
 			outputPath: "/path/to/test_cleaned_2.jpg",
+			wasForcedCopy: undefined,
+			outcomeKind: "cleaned",
+			removedFields: 1,
+			stillPresentFields: 0,
+			wroteFile: true,
 		});
 	});
 
 	it("copies the main-returned forced-copy fact only after the successful AFTER read", async () => {
-		const entry = makeFileEntry({ path: "/path/to/sample.raf" });
+		const entry = makeFileEntry({ path: "/path/to/sample.cr2" });
 		mockApi.exif.readMetadata
 			.mockResolvedValueOnce({ DateTimeOriginal: "2024:01:01 00:00:00" })
 			.mockResolvedValueOnce({});
 		mockApi.exif.removeMetadata.mockResolvedValue({
 			success: true,
-			outputPath: "/path/to/sample_cleaned.raf",
+			outputPath: "/path/to/sample_cleaned.cr2",
 			wasForcedCopy: true,
+			outcomeKind: "cleaned",
+			removedFields: 1,
+			stillPresentFields: 0,
+			wroteFile: true,
 		});
 
 		await processFileEntries([entry], mockDispatch);
@@ -215,9 +233,64 @@ describe("processFileEntries", () => {
 			afterTags: 0,
 			beforeMetadata: { DateTimeOriginal: "2024:01:01 00:00:00" },
 			afterMetadata: {},
-			outputPath: "/path/to/sample_cleaned.raf",
+			outputPath: "/path/to/sample_cleaned.cr2",
 			wasForcedCopy: true,
+			outcomeKind: "cleaned",
+			removedFields: 1,
+			stillPresentFields: 0,
+			wroteFile: true,
+			outputSize: undefined,
 		});
+	});
+
+	it("continues the batch after refusing an unsafe RAF write", async () => {
+		const raf = makeFileEntry({
+			id: "raf",
+			path: "/path/to/sample.raf",
+			name: "sample.raf",
+		});
+		const jpeg = makeFileEntry({
+			id: "jpeg",
+			path: "/path/to/sample.jpg",
+			name: "sample.jpg",
+		});
+		mockApi.exif.readMetadata
+			.mockResolvedValueOnce({ DateTimeOriginal: "2024:01:01 00:00:00" })
+			.mockResolvedValueOnce({ Artist: "Ada" })
+			.mockResolvedValueOnce({});
+		mockApi.exif.removeMetadata
+			.mockResolvedValueOnce({
+				success: false,
+				failureKind: "refused",
+				refusalReason: "unsafe-raf-write",
+				detail: "RAF was left unchanged",
+				originalPath: raf.path,
+			})
+			.mockResolvedValueOnce({
+				success: true,
+				outputPath: jpeg.path,
+				wasForcedCopy: false,
+				wroteFile: true,
+				outputSize: 512,
+			});
+
+		await processFileEntries([raf, jpeg], mockDispatch);
+
+		expect(dispatches).toContainEqual({
+			type: "UPDATE_FILE_ERROR",
+			id: "raf",
+			error: "RAF was left unchanged",
+			failureKind: "refused",
+			detail: "RAF was left unchanged",
+			outcomeKind: "refused",
+		});
+		expect(dispatches).toContainEqual({
+			type: "UPDATE_FILE_STATUS",
+			id: "jpeg",
+			status: FileProcessingStatus.Complete,
+		});
+		expect(mockApi.files.notifyFileProcessed).toHaveBeenCalledTimes(2);
+		expect(mockApi.files.notifyAllFilesProcessed).toHaveBeenCalledTimes(1);
 	});
 
 	it("dispatches UPDATE_FILE_STATUS 'complete' on success", async () => {
@@ -240,6 +313,32 @@ describe("processFileEntries", () => {
 		expect(completeDispatches).toHaveLength(1);
 	});
 
+	it("reports unchanged metadata as complete, not metadata-free", async () => {
+		const entry = makeFileEntry();
+		mockApi.exif.readMetadata.mockResolvedValue({ Artist: "Ada" });
+		mockApi.exif.removeMetadata.mockResolvedValue({
+			success: true,
+			outputPath: entry.path,
+			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: entry.size,
+		});
+
+		await processFileEntries([entry], mockDispatch);
+
+		expect(dispatches).toContainEqual(
+			expect.objectContaining({
+				type: "UPDATE_FILE_METADATA",
+				outcomeKind: "unchanged",
+			}),
+		);
+		expect(dispatches).toContainEqual({
+			type: "UPDATE_FILE_STATUS",
+			id: entry.id,
+			status: FileProcessingStatus.Complete,
+		});
+	});
+
 	it("dispatches 'no-metadata-found' when beforeTags is 0", async () => {
 		const entry = makeFileEntry();
 		mockApi.exif.readMetadata.mockResolvedValue({});
@@ -250,13 +349,8 @@ describe("processFileEntries", () => {
 
 		await processFileEntries([entry], mockDispatch);
 
-		expect(mockApi.exif.removeMetadata).toHaveBeenCalledWith(
-			"/path/to/test.jpg",
-		);
-		expect(mockApi.exif.readMetadata).toHaveBeenNthCalledWith(
-			2,
-			"/path/to/test_cleaned.jpg",
-		);
+		expect(mockApi.exif.removeMetadata).not.toHaveBeenCalled();
+		expect(mockApi.exif.readMetadata).toHaveBeenCalledTimes(1);
 		expect(dispatches).toContainEqual({
 			type: "UPDATE_FILE_METADATA",
 			id: "test-id-1",
@@ -264,7 +358,12 @@ describe("processFileEntries", () => {
 			afterTags: 0,
 			beforeMetadata: {},
 			afterMetadata: {},
-			outputPath: "/path/to/test_cleaned.jpg",
+			outputPath: "/path/to/test.jpg",
+			wasForcedCopy: false,
+			outcomeKind: "already-clean",
+			removedFields: 0,
+			stillPresentFields: 0,
+			wroteFile: false,
 		});
 		const noMetadataDispatches = dispatches.filter(
 			(d) =>
@@ -421,7 +520,9 @@ describe("processFileEntries", () => {
 				name: `jpeg-${number}.jpg`,
 			});
 		});
-		mockApi.exif.readMetadata.mockResolvedValue({ metadata: "present" });
+		mockApi.exif.readMetadata.mockImplementation(async (path: string) =>
+			path.includes("_cleaned") ? {} : { metadata: "present" },
+		);
 		mockApi.exif.removeMetadata.mockImplementation(async (path: string) => {
 			return {
 				success: true,

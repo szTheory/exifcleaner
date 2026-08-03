@@ -17,7 +17,7 @@ test.describe("Error Handling", () => {
 
 	test.beforeEach(async () => {
 		consoleErrors = [];
-		const launched = await launchApp();
+		const launched = await launchApp({ settings: { saveAsCopy: false } });
 		app = launched.app;
 		window = launched.window;
 
@@ -161,9 +161,9 @@ test.describe("Error Handling", () => {
 				[tempFile],
 			);
 
-			// Wait briefly and verify the file was filtered out (not added to table)
-			// The app's isSupportedFile() filters .txt files before adding to state
-			await window.waitForTimeout(2000);
+			await expect(window.locator(".toast")).toContainText(
+				"1 unsupported files skipped",
+			);
 
 			const after = snapshotDir(dir);
 

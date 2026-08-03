@@ -12,6 +12,7 @@ import { createFixtureDir } from "../helpers/fixture_copier";
 import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
 import { waitForProcessing } from "../e2e/helpers/wait_for_processing";
 import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
+import { createProcessingDriver } from "../helpers/processing_driver";
 import {
 	expectNoXattrs,
 	expectSeededXattrs,
@@ -131,6 +132,8 @@ test.describe("Packaged artifact", () => {
 		// fine with mis-resolved resource paths.
 		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
+			if (!context) throw new Error("packaged launch context is missing");
+			await createProcessingDriver(context).setSaveAsCopy(false);
 			const tempFile = copyFixture("sample.jpg");
 
 			const before = snapshotDir(dir);
@@ -166,6 +169,8 @@ test.describe("Packaged artifact", () => {
 		// argument shape than JPEG.
 		const { dir, copyFixtures, cleanup } = createFixtureDir();
 		try {
+			if (!context) throw new Error("packaged launch context is missing");
+			await createProcessingDriver(context).setSaveAsCopy(false);
 			const tempFiles = copyFixtures([
 				"sample.jpg",
 				"sample.png",
@@ -226,7 +231,7 @@ test.describe("Packaged artifact", () => {
 			await expect(macosAttributesSwitch).toBeChecked();
 
 			await drawer.getByRole("button", { name: "Close settings" }).click();
-			await expect(drawer).not.toHaveClass(/settings-drawer--open/);
+			await expect(drawer).toHaveCount(0);
 
 			await window.getByRole("button", { name: "Open settings" }).click();
 			await expect(macosAttributesSwitch).toBeChecked();
@@ -246,7 +251,10 @@ test.describe("Packaged artifact", () => {
 			try {
 				await window.getByRole("button", { name: "Open settings" }).click();
 				await window.evaluate(() =>
-					globalThis.window.api.settings.set({ removeXattrs: true }),
+					globalThis.window.api.settings.set({
+						removeXattrs: true,
+						saveAsCopy: false,
+					}),
 				);
 				await window.waitForTimeout(300);
 				expect(await window.locator("#toggle-remove-xattrs").isChecked()).toBe(

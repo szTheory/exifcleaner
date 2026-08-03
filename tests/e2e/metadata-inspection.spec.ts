@@ -16,7 +16,7 @@ test.describe("Metadata Inspection", () => {
 
 	test.beforeEach(async () => {
 		consoleErrors = [];
-		const launched = await launchApp();
+		const launched = await launchApp({ settings: { saveAsCopy: false } });
 		app = launched.app;
 		window = launched.window;
 
@@ -118,14 +118,10 @@ test.describe("Metadata Inspection", () => {
 			const expansion = window.locator(".metadata-expansion");
 			await expect(expansion).toBeVisible();
 
-			// Metadata groups start collapsed -- expand them all
+			// Removed metadata is visible immediately after expanding the file row.
 			const groupHeaders = expansion.locator(".metadata-group__header");
 			const groupCount = await groupHeaders.count();
 			expect(groupCount).toBeGreaterThan(0);
-
-			for (let i = 0; i < groupCount; i++) {
-				await groupHeaders.nth(i).click();
-			}
 
 			// Now check for metadata field names
 			const allFieldNames = expansion.locator(".metadata-field__name");
@@ -139,17 +135,15 @@ test.describe("Metadata Inspection", () => {
 				if (text) allNames.push(text);
 			}
 
-			// The metadata expansion shows file-level tags (via -G2 -File:all).
-			// Known tags that should be present include structural fields like:
-			// ExifByteOrder, ImageWidth, ImageHeight, EncodingProcess, etc.
+			// The expansion shows removable embedded metadata, not ExifTool's
+			// structural file facts.
 			const knownTags = [
-				"ExifByteOrder",
-				"ImageWidth",
-				"ImageHeight",
-				"EncodingProcess",
-				"FileName",
-				"FileSize",
-				"MIMEType",
+				"Make",
+				"Model",
+				"Artist",
+				"Copyright",
+				"DateTimeOriginal",
+				"GPSLatitude",
 			];
 			const hasKnownTag = knownTags.some((tag) => allNames.includes(tag));
 			expect(
@@ -164,7 +158,7 @@ test.describe("Metadata Inspection", () => {
 	test("shows removed indicators for stripped metadata tags", async () => {
 		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
-			const tempFile = copyFixture("sample.jpg");
+			const tempFile = copyFixture("orientation.jpg");
 
 			const before = snapshotDir(dir);
 
@@ -183,7 +177,7 @@ test.describe("Metadata Inspection", () => {
 			const after = snapshotDir(dir);
 
 			assertDirEffect(before, after, {
-				modified: ["sample.jpg"],
+				modified: ["orientation.jpg"],
 				added: [],
 				removed: [],
 				unchanged: [],
@@ -196,16 +190,7 @@ test.describe("Metadata Inspection", () => {
 			const expansion = window.locator(".metadata-expansion");
 			await expect(expansion).toBeVisible();
 
-			// Expand all metadata groups
-			const groupHeaders = expansion.locator(".metadata-group__header");
-			const groupCount = await groupHeaders.count();
-			for (let i = 0; i < groupCount; i++) {
-				await groupHeaders.nth(i).click();
-			}
-
-			// After processing sample.jpg with preserveOrientation=true,
-			// ExifByteOrder gets stripped (present in before, absent in after).
-			// This should appear as a removed field.
+			// Most embedded fields are removed.
 			const removedFields = expansion.locator(".metadata-field--removed");
 			const removedCount = await removedFields.count();
 			expect(removedCount).toBeGreaterThan(0);
@@ -217,7 +202,8 @@ test.describe("Metadata Inspection", () => {
 			const iconText = await firstRemovedIcon.textContent();
 			expect(iconText).toBe("\u2212");
 
-			// Verify preserved fields also exist (structural tags present in both)
+			// Still-present fields are secondary and disclosed separately.
+			await expansion.locator(".metadata-expansion__present summary").click();
 			const preservedFields = expansion.locator(".metadata-field--preserved");
 			const preservedCount = await preservedFields.count();
 			expect(preservedCount).toBeGreaterThan(0);

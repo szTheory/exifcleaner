@@ -92,6 +92,40 @@ declare module "*release_evidence.mjs" {
 	export function main(...args: any[]): any;
 }
 
+declare module "*release_asset_gate.mjs" {
+	export type PromotionManifest = {
+		readonly schemaVersion: 1;
+		readonly version: string;
+		readonly sourceCommit: string;
+		readonly assets: readonly {
+			readonly name: string;
+			readonly size: number;
+			readonly sha256: string;
+		}[];
+		readonly nativeEvidence: readonly {
+			readonly runnerOs: string;
+			readonly [key: string]: unknown;
+		}[];
+	};
+	export function expectedAssetNames(version: string): string[];
+	export function parseChecksumManifest(source: string): Map<string, string>;
+	export function buildPromotionManifest(input: {
+		assetDirectory: string;
+		evidenceDirectory: string;
+		sourceCommit: string;
+		version: string;
+		requireChecksums?: boolean;
+	}): PromotionManifest;
+	export function renderChecksums(manifest: PromotionManifest): string;
+	export function validateRemoteRelease(input: {
+		release: unknown;
+		manifest: PromotionManifest;
+		releaseNotes: string;
+		expectedDraft: boolean;
+	}): void;
+	export function main(argv?: string[]): number;
+}
+
 declare module "*release_tag_gate.mjs" {
 	export function buildTagEvidence(...args: any[]): any;
 	export function classifyTagRef(...args: any[]): any;
@@ -99,6 +133,56 @@ declare module "*release_tag_gate.mjs" {
 	export function parseRemoteTagRefs(...args: any[]): any;
 	export function verifyCleanupTargets(...args: any[]): any;
 	export function main(...args: any[]): any;
+}
+
+declare module "*oracle_accountability_gate.mjs" {
+	export type AccountabilityClaim = {
+		issue: number;
+		outcome: string;
+		causality: string;
+		completion: string;
+		evidence: string[];
+	};
+	export type AccountabilitySubject = {
+		metadataOracleSource: string;
+		consumerSources: Record<string, string>;
+		fixtureGeneratorSource: string;
+		orientationCommandSource: string;
+		artifactPaths: string[];
+		claims: {
+			schemaVersion: number;
+			issues: AccountabilityClaim[];
+		};
+		knownGaps: {
+			records: Array<{
+				issue: number;
+				releasePolicy: string;
+				path: string;
+			}>;
+		};
+	};
+	export function evaluateAccountabilitySubject(
+		subject: AccountabilitySubject,
+	): string[];
+	export function renderAccountabilityClaims(claims: {
+		schemaVersion: number;
+		issues: AccountabilityClaim[];
+	}): string;
+	export function evaluateCiWiring(
+		workflowSource: string,
+		scripts: Record<string, string>,
+	): string[];
+}
+
+declare module "*orientation_mutation_gate.mjs" {
+	export function applyOrientationMutation(source: string): string;
+	export function executeOrientationMutation(dependencies: {
+		readSource: () => string;
+		writeSource: (source: string) => void;
+		run: (
+			step: "compile" | "orientation-test",
+		) => Promise<{ status: number | null; output: string }>;
+	}): Promise<void>;
 }
 
 declare module "*known_gap_gate.mjs" {

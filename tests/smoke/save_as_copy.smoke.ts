@@ -13,6 +13,21 @@ import {
 
 test.describe.configure({ mode: "serial" });
 
+test("fresh packaged profiles default to Save as Copy", async () => {
+	const context = await launchPackagedApp({ language: null });
+	try {
+		const settings = await context.window.evaluate(() =>
+			window.api.settings.get(),
+		);
+		expect(settings.saveAsCopy).toBe(true);
+		await expect(
+			context.window.locator(".drop-zone__output-mode"),
+		).toContainText(/cleaned copies/i);
+	} finally {
+		await closePackagedApp(context);
+	}
+});
+
 test("#304 save-as-copy preserves originals, resolves collisions, and reveals the copy", async () => {
 	const context: PackagedLaunchContext = await launchPackagedApp();
 	const driver = createProcessingDriver(context);

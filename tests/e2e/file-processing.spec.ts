@@ -17,7 +17,7 @@ test.describe("File Processing", () => {
 
 	test.beforeEach(async () => {
 		consoleErrors = [];
-		const launched = await launchApp();
+		const launched = await launchApp({ settings: { saveAsCopy: false } });
 		app = launched.app;
 		window = launched.window;
 
@@ -76,6 +76,37 @@ test.describe("File Processing", () => {
 
 			// Verify metadata stripped on disk
 			await assertMetadataStripped(tempFile);
+		} finally {
+			cleanup();
+		}
+	});
+
+	test("does not rewrite a genuinely metadata-free file", async () => {
+		const { dir, copyFixture, cleanup } = createFixtureDir();
+		try {
+			const tempFile = copyFixture("no_metadata.jpg");
+			const before = snapshotDir(dir);
+
+			await app.evaluate(
+				({ BrowserWindow }, filePaths) => {
+					BrowserWindow.getAllWindows()[0]?.webContents.send(
+						"file-open-add-files",
+						filePaths,
+					);
+				},
+				[tempFile],
+			);
+			await waitForProcessing(window);
+
+			assertDirEffect(before, snapshotDir(dir), {
+				unchanged: ["no_metadata.jpg"],
+				added: [],
+				modified: [],
+				removed: [],
+			});
+			await expect(window.locator(".file-table__error-summary")).toContainText(
+				"No removable metadata found",
+			);
 		} finally {
 			cleanup();
 		}

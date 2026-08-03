@@ -7,7 +7,7 @@ import {
 	runMixedFormatScenario,
 	runPositiveFormatScenario,
 	runErrorFormatScenario,
-	runForcedCopyScenario,
+	runRafRefusalScenario,
 	SUPPORTED_FORMAT_FIXTURES,
 	type ProcessingLaunchContext,
 } from "../helpers/processing_driver";
@@ -28,7 +28,7 @@ test.describe("File type coverage", () => {
 	}
 
 	test.beforeEach(async () => {
-		const launched = await launchApp();
+		const launched = await launchApp({ settings: { saveAsCopy: true } });
 		app = launched.app;
 		window = launched.window;
 	});
@@ -59,7 +59,7 @@ test.describe("File type coverage", () => {
 		await runErrorFormatScenario(context(), "truncated.mp4");
 	});
 
-	test("RAF forced copy preserves, discloses, and reveals the artifact", async () => {
-		await runForcedCopyScenario(context());
+	test("RAF is refused without modifying the original or writing an artifact", async () => {
+		await runRafRefusalScenario(context());
 	});
 });

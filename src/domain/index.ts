@@ -8,6 +8,11 @@ export type {
 	MetadataDiffField,
 	MetadataDiffGroup,
 } from "./exif/metadata_groups";
+export type {
+	FileProcessingOutcomeKind,
+	FileProcessingRefusal,
+	MetadataChangeSummary,
+} from "./files/file_processing_outcome";
 
 export { cleanExifData } from "./exif/exif";
 export { Locale, i18nLookup, fallbackLocale } from "./i18n/i18n_lookup";
@@ -18,8 +23,17 @@ export {
 	migrateSettings,
 	validateSettings,
 } from "./settings_schema";
-export { SUPPORTED_EXTENSIONS, isSupportedFile } from "./files/file_types";
+export {
+	SUPPORTED_EXTENSIONS,
+	isRafFile,
+	isSupportedFile,
+} from "./files/file_types";
 export { FileProcessingStatus } from "./files/file_status";
+export {
+	classifyMetadataOutcome,
+	refuseUnsafeRafWrite,
+	summarizeMetadataChange,
+} from "./files/file_processing_outcome";
 export { ACCENT_COLOR_FALLBACK, parseAccentColorHex } from "./accent_color";
 export { generateCleanedPath } from "./files/cleaned_path";
 export { LANGUAGE_NAMES } from "./i18n/language_names";

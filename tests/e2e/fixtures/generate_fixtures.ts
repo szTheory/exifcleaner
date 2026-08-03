@@ -20,7 +20,7 @@ const EXIFTOOL =
 		? path.resolve(__dirname, "../../../.resources/win/bin/exiftool.exe")
 		: path.resolve(__dirname, "../../../.resources/nix/bin/exiftool");
 
-const FIXTURES_DIR = __dirname;
+const DEFAULT_FIXTURES_DIR = __dirname;
 const QUICKTIME_DATE = "2019:10:02 00:49:04";
 const QUICKTIME_EPOCH_OFFSET_SECONDS = 2082844800;
 const ISSUE_240_TAGS = {
@@ -378,11 +378,12 @@ function createMinimalWebp(): Buffer {
 	return Buffer.concat([riffHeader, vp8Header, paddedVp8]);
 }
 
-function generateFixtures(): void {
+function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	console.log("Generating E2E test fixtures...");
+	fs.mkdirSync(fixturesDir, { recursive: true });
 
 	// sample.jpg - JPEG with known EXIF tags
-	const jpegPath = path.join(FIXTURES_DIR, "sample.jpg");
+	const jpegPath = path.join(fixturesDir, "sample.jpg");
 	fs.writeFileSync(jpegPath, createMinimalJpeg());
 	execFileSync(EXIFTOOL, [
 		"-overwrite_original",
@@ -398,7 +399,7 @@ function generateFixtures(): void {
 	console.log("  Created sample.jpg (JPEG with EXIF)");
 
 	// sample.png - PNG with known metadata (tEXt chunks)
-	const pngPath = path.join(FIXTURES_DIR, "sample.png");
+	const pngPath = path.join(fixturesDir, "sample.png");
 	fs.writeFileSync(pngPath, createMinimalPng());
 	execFileSync(EXIFTOOL, [
 		"-overwrite_original",
@@ -409,7 +410,7 @@ function generateFixtures(): void {
 	console.log("  Created sample.png (PNG with metadata)");
 
 	// sample.pdf - PDF with metadata
-	const pdfPath = path.join(FIXTURES_DIR, "sample.pdf");
+	const pdfPath = path.join(fixturesDir, "sample.pdf");
 	fs.writeFileSync(pdfPath, createMinimalPdf());
 	// Deliberately NOT wrapped in try/catch. This call used to swallow its failure behind
 	// a comment claiming the file was "still valid" -- it wasn't. createMinimalPdf briefly
@@ -428,7 +429,7 @@ function generateFixtures(): void {
 	console.log("  Created sample.pdf (PDF with metadata)");
 
 	// sample.mp4 - MP4 with metadata
-	const mp4Path = path.join(FIXTURES_DIR, "sample.mp4");
+	const mp4Path = path.join(fixturesDir, "sample.mp4");
 	fs.writeFileSync(mp4Path, createMinimalMp4());
 	// Not wrapped: execFileSync throws only on a nonzero exit, and ExifTool exits 0 for
 	// warnings. So a catch here could never absorb "minor structure warnings" -- only a
@@ -442,7 +443,7 @@ function generateFixtures(): void {
 	console.log("  Created sample.mp4 (MP4 container)");
 
 	// issue240.mp4 - MP4 with the measured create-date family that survives stripping
-	const issue240Path = path.join(FIXTURES_DIR, "issue240.mp4");
+	const issue240Path = path.join(fixturesDir, "issue240.mp4");
 	fs.writeFileSync(issue240Path, movieHeaderMp4());
 	execFileSync(EXIFTOOL, [
 		"-overwrite_original",
@@ -453,7 +454,7 @@ function generateFixtures(): void {
 	console.log("  Created issue240.mp4 (measured create-date family)");
 
 	// sample.webp - WebP with metadata
-	const webpPath = path.join(FIXTURES_DIR, "sample.webp");
+	const webpPath = path.join(fixturesDir, "sample.webp");
 	fs.writeFileSync(webpPath, createMinimalWebp());
 	execFileSync(EXIFTOOL, [
 		"-overwrite_original",
@@ -465,7 +466,7 @@ function generateFixtures(): void {
 
 	// Error fixtures
 	// corrupted.jpg - JPEG magic bytes followed by garbage
-	const corruptedPath = path.join(FIXTURES_DIR, "corrupted.jpg");
+	const corruptedPath = path.join(fixturesDir, "corrupted.jpg");
 	const corruptedData = Buffer.alloc(50);
 	corruptedData[0] = 0xff;
 	corruptedData[1] = 0xd8;
@@ -477,22 +478,22 @@ function generateFixtures(): void {
 	console.log("  Created corrupted.jpg (garbled content)");
 
 	// unsupported.txt - plain text file
-	const txtPath = path.join(FIXTURES_DIR, "unsupported.txt");
+	const txtPath = path.join(fixturesDir, "unsupported.txt");
 	fs.writeFileSync(txtPath, "This is not an image file.");
 	console.log("  Created unsupported.txt (unsupported format)");
 
 	// zero_byte.jpg - empty file
-	const zeroPath = path.join(FIXTURES_DIR, "zero_byte.jpg");
+	const zeroPath = path.join(fixturesDir, "zero_byte.jpg");
 	fs.writeFileSync(zeroPath, Buffer.alloc(0));
 	console.log("  Created zero_byte.jpg (zero bytes)");
 
 	// no_metadata.jpg - valid JPEG with no EXIF injected
-	const noMetaPath = path.join(FIXTURES_DIR, "no_metadata.jpg");
+	const noMetaPath = path.join(fixturesDir, "no_metadata.jpg");
 	fs.writeFileSync(noMetaPath, createMinimalJpeg());
 	console.log("  Created no_metadata.jpg (JPEG without EXIF)");
 
 	// orientation.jpg - JPEG with exact pre-strip Orientation value
-	const orientationPath = path.join(FIXTURES_DIR, "orientation.jpg");
+	const orientationPath = path.join(fixturesDir, "orientation.jpg");
 	fs.writeFileSync(orientationPath, createMinimalJpeg());
 	execFileSync(EXIFTOOL, [
 		"-overwrite_original",
@@ -504,4 +505,12 @@ function generateFixtures(): void {
 	console.log("\nAll 11 fixture files generated successfully.");
 }
 
-generateFixtures();
+const outputFlag = process.argv.indexOf("--output-dir");
+if (outputFlag !== -1 && process.argv[outputFlag + 1] === undefined) {
+	throw new Error("--output-dir requires a path");
+}
+const outputDir =
+	outputFlag === -1
+		? DEFAULT_FIXTURES_DIR
+		: path.resolve(process.argv[outputFlag + 1]!);
+generateFixtures(outputDir);

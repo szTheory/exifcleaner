@@ -4,11 +4,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import type { Settings } from "../../../src/domain/settings_schema";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export async function launchApp(): Promise<{
+export async function launchApp(options?: {
+	settings?: Partial<Settings>;
+}): Promise<{
 	app: ElectronApplication;
 	window: Page;
 }> {
@@ -51,6 +54,12 @@ export async function launchApp(): Promise<{
 	await window.waitForLoadState("domcontentloaded");
 	// Wait for the React app to mount (main element with role="main")
 	await window.waitForSelector("[role='main']", { timeout: 10000 });
+	if (options?.settings !== undefined) {
+		await window.evaluate(
+			(settings) => globalThis.window.api.settings.set(settings),
+			options.settings,
+		);
+	}
 	return { app, window };
 }
 

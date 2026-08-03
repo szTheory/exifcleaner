@@ -1,0 +1,66 @@
+name: Auto-merge canonical release PR
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+concurrency:
+  group: auto-merge-release-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    name: Merge fully green owner release branch
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      REPOSITORY_OWNER: ${{ github.repository_owner }}
+    steps:
+      - name: Enforce release PR trust and check policy
+        id: policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA/pulls" > associated-prs.json
+          test "$(jq length associated-prs.json)" -eq 1
+
+          number=$(jq -r '.[0].number' associated-prs.json)
+          head_ref=$(jq -r '.[0].head.ref' associated-prs.json)
+          head_repo=$(jq -r '.[0].head.repo.full_name' associated-prs.json)
+          author=$(jq -r '.[0].user.login' associated-prs.json)
+          base_ref=$(jq -r '.[0].base.ref' associated-prs.json)
+          draft=$(jq -r '.[0].draft' associated-prs.json)
+
+          [[ "$head_ref" =~ ^gsd/v[0-9]+\.[0-9]+\.[0-9]+-canonical$ ]]
+          test "$head_repo" = "$GITHUB_REPOSITORY"
+          test "$author" = "$REPOSITORY_OWNER"
+          test "$base_ref" = master
+          test "$draft" = false
+
+          gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA/check-runs" \
+            --paginate --jq '.check_runs[] | [.name, .conclusion] | @tsv' > check-runs.tsv
+          required=(
+            "Lint, Typecheck & Test"
+            "Build macOS"
+            "Build Windows"
+            "Build Linux"
+            "Verify Native Release Evidence"
+          )
+          for name in "${required[@]}"; do
+            test "$(awk -F '\t' -v required="$name" '$1 == required && $2 == "success" { count++ } END { print count + 0 }' check-runs.tsv)" -eq 1
+          done
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
+      - name: Merge canonical release PR
+        run: gh pr merge -R "$GITHUB_REPOSITORY" "${{ steps.policy.outputs.number }}" --merge --delete-branch

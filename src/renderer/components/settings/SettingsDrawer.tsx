@@ -79,6 +79,7 @@ export function SettingsDrawer({
 	const isMac = window.api.platform.isMac;
 	const { themeMode, setThemeMode } = useContext(ThemeContext);
 	const { t } = useContext(I18nContext);
+	const isReady = settings !== null;
 
 	// Load settings on mount
 	useEffect(() => {
@@ -132,9 +133,11 @@ export function SettingsDrawer({
 
 		container.addEventListener("keydown", handleKeyDown);
 		return () => container.removeEventListener("keydown", handleKeyDown);
-	}, [isOpen, onClose]);
+	}, [isOpen, isReady, onClose]);
 
-	if (!settings) return null;
+	// Keeping a translated-offscreen modal mounted leaves its controls in the
+	// accessibility tree and tab order. Mount it only while it is actionable.
+	if (!settings || !isOpen) return null;
 
 	return (
 		<>
@@ -148,18 +151,20 @@ export function SettingsDrawer({
 			{/* Drawer panel */}
 			<div
 				ref={drawerRef}
-				className={`settings-drawer${isOpen ? " settings-drawer--open" : ""}`}
+				className="settings-drawer settings-drawer--open"
 				role="dialog"
-				aria-label="Settings"
+				aria-labelledby="settings-drawer-title"
 				aria-modal="true"
 			>
 				{/* Header (per D-05) */}
 				<div className="settings-drawer__header">
-					<h2 className="settings-drawer__title">Settings</h2>
+					<h2 className="settings-drawer__title" id="settings-drawer-title">
+						{t("menu.app.settings") || "Settings"}
+					</h2>
 					<button
 						className="settings-drawer__close"
 						onClick={onClose}
-						aria-label="Close settings"
+						aria-label={t("settings.close") || "Close settings"}
 						type="button"
 					>
 						<svg
@@ -232,37 +237,37 @@ export function SettingsDrawer({
 						id="toggle-preserve-orientation"
 						checked={settings.preserveOrientation}
 						onChange={(v) => handleToggle("preserveOrientation", v)}
-						label="Preserve orientation"
-						description="Keep photos upright after metadata removal"
+						label={t("settings.preserveOrientation.label")}
+						description={t("settings.preserveOrientation.description")}
 					/>
 					<ToggleSwitch
 						id="toggle-preserve-color-profile"
 						checked={settings.preserveColorProfile}
 						onChange={(v) => handleToggle("preserveColorProfile", v)}
-						label="Preserve color profile"
-						description="Keep ICC color profile for accurate display"
+						label={t("settings.preserveColorProfile.label")}
+						description={t("settings.preserveColorProfile.description")}
 					/>
 					<ToggleSwitch
 						id="toggle-save-as-copy"
 						checked={settings.saveAsCopy}
 						onChange={(v) => handleToggle("saveAsCopy", v)}
-						label="Save as copy"
-						description="Create _cleaned copy, leave original untouched"
+						label={t("settings.saveAsCopy.label")}
+						description={t("settings.saveAsCopy.description")}
 					/>
 					<ToggleSwitch
 						id="toggle-preserve-timestamps"
 						checked={settings.preserveTimestamps}
 						onChange={(v) => handleToggle("preserveTimestamps", v)}
-						label="Preserve timestamps"
-						description="Keep original file dates"
+						label={t("settings.preserveTimestamps.label")}
+						description={t("settings.preserveTimestamps.description")}
 					/>
 					{isMac && (
 						<ToggleSwitch
 							id="toggle-remove-xattrs"
 							checked={settings.removeXattrs}
 							onChange={(v) => handleToggle("removeXattrs", v)}
-							label="Remove macOS attributes"
-							description="Quarantine, download origin, Finder tags"
+							label={t("settings.removeXattrs.label")}
+							description={t("settings.removeXattrs.description")}
 						/>
 					)}
 				</div>

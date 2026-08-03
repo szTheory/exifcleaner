@@ -1,0 +1,62 @@
+{
+	"index": "docs/README.md",
+	"versionFiles": ["docs/README.md"],
+	"documents": [
+		{
+			"path": "docs/architecture/overview.md",
+			"sources": [
+				{ "path": "src/main/container.ts", "symbols": ["createContainer"] },
+				{ "path": "src/preload/index.ts", "symbols": ["contextBridge.exposeInMainWorld"] },
+				{ "path": "src/renderer/App.tsx", "symbols": ["App"] }
+			]
+		},
+		{
+			"path": "docs/guides/code-walkthrough.md",
+			"sources": [
+				{ "path": "src/renderer/components/ui/DropZone.tsx", "symbols": ["processSelectedPaths"] },
+				{ "path": "src/renderer/hooks/use_process_files.ts", "symbols": ["processFileEntries"] },
+				{ "path": "src/main/exif_handlers.ts", "symbols": ["setupExifHandlers"] }
+			]
+		},
+		{
+			"path": "docs/subsystems/file-processing.md",
+			"sources": [
+				{ "path": "src/main/output_transaction.ts", "symbols": ["OutputTransaction"] },
+				{ "path": "src/application/commands/strip_metadata_command.ts", "symbols": ["StripMetadataCommand"] },
+				{ "path": "src/domain/files/file_processing_outcome.ts", "symbols": ["summarizeMetadataChange"] }
+			]
+		},
+		{
+			"path": "docs/subsystems/electron-boundaries.md",
+			"sources": [
+				{ "path": "src/common/ipc_channels.ts", "symbols": ["IpcInvokeMap"] },
+				{ "path": "src/main/ipc/ipc_validation.ts", "symbols": ["createValidatedHandler"] },
+				{ "path": "src/main/security/navigation.ts", "symbols": ["hardenNavigation"] }
+			]
+		},
+		{
+			"path": "docs/subsystems/renderer-state-and-results.md",
+			"sources": [
+				{ "path": "src/renderer/contexts/AppContext.tsx", "symbols": ["appReducer"] },
+				{ "path": "src/renderer/components/file-list/FileTable.tsx", "symbols": ["FileTable"] },
+				{ "path": "src/renderer/components/file-list/MetadataExpansion.tsx", "symbols": ["MetadataExpansion"] }
+			]
+		},
+		{
+			"path": "docs/subsystems/settings-and-localization.md",
+			"sources": [
+				{ "path": "src/domain/settings_schema.ts", "symbols": ["migrateSettings"] },
+				{ "path": "scripts/i18n_resources.mjs", "symbols": ["assertPlaceholderParity"] },
+				{ "path": "src/renderer/contexts/I18nContext.tsx", "symbols": ["I18nProvider"] }
+			]
+		},
+		{
+			"path": "docs/subsystems/build-test-release.md",
+			"sources": [
+				{ "path": ".github/workflows/ci.yml", "symbols": ["jobs:"] },
+				{ "path": ".github/workflows/release.yml", "symbols": ["SHASUMS256.txt"] },
+				{ "path": "playwright.config.ts", "symbols": ["smoke"] }
+			]
+		}
+	]
+}

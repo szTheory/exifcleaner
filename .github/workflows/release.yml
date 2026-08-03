@@ -1,356 +1,187 @@
 name: Release
 
 on:
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [master]
+
+permissions:
+  contents: read
+  actions: read
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
-  test:
-    name: Lint, Typecheck & Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "yarn"
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Verify release-note identity
-        run: yarn verify:release-notes
-
-      - name: Known-gap release gate
-        run: yarn verify:release
-
-      - name: Lint (Prettier)
-        run: yarn lint
-
-      - name: Typecheck (tsc --noEmit)
-        run: yarn typecheck
-
-      - name: Unit tests (Vitest)
-        run: yarn test
-
-      # Parity with ci.yml. Release previously omitted this, so a release could
-      # ship something CI never checked.
-      - name: Check circular dependencies (madge)
-        run: yarn check:deps
-
-      - name: Compile (electron-vite build)
-        run: yarn compile
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-
-      - name: Install Playwright
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
-
-      - name: Install Playwright system deps
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
-
-      - name: Disable AppArmor restriction (Ubuntu 24.04)
-        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-
-      - name: E2E tests (Playwright)
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" yarn test:e2e
-
-  build-macos:
-    name: Build macOS
-    needs: test
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "yarn"
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      # Signed/notarized path deleted deliberately. ExifCleaner ships unsigned
-      # with an ad-hoc signature (scripts/afterPack.cjs). Apple notarization
-      # requires a paid Developer ID whose certificate embeds the holder's legal
-      # name in the Gatekeeper dialog, which is incompatible with this project's
-      # anonymity. Keeping the dead path around meant a step labelled "signed +
-      # notarized" that actually produced unsigned artifacts, plus a latent bug
-      # (APPLE_API_KEY used a literal unexpanded "~").
-      # See SIGNING-SETUP.md if this is ever revisited.
-      - name: Build macOS artifacts
-        run: yarn packmac
-
-      - name: macOS xattr E2E
-        run: yarn playwright test tests/e2e/xattr.spec.ts --project=dev
-
-      # Smoke runs in the SAME job as the build: upload-artifact normalizes file
-      # modes to 644 and drops symlinks, so an unpacked .app cannot cross a job
-      # boundary intact. Only the sealed .dmg does.
-      - name: Install from DMG
-        id: install
-        run: |
-          ARTIFACT=$(find dist -maxdepth 1 -name "*arm64.dmg" -print -quit)
-          test -n "$ARTIFACT"
-          APP=$(scripts/smoke/install-macos.sh "$ARTIFACT" "$RUNNER_TEMP/smoke")
-          echo "artifact=$ARTIFACT" >> "$GITHUB_OUTPUT"
-          echo "executable=$APP" >> "$GITHUB_OUTPUT"
-          # See ci.yml: $APP is <bundle>.app/Contents/MacOS/<name>, so chained
-          # dirnames are off by one and yield a path codesign cannot verify.
-          echo "bundle=${APP%/Contents/MacOS/*}" >> "$GITHUB_OUTPUT"
-
-      - name: Gatekeeper gate
-        run: node scripts/gatekeeper_check.mjs --app "${{ steps.install.outputs.bundle }}"
-
-      - name: Smoke test packaged app
-        env:
-          EXIFCLEANER_PACKAGED_APP: ${{ steps.install.outputs.executable }}
-        run: yarn test:smoke
-
-      - name: Write macOS release evidence
-        run: yarn release:evidence --artifact "${{ steps.install.outputs.artifact }}" --executable "${{ steps.install.outputs.executable }}" --runner-os macos --runner-arch "${{ runner.arch }}" --smoke-result passed --output release-evidence-macos.json
-
-      - name: Upload macOS release evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-evidence-macos
-          path: release-evidence-macos.json
-          retention-days: 7
-
-      - name: Upload smoke report
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: smoke-report-macos
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 7
-
-      - name: Upload macOS artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-macos
-          path: dist/*.dmg
-          retention-days: 30
-
-  build-windows:
-    name: Build Windows
-    needs: test
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "yarn"
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build Windows artifacts
-        run: yarn packwin
-
-      # nsis.runAfterFinish:false stops the silent install auto-launching the app;
-      # the install script also stops any stray instance. Without both, Playwright's
-      # launch becomes a second instance that hangs on the single-instance lock.
-      - name: Install from NSIS installer
-        id: install
-        shell: pwsh
-        run: |
-          $installer = Get-ChildItem -Path dist -Filter "*Setup*.exe" | Select-Object -First 1
-          if ($null -eq $installer) { throw "No NSIS installer found in dist" }
-          $app = ./scripts/smoke/install-windows.ps1 -DistDir dist
-          "artifact=$($installer.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "executable=$app" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-
-      - name: Smoke test packaged app
-        env:
-          EXIFCLEANER_PACKAGED_APP: ${{ steps.install.outputs.executable }}
-        run: yarn test:smoke
-
-      - name: Write Windows release evidence
-        run: yarn release:evidence --artifact "${{ steps.install.outputs.artifact }}" --executable "${{ steps.install.outputs.executable }}" --runner-os windows --runner-arch "${{ runner.arch }}" --smoke-result passed --output release-evidence-windows.json
-
-      - name: Upload Windows release evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-evidence-windows
-          path: release-evidence-windows.json
-          retention-days: 7
-
-      - name: Upload smoke report
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: smoke-report-windows
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 7
-
-      - name: Upload Windows artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-windows
-          path: dist/*.exe
-          retention-days: 30
-
-  build-linux:
-    name: Build Linux
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "yarn"
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build Linux artifacts
-        run: yarn packlinux
-
-      # Same AppArmor workaround the dev E2E job needs — the packaged app runs the
-      # same Chromium renderer.
-      - name: Disable AppArmor restriction (Ubuntu 24.04)
-        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
-
-      - name: Extract AppImage
-        id: install
-        run: |
-          ARTIFACT=$(find dist -maxdepth 1 -name "*.AppImage" -print -quit)
-          test -n "$ARTIFACT"
-          APP=$(scripts/smoke/install-linux.sh "$ARTIFACT" "$RUNNER_TEMP/smoke")
-          echo "artifact=$ARTIFACT" >> "$GITHUB_OUTPUT"
-          echo "executable=$APP" >> "$GITHUB_OUTPUT"
-
-      - name: Smoke test packaged app
-        env:
-          EXIFCLEANER_PACKAGED_APP: ${{ steps.install.outputs.executable }}
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" yarn test:smoke
-
-      - name: Write Linux release evidence
-        run: yarn release:evidence --artifact "${{ steps.install.outputs.artifact }}" --executable "${{ steps.install.outputs.executable }}" --runner-os linux --runner-arch "${{ runner.arch }}" --smoke-result passed --output release-evidence-linux.json
-
-      - name: Upload Linux release evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-evidence-linux
-          path: release-evidence-linux.json
-          retention-days: 7
-
-      - name: Upload smoke report
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: smoke-report-linux
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 7
-
-      - name: Upload Linux artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-linux
-          path: |
-            dist/*.AppImage
-            dist/*.deb
-            dist/*.rpm
-          retention-days: 30
-
-  release:
-    name: Create Release
-    needs: [build-macos, build-windows, build-linux]
-    runs-on: ubuntu-latest
+  promote:
+    name: Audit and publish tested artifacts
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'master' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     permissions:
       contents: write
+      actions: read
+    env:
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact tested source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Download native release evidence
-        uses: actions/download-artifact@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Download native release evidence from tested CI run
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: release-evidence-*
           path: release-evidence
           merge-multiple: true
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
 
-      - name: Validate native release evidence
-        run: yarn verify:release-evidence release-evidence
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
+      - name: Download binaries from tested CI run
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          path: artifacts
+          pattern: ExifCleaner-*
+          path: release-assets
+          merge-multiple: true
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
 
-      - name: Generate SHASUMS256.txt
+      - name: Prepare and validate exact release assets and SHASUMS256.txt
+        run: >-
+          yarn release:prepare-assets
+          --assets release-assets
+          --evidence release-evidence
+          --source-sha "$HEAD_SHA"
+          --output promotion-manifest.json
+
+      - name: Validate native package structure
+        shell: bash
         run: |
-          cd artifacts
-          find . -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" \) -exec sha256sum {} \; | sed 's|  \./[^/]*/|  |' > ../SHASUMS256.txt
-          cd ..
-          cat SHASUMS256.txt
+          set -euo pipefail
+          version=$(node -p 'require("./package.json").version')
+          file "release-assets/ExifCleaner.${version}.exe" | grep -q 'PE32'
+          dpkg-deb --info "release-assets/exifcleaner_${version}_amd64.deb" >/dev/null
+          file "release-assets/exifcleaner-${version}.x86_64.rpm" | grep -q 'RPM'
 
       - name: Get version
         id: version
-        run: echo "version=v$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
+        run: echo "tag=v$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
 
-      # Idempotent. The previous unconditional `git tag && git push` hard-fails on
-      # any re-run, which matters a great deal when you are on release attempt
-      # five. Re-running on the same commit is now a no-op; re-running on a
-      # different commit under the same version is a loud, explanatory red.
-      - name: Create git tag
+      - name: Create or verify exact version tag
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
-          V="${{ steps.version.outputs.version }}"
-          git fetch --tags --force
-          if git rev-parse -q --verify "refs/tags/$V" >/dev/null; then
-            EXISTING=$(git rev-parse "$V^{commit}")
-            if [ "$EXISTING" = "$GITHUB_SHA" ]; then
-              echo "Tag $V already points at $GITHUB_SHA — reusing."
-            else
-              echo "::error::Tag $V exists at $EXISTING but this run is $GITHUB_SHA."
-              echo "::error::Delete the stale tag or bump the version in package.json."
+          set -euo pipefail
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" >/dev/null 2>&1; then
+            existing=$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)
+            test "$existing" = "$HEAD_SHA" || {
+              echo "::error::Tag $TAG is bound to $existing, not tested commit $HEAD_SHA"
               exit 1
-            fi
+            }
           else
-            git tag "$V"
-            git push origin "$V"
+            gh api "repos/$GITHUB_REPOSITORY/git/refs" \
+              --method POST \
+              -f ref="refs/tags/$TAG" \
+              -f sha="$HEAD_SHA" >/dev/null
           fi
 
-      - name: Create draft release
-        uses: softprops/action-gh-release@v2
+      - name: Inspect release state
+        id: state
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" > existing-release.json 2>/dev/null; then
+            draft=$(jq -r .draft existing-release.json)
+            echo "already_published=$([ "$draft" = false ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          else
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or update transient draft
+        if: steps.state.outputs.already_published != 'true'
+        uses: softprops/action-gh-release@fe965f7af51af5f2602596916f38a38df2e33de0 # v3.0.2
         with:
-          tag_name: ${{ steps.version.outputs.version }}
-          name: ExifCleaner ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ExifCleaner ${{ steps.version.outputs.tag }}
           draft: true
-          # body_path, NOT generate_release_notes. They are mutually exclusive, and
-          # with autogeneration on, the hand-written notes — including the entire
-          # macOS unsigned-bypass section users most need — never reach the page.
           body_path: RELEASE_NOTES.md
-          # An artifact-name typo would otherwise silently publish a release with
-          # no binaries, which is a worse failure mode than a red job.
           fail_on_unmatched_files: true
-          files: |
-            artifacts/release-macos/*
-            artifacts/release-windows/*
-            artifacts/release-linux/*
-            SHASUMS256.txt
+          files: release-assets/*
+
+      - name: Capture transient draft metadata
+        if: steps.state.outputs.already_published != 'true'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: gh release view "$TAG" --json isDraft,tagName,body,assets,url > transient-release.json
+
+      - name: Audit transient draft
+        if: steps.state.outputs.already_published != 'true'
+        run: >-
+          yarn verify:release-assets
+          --assets release-assets
+          --evidence release-evidence
+          --source-sha "$HEAD_SHA"
+          --release-json transient-release.json
+          --release-notes RELEASE_NOTES.md
+          --expected-draft true
+
+      - name: Audit downloaded transient draft bytes
+        if: steps.state.outputs.already_published != 'true'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          mkdir remote-release-assets
+          gh release download "$TAG" --dir remote-release-assets
+          yarn verify:release-assets --assets remote-release-assets --evidence release-evidence --source-sha "$HEAD_SHA"
+
+      - name: Publish audited release
+        if: steps.state.outputs.already_published != 'true'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          release_id=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq .id)
+          gh api "repos/$GITHUB_REPOSITORY/releases/$release_id" \
+            --method PATCH \
+            -F draft=false \
+            -F make_latest=true >/dev/null
+
+      - name: Capture published release metadata
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: gh release view "$TAG" --json isDraft,tagName,body,assets,url > published-release.json
+
+      - name: Audit published release
+        run: >-
+          yarn verify:release-assets
+          --assets release-assets
+          --evidence release-evidence
+          --source-sha "$HEAD_SHA"
+          --release-json published-release.json
+          --release-notes RELEASE_NOTES.md
+          --expected-draft false
+
+      - name: Audit downloaded published bytes
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          mkdir -p published-release-assets
+          gh release download "$TAG" --dir published-release-assets
+          yarn verify:release-assets --assets published-release-assets --evidence release-evidence --source-sha "$HEAD_SHA"

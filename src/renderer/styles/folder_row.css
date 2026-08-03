@@ -1,8 +1,6 @@
 /* FolderRow — Folder grouping row with collapsible sections */
 
 .folder-row {
-	display: flex;
-	align-items: center;
 	height: 36px;
 	padding: 0 var(--ec-space-4);
 	background: var(--ec-color-surface);
@@ -10,6 +8,13 @@
 	font-size: var(--ec-font-size-small);
 	font-weight: var(--ec-font-weight-semibold);
 	border-bottom: 1px solid var(--ec-color-border);
+}
+
+.folder-row__cell {
+	display: flex;
+	align-items: center;
+	gap: var(--ec-space-2);
+	width: 100%;
 }
 
 .folder-row__toggle {

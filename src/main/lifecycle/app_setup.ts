@@ -1,7 +1,7 @@
 import { app } from "electron";
 import type { BrowserWindow } from "electron";
 import { restoreWindowAndFocus } from "../../infrastructure";
-import { isWindows } from "../../common";
+import { isMac, isWindows } from "../../common";
 import { fileOpen } from "../file_open";
 
 function preventMultipleAppInstances(): void {
@@ -11,13 +11,14 @@ function preventMultipleAppInstances(): void {
 }
 
 interface OpenMinimizedParams {
-	browserWindow: BrowserWindow | null;
+	getWindow: () => BrowserWindow | null;
 }
 
 function openMinimizedIfAlreadyExists({
-	browserWindow,
+	getWindow,
 }: OpenMinimizedParams): void {
 	app.on("second-instance", (_event, argv) => {
+		const browserWindow = getWindow();
 		console.log(argv);
 		if (isWindows() && argv.length > 0 && argv.includes("--open-file")) {
 			fileOpen({ browserWindow });
@@ -30,18 +31,20 @@ function openMinimizedIfAlreadyExists({
 
 function quitOnWindowsAllClosed(): void {
 	app.on("window-all-closed", () => {
-		app.quit();
+		if (!isMac()) {
+			app.quit();
+		}
 	});
 }
 
 interface SetupAppParams {
-	browserWindow: BrowserWindow | null;
+	getWindow: () => BrowserWindow | null;
 	onQuit: () => void;
 }
 
-export function setupApp({ browserWindow, onQuit }: SetupAppParams): void {
+export function setupApp({ getWindow, onQuit }: SetupAppParams): void {
 	preventMultipleAppInstances();
-	openMinimizedIfAlreadyExists({ browserWindow });
+	openMinimizedIfAlreadyExists({ getWindow });
 	quitOnWindowsAllClosed();
 	// Note: "activate" handler (re-create window on dock click) is in index.ts
 	// because it needs to call the full init + setupMainWindow sequence

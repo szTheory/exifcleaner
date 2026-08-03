@@ -1,13 +1,15 @@
 import { app, ipcMain } from "electron";
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
+import { stat } from "node:fs/promises";
 import { dirname, join, parse } from "node:path";
 import type { Container } from "./container";
 import { createValidatedHandler } from "./ipc/ipc_validation";
 import { exifReadSchema, exifRemoveSchema } from "./ipc/ipc_schemas";
 import { formatExifError } from "../domain";
 import { generateCleanedPath } from "../domain/files/cleaned_path";
-import { isRawFile, isVideoFile } from "../domain/files/file_types";
+import { isRafFile, isRawFile, isVideoFile } from "../domain/files/file_types";
+import { refuseUnsafeRafWrite } from "../domain/files/file_processing_outcome";
 import type { OutputTransactionFailure } from "./output_transaction";
 
 const DEV_XATTR_FAILURE_EVENT = "exifcleaner:dev-xattr-failure-path";
@@ -34,7 +36,7 @@ export function setupExifHandlers({
 			if (result.ok) {
 				return result.value;
 			}
-			return {};
+			throw new Error(formatExifError(result.error));
 		}),
 	);
 
@@ -42,6 +44,26 @@ export function setupExifHandlers({
 		"exif:remove",
 		createValidatedHandler(exifRemoveSchema, async (filePath) => {
 			const settings = container.settings.get();
+			if (isRafFile({ filename: filePath })) {
+				return refuseUnsafeRafWrite({ filePath });
+			}
+			if (settings.removeXattrs && !settings.saveAsCopy) {
+				const metadataResult = await container.readMetadata.execute({
+					filePath,
+				});
+				if (
+					metadataResult.ok &&
+					Object.keys(metadataResult.value).length === 0
+				) {
+					return applyXattrPostcondition({
+						container,
+						actualOutputPath: filePath,
+						wasForcedCopy: false,
+						removeXattrs: true,
+						wroteFile: false,
+					});
+				}
+			}
 			const isRaw = isRawFile({ filename: filePath });
 			const isVideo = isVideoFile({ filename: filePath });
 			const wasForcedCopy = isRaw && !settings.saveAsCopy;
@@ -98,17 +120,22 @@ async function applyXattrPostcondition({
 	actualOutputPath,
 	wasForcedCopy,
 	removeXattrs,
+	wroteFile = true,
 }: {
 	container: Container;
 	actualOutputPath: string;
 	wasForcedCopy: boolean;
 	removeXattrs: boolean;
+	wroteFile?: boolean;
 }) {
 	if (!removeXattrs) {
+		const outputSize = (await stat(actualOutputPath)).size;
 		return {
 			success: true as const,
 			outputPath: actualOutputPath,
 			wasForcedCopy,
+			wroteFile,
+			outputSize,
 		};
 	}
 
@@ -126,10 +153,13 @@ async function applyXattrPostcondition({
 		return xattrFailureResult({ actualOutputPath, error });
 	}
 
+	const outputSize = (await stat(actualOutputPath)).size;
 	return {
 		success: true as const,
 		outputPath: actualOutputPath,
 		wasForcedCopy,
+		wroteFile,
+		outputSize,
 	};
 }
 

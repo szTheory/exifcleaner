@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import type { ReactNode } from "react";
 import { useAppContext } from "../../contexts/AppContext";
 import type { FileEntry, AppAction } from "../../contexts/AppContext";
@@ -6,8 +6,11 @@ import type { ClassifiedFile } from "../../../common/ipc_channels";
 import { FileProcessingStatus, isSupportedFile } from "../../../domain";
 import { getFileExtension } from "../../utils/get_file_extension";
 import { useProcessFiles } from "../../hooks/use_process_files";
+import { useI18n } from "../../hooks/use_i18n";
+import { Toast } from "./Toast";
 
 const FOLDER_AUTO_COLLAPSE_DELAY_MS = 1500;
+const SKIP_TOAST_DELAY_MS = 3000;
 
 function buildFileEntry(
 	path: string,
@@ -69,11 +72,13 @@ async function expandAndProcessFolder({
 	dispatch,
 	processFiles,
 	onSkipToast,
+	unreadableTemplate,
 }: {
 	folderPath: string;
 	dispatch: (action: AppAction) => void;
 	processFiles: (files: FileEntry[]) => void;
 	onSkipToast?: ((message: string) => void) | undefined;
+	unreadableTemplate: string;
 }): Promise<void> {
 	const folderBaseName =
 		folderPath.split(/[/\\]/).filter(Boolean).pop() || folderPath;
@@ -126,20 +131,50 @@ async function expandAndProcessFolder({
 	}
 
 	if (result.skippedCount > 0 && onSkipToast !== undefined) {
-		onSkipToast(`${result.skippedCount} folders couldn't be read`);
+		onSkipToast(
+			unreadableTemplate.replace("{count}", String(result.skippedCount)),
+		);
 	}
 }
 
 export function DropZone({
 	children,
-	onSkipToast,
 }: {
 	children: ReactNode;
-	onSkipToast?: (message: string) => void;
 }): React.JSX.Element {
 	const [isDragOver, setIsDragOver] = useState(false);
-	const { dispatch } = useAppContext();
+	const [saveAsCopy, setSaveAsCopy] = useState<boolean | null>(null);
+	const [skipToast, setSkipToast] = useState("");
+	const [skipToastVisible, setSkipToastVisible] = useState(false);
+	const skipToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const { state, dispatch } = useAppContext();
 	const { processFiles } = useProcessFiles();
+	const { t } = useI18n();
+
+	const showSkipToast = useCallback((message: string): void => {
+		if (skipToastTimer.current !== null) clearTimeout(skipToastTimer.current);
+		setSkipToast(message);
+		setSkipToastVisible(true);
+		skipToastTimer.current = setTimeout(() => {
+			setSkipToastVisible(false);
+			skipToastTimer.current = null;
+		}, SKIP_TOAST_DELAY_MS);
+	}, []);
+
+	useEffect(() => {
+		let active = true;
+		void window.api.settings.get().then((settings) => {
+			if (active) setSaveAsCopy(settings.saveAsCopy);
+		});
+		const unsubscribe = window.api.settings.onChanged((settings) => {
+			setSaveAsCopy(settings.saveAsCopy);
+		});
+		return () => {
+			active = false;
+			unsubscribe();
+			if (skipToastTimer.current !== null) clearTimeout(skipToastTimer.current);
+		};
+	}, []);
 
 	const handleDragOver = (e: React.DragEvent): void => {
 		e.preventDefault();
@@ -153,17 +188,8 @@ export function DropZone({
 		setIsDragOver(false);
 	};
 
-	const handleDrop = useCallback(
-		async (e: React.DragEvent): Promise<void> => {
-			e.preventDefault();
-			e.stopPropagation();
-			setIsDragOver(false);
-
-			const droppedFiles = Array.from(e.dataTransfer.files);
-			const allPaths = droppedFiles.map((file) =>
-				window.api.files.getPathForFile(file),
-			);
-
+	const processSelectedPaths = useCallback(
+		async (allPaths: string[]): Promise<void> => {
 			const { files: filePaths, folders: folderPaths } =
 				await window.api.folder.classify(allPaths);
 
@@ -173,35 +199,61 @@ export function DropZone({
 				dispatch({ type: "ADD_FILES", files: looseEntries });
 				processFiles(looseEntries);
 			}
+			const unsupportedCount = filePaths.length - looseEntries.length;
+			if (unsupportedCount > 0) {
+				showSkipToast(
+					t("intake.unsupportedSkipped").replace(
+						"{count}",
+						String(unsupportedCount),
+					),
+				);
+			}
 
 			for (const folderPath of folderPaths) {
 				await expandAndProcessFolder({
 					folderPath,
 					dispatch,
 					processFiles,
-					onSkipToast,
+					onSkipToast: showSkipToast,
+					unreadableTemplate: t("intake.foldersUnreadable"),
 				});
 			}
 		},
-		[dispatch, processFiles, onSkipToast],
+		[dispatch, processFiles, showSkipToast, t],
+	);
+
+	const handleDrop = useCallback(
+		async (e: React.DragEvent): Promise<void> => {
+			e.preventDefault();
+			e.stopPropagation();
+			setIsDragOver(false);
+
+			const allPaths = Array.from(e.dataTransfer.files).map((file) =>
+				window.api.files.getPathForFile(file),
+			);
+			await processSelectedPaths(allPaths);
+		},
+		[processSelectedPaths],
 	);
 
 	// Files added via File > Open menu
 	useEffect(() => {
 		const cleanup = window.api.files.onFileOpenAddFiles((menuFilePaths) => {
 			void (async () => {
-				const sized = await classifyForSizes(
-					menuFilePaths.filter((p) => isSupportedFile({ filename: p })),
-				);
-				const entries = buildLooseEntries(sized);
-				if (entries.length > 0) {
-					dispatch({ type: "ADD_FILES", files: entries });
-					processFiles(entries);
-				}
+				await processSelectedPaths(menuFilePaths);
 			})();
 		});
 		return cleanup;
-	}, [dispatch, processFiles]);
+	}, [processSelectedPaths]);
+
+	async function chooseFiles(): Promise<void> {
+		await processSelectedPaths(await window.api.files.chooseFiles());
+	}
+
+	async function chooseFolder(): Promise<void> {
+		const folderPath = await window.api.files.chooseFolder();
+		if (folderPath !== null) await processSelectedPaths([folderPath]);
+	}
 
 	return (
 		<div
@@ -210,9 +262,25 @@ export function DropZone({
 			onDragLeave={handleDragLeave}
 			onDrop={handleDrop}
 			role="region"
-			aria-label="File drop zone"
+			aria-label={t("intake.dropZone")}
 		>
 			{children}
+			{state.files.length === 0 && (
+				<div className="drop-zone__actions">
+					<button type="button" onClick={() => void chooseFiles()}>
+						{t("intake.chooseFiles")}
+					</button>
+					<button type="button" onClick={() => void chooseFolder()}>
+						{t("intake.chooseFolder")}
+					</button>
+					{saveAsCopy !== null && (
+						<span className="drop-zone__output-mode">
+							{t(saveAsCopy ? "intake.outputCopy" : "intake.outputOverwrite")}
+						</span>
+					)}
+				</div>
+			)}
+			<Toast message={skipToast} visible={skipToastVisible} />
 		</div>
 	);
 }

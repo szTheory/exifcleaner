@@ -1776,7 +1776,9 @@ export function buildKnownLimitationsBlock(records, version) {
 	const allowed = allowedRecords(records);
 
 	if (allowed.length === 0) {
-		lines.push("No known limitations are approved for this release.");
+		lines.push(
+			"No executable release-blocking known gaps are approved for this release; documented format constraints follow below.",
+		);
 	} else {
 		for (const record of allowed) {
 			lines.push(

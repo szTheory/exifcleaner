@@ -9,8 +9,8 @@ import {
 import type { Settings, SettingsFile } from "../../src/domain/settings_schema";
 
 describe("CURRENT_SCHEMA_VERSION", () => {
-	it("is version 3", () => {
-		expect(CURRENT_SCHEMA_VERSION).toBe(3);
+	it("is version 4", () => {
+		expect(CURRENT_SCHEMA_VERSION).toBe(4);
 	});
 });
 
@@ -62,7 +62,7 @@ describe("validateSettings", () => {
 		if (result.ok) {
 			expect(result.value.preserveOrientation).toBe(true);
 			expect(result.value.preserveColorProfile).toBe(true);
-			expect(result.value.saveAsCopy).toBe(false);
+			expect(result.value.saveAsCopy).toBe(true);
 			expect(result.value.removeXattrs).toBe(false);
 			expect(result.value.preserveTimestamps).toBe(false);
 			expect(result.value.language).toBeNull();
@@ -348,6 +348,21 @@ describe("migrateSettings", () => {
 		expect(didMigrate).toBe(true);
 		expect(settings.preserveOrientation).toBe(true);
 		expect(settings.preserveColorProfile).toBe(true);
+		expect(settings.saveAsCopy).toBe(true);
+	});
+
+	it("migrates Vietnamese locale code without changing an existing copy choice", () => {
+		const file = {
+			version: 3,
+			settings: {
+				...DEFAULT_SETTINGS,
+				saveAsCopy: false,
+				language: "vn",
+			},
+		} as SettingsFile;
+		const { settings, didMigrate } = migrateSettings({ file });
+		expect(didMigrate).toBe(true);
+		expect(settings.language).toBe("vi");
 		expect(settings.saveAsCopy).toBe(false);
 	});
 });

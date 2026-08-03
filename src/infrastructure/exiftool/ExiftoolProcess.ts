@@ -8,6 +8,25 @@ import {
 const EXIFTOOL_CLOSE_TIMEOUT_MS = 5000;
 const EXIFTOOL_COMMAND_TIMEOUT_MS = 30000;
 
+/**
+ * ExifTool's stay-open protocol is line-delimited. A path containing a line
+ * break would become additional protocol arguments instead of one filename.
+ */
+export class UnsafeExifToolPathError extends Error {
+	readonly code = "unsafe-exiftool-path" as const;
+
+	constructor() {
+		super("The selected path contains an unsupported line break");
+		this.name = "UnsafeExifToolPathError";
+	}
+}
+
+export function assertSafeExifToolPath(filePath: string): void {
+	if (/[\r\n]/u.test(filePath)) {
+		throw new UnsafeExifToolPathError();
+	}
+}
+
 interface CommandResolver {
 	resolve: (result: ExifToolResult) => void;
 	reject: (error: Error) => void;
@@ -124,6 +143,7 @@ export class ExiftoolProcess {
 		filePath: string;
 		args: string[];
 	}): Promise<ExifToolResult> {
+		assertSafeExifToolPath(filePath);
 		if (!this.process || !this.process.stdin) {
 			throw new Error("ExifTool process is not open");
 		}
@@ -145,6 +165,7 @@ export class ExiftoolProcess {
 		metadata: Record<string, unknown>;
 		extraArgs: string[];
 	}): Promise<ExifToolResult> {
+		assertSafeExifToolPath(filePath);
 		if (!this.process || !this.process.stdin) {
 			throw new Error("ExifTool process is not open");
 		}

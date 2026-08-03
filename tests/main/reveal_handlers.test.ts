@@ -78,6 +78,7 @@ describe("save-as-copy reveal context menu", () => {
 
 		expect(popupMock).toHaveBeenCalledWith({ window: {} });
 		const template = buildFromTemplateMock.mock.calls[0]?.[0] as Array<{
+			id: string;
 			label: string;
 			click?: () => void;
 		}>;
@@ -90,6 +91,8 @@ describe("save-as-copy reveal context menu", () => {
 
 		expect(cleanedCopyItem?.click).toBeTypeOf("function");
 		expect(originalItem?.click).toBeTypeOf("function");
+		expect(cleanedCopyItem?.id).toBe("reveal-cleaned-copy");
+		expect(originalItem?.id).toBe("reveal-original");
 		cleanedCopyItem?.click?.();
 		originalItem?.click?.();
 

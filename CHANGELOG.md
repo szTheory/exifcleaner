@@ -1,5 +1,27 @@
 # Changelog
 
+## 4.1.0
+
+### Added
+
+- Truthful per-file outcomes, before/after size display, stable table sorting, and immediately visible removed metadata
+- Native file and folder pickers with a visible output-mode summary and unsupported-file feedback
+- Architecture, code walkthrough, subsystem, contribution, and translation documentation with drift checks
+
+### Changed
+
+- New installs default to Save as copy; existing settings retain their chosen behavior
+- MP4/MOV cleaning explicitly clears QuickTime movie, track, and media date fields
+- Dependency and CI baselines were refreshed, with pinned Actions and an exact release-artifact inventory
+- Vietnamese locale handling uses the standard `vi` code; locale resources are independently reviewable
+
+### Fixed
+
+- RAF input is refused without mutation instead of producing an artifact that cannot meet the cleaning contract
+- Already-clean files no longer incur an unnecessary rewrite
+- Carriage-return and line-feed paths are rejected before reaching ExifTool
+- macOS window close/reopen follows the expected single-instance lifecycle
+
 ## 4.0.0
 
 Complete modernization of ExifCleaner after a 5-year hiatus. Every layer of the application has been rebuilt — from Electron 11 to 35, vanilla DOM to React 19, loose scripts to DDD architecture, zero tests to 265 unit + 42 E2E tests.

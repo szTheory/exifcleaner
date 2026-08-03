@@ -14,19 +14,19 @@ let batchCount = 0;
 let remainingCount = 0;
 
 interface SetupDockEventHandlersParams {
-	browserWindow: BrowserWindow | null;
+	getWindow: () => BrowserWindow | null;
 }
 
 export function setupDockEventHandlers({
-	browserWindow,
+	getWindow,
 }: SetupDockEventHandlersParams): void {
 	ipcMain.on(
 		IPC_CHANNELS.FILES_ADDED,
 		createValidatedListener(filesAddedSchema, (filesCount) => {
 			storeBatchCount(filesCount);
 
-			updateDockAndProgressBar(browserWindow);
-			windowsOverlayIcon(browserWindow, false);
+			updateDockAndProgressBar(getWindow());
+			windowsOverlayIcon(getWindow(), false);
 		}),
 	);
 
@@ -38,7 +38,7 @@ export function setupDockEventHandlers({
 			// if there are none remaining, let the all finished
 			// event take care of it so we don't double up
 			if (remainingCount > 0) {
-				updateDockAndProgressBar(browserWindow);
+				updateDockAndProgressBar(getWindow());
 			}
 		}),
 	);
@@ -48,10 +48,10 @@ export function setupDockEventHandlers({
 		createValidatedListener(allFilesProcessedSchema, () => {
 			storeBatchCount(0);
 
-			updateDockAndProgressBar(browserWindow);
-			updateDockBounce(browserWindow);
-			windowsFlashFrame(browserWindow);
-			windowsOverlayIcon(browserWindow, true);
+			updateDockAndProgressBar(getWindow());
+			updateDockBounce(getWindow());
+			windowsFlashFrame(getWindow());
+			windowsOverlayIcon(getWindow(), true);
 		}),
 	);
 }

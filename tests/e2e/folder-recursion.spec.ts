@@ -19,7 +19,7 @@ test.describe("Folder Recursion", () => {
 
 	test.beforeEach(async () => {
 		consoleErrors = [];
-		const launched = await launchApp();
+		const launched = await launchApp({ settings: { saveAsCopy: false } });
 		app = launched.app;
 		page = launched.window;
 

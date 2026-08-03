@@ -207,8 +207,8 @@ describe("SettingsService", () => {
 		// preserveRotation=false should map to both new fields as false
 		expect(settings.preserveOrientation).toBe(false);
 		expect(settings.preserveColorProfile).toBe(false);
-		// Other fields should come from defaults
-		expect(settings.saveAsCopy).toBe(DEFAULT_SETTINGS.saveAsCopy);
+		// Existing preferences survive migrations even when a new-install default changes.
+		expect(settings.saveAsCopy).toBe(false);
 		expect(settings.removeXattrs).toBe(DEFAULT_SETTINGS.removeXattrs);
 		expect(settings.preserveTimestamps).toBe(
 			DEFAULT_SETTINGS.preserveTimestamps,
