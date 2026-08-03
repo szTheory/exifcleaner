@@ -306,8 +306,14 @@ test.describe("File Processing", () => {
 	});
 
 	test("applies drag-over CSS class on dragenter", async () => {
-		await window.locator(".empty-state__inner").waitFor();
-		const before = await window.locator(".empty-state__inner").boundingBox();
+		const emptyState = window.locator(".empty-state__inner");
+		await emptyState.waitFor();
+		await emptyState.evaluate(async (element) => {
+			await Promise.all(
+				element.getAnimations().map((animation) => animation.finished),
+			);
+		});
+		const before = await emptyState.boundingBox();
 
 		// Dispatch dragenter event on the drop zone
 		await window.evaluate(() => {
@@ -328,7 +334,7 @@ test.describe("File Processing", () => {
 		await expect(
 			window.locator('.empty-state__instruction[aria-hidden="false"]'),
 		).toHaveText("Drop files to clean.");
-		const during = await window.locator(".empty-state__inner").boundingBox();
+		const during = await emptyState.boundingBox();
 		expect(during).toEqual(before);
 
 		// Dispatch dragleave to remove it
