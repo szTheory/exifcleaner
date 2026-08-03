@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import type { ElectronApplication, Page } from "playwright";
 import { launchApp, closeApp } from "./helpers/app_launcher";
 import { createFixtureDir } from "../helpers/fixture_copier";
+import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 
 test.describe("Internationalization", () => {
 	let app: ElectronApplication;
@@ -139,9 +140,10 @@ test.describe("Internationalization", () => {
 			folderBox?.x ?? Number.POSITIVE_INFINITY,
 		);
 
-		const { copyFixture, cleanup } = createFixtureDir();
+		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const unsupported = copyFixture("unsupported.txt");
+			const before = snapshotDir(dir);
 			await app.evaluate(
 				({ BrowserWindow }, filePaths) => {
 					const win = BrowserWindow.getAllWindows()[0];
@@ -154,6 +156,12 @@ test.describe("Internationalization", () => {
 			await expect(window.locator(".toast")).toContainText(
 				"ملفات غير مدعومة تم تخطيها: 1",
 			);
+			assertDirEffect(before, snapshotDir(dir), {
+				unchanged: ["unsupported.txt"],
+				added: [],
+				modified: [],
+				removed: [],
+			});
 		} finally {
 			cleanup();
 		}
