@@ -1,6 +1,6 @@
 {
-	"empty.title": "Nijedna datoteka nije odabrana",
-	"empty.subtitle": "Povuci i ispusti slike, videa ili PDF datoteke za automatsko uklanjanje metapodataka.",
+	"empty.title": "Dodajte datoteke za čišćenje",
+	"empty.subtitle": "Ovdje ispustite slike, videozapise ili PDF datoteke ili odaberite mogućnost.",
 	"table.header.filename": "Odabrane datoteke",
 	"table.header.exif-before": "Broj Exifa prije",
 	"table.header.exif-after": "Broj Exifa poslije",

@@ -1,6 +1,6 @@
 {
-	"empty.title": "Nie wybrano plików",
-	"empty.subtitle": "Przeciągnij i upuść zdjęcia, filmy lub pliki PDF, aby automatycznie usunąć z nich metadane.",
+	"empty.title": "Dodaj pliki do wyczyszczenia",
+	"empty.subtitle": "Upuść tutaj obrazy, filmy lub pliki PDF albo wybierz opcję.",
 	"table.header.filename": "Wybrane pliki",
 	"table.header.exif-before": "# Exif przed",
 	"table.header.exif-after": "# Exif po",

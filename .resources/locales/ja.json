@@ -1,6 +1,6 @@
 {
-	"empty.title": "ファイルが選択されていません",
-	"empty.subtitle": "画像、動画、PDF をドラッグ＆ドロップすると、メタデータが自動的に削除されます。",
+	"empty.title": "クリーニングするファイルを追加",
+	"empty.subtitle": "画像、動画、PDF をここにドロップするか、オプションを選択してください。",
 	"table.header.filename": "選択されたファイル",
 	"table.header.exif-before": "# 処理前の Exif",
 	"table.header.exif-after": "# 処理後の Exif",

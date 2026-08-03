@@ -18,6 +18,9 @@ const provenance = readJson(
 		Record<string, { sourceHash: string; origin: string; review: string }>
 	>;
 };
+const romanianArchive = readJson(
+	path.join(resources, "translation-contributions/pr-297-ro.json"),
+) as unknown as { values: Record<string, string> };
 
 const protectedKeys = Object.keys(english).filter(
 	(key) =>
@@ -27,7 +30,7 @@ const protectedKeys = Object.keys(english).filter(
 );
 
 describe("translation resources", () => {
-	it("keeps Romanian complete and credits the 70 contributed strings", () => {
+	it("keeps Romanian complete and archives all 70 contributed strings", () => {
 		const romanian = readJson(path.join(localesDir, "ro.json")) as Record<
 			string,
 			string
@@ -36,11 +39,16 @@ describe("translation resources", () => {
 		expect(provenance.contributorCredits.ro).toContainEqual(
 			expect.objectContaining({ pullRequest: 297, keys: 70 }),
 		);
+		expect(Object.keys(romanianArchive.values)).toHaveLength(70);
+		const evolved = Object.entries(romanianArchive.values)
+			.filter(([key, value]) => romanian[key] !== value)
+			.map(([key]) => key);
+		expect(evolved).toEqual(["empty.title", "empty.subtitle"]);
 		expect(
 			Object.values(provenance.locales.ro ?? {}).filter(
 				(entry) => entry.origin === "existing-contribution",
 			),
-		).toHaveLength(70);
+		).toHaveLength(68);
 	});
 
 	it("covers protected first-run keys in every locale", () => {

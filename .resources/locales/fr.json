@@ -1,6 +1,6 @@
 {
-	"empty.title": "Aucun fichier sélectionné",
-	"empty.subtitle": "Faites glisser-déposer des images, des vidéos ou des fichiers PDF pour supprimer automatiquement les métadonnées.",
+	"empty.title": "Ajoutez des fichiers à nettoyer",
+	"empty.subtitle": "Déposez ici des images, des vidéos ou des PDF, ou choisissez une option.",
 	"table.header.filename": "Fichiers sélectionnés",
 	"table.header.exif-before": "# Exif Avant",
 	"table.header.exif-after": "# Exif Après",

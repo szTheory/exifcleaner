@@ -1,6 +1,6 @@
 {
-	"empty.title": "Nessun file selezionato",
-	"empty.subtitle": "Trascina e rilascia immagini, video o file PDF qui per rimuovere automaticamente i metadati.",
+	"empty.title": "Aggiungi file da pulire",
+	"empty.subtitle": "Rilascia qui immagini, video o PDF oppure scegli un'opzione.",
 	"table.header.filename": "File selezionati",
 	"table.header.exif-before": "Nº di dati Exif prima",
 	"table.header.exif-after": "Nº di dati Exif dopo",

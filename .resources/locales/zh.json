@@ -1,6 +1,6 @@
 {
-	"empty.title": "未选择文件",
-	"empty.subtitle": "拖放图像，视频或PDF文件以自动删除元数据。",
+	"empty.title": "添加要清理的文件",
+	"empty.subtitle": "将图片、视频或 PDF 拖放到此处，或选择一个选项。",
 	"table.header.filename": "选中的文件",
 	"table.header.exif-before": "# Exif 处理前",
 	"table.header.exif-after": "# Exif 处理后",

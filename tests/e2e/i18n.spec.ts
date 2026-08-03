@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import type { ElectronApplication, Page } from "playwright";
 import { launchApp, closeApp } from "./helpers/app_launcher";
+import { createFixtureDir } from "../helpers/fixture_copier";
 
 test.describe("Internationalization", () => {
 	let app: ElectronApplication;
@@ -76,8 +77,7 @@ test.describe("Internationalization", () => {
 
 		// Verify the title now shows French text
 		const frenchText = await title.textContent();
-		// French: "Aucun fichier sélectionné" (from strings.json empty.title.fr)
-		expect(frenchText).toContain("Aucun fichier");
+		expect(frenchText).toContain("Ajoutez des fichiers");
 		expect(frenchText).not.toBe(englishText);
 	});
 
@@ -112,9 +112,50 @@ test.describe("Internationalization", () => {
 		}, "ro");
 
 		const title = window.locator(".empty-state__title");
-		await expect(title).toHaveText("Niciun fișier selectat");
+		await expect(title).toHaveText("Adaugă fișiere pentru curățare");
 		await expect(
 			window.getByRole("button", { name: "Alege fișiere…" }),
 		).toBeVisible();
+	});
+
+	test("uses RTL direction, visual action order, and a localized count in Arabic", async () => {
+		await app.evaluate(({ BrowserWindow }, locale) => {
+			const win = BrowserWindow.getAllWindows()[0];
+			if (win) {
+				win.webContents.send("language:changed", locale);
+			}
+		}, "ar");
+
+		await expect(window.locator("html")).toHaveAttribute("dir", "rtl");
+		const chooseFiles = window.getByRole("button", { name: "اختر ملفات…" });
+		const chooseFolder = window.getByRole("button", { name: "اختر مجلدًا…" });
+		const [filesBox, folderBox] = await Promise.all([
+			chooseFiles.boundingBox(),
+			chooseFolder.boundingBox(),
+		]);
+		expect(filesBox).not.toBeNull();
+		expect(folderBox).not.toBeNull();
+		expect(filesBox?.x).toBeGreaterThan(
+			folderBox?.x ?? Number.POSITIVE_INFINITY,
+		);
+
+		const { copyFixture, cleanup } = createFixtureDir();
+		try {
+			const unsupported = copyFixture("unsupported.txt");
+			await app.evaluate(
+				({ BrowserWindow }, filePaths) => {
+					const win = BrowserWindow.getAllWindows()[0];
+					if (win) {
+						win.webContents.send("file-open-add-files", filePaths);
+					}
+				},
+				[unsupported],
+			);
+			await expect(window.locator(".toast")).toContainText(
+				"ملفات غير مدعومة تم تخطيها: 1",
+			);
+		} finally {
+			cleanup();
+		}
 	});
 });

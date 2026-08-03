@@ -1,6 +1,6 @@
 {
-	"empty.title": "Inga filer valda",
-	"empty.subtitle": "Dra och släpp bilder, videor eller PDF filer för att ta bort metadata automatiskt",
+	"empty.title": "Lägg till filer att rensa",
+	"empty.subtitle": "Släpp bilder, videor eller PDF-filer här, eller välj ett alternativ.",
 	"table.header.filename": "valda filer",
 	"table.header.exif-before": "# Exif Innan",
 	"table.header.exif-after": "# Exif Efter",

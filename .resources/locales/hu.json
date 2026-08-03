@@ -1,6 +1,6 @@
 {
-	"empty.title": "Nincs kiválasztva fájl",
-	"empty.subtitle": "Húzd át a képeket, videókat vagy PDF fájlokat a metaadatatok automatikus eltávolításához.",
+	"empty.title": "Adjon hozzá tisztítandó fájlokat",
+	"empty.subtitle": "Dobjon ide képeket, videókat vagy PDF-fájlokat, vagy válasszon egy lehetőséget.",
 	"table.header.filename": "Kiválasztott fájlok",
 	"table.header.exif-before": "# Exif előtt",
 	"table.header.exif-after": "# Exif után",

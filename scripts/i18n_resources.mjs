@@ -11,6 +11,10 @@ const statusPath = path.join(resourcesDir, "translation-status.json");
 const provenancePath = path.join(resourcesDir, "translation-provenance.json");
 const worklistPath = path.join(resourcesDir, "translation-worklist.json");
 const glossaryPath = path.join(resourcesDir, "translation-glossary.json");
+const contributionArchivesDir = path.join(
+	resourcesDir,
+	"translation-contributions",
+);
 const localeSourcePath = path.join(
 	root,
 	"src",
@@ -64,6 +68,7 @@ for (const [key, value] of Object.entries(english)) {
 
 const provenance = await readJson(provenancePath, "translation provenance");
 validateProvenanceHeader(provenance);
+await validateContributionArchives(provenance);
 const glossary = await readJson(glossaryPath, "translation glossary");
 validateGlossary(glossary);
 
@@ -284,6 +289,44 @@ function validateProvenanceHeader(value) {
 		value.locales === null
 	) {
 		throw new Error("translation provenance has an unsupported schema");
+	}
+}
+
+async function validateContributionArchives(value) {
+	for (const [locale, credits] of Object.entries(
+		value.contributorCredits ?? {},
+	)) {
+		if (!Array.isArray(credits)) {
+			throw new Error(`contributor credits for ${locale} must be an array`);
+		}
+		for (const credit of credits) {
+			if (typeof credit.archive !== "string") continue;
+			const archivePath = path.resolve(root, credit.archive);
+			const relative = path.relative(contributionArchivesDir, archivePath);
+			if (relative.startsWith("..") || path.isAbsolute(relative)) {
+				throw new Error(
+					`contribution archive escapes its directory: ${credit.archive}`,
+				);
+			}
+			const archive = await readJson(
+				archivePath,
+				`contribution archive ${credit.archive}`,
+			);
+			if (
+				archive.schemaVersion !== 1 ||
+				archive.locale !== locale ||
+				archive.source?.pullRequest !== credit.pullRequest ||
+				typeof archive.values !== "object" ||
+				archive.values === null ||
+				Object.keys(archive.values).length !== credit.keys ||
+				Object.values(archive.values).some(
+					(translation) =>
+						typeof translation !== "string" || translation.length === 0,
+				)
+			) {
+				throw new Error(`contribution archive ${credit.archive} is invalid`);
+			}
+		}
 	}
 }
 

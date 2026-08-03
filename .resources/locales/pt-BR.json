@@ -1,6 +1,6 @@
 {
-	"empty.title": "Nenhum arquivo selecionado",
-	"empty.subtitle": "Arraste e solte imagens, vídeos ou arquivos PDF para remover metadados automaticamente.",
+	"empty.title": "Adicione arquivos para limpar",
+	"empty.subtitle": "Solte imagens, vídeos ou PDFs aqui ou escolha uma opção.",
 	"table.header.filename": "Arquivos selecionados",
 	"table.header.exif-before": "# Exif antes",
 	"table.header.exif-after": "# Exif depois",

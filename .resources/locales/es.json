@@ -1,6 +1,6 @@
 {
-	"empty.title": "No hay archivos seleccionados",
-	"empty.subtitle": "Arrastre y suelte imágenes, videos, o documentos PDF para automáticamente eliminar metadatos.",
+	"empty.title": "Añade archivos para limpiarlos",
+	"empty.subtitle": "Suelta aquí imágenes, vídeos o archivos PDF, o elige una opción.",
 	"table.header.filename": "Archivos seleccionados",
 	"table.header.exif-before": "Exif antes",
 	"table.header.exif-after": "Exif después",

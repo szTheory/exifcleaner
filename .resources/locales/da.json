@@ -1,6 +1,6 @@
 {
-	"empty.title": "Ingen filer valgt",
-	"empty.subtitle": "Træk og slip billeder, videoer eller PDF filer for automatisk at fjerne metadata",
+	"empty.title": "Tilføj filer, der skal renses",
+	"empty.subtitle": "Slip billeder, videoer eller PDF-filer her, eller vælg en mulighed.",
 	"table.header.filename": "Valgte filer",
 	"table.header.exif-before": "Exif Før",
 	"table.header.exif-after": "Exif Efter",

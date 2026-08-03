@@ -1,11 +1,11 @@
 {
 	"schemaVersion": 1,
 	"sourceLocale": "en",
-	"contributorCredits": {"ro":[{"github":"TiberiuWSJ","name":"Rodanciuc Tiberiu-Gabriel","pullRequest":297,"keys":70,"note":"Values imported byte-for-byte from the accepted contribution."}]},
+	"contributorCredits": {"ro":[{"github":"TiberiuWSJ","name":"Rodanciuc Tiberiu-Gabriel","pullRequest":297,"keys":70,"servedUnmodified":68,"archive":".resources/translation-contributions/pr-297-ro.json","note":"All 70 contributed values are preserved byte-for-byte in the archive; two served empty-state values evolved after the English source copy changed."}]},
 	"locales": {
 		"ar": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -56,7 +56,7 @@
 			"writtenToCopy": {"sourceHash":"546a3a63d5e6c417dd330857fe2cf02c1c5d9fd8ddca39c65a5263b9827cb59c","origin":"existing-contribution","review":"human-reviewed"},
 			"verificationFailedSummary": {"sourceHash":"42cec0e9640664aa35d847a47947c14571dc6ea263cb60032088013e8bd222e1","origin":"existing-contribution","review":"human-reviewed"},
 			"cleanupFailedSummary": {"sourceHash":"10816006525eea14ca88238e4ef08e3f5434240e18bd98f9ad33bef893f65eaa","origin":"existing-contribution","review":"human-reviewed"},
-			"xattrFailedSummary": {"sourceHash":"aa4ca35e68adc3cd88abebe7616d9bda5b9e7c61b3ca8d97868713dca367f06d","origin":"existing-contribution","review":"human-reviewed"},
+			"xattrFailedSummary": {"sourceHash":"aa4ca35e68adc3cd88abebe7616d9bda5b9e7c61b3ca8d97868713dca367f06d","origin":"agent-assisted","review":"agent-reviewed"},
 			"complete": {"sourceHash":"602004adef9a450dd44fc5e5b5f36354eedb002c526931c865cc8a2c09300e0c","origin":"existing-contribution","review":"human-reviewed"},
 			"intake.chooseFiles": {"sourceHash":"6f6c62e5bccc6bbf128f3684484430adb434d4a1d2d8b5322774ced162c6ab7c","origin":"agent-assisted","review":"agent-reviewed"},
 			"intake.chooseFolder": {"sourceHash":"f86cde3b6206c3adb46934c52130973a7c1c1164101a23e8e389884dc37fb3de","origin":"agent-assisted","review":"agent-reviewed"},
@@ -67,8 +67,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"ca": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -130,8 +130,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"cs": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -193,8 +193,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"da": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -256,8 +256,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"de": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -319,8 +319,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"es": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -380,8 +380,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"fa": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -432,7 +432,7 @@
 			"writtenToCopy": {"sourceHash":"546a3a63d5e6c417dd330857fe2cf02c1c5d9fd8ddca39c65a5263b9827cb59c","origin":"existing-contribution","review":"human-reviewed"},
 			"verificationFailedSummary": {"sourceHash":"42cec0e9640664aa35d847a47947c14571dc6ea263cb60032088013e8bd222e1","origin":"existing-contribution","review":"human-reviewed"},
 			"cleanupFailedSummary": {"sourceHash":"10816006525eea14ca88238e4ef08e3f5434240e18bd98f9ad33bef893f65eaa","origin":"existing-contribution","review":"human-reviewed"},
-			"xattrFailedSummary": {"sourceHash":"aa4ca35e68adc3cd88abebe7616d9bda5b9e7c61b3ca8d97868713dca367f06d","origin":"existing-contribution","review":"human-reviewed"},
+			"xattrFailedSummary": {"sourceHash":"aa4ca35e68adc3cd88abebe7616d9bda5b9e7c61b3ca8d97868713dca367f06d","origin":"agent-assisted","review":"agent-reviewed"},
 			"complete": {"sourceHash":"602004adef9a450dd44fc5e5b5f36354eedb002c526931c865cc8a2c09300e0c","origin":"existing-contribution","review":"human-reviewed"},
 			"intake.chooseFiles": {"sourceHash":"6f6c62e5bccc6bbf128f3684484430adb434d4a1d2d8b5322774ced162c6ab7c","origin":"agent-assisted","review":"agent-reviewed"},
 			"intake.chooseFolder": {"sourceHash":"f86cde3b6206c3adb46934c52130973a7c1c1164101a23e8e389884dc37fb3de","origin":"agent-assisted","review":"agent-reviewed"},
@@ -443,8 +443,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"fr": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -529,8 +529,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"hr": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -592,8 +592,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"hu": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -655,8 +655,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"it": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -718,8 +718,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"ja": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -779,8 +779,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"ml": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -831,7 +831,7 @@
 			"writtenToCopy": {"sourceHash":"546a3a63d5e6c417dd330857fe2cf02c1c5d9fd8ddca39c65a5263b9827cb59c","origin":"existing-contribution","review":"human-reviewed"},
 			"verificationFailedSummary": {"sourceHash":"42cec0e9640664aa35d847a47947c14571dc6ea263cb60032088013e8bd222e1","origin":"existing-contribution","review":"human-reviewed"},
 			"cleanupFailedSummary": {"sourceHash":"10816006525eea14ca88238e4ef08e3f5434240e18bd98f9ad33bef893f65eaa","origin":"existing-contribution","review":"human-reviewed"},
-			"xattrFailedSummary": {"sourceHash":"aa4ca35e68adc3cd88abebe7616d9bda5b9e7c61b3ca8d97868713dca367f06d","origin":"existing-contribution","review":"human-reviewed"},
+			"xattrFailedSummary": {"sourceHash":"aa4ca35e68adc3cd88abebe7616d9bda5b9e7c61b3ca8d97868713dca367f06d","origin":"agent-assisted","review":"agent-reviewed"},
 			"complete": {"sourceHash":"602004adef9a450dd44fc5e5b5f36354eedb002c526931c865cc8a2c09300e0c","origin":"existing-contribution","review":"human-reviewed"},
 			"intake.chooseFiles": {"sourceHash":"6f6c62e5bccc6bbf128f3684484430adb434d4a1d2d8b5322774ced162c6ab7c","origin":"agent-assisted","review":"agent-reviewed"},
 			"intake.chooseFolder": {"sourceHash":"f86cde3b6206c3adb46934c52130973a7c1c1164101a23e8e389884dc37fb3de","origin":"agent-assisted","review":"agent-reviewed"},
@@ -842,8 +842,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"nl": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -905,8 +905,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"pl": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -968,8 +968,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"pt-BR": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -1046,8 +1046,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"ro": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -1174,8 +1174,8 @@
 			"reveal.cleanedCopy": {"sourceHash":"84047d216bcfbc6a12c8b356b8f1dfd1e825771a2eace7bc230a4e5d04b04789","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"ru": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -1237,8 +1237,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"sk": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -1300,8 +1300,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"sv": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -1363,8 +1363,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"tr": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -1426,8 +1426,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"uk": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -1489,8 +1489,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"vi": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},
@@ -1552,8 +1552,8 @@
 			"intake.outputOverwrite": {"sourceHash":"4ffcfe77f3b05a010d5b0506add0f075ee8f0a3d6ea0a0fff1c1f628580f69b3","origin":"agent-assisted","review":"agent-reviewed"}
 		},
 		"zh": {
-			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"existing-contribution","review":"human-reviewed"},
-			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"existing-contribution","review":"human-reviewed"},
+			"empty.title": {"sourceHash":"0bddbe2e8fbe4f94ce6d8b25da01a30486995415daa116bb30b5fa250eb05900","origin":"agent-assisted","review":"agent-reviewed"},
+			"empty.subtitle": {"sourceHash":"47d9648ff05a660316d326d2cdca0f6781cd6768f82da3fef172b7da6ad42079","origin":"agent-assisted","review":"agent-reviewed"},
 			"empty.dropActive": {"sourceHash":"f5cad72210c2740134af6dd03c77df3e474491377972f11ba86bab1947b994af","origin":"agent-assisted","review":"agent-reviewed"},
 			"table.header.filename": {"sourceHash":"b493a221408bfaf41ac180178e7628f795475bd9ae3ab2fe12b23dc7ceda96ba","origin":"existing-contribution","review":"human-reviewed"},
 			"table.header.exif-before": {"sourceHash":"7265d519d3d0dfbfadfa7b3b695518fe8bc6bf7f087f31878bdec2d46d6b4336","origin":"existing-contribution","review":"human-reviewed"},

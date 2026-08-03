@@ -1,6 +1,6 @@
 {
-	"empty.title": "Henüz dosya seçilmedi",
-	"empty.subtitle": "Meta verileri otomatik olarak kaldırmak için görüntü, video veya PDF dosyalarını sürükleyip bırakabilirsin.",
+	"empty.title": "Temizlenecek dosyaları ekleyin",
+	"empty.subtitle": "Görüntüleri, videoları veya PDF'leri buraya bırakın ya da bir seçenek belirleyin.",
 	"table.header.filename": "Seçilen dosyalar",
 	"table.header.exif-before": "# Exif'den önce",
 	"table.header.exif-after": "# Exif'den Sonra",

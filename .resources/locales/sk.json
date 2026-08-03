@@ -1,6 +1,6 @@
 {
-	"empty.title": "Nie sú vybraté žiadne súbory",
-	"empty.subtitle": "Presuňte a pustite fotografie, videá alebo PDF súbory sem a automaticky z nich odstránia metadáta.",
+	"empty.title": "Pridajte súbory na vyčistenie",
+	"empty.subtitle": "Presuňte sem obrázky, videá alebo súbory PDF, prípadne vyberte možnosť.",
 	"table.header.filename": "Vybrané súbory",
 	"table.header.exif-before": "# Exif predtým",
 	"table.header.exif-after": "# Exif po",

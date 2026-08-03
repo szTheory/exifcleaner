@@ -1,6 +1,6 @@
 {
-	"empty.title": "Keine Datei ausgewählt",
-	"empty.subtitle": "Ziehen Sie Bilder, Videos oder PDF-Dateien per Drag & Drop, um Metadaten automatisch zu entfernen.",
+	"empty.title": "Dateien zum Bereinigen hinzufügen",
+	"empty.subtitle": "Bilder, Videos oder PDF-Dateien hier ablegen oder eine Option wählen.",
 	"table.header.filename": "Ausgewählte Dateien",
 	"table.header.exif-before": "# Exif vorher",
 	"table.header.exif-after": "# Exif nachher",

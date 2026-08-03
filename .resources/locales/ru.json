@@ -1,6 +1,6 @@
 {
-	"empty.title": "Нет выбранных файлов",
-	"empty.subtitle": "Перетащите изображения, видео или PDF-файлы для автоматического удаления метаданных.",
+	"empty.title": "Добавьте файлы для очистки",
+	"empty.subtitle": "Перетащите сюда изображения, видео или PDF-файлы либо выберите нужный вариант.",
 	"table.header.filename": "Выбранные файлы",
 	"table.header.exif-before": "# Exif до",
 	"table.header.exif-after": "# Exif после",

@@ -1,6 +1,6 @@
 {
-	"empty.title": "No s'ha seleccionat cap fitxer",
-	"empty.subtitle": "Arrossegueu i deixeu anar imatges, vídeos o fitxers PDF per a eliminar automàticament les metadades.",
+	"empty.title": "Afegiu fitxers per netejar",
+	"empty.subtitle": "Deixeu aquí imatges, vídeos o PDF, o trieu una opció.",
 	"table.header.filename": "Fitxers seleccionats",
 	"table.header.exif-before": "Exif avans",
 	"table.header.exif-after": "Exif després",

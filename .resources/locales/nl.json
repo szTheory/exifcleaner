@@ -1,6 +1,6 @@
 {
-	"empty.title": "Geen bestanden geselecteerd",
-	"empty.subtitle": "Sleep en plaats afbeeldingen, video's of PDF-bestanden om metagegevens automatisch te verwijderen.",
+	"empty.title": "Voeg bestanden toe om op te schonen",
+	"empty.subtitle": "Zet hier afbeeldingen, video's of pdf's neer, of kies een optie.",
 	"table.header.filename": "Geselecteerde bestanden",
 	"table.header.exif-before": "# Exif Voor",
 	"table.header.exif-after": "# Exif Na",

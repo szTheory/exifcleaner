@@ -1,6 +1,6 @@
 {
-	"empty.title": "Không có tập tin nào được chọn",
-	"empty.subtitle": "Kéo và thả tập tin hình ảnh, video hoặc PDF để tự động xóa siêu dữ liệu.",
+	"empty.title": "Thêm tệp để làm sạch",
+	"empty.subtitle": "Thả hình ảnh, video hoặc tệp PDF vào đây, hoặc chọn một tùy chọn.",
 	"table.header.filename": "Những tập tin đã được chọn",
 	"table.header.exif-before": "#Trước Exif",
 	"table.header.exif-after": "#Sau Exif",
