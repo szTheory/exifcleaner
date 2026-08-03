@@ -5,16 +5,15 @@
 // macOS Gatekeeper to report the app as "damaged." A uniform ad-hoc
 // signature produces the bypassable "unidentified developer" dialog instead.
 //
-// Skips when a real signing certificate is configured (CI with Apple cert).
+// The product deliberately configures identity: null, so this hook is the
+// authoritative final signature even if conventional CSC variables happen to
+// exist in a maintainer environment.
 const { execSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
 exports.default = async function afterSign(context) {
 	if (context.electronPlatformName !== "darwin") return;
-
-	// Skip if real signing identity is configured
-	if (process.env.CSC_LINK || process.env.CSC_NAME) return;
 
 	const appPath = path.join(
 		context.appOutDir,

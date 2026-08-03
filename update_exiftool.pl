@@ -294,16 +294,21 @@ sub copy_unix_binary {
 }
 
 sub verify_successful_install {
-  my $command = BIN_DIR_UNIX . '/exiftool -ver';
-  my $version = qx($command);
-  if ($version) {
-    print "\n";
-    print_success("Success! Updated to ExifTool $version\n");
-  }
-  else {
-    print_error(
-      "Error while attempting to verify ExifTool install with $command\n");
-  }
+  my $exiftool = BIN_DIR_UNIX . '/exiftool';
+  open my $version_output, '-|', $exiftool, '-ver'
+    or die "Unable to run $exiftool -ver: $!\n";
+  my $version = <$version_output>;
+  close $version_output
+    or die "ExifTool version check failed for $exiftool\n";
+
+  die "ExifTool version check returned no output for $exiftool\n"
+    if !defined $version;
+  chomp $version;
+  die "Expected ExifTool " . EXIFTOOL_VERSION . ", got '$version'\n"
+    if $version ne EXIFTOOL_VERSION;
+
+  print "\n";
+  print_success("Success! Updated to ExifTool $version\n");
 
   return;
 }

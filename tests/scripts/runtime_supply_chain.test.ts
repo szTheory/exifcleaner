@@ -90,6 +90,9 @@ describe("packaged Electron fuse policy", () => {
 	});
 
 	test("keeps final ad-hoc signing after electron-builder's fuse stage", () => {
+		const packageJson = JSON.parse(
+			fs.readFileSync(path.join(ROOT, "package.json"), "utf8"),
+		) as { build?: { mac?: { identity?: string | null } } };
 		const hook = fs.readFileSync(
 			path.join(ROOT, "scripts/afterPack.cjs"),
 			"utf8",
@@ -97,6 +100,8 @@ describe("packaged Electron fuse policy", () => {
 
 		expect(hook).toContain("function afterSign(context)");
 		expect(hook).toContain("codesign --force --deep --sign -");
-		expect(hook).toContain("process.env.CSC_LINK || process.env.CSC_NAME");
+		expect(hook).not.toContain("process.env.CSC_LINK");
+		expect(hook).not.toContain("process.env.CSC_NAME");
+		expect(packageJson.build?.mac).toMatchObject({ identity: null });
 	});
 });
