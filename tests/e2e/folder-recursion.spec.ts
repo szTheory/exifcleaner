@@ -78,12 +78,15 @@ test.describe("Folder Recursion", () => {
 			// Send the folder root through the production intake event. The renderer
 			// must expand it through validated IPC rather than receiving pre-expanded
 			// paths from this test.
-			await app.evaluate(({ BrowserWindow }, filePaths) => {
-				const win = BrowserWindow.getAllWindows()[0];
-				if (win) {
-					win.webContents.send("file-open-add-files", filePaths);
-				}
-			}, [photosDir]);
+			await app.evaluate(
+				({ BrowserWindow }, filePaths) => {
+					const win = BrowserWindow.getAllWindows()[0];
+					if (win) {
+						win.webContents.send("file-open-add-files", filePaths);
+					}
+				},
+				[photosDir],
+			);
 
 			const visibleToasts = page.locator(".toast--visible");
 			await expect(visibleToasts).toHaveCount(1);
@@ -100,7 +103,11 @@ test.describe("Folder Recursion", () => {
 				modified: ["photos/vacation/sample.jpg", "photos/sample.png"],
 				added: [],
 				removed: [],
-				unchanged: ["photos", "photos/vacation", "photos/vacation/unsupported.txt"],
+				unchanged: [
+					"photos",
+					"photos/vacation",
+					"photos/vacation/unsupported.txt",
+				],
 			});
 
 			// Verify 2 file rows appear
