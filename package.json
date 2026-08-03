@@ -136,9 +136,13 @@
 			]
 		},
 		"nsis": {
+			"artifactName": "${productName}.Setup.${version}.${ext}",
 			"oneClick": true,
 			"perMachine": false,
 			"runAfterFinish": false
+		},
+		"portable": {
+			"artifactName": "${productName}.${version}.${ext}"
 		},
 		"win": {
 			"target": [
