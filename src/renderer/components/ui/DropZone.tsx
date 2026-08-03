@@ -72,13 +72,13 @@ async function expandAndProcessFolder({
 	dispatch,
 	processFiles,
 	onSkipToast,
-	unreadableTemplate,
+	unsupportedSkippedTemplate,
 }: {
 	folderPath: string;
 	dispatch: (action: AppAction) => void;
 	processFiles: (files: FileEntry[]) => void;
 	onSkipToast?: ((message: string) => void) | undefined;
-	unreadableTemplate: string;
+	unsupportedSkippedTemplate: string;
 }): Promise<void> {
 	const folderBaseName =
 		folderPath.split(/[/\\]/).filter(Boolean).pop() || folderPath;
@@ -132,7 +132,10 @@ async function expandAndProcessFolder({
 
 	if (result.skippedCount > 0 && onSkipToast !== undefined) {
 		onSkipToast(
-			unreadableTemplate.replace("{count}", String(result.skippedCount)),
+			unsupportedSkippedTemplate.replace(
+				"{count}",
+				String(result.skippedCount),
+			),
 		);
 	}
 }
@@ -215,7 +218,7 @@ export function DropZone({
 					dispatch,
 					processFiles,
 					onSkipToast: showSkipToast,
-					unreadableTemplate: t("intake.foldersUnreadable"),
+					unsupportedSkippedTemplate: t("intake.unsupportedSkipped"),
 				});
 			}
 		},
