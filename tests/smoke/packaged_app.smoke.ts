@@ -112,7 +112,7 @@ test.describe("Packaged artifact", () => {
 			disabled,
 		);
 		expect(fuses[FuseV1Options.EnableNodeCliInspectArguments]).toBe(disabled);
-		// These are deliberately deferred while ExifTool remains an external resource.
+		// These remain disabled while ExifTool is an external resource.
 		expect(fuses[FuseV1Options.EnableEmbeddedAsarIntegrityValidation]).toBe(
 			disabled,
 		);

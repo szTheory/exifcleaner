@@ -53,18 +53,17 @@ describe("ExifTool supply chain", () => {
 		expect(windowsExecutable.readUInt16LE(peOffset + 4)).toBe(0x14c);
 	});
 
-	test.runIf(process.platform !== "win32")(
-		"runs the vendored Unix distribution",
-		() => {
-			const version = execFileSync(
-				path.join(ROOT, ".resources/nix/bin/exiftool"),
-				["-ver"],
-				{ encoding: "utf8" },
-			).trim();
+	test("runs the vendored distribution for the current platform", () => {
+		const executable =
+			process.platform === "win32"
+				? path.join(ROOT, ".resources/win/bin/exiftool.exe")
+				: path.join(ROOT, ".resources/nix/bin/exiftool");
+		const version = execFileSync(executable, ["-ver"], {
+			encoding: "utf8",
+		}).trim();
 
-			expect(version).toBe(TARGET_VERSION);
-		},
-	);
+		expect(version).toBe(TARGET_VERSION);
+	});
 });
 
 describe("packaged Electron fuse policy", () => {
