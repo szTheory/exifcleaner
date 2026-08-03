@@ -1362,69 +1362,63 @@ describe("release marker count evidence", () => {
 });
 
 describe("release workflow enforcement", () => {
-	test("requires a pre-existing version tag before creating the seven-asset draft", () => {
+	test("promotes only a successful trusted master CI run", () => {
 		const workflow = readRepoText(".github/workflows/release.yml");
-		const guard = "Verify pre-existing release tag";
-		const draft = "Create draft release";
-		const guardIndex = workflow.indexOf(guard);
-		const draftIndex = workflow.indexOf(draft);
 
-		expect(workflow).not.toMatch(/\bgit\s+tag\b/);
-		expect(workflow).not.toMatch(/\bgit\s+push\b/);
-		expect(guardIndex).toBeGreaterThanOrEqual(0);
-		expect(draftIndex).toBeGreaterThan(guardIndex);
-		expect(workflow).toContain("git fetch --tags --force");
-		expect(workflow).toContain('git rev-parse -q --verify "refs/tags/$V"');
-		expect(workflow).toContain('git rev-parse "$V^{commit}"');
-		expect(workflow).toMatch(/\[ "\$EXISTING" (?:=|!=) "\$GITHUB_SHA" \]/);
-		expect(workflow).toMatch(
-			/release:[\s\S]*?if: github\.ref == 'refs\/heads\/master'/,
+		expect(workflow).toContain("workflow_run:");
+		expect(workflow).toContain('workflows: ["CI"]');
+		expect(workflow).not.toContain("workflow_dispatch:");
+		expect(workflow).toContain(
+			"github.event.workflow_run.conclusion == 'success'",
 		);
-		expect(workflow).toContain("draft: true");
-		expect(workflow).toContain("fail_on_unmatched_files: true");
-		expect(workflow).toContain("artifacts/release-macos/*");
-		expect(workflow).toContain("artifacts/release-windows/*");
-		expect(workflow).toContain("artifacts/release-linux/*");
-
-		const assetInventory = workflow.match(/expected=\([\s\S]*?\)/)?.[0] ?? "";
-		expect(assetInventory.match(/^\s*"artifacts\/release-/gm)).toHaveLength(7);
+		expect(workflow).toContain("github.event.workflow_run.event == 'push'");
+		expect(workflow).toContain(
+			"github.event.workflow_run.head_branch == 'master'",
+		);
+		expect(workflow).toContain(
+			"github.event.workflow_run.head_repository.full_name == github.repository",
+		);
+		expect(workflow).toContain(
+			"ref: ${{ github.event.workflow_run.head_sha }}",
+		);
+		expect(workflow).toContain("run-id: ${{ github.event.workflow_run.id }}");
+		expect(workflow).toMatch(/promote:[\s\S]*?contents: write/);
+		expect(workflow).toMatch(/promote:[\s\S]*?actions: read/);
+		expect(workflow).not.toMatch(/\byarn pack(?:mac|win|linux)\b/);
 	});
 
-	test("runs the composed release gate before expensive release work", () => {
+	test("audits a transient draft before automatic publication", () => {
 		const workflow = readRepoText(".github/workflows/release.yml");
-		const runLines = workflow
-			.split("\n")
-			.map((line, index) => ({ index, text: line.trim() }));
-		const releaseGateRuns = runLines.filter(
-			(line) => line.text === "run: yarn verify:release",
-		);
-		const installIndex = runLines.findIndex(
-			(line) => line.text === "run: yarn install --frozen-lockfile",
-		);
-		const gateIndex = releaseGateRuns[0]?.index ?? -1;
-		const compileIndex = runLines.findIndex(
-			(line) => line.text === "run: yarn compile",
-		);
+		const draftIndex = workflow.indexOf("Create or update transient draft");
+		const draftAuditIndex = workflow.indexOf("Audit transient draft");
+		const publishIndex = workflow.indexOf("Publish audited release");
+		const finalAuditIndex = workflow.indexOf("Audit published release");
 
-		expect(releaseGateRuns).toHaveLength(1);
-		expect(installIndex).toBeGreaterThanOrEqual(0);
-		expect(gateIndex).toBeGreaterThan(installIndex);
-		expect(gateIndex).toBeLessThan(compileIndex);
-		expect(
-			runLines.filter((line) => line.text === "run: yarn lint"),
-		).toHaveLength(0);
-		expect(
-			runLines.filter((line) => line.text === "run: yarn typecheck"),
-		).toHaveLength(0);
-		expect(
-			runLines.filter((line) => line.text === "run: yarn test"),
-		).toHaveLength(0);
-		expect(
-			runLines.filter((line) => line.text === "run: yarn check:deps"),
-		).toHaveLength(0);
-		expect(workflow).toMatch(/build-macos:[\s\S]*?needs: test/);
-		expect(workflow).toMatch(/build-windows:[\s\S]*?needs: test/);
-		expect(workflow).toMatch(/build-linux:[\s\S]*?needs: test/);
+		expect(draftIndex).toBeGreaterThanOrEqual(0);
+		expect(draftAuditIndex).toBeGreaterThan(draftIndex);
+		expect(publishIndex).toBeGreaterThan(draftAuditIndex);
+		expect(finalAuditIndex).toBeGreaterThan(publishIndex);
+		expect(workflow).toContain("draft: true");
+		expect(workflow).toContain("fail_on_unmatched_files: true");
+		expect(workflow).toContain("release-assets/*");
+		expect(workflow).toContain("--expected-draft true");
+		expect(workflow).toContain("--expected-draft false");
+	});
+
+	test("auto-merges only owner-controlled canonical release branches", () => {
+		const workflow = readRepoText(".github/workflows/auto-merge-release.yml");
+
+		expect(workflow).toContain("workflow_run:");
+		expect(workflow).toContain('workflows: ["CI"]');
+		expect(workflow).toContain("pull-requests: write");
+		expect(workflow).toContain("contents: write");
+		expect(workflow).toContain("head.repo.full_name");
+		expect(workflow).toContain("user.login");
+		expect(workflow).toContain("repository_owner");
+		expect(workflow).toContain("gsd/v");
+		expect(workflow).toContain("-canonical");
+		expect(workflow).toContain("--merge --delete-branch");
+		expect(workflow).not.toContain("actions/checkout@");
 	});
 
 	test("traces verify:release through the managed release-note checker", () => {

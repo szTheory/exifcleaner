@@ -92,6 +92,40 @@ declare module "*release_evidence.mjs" {
 	export function main(...args: any[]): any;
 }
 
+declare module "*release_asset_gate.mjs" {
+	export type PromotionManifest = {
+		readonly schemaVersion: 1;
+		readonly version: string;
+		readonly sourceCommit: string;
+		readonly assets: readonly {
+			readonly name: string;
+			readonly size: number;
+			readonly sha256: string;
+		}[];
+		readonly nativeEvidence: readonly {
+			readonly runnerOs: string;
+			readonly [key: string]: unknown;
+		}[];
+	};
+	export function expectedAssetNames(version: string): string[];
+	export function parseChecksumManifest(source: string): Map<string, string>;
+	export function buildPromotionManifest(input: {
+		assetDirectory: string;
+		evidenceDirectory: string;
+		sourceCommit: string;
+		version: string;
+		requireChecksums?: boolean;
+	}): PromotionManifest;
+	export function renderChecksums(manifest: PromotionManifest): string;
+	export function validateRemoteRelease(input: {
+		release: unknown;
+		manifest: PromotionManifest;
+		releaseNotes: string;
+		expectedDraft: boolean;
+	}): void;
+	export function main(argv?: string[]): number;
+}
+
 declare module "*release_tag_gate.mjs" {
 	export function buildTagEvidence(...args: any[]): any;
 	export function classifyTagRef(...args: any[]): any;
