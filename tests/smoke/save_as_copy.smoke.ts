@@ -21,7 +21,7 @@ test("fresh packaged profiles default to Save as Copy", async () => {
 		);
 		expect(settings.saveAsCopy).toBe(true);
 		await expect(
-			context.window.locator(".drop-zone__output-mode"),
+			context.window.locator(".empty-state__output-mode"),
 		).toContainText(/cleaned copies/i);
 	} finally {
 		await closePackagedApp(context);
