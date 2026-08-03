@@ -219,7 +219,7 @@ status.nonblockingLegacyItems = worklist.items.filter(
 const generatedFiles = [
 	[outputPath, jsonText(dictionary)],
 	[statusPath, jsonText(status)],
-	[worklistPath, jsonText(worklist)],
+	[worklistPath, worklistText(worklist)],
 ];
 
 if (process.argv.includes("--check")) {
@@ -346,6 +346,23 @@ async function readJson(filePath, label) {
 
 function jsonText(value) {
 	return JSON.stringify(value, null, "\t") + "\n";
+}
+
+function worklistText(value) {
+	const items = value.items
+		.map(
+			(item, index) =>
+				`\t\t${JSON.stringify(item)}${index === value.items.length - 1 ? "" : ","}`,
+		)
+		.join("\n");
+	return `{
+\t"schemaVersion": ${value.schemaVersion},
+\t"sourceLocale": ${JSON.stringify(value.sourceLocale)},
+\t"protectedKeys": ${JSON.stringify(value.protectedKeys)},
+\t"items": [
+${items}
+\t]
+}\n`;
 }
 
 async function assertCurrent(filePath, expected) {
