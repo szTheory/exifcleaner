@@ -76,6 +76,24 @@ afterEach(() => {
 });
 
 describe("release asset gate", () => {
+	test("pins Windows builder output to the public asset contract", () => {
+		const packageJson = JSON.parse(
+			fs.readFileSync(path.resolve("package.json"), "utf8"),
+		) as {
+			build?: {
+				nsis?: { artifactName?: string };
+				portable?: { artifactName?: string };
+			};
+		};
+
+		expect(packageJson.build?.nsis?.artifactName).toBe(
+			"${productName}.Setup.${version}.${ext}",
+		);
+		expect(packageJson.build?.portable?.artifactName).toBe(
+			"${productName}.${version}.${ext}",
+		);
+	});
+
 	test("builds a byte-derived manifest for the exact native release set", () => {
 		const bundle = createBundle();
 
