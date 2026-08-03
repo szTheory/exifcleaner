@@ -10,6 +10,7 @@ import {
 
 const ipcHandleMock = vi.hoisted(() => vi.fn());
 const showOpenDialogMock = vi.hoisted(() => vi.fn());
+const expandFolderExecuteMock = vi.hoisted(() => vi.fn());
 
 vi.mock("electron", () => ({
 	dialog: { showOpenDialog: showOpenDialogMock },
@@ -37,10 +38,11 @@ function authorizedEvent(): IpcMainInvokeEvent {
 beforeEach(() => {
 	ipcHandleMock.mockClear();
 	showOpenDialogMock.mockReset();
+	expandFolderExecuteMock.mockReset();
 	unregisterSender(TEST_SENDER_ID);
 	setupFolderHandlers({
 		container: {
-			expandFolder: { execute: vi.fn() },
+			expandFolder: { execute: expandFolderExecuteMock },
 		} as unknown as Container,
 		getWindow: () => null,
 	});
@@ -98,5 +100,55 @@ describe("native picker handlers", () => {
 		);
 
 		expect(result).toEqual(["/photos/safe.jpg"]);
+	});
+});
+
+describe("folder expansion handler", () => {
+	it("forwards supported paths and skipped counts from the command", async () => {
+		expandFolderExecuteMock.mockResolvedValue({
+			ok: true,
+			value: { files: ["/photos/one.jpg"], skippedCount: 1 },
+		});
+
+		const result = await captureHandler(IPC_CHANNELS.FOLDER_EXPAND)(
+			authorizedEvent(),
+			"/photos",
+		);
+
+		expect(result).toEqual({
+			files: ["/photos/one.jpg"],
+			skippedCount: 1,
+		});
+	});
+
+	it("keeps the safe empty response when expansion fails", async () => {
+		expandFolderExecuteMock.mockResolvedValue({
+			ok: false,
+			error: {
+				code: "read-failed",
+				dirPath: "/photos",
+				cause: "Permission denied",
+			},
+		});
+
+		const result = await captureHandler(IPC_CHANNELS.FOLDER_EXPAND)(
+			authorizedEvent(),
+			"/photos",
+		);
+
+		expect(result).toEqual({
+			files: [],
+			skippedCount: 0,
+			error: "Could not read folder /photos: Permission denied. Check folder permissions.",
+		});
+	});
+
+	it("rejects CR/LF-bearing folder roots before command execution", async () => {
+		const handler = captureHandler(IPC_CHANNELS.FOLDER_EXPAND);
+
+		await expect(handler(authorizedEvent(), "/photos\nunsafe")).rejects.toThrow(
+			"Paths containing line breaks are not supported",
+		);
+		expect(expandFolderExecuteMock).not.toHaveBeenCalled();
 	});
 });
