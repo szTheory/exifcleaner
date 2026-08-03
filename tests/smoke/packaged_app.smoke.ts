@@ -12,6 +12,7 @@ import { createFixtureDir } from "../helpers/fixture_copier";
 import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
 import { waitForProcessing } from "../e2e/helpers/wait_for_processing";
 import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
+import { createProcessingDriver } from "../helpers/processing_driver";
 import {
 	expectNoXattrs,
 	expectSeededXattrs,
@@ -131,6 +132,8 @@ test.describe("Packaged artifact", () => {
 		// fine with mis-resolved resource paths.
 		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
+			if (!context) throw new Error("packaged launch context is missing");
+			await createProcessingDriver(context).setSaveAsCopy(false);
 			const tempFile = copyFixture("sample.jpg");
 
 			const before = snapshotDir(dir);
@@ -166,6 +169,8 @@ test.describe("Packaged artifact", () => {
 		// argument shape than JPEG.
 		const { dir, copyFixtures, cleanup } = createFixtureDir();
 		try {
+			if (!context) throw new Error("packaged launch context is missing");
+			await createProcessingDriver(context).setSaveAsCopy(false);
 			const tempFiles = copyFixtures([
 				"sample.jpg",
 				"sample.png",

@@ -1,12 +1,14 @@
 import { expect } from "@playwright/test";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
+import path from "node:path";
 import { promisify } from "node:util";
 import { createFixtureDir } from "./fixture_copier";
 import { assertDirEffect, snapshotDir } from "./dir_effect";
 import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
 import type { ElectronApplication, Page } from "playwright";
 import { waitForProcessing } from "../e2e/helpers/wait_for_processing";
+import { generateCleanedPath } from "../../src/domain/files/cleaned_path";
 
 const execFileAsync = promisify(execFile);
 
@@ -139,18 +141,22 @@ export async function runPositiveFormatScenario(
 
 	try {
 		const filePath = copyFixture(fixture);
+		const outputPath = generateCleanedPath({
+			filePath,
+			exists: fs.existsSync,
+		});
 		const before = snapshotDir(dir);
 		await driver.submitFiles([filePath]);
 		await driver.waitForTerminal();
 		const after = snapshotDir(dir);
 
 		assertDirEffect(before, after, {
-			modified: [fixture],
-			added: [],
+			modified: [],
+			added: [path.basename(outputPath)],
 			removed: [],
-			unchanged: [],
+			unchanged: [fixture],
 		});
-		await assertMetadataStripped(filePath, context.exiftoolPath);
+		await assertMetadataStripped(outputPath, context.exiftoolPath);
 		expect(await driver.terminalRowCounts()).toEqual({
 			total: 1,
 			complete: 1,
@@ -175,6 +181,9 @@ export async function runMixedFormatScenario(
 
 	try {
 		const filePaths = copyFixtures([...SUPPORTED_FORMAT_FIXTURES]);
+		const outputPaths = filePaths.map((filePath) =>
+			generateCleanedPath({ filePath, exists: fs.existsSync }),
+		);
 		const before = snapshotDir(dir);
 		await driver.submitFiles(filePaths);
 		await driver.waitForTerminal({
@@ -184,13 +193,13 @@ export async function runMixedFormatScenario(
 		const after = snapshotDir(dir);
 
 		assertDirEffect(before, after, {
-			modified: SUPPORTED_FORMAT_FIXTURES,
-			added: [],
+			modified: [],
+			added: outputPaths.map((outputPath) => path.basename(outputPath)),
 			removed: [],
-			unchanged: [],
+			unchanged: SUPPORTED_FORMAT_FIXTURES,
 		});
-		for (const filePath of filePaths) {
-			await assertMetadataStripped(filePath, context.exiftoolPath);
+		for (const outputPath of outputPaths) {
+			await assertMetadataStripped(outputPath, context.exiftoolPath);
 		}
 		expect(await driver.terminalRowCounts()).toEqual({
 			total: SUPPORTED_FORMAT_FIXTURES.length,

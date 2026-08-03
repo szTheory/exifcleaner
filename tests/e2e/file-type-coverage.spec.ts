@@ -28,7 +28,7 @@ test.describe("File type coverage", () => {
 	}
 
 	test.beforeEach(async () => {
-		const launched = await launchApp({ settings: { saveAsCopy: false } });
+		const launched = await launchApp({ settings: { saveAsCopy: true } });
 		app = launched.app;
 		window = launched.window;
 	});
