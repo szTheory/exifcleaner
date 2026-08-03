@@ -84,17 +84,24 @@ jobs:
         id: version
         run: echo "tag=v$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
 
-      - name: Create or verify exact version tag
+      - name: Create or reconcile exact pre-publication version tag
         env:
           TAG: ${{ steps.version.outputs.tag }}
         run: |
           set -euo pipefail
           if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" >/dev/null 2>&1; then
             existing=$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)
-            test "$existing" = "$HEAD_SHA" || {
-              echo "::error::Tag $TAG is bound to $existing, not tested commit $HEAD_SHA"
-              exit 1
-            }
+            if [ "$existing" != "$HEAD_SHA" ]; then
+              release_state=$(gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null || true)
+              if [ "$release_state" != true ]; then
+                echo "::error::Refusing to move a published release tag or an orphan tag: $TAG"
+                exit 1
+              fi
+              gh api "repos/$GITHUB_REPOSITORY/git/refs/tags/$TAG" \
+                --method PATCH \
+                -f sha="$HEAD_SHA" \
+                -F force=true >/dev/null
+            fi
           else
             gh api "repos/$GITHUB_REPOSITORY/git/refs" \
               --method POST \
@@ -108,8 +115,8 @@ jobs:
           TAG: ${{ steps.version.outputs.tag }}
         run: |
           set -euo pipefail
-          if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" > existing-release.json 2>/dev/null; then
-            draft=$(jq -r .draft existing-release.json)
+          if gh release view "$TAG" --json isDraft > existing-release.json 2>/dev/null; then
+            draft=$(jq -r .isDraft existing-release.json)
             echo "already_published=$([ "$draft" = false ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           else
             echo "already_published=false" >> "$GITHUB_OUTPUT"
@@ -157,7 +164,7 @@ jobs:
         env:
           TAG: ${{ steps.version.outputs.tag }}
         run: |
-          release_id=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq .id)
+          release_id=$(gh release view "$TAG" --json databaseId --jq .databaseId)
           gh api "repos/$GITHUB_REPOSITORY/releases/$release_id" \
             --method PATCH \
             -F draft=false \
