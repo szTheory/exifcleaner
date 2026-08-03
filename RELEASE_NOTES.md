@@ -7,6 +7,7 @@ ExifCleaner 4.2.0 makes the first run calmer and keeps the packaged privacy tool
 - The empty intake is now centered as one responsive composition instead of feeling split between copy and controls.
 - **Choose files** is the clear primary action, with **Choose folder** available beside it and drag and drop unchanged.
 - The intake explains whether ExifCleaner will save cleaned copies or modify originals, using the current setting rather than a generic promise.
+- Nested folder intake reports unsupported files and folders it could not read instead of silently losing that summary.
 - Help now includes **New Releases**, which opens the GitHub Releases page only when you click it. ExifCleaner does not poll for updates.
 
 ## Localization with provenance

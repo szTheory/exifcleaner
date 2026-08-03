@@ -18,6 +18,7 @@
 ### Fixed
 
 - Re-running release automation for an already-published version exits quietly without downloading artifacts or mutating release state
+- Folder intake reports unsupported files and unreadable folders instead of dropping that accounting at the IPC boundary
 
 ## 4.1.0
 
