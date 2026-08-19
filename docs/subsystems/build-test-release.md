@@ -4,7 +4,7 @@ ExifCleaner’s release process is designed around one lesson: a source tree tha
 does not prove an installed desktop artifact works.
 
 ```mermaid
-flowchart LR
+flowchart TB
     S[Clean master SHA] --> Q[Format, types, unit, dependency gates]
     Q --> B[Native platform builds]
     B --> I[Install or extract artifacts]
