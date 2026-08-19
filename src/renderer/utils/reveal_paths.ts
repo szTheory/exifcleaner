@@ -13,6 +13,7 @@ export interface RevealTargets {
 	contextPaths: RevealContextPaths | null;
 }
 
+// FileRow uses this to reveal the cleaned file and offer the original when a copy exists.
 export function resolveRevealTargets(file: RevealTargetInput): RevealTargets {
 	const primaryPath = file.outputPath ?? file.path;
 	const contextPaths =
