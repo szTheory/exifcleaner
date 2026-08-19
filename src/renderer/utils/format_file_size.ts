@@ -3,6 +3,7 @@ interface FormatFileSizeParams {
 }
 
 export function formatFileSize({ bytes }: FormatFileSizeParams): string {
+	// Example: 1536 bytes returns "1.5 KB".
 	if (bytes === 0) return "0 B";
 	const units = ["B", "KB", "MB", "GB"];
 	const i = Math.min(
