@@ -27,6 +27,7 @@ export class StripMetadataCommand {
 		outputPath?: string | undefined;
 		signal?: AbortSignal | undefined;
 	}): Promise<Result<{ tagsRemoved: number }, ExifError>> {
+		// Example: an AbortController cancelled a queued cleanup before ExifTool started.
 		if (signal?.aborted) {
 			return {
 				ok: false,
