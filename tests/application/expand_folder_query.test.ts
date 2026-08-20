@@ -1,14 +1,14 @@
 import { it, expect, beforeEach, afterEach } from "vitest";
-import { ExpandFolderCommand } from "../../src/application/commands/expand_folder_command";
+import { ExpandFolderQuery } from "../../src/application/queries/expand_folder_query";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 
-let command: ExpandFolderCommand;
+let query: ExpandFolderQuery;
 let tmpDir: string;
 
 beforeEach(async () => {
-	command = new ExpandFolderCommand();
+	query = new ExpandFolderQuery();
 	tmpDir = await mkdtemp(path.join(os.tmpdir(), "expand-test-"));
 });
 
@@ -24,7 +24,7 @@ it("finds supported files recursively", async () => {
 	await writeFile(path.join(tmpDir, "subdir", "details.md"), "unsupported");
 	await mkdir(path.join(tmpDir, "unsupported-directory.txt"));
 
-	const result = await command.execute({ dirPath: tmpDir });
+	const result = await query.execute({ dirPath: tmpDir });
 
 	expect(result.ok).toBe(true);
 	if (result.ok) {
@@ -38,7 +38,7 @@ it("finds supported files recursively", async () => {
 it("reports unsupported-only folders without supported paths", async () => {
 	await writeFile(path.join(tmpDir, "readme.txt"), "hello");
 
-	const result = await command.execute({ dirPath: tmpDir });
+	const result = await query.execute({ dirPath: tmpDir });
 
 	expect(result.ok).toBe(true);
 	if (result.ok) {
@@ -48,7 +48,7 @@ it("reports unsupported-only folders without supported paths", async () => {
 });
 
 it("returns empty array for empty directory", async () => {
-	const result = await command.execute({ dirPath: tmpDir });
+	const result = await query.execute({ dirPath: tmpDir });
 
 	expect(result.ok).toBe(true);
 	if (result.ok) {
@@ -59,7 +59,7 @@ it("returns empty array for empty directory", async () => {
 
 it("returns FolderError for nonexistent directory", async () => {
 	const nonexistent = path.join(tmpDir, "nonexistent");
-	const result = await command.execute({ dirPath: nonexistent });
+	const result = await query.execute({ dirPath: nonexistent });
 
 	expect(result.ok).toBe(false);
 	if (!result.ok) {
@@ -85,7 +85,7 @@ it("returns read-failed error for permission-denied directory", async () => {
 	await chmod(restrictedDir, 0o000);
 
 	try {
-		const result = await command.execute({ dirPath: restrictedDir });
+		const result = await query.execute({ dirPath: restrictedDir });
 
 		expect(result.ok).toBe(false);
 		if (!result.ok) {

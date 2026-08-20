@@ -12,7 +12,7 @@ import {
 import {
 	StripMetadataCommand,
 	ReadMetadataQuery,
-	ExpandFolderCommand,
+	ExpandFolderQuery,
 	RemoveXattrCommand,
 	VerifyGeneratedOutputQuery,
 } from "../application";
@@ -25,7 +25,7 @@ export function createContainer(): {
 	logger: ConsoleLogger;
 	stripMetadata: StripMetadataCommand;
 	readMetadata: ReadMetadataQuery;
-	expandFolder: ExpandFolderCommand;
+	expandFolder: ExpandFolderQuery;
 	removeXattrCommand: RemoveXattrCommand;
 	verifyGeneratedOutput: VerifyGeneratedOutputQuery;
 	outputTransaction: OutputTransaction;
@@ -47,7 +47,7 @@ export function createContainer(): {
 			await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 		},
 	});
-	const expandFolder = new ExpandFolderCommand();
+	const expandFolder = new ExpandFolderQuery();
 	const xattrAdapter = { removeXattrs };
 	const removeXattrCommand = new RemoveXattrCommand({
 		xattr: xattrAdapter,

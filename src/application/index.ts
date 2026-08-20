@@ -12,4 +12,4 @@ export {
 	VerifyGeneratedOutputQuery,
 	type OutputVerificationError,
 } from "./queries/verify_generated_output_query";
-export { ExpandFolderCommand } from "./commands/expand_folder_command";
+export { ExpandFolderQuery } from "./queries/expand_folder_query";
