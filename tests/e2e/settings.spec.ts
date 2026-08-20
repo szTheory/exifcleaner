@@ -409,8 +409,7 @@ test.describe("Settings", () => {
 		} finally {
 			await app.evaluate(() => {
 				const restore = Reflect.get(globalThis, "__issue304RestoreReveal") as
-					| (() => void)
-					| undefined;
+					(() => void) | undefined;
 				restore?.();
 			});
 			await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));

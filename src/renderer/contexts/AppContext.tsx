@@ -5,10 +5,7 @@ import { FileProcessingStatus } from "../../domain";
 import { assertNever } from "../../common/types";
 
 export type FolderDiscoveryStatus =
-	| "scanning"
-	| "discovering"
-	| "complete"
-	| "empty";
+	"scanning" | "discovering" | "complete" | "empty";
 
 export interface FolderState {
 	path: string;
@@ -79,12 +76,7 @@ export type AppAction =
 			id: string;
 			error: string;
 			failureKind?:
-				| "write"
-				| "verification"
-				| "cleanup"
-				| "commit"
-				| "xattr"
-				| "refused";
+				"write" | "verification" | "cleanup" | "commit" | "xattr" | "refused";
 			detail?: string;
 			residualPath?: string;
 			outcomeKind?: "failed" | "refused";

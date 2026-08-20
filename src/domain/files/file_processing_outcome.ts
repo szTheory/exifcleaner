@@ -1,9 +1,5 @@
 export type FileProcessingOutcomeKind =
-	| "cleaned"
-	| "already-clean"
-	| "unchanged"
-	| "refused"
-	| "failed";
+	"cleaned" | "already-clean" | "unchanged" | "refused" | "failed";
 
 export type FileProcessingRefusal = {
 	readonly success: false;

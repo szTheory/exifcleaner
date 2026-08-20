@@ -20,8 +20,7 @@ export interface FakeBrowserWindow {
 		id: number;
 		handlers: Map<string, (...args: unknown[]) => void>;
 		windowOpenHandler:
-			| ((details: { url: string }) => { action: string })
-			| null;
+			((details: { url: string }) => { action: string }) | null;
 		on(event: string, handler: (...args: unknown[]) => void): void;
 		setWindowOpenHandler(
 			handler: (details: { url: string }) => { action: string },
