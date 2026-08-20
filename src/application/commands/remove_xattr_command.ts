@@ -4,7 +4,7 @@ export interface XattrPort {
 	removeXattrs(args: { filePath: string; logger: LoggerPort }): Promise<void>;
 }
 
-export class XattrCommand {
+export class RemoveXattrCommand {
 	private readonly xattr: XattrPort;
 	private readonly logger: LoggerPort;
 

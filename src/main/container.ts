@@ -13,7 +13,7 @@ import {
 	StripMetadataCommand,
 	ReadMetadataQuery,
 	ExpandFolderCommand,
-	XattrCommand,
+	RemoveXattrCommand,
 	VerifyGeneratedOutputQuery,
 } from "../application";
 import { OutputTransaction } from "./output_transaction";
@@ -26,7 +26,7 @@ export function createContainer(): {
 	stripMetadata: StripMetadataCommand;
 	readMetadata: ReadMetadataQuery;
 	expandFolder: ExpandFolderCommand;
-	xattrCommand: XattrCommand;
+	removeXattrCommand: RemoveXattrCommand;
 	verifyGeneratedOutput: VerifyGeneratedOutputQuery;
 	outputTransaction: OutputTransaction;
 } {
@@ -49,7 +49,10 @@ export function createContainer(): {
 	});
 	const expandFolder = new ExpandFolderCommand();
 	const xattrAdapter = { removeXattrs };
-	const xattrCommand = new XattrCommand({ xattr: xattrAdapter, logger });
+	const removeXattrCommand = new RemoveXattrCommand({
+		xattr: xattrAdapter,
+		logger,
+	});
 
 	return {
 		exiftoolProcess,
@@ -61,7 +64,7 @@ export function createContainer(): {
 		verifyGeneratedOutput,
 		outputTransaction,
 		expandFolder,
-		xattrCommand,
+		removeXattrCommand,
 	};
 }
 

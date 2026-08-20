@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { VerifyGeneratedOutputQuery } from "../../src/application/queries/verify_generated_output";
+import { VerifyGeneratedOutputQuery } from "../../src/application/queries/verify_generated_output_query";
 import { FakeExifTool } from "../fakes/fake_exiftool";
 
 let exiftool: FakeExifTool;

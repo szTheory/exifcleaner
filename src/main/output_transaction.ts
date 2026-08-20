@@ -1,6 +1,6 @@
 import type { Result } from "../common";
 import type { ExifError } from "../domain";
-import type { OutputVerificationError } from "../application/queries/verify_generated_output";
+import type { OutputVerificationError } from "../application/queries/verify_generated_output_query";
 
 export type OutputTransactionFailure =
 	| { readonly code: "write-failed" }

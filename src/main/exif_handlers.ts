@@ -148,7 +148,7 @@ async function applyXattrPostcondition({
 	}
 
 	try {
-		await container.xattrCommand.execute({ filePath: actualOutputPath });
+		await container.removeXattrCommand.execute({ filePath: actualOutputPath });
 	} catch (error) {
 		return xattrFailureResult({ actualOutputPath, error });
 	}

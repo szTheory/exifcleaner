@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { IpcMainInvokeEvent } from "electron";
 import type { Container } from "../../src/main/container";
 import { StripMetadataCommand } from "../../src/application/commands/strip_metadata_command";
-import { VerifyGeneratedOutputQuery } from "../../src/application/queries/verify_generated_output";
+import { VerifyGeneratedOutputQuery } from "../../src/application/queries/verify_generated_output_query";
 import { DEFAULT_SETTINGS } from "../../src/domain/settings_schema";
 import {
 	registerAllowedSender,
@@ -97,7 +97,7 @@ function makeContainer({
 	container: Container;
 	stripMetadata: { execute: ReturnType<typeof vi.fn> };
 	outputTransaction: { execute: ReturnType<typeof vi.fn> };
-	xattrCommand: { execute: ReturnType<typeof vi.fn> };
+	removeXattrCommand: { execute: ReturnType<typeof vi.fn> };
 } {
 	const stripMetadata = {
 		execute: vi.fn(async () => executeResult),
@@ -112,7 +112,7 @@ function makeContainer({
 			);
 		}),
 	};
-	const xattrCommand = { execute: vi.fn(async () => undefined) };
+	const removeXattrCommand = { execute: vi.fn(async () => undefined) };
 	const container = {
 		settings: {
 			get: () => ({
@@ -126,9 +126,9 @@ function makeContainer({
 		},
 		stripMetadata,
 		outputTransaction,
-		xattrCommand,
+		removeXattrCommand,
 	} as unknown as Container;
-	return { container, stripMetadata, outputTransaction, xattrCommand };
+	return { container, stripMetadata, outputTransaction, removeXattrCommand };
 }
 
 function makePortCountContainer({ saveAsCopy }: { saveAsCopy: boolean }): {
@@ -304,7 +304,7 @@ describe("exif:remove handler", () => {
 	});
 
 	it("awaits xattr clearing on the main-owned output path only when enabled", async () => {
-		const { container, xattrCommand } = makeContainer({
+		const { container, removeXattrCommand } = makeContainer({
 			saveAsCopy: true,
 			removeXattrs: true,
 		});
@@ -313,8 +313,8 @@ describe("exif:remove handler", () => {
 		const { handler } = captureInvokeHandler("exif:remove");
 		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
 
-		expect(xattrCommand.execute).toHaveBeenCalledTimes(1);
-		expect(xattrCommand.execute).toHaveBeenCalledWith({
+		expect(removeXattrCommand.execute).toHaveBeenCalledTimes(1);
+		expect(removeXattrCommand.execute).toHaveBeenCalledWith({
 			filePath: "/dir/photo_cleaned.jpg",
 		});
 		expect(result).toEqual({
@@ -327,7 +327,7 @@ describe("exif:remove handler", () => {
 	});
 
 	it("clears only xattrs without rewriting an already-clean file", async () => {
-		const { container, stripMetadata, outputTransaction, xattrCommand } =
+		const { container, stripMetadata, outputTransaction, removeXattrCommand } =
 			makeContainer({
 				saveAsCopy: false,
 				removeXattrs: true,
@@ -338,7 +338,7 @@ describe("exif:remove handler", () => {
 		const { handler } = captureInvokeHandler("exif:remove");
 		const result = await handler(makeAuthorizedEvent(), "/dir/clean.jpg");
 
-		expect(xattrCommand.execute).toHaveBeenCalledWith({
+		expect(removeXattrCommand.execute).toHaveBeenCalledWith({
 			filePath: "/dir/clean.jpg",
 		});
 		expect(stripMetadata.execute).not.toHaveBeenCalled();
@@ -353,7 +353,7 @@ describe("exif:remove handler", () => {
 	});
 
 	it("preserves copy-mode semantics for an already-clean xattr request", async () => {
-		const { container, stripMetadata, xattrCommand } = makeContainer({
+		const { container, stripMetadata, removeXattrCommand } = makeContainer({
 			saveAsCopy: true,
 			removeXattrs: true,
 			readMetadataResult: { ok: true, value: {} },
@@ -370,7 +370,7 @@ describe("exif:remove handler", () => {
 				outputPath: "/dir/clean_cleaned.jpg",
 			}),
 		);
-		expect(xattrCommand.execute).toHaveBeenCalledWith({
+		expect(removeXattrCommand.execute).toHaveBeenCalledWith({
 			filePath: "/dir/clean_cleaned.jpg",
 		});
 		expect(result).toEqual({
@@ -383,7 +383,7 @@ describe("exif:remove handler", () => {
 	});
 
 	it("does not explicitly clear xattrs when remove-xattrs is disabled", async () => {
-		const { container, xattrCommand } = makeContainer({
+		const { container, removeXattrCommand } = makeContainer({
 			saveAsCopy: false,
 			removeXattrs: false,
 		});
@@ -399,7 +399,7 @@ describe("exif:remove handler", () => {
 			wroteFile: true,
 			outputSize: 4096,
 		});
-		expect(xattrCommand.execute).not.toHaveBeenCalled();
+		expect(removeXattrCommand.execute).not.toHaveBeenCalled();
 	});
 
 	it.each([
@@ -424,7 +424,7 @@ describe("exif:remove handler", () => {
 	])("leaves the dev xattr failure seam inert for $name", async (scenario) => {
 		appMock.isPackaged = scenario.isPackaged;
 		process.env.NODE_ENV = scenario.nodeEnv;
-		const { container, xattrCommand } = makeContainer({
+		const { container, removeXattrCommand } = makeContainer({
 			saveAsCopy: false,
 			removeXattrs: true,
 		});
@@ -441,14 +441,14 @@ describe("exif:remove handler", () => {
 			wroteFile: true,
 			outputSize: 4096,
 		});
-		expect(xattrCommand.execute).toHaveBeenCalledWith({
+		expect(removeXattrCommand.execute).toHaveBeenCalledWith({
 			filePath: "/dir/photo.jpg",
 		});
 	});
 
 	it("returns the native-shaped xattr failure for an exact dev marker match", async () => {
 		process.env.NODE_ENV = "development";
-		const { container, xattrCommand } = makeContainer({
+		const { container, removeXattrCommand } = makeContainer({
 			saveAsCopy: false,
 			removeXattrs: true,
 		});
@@ -465,12 +465,12 @@ describe("exif:remove handler", () => {
 				"Embedded metadata was removed, but macOS extended attributes could not be cleared: deterministic development failure",
 			residualPath: "/dir/photo.jpg",
 		});
-		expect(xattrCommand.execute).not.toHaveBeenCalled();
+		expect(removeXattrCommand.execute).not.toHaveBeenCalled();
 	});
 
 	it("consumes an exact dev failure path once without accumulating listeners", async () => {
 		process.env.NODE_ENV = "development";
-		const { container, xattrCommand } = makeContainer({
+		const { container, removeXattrCommand } = makeContainer({
 			saveAsCopy: false,
 			removeXattrs: true,
 		});
@@ -492,15 +492,17 @@ describe("exif:remove handler", () => {
 			success: true,
 			outputPath: "/dir/photo.jpg",
 		});
-		expect(xattrCommand.execute).toHaveBeenCalledOnce();
+		expect(removeXattrCommand.execute).toHaveBeenCalledOnce();
 	});
 
 	it("returns a truthful terminal xattr failure without a success output path", async () => {
-		const { container, xattrCommand } = makeContainer({
+		const { container, removeXattrCommand } = makeContainer({
 			saveAsCopy: false,
 			removeXattrs: true,
 		});
-		xattrCommand.execute.mockRejectedValue(new Error("permission denied"));
+		removeXattrCommand.execute.mockRejectedValue(
+			new Error("permission denied"),
+		);
 		setupExifHandlers({ container });
 
 		const { handler } = captureInvokeHandler("exif:remove");
@@ -546,7 +548,7 @@ describe("exif:remove handler", () => {
 	});
 
 	it("refuses RAF before any write and identifies the unchanged original", async () => {
-		const { container, stripMetadata, outputTransaction, xattrCommand } =
+		const { container, stripMetadata, outputTransaction, removeXattrCommand } =
 			makeContainer({ saveAsCopy: false, removeXattrs: true });
 		setupExifHandlers({ container });
 
@@ -566,7 +568,7 @@ describe("exif:remove handler", () => {
 		});
 		expect(stripMetadata.execute).not.toHaveBeenCalled();
 		expect(outputTransaction.execute).not.toHaveBeenCalled();
-		expect(xattrCommand.execute).not.toHaveBeenCalled();
+		expect(removeXattrCommand.execute).not.toHaveBeenCalled();
 		expect(statMock).not.toHaveBeenCalled();
 	});
 

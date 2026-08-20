@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { XattrCommand } from "../../src/application/commands/xattr_command";
-import type { XattrPort } from "../../src/application/commands/xattr_command";
+import { RemoveXattrCommand } from "../../src/application/commands/remove_xattr_command";
+import type { XattrPort } from "../../src/application/commands/remove_xattr_command";
 import type { LoggerPort } from "../../src/application/logger_port";
 import { FakeLogger } from "../fakes/fake_logger";
 
@@ -24,15 +24,15 @@ class FakeXattrPort implements XattrPort {
 
 let xattr: FakeXattrPort;
 let logger: FakeLogger;
-let command: XattrCommand;
+let command: RemoveXattrCommand;
 
 beforeEach(() => {
 	xattr = new FakeXattrPort();
 	logger = new FakeLogger();
-	command = new XattrCommand({ xattr, logger });
+	command = new RemoveXattrCommand({ xattr, logger });
 });
 
-describe("XattrCommand", () => {
+describe("RemoveXattrCommand", () => {
 	it("delegates filePath to xattr port on execute", async () => {
 		await command.execute({ filePath: "/tmp/photo.jpg" });
 
