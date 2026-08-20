@@ -226,11 +226,11 @@ ExifCleaner has the same writer limitations as the underlying `exiftool` it depe
 
 New translations and corrections are welcome. See [Contributing](CONTRIBUTING.md#translation-corrections) for the small-string workflow. Current translation status:
 
-- Arabic by [@ZER0-X](https://github.com/ZER0-X)
+- Arabic by [@zefr0x](https://github.com/zefr0x)
 - Catalan by [@marcarmengou](https://github.com/marcarmengou)
 - Chinese (Mandarin) by [MarcusPierce](https://github.com/MarcusPierce)
 - Croatian by [@milotype](https://github.com/milotype)
-- Czech by [@t0mzSK](https://github.com/t0mzSK)
+- Czech by [@tomz00](https://github.com/tomz00)
 - Danish by [@zlatco](https://github.com/zlatco)
 - Dutch by [@rvl-code](https://github.com/rvl-code)
 - French by [@NathanBnm](https://github.com/NathanBnm)
@@ -332,7 +332,7 @@ Thanks to all the people who submitted bug reports, fixes, and translations. If 
 - [@hugonote](https://github.com/hugonote) - Ukrainian translation
 - @dadodollabela - Portuguese (Brazil) translation fixes
 - [@zlatco](https://github.com/zlatco) - Danish translation
-- [@ZER0-X](https://github.com/ZER0-X) - Arabic translation
+- [@zefr0x](https://github.com/zefr0x) - Arabic translation
 - [@rvl-code](https://github.com/rvl-code) - Dutch translation
 - [@PolpOnline](https://github.com/PolpOnline) - Italian translation, Arch Linux distribution
 - [@NathanBnm](https://github.com/NathanBnm) - French translation
@@ -348,7 +348,7 @@ Thanks to all the people who submitted bug reports, fixes, and translations. If 
 - [@icetee](https://github.com/icetee) - Hungarian translation
 - [@sastofficial](https://github.com/sastofficial) - Swedish translation
 - [@theunknownKiran](https://github.com/theunknownKiran) - Malayalam translation
-- [@t0mzSK](https://github.com/t0mzSK) - Czech translation
+- [@tomz00](https://github.com/tomz00) - Czech translation
 - [@tensingnightco](https://github.com/tensingnightco) - Vietnamese translation
 - [@marcarmengou](https://github.com/marcarmengou) - Catalan translation
 - [@RamtinA](https://github.com/RamtinA) - Persian translation

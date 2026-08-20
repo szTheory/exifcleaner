@@ -275,6 +275,5 @@ A `.travis.yml` exists but is minimal (lint + `tsc` on Node 14/16, no builds, ma
 - No automated tests
 - **Completed**: Chunk 1 (electron-webpack → electron-vite), Chunk 2 (TypeScript 5.7 + strict + Prettier 3.x), Chunk 3 (Electron 11 → 35 + contextIsolation + preload), Chunk 4 (ESM modules — verbatimModuleSyntax + type: module), Phase 4 (Verify + Cleanup), Chunk 6 (Zero production dependencies — hand-rolled ExifTool wrapper)
 - **Next**: Phase 5 (Playwright e2e tests), then Phase 6 (DDD architecture refactor) — see `.claude/rules/modernization-roadmap.md`
-- See `devplans/` for detailed upgrade plans
 - See `.claude/rules/modernization-roadmap.md` for the master roadmap
 - See `.claude/rules/github-context.md` for community issues summary
