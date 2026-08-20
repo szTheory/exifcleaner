@@ -65,15 +65,15 @@ const VITEST_TEST_PATH = /(?:^|\/)tests\/.*\.test\.ts$/;
 const PLAYWRIGHT_SPEC_PATH = /(?:^|\/)tests\/e2e\/.*\.spec\.ts$/;
 const SMOKE_TEST_PATH = /(?:^|\/)tests\/smoke\/.*\.smoke\.ts$/;
 
-// The exact, countable size of the remaining GATE-01 gap (D-23): ExpandFolderCommand only
+// The exact, countable size of the remaining GATE-01 gap (D-23): ExpandFolderQuery only
 // reads the directory tree it is given (fs.readdir under the hood) and never writes, so its
 // directory delta is tautologically empty — asserting one would assert nothing real. This is
 // the ONE intended exemption. EXEMPT.size is printed in the passing summary below so the gap
 // stays a number, not a rhetorical claim.
 const EXEMPT = new Map([
 	[
-		"tests/application/expand_folder_command.test.ts",
-		"ExpandFolderCommand's subject under test only reads the directory tree (fs.readdir) — " +
+		"tests/application/expand_folder_query.test.ts",
+		"ExpandFolderQuery's subject under test only reads the directory tree (fs.readdir) — " +
 			"it never writes, so a before/after directory delta would always be empty. Asserting " +
 			"a tautologically-empty delta would test nothing real (D-23).",
 	],

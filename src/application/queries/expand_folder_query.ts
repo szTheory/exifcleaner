@@ -9,7 +9,7 @@ export interface ExpandedFolder {
 	skippedCount: number;
 }
 
-export class ExpandFolderCommand {
+export class ExpandFolderQuery {
 	async execute({
 		dirPath,
 	}: {

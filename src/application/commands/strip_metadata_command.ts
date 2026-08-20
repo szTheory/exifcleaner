@@ -4,6 +4,7 @@ import type { ExifError } from "../../domain";
 import { QUICKTIME_DATE_REMOVAL_ARGS } from "../../domain/exif/exif";
 import { isVideoFile } from "../../domain/files/file_types";
 
+// Builds ExifTool arguments, then invokes the bundled CLI to remove metadata.
 export class StripMetadataCommand {
 	private readonly exiftool: ExifToolPort;
 
@@ -27,6 +28,7 @@ export class StripMetadataCommand {
 		outputPath?: string | undefined;
 		signal?: AbortSignal | undefined;
 	}): Promise<Result<{ tagsRemoved: number }, ExifError>> {
+		// Example: an AbortController cancelled a queued cleanup before ExifTool started.
 		if (signal?.aborted) {
 			return {
 				ok: false,

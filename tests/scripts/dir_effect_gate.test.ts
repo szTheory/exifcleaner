@@ -67,11 +67,11 @@ describe("cleanExifData", () => {
 });
 `;
 
-// The live state of the ONE real exemption (tests/application/expand_folder_command.test.ts,
+// The live state of the ONE real exemption (tests/application/expand_folder_query.test.ts,
 // D-23): it writes to disk via mkdtemp in its own beforeEach, but its subject under test
-// (ExpandFolderCommand) only ever reads -- so it deliberately never calls assertDirEffect.
+// (ExpandFolderQuery) only ever reads -- so it deliberately never calls assertDirEffect.
 const EXPAND_FOLDER_EXEMPT_PATH =
-	"tests/application/expand_folder_command.test.ts";
+	"tests/application/expand_folder_query.test.ts";
 const EXPAND_FOLDER_LIVE_SOURCE = `
 import { mkdtemp } from "some-fs-module";
 import path from "node:path";
@@ -82,7 +82,7 @@ beforeEach(async () => {
 });
 
 it("finds supported files recursively", async () => {
-	const result = await command.execute({ dirPath: tmpDir });
+	const result = await query.execute({ dirPath: tmpDir });
 	expect(result.ok).toBe(true);
 });
 `;
@@ -102,7 +102,7 @@ beforeEach(async () => {
 
 it("finds supported files recursively", async () => {
 	const before = snapshotDir(tmpDir);
-	const result = await command.execute({ dirPath: tmpDir });
+	const result = await query.execute({ dirPath: tmpDir });
 	const after = snapshotDir(tmpDir);
 	assertDirEffect(before, after, {});
 	expect(result.ok).toBe(true);
@@ -119,7 +119,7 @@ beforeEach(() => {
 });
 
 it("finds supported files recursively", async () => {
-	const result = await command.execute({ dirPath: "/virtual" });
+	const result = await query.execute({ dirPath: "/virtual" });
 	expect(result.ok).toBe(true);
 });
 `;
@@ -197,7 +197,7 @@ describe("classifyTestFile", () => {
 });
 
 describe("classifyExemptionFreshness", () => {
-	test("reports the real expand_folder_command.test.ts exemption as fresh (not stale)", () => {
+	test("reports the real expand_folder_query.test.ts exemption as fresh (not stale)", () => {
 		const result = classifyExemptionFreshness(
 			EXPAND_FOLDER_EXEMPT_PATH,
 			EXPAND_FOLDER_LIVE_SOURCE,

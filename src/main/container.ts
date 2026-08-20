@@ -12,8 +12,8 @@ import {
 import {
 	StripMetadataCommand,
 	ReadMetadataQuery,
-	ExpandFolderCommand,
-	XattrCommand,
+	ExpandFolderQuery,
+	RemoveXattrCommand,
 	VerifyGeneratedOutputQuery,
 } from "../application";
 import { OutputTransaction } from "./output_transaction";
@@ -25,8 +25,8 @@ export function createContainer(): {
 	logger: ConsoleLogger;
 	stripMetadata: StripMetadataCommand;
 	readMetadata: ReadMetadataQuery;
-	expandFolder: ExpandFolderCommand;
-	xattrCommand: XattrCommand;
+	expandFolder: ExpandFolderQuery;
+	removeXattrCommand: RemoveXattrCommand;
 	verifyGeneratedOutput: VerifyGeneratedOutputQuery;
 	outputTransaction: OutputTransaction;
 } {
@@ -47,9 +47,12 @@ export function createContainer(): {
 			await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 		},
 	});
-	const expandFolder = new ExpandFolderCommand();
+	const expandFolder = new ExpandFolderQuery();
 	const xattrAdapter = { removeXattrs };
-	const xattrCommand = new XattrCommand({ xattr: xattrAdapter, logger });
+	const removeXattrCommand = new RemoveXattrCommand({
+		xattr: xattrAdapter,
+		logger,
+	});
 
 	return {
 		exiftoolProcess,
@@ -61,7 +64,7 @@ export function createContainer(): {
 		verifyGeneratedOutput,
 		outputTransaction,
 		expandFolder,
-		xattrCommand,
+		removeXattrCommand,
 	};
 }
 
