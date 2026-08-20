@@ -1,5 +1,4 @@
 /* Design token system for ExifCleaner v4.0
-   Source of truth: devplans/10-brand-identity.md, 04-UI-SPEC.md
    Prefix: --ec-* for new tokens, backward-compat aliases for existing consumers */
 
 :root {
