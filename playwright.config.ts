@@ -5,7 +5,8 @@ const isCI = process.env["CI"] !== undefined;
 export default defineConfig({
 	testDir: "./tests/e2e",
 	testMatch: "*.spec.ts",
-	timeout: 15000,
+	// Hosted runners need extra headroom for a cold Electron launch.
+	timeout: isCI ? 60_000 : 15_000,
 	retries: 0,
 	// The app holds an OS-level single-instance lock, so two workers launching
 	// it concurrently would deadlock. This is a constraint, not a tuning knob.

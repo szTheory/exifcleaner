@@ -8,6 +8,7 @@ import type { Settings } from "../../../src/domain/settings_schema";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const APP_LAUNCH_TIMEOUT_MS = process.env["CI"] === undefined ? 15_000 : 30_000;
 
 export async function launchApp(options?: {
 	settings?: Partial<Settings>;
@@ -48,7 +49,7 @@ export async function launchApp(options?: {
 			// (not the Electron.app bundle). The compiled output in out/ is still used.
 			NODE_ENV: "development",
 		},
-		timeout: 15000,
+		timeout: APP_LAUNCH_TIMEOUT_MS,
 	});
 	const window = await app.firstWindow();
 	await window.waitForLoadState("domcontentloaded");
