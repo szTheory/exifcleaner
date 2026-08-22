@@ -1,15 +1,19 @@
-import type { ExifToolPort } from "../exiftool_port";
 import type { Result } from "../../common";
 import type { ExifError } from "../../domain";
-import { QUICKTIME_DATE_REMOVAL_ARGS } from "../../domain/exif/exif";
-import { isMediaFile } from "../../domain/files/file_types";
+import type { MetadataEnginePort } from "../metadata_engine_port";
 
-// Builds ExifTool arguments, then invokes the bundled CLI to remove metadata.
 export class StripMetadataCommand {
-	private readonly exiftool: ExifToolPort;
+	private readonly metadataEngine: MetadataEnginePort;
 
-	constructor({ exiftool }: { exiftool: ExifToolPort }) {
-		this.exiftool = exiftool;
+	constructor({
+		metadataEngine,
+		exiftool,
+	}: {
+		metadataEngine?: MetadataEnginePort;
+		/** @deprecated Compatibility alias until the Phase 41 container migration. */
+		exiftool?: unknown;
+	}) {
+		this.metadataEngine = metadataEngine ?? (exiftool as MetadataEnginePort);
 	}
 
 	async execute({
@@ -32,36 +36,18 @@ export class StripMetadataCommand {
 		if (signal?.aborted) {
 			return {
 				ok: false,
-				error: { code: "exiftool-error", detail: "Aborted" },
+				error: { code: "engine-error", detail: "Aborted" },
 			};
 		}
 
-		// CRITICAL FLAG ORDER: -all= must come before -TagsFromFile
-		// ExifTool processes flags left-to-right, so we strip first then copy back
-		const args: string[] = ["-all="];
-		if (isMediaFile({ filename: filePath })) {
-			args.push(...QUICKTIME_DATE_REMOVAL_ARGS);
-		}
-
-		const preserveTags: string[] = [];
-		if (preserveOrientation) preserveTags.push("-Orientation");
-		if (preserveColorProfile) preserveTags.push("-ICC_Profile");
-
-		if (preserveTags.length > 0) {
-			args.push("-TagsFromFile", "@", ...preserveTags);
-		}
-
-		if (preserveTimestamps) {
-			args.push("-P");
-		}
-
-		if (outputPath) {
-			args.push("-o", outputPath);
-		} else {
-			args.push("-overwrite_original");
-		}
-
-		const result = await this.exiftool.removeMetadata({ filePath, args });
+		const result = await this.metadataEngine.sanitize({
+			source: filePath,
+			destination: outputPath,
+			preserveOrientation,
+			preserveColorProfile,
+			preserveTimestamps,
+			signal,
+		});
 
 		if (!result.ok) {
 			return result;

@@ -1,9 +1,7 @@
 import type { Result } from "../common";
 import type { MetadataEngineError } from "../domain/exif/exif_errors";
 
-export type MetadataInspectionPurpose =
-	| "display"
-	| "output-verification";
+export type MetadataInspectionPurpose = "display" | "output-verification";
 
 export interface MetadataInspection {
 	readonly metadata: Record<string, unknown>;
@@ -22,4 +20,20 @@ export interface MetadataEnginePort {
 		source: string;
 		purpose: MetadataInspectionPurpose;
 	}): Promise<Result<MetadataInspection, MetadataEngineError>>;
+
+	sanitize({
+		source,
+		destination,
+		preserveOrientation,
+		preserveColorProfile,
+		preserveTimestamps,
+		signal,
+	}: {
+		source: string;
+		destination?: string | undefined;
+		preserveOrientation: boolean;
+		preserveColorProfile: boolean;
+		preserveTimestamps: boolean;
+		signal?: AbortSignal | undefined;
+	}): Promise<Result<void, MetadataEngineError>>;
 }
