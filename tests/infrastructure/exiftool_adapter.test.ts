@@ -17,6 +17,33 @@ function makeFakeProcess(overrides: Partial<Record<string, unknown>> = {}) {
 }
 
 describe("ExifToolAdapter.inspect", () => {
+	it("maps output verification to the historical file-only preset", async () => {
+		const fakeProcess = makeFakeProcess({
+			readMetadata: vi.fn().mockResolvedValue({
+				data: [{ FileType: "RAF" }],
+				error: null,
+			}),
+		});
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		const result = await adapter.inspect({
+			source: "/tmp/photo.raf",
+			purpose: "output-verification",
+		});
+
+		expect(fakeProcess.readMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/photo.raf",
+			args: ["-File:FileType", "-File:Error"],
+		});
+		expect(result).toMatchObject({
+			ok: true,
+			value: {
+				recordCount: 1,
+				verification: { fileType: "RAF", error: undefined },
+			},
+		});
+	});
+
 	it("maps display inspection to the historical grouped preset", async () => {
 		const fakeProcess = makeFakeProcess();
 		const adapter = new ExifToolAdapter({ process: fakeProcess });
