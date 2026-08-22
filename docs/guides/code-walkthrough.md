@@ -161,7 +161,7 @@ export interface IpcInvokeMap {
 
 `setupExifHandlers()` reads current settings, selects overwrite/copy/staged behavior, and
 routes the work through application commands. RAF is refused until the project has a safe
-write oracle. Video and other guarded formats use `OutputTransaction`.
+write oracle. Media and other guarded formats use `OutputTransaction`.
 
 ```ts
 // src/main/exif_handlers.ts
@@ -170,17 +170,17 @@ ipcMain.handle("exif:remove", createValidatedHandler(exifRemoveSchema, async (fi
 	if (isRafFile({ filename: filePath })) return refuseUnsafeRafWrite({ filePath });
 
 	const isRaw = isRawFile({ filename: filePath });
-	const isVideo = isVideoFile({ filename: filePath });
+	const isMedia = isMediaFile({ filename: filePath });
 	const wasForcedCopy = isRaw && !settings.saveAsCopy;
 	const saveAsCopy = settings.saveAsCopy || wasForcedCopy;
 	const outputPath = saveAsCopy
 		? generateCleanedPath({ filePath, exists: existsSync })
 		: undefined;
 
-	if (isRaw || isVideo) {
+	if (isRaw || isMedia) {
 		const transactionResult = await container.outputTransaction.execute({
 			filePath,
-			generatedPath: outputPath ?? generateVideoStagePath({ filePath }),
+			generatedPath: outputPath ?? generateMediaStagePath({ filePath }),
 			commitPath: outputPath === undefined ? filePath : undefined,
 			// ...preservation settings
 		});

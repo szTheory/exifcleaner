@@ -2,9 +2,9 @@ import { it, expect } from "vitest";
 import {
 	isRawFile,
 	isSupportedFile,
-	isVideoFile,
+	isMediaFile,
 	RAW_EXTENSIONS,
-	VIDEO_EXTENSIONS,
+	MEDIA_EXTENSIONS,
 } from "../../src/domain/files/file_types";
 
 it("returns true for supported image extensions", () => {
@@ -14,9 +14,10 @@ it("returns true for supported image extensions", () => {
 	expect(isSupportedFile({ filename: "shot.heic" })).toBe(true);
 });
 
-it("returns true for supported video extensions", () => {
+it("returns true for supported media extensions", () => {
 	expect(isSupportedFile({ filename: "video.mp4" })).toBe(true);
 	expect(isSupportedFile({ filename: "clip.mov" })).toBe(true);
+	expect(isSupportedFile({ filename: "audio.m4a" })).toBe(true);
 });
 
 it("returns true for PDF", () => {
@@ -26,6 +27,8 @@ it("returns true for PDF", () => {
 it("returns false for unsupported extensions", () => {
 	expect(isSupportedFile({ filename: "readme.txt" })).toBe(false);
 	expect(isSupportedFile({ filename: "report.doc" })).toBe(false);
+	expect(isSupportedFile({ filename: "movie.mkv" })).toBe(false);
+	expect(isSupportedFile({ filename: "report.docx" })).toBe(false);
 	expect(isSupportedFile({ filename: "malware.exe" })).toBe(false);
 });
 
@@ -56,17 +59,18 @@ it("classifies exactly the supported RAW extensions case-insensitively", () => {
 	expect(isRawFile({ filename: "sample.jpg" })).toBe(false);
 });
 
-it("classifies exactly the seven supported video extensions case-insensitively", () => {
-	expect([...VIDEO_EXTENSIONS]).toEqual([
+it("classifies exactly the seven supported media extensions case-insensitively", () => {
+	expect([...MEDIA_EXTENSIONS]).toEqual([
 		".mp4",
 		".mov",
 		".avi",
-		".mkv",
+		".m4a",
 		".m4v",
 		".3gp",
 		".wmv",
 	]);
-	expect(isVideoFile({ filename: "sample.mp4" })).toBe(true);
-	expect(isVideoFile({ filename: "sample.MOV" })).toBe(true);
-	expect(isVideoFile({ filename: "sample.jpg" })).toBe(false);
+	expect(isMediaFile({ filename: "sample.mp4" })).toBe(true);
+	expect(isMediaFile({ filename: "sample.M4A" })).toBe(true);
+	expect(isMediaFile({ filename: "sample.mkv" })).toBe(false);
+	expect(isMediaFile({ filename: "sample.jpg" })).toBe(false);
 });

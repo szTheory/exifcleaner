@@ -18,6 +18,7 @@ for (const fixture of [
 	"sample.webp",
 	"sample.pdf",
 	"sample.mp4",
+	"sample.m4a",
 ] as const) {
 	test(`${fixture} processes through the installed artifact`, async () => {
 		const context = await launchPackagedApp();

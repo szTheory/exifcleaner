@@ -7,11 +7,11 @@ function pillClass(extension: string): string {
 	if (ext === "jpeg") return "jpg";
 	if (ext === "heif") return "heic";
 
-	// Video aliases -- all map to mov
+	// Media aliases -- all map to mov
 	if (
 		ext === "m4v" ||
+		ext === "m4a" ||
 		ext === "avi" ||
-		ext === "mkv" ||
 		ext === "3gp" ||
 		ext === "wmv"
 	)

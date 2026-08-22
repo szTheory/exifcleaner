@@ -24,6 +24,7 @@ export const SUPPORTED_FORMAT_FIXTURES = [
 	"sample.webp",
 	"sample.pdf",
 	"sample.mp4",
+	"sample.m4a",
 ] as const;
 
 export type SupportedFormatFixture = (typeof SUPPORTED_FORMAT_FIXTURES)[number];

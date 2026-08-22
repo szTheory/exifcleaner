@@ -442,6 +442,17 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	]);
 	console.log("  Created sample.mp4 (MP4 container)");
 
+	// sample.m4a - MPEG-4 audio container with metadata
+	const m4aPath = path.join(fixturesDir, "sample.m4a");
+	fs.writeFileSync(m4aPath, createMinimalMp4());
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-Artist=Test Author",
+		"-Title=Test Audio",
+		m4aPath,
+	]);
+	console.log("  Created sample.m4a (MPEG-4 audio container)");
+
 	// issue240.mp4 - MP4 with the measured create-date family that survives stripping
 	const issue240Path = path.join(fixturesDir, "issue240.mp4");
 	fs.writeFileSync(issue240Path, movieHeaderMp4());
@@ -482,6 +493,11 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	fs.writeFileSync(txtPath, "This is not an image file.");
 	console.log("  Created unsupported.txt (unsupported format)");
 
+	// sample.mkv - enough of an EBML header for ExifTool to report its MKV write refusal
+	const mkvPath = path.join(fixturesDir, "sample.mkv");
+	fs.writeFileSync(mkvPath, Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 0x80]));
+	console.log("  Created sample.mkv (unsupported Matroska container)");
+
 	// zero_byte.jpg - empty file
 	const zeroPath = path.join(fixturesDir, "zero_byte.jpg");
 	fs.writeFileSync(zeroPath, Buffer.alloc(0));
@@ -502,7 +518,7 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	]);
 	console.log("  Created orientation.jpg (Rotate 90 CW)");
 
-	console.log("\nAll 11 fixture files generated successfully.");
+	console.log("\nAll 13 fixture files generated successfully.");
 }
 
 const outputFlag = process.argv.indexOf("--output-dir");

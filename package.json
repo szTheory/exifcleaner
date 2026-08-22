@@ -1,8 +1,8 @@
 {
 	"name": "exifcleaner",
 	"productName": "ExifCleaner",
-	"version": "4.2.0",
-	"description": "Clean exif metadata from images, videos, and PDF documents",
+	"version": "4.2.1",
+	"description": "Clean exif metadata from images, media files, and PDF documents",
 	"license": "MIT",
 	"repository": "github:szTheory/exifcleaner",
 	"type": "module",

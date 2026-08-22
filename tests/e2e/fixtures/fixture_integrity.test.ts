@@ -48,6 +48,7 @@ const WRITABLE_FIXTURES = [
 	"sample.webp",
 	"sample.pdf",
 	"sample.mp4",
+	"sample.m4a",
 	"issue240.mp4",
 	"orientation.jpg",
 	"no_metadata.jpg",
@@ -58,6 +59,7 @@ const UNWRITABLE_FIXTURES = [
 	"corrupted.jpg",
 	"zero_byte.jpg",
 	"unsupported.txt",
+	"sample.mkv",
 ];
 
 function stripInTempCopy(name: string): { ok: boolean; output: string } {
@@ -177,6 +179,20 @@ describe("E2E fixture integrity", () => {
 		expect(metadata.CreateDate).toBe("2019:10:02 00:49:04");
 		expect(metadata.TrackCreateDate).toBe("2019:10:02 00:49:04");
 		expect(metadata.MediaCreateDate).toBe("2019:10:02 00:49:04");
+	});
+
+	it("sample.m4a contains removable audio metadata", () => {
+		const metadata = readFixtureMetadata("sample.m4a");
+
+		expect(metadata.Title).toBe("Test Audio");
+		expect(metadata.Artist).toBe("Test Author");
+	});
+
+	it("sample.mkv demonstrates bundled ExifTool's unsupported write path", () => {
+		const { ok, output } = stripInTempCopy("sample.mkv");
+
+		expect(ok).toBe(false);
+		expect(output).toContain("Writing of MKV files is not yet supported");
 	});
 
 	it("orientation fixture pins exact Orientation before processing", () => {

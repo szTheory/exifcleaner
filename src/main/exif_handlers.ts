@@ -8,7 +8,7 @@ import { createValidatedHandler } from "./ipc/ipc_validation";
 import { exifReadSchema, exifRemoveSchema } from "./ipc/ipc_schemas";
 import { formatExifError } from "../domain";
 import { generateCleanedPath } from "../domain/files/cleaned_path";
-import { isRafFile, isRawFile, isVideoFile } from "../domain/files/file_types";
+import { isMediaFile, isRafFile, isRawFile } from "../domain/files/file_types";
 import { refuseUnsafeRafWrite } from "../domain/files/file_processing_outcome";
 import type { OutputTransactionFailure } from "./output_transaction";
 
@@ -65,16 +65,16 @@ export function setupExifHandlers({
 				}
 			}
 			const isRaw = isRawFile({ filename: filePath });
-			const isVideo = isVideoFile({ filename: filePath });
+			const isMedia = isMediaFile({ filename: filePath });
 			const wasForcedCopy = isRaw && !settings.saveAsCopy;
 			const saveAsCopy = settings.saveAsCopy || wasForcedCopy;
 			const outputPath = saveAsCopy
 				? generateCleanedPath({ filePath, exists: existsSync })
 				: undefined;
 
-			if (isRaw || isVideo) {
+			if (isRaw || isMedia) {
 				const generatedPath =
-					outputPath ?? generateVideoStagePath({ filePath });
+					outputPath ?? generateMediaStagePath({ filePath });
 				const transactionResult = await container.outputTransaction.execute({
 					filePath,
 					generatedPath,
@@ -202,7 +202,7 @@ function xattrFailureResult({
 	};
 }
 
-function generateVideoStagePath({ filePath }: { filePath: string }): string {
+function generateMediaStagePath({ filePath }: { filePath: string }): string {
 	const parsedPath = parse(filePath);
 	return join(
 		dirname(filePath),

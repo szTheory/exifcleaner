@@ -1,29 +1,18 @@
-# ExifCleaner 4.2.0
+# ExifCleaner 4.2.1
 
-ExifCleaner 4.2.0 makes the first run calmer and keeps the packaged privacy toolchain current without adding background network activity.
+ExifCleaner 4.2.1 makes the supported-format promise match what the bundled metadata engine can safely process.
 
-## A clearer first run
+## Format support
 
-- The empty intake is now centered as one responsive composition instead of feeling split between copy and controls.
-- **Choose files** is the clear primary action, with **Choose folder** available beside it and drag and drop unchanged.
-- The intake explains whether ExifCleaner will save cleaned copies or modify originals, using the current setting rather than a generic promise.
-- Nested folder intake reports unsupported files and folders it could not read instead of silently losing that summary.
-- Help now includes **New Releases**, which opens the GitHub Releases page only when you click it. ExifCleaner does not poll for updates.
+- **M4A is now supported.** Audio metadata is removed through the same staged, verified publication path used by other media files.
+- **MKV is no longer accepted.** ExifTool can read Matroska metadata but cannot write MKV files, so rejecting the format before processing is the truthful behavior.
+- The README now lists the app's exact intake allowlist instead of ExifTool's much broader catalog, and CI prevents that list from drifting from source.
+- DOCX remains unsupported.
 
-## Localization with provenance
-
-- Romanian is now fully supported. The 70 strings contributed in PR #297 are preserved exactly and credited to their contributor.
-- Every supported locale covers the first-run and New Releases vocabulary.
-- Translation records now distinguish existing community work from assisted drafts, track the English source each string translates, and expose stale or missing work without silently overwriting it.
-
-## Runtime and release maintenance
-
-- The bundled ExifTool is updated from 13.50 to 13.59 for Unix and 32-bit-compatible Windows packages, with pinned upstream SHA-256 verification.
-- Packaged Electron disables RunAsNode, `NODE_OPTIONS`, and Node CLI inspection. Cookie encryption remains disabled because ExifCleaner does not need cookie storage.
-- Release automation treats a verified already-published version as a quiet no-op while retaining the full evidence gates for a new release.
+The patch includes a metadata-bearing M4A fixture, explicit MKV rejection coverage, and installed-artifact M4A smoke coverage.
 
 <!-- exifcleaner-known-limitations:start v1 -->
-## Known limitations in 4.2.0
+## Known limitations in 4.2.1
 
 No executable release-blocking known gaps are approved for this release; documented format constraints follow below.
 <!-- exifcleaner-known-limitations:end -->
@@ -33,21 +22,20 @@ No executable release-blocking known gaps are approved for this release; documen
 
 - **RAF:** cleaning is refused and the source is left unchanged because a safe cleaned RAF artifact cannot currently be guaranteed.
 - **PDF:** ExifTool uses reversible updates, so prior metadata may remain recoverable.
-- **MKV:** ExifTool does not expose a complete writable removal path.
+- **MKV:** unsupported because ExifTool does not expose a writable removal path.
 - **TIFF and AVIF:** user-reported partial-removal behavior remains under investigation.
-
 
 ## Downloads
 
 | Platform | File |
 | --- | --- |
-| **Windows portable (recommended)** | `ExifCleaner.4.2.0.exe` |
-| Windows installer | `ExifCleaner.Setup.4.2.0.exe` |
-| macOS (Apple Silicon) | `ExifCleaner-4.2.0-arm64.dmg` |
-| macOS (Intel) | `ExifCleaner-4.2.0.dmg` |
-| Linux (AppImage) | `ExifCleaner-4.2.0.AppImage` |
-| Linux (Debian/Ubuntu) | `exifcleaner_4.2.0_amd64.deb` |
-| Linux (Fedora/RHEL) | `exifcleaner-4.2.0.x86_64.rpm` |
+| **Windows portable (recommended)** | `ExifCleaner.4.2.1.exe` |
+| Windows installer | `ExifCleaner.Setup.4.2.1.exe` |
+| macOS (Apple Silicon) | `ExifCleaner-4.2.1-arm64.dmg` |
+| macOS (Intel) | `ExifCleaner-4.2.1.dmg` |
+| Linux (AppImage) | `ExifCleaner-4.2.1.AppImage` |
+| Linux (Debian/Ubuntu) | `exifcleaner_4.2.1_amd64.deb` |
+| Linux (Fedora/RHEL) | `exifcleaner-4.2.1.x86_64.rpm` |
 
 Verify downloads against the release's `SHASUMS256.txt` file.
 
@@ -58,10 +46,10 @@ ExifCleaner remains unsigned. Signing would require publishing the maintainer's 
 - **macOS 14 and earlier:** right-click or Control-click the app, choose **Open**, then choose **Open** again.
 - **macOS 15 and later:** open the app once, then use **System Settings → Privacy & Security → Open Anyway**.
 - **Windows:** if SmartScreen appears, choose **More info → Run anyway** after verifying the checksum.
-- **Linux:** make the AppImage executable with `chmod +x ExifCleaner-4.2.0.AppImage`; `.deb` and `.rpm` packages install normally.
+- **Linux:** make the AppImage executable with `chmod +x ExifCleaner-4.2.1.AppImage`; `.deb` and `.rpm` packages install normally.
 
 Every artifact is built publicly from tagged source by GitHub Actions. ExifCleaner makes no network requests during normal use.
 
 Only download ExifCleaner from the [GitHub releases page](https://github.com/szTheory/exifcleaner/releases).
 
-**Full changelog:** https://github.com/szTheory/exifcleaner/compare/v4.1.0...v4.2.0
+**Full changelog:** https://github.com/szTheory/exifcleaner/compare/v4.2.0...v4.2.1
