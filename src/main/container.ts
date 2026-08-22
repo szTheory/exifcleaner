@@ -36,7 +36,7 @@ export function createContainer(): {
 	const settingsPath = path.join(app.getPath("userData"), "settings.json");
 	const settings = new SettingsService({ filePath: settingsPath, logger });
 	const stripMetadata = new StripMetadataCommand({ exiftool });
-	const readMetadata = new ReadMetadataQuery({ exiftool });
+	const readMetadata = new ReadMetadataQuery({ metadataEngine: exiftool });
 	const verifyGeneratedOutput = new VerifyGeneratedOutputQuery({ exiftool });
 	const outputTransaction = new OutputTransaction({
 		stripMetadata,

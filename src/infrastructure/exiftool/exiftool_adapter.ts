@@ -1,4 +1,6 @@
-import type { ExifToolPort } from "../../application";
+import type { MetadataEnginePort } from "../../application/metadata_engine_port";
+import { cleanExifData } from "../../domain";
+import type { ExifToolPort } from "../../application/exiftool_port";
 import type { Result } from "../../common";
 import type { ExifError } from "../../domain";
 import {
@@ -7,12 +9,14 @@ import {
 } from "./ExiftoolProcess";
 
 const UNSAFE_PATH_MESSAGE = "The selected file path is not supported";
+const DISPLAY_INSPECTION_ARGS = ["-G1:2"];
+const OUTPUT_VERIFICATION_INSPECTION_ARGS = ["-File:FileType", "-File:Error"];
 
 // Adapter pattern: wraps the existing ExiftoolProcess with the clean ExifToolPort
 // interface. Does NOT modify ExiftoolProcess.ts (working infrastructure code).
 // Converts ExiftoolProcess's { data, error } / throw pattern to Result<T, ExifError>.
 
-export class ExifToolAdapter implements ExifToolPort {
+export class ExifToolAdapter implements ExifToolPort, MetadataEnginePort {
 	private readonly process: ExiftoolProcess;
 
 	constructor({ process }: { process: ExiftoolProcess }) {
@@ -68,6 +72,59 @@ export class ExifToolAdapter implements ExifToolPort {
 			}
 			return { ok: false, error: { code: "process-not-open" } };
 		}
+	}
+
+	async inspect({
+		source,
+		purpose,
+	}: {
+		source: string;
+		purpose: "display" | "output-verification";
+	}): ReturnType<MetadataEnginePort["inspect"]> {
+		const args =
+			purpose === "display"
+				? DISPLAY_INSPECTION_ARGS
+				: OUTPUT_VERIFICATION_INSPECTION_ARGS;
+		const result = await this.readMetadata({ filePath: source, args });
+		if (!result.ok) {
+			return result;
+		}
+
+		const firstRecord = result.value[0];
+		if (firstRecord === undefined) {
+			return {
+				ok: true,
+				value: {
+					metadata: {},
+					recordCount: 0,
+					verification: { fileType: undefined, error: undefined },
+				},
+			};
+		}
+
+		const diagnostic = Object.entries(firstRecord).find(([key]) => {
+			const parts = key.split(":");
+			const tag = parts.at(-1);
+			return parts[0] === "ExifTool" && (tag === "Error" || tag === "Warning");
+		});
+		if (diagnostic !== undefined) {
+			return {
+				ok: false,
+				error: { code: "exiftool-error", detail: String(diagnostic[1]) },
+			};
+		}
+
+		return {
+			ok: true,
+			value: {
+				metadata: cleanExifData({ raw: firstRecord }),
+				recordCount: result.value.length,
+				verification: {
+					fileType: firstRecord.FileType,
+					error: firstRecord.Error,
+				},
+			},
+		};
 	}
 
 	async removeMetadata({
