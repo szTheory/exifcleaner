@@ -86,6 +86,7 @@ const STRUCTURAL_TAG_NAMES = new Set([
 	"TaggedPDF",
 	"Conformance",
 	// WebP structural tags
+	"WebP_Flags",
 	"VP8Version",
 	"HorizontalScale",
 	"VerticalScale",
