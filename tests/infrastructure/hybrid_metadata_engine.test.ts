@@ -13,7 +13,9 @@ describe("HybridMetadataEngine", () => {
 		preserveTimestamps: true,
 	};
 
-	function nativeError(nativeCode: NativeWebpError["nativeCode"]): NativeWebpError {
+	function nativeError(
+		nativeCode: NativeWebpError["nativeCode"],
+	): NativeWebpError {
 		return {
 			code: "native-error",
 			nativeCode,
@@ -75,20 +77,23 @@ describe("HybridMetadataEngine", () => {
 		"malformed-file",
 		"unsafe-structure",
 		"unsupported-feature",
-	] as const)("falls back to ExifTool exactly once after %s", async (nativeCode) => {
-		const exiftool = new FakeMetadataEngine();
-		const nativeWebp = new FakeNativeWebp();
-		nativeWebp.sanitizeResult = { ok: false, error: nativeError(nativeCode) };
-		const engine = new HybridMetadataEngine({ exiftool, nativeWebp });
-		const controller = new AbortController();
-		const request = { ...sanitizeRequest, signal: controller.signal };
+	] as const)(
+		"falls back to ExifTool exactly once after %s",
+		async (nativeCode) => {
+			const exiftool = new FakeMetadataEngine();
+			const nativeWebp = new FakeNativeWebp();
+			nativeWebp.sanitizeResult = { ok: false, error: nativeError(nativeCode) };
+			const engine = new HybridMetadataEngine({ exiftool, nativeWebp });
+			const controller = new AbortController();
+			const request = { ...sanitizeRequest, signal: controller.signal };
 
-		const result = await engine.sanitize(request);
+			const result = await engine.sanitize(request);
 
-		expect(result).toBe(exiftool.sanitizeResult);
-		expect(nativeWebp.sanitizeCalls).toEqual([request]);
-		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
-	});
+			expect(result).toBe(exiftool.sanitizeResult);
+			expect(nativeWebp.sanitizeCalls).toEqual([request]);
+			expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
+		},
+	);
 
 	it.each([
 		"aborted",
@@ -101,29 +106,26 @@ describe("HybridMetadataEngine", () => {
 		"write-failed",
 		"verification-failed",
 		"cleanup-failed",
-	] as const)("never retries %s after native work begins", async (nativeCode) => {
-		const exiftool = new FakeMetadataEngine();
-		const nativeWebp = new FakeNativeWebp();
-		const error = nativeError(nativeCode);
-		nativeWebp.sanitizeResult = { ok: false, error };
-		const engine = new HybridMetadataEngine({ exiftool, nativeWebp });
+	] as const)(
+		"never retries %s after native work begins",
+		async (nativeCode) => {
+			const exiftool = new FakeMetadataEngine();
+			const nativeWebp = new FakeNativeWebp();
+			const error = nativeError(nativeCode);
+			nativeWebp.sanitizeResult = { ok: false, error };
+			const engine = new HybridMetadataEngine({ exiftool, nativeWebp });
 
-		const result = await engine.sanitize(sanitizeRequest);
+			const result = await engine.sanitize(sanitizeRequest);
 
-		expect(result).toBe(nativeWebp.sanitizeResult);
-		expect(nativeWebp.sanitizeCalls).toEqual([sanitizeRequest]);
-		expect(exiftool.calls).toEqual([]);
-	});
+			expect(result).toBe(nativeWebp.sanitizeResult);
+			expect(nativeWebp.sanitizeCalls).toEqual([sanitizeRequest]);
+			expect(exiftool.calls).toEqual([]);
+		},
+	);
 
 	it.each([
-		[
-			"non-WebP source",
-			{ ...sanitizeRequest, source: "/files/source.jpg" },
-		],
-		[
-			"missing destination",
-			{ ...sanitizeRequest, destination: undefined },
-		],
+		["non-WebP source", { ...sanitizeRequest, source: "/files/source.jpg" }],
+		["missing destination", { ...sanitizeRequest, destination: undefined }],
 		[
 			"same resolved path",
 			{

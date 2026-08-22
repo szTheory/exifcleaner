@@ -12,21 +12,23 @@ export class FakeNativeWebp implements NativeWebpPort {
 		value: undefined,
 	};
 
-	getCapabilities(): ReturnType<NativeWebpPort["getCapabilities"]> {
-		return {
-			formats: [
-				{
-					format: "webp",
-					sanitize: true,
-					detection: "magic",
-					preserves: {
-						orientation: true,
-						colorProfile: true,
-						timestamps: true,
-					},
+	capabilities: ReturnType<NativeWebpPort["getCapabilities"]> = {
+		formats: [
+			{
+				format: "webp",
+				sanitize: true,
+				detection: "magic",
+				preserves: {
+					orientation: true,
+					colorProfile: true,
+					timestamps: true,
 				},
-			],
-		};
+			},
+		],
+	};
+
+	getCapabilities(): ReturnType<NativeWebpPort["getCapabilities"]> {
+		return this.capabilities;
 	}
 
 	async sanitize(
