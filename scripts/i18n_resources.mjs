@@ -81,7 +81,7 @@ const worklist = {
 	items: [],
 };
 const status = {
-	schemaVersion: 2,
+	schemaVersion: 3,
 	sourceLocale: "en",
 	totalKeys: englishKeys.length,
 	protectedKeys: protectedKeys.length,
@@ -151,7 +151,7 @@ for (const [locale, strings] of locales) {
 	for (const key of englishKeys) {
 		const hasTranslation = typeof strings[key] === "string";
 		const protectedKey = isProtectedKey(key);
-		const blocking = locale === "ro" || protectedKey;
+		const blocking = true;
 		if (!hasTranslation) {
 			provenanceCounts.missing += 1;
 			if (!protectedKey) legacyMissing += 1;
@@ -188,6 +188,23 @@ for (const [locale, strings] of locales) {
 			continue;
 		}
 
+		if (
+			strings[key] === english[key] &&
+			typeof entry.sourceIdenticalReason !== "string"
+		) {
+			worklist.items.push({
+				locale,
+				key,
+				state: "source-identical-unreviewed",
+				blocking,
+				source: english[key],
+				sourceHash: currentSourceHash,
+			});
+			blockingIssues.push(
+				`${locale}:${key} matches English without sourceIdenticalReason`,
+			);
+		}
+
 		if (entry.origin === "existing-contribution") {
 			provenanceCounts["existing-contribution"] += 1;
 		} else {
@@ -217,9 +234,7 @@ worklist.items.sort(
 		a.key.localeCompare(b.key),
 );
 status.blockingIssues = blockingIssues.length;
-status.nonblockingLegacyItems = worklist.items.filter(
-	(item) => !item.blocking,
-).length;
+status.nonblockingLegacyItems = 0;
 
 const generatedFiles = [
 	[outputPath, jsonText(dictionary)],
@@ -237,11 +252,6 @@ if (process.argv.includes("--check")) {
 	}
 }
 
-if (status.nonblockingLegacyItems > 0) {
-	console.log(
-		`${status.nonblockingLegacyItems} legacy translation gaps/stale entries remain (nonblocking; see .resources/translation-worklist.json).`,
-	);
-}
 if (blockingIssues.length > 0) {
 	throw new Error(
 		`blocking translation issues:\n- ${blockingIssues.join("\n- ")}`,
@@ -347,6 +357,15 @@ function validateProvenanceEntry(locale, key, entry) {
 	}
 	if (!/^[a-f0-9]{64}$/.test(entry.sourceHash)) {
 		throw new Error(`${locale}:${key} has an invalid source hash`);
+	}
+	if (
+		entry.sourceIdenticalReason !== undefined &&
+		(typeof entry.sourceIdenticalReason !== "string" ||
+			entry.sourceIdenticalReason.trim().length === 0)
+	) {
+		throw new Error(
+			`${locale}:${key} has an invalid source-identical justification`,
+		);
 	}
 }
 
