@@ -4,6 +4,8 @@ import { rename, unlink } from "node:fs/promises";
 import {
 	ExiftoolProcess,
 	ExifToolAdapter,
+	HybridMetadataEngine,
+	NativeWebpAdapter,
 	SettingsService,
 	ConsoleLogger,
 	removeXattrs,
@@ -20,7 +22,7 @@ import { OutputTransaction } from "./output_transaction";
 
 export function createContainer(): {
 	exiftoolProcess: ExiftoolProcess;
-	metadataEngine: ExifToolAdapter;
+	metadataEngine: HybridMetadataEngine;
 	settings: SettingsService;
 	logger: ConsoleLogger;
 	stripMetadata: StripMetadataCommand;
@@ -32,7 +34,9 @@ export function createContainer(): {
 } {
 	const logger = new ConsoleLogger();
 	const exiftoolProcess = new ExiftoolProcess({ binPath: exiftoolBinPath });
-	const metadataEngine = new ExifToolAdapter({ process: exiftoolProcess });
+	const exiftool = new ExifToolAdapter({ process: exiftoolProcess });
+	const nativeWebp = new NativeWebpAdapter();
+	const metadataEngine = new HybridMetadataEngine({ exiftool, nativeWebp });
 	const settingsPath = path.join(app.getPath("userData"), "settings.json");
 	const settings = new SettingsService({ filePath: settingsPath, logger });
 	const stripMetadata = new StripMetadataCommand({ metadataEngine });
