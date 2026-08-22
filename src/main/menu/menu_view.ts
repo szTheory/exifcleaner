@@ -13,13 +13,13 @@ function broadcastThemeSet(mode: "light" | "dark" | "system"): void {
 }
 
 // Set by init.ts to avoid circular dependency with container
-let onLanguageChange: ((code: string | null) => void) | null = null;
+let onLanguageChange: ((code: string | null) => Promise<void>) | null = null;
 let getLanguageSetting: (() => string | null) | null = null;
 let onThemeChange: ((mode: ThemeMode) => void) | null = null;
 let getThemeSetting: (() => ThemeMode) | null = null;
 
 export function setLanguageChangeHandler(
-	handler: (code: string | null) => void,
+	handler: (code: string | null) => Promise<void>,
 ): void {
 	onLanguageChange = handler;
 }
@@ -48,7 +48,7 @@ function languageSubmenu(): MenuItemConstructorOptions {
 			type: "radio",
 			checked: settingValue === lang.code,
 			click: () => {
-				onLanguageChange?.(lang.code);
+				void onLanguageChange?.(lang.code);
 			},
 		}),
 	);
@@ -61,7 +61,7 @@ function languageSubmenu(): MenuItemConstructorOptions {
 				type: "radio",
 				checked: settingValue === null,
 				click: () => {
-					onLanguageChange?.(null);
+					void onLanguageChange?.(null);
 				},
 			},
 			{ type: "separator" },

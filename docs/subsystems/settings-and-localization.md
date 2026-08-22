@@ -26,15 +26,16 @@ key/value JSON file containing only translations it actually has. Romanian (`ro`
 
 `.resources/translation-provenance.json` records a SHA-256 hash of the English source for
 every translated key, its origin (`existing-contribution` or `agent-assisted`), and review
-state. A changed English source therefore makes the translation stale until someone reviews
-it; running the generator never silently refreshes that hash. The glossary documents product
+state. An intentional source-identical translation also records a concise justification.
+A changed English source therefore makes the translation stale until someone reviews it;
+running the generator never silently refreshes that hash. The glossary documents product
 terms and safety-sensitive context for translators.
 
 Running `yarn i18n:write` deterministically generates the legacy bundled `strings.json`,
 the coverage report, and `translation-worklist.json`. `yarn i18n:check` fails on generated
-drift, malformed data, unknown keys, placeholder mismatch, incomplete/stale Romanian, or an
-incomplete/stale protected first-run key in any locale. Missing or stale legacy strings
-outside that surface are reported in the worklist but remain nonblocking.
+drift, malformed data, unknown keys, placeholder mismatch, missing or stale text in any
+locale, or source-identical text without an explicit reviewed justification. A current tree
+has an empty worklist and complete coverage for every supported locale.
 
 English fallback is intentional. Agent-assisted translations are drafted outside the app
 and CI, labeled in provenance, and independently reviewed. The application and build have

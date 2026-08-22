@@ -4,7 +4,6 @@ import { preloadI18nStrings } from "../infrastructure";
 import {
 	setupI18nHandlers,
 	setContainer,
-	handleLanguageChange,
 	setLanguageChangeCallback,
 } from "./i18n";
 import { setupMenus } from "./menu/menu";
@@ -20,7 +19,10 @@ import {
 	setDockLanguageChangeHandler,
 	setDockLanguageSettingGetter,
 } from "./menu/menu_dock";
-import { setupSettingsHandlers } from "./settings_handlers";
+import {
+	setupSettingsHandlers,
+	updateSettingsAndNotify,
+} from "./settings_handlers";
 import { setupThemeHandlers } from "./theme_handlers";
 import { setupRevealHandlers } from "./reveal_handlers";
 import { setupContextMenu } from "./window/context_menu";
@@ -72,10 +74,12 @@ async function initializeProcess(): Promise<Container> {
 	setLanguageChangeCallback(() => setupMenus());
 
 	// Wire language change handler for View menu and dock menu
-	const languageChangeHandler = (code: string | null): void => {
-		const previousLanguage = container.settings.get().language;
-		container.settings.update({ partial: { language: code } });
-		handleLanguageChange(previousLanguage, code);
+	const languageChangeHandler = async (code: string | null): Promise<void> => {
+		await updateSettingsAndNotify({
+			container,
+			getWindow: getActiveBrowserWindow,
+			partial: { language: code },
+		});
 	};
 	const languageSettingGetter = (): string | null =>
 		container.settings.get().language;

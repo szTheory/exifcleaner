@@ -15,19 +15,27 @@ const provenance = readJson(
 	contributorCredits: { ro: Array<{ keys: number; pullRequest: number }> };
 	locales: Record<
 		string,
-		Record<string, { sourceHash: string; origin: string; review: string }>
+		Record<
+			string,
+			{
+				sourceHash: string;
+				origin: string;
+				review: string;
+				sourceIdenticalReason?: string;
+			}
+		>
 	>;
 };
 const romanianArchive = readJson(
 	path.join(resources, "translation-contributions/pr-297-ro.json"),
 ) as unknown as { values: Record<string, string> };
-
-const protectedKeys = Object.keys(english).filter(
-	(key) =>
-		key.startsWith("empty.") ||
-		key.startsWith("intake.") ||
-		key === "menu.help.new-releases",
-);
+const worklist = readJson(
+	path.join(resources, "translation-worklist.json"),
+) as { items: unknown[] };
+const status = readJson(path.join(resources, "translation-status.json")) as {
+	blockingIssues: number;
+	locales: Record<string, { coverage: number; stale: number }>;
+};
 
 describe("translation resources", () => {
 	it("keeps Romanian complete and archives all 70 contributed strings", () => {
@@ -51,7 +59,7 @@ describe("translation resources", () => {
 		).toHaveLength(68);
 	});
 
-	it("covers protected first-run keys in every locale", () => {
+	it("covers every canonical key in every locale", () => {
 		for (const file of readdirSync(localesDir).filter((name) =>
 			name.endsWith(".json"),
 		)) {
@@ -59,8 +67,28 @@ describe("translation resources", () => {
 				string,
 				string
 			>;
-			for (const key of protectedKeys) {
-				expect(strings[key], `${file}:${key}`).toBeTruthy();
+			expect(Object.keys(strings).sort(), file).toEqual(
+				Object.keys(english).sort(),
+			);
+		}
+	});
+
+	it("requires a provenance justification for source-identical text", () => {
+		for (const file of readdirSync(localesDir).filter(
+			(name) => name.endsWith(".json") && name !== "en.json",
+		)) {
+			const locale = path.basename(file, ".json");
+			const strings = readJson(path.join(localesDir, file)) as Record<
+				string,
+				string
+			>;
+			for (const [key, value] of Object.entries(strings)) {
+				if (value === english[key]) {
+					expect(
+						provenance.locales[locale]?.[key]?.sourceIdenticalReason,
+						`${locale}:${key}`,
+					).toMatch(/\S/);
+				}
 			}
 		}
 	});
@@ -73,6 +101,15 @@ describe("translation resources", () => {
 					.digest("hex");
 				expect(entry.sourceHash, `${locale}:${key}`).toBe(expected);
 			}
+		}
+	});
+
+	it("ships with an empty worklist and complete generated status", () => {
+		expect(worklist.items).toEqual([]);
+		expect(status.blockingIssues).toBe(0);
+		for (const [locale, localeStatus] of Object.entries(status.locales)) {
+			expect(localeStatus.coverage, locale).toBe(1);
+			expect(localeStatus.stale, locale).toBe(0);
 		}
 	});
 });

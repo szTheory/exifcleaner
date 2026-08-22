@@ -12,9 +12,12 @@ const APP_LAUNCH_TIMEOUT_MS = process.env["CI"] === undefined ? 15_000 : 30_000;
 
 export async function launchApp(options?: {
 	settings?: Partial<Settings>;
+	userDataDir?: string;
+	pinEnglish?: boolean;
 }): Promise<{
 	app: ElectronApplication;
 	window: Page;
+	userDataDir: string;
 }> {
 	// A private profile per launch, for two reasons.
 	//
@@ -27,9 +30,9 @@ export async function launchApp(options?: {
 	// last configured (save-as-copy, language, preserve-orientation), so a suite that
 	// passes locally can fail in CI or on a colleague's machine for reasons invisible in
 	// the test source.
-	const userDataDir = fs.mkdtempSync(
-		path.join(os.tmpdir(), "exifcleaner-e2e-profile-"),
-	);
+	const userDataDir =
+		options?.userDataDir ??
+		fs.mkdtempSync(path.join(os.tmpdir(), "exifcleaner-e2e-profile-"));
 
 	// process.env values are typed string | undefined; filter the undefined ones out
 	// before spreading, since Playwright's env option requires Record<string, string>.
@@ -60,14 +63,16 @@ export async function launchApp(options?: {
 	// requests another locale. This keeps the suite deterministic on non-English
 	// developer machines and runners.
 	const settings = {
-		language: "en",
+		...(options?.pinEnglish === false ? {} : { language: "en" as const }),
 		...options?.settings,
 	} satisfies Partial<Settings>;
-	await window.evaluate(
-		(nextSettings) => globalThis.window.api.settings.set(nextSettings),
-		settings,
-	);
-	return { app, window };
+	if (Object.keys(settings).length > 0) {
+		await window.evaluate(
+			(nextSettings) => globalThis.window.api.settings.set(nextSettings),
+			settings,
+		);
+	}
+	return { app, window, userDataDir };
 }
 
 export async function closeApp(app: ElectronApplication): Promise<void> {

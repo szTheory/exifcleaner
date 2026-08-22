@@ -1,87 +1,87 @@
 {
-	"schemaVersion": 2,
+	"schemaVersion": 3,
 	"sourceLocale": "en",
 	"totalKeys": 126,
 	"protectedKeys": 11,
 	"locales": {
 		"ar": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
 				"existing-contribution": 49,
-				"agent-assisted/reviewed": 12,
+				"agent-assisted/reviewed": 77,
 				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"ca": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"cs": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"da": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"de": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"en": {
@@ -97,195 +97,195 @@
 			"stale": 0
 		},
 		"es": {
-			"translated": 59,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4683,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 48,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 48,
+				"existing-contribution": 47,
+				"agent-assisted/reviewed": 79,
+				"human-reviewed": 47,
 				"stale": 0,
-				"missing": 67
+				"missing": 0
 			},
-			"legacyMissing": 67,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"fa": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
 				"existing-contribution": 49,
-				"agent-assisted/reviewed": 12,
+				"agent-assisted/reviewed": 77,
 				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"fr": {
-			"translated": 84,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.6667,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 73,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 73,
+				"existing-contribution": 72,
+				"agent-assisted/reviewed": 54,
+				"human-reviewed": 72,
 				"stale": 0,
-				"missing": 42
+				"missing": 0
 			},
-			"legacyMissing": 42,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"hr": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
-			"protectedTranslated": 11,
-			"protectedTotal": 11,
-			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
-				"stale": 0,
-				"missing": 65
-			},
-			"legacyMissing": 65,
-			"stale": 0
-		},
-		"hu": {
-			"translated": 61,
-			"total": 126,
-			"coverage": 0.4841,
-			"protectedTranslated": 11,
-			"protectedTotal": 11,
-			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
-				"stale": 0,
-				"missing": 65
-			},
-			"legacyMissing": 65,
-			"stale": 0
-		},
-		"it": {
-			"translated": 61,
-			"total": 126,
-			"coverage": 0.4841,
-			"protectedTranslated": 11,
-			"protectedTotal": 11,
-			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
-				"stale": 0,
-				"missing": 65
-			},
-			"legacyMissing": 65,
-			"stale": 0
-		},
-		"ja": {
-			"translated": 59,
-			"total": 126,
-			"coverage": 0.4683,
-			"protectedTranslated": 11,
-			"protectedTotal": 11,
-			"provenance": {
-				"existing-contribution": 48,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 48,
-				"stale": 0,
-				"missing": 67
-			},
-			"legacyMissing": 67,
-			"stale": 0
-		},
-		"ml": {
-			"translated": 61,
-			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
 				"existing-contribution": 49,
-				"agent-assisted/reviewed": 12,
+				"agent-assisted/reviewed": 77,
 				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
+			"stale": 0
+		},
+		"hu": {
+			"translated": 126,
+			"total": 126,
+			"coverage": 1,
+			"protectedTranslated": 11,
+			"protectedTotal": 11,
+			"provenance": {
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
+				"stale": 0,
+				"missing": 0
+			},
+			"legacyMissing": 0,
+			"stale": 0
+		},
+		"it": {
+			"translated": 126,
+			"total": 126,
+			"coverage": 1,
+			"protectedTranslated": 11,
+			"protectedTotal": 11,
+			"provenance": {
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
+				"stale": 0,
+				"missing": 0
+			},
+			"legacyMissing": 0,
+			"stale": 0
+		},
+		"ja": {
+			"translated": 126,
+			"total": 126,
+			"coverage": 1,
+			"protectedTranslated": 11,
+			"protectedTotal": 11,
+			"provenance": {
+				"existing-contribution": 47,
+				"agent-assisted/reviewed": 79,
+				"human-reviewed": 47,
+				"stale": 0,
+				"missing": 0
+			},
+			"legacyMissing": 0,
+			"stale": 0
+		},
+		"ml": {
+			"translated": 126,
+			"total": 126,
+			"coverage": 1,
+			"protectedTranslated": 11,
+			"protectedTotal": 11,
+			"provenance": {
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
+				"stale": 0,
+				"missing": 0
+			},
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"nl": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"pl": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"pt-BR": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"pt": {
-			"translated": 13,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.1032,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
 				"existing-contribution": 2,
-				"agent-assisted/reviewed": 11,
+				"agent-assisted/reviewed": 124,
 				"human-reviewed": 2,
 				"stale": 0,
-				"missing": 113
+				"missing": 0
 			},
-			"legacyMissing": 113,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"ro": {
@@ -305,118 +305,118 @@
 			"stale": 0
 		},
 		"ru": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"sk": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"sv": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"tr": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"uk": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"vi": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		},
 		"zh": {
-			"translated": 61,
+			"translated": 126,
 			"total": 126,
-			"coverage": 0.4841,
+			"coverage": 1,
 			"protectedTranslated": 11,
 			"protectedTotal": 11,
 			"provenance": {
-				"existing-contribution": 50,
-				"agent-assisted/reviewed": 11,
-				"human-reviewed": 50,
+				"existing-contribution": 49,
+				"agent-assisted/reviewed": 77,
+				"human-reviewed": 49,
 				"stale": 0,
-				"missing": 65
+				"missing": 0
 			},
-			"legacyMissing": 65,
+			"legacyMissing": 0,
 			"stale": 0
 		}
 	},
 	"blockingIssues": 0,
-	"nonblockingLegacyItems": 1589
+	"nonblockingLegacyItems": 0
 }

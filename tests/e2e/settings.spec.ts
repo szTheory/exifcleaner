@@ -7,9 +7,14 @@ import { createFixtureDir } from "../helpers/fixture_copier";
 import { readMetadataTags } from "./helpers/metadata_assertions";
 import { waitForProcessing } from "./helpers/wait_for_processing";
 import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
+
+const german = readLocale("de");
+const french = readLocale("fr");
+
 test.describe("Settings", () => {
 	let app: ElectronApplication;
 	let page: Page;
+	let userDataDir: string;
 	let consoleErrors: string[];
 
 	test.beforeEach(async () => {
@@ -17,6 +22,7 @@ test.describe("Settings", () => {
 		const launched = await launchApp();
 		app = launched.app;
 		page = launched.window;
+		userDataDir = launched.userDataDir;
 
 		page.on("console", (msg) => {
 			if (msg.type() === "error") {
@@ -55,6 +61,97 @@ test.describe("Settings", () => {
 
 		// Verify drawer closes (no longer has --open class)
 		await expect(drawer).toHaveCount(0);
+	});
+
+	test("switches every settings string immediately and persists the locale", async () => {
+		await page.locator(".gear-icon").click();
+		let drawer = page.locator('[role="dialog"]');
+		await drawer.locator(".language-dropdown__trigger").click();
+		await drawer.getByRole("option", { name: /Deutsch/ }).click();
+
+		await expect(page.locator("html")).toHaveAttribute("lang", "de");
+		await expect(drawer.locator("h2")).toHaveText(
+			localeValue(german, "menu.app.settings"),
+		);
+		await expect(
+			drawer.locator(".settings-drawer__section-label").first(),
+		).toHaveText(localeValue(german, "appearance"));
+		await expect(drawer.locator(".toggle-switch__label").first()).toHaveText(
+			localeValue(german, "settings.preserveOrientation.label"),
+		);
+		await expect(
+			drawer.locator(".toggle-switch__description").first(),
+		).toHaveText(
+			localeValue(german, "settings.preserveOrientation.description"),
+		);
+		await expect(page.locator(".empty-state__title")).toHaveText(
+			localeValue(german, "empty.title"),
+		);
+		await expect
+			.poll(() => page.evaluate(() => window.api.settings.get()))
+			.toMatchObject({ language: "de" });
+
+		await closeApp(app);
+		const relaunched = await launchApp({ userDataDir, pinEnglish: false });
+		app = relaunched.app;
+		page = relaunched.window;
+		page.on("console", (msg) => {
+			if (msg.type() === "error") consoleErrors.push(msg.text());
+		});
+
+		await expect(page.locator("html")).toHaveAttribute("lang", "de");
+		await page.locator(".gear-icon").click();
+		drawer = page.locator('[role="dialog"]');
+		await expect(drawer.locator("h2")).toHaveText(
+			localeValue(german, "menu.app.settings"),
+		);
+
+		await drawer.locator(".language-dropdown__trigger").click();
+		await drawer
+			.getByRole("option", { name: localeValue(german, "languageSystem") })
+			.click();
+		const systemLocale = await app.evaluate(({ app: electronApp }) =>
+			electronApp.getLocale(),
+		);
+		await expect(page.locator("html")).toHaveAttribute("lang", systemLocale);
+
+		await drawer.locator(".language-dropdown__trigger").click();
+		await drawer.getByRole("option", { name: /العربية/ }).click();
+		await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+		await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+	});
+
+	test("applies native View-menu language changes without a restart", async () => {
+		await page.locator(".gear-icon").click();
+		const drawer = page.locator('[role="dialog"]');
+
+		await app.evaluate(({ BrowserWindow, Menu }) => {
+			const window = BrowserWindow.getAllWindows()[0];
+			const view = Menu.getApplicationMenu()?.items.find(
+				(item) => item.label === "View",
+			);
+			const language = view?.submenu?.items.find(
+				(item) => item.label === "Language",
+			);
+			const frenchItem = language?.submenu?.items.find(
+				(item) => item.label === "Français",
+			);
+			if (!window || !frenchItem?.click) {
+				throw new Error("French View-menu language item not found");
+			}
+			frenchItem.click(frenchItem, window, {} as never);
+		});
+
+		await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+		await expect(drawer.locator("h2")).toHaveText(
+			localeValue(french, "menu.app.settings"),
+		);
+		await expect(drawer.locator(".language-dropdown__trigger")).toContainText(
+			"Français",
+		);
+		await expect
+			.poll(() => page.evaluate(() => window.api.settings.get()))
+			.toMatchObject({ language: "fr" });
 	});
 
 	test("toggles preserve orientation switch", async () => {
@@ -417,3 +514,16 @@ test.describe("Settings", () => {
 		}
 	});
 });
+
+function readLocale(locale: string): Record<string, string> {
+	return JSON.parse(
+		fs.readFileSync(path.resolve(`.resources/locales/${locale}.json`), "utf8"),
+	) as Record<string, string>;
+}
+
+function localeValue(strings: Record<string, string>, key: string): string {
+	const value = strings[key];
+	if (value === undefined)
+		throw new Error(`Missing locale fixture key: ${key}`);
+	return value;
+}

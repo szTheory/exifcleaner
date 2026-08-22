@@ -29,26 +29,28 @@ change. Packaging/release changes also need the relevant packaged-smoke path des
 ## Translation corrections
 
 Translations live in `.resources/locales/<locale>.json`. English is the canonical key set.
-A useful translation PR can change one string; it does not need to complete the locale.
+A useful correction PR can change one string without touching unrelated translations.
 
 1. Edit only your locale file. Use the existing English key and preserve placeholders such
    as `{count}` exactly.
 2. Update the matching entry in `.resources/translation-provenance.json`: record the
-   current English source hash, use `existing-contribution` as the origin, and label the
-   review accurately. A maintainer can help calculate the SHA-256 source hash.
+	current English source hash, use `existing-contribution` as the origin, and label the
+	review accurately. If the translation intentionally equals English, include a concise
+	`sourceIdenticalReason`. A maintainer can help calculate the SHA-256 source hash.
 3. Run `yarn i18n:write` to regenerate `.resources/strings.json`, the deterministic
    translation worklist, and the coverage report.
 4. Run `yarn i18n:check` and test the locale with `yarn dev --lang=<locale>`.
 5. In the PR, say whether you are a native speaker and briefly explain wording that is
    context-sensitive.
 
-AI suggestions are welcome as review notes, but they must be labeled as AI-assisted and
-must not replace an existing human translation without a fluent reviewer.
+AI suggestions are welcome as review notes, but they must be labeled as AI-assisted,
+independently reviewed, and must not replace an existing human translation without a
+fluent reviewer.
 
-The first-run surface (`empty.*`, `intake.*`, and `menu.help.new-releases`) is protected:
-every supported locale must cover it, and its recorded English source hash must be current.
-Romanian is intentionally complete. Missing legacy strings in other locales remain visible
-in `.resources/translation-worklist.json` but do not block an unrelated contribution.
+Every supported locale must cover every canonical key with current provenance. Missing,
+stale, placeholder-invalid, or unjustified source-identical text fails `yarn i18n:check`.
+Adding or changing English UI copy therefore includes the corresponding reviewed locale
+updates; unrelated contributions remain unaffected while resources are current.
 
 ## Pull-request shape
 
