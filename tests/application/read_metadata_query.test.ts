@@ -76,7 +76,7 @@ it.each([
 
 	expect(await query.execute({ filePath: "/tmp/corrupt.jpg" })).toEqual({
 		ok: false,
-		error: { code: "exiftool-error", detail },
+		error: { code: "engine-error", detail, backend: "exiftool" },
 	});
 });
 
@@ -93,8 +93,9 @@ it("converts unsafe path failures to the established safe detail", async () => {
 	).toEqual({
 		ok: false,
 		error: {
-			code: "exiftool-error",
+			code: "engine-error",
 			detail: "The selected file path is not supported",
+			backend: "exiftool",
 		},
 	});
 });
@@ -109,6 +110,6 @@ it("converts process failures to typed errors", async () => {
 
 	expect(await query.execute({ filePath: "/tmp/test.jpg" })).toEqual({
 		ok: false,
-		error: { code: "process-not-open" },
+		error: { code: "engine-unavailable", backend: "exiftool" },
 	});
 });

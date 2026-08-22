@@ -34,7 +34,7 @@ describe("ExifToolAdapter.inspect", () => {
 		expect(result).toEqual({
 			ok: true,
 			value: {
-				metadata: {},
+				metadata: { FileName: "test.jpg", FileSize: "1024" },
 				recordCount: 1,
 				verification: { fileType: undefined, error: undefined },
 			},

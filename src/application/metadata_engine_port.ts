@@ -1,5 +1,5 @@
 import type { Result } from "../common";
-import type { ExifError } from "../domain";
+import type { MetadataEngineError } from "../domain/exif/exif_errors";
 
 export type MetadataInspectionPurpose =
 	| "display"
@@ -21,5 +21,5 @@ export interface MetadataEnginePort {
 	}: {
 		source: string;
 		purpose: MetadataInspectionPurpose;
-	}): Promise<Result<MetadataInspection, ExifError>>;
+	}): Promise<Result<MetadataInspection, MetadataEngineError>>;
 }

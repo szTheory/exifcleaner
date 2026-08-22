@@ -2,7 +2,9 @@ import type { MetadataEnginePort } from "../../application/metadata_engine_port"
 import { cleanExifData } from "../../domain";
 import type { ExifToolPort } from "../../application/exiftool_port";
 import type { Result } from "../../common";
+import { assertNever } from "../../common/types";
 import type { ExifError } from "../../domain";
+import type { MetadataEngineError } from "../../domain/exif/exif_errors";
 import {
 	UnsafeExifToolPathError,
 	type ExiftoolProcess,
@@ -87,7 +89,7 @@ export class ExifToolAdapter implements ExifToolPort, MetadataEnginePort {
 				: OUTPUT_VERIFICATION_INSPECTION_ARGS;
 		const result = await this.readMetadata({ filePath: source, args });
 		if (!result.ok) {
-			return result;
+			return { ok: false, error: toMetadataEngineError(result.error) };
 		}
 
 		const firstRecord = result.value[0];
@@ -110,7 +112,11 @@ export class ExifToolAdapter implements ExifToolPort, MetadataEnginePort {
 		if (diagnostic !== undefined) {
 			return {
 				ok: false,
-				error: { code: "exiftool-error", detail: String(diagnostic[1]) },
+				error: {
+					code: "engine-error",
+					detail: String(diagnostic[1]),
+					backend: "exiftool",
+				},
 			};
 		}
 
@@ -162,5 +168,28 @@ export class ExifToolAdapter implements ExifToolPort, MetadataEnginePort {
 			}
 			return { ok: false, error: { code: "process-not-open" } };
 		}
+	}
+}
+
+function toMetadataEngineError(error: ExifError): MetadataEngineError {
+	switch (error.code) {
+		case "engine-unavailable":
+		case "engine-error":
+			return error;
+		case "process-not-open":
+			return { code: "engine-unavailable", backend: "exiftool" };
+		case "exiftool-error":
+			return { code: "engine-error", detail: error.detail, backend: "exiftool" };
+		case "spawn-failed":
+		case "command-timeout":
+		case "process-exited":
+		case "parse-failed":
+			return {
+				code: "engine-error",
+				detail: "The metadata engine could not inspect the selected file",
+				backend: "exiftool",
+			};
+		default:
+			return assertNever({ value: error });
 	}
 }
