@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const ORIENTATION_SEAM =
 	'if (preserveOrientation) preserveTags.push("-Orientation");';
-const TARGET_SOURCE = "src/application/commands/strip_metadata_command.ts";
+const TARGET_SOURCE = "src/infrastructure/exiftool/exiftool_adapter.ts";
 const TEST_TITLE = "preserves orientation metadata when toggle is enabled";
 
 export function applyOrientationMutation(source) {
