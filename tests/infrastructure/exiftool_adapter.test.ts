@@ -16,36 +16,85 @@ function makeFakeProcess(overrides: Partial<Record<string, unknown>> = {}) {
 	} as unknown as ExiftoolProcess;
 }
 
-describe("ExifToolAdapter.readMetadata", () => {
-	it("returns ok result with metadata array when process succeeds", async () => {
+describe("ExifToolAdapter.inspect", () => {
+	it("maps display inspection to the historical grouped preset", async () => {
 		const fakeProcess = makeFakeProcess();
 		const adapter = new ExifToolAdapter({ process: fakeProcess });
 
-		const result = await adapter.readMetadata({
-			filePath: "/tmp/photo.jpg",
-			args: ["-j"],
+		const result = await adapter.inspect({
+			source: "/tmp/photo.jpg",
+			purpose: "display",
 		});
 
-		expect(result.ok).toBe(true);
-		if (result.ok) {
-			expect(result.value[0]?.FileName).toBe("test.jpg");
-		}
+		expect(fakeProcess.readMetadata).toHaveBeenCalledOnce();
+		expect(fakeProcess.readMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/photo.jpg",
+			args: ["-G1:2"],
+		});
+		expect(result).toEqual({
+			ok: true,
+			value: {
+				metadata: {},
+				recordCount: 1,
+				verification: { fileType: undefined, error: undefined },
+			},
+		});
 	});
 
-	it("returns process-not-open error when process throws", async () => {
+	it("returns an empty normalized map when no records are found", async () => {
+		const fakeProcess = makeFakeProcess({
+			readMetadata: vi.fn().mockResolvedValue({ data: [], error: null }),
+		});
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		expect(
+			await adapter.inspect({ source: "/tmp/photo.jpg", purpose: "display" }),
+		).toEqual({
+			ok: true,
+			value: {
+				metadata: {},
+				recordCount: 0,
+				verification: { fileType: undefined, error: undefined },
+			},
+		});
+	});
+
+	it.each([
+		["ExifTool:Error", "File format error"],
+		["ExifTool:ExifTool:Warning", "JPEG format error"],
+	])("converts embedded %s diagnostics", async (key, detail) => {
+		const fakeProcess = makeFakeProcess({
+			readMetadata: vi
+				.fn()
+				.mockResolvedValue({ data: [{ [key]: detail }], error: null }),
+		});
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		expect(
+			await adapter.inspect({ source: "/tmp/photo.jpg", purpose: "display" }),
+		).toEqual({
+			ok: false,
+			error: { code: "engine-error", detail, backend: "exiftool" },
+		});
+	});
+
+	it("returns engine-unavailable when process throws", async () => {
 		const fakeProcess = makeFakeProcess({
 			readMetadata: vi.fn().mockRejectedValue(new Error("not open")),
 		});
 		const adapter = new ExifToolAdapter({ process: fakeProcess });
 
-		const result = await adapter.readMetadata({
-			filePath: "/tmp/photo.jpg",
-			args: ["-j"],
+		const result = await adapter.inspect({
+			source: "/tmp/photo.jpg",
+			purpose: "display",
 		});
 
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
-			expect(result.error.code).toBe("process-not-open");
+			expect(result.error).toEqual({
+				code: "engine-unavailable",
+				backend: "exiftool",
+			});
 		}
 	});
 
@@ -55,21 +104,22 @@ describe("ExifToolAdapter.readMetadata", () => {
 		});
 		const adapter = new ExifToolAdapter({ process: fakeProcess });
 
-		const result = await adapter.readMetadata({
-			filePath: "/tmp/private\n-execute99.jpg",
-			args: [],
+		const result = await adapter.inspect({
+			source: "/tmp/private\n-execute99.jpg",
+			purpose: "display",
 		});
 
 		expect(result).toEqual({
 			ok: false,
 			error: {
-				code: "exiftool-error",
+				code: "engine-error",
 				detail: "The selected file path is not supported",
+				backend: "exiftool",
 			},
 		});
 	});
 
-	it("returns exiftool-error when process result has non-null error", async () => {
+	it("returns engine-error when process reports an error", async () => {
 		const fakeProcess = makeFakeProcess({
 			readMetadata: vi
 				.fn()
@@ -77,35 +127,36 @@ describe("ExifToolAdapter.readMetadata", () => {
 		});
 		const adapter = new ExifToolAdapter({ process: fakeProcess });
 
-		const result = await adapter.readMetadata({
-			filePath: "/tmp/photo.jpg",
-			args: ["-j"],
+		const result = await adapter.inspect({
+			source: "/tmp/photo.jpg",
+			purpose: "display",
 		});
 
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
-			expect(result.error.code).toBe("exiftool-error");
-			if (result.error.code === "exiftool-error") {
+			expect(result.error.code).toBe("engine-error");
+			if (result.error.code === "engine-error") {
 				expect(result.error.detail).toBe("File not found");
+				expect(result.error.backend).toBe("exiftool");
 			}
 		}
 	});
 
-	it("returns exiftool-error with no-data message when data is null and error is null", async () => {
+	it("returns engine-error with no-data message when process has no data", async () => {
 		const fakeProcess = makeFakeProcess({
 			readMetadata: vi.fn().mockResolvedValue({ data: null, error: null }),
 		});
 		const adapter = new ExifToolAdapter({ process: fakeProcess });
 
-		const result = await adapter.readMetadata({
-			filePath: "/tmp/photo.jpg",
-			args: ["-j"],
+		const result = await adapter.inspect({
+			source: "/tmp/photo.jpg",
+			purpose: "display",
 		});
 
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
-			expect(result.error.code).toBe("exiftool-error");
-			if (result.error.code === "exiftool-error") {
+			expect(result.error.code).toBe("engine-error");
+			if (result.error.code === "engine-error") {
 				expect(result.error.detail).toBe("No data returned");
 			}
 		}
