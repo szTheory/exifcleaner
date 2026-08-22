@@ -33,7 +33,9 @@ export class NativeWebpAdapter implements NativeWebpPort {
 			preserveTimestamps: request.preserveTimestamps,
 		};
 		const result = await sanitizeFile(
-			request.signal === undefined ? options : { ...options, signal: request.signal },
+			request.signal === undefined
+				? options
+				: { ...options, signal: request.signal },
 		);
 
 		if (result.ok) return { ok: true, value: undefined };
