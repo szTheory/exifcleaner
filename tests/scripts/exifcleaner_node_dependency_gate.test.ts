@@ -17,6 +17,7 @@ import {
 	validatePackageMetadata,
 	validateSealDependency,
 } from "../../scripts/exifcleaner_node_dependency_gate.mjs";
+import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 
 const safeRuntime = `import fs from "node:fs";
 import { readFile } from "node:fs/promises";
@@ -25,18 +26,30 @@ import "./local.js";
 void fs; void readFile; void path;`;
 
 function fixture(files: Record<string, string>): {
+	container: string;
 	root: string;
 	cleanup(): void;
 } {
-	const root = mkdtempSync(path.join(tmpdir(), "native-dependency-gate-"));
+	const container = mkdtempSync(path.join(tmpdir(), "native-dependency-gate-"));
+	const before = snapshotDir(container);
+	const root = path.join(container, "package");
+	mkdirSync(root);
+	const added = new Set(["package"]);
 	for (const [relative, contents] of Object.entries(files)) {
 		const target = path.join(root, relative);
 		mkdirSync(path.dirname(target), { recursive: true });
 		writeFileSync(target, contents, "utf8");
+		const parts = relative.split("/");
+		for (let index = 1; index < parts.length; index += 1) {
+			added.add(`package/${parts.slice(0, index).join("/")}`);
+		}
+		added.add(`package/${relative}`);
 	}
+	assertDirEffect(before, snapshotDir(container), { added: [...added] });
 	return {
+		container,
 		root,
-		cleanup: () => rmSync(root, { recursive: true, force: true }),
+		cleanup: () => rmSync(container, { recursive: true, force: true }),
 	};
 }
 
@@ -192,17 +205,20 @@ describe("installed runtime audit", () => {
 
 	test("fails closed for invalid JavaScript and symlink escapes", () => {
 		const subject = fixture({ "dist/index.js": "export const = ;" });
-		const outside = `${subject.root}-outside.js`;
 		try {
 			expect(auditInstalledRuntime(subject.root).problems[0]).toMatch(/parse/i);
+			const before = snapshotDir(subject.container);
+			const outside = path.join(subject.container, "outside.js");
 			writeFileSync(outside, "export {};", "utf8");
 			symlinkSync(outside, path.join(subject.root, "dist/escape.js"));
+			assertDirEffect(before, snapshotDir(subject.container), {
+				added: ["outside.js", "package/dist/escape.js"],
+			});
 			expect(auditInstalledRuntime(subject.root).problems).toContain(
 				"runtime path escapes package root: dist/escape.js",
 			);
 		} finally {
 			subject.cleanup();
-			rmSync(outside, { force: true });
 		}
 	});
 });
