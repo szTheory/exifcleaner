@@ -48,7 +48,7 @@ it("FakeMetadataEngine allows configuring engine-neutral error results", async (
 	const fake = new FakeMetadataEngine();
 	fake.inspectResult = {
 		ok: false,
-		error: { code: "metadata-read-failed", detail: "File not found" },
+		error: { code: "engine-error", detail: "File not found" },
 	};
 	const result = await fake.inspect({
 		source: "/missing.jpg",
@@ -56,7 +56,7 @@ it("FakeMetadataEngine allows configuring engine-neutral error results", async (
 	});
 	expect(result.ok).toBe(false);
 	if (!result.ok) {
-		expect(result.error.code).toBe("metadata-read-failed");
+		expect(result.error.code).toBe("engine-error");
 	}
 });
 

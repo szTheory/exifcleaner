@@ -145,7 +145,9 @@ function makePortCountContainer({ saveAsCopy }: { saveAsCopy: boolean }): {
 		},
 	};
 	const stripMetadata = new StripMetadataCommand({ metadataEngine });
-	const verifyGeneratedOutput = new VerifyGeneratedOutputQuery({ metadataEngine });
+	const verifyGeneratedOutput = new VerifyGeneratedOutputQuery({
+		metadataEngine,
+	});
 	const outputTransaction = new OutputTransaction({
 		stripMetadata,
 		verifyGeneratedOutput,
