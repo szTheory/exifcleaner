@@ -1,0 +1,159 @@
+{
+	"schemaVersion": 1,
+	"recordedAt": "2026-08-22T20:28:00.000Z",
+	"package": {
+		"name": "exifcleaner-node",
+		"version": "0.1.1",
+		"publishedAt": "2026-08-22T20:21:25.035Z",
+		"repository": "https://github.com/szTheory/exifcleaner-node",
+		"sourceCommit": "411fdbdad3faa2e5dd5033bea5def435b4d03323",
+		"releaseTag": "v0.1.1"
+	},
+	"dist": {
+		"tarball": "https://registry.npmjs.org/exifcleaner-node/-/exifcleaner-node-0.1.1.tgz",
+		"integrity": "sha512-9SkTOLaJBphb/YBo3JkwJ9ShunLbKzUIsgCTxG5k9UnN1SWb3tFD0IjUr4Yo3P7tEyWH4rnrUUkdo8fPVvDT6g==",
+		"shasum": "a1280ed9afb1d5863c58b6559e01549df64a1cdd",
+		"sha256": "c2fc569b553cba360814bcce61d6882a02aba062e6d6da2193323915530a34bf",
+		"fileCount": 39,
+		"packedSize": 30811,
+		"unpackedSize": 145227
+	},
+	"provenance": {
+		"verified": true,
+		"url": "https://registry.npmjs.org/-/npm/v1/attestations/exifcleaner-node@0.1.1",
+		"predicateType": "https://slsa.dev/provenance/v1",
+		"workflow": "release.yml",
+		"workflowRun": "https://github.com/szTheory/exifcleaner-node/actions/runs/32596327463/attempts/2",
+		"environment": "npm",
+		"sourceCommit": "411fdbdad3faa2e5dd5033bea5def435b4d03323"
+	},
+	"signatures": {
+		"verified": true,
+		"command": "npm audit signatures",
+		"verifiedRegistrySignatures": 568,
+		"verifiedAttestations": 125
+	},
+	"tarball": {
+		"verified": true,
+		"files": [
+			"LICENSE",
+			"README.md",
+			"dist/engine.d.ts",
+			"dist/engine.d.ts.map",
+			"dist/engine.js",
+			"dist/engine.js.map",
+			"dist/errors.d.ts",
+			"dist/errors.d.ts.map",
+			"dist/errors.js",
+			"dist/errors.js.map",
+			"dist/index.d.ts",
+			"dist/index.d.ts.map",
+			"dist/index.js",
+			"dist/index.js.map",
+			"dist/metadata/exif.d.ts",
+			"dist/metadata/exif.d.ts.map",
+			"dist/metadata/exif.js",
+			"dist/metadata/exif.js.map",
+			"dist/metadata/icc.d.ts",
+			"dist/metadata/icc.d.ts.map",
+			"dist/metadata/icc.js",
+			"dist/metadata/icc.js.map",
+			"dist/metadata/xmp.d.ts",
+			"dist/metadata/xmp.d.ts.map",
+			"dist/metadata/xmp.js",
+			"dist/metadata/xmp.js.map",
+			"dist/result.d.ts",
+			"dist/result.d.ts.map",
+			"dist/result.js",
+			"dist/result.js.map",
+			"dist/types.d.ts",
+			"dist/types.d.ts.map",
+			"dist/types.js",
+			"dist/types.js.map",
+			"dist/webp/riff.d.ts",
+			"dist/webp/riff.d.ts.map",
+			"dist/webp/riff.js",
+			"dist/webp/riff.js.map",
+			"package.json"
+		]
+	},
+	"packageManifest": {
+		"runtimeDependencies": {},
+		"lifecycleScripts": {},
+		"engines": {
+			"node": ">=22"
+		},
+		"exports": {
+			".": {
+				"types": "./dist/index.d.ts",
+				"import": "./dist/index.js"
+			}
+		},
+		"runtimeExports": [
+			"err",
+			"getCapabilities",
+			"inspectFile",
+			"ok",
+			"sanitizeFile"
+		]
+	},
+	"runtimeAudit": {
+		"runtimePaths": [
+			"dist/engine.js",
+			"dist/errors.js",
+			"dist/index.js",
+			"dist/metadata/exif.js",
+			"dist/metadata/icc.js",
+			"dist/metadata/xmp.js",
+			"dist/result.js",
+			"dist/types.js",
+			"dist/webp/riff.js"
+		],
+		"digests": [
+			{
+				"path": "dist/engine.js",
+				"sha256": "a259eaec4614eefaf5fd916f41537e1672c985f2205394b9f003e5f894352360"
+			},
+			{
+				"path": "dist/errors.js",
+				"sha256": "62940899b6ccfec671f4eada4dccf0f2169d25f0d999646867a6570568b7e555"
+			},
+			{
+				"path": "dist/index.js",
+				"sha256": "80c203366861b6f1611c6264c7b8494aa48742c3ea65eda07acd28cfbc838080"
+			},
+			{
+				"path": "dist/metadata/exif.js",
+				"sha256": "46bc5fed1a232afac4d327e55e1a1ebecae2faeb104d400e0f9909516f8e6f14"
+			},
+			{
+				"path": "dist/metadata/icc.js",
+				"sha256": "c1b3a5795a3397cf08ce0be4e6b976e169e15edc4624f8e1ffd8909ab13c759c"
+			},
+			{
+				"path": "dist/metadata/xmp.js",
+				"sha256": "1e470f175a772df1d2e6b0c9a8699992dcd6e4d1c1c1bbbdd89cccb7131cedb2"
+			},
+			{
+				"path": "dist/result.js",
+				"sha256": "78e2e0ddab7e0d3d0bf6527ebf3a230093f6d5ab5d3cd7a75ca489ccdcbc5b2b"
+			},
+			{
+				"path": "dist/types.js",
+				"sha256": "01ae2a5b120382f9a648ced7ee8507493a134f216d100fc61600c6c9738235d2"
+			},
+			{
+				"path": "dist/webp/riff.js",
+				"sha256": "f1da8b39b2562f5b5998a34d789346aa9f883c74f5df9534cdae854cca3d2b02"
+			}
+		],
+		"allowlistedImports": ["node:fs", "node:fs/promises", "node:path"],
+		"zeroForbiddenNetwork": true
+	},
+	"checks": {
+		"publicMetadata": true,
+		"provenance": true,
+		"signatures": true,
+		"tarballContent": true
+	}
+}

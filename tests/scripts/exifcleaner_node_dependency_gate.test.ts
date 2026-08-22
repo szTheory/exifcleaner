@@ -11,10 +11,13 @@ import path from "node:path";
 import { describe, expect, test } from "vitest";
 import {
 	ALLOWED_DRAFT_SHA,
+	SEALED_VERSION,
 	auditInstalledRuntime,
 	classifyDependencySpec,
+	validateCiWorkflowPolicy,
 	validateDraftDependency,
 	validatePackageMetadata,
+	validateRegistryEvidence,
 	validateSealDependency,
 } from "../../scripts/exifcleaner_node_dependency_gate.mjs";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
@@ -24,6 +27,60 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import "./local.js";
 void fs; void readFile; void path;`;
+
+function validEvidence() {
+	return {
+		schemaVersion: 1,
+		package: {
+			name: "exifcleaner-node",
+			version: SEALED_VERSION,
+			publishedAt: "2026-08-22T20:21:25.035Z",
+			repository: "https://github.com/szTheory/exifcleaner-node",
+			sourceCommit: "411fdbdad3faa2e5dd5033bea5def435b4d03323",
+			releaseTag: `v${SEALED_VERSION}`,
+		},
+		dist: {
+			tarball: `https://registry.npmjs.org/exifcleaner-node/-/exifcleaner-node-${SEALED_VERSION}.tgz`,
+			integrity:
+				"sha512-9SkTOLaJBphb/YBo3JkwJ9ShunLbKzUIsgCTxG5k9UnN1SWb3tFD0IjUr4Yo3P7tEyWH4rnrUUkdo8fPVvDT6g==",
+			shasum: "a1280ed9afb1d5863c58b6559e01549df64a1cdd",
+			sha256:
+				"c2fc569b553cba360814bcce61d6882a02aba062e6d6da2193323915530a34bf",
+			fileCount: 2,
+		},
+		provenance: {
+			verified: true,
+			predicateType: "https://slsa.dev/provenance/v1",
+			workflow: "release.yml",
+			environment: "npm",
+			workflowRun:
+				"https://github.com/szTheory/exifcleaner-node/actions/runs/32596327463/attempts/2",
+		},
+		signatures: { verified: true },
+		tarball: {
+			verified: true,
+			files: ["dist/index.js", "package.json"],
+		},
+		packageManifest: {
+			runtimeDependencies: {},
+			lifecycleScripts: {},
+			engines: { node: ">=22" },
+			runtimeExports: [
+				"err",
+				"getCapabilities",
+				"inspectFile",
+				"ok",
+				"sanitizeFile",
+			],
+		},
+		checks: {
+			publicMetadata: true,
+			provenance: true,
+			signatures: true,
+			tarballContent: true,
+		},
+	};
+}
 
 function fixture(files: Record<string, string>): {
 	container: string;
@@ -101,6 +158,25 @@ describe("dependency source policy", () => {
 		);
 	});
 
+	test("seal accepts only the exact registry version and matching evidence", () => {
+		const evidence = validEvidence();
+		const lockText = `exifcleaner-node@${SEALED_VERSION}:\n  version "${SEALED_VERSION}"\n  integrity ${evidence.dist.integrity}\n`;
+		expect(
+			validateSealDependency({
+				manifest: {
+					dependencies: { "exifcleaner-node": SEALED_VERSION },
+				},
+				lockText,
+				evidence,
+			}),
+		).toEqual([]);
+
+		evidence.package.sourceCommit = "main";
+		expect(validateRegistryEvidence(evidence, SEALED_VERSION)).toContain(
+			"seal evidence mismatch: sourceCommit",
+		);
+	});
+
 	test("rejects runtime dependencies, lifecycle scripts, and native payloads", () => {
 		expect(
 			validatePackageMetadata(
@@ -122,8 +198,8 @@ describe("dependency source policy", () => {
 describe("installed runtime audit", () => {
 	test("accepts only the audited builtin allowlist and records deterministic evidence", () => {
 		const subject = fixture({
-			"dist/index.js": safeRuntime,
-			"dist/local.js": "export {};",
+			"dist/index.js": `${safeRuntime}\nexport { inspectFile } from "./local.js";`,
+			"dist/local.js": "export const inspectFile = () => {};",
 		});
 		try {
 			const result = auditInstalledRuntime(subject.root);
@@ -184,11 +260,6 @@ describe("installed runtime audit", () => {
 			`const endpoint = "ws://example.test";`,
 			"forbidden network URL literal: ws:",
 		],
-		[
-			"inspection surface",
-			`export { inspectFile } from "./local.js";`,
-			"undeclared package surface: inspectFile",
-		],
 	])("rejects %s", (_name, source, diagnostic) => {
 		const subject = fixture({
 			"dist/index.js": source,
@@ -223,14 +294,91 @@ describe("installed runtime audit", () => {
 	});
 });
 
-describe("repository draft state", () => {
-	test("pins the manifest and lock to the one permitted immutable SHA", () => {
+describe("repository sealed state", () => {
+	test("pins the manifest, lock, and evidence to the audited registry version", () => {
 		const root = path.resolve(import.meta.dirname, "../..");
 		const manifest = JSON.parse(
 			readFileSync(path.join(root, "package.json"), "utf8"),
 		);
 		const lockText = readFileSync(path.join(root, "yarn.lock"), "utf8");
-		expect(validateDraftDependency(manifest)).toEqual([]);
-		expect(lockText).toContain(ALLOWED_DRAFT_SHA);
+		const evidence = JSON.parse(
+			readFileSync(
+				path.join(root, "docs/evidence/native-webp-registry-package.json"),
+				"utf8",
+			),
+		);
+		expect(validateSealDependency({ manifest, lockText, evidence })).toEqual(
+			[],
+		);
+		expect(lockText).not.toContain(ALLOWED_DRAFT_SHA);
+	});
+});
+
+describe("required CI linkage", () => {
+	const root = path.resolve(import.meta.dirname, "../..");
+	const source = readFileSync(
+		path.join(root, ".github/workflows/ci.yml"),
+		"utf8",
+	);
+
+	test("seals immediately after frozen install before every platform build", () => {
+		expect(validateCiWorkflowPolicy(source)).toEqual([]);
+	});
+
+	test.each([
+		[
+			"missing seal",
+			source.replace(
+				"run: yarn verify:native-dependency:seal",
+				"run: yarn verify:native-dependency",
+			),
+			/literal native dependency seal/i,
+		],
+		[
+			"seal before install",
+			source
+				.replace("run: yarn install --frozen-lockfile", "run: __INSTALL__")
+				.replace(
+					"run: yarn verify:native-dependency:seal",
+					"run: yarn install --frozen-lockfile",
+				)
+				.replace("run: __INSTALL__", "run: yarn verify:native-dependency:seal"),
+			/after frozen install/i,
+		],
+		[
+			"intervening step",
+			source.replace(
+				"\n      - name: Seal native dependency",
+				"\n      - name: Unrelated step\n        run: yarn typecheck\n\n      - name: Seal native dependency",
+			),
+			/immediately follow install/i,
+		],
+		[
+			"seal outside test job",
+			`${source.replace(
+				"run: yarn verify:native-dependency:seal",
+				"run: yarn typecheck",
+			)}\n  detached-seal:\n    runs-on: ubuntu-latest\n    steps:\n      - run: yarn verify:native-dependency:seal\n`,
+			/test job must run/i,
+		],
+		[
+			"missing pull request trigger",
+			source.replace("  pull_request:\n", ""),
+			/pull requests/i,
+		],
+		[
+			"missing master trigger",
+			source.replace("    branches: [master]", "    branches: [next]"),
+			/master pushes/i,
+		],
+		[
+			"build bypasses test",
+			source.replace("    needs: test", "    needs: []"),
+			/build-macos must depend/i,
+		],
+	])("rejects %s", (_name, hostile, diagnostic) => {
+		expect(validateCiWorkflowPolicy(hostile)).toEqual(
+			expect.arrayContaining([expect.stringMatching(diagnostic)]),
+		);
 	});
 });

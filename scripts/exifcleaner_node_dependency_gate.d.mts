@@ -1,4 +1,5 @@
 export const ALLOWED_DRAFT_SHA: string;
+export const SEALED_VERSION: string;
 
 export function classifyDependencySpec(spec: unknown): {
 	kind:
@@ -14,6 +15,10 @@ export function validateSealDependency(input: {
 	lockText: string;
 	evidence: Record<string, unknown>;
 }): readonly string[];
+export function validateRegistryEvidence(
+	evidence: Record<string, unknown>,
+	version: string,
+): readonly string[];
 
 export function validatePackageMetadata(
 	packageJson: {
@@ -22,6 +27,7 @@ export function validatePackageMetadata(
 	},
 	packedPaths?: readonly string[],
 ): readonly string[];
+export function validateCiWorkflowPolicy(source: string): readonly string[];
 
 export function auditInstalledRuntime(packageRoot: string): {
 	problems: readonly string[];

@@ -69,7 +69,7 @@
 		"check:deps": "madge --circular --extensions ts,tsx src/"
 	},
 	"dependencies": {
-		"exifcleaner-node": "https://github.com/szTheory/exifcleaner-node.git#05f64cf6718ab2532ddac73429c7736ab31d95f3",
+		"exifcleaner-node": "0.1.1",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"zod": "^3.25.0"

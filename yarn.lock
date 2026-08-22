@@ -2175,9 +2175,10 @@ esutils@^2.0.2:
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.3.tgz#74d2eb4de0b8da1293711910d50775b9b710ef64"
   integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
-"exifcleaner-node@https://github.com/szTheory/exifcleaner-node.git#05f64cf6718ab2532ddac73429c7736ab31d95f3":
-  version "0.1.0"
-  resolved "https://github.com/szTheory/exifcleaner-node.git#05f64cf6718ab2532ddac73429c7736ab31d95f3"
+exifcleaner-node@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/exifcleaner-node/-/exifcleaner-node-0.1.1.tgz#a1280ed9afb1d5863c58b6559e01549df64a1cdd"
+  integrity sha512-9SkTOLaJBphb/YBo3JkwJ9ShunLbKzUIsgCTxG5k9UnN1SWb3tFD0IjUr4Yo3P7tEyWH4rnrUUkdo8fPVvDT6g==
 
 expect-type@^1.3.0:
   version "1.4.0"
