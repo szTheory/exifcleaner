@@ -163,28 +163,19 @@ describe("ExifToolAdapter.inspect", () => {
 	});
 });
 
-describe("ExifToolAdapter.removeMetadata", () => {
-	it("returns ok result on successful metadata removal", async () => {
+describe("ExifToolAdapter.sanitize", () => {
+	it("maps a basic in-place sanitize request to the historical write arguments", async () => {
 		const fakeProcess = makeFakeProcess();
 		const adapter = new ExifToolAdapter({ process: fakeProcess });
 
-		const result = await adapter.removeMetadata({
-			filePath: "/tmp/photo.jpg",
-			args: ["-all=", "-overwrite_original"],
+		const result = await adapter.sanitize({
+			source: "/tmp/photo.jpg",
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveTimestamps: false,
 		});
 
-		expect(result.ok).toBe(true);
-	});
-
-	it("passes args as extraArgs to writeMetadata", async () => {
-		const fakeProcess = makeFakeProcess();
-		const adapter = new ExifToolAdapter({ process: fakeProcess });
-
-		await adapter.removeMetadata({
-			filePath: "/tmp/photo.jpg",
-			args: ["-all=", "-overwrite_original"],
-		});
-
+		expect(result).toEqual({ ok: true, value: undefined });
 		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
 			filePath: "/tmp/photo.jpg",
 			metadata: {},
@@ -192,60 +183,241 @@ describe("ExifToolAdapter.removeMetadata", () => {
 		});
 	});
 
-	it("returns process-not-open error when process throws", async () => {
-		const fakeProcess = makeFakeProcess({
-			writeMetadata: vi.fn().mockRejectedValue(new Error("not open")),
-		});
+	it.each([
+		{
+			name: "timestamp preservation",
+			request: {
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: true,
+			},
+			extraArgs: ["-all=", "-P", "-overwrite_original"],
+		},
+		{
+			name: "orientation preservation",
+			request: {
+				preserveOrientation: true,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			},
+			extraArgs: [
+				"-all=",
+				"-TagsFromFile",
+				"@",
+				"-Orientation",
+				"-overwrite_original",
+			],
+		},
+		{
+			name: "ICC preservation",
+			request: {
+				preserveOrientation: false,
+				preserveColorProfile: true,
+				preserveTimestamps: false,
+			},
+			extraArgs: [
+				"-all=",
+				"-TagsFromFile",
+				"@",
+				"-ICC_Profile",
+				"-overwrite_original",
+			],
+		},
+		{
+			name: "orientation and ICC preservation",
+			request: {
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				preserveTimestamps: false,
+			},
+			extraArgs: [
+				"-all=",
+				"-TagsFromFile",
+				"@",
+				"-Orientation",
+				"-ICC_Profile",
+				"-overwrite_original",
+			],
+		},
+		{
+			name: "orientation and timestamp preservation",
+			request: {
+				preserveOrientation: true,
+				preserveColorProfile: false,
+				preserveTimestamps: true,
+			},
+			extraArgs: [
+				"-all=",
+				"-TagsFromFile",
+				"@",
+				"-Orientation",
+				"-P",
+				"-overwrite_original",
+			],
+		},
+		{
+			name: "ICC and timestamp preservation",
+			request: {
+				preserveOrientation: false,
+				preserveColorProfile: true,
+				preserveTimestamps: true,
+			},
+			extraArgs: [
+				"-all=",
+				"-TagsFromFile",
+				"@",
+				"-ICC_Profile",
+				"-P",
+				"-overwrite_original",
+			],
+		},
+		{
+			name: "all preservation settings",
+			request: {
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				preserveTimestamps: true,
+			},
+			extraArgs: [
+				"-all=",
+				"-TagsFromFile",
+				"@",
+				"-Orientation",
+				"-ICC_Profile",
+				"-P",
+				"-overwrite_original",
+			],
+		},
+	])("preserves exact ordering for $name", async ({ request, extraArgs }) => {
+		const fakeProcess = makeFakeProcess();
 		const adapter = new ExifToolAdapter({ process: fakeProcess });
 
-		const result = await adapter.removeMetadata({
-			filePath: "/tmp/photo.jpg",
-			args: ["-all=", "-overwrite_original"],
-		});
+		await adapter.sanitize({ source: "/tmp/photo.jpg", ...request });
 
-		expect(result.ok).toBe(false);
-		if (!result.ok) {
-			expect(result.error.code).toBe("process-not-open");
-		}
+		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/photo.jpg",
+			metadata: {},
+			extraArgs,
+		});
 	});
 
-	it("returns a safe typed error for an unsafe generated output path", async () => {
-		const fakeProcess = makeFakeProcess({
-			writeMetadata: vi.fn().mockRejectedValue(new UnsafeExifToolPathError()),
-		});
+	it.each(["video.mp4", "audio.m4a"])(
+		"clears all measured QuickTime dates for %s before destination selection",
+		async (fileName) => {
+			const fakeProcess = makeFakeProcess();
+			const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+			await adapter.sanitize({
+				source: `/tmp/${fileName}`,
+				destination: `/tmp/${fileName}.cleaned`,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			});
+
+			expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+				filePath: `/tmp/${fileName}`,
+				metadata: {},
+				extraArgs: [
+					"-all=",
+					"-QuickTime:CreateDate=",
+					"-QuickTime:ModifyDate=",
+					"-TrackCreateDate=",
+					"-TrackModifyDate=",
+					"-MediaCreateDate=",
+					"-MediaModifyDate=",
+					"-o",
+					`/tmp/${fileName}.cleaned`,
+				],
+			});
+		},
+	);
+
+	it("does not start a process write for an already-aborted request", async () => {
+		const fakeProcess = makeFakeProcess();
 		const adapter = new ExifToolAdapter({ process: fakeProcess });
+		const controller = new AbortController();
+		controller.abort();
 
-		const result = await adapter.removeMetadata({
-			filePath: "/tmp/photo_cleaned.jpg\r-overwrite_original",
-			args: ["-all="],
+		await expect(
+			adapter.sanitize({
+				source: "/tmp/photo.jpg",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+				signal: controller.signal,
+			}),
+		).resolves.toEqual({
+			ok: false,
+			error: { code: "engine-error", detail: "Aborted" },
+		});
+		expect(fakeProcess.writeMetadata).not.toHaveBeenCalled();
+	});
+
+	it("converts unsafe paths and process failures to safe engine-neutral errors", async () => {
+		const unsafeAdapter = new ExifToolAdapter({
+			process: makeFakeProcess({
+				writeMetadata: vi.fn().mockRejectedValue(new UnsafeExifToolPathError()),
+			}),
+		});
+		const unavailableAdapter = new ExifToolAdapter({
+			process: makeFakeProcess({
+				writeMetadata: vi.fn().mockRejectedValue(new Error("not open")),
+			}),
 		});
 
-		expect(result).toEqual({
+		await expect(
+			unsafeAdapter.sanitize({
+				source: "/tmp/photo\n.jpg",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			}),
+		).resolves.toEqual({
 			ok: false,
 			error: {
-				code: "exiftool-error",
+				code: "engine-error",
 				detail: "The selected file path is not supported",
+				backend: "exiftool",
 			},
+		});
+		await expect(
+			unavailableAdapter.sanitize({
+				source: "/tmp/photo.jpg",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			}),
+		).resolves.toEqual({
+			ok: false,
+			error: { code: "engine-unavailable", backend: "exiftool" },
 		});
 	});
 
-	it("returns exiftool-error when process result has non-null error", async () => {
-		const fakeProcess = makeFakeProcess({
-			writeMetadata: vi
-				.fn()
-				.mockResolvedValue({ data: null, error: "Permission denied" }),
-		});
-		const adapter = new ExifToolAdapter({ process: fakeProcess });
-
-		const result = await adapter.removeMetadata({
-			filePath: "/tmp/photo.jpg",
-			args: ["-all=", "-overwrite_original"],
+	it("preserves the process result detail as safe engine-neutral provenance", async () => {
+		const adapter = new ExifToolAdapter({
+			process: makeFakeProcess({
+				writeMetadata: vi
+					.fn()
+					.mockResolvedValue({ data: null, error: "Permission denied" }),
+			}),
 		});
 
-		expect(result.ok).toBe(false);
-		if (!result.ok) {
-			expect(result.error.code).toBe("exiftool-error");
-		}
+		await expect(
+			adapter.sanitize({
+				source: "/tmp/photo.jpg",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			}),
+		).resolves.toEqual({
+			ok: false,
+			error: {
+				code: "engine-error",
+				detail: "Permission denied",
+				backend: "exiftool",
+			},
+		});
 	});
 });
 
