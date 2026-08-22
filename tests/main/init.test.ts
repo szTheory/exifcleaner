@@ -10,6 +10,8 @@ const mocks = vi.hoisted(() => ({
 	setupExifHandlers: vi.fn(),
 	setupFolderHandlers: vi.fn(),
 	setupSettingsHandlers: vi.fn(),
+	updateSettingsAndNotify: vi.fn(),
+	setLanguageChangeHandler: vi.fn(),
 	setupThemeHandlers: vi.fn(),
 	setupRevealHandlers: vi.fn(),
 	setupContextMenu: vi.fn(),
@@ -43,7 +45,7 @@ vi.mock("../../src/main/i18n", () => ({
 }));
 vi.mock("../../src/main/menu/menu", () => ({ setupMenus: vi.fn() }));
 vi.mock("../../src/main/menu/menu_view", () => ({
-	setLanguageChangeHandler: vi.fn(),
+	setLanguageChangeHandler: mocks.setLanguageChangeHandler,
 	setLanguageSettingGetter: vi.fn(),
 	setThemeChangeHandler: vi.fn(),
 	setThemeSettingGetter: vi.fn(),
@@ -60,6 +62,7 @@ vi.mock("../../src/main/folder_handlers", () => ({
 }));
 vi.mock("../../src/main/settings_handlers", () => ({
 	setupSettingsHandlers: mocks.setupSettingsHandlers,
+	updateSettingsAndNotify: mocks.updateSettingsAndNotify,
 }));
 vi.mock("../../src/main/theme_handlers", () => ({
 	setupThemeHandlers: mocks.setupThemeHandlers,
@@ -89,6 +92,7 @@ describe("main process initialization", () => {
 			exiftoolProcess: { close: vi.fn() },
 		});
 		mocks.initContainer.mockResolvedValue(undefined);
+		mocks.updateSettingsAndNotify.mockResolvedValue(undefined);
 	});
 
 	it("initializes the container and process-wide handlers only once", async () => {
@@ -123,5 +127,19 @@ describe("main process initialization", () => {
 		expect(mocks.registerAllowedSender).toHaveBeenCalledWith(44);
 		expect(mocks.hardenNavigation).toHaveBeenCalledWith(window);
 		expect(mocks.unregisterSender).toHaveBeenCalledWith(44);
+	});
+
+	it("routes menu language changes through the awaited settings update", async () => {
+		await import("../../src/main/init").then(({ initProcess }) =>
+			initProcess(),
+		);
+		const languageHandler = mocks.setLanguageChangeHandler.mock
+			.calls[0]?.[0] as ((code: string | null) => Promise<void>) | undefined;
+
+		await languageHandler?.("fr");
+
+		expect(mocks.updateSettingsAndNotify).toHaveBeenCalledWith(
+			expect.objectContaining({ partial: { language: "fr" } }),
+		);
 	});
 });

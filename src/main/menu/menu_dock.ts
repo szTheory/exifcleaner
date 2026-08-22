@@ -5,11 +5,11 @@ import { IPC_CHANNELS } from "../../common";
 import { LANGUAGE_NAMES } from "../../domain";
 
 // Set by init.ts to avoid circular dependency with container
-let onLanguageChange: ((code: string | null) => void) | null = null;
+let onLanguageChange: ((code: string | null) => Promise<void>) | null = null;
 let getLanguageSetting: (() => string | null) | null = null;
 
 export function setDockLanguageChangeHandler(
-	handler: (code: string | null) => void,
+	handler: (code: string | null) => Promise<void>,
 ): void {
 	onLanguageChange = handler;
 }
@@ -29,7 +29,7 @@ function dockLanguageSubmenu(): MenuItemConstructorOptions {
 			type: "radio",
 			checked: settingValue === lang.code,
 			click: () => {
-				onLanguageChange?.(lang.code);
+				void onLanguageChange?.(lang.code);
 			},
 		}),
 	);
@@ -42,7 +42,7 @@ function dockLanguageSubmenu(): MenuItemConstructorOptions {
 				type: "radio",
 				checked: settingValue === null,
 				click: () => {
-					onLanguageChange?.(null);
+					void onLanguageChange?.(null);
 				},
 			},
 			{ type: "separator" },
