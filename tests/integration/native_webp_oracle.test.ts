@@ -55,6 +55,8 @@ describe("native WebP sanitization with an independent ExifTool oracle", () => {
 		const source = path.join(dir, "sample.webp");
 		const destination = path.join(dir, "sample-cleaned.webp");
 		fs.copyFileSync(FIXTURE, source);
+		const fixtureTimestamp = new Date("2020-01-02T03:04:05.000Z");
+		fs.utimesSync(source, fixtureTimestamp, fixtureTimestamp);
 		const sourceDigest = sha256(source);
 		const sourceStats = fs.statSync(source);
 		const beforeDir = snapshotDir(dir);
@@ -71,10 +73,10 @@ describe("native WebP sanitization with an independent ExifTool oracle", () => {
 			expect(before).toMatchObject({ ok: true });
 			if (!before.ok) return;
 			expect(before.value.metadata).toMatchObject({
-				"IFD0:Make": "TestCamera",
-				"IFD0:Artist": "Test Author",
-				"IFD0:Orientation": "Rotate 90 CW",
-				"ICC_Profile:ProfileDescription": "Nikon Adobe RGB 4.0.0.3000",
+				"Camera:Make": "TestCamera",
+				"Author:Artist": "Test Author",
+				"Image:Orientation": "Rotate 90 CW",
+				"Image:ProfileDescription": "Nikon Adobe RGB 4.0.0.3000",
 			});
 
 			const result = await hybrid.sanitize({
@@ -92,8 +94,8 @@ describe("native WebP sanitization with an independent ExifTool oracle", () => {
 			expect(fs.existsSync(destination)).toBe(true);
 			expect(sha256(source)).toBe(sourceDigest);
 			expect(fs.statSync(source)).toMatchObject({
-			mtimeMs: sourceStats.mtimeMs,
-		});
+				mtimeMs: sourceStats.mtimeMs,
+			});
 			assertDirEffect(beforeDir, snapshotDir(dir), {
 				unchanged: ["sample.webp"],
 				added: ["sample-cleaned.webp"],
@@ -114,24 +116,38 @@ describe("native WebP sanitization with an independent ExifTool oracle", () => {
 				/WEBP/u,
 			);
 
-			const after = await exiftool.inspect({ source: destination, purpose: "display" });
+			const after = await exiftool.inspect({
+				source: destination,
+				purpose: "display",
+			});
 			expect(after).toMatchObject({ ok: true });
 			if (!after.ok) return;
-			expect(after.value.metadata).not.toHaveProperty("IFD0:Make");
-			expect(after.value.metadata).not.toHaveProperty("IFD0:Artist");
-			expect(after.value.metadata).toHaveProperty(
-			"IFD0:Orientation",
-			preservation.expectedOrientation ? "Rotate 90 CW" : undefined,
-		);
-			expect(after.value.metadata).toHaveProperty(
-			"ICC_Profile:ProfileDescription",
-			preservation.expectedColorProfile
-				? "Nikon Adobe RGB 4.0.0.3000"
-				: undefined,
-		);
-			expect(fs.statSync(destination).mtimeMs === sourceStats.mtimeMs).toBe(
-				preservation.expectedTimestampMatch,
-			);
+			expect(after.value.metadata).not.toHaveProperty("Camera:Make");
+			expect(after.value.metadata).not.toHaveProperty("Author:Artist");
+			if (preservation.expectedOrientation) {
+				expect(after.value.metadata).toHaveProperty(
+					"Image:Orientation",
+					"Rotate 90 CW",
+				);
+			} else {
+				expect(after.value.metadata).not.toHaveProperty("Image:Orientation");
+			}
+			if (preservation.expectedColorProfile) {
+				expect(after.value.metadata).toHaveProperty(
+					"Image:ProfileDescription",
+					"Nikon Adobe RGB 4.0.0.3000",
+				);
+			} else {
+				expect(after.value.metadata).not.toHaveProperty(
+					"Image:ProfileDescription",
+				);
+			}
+			const destinationTimestamp = fs.statSync(destination).mtimeMs;
+			if (preservation.expectedTimestampMatch) {
+				expect(destinationTimestamp).toBeCloseTo(sourceStats.mtimeMs, 0);
+			} else {
+				expect(destinationTimestamp).not.toBeCloseTo(sourceStats.mtimeMs, 0);
+			}
 		} finally {
 			await process.close();
 		}

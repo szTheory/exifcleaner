@@ -538,6 +538,13 @@ function createMinimalWebp(): Buffer {
 	return Buffer.concat([riffHeader, vp8Header, paddedVp8]);
 }
 
+// Nikon Adobe RGB 4.0.0.3000 profile, extracted from ExifTool 13.59's public
+// test corpus and pinned here so the WebP oracle fixture remains reproducible.
+const WEBP_ORACLE_ICC_PROFILE = Buffer.from(
+	"AAAB7E5LT04CIAAAbW50clJHQiBYWVogB88ADAAHABIAOwAWYWNzcEFQUEwAAAAAbm9uZQAAAAEAAAAAAAAAAAAAAAAAAPbWAAEAAAAA0y0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJZGVzYwAAAPAAAABNclhZWgAAAUAAAAAUZ1hZWgAAAVQAAAAUYlhZWgAAAWgAAAAUclRSQwAAAXwAAAAOZ1RSQwAAAYwAAAAOYlRSQwAAAZwAAAAOd3RwdAAAAawAAAAUY3BydAAAAcAAAAAsZGVzYwAAAAAAAAAbTmlrb24gQWRvYmUgUkdCIDQuMC4wLjMwMDAAAAAAAAAAAAAAABtOaWtvbiBBZG9iZSBSR0IgNC4wLjAuMzAwMAAAAABYWVogAAAAAAAAnBkAAE+mAAAE/FhZWiAAAAAAAAA0iwAAoCsAAA+VWFlaIAAAAAAAACYyAAAQLwAAvqBjdXJ2AAAAAAAAAAECMwAAY3VydgAAAAAAAAABAjMAAGN1cnYAAAAAAAAAAQIzAABYWVogAAAAAAAA81QAAQAAAAEWz3RleHQAAAAATmlrb24gSW5jLiAmIE5pa29uIENvcnBvcmF0aW9uIDIwMDEA",
+	"base64",
+);
+
 function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	console.log("Generating E2E test fixtures...");
 	fs.mkdirSync(fixturesDir, { recursive: true });
@@ -661,15 +668,21 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	);
 
 	// sample.webp - WebP with metadata
+	// sample.webp - provenance-pinned WebP with removable EXIF and opt-in
+	// Orientation/ICC/timestamp preservation evidence for the native oracle test.
 	const webpPath = path.join(fixturesDir, "sample.webp");
+	const webpIccPath = path.join(fixturesDir, "webp-oracle-profile.icc");
+	fs.writeFileSync(webpIccPath, WEBP_ORACLE_ICC_PROFILE);
 	fs.writeFileSync(webpPath, createMinimalWebp());
 	execFileSync(EXIFTOOL, [
 		"-overwrite_original",
 		"-Artist=Test Author",
 		"-Make=TestCamera",
+		"-Orientation#=6",
+		`-icc_profile<=${webpIccPath}`,
 		webpPath,
 	]);
-	console.log("  Created sample.webp (WebP with EXIF)");
+	console.log("  Created sample.webp (WebP with EXIF, Orientation, and ICC)");
 
 	// Error fixtures
 	// corrupted.jpg - JPEG magic bytes followed by garbage
