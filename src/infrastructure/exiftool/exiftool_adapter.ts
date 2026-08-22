@@ -2,7 +2,6 @@ import type { MetadataEnginePort } from "../../application/metadata_engine_port"
 import { cleanExifData } from "../../domain";
 import { QUICKTIME_DATE_REMOVAL_ARGS } from "../../domain/exif/exif";
 import { isMediaFile } from "../../domain/files/file_types";
-import type { ExifToolPort } from "../../application/exiftool_port";
 import type { Result } from "../../common";
 import { assertNever } from "../../common/types";
 import type { ExifError } from "../../domain";
@@ -16,14 +15,12 @@ const UNSAFE_PATH_MESSAGE = "The selected file path is not supported";
 const DISPLAY_INSPECTION_ARGS = ["-G1:2"];
 const OUTPUT_VERIFICATION_INSPECTION_ARGS = ["-File:FileType", "-File:Error"];
 
-// Adapter pattern: wraps the existing ExiftoolProcess with the clean ExifToolPort
+// Adapter pattern: wraps the existing ExiftoolProcess with the semantic metadata engine
 // interface. Does NOT modify ExiftoolProcess.ts (working infrastructure code).
 // Converts ExiftoolProcess's { data, error } / throw pattern to Result<T, ExifError>.
 
-export class ExifToolAdapter implements ExifToolPort, MetadataEnginePort {
+export class ExifToolAdapter implements MetadataEnginePort {
 	private readonly process: ExiftoolProcess;
-	/** @deprecated Transitional type-only compatibility until the CLI port is removed. */
-	declare readonly removeMetadata: ExifToolPort["removeMetadata"];
 
 	constructor({ process }: { process: ExiftoolProcess }) {
 		this.process = process;
@@ -44,7 +41,7 @@ export class ExifToolAdapter implements ExifToolPort, MetadataEnginePort {
 		};
 	}
 
-	async readMetadata({
+	private async readInspection({
 		filePath,
 		args,
 	}: {
@@ -91,7 +88,7 @@ export class ExifToolAdapter implements ExifToolPort, MetadataEnginePort {
 			purpose === "display"
 				? DISPLAY_INSPECTION_ARGS
 				: OUTPUT_VERIFICATION_INSPECTION_ARGS;
-		const result = await this.readMetadata({ filePath: source, args });
+		const result = await this.readInspection({ filePath: source, args });
 		if (!result.ok) {
 			return { ok: false, error: toMetadataEngineError(result.error) };
 		}
