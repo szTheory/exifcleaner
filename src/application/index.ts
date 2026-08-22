@@ -1,6 +1,10 @@
 // Application layer barrel file — re-exports commands, queries, ports, and use cases.
 
-export type { ExifToolPort } from "./exiftool_port";
+export type {
+	MetadataEnginePort,
+	MetadataInspection,
+	MetadataInspectionPurpose,
+} from "./metadata_engine_port";
 export type { LoggerPort } from "./logger_port";
 export type { SettingsPort } from "./settings_port";
 export type { XattrPort } from "./commands/remove_xattr_command";

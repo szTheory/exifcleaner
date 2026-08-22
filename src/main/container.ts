@@ -20,7 +20,7 @@ import { OutputTransaction } from "./output_transaction";
 
 export function createContainer(): {
 	exiftoolProcess: ExiftoolProcess;
-	exiftool: ExifToolAdapter;
+	metadataEngine: ExifToolAdapter;
 	settings: SettingsService;
 	logger: ConsoleLogger;
 	stripMetadata: StripMetadataCommand;
@@ -32,12 +32,14 @@ export function createContainer(): {
 } {
 	const logger = new ConsoleLogger();
 	const exiftoolProcess = new ExiftoolProcess({ binPath: exiftoolBinPath });
-	const exiftool = new ExifToolAdapter({ process: exiftoolProcess });
+	const metadataEngine = new ExifToolAdapter({ process: exiftoolProcess });
 	const settingsPath = path.join(app.getPath("userData"), "settings.json");
 	const settings = new SettingsService({ filePath: settingsPath, logger });
-	const stripMetadata = new StripMetadataCommand({ exiftool });
-	const readMetadata = new ReadMetadataQuery({ metadataEngine: exiftool });
-	const verifyGeneratedOutput = new VerifyGeneratedOutputQuery({ exiftool });
+	const stripMetadata = new StripMetadataCommand({ metadataEngine });
+	const readMetadata = new ReadMetadataQuery({ metadataEngine });
+	const verifyGeneratedOutput = new VerifyGeneratedOutputQuery({
+		metadataEngine,
+	});
 	const outputTransaction = new OutputTransaction({
 		stripMetadata,
 		verifyGeneratedOutput,
@@ -56,7 +58,7 @@ export function createContainer(): {
 
 	return {
 		exiftoolProcess,
-		exiftool,
+		metadataEngine,
 		settings,
 		logger,
 		stripMetadata,
@@ -71,6 +73,6 @@ export function createContainer(): {
 export type Container = ReturnType<typeof createContainer>;
 
 export async function initContainer(container: Container): Promise<void> {
-	await container.exiftool.open();
+	await container.exiftoolProcess.open();
 	await container.settings.load();
 }
