@@ -1,11 +1,36 @@
 import { assertNever } from "../../common/types";
 
+export type NativeMetadataErrorCode =
+	| "aborted"
+	| "invalid-options"
+	| "not-found"
+	| "unsupported-format"
+	| "malformed-file"
+	| "unsafe-structure"
+	| "unsupported-feature"
+	| "source-changed"
+	| "destination-exists"
+	| "destination-changed"
+	| "read-failed"
+	| "write-failed"
+	| "verification-failed"
+	| "cleanup-failed";
+
 export type MetadataEngineError =
 	| { readonly code: "engine-unavailable"; readonly backend?: "exiftool" }
 	| {
 			readonly code: "engine-error";
 			readonly detail: string;
 			readonly backend?: "exiftool";
+	  }
+	| {
+			readonly code: "native-error";
+			readonly nativeCode: NativeMetadataErrorCode;
+			readonly detail: string;
+			readonly path?: string;
+			readonly feature?: string;
+			readonly cause?: { readonly code?: string; readonly message: string };
+			readonly backend: "native-webp";
 	  };
 
 type LegacyExifError =
@@ -33,6 +58,8 @@ export function formatMetadataEngineError(error: MetadataEngineError): string {
 			return error.backend === "exiftool"
 				? `ExifTool error: ${error.detail}`
 				: `Metadata engine error: ${error.detail}`;
+		case "native-error":
+			return "Metadata engine error: native processing failed.";
 		default:
 			assertNever({ value: error });
 	}
@@ -55,6 +82,7 @@ export function formatExifError(error: ExifError): string {
 			return `ExifTool error: ${error.detail}`;
 		case "engine-unavailable":
 		case "engine-error":
+		case "native-error":
 			return formatMetadataEngineError(error);
 		default:
 			assertNever({ value: error });

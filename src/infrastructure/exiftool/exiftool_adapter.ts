@@ -208,6 +208,7 @@ function toMetadataEngineError(error: ExifError): MetadataEngineError {
 	switch (error.code) {
 		case "engine-unavailable":
 		case "engine-error":
+		case "native-error":
 			return error;
 		case "process-not-open":
 			return { code: "engine-unavailable", backend: "exiftool" };

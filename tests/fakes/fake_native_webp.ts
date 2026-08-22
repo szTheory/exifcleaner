@@ -1,13 +1,32 @@
 import type { Result } from "../../src/common/result";
-import type { NativeWebpError, NativeWebpPort } from "../../src/infrastructure/metadata/native_webp_port";
+import type {
+	NativeWebpError,
+	NativeWebpPort,
+} from "../../src/infrastructure/metadata/native_webp_port";
 
 export class FakeNativeWebp implements NativeWebpPort {
 	sanitizeCalls: Parameters<NativeWebpPort["sanitize"]>[0][] = [];
 
-	sanitizeResult: Result<void, NativeWebpError> = { ok: true, value: undefined };
+	sanitizeResult: Result<void, NativeWebpError> = {
+		ok: true,
+		value: undefined,
+	};
 
 	getCapabilities(): ReturnType<NativeWebpPort["getCapabilities"]> {
-		throw new Error("not implemented");
+		return {
+			formats: [
+				{
+					format: "webp",
+					sanitize: true,
+					detection: "magic",
+					preserves: {
+						orientation: true,
+						colorProfile: true,
+						timestamps: true,
+					},
+				},
+			],
+		};
 	}
 
 	async sanitize(
