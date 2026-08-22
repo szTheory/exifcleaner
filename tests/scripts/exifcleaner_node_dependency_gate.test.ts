@@ -14,6 +14,7 @@ import {
 	auditInstalledRuntime,
 	classifyDependencySpec,
 	validateDraftDependency,
+	validatePackageMetadata,
 	validateSealDependency,
 } from "../../scripts/exifcleaner_node_dependency_gate.mjs";
 
@@ -86,6 +87,23 @@ describe("dependency source policy", () => {
 			]),
 		);
 	});
+
+	test("rejects runtime dependencies, lifecycle scripts, and native payloads", () => {
+		expect(
+			validatePackageMetadata(
+				{
+					dependencies: { undici: "1.0.0" },
+					scripts: { postinstall: "curl https://example.test" },
+				},
+				["dist/engine.js", "prebuilds/native.node", "bin/helper.exe"],
+			),
+		).toEqual([
+			"runtime dependencies are forbidden",
+			"lifecycle install script is forbidden: postinstall",
+			"native or executable payload is forbidden: prebuilds/native.node",
+			"native or executable payload is forbidden: bin/helper.exe",
+		]);
+	});
 });
 
 describe("installed runtime audit", () => {
@@ -132,6 +150,16 @@ describe("installed runtime audit", () => {
 			"websocket",
 			`new WebSocket("wss://example.test");`,
 			"forbidden network API: WebSocket",
+		],
+		[
+			"xml request",
+			`new XMLHttpRequest();`,
+			"forbidden network API: XMLHttpRequest",
+		],
+		[
+			"event source",
+			`new EventSource("https://example.test");`,
+			"forbidden network API: EventSource",
 		],
 		[
 			"beacon",
