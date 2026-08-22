@@ -149,9 +149,8 @@ describe("main process initialization", () => {
 	it("composes one hybrid metadata engine while retaining one ExifTool lifecycle owner", async () => {
 		vi.doUnmock("../../src/main/container");
 		vi.doUnmock("../../src/infrastructure");
-		const { createContainer, initContainer } = await import(
-			"../../src/main/container"
-		);
+		const { createContainer, initContainer } =
+			await import("../../src/main/container");
 		const { HybridMetadataEngine } = await import("../../src/infrastructure");
 		const container = createContainer();
 		const sharedEngine = container.metadataEngine;
@@ -170,7 +169,9 @@ describe("main process initialization", () => {
 		expect(sharedEngine).toBeInstanceOf(HybridMetadataEngine);
 		expect(dependencies.stripMetadata.metadataEngine).toBe(sharedEngine);
 		expect(dependencies.readMetadata.metadataEngine).toBe(sharedEngine);
-		expect(dependencies.verifyGeneratedOutput.metadataEngine).toBe(sharedEngine);
+		expect(dependencies.verifyGeneratedOutput.metadataEngine).toBe(
+			sharedEngine,
+		);
 
 		await initContainer(container);
 		await container.exiftoolProcess.close();
