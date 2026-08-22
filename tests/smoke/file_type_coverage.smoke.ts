@@ -12,6 +12,17 @@ import {
 
 test.describe.configure({ mode: "serial" });
 
+async function launchForFullStrip() {
+	const context = await launchPackagedApp();
+	await context.window.evaluate(() =>
+		globalThis.window.api.settings.set({
+			preserveColorProfile: false,
+			preserveOrientation: false,
+		}),
+	);
+	return context;
+}
+
 for (const fixture of [
 	"sample.jpg",
 	"sample.png",
@@ -25,7 +36,7 @@ for (const fixture of [
 			? "sample.webp preserves its source and verifies output with bundled ExifTool in the installed artifact"
 			: `${fixture} processes through the installed artifact`,
 		async () => {
-			const context = await launchPackagedApp();
+			const context = await launchForFullStrip();
 			try {
 				await runPositiveFormatScenario(context, fixture);
 			} finally {
@@ -36,7 +47,7 @@ for (const fixture of [
 }
 
 test("mixed advertised formats process through the installed artifact", async () => {
-	const context = await launchPackagedApp();
+	const context = await launchForFullStrip();
 	try {
 		await runMixedFormatScenario(context);
 	} finally {
