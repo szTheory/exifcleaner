@@ -1,9 +1,27 @@
 import { describe, expect, it } from "vitest";
 import { HybridMetadataEngine } from "../../src/infrastructure/metadata/hybrid_metadata_engine";
+import type { NativeWebpError } from "../../src/infrastructure/metadata/native_webp_port";
 import { FakeMetadataEngine } from "../fakes/fake_metadata_engine";
 import { FakeNativeWebp } from "../fakes/fake_native_webp";
 
 describe("HybridMetadataEngine", () => {
+	const sanitizeRequest = {
+		source: "/files/source.webp",
+		destination: "/files/clean.webp",
+		preserveOrientation: true,
+		preserveColorProfile: true,
+		preserveTimestamps: true,
+	};
+
+	function nativeError(nativeCode: NativeWebpError["nativeCode"]): NativeWebpError {
+		return {
+			code: "native-error",
+			nativeCode,
+			detail: `native ${nativeCode}`,
+			path: sanitizeRequest.source,
+			backend: "native-webp",
+		};
+	}
 	it("keeps both inspection purposes on ExifTool", async () => {
 		const exiftool = new FakeMetadataEngine();
 		const nativeWebp = new FakeNativeWebp();
@@ -50,5 +68,105 @@ describe("HybridMetadataEngine", () => {
 		expect(exiftool.calls.filter((call) => call.method === "sanitize")).toEqual(
 			[],
 		);
+	});
+
+	it.each([
+		"unsupported-format",
+		"malformed-file",
+		"unsafe-structure",
+		"unsupported-feature",
+	] as const)("falls back to ExifTool exactly once after %s", async (nativeCode) => {
+		const exiftool = new FakeMetadataEngine();
+		const nativeWebp = new FakeNativeWebp();
+		nativeWebp.sanitizeResult = { ok: false, error: nativeError(nativeCode) };
+		const engine = new HybridMetadataEngine({ exiftool, nativeWebp });
+		const controller = new AbortController();
+		const request = { ...sanitizeRequest, signal: controller.signal };
+
+		const result = await engine.sanitize(request);
+
+		expect(result).toBe(exiftool.sanitizeResult);
+		expect(nativeWebp.sanitizeCalls).toEqual([request]);
+		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
+	});
+
+	it.each([
+		"aborted",
+		"invalid-options",
+		"not-found",
+		"read-failed",
+		"destination-exists",
+		"destination-changed",
+		"source-changed",
+		"write-failed",
+		"verification-failed",
+		"cleanup-failed",
+	] as const)("never retries %s after native work begins", async (nativeCode) => {
+		const exiftool = new FakeMetadataEngine();
+		const nativeWebp = new FakeNativeWebp();
+		const error = nativeError(nativeCode);
+		nativeWebp.sanitizeResult = { ok: false, error };
+		const engine = new HybridMetadataEngine({ exiftool, nativeWebp });
+
+		const result = await engine.sanitize(sanitizeRequest);
+
+		expect(result).toBe(nativeWebp.sanitizeResult);
+		expect(nativeWebp.sanitizeCalls).toEqual([sanitizeRequest]);
+		expect(exiftool.calls).toEqual([]);
+	});
+
+	it.each([
+		[
+			"non-WebP source",
+			{ ...sanitizeRequest, source: "/files/source.jpg" },
+		],
+		[
+			"missing destination",
+			{ ...sanitizeRequest, destination: undefined },
+		],
+		[
+			"same resolved path",
+			{
+				...sanitizeRequest,
+				destination: "/files/other/../source.webp",
+			},
+		],
+	] as const)("uses ExifTool directly for %s", async (_reason, request) => {
+		const exiftool = new FakeMetadataEngine();
+		const nativeWebp = new FakeNativeWebp();
+		const engine = new HybridMetadataEngine({ exiftool, nativeWebp });
+
+		const result = await engine.sanitize(request);
+
+		expect(result).toBe(exiftool.sanitizeResult);
+		expect(nativeWebp.sanitizeCalls).toEqual([]);
+		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
+	});
+
+	it("uses ExifTool directly when a requested preservation capability is absent", async () => {
+		const exiftool = new FakeMetadataEngine();
+		const nativeWebp = new FakeNativeWebp();
+		nativeWebp.capabilities = {
+			formats: [
+				{
+					format: "webp",
+					sanitize: true,
+					detection: "magic",
+					preserves: {
+						orientation: false,
+						colorProfile: true,
+						timestamps: true,
+					},
+				},
+			],
+		};
+		const engine = new HybridMetadataEngine({ exiftool, nativeWebp });
+
+		await engine.sanitize(sanitizeRequest);
+
+		expect(nativeWebp.sanitizeCalls).toEqual([]);
+		expect(exiftool.calls).toEqual([
+			{ method: "sanitize", request: sanitizeRequest },
+		]);
 	});
 });

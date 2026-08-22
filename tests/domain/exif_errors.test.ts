@@ -34,12 +34,34 @@ describe("MetadataEngineError", () => {
 			expect(result).not.toContain("ExifTool");
 		});
 
+		it("keeps native failure text generic", () => {
+			const result = formatMetadataEngineError({
+				code: "native-error",
+				nativeCode: "write-failed",
+				detail: "/private/output.webp write failed",
+				path: "/private/output.webp",
+				backend: "native-webp",
+			});
+
+			expect(result).toContain("native processing failed");
+			expect(result).not.toContain("/private/output.webp");
+		});
+
 		it("produces non-empty strings for all codes", () => {
 			const errors: MetadataEngineError[] = [
 				{ code: "engine-unavailable" },
 				{ code: "engine-unavailable", backend: "exiftool" },
 				{ code: "engine-error", detail: "err" },
 				{ code: "engine-error", detail: "err", backend: "exiftool" },
+				{
+					code: "native-error",
+					nativeCode: "unsupported-feature",
+					detail: "err",
+					path: "/files/source.webp",
+					feature: "orientation-preservation",
+					cause: { code: "EINVAL", message: "unsupported" },
+					backend: "native-webp",
+				},
 			];
 
 			for (const error of errors) {
