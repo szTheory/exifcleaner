@@ -3,11 +3,13 @@ import { StripMetadataCommand } from "../../src/application/commands/strip_metad
 import type { MetadataEnginePort } from "../../src/application/metadata_engine_port";
 
 let metadataEngine: MetadataEnginePort;
-let sanitize: ReturnType<typeof vi.fn>;
+let sanitize: ReturnType<typeof vi.fn<MetadataEnginePort["sanitize"]>>;
 let command: StripMetadataCommand;
 
 beforeEach(() => {
-	sanitize = vi.fn().mockResolvedValue({ ok: true, value: undefined });
+	sanitize = vi
+		.fn<MetadataEnginePort["sanitize"]>()
+		.mockResolvedValue({ ok: true, value: undefined });
 	metadataEngine = {
 		inspect: vi.fn(),
 		sanitize,
