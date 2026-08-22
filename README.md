@@ -2,7 +2,7 @@
 
 ![Version](https://img.shields.io/github/v/release/szTheory/exifcleaner) ![Total Downloads](https://img.shields.io/github/downloads/szTheory/exifcleaner/total)
 
-> Desktop app to clean metadata from images, videos, PDFs, and other files.
+> Desktop app to clean metadata from supported images, media files, and PDFs.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="static/screenshot-dark.png">
@@ -15,7 +15,7 @@
 - Drag and drop files or folders
 - Free and open source (MIT)
 - Cross-platform: macOS, Windows, and Linux
-- Supports 90+ image, video, and document formats ([full list below](#supported-file-types))
+- Supports a verified allowlist of image, media, and PDF formats ([full list below](#supported-file-types))
 - Privacy controls: preserve orientation, save as copy, remove macOS extended attributes, preserve timestamps
 - Folder recursion — drop a folder to process all files inside
 - Metadata inspection — expand any file to see before/after diff
@@ -120,71 +120,14 @@ sha256sum -c SHASUMS256.txt 2>&1 | grep OK
 
 ## Supported File Types
 
-Below is the intake list derived from formats for which [ExifTool](https://exiftool.org/) exposes write operations. Acceptance does not guarantee complete, irreversible removal for every container; the important exceptions are documented immediately after the list.
+ExifCleaner accepts only the formats below. This is the app's tested intake contract, not
+ExifTool's much broader reader/writer catalog.
 
-- **3G2, 3GP2** – 3rd Gen. Partnership Project 2 a/v (QuickTime-based)
-- **3GP, 3GPP** – 3rd Gen. Partnership Project a/v (QuickTime-based)
-- **AAX** – Audible Enhanced Audiobook (QuickTime-based)
-- **AI, AIT** – Adobe Illustrator [Template] (PS or PDF)
-- **ARQ** – Sony Alpha Pixel-Shift RAW (TIFF-based)
-- **ARW** – Sony Alpha RAW (TIFF-based)
-- **AVIF** – AV1 Image File Format (QuickTime-based)
-- **CR2** – Canon RAW 2 (TIFF-based) (CR2 spec)
-- **CR3** – Canon RAW 3 (QuickTime-based) (CR3 spec)
-- **CRM** – Canon RAW Movie (QuickTime-based)
-- **CRW, CIFF** – Canon RAW Camera Image File Format (CRW spec)
-- **CS1** – Sinar CaptureShop 1-shot RAW (PSD-based)
-- **DCP DNG** – Camera Profile (DNG-like)
-- **DNG** – Digital Negative (TIFF-based)
-- **DR4** – Canon DPP version 4 Recipe
-- **DVB** – Digital Video Broadcasting (QuickTime-based)
-- **EPS, EPSF, PS** – [Encapsulated] PostScript Format
-- **ERF** – Epson RAW Format (TIFF-based)
-- **EXIF** – Exchangeable Image File Format metadata (TIFF-based)
-- **EXV** – Exiv2 metadata file (JPEG-based)
-- **F4A, F4B, F4P, F4V** – Adobe Flash Player 9+ Audio/Video (QuickTime-based)
-- **FFF** – Hasselblad Flexible File Format (TIFF-based)
-- **FLIF** – Free Lossless Image Format
-- **GIF** – Compuserve Graphics Interchange Format
-- **GPR** – GoPro RAW (DNG-based)
-- **HDP, WDP, JXR** – Windows HD Photo / Media Photo / JPEG XR (TIFF-based)
-- **HEIC, HEIF** – High Efficiency Image Format (QuickTime-based)
-- **ICC, ICM** – International Color Consortium color profile
-- **IIQ** – Phase One Intelligent Image Quality RAW (TIFF-based)
-- **IND, INDD, INDT** – Adobe InDesign Document/Template
-- **INSP** – Insta360 Picture (JPEG-based)
-- **JP2, JPF, JPM, JPX** – JPEG 2000 image [Compound/Extended]
-- **JPEG, JPG, JPE** – Joint Photographic Experts Group image
-- **LRV** – Low-Resolution Video (QuickTime-based)
-- **M4A, M4B, M4P, M4V** – MPEG-4 Audio/Video (QuickTime-based)
-- **MEF** – Mamiya (RAW) Electronic Format (TIFF-based)
-- **MIE** – Meta Information Encapsulation (MIE specification)
-- **MOS** – Creo Leaf Mosaic (TIFF-based)
-- **MOV, QT** – Apple QuickTime Movie
-- **MP4** – Motion Picture Experts Group version 4 (QuickTime-based)
-- **MPO** – Extended Multi-Picture format (JPEG with MPF extensions)
-- **MQV** – Sony Mobile QuickTime Video
-- **NEF** – Nikon (RAW) Electronic Format (TIFF-based)
-- **NRW** – Nikon RAW (2) (TIFF-based)
-- **ORF** – Olympus RAW Format (TIFF-based)
-- **PDF** – Adobe Portable Document Format
-- **PEF** – Pentax (RAW) Electronic Format (TIFF-based)
-- **PNG, JNG, MNG** – Portable/JPEG/Multiple-image Network Graphics
-- **PPM, PBM, PGM** – Portable Pixel/Bit/Gray Map
-- **PSD, PSB, PSDT** – PhotoShop Document / Large Document / Template
-- **QTIF, QTI, QIF** – QuickTime Image File
-- **RAF** – FujiFilm RAW Format (currently refused without writing; see limitations)
-- **RAW** – Panasonic RAW (TIFF-based)
-- **RW2** – Panasonic RAW 2 (TIFF-based)
-- **RWL** – Leica RAW (TIFF-based)
-- **SR2** – Sony RAW 2 (TIFF-based)
-- **SRW** – Samsung RAW format (TIFF-based)
-- **THM** – Thumbnail image (JPEG)
-- **TIFF, TIF** – Tagged Image File Format
-- **VRD** – Canon DPP Recipe Data
-- **WEBP** – WebP image format
-- **X3F** – Sigma/Foveon RAW
-- **XMP** – Extensible Metadata Platform sidecar file
+<!-- exifcleaner-supported-extensions:start -->
+- **Images:** `.jpg`, `.jpeg`, `.png`, `.gif`, `.tiff`, `.tif`, `.webp`, `.heic`, `.heif`, `.bmp`, `.avif`, `.svg`, `.cr2`, `.cr3`, `.nef`, `.arw`, `.orf`, `.rw2`, `.raf`, `.dng`, `.pef`, `.srw`
+- **Media:** `.mp4`, `.mov`, `.avi`, `.m4a`, `.m4v`, `.3gp`, `.wmv`
+- **Documents:** `.pdf`
+<!-- exifcleaner-supported-extensions:end -->
 
 ## Known limitations by format
 
@@ -195,7 +138,7 @@ that prevent ExifCleaner from making an irreversible-removal guarantee:
 | --- | --- | --- |
 | RAF | The operation is refused before writing because ExifCleaner cannot currently guarantee a safe cleaned RAF artifact. | Source is left unchanged |
 | PDF | ExifTool writes a reversible PDF update; the original metadata remains recoverable, so ExifCleaner cannot securely erase PDF metadata. | Documented limitation — [#216](https://github.com/szTheory/exifcleaner/issues/216) |
-| MKV / Matroska | ExifTool exposes Matroska metadata for reading but does not provide writable tags, so ExifCleaner cannot reliably remove it without a separate remuxing engine. | Documented limitation — [#182](https://github.com/szTheory/exifcleaner/issues/182) |
+| MKV / Matroska | ExifTool exposes Matroska metadata for reading but does not provide writable tags, so ExifCleaner rejects MKV at intake. | Unsupported — [#182](https://github.com/szTheory/exifcleaner/issues/182) |
 | TIFF | Removal may be partial because some metadata can remain in IFD0. | Open investigation — [#199](https://github.com/szTheory/exifcleaner/issues/199) |
 | AVIF | A user-reported partial-removal case remains under investigation. | Open investigation — [#215](https://github.com/szTheory/exifcleaner/issues/215) |
 

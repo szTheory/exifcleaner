@@ -39,12 +39,12 @@
 	color: var(--ec-pill-pdf-text);
 }
 
-/* Video — MOV, MP4, M4V, AVI, MKV, 3GP, WMV */
+/* Media — MOV, MP4, M4A, M4V, AVI, 3GP, WMV */
 .type-pill--mov,
 .type-pill--mp4,
+.type-pill--m4a,
 .type-pill--m4v,
 .type-pill--avi,
-.type-pill--mkv,
 .type-pill--3gp,
 .type-pill--wmv {
 	background: var(--ec-pill-mov-bg);

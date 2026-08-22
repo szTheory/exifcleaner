@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.2.1
+
+### Added
+
+- M4A metadata removal through the same transactional verification path as other supported media
+
+### Changed
+
+- The README now lists the app's exact tested intake allowlist and CI rejects format-list drift
+
+### Fixed
+
+- MKV files are rejected at intake because the bundled ExifTool cannot write them
+
 ## 4.2.0
 
 ### Added

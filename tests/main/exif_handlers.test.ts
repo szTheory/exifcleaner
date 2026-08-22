@@ -256,6 +256,12 @@ describe("exif:remove handler", () => {
 			saveAsCopy: false,
 			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.mp4",
 		},
+		{
+			name: "overwrite-mode audio",
+			filePath: "/tmp/sample.m4a",
+			saveAsCopy: false,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.m4a",
+		},
 	])(
 		"uses the exact main-process port count for $name",
 		async ({ filePath, saveAsCopy, verifierPath }) => {

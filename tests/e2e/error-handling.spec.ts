@@ -144,49 +144,51 @@ test.describe("Error Handling", () => {
 		}
 	});
 
-	test("filters out unsupported file formats", async () => {
-		const { dir, copyFixture, cleanup } = createFixtureDir();
-		try {
-			const tempFile = copyFixture("unsupported.txt");
+	for (const fixture of ["unsupported.txt", "sample.mkv"] as const) {
+		test(`filters out unsupported file format ${fixture}`, async () => {
+			const { dir, copyFixture, cleanup } = createFixtureDir();
+			try {
+				const tempFile = copyFixture(fixture);
 
-			const before = snapshotDir(dir);
+				const before = snapshotDir(dir);
 
-			await app.evaluate(
-				({ BrowserWindow }, filePaths) => {
-					const win = BrowserWindow.getAllWindows()[0];
-					if (win) {
-						win.webContents.send("file-open-add-files", filePaths);
-					}
-				},
-				[tempFile],
-			);
+				await app.evaluate(
+					({ BrowserWindow }, filePaths) => {
+						const win = BrowserWindow.getAllWindows()[0];
+						if (win) {
+							win.webContents.send("file-open-add-files", filePaths);
+						}
+					},
+					[tempFile],
+				);
 
-			await expect(window.locator(".toast")).toContainText(
-				"1 unsupported files skipped",
-			);
+				await expect(window.locator(".toast")).toContainText(
+					"1 unsupported files skipped",
+				);
 
-			const after = snapshotDir(dir);
+				const after = snapshotDir(dir);
 
-			// isSupportedFile() filters this out in the renderer before any IPC
-			// call reaches ExifTool, so the file is never even opened for writing.
-			assertDirEffect(before, after, {
-				unchanged: ["unsupported.txt"],
-				added: [],
-				modified: [],
-				removed: [],
-			});
+				// isSupportedFile() filters this out in the renderer before any IPC
+				// call reaches ExifTool, so the file is never even opened for writing.
+				assertDirEffect(before, after, {
+					unchanged: [fixture],
+					added: [],
+					modified: [],
+					removed: [],
+				});
 
-			const dataRows = window.locator(".file-table__row");
-			const rowCount = await dataRows.count();
-			expect(rowCount).toBe(0);
+				const dataRows = window.locator(".file-table__row");
+				const rowCount = await dataRows.count();
+				expect(rowCount).toBe(0);
 
-			// Empty state should still be visible since no files were processed
-			const emptyState = window.locator("section.empty-state");
-			await expect(emptyState).toBeVisible();
-		} finally {
-			cleanup();
-		}
-	});
+				// Empty state should still be visible since no files were processed
+				const emptyState = window.locator("section.empty-state");
+				await expect(emptyState).toBeVisible();
+			} finally {
+				cleanup();
+			}
+		});
+	}
 
 	test("recovers and processes good files after problematic files", async () => {
 		const { dir, copyFixture, cleanup } = createFixtureDir();

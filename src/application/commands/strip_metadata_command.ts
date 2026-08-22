@@ -2,7 +2,7 @@ import type { ExifToolPort } from "../exiftool_port";
 import type { Result } from "../../common";
 import type { ExifError } from "../../domain";
 import { QUICKTIME_DATE_REMOVAL_ARGS } from "../../domain/exif/exif";
-import { isVideoFile } from "../../domain/files/file_types";
+import { isMediaFile } from "../../domain/files/file_types";
 
 // Builds ExifTool arguments, then invokes the bundled CLI to remove metadata.
 export class StripMetadataCommand {
@@ -39,7 +39,7 @@ export class StripMetadataCommand {
 		// CRITICAL FLAG ORDER: -all= must come before -TagsFromFile
 		// ExifTool processes flags left-to-right, so we strip first then copy back
 		const args: string[] = ["-all="];
-		if (isVideoFile({ filename: filePath })) {
+		if (isMediaFile({ filename: filePath })) {
 			args.push(...QUICKTIME_DATE_REMOVAL_ARGS);
 		}
 

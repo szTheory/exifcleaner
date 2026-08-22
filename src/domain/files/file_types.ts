@@ -1,5 +1,5 @@
 // Pure domain logic — zero dependencies, zero I/O.
-// Supported file extensions that ExifTool can process.
+// File extensions accepted by ExifCleaner's verified processing contract.
 
 export const SUPPORTED_EXTENSIONS: ReadonlySet<string> = new Set([
 	// Images
@@ -25,11 +25,11 @@ export const SUPPORTED_EXTENSIONS: ReadonlySet<string> = new Set([
 	".dng",
 	".pef",
 	".srw",
-	// Videos
+	// Media
 	".mp4",
 	".mov",
 	".avi",
-	".mkv",
+	".m4a",
 	".m4v",
 	".3gp",
 	".wmv",
@@ -52,11 +52,11 @@ export const RAW_EXTENSIONS: ReadonlySet<string> = new Set([
 
 const RAF_EXTENSIONS: ReadonlySet<string> = new Set([".raf"]);
 
-export const VIDEO_EXTENSIONS: ReadonlySet<string> = new Set([
+export const MEDIA_EXTENSIONS: ReadonlySet<string> = new Set([
 	".mp4",
 	".mov",
 	".avi",
-	".mkv",
+	".m4a",
 	".m4v",
 	".3gp",
 	".wmv",
@@ -83,8 +83,8 @@ export function isRafFile({ filename }: IsSupportedFileParams): boolean {
 	return hasExtension({ filename, extensions: RAF_EXTENSIONS });
 }
 
-export function isVideoFile({ filename }: IsSupportedFileParams): boolean {
-	return hasExtension({ filename, extensions: VIDEO_EXTENSIONS });
+export function isMediaFile({ filename }: IsSupportedFileParams): boolean {
+	return hasExtension({ filename, extensions: MEDIA_EXTENSIONS });
 }
 
 function hasExtension({

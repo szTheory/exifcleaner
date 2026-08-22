@@ -48,6 +48,8 @@ for (const file of documents) {
 	if (!(await exists(file))) failures.push(`missing document ${file}`);
 }
 
+await verifySupportedExtensions();
+
 if (failures.length > 0) {
 	throw new Error(
 		`Documentation verification failed:\n- ${failures.join("\n- ")}`,
@@ -68,6 +70,37 @@ async function verifyLocalLinks(documentPath, text) {
 		if (!(await exists(resolved))) {
 			failures.push(`${documentPath} has broken link ${match[1]}`);
 		}
+	}
+}
+
+async function verifySupportedExtensions() {
+	const sourcePath = "src/domain/files/file_types.ts";
+	const readmePath = "README.md";
+	const sourceText = await readText(sourcePath);
+	const readmeText = await readText(readmePath);
+	const sourceBlock = sourceText.match(
+		/export const SUPPORTED_EXTENSIONS:[\s\S]*?new Set\(\[([\s\S]*?)\]\);/,
+	)?.[1];
+	const readmeBlock = readmeText.match(
+		/<!-- exifcleaner-supported-extensions:start -->([\s\S]*?)<!-- exifcleaner-supported-extensions:end -->/,
+	)?.[1];
+
+	if (sourceBlock === undefined || readmeBlock === undefined) {
+		failures.push("supported-extension contract markers are missing");
+		return;
+	}
+
+	const sourceExtensions = [...sourceBlock.matchAll(/"(\.[a-z0-9]+)"/g)].map(
+		(match) => match[1],
+	);
+	const readmeExtensions = [...readmeBlock.matchAll(/`(\.[a-z0-9]+)`/g)].map(
+		(match) => match[1],
+	);
+
+	if (JSON.stringify(sourceExtensions) !== JSON.stringify(readmeExtensions)) {
+		failures.push(
+			`${readmePath} supported extensions must exactly match ${sourcePath}`,
+		);
 	}
 }
 

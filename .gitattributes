@@ -19,5 +19,6 @@
 *.mp4 binary
 *.mov binary
 *.m4a binary
+*.mkv binary
 *.ico binary
 *.icns binary
