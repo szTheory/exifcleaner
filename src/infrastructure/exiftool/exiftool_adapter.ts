@@ -1,5 +1,7 @@
 import type { MetadataEnginePort } from "../../application/metadata_engine_port";
 import { cleanExifData } from "../../domain";
+import { QUICKTIME_DATE_REMOVAL_ARGS } from "../../domain/exif/exif";
+import { isMediaFile } from "../../domain/files/file_types";
 import type { ExifToolPort } from "../../application/exiftool_port";
 import type { Result } from "../../common";
 import { assertNever } from "../../common/types";
@@ -20,6 +22,8 @@ const OUTPUT_VERIFICATION_INSPECTION_ARGS = ["-File:FileType", "-File:Error"];
 
 export class ExifToolAdapter implements ExifToolPort, MetadataEnginePort {
 	private readonly process: ExiftoolProcess;
+	/** @deprecated Transitional type-only compatibility until the CLI port is removed. */
+	declare readonly removeMetadata: ExifToolPort["removeMetadata"];
 
 	constructor({ process }: { process: ExiftoolProcess }) {
 		this.process = process;
@@ -133,28 +137,53 @@ export class ExifToolAdapter implements ExifToolPort, MetadataEnginePort {
 		};
 	}
 
-	async removeMetadata({
-		filePath,
-		args,
-	}: {
-		filePath: string;
-		args: string[];
-	}): Promise<Result<void, ExifError>> {
+	async sanitize({
+		source,
+		destination,
+		preserveOrientation,
+		preserveColorProfile,
+		preserveTimestamps,
+		signal,
+	}: Parameters<MetadataEnginePort["sanitize"]>[0]): ReturnType<
+		MetadataEnginePort["sanitize"]
+	> {
+		if (signal?.aborted) {
+			return { ok: false, error: { code: "engine-error", detail: "Aborted" } };
+		}
+
+		const extraArgs = ["-all="];
+		if (isMediaFile({ filename: source })) {
+			extraArgs.push(...QUICKTIME_DATE_REMOVAL_ARGS);
+		}
+
+		const preserveTags: string[] = [];
+		if (preserveOrientation) preserveTags.push("-Orientation");
+		if (preserveColorProfile) preserveTags.push("-ICC_Profile");
+		if (preserveTags.length > 0) {
+			extraArgs.push("-TagsFromFile", "@", ...preserveTags);
+		}
+		if (preserveTimestamps) extraArgs.push("-P");
+		if (destination !== undefined) {
+			extraArgs.push("-o", destination);
+		} else {
+			extraArgs.push("-overwrite_original");
+		}
+
 		try {
-			// Bridge: ExifToolPort's removeMetadata receives args like
-			// ["-all=", "-TagsFromFile", "@", "-Orientation", "-overwrite_original"].
-			// The adapter passes these as extraArgs to writeMetadata with an empty
-			// metadata object {} since -all= is already in the args array.
 			const result = await this.process.writeMetadata({
-				filePath,
+				filePath: source,
 				metadata: {},
-				extraArgs: args,
+				extraArgs,
 			});
 
 			if (result.error !== null) {
 				return {
 					ok: false,
-					error: { code: "exiftool-error", detail: result.error },
+					error: {
+						code: "engine-error",
+						detail: result.error,
+						backend: "exiftool",
+					},
 				};
 			}
 
@@ -163,10 +192,17 @@ export class ExifToolAdapter implements ExifToolPort, MetadataEnginePort {
 			if (error instanceof UnsafeExifToolPathError) {
 				return {
 					ok: false,
-					error: { code: "exiftool-error", detail: UNSAFE_PATH_MESSAGE },
+					error: {
+						code: "engine-error",
+						detail: UNSAFE_PATH_MESSAGE,
+						backend: "exiftool",
+					},
 				};
 			}
-			return { ok: false, error: { code: "process-not-open" } };
+			return {
+				ok: false,
+				error: { code: "engine-unavailable", backend: "exiftool" },
+			};
 		}
 	}
 }
@@ -179,7 +215,11 @@ function toMetadataEngineError(error: ExifError): MetadataEngineError {
 		case "process-not-open":
 			return { code: "engine-unavailable", backend: "exiftool" };
 		case "exiftool-error":
-			return { code: "engine-error", detail: error.detail, backend: "exiftool" };
+			return {
+				code: "engine-error",
+				detail: error.detail,
+				backend: "exiftool",
+			};
 		case "spawn-failed":
 		case "command-timeout":
 		case "process-exited":
