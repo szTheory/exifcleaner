@@ -164,6 +164,7 @@ declare module "*oracle_accountability_gate.mjs" {
 	export function evaluateAccountabilitySubject(
 		subject: AccountabilitySubject,
 	): string[];
+	export function buildRepositorySubject(): AccountabilitySubject;
 	export function renderAccountabilityClaims(claims: {
 		schemaVersion: number;
 		issues: AccountabilityClaim[];

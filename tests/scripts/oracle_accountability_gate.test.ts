@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { describe, expect, test } from "vitest";
 import {
+	buildRepositorySubject,
 	evaluateAccountabilitySubject,
 	evaluateCiWiring,
 	renderAccountabilityClaims,
@@ -71,6 +72,12 @@ const cleanSubject = (): AccountabilitySubject => ({
 });
 
 describe("evaluateAccountabilitySubject", () => {
+	test("reads the production Orientation seam from the ExifTool adapter", () => {
+		expect(buildRepositorySubject().orientationCommandSource).toContain(
+			'preserveTags.push("-Orientation")',
+		);
+	});
+
 	test("accepts the finite repository-owned Phase 20 contract", () => {
 		expect(evaluateAccountabilitySubject(cleanSubject())).toEqual([]);
 	});
