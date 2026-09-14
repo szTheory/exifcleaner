@@ -22,3 +22,9 @@
 *.mkv binary
 *.ico binary
 *.icns binary
+
+# Bundled upstream ExifTool distributions (708 Perl files) are vendored, not our code.
+# Without this, GitHub Linguist counts them and labels the repo "Perl" instead of
+# TypeScript. Excludes them from the language stats and collapses them in diffs.
+.resources/nix/bin/** linguist-vendored
+.resources/win/bin/** linguist-vendored
