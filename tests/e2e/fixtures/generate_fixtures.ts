@@ -29,6 +29,28 @@ const ISSUE_240_TAGS = {
 	MediaCreateDate: QUICKTIME_DATE,
 } as const;
 
+// Issue #344: Microsoft Pro Photo Tools writes the MicrosoftPhoto XMP namespace URI with a
+// trailing slash ("http://ns.microsoft.com/photo/1.0/"), which does not match ExifTool's
+// canonical URI (no trailing slash). ExifTool.pm's XMP parser recovers by toggling the
+// trailing slash and retrying (Image-ExifTool-13.59/lib/Image/ExifTool/XMP.pm:3902-3915,
+// the "patch for Nikon NX2 URI bug for Microsoft PhotoInfo namespace" branch), then emits
+// `$et->Warn("Fixed incorrect URI for xmlns:MicrosoftPhoto", 1)` -- the trailing `1` marks
+// this a *minor* warning (rendered as the `[minor] ` JSON value prefix), never an Error.
+// Measured this session: `xmlns:MicrosoftPhoto="http://ns.microsoft.com/photo/1.0/"` (WITH
+// the trailing slash) is the string that trips the recovery path and produces the warning;
+// declaring the canonical no-trailing-slash form produces no warning at all.
+const ISSUE_344_MICROSOFT_PHOTO_XMP = `<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:Description rdf:about="" xmlns:MicrosoftPhoto="http://ns.microsoft.com/photo/1.0/">
+<MicrosoftPhoto:Rating>3</MicrosoftPhoto:Rating>
+</rdf:Description>
+</rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>`;
+const ISSUE_344_EXPECTED_WARNING =
+	"[minor] Fixed incorrect URI for xmlns:MicrosoftPhoto";
+
 // Minimal valid 1x1 white JPEG (JFIF)
 function createMinimalJpeg(): Buffer {
 	return Buffer.from([
@@ -75,6 +97,25 @@ function createMinimalJpeg(): Buffer {
 		// EOI
 		0xff, 0xd9,
 	]);
+}
+
+// Build an APP1 XMP segment: marker + big-endian 2-byte length + the NUL-terminated Adobe
+// XMP identifier + the raw XMP packet. Byte-deterministic -- no timestamps, no hostname.
+function buildXmpApp1Segment(xml: string): Buffer {
+	const identifier = Buffer.from("http://ns.adobe.com/xap/1.0/\0", "ascii");
+	const packet = Buffer.from(xml, "utf8");
+	const payload = Buffer.concat([identifier, packet]);
+	const length = Buffer.alloc(2);
+	// Segment length field counts itself (2 bytes) plus everything after it, per the JPEG
+	// marker-segment spec -- it does not include the 2-byte 0xFFE1 marker itself.
+	length.writeUInt16BE(payload.length + 2, 0);
+	return Buffer.concat([Buffer.from([0xff, 0xe1]), length, payload]);
+}
+
+// Splice an APP1 XMP segment into a minimal JPEG immediately after the SOI marker (the first
+// two bytes), matching where real encoders place APP1.
+function spliceApp1(jpeg: Buffer, app1: Buffer): Buffer {
+	return Buffer.concat([jpeg.subarray(0, 2), app1, jpeg.subarray(2)]);
 }
 
 // Build a PNG chunk with correct CRC32 (covers type + data)
@@ -321,6 +362,37 @@ function assertIssue240Metadata(filePath: string): void {
 	}
 }
 
+// Reads the bundled binary's grouped (-G1:2) diagnostic output directly, rather than
+// reusing readFixtureMetadata's ungrouped -json, since ExifTool-group Error/Warning keys
+// (the values #344's fixtures must produce) only survive under -G.
+function readFixtureDiagnostics(filePath: string): Record<string, unknown> {
+	const output = execFileSync(EXIFTOOL, ["-j", "-G1:2", filePath], {
+		encoding: "utf8",
+		stdio: ["ignore", "pipe", "pipe"],
+	});
+	const parsed = JSON.parse(output) as unknown;
+	if (!Array.isArray(parsed) || parsed.length !== 1) {
+		throw new Error(`Expected one ExifTool result for ${filePath}`);
+	}
+	const first = parsed[0];
+	if (first === null || typeof first !== "object" || Array.isArray(first)) {
+		throw new Error(`Expected ExifTool object result for ${filePath}`);
+	}
+	return first as Record<string, unknown>;
+}
+
+// Verify with the real binary, per this file's own established convention: never assert a
+// fixture is correct by construction alone.
+function assertIssue344Warning(filePath: string): void {
+	const diagnostics = readFixtureDiagnostics(filePath);
+	const warning = diagnostics["ExifTool:Warning"];
+	if (warning !== ISSUE_344_EXPECTED_WARNING) {
+		throw new Error(
+			`${filePath} ExifTool:Warning expected "${ISSUE_344_EXPECTED_WARNING}", got ${String(warning)}`,
+		);
+	}
+}
+
 // Minimal valid WebP (VP8 lossy) — a proper 1x1 keyframe
 // VP8 spec: frame tag (3 bytes) + start code (3 bytes) + frame header
 function createMinimalWebp(): Buffer {
@@ -463,6 +535,21 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	]);
 	assertIssue240Metadata(issue240Path);
 	console.log("  Created issue240.mp4 (measured create-date family)");
+
+	// issue344_microsoft_photo.jpg - JPEG carrying only the malformed MicrosoftPhoto XMP
+	// namespace URI -- produces exactly one [minor] ExifTool:Warning and no ExifTool:Error.
+	const issue344Path = path.join(fixturesDir, "issue344_microsoft_photo.jpg");
+	fs.writeFileSync(
+		issue344Path,
+		spliceApp1(
+			createMinimalJpeg(),
+			buildXmpApp1Segment(ISSUE_344_MICROSOFT_PHOTO_XMP),
+		),
+	);
+	assertIssue344Warning(issue344Path);
+	console.log(
+		"  Created issue344_microsoft_photo.jpg (malformed MicrosoftPhoto XMP URI)",
+	);
 
 	// sample.webp - WebP with metadata
 	const webpPath = path.join(fixturesDir, "sample.webp");

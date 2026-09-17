@@ -2,6 +2,7 @@ import type { ExifToolPort } from "../exiftool_port";
 import type { Result } from "../../common";
 import type { ExifError } from "../../domain";
 import { cleanExifData } from "../../domain";
+import { classifyInspectionDiagnostics } from "../../infrastructure/exiftool/exiftool_diagnostics";
 
 export class ReadMetadataQuery {
 	private readonly exiftool: ExifToolPort;
@@ -29,17 +30,16 @@ export class ReadMetadataQuery {
 		if (firstItem === undefined) {
 			return { ok: true, value: {} };
 		}
-		const diagnostic = Object.entries(firstItem).find(([key]) => {
-			const parts = key.split(":");
-			const tag = parts.at(-1);
-			return parts[0] === "ExifTool" && (tag === "Error" || tag === "Warning");
+		const verdict = classifyInspectionDiagnostics({
+			record: firstItem,
+			purpose: "display",
 		});
-		if (diagnostic !== undefined) {
+		if (verdict.fatal) {
 			return {
 				ok: false,
 				error: {
 					code: "exiftool-error",
-					detail: String(diagnostic[1]),
+					detail: verdict.detail,
 				},
 			};
 		}
