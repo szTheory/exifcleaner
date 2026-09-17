@@ -199,6 +199,15 @@ declare module "*orientation_mutation_gate.mjs" {
 	}): Promise<void>;
 }
 
+declare module "*nc1_mutation_gate.mjs" {
+	export function applyNc1Mutation(source: string): string;
+	export function evaluateMutationVerdict(input: {
+		baseline: { success: boolean; failingTitles: string[] };
+		mutated: { success: boolean; failingTitles: string[] };
+		expectedFailingTitle: string;
+	}): { ok: boolean; reason: string };
+}
+
 declare module "*known_gap_gate.mjs" {
 	export const BANNED_PROSE_PHRASES: readonly string[];
 	export type KnownGapProblem = {

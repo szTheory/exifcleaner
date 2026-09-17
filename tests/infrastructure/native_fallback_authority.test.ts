@@ -190,8 +190,8 @@ describe("native fallback authority", () => {
 
 		expect(first).toBe(exiftool.sanitizeResult);
 		expect(second).toBe(exiftool.sanitizeResult);
-		expect(exiftool.calls.filter((call) => call.method === "sanitize")).toHaveLength(
-			2,
-		);
+		expect(
+			exiftool.calls.filter((call) => call.method === "sanitize"),
+		).toHaveLength(2);
 	});
 });

@@ -171,4 +171,48 @@ describe("native WebP sanitization with an independent ExifTool oracle", () => {
 			await process.close();
 		}
 	});
+
+	// NC-7 (D-27) whole-directory row: overwrite-mode routing never reaches the
+	// native engine, and the on-disk blast radius of an overwrite-mode
+	// sanitize is exactly one modified path with nothing added — asserted via
+	// assertDirEffect against a real temp fixture directory, per the
+	// nc7_granularity_decision recorded in 47-03-PLAN.md.
+	it("NC-7: an overwrite-mode sanitize modifies exactly one path and adds none, with native call count 0 and ExifTool call count 1", async () => {
+		const dir = fs.mkdtempSync(
+			path.join(os.tmpdir(), "native-webp-oracle-overwrite-"),
+		);
+		temporaryDirs.push(dir);
+		const source = path.join(dir, "sample.webp");
+		fs.copyFileSync(FIXTURE, source);
+		const beforeDir = snapshotDir(dir);
+		const process = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+		const exiftool = new ExifToolAdapter({ process });
+		const native = new NativeMetadataAdapter();
+		const hybrid = new HybridMetadataEngine({ exiftool, native });
+		const exiftoolWrite = vi.spyOn(exiftool, "sanitize");
+		const nativeWrite = vi.spyOn(native, "sanitize");
+
+		await process.open();
+		try {
+			const result = await hybrid.sanitize({
+				source,
+				destination: undefined,
+				outputMode: "overwrite",
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				preserveTimestamps: true,
+			});
+
+			expect(result).toMatchObject({ ok: true });
+			expect(nativeWrite).not.toHaveBeenCalled();
+			expect(exiftoolWrite).toHaveBeenCalledOnce();
+			assertDirEffect(beforeDir, snapshotDir(dir), {
+				modified: ["sample.webp"],
+				added: [],
+				removed: [],
+			});
+		} finally {
+			await process.close();
+		}
+	});
 });

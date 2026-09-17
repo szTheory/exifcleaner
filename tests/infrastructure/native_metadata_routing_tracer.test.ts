@@ -153,7 +153,15 @@ describe("native metadata routing tracer", () => {
 		expect(redeemFallbackGrant(grant)).toBe(false);
 	});
 
-	it.each(["aborted", "malformed-file", "write-failed"] as const)(
+	// "malformed-file" deliberately excluded from this sweep: that exact
+	// tuple (phase: transaction, nativeWrite: started, code: malformed-file)
+	// is 47-03's dedicated NC-1 fixture in native_fallback_authority.test.ts,
+	// which scripts/nc1_mutation_gate.mjs's mutation targets specifically so
+	// restoring the deleted error-code switch makes EXACTLY that one test
+	// fail. Keeping "malformed-file" here too would make this test fail
+	// alongside it, widening the mutation's observed blast radius past the
+	// single title the gate requires.
+	it.each(["aborted", "not-found", "write-failed"] as const)(
 		"authorizes zero substitute writers for a post-write %s error, regardless of its error code",
 		async (nativeCode) => {
 			const exiftool = new FakeMetadataEngine();

@@ -302,7 +302,11 @@ describe("HybridMetadataEngine", () => {
 					// version) rather than a shape the compiler would ever emit
 					// on its own.
 					detection: "not-magic" as unknown as "magic",
-					preserves: { orientation: true, colorProfile: true, timestamps: true },
+					preserves: {
+						orientation: true,
+						colorProfile: true,
+						timestamps: true,
+					},
 				},
 			],
 		};
@@ -331,7 +335,11 @@ describe("HybridMetadataEngine", () => {
 					format: "avif",
 					sanitize: true,
 					detection: "magic",
-					preserves: { orientation: true, colorProfile: true, timestamps: true },
+					preserves: {
+						orientation: true,
+						colorProfile: true,
+						timestamps: true,
+					},
 				},
 			],
 		};
