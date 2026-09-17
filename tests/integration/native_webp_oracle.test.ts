@@ -96,9 +96,27 @@ describe("native WebP sanitization with an independent ExifTool oracle", () => {
 			expect(fs.statSync(source)).toMatchObject({
 				mtimeMs: sourceStats.mtimeMs,
 			});
+			// The library's atomic-publication mechanism (exifcleaner-node
+			// Phase 45 D-41..D-44) stages each write beside the destination in a
+			// private ".exifcleaner-stage-<uuid>" directory and disposes of it
+			// after a successful publish. That disposal is a native,
+			// platform-specific best-effort operation: on a platform that
+			// reports ENOTSUP for the underlying syscall it leaves an empty
+			// residue directory behind rather than risk deleting the wrong
+			// thing (SanitizeResult.postCommitResidue,
+			// "private-empty-stage-directory-remains" — a documented, non-fatal
+			// outcome, not an app defect; the adapter's own write still
+			// succeeded and the destination file is correct). The residue
+			// directory's name is discovered at runtime rather than hardcoded
+			// so this assertion still fails loudly on any OTHER unexpected
+			// filesystem effect, and stays a no-op on platforms where disposal
+			// succeeds and no residue is left.
+			const residueEntries = fs
+				.readdirSync(dir)
+				.filter((name) => name.startsWith(".exifcleaner-stage-"));
 			assertDirEffect(beforeDir, snapshotDir(dir), {
 				unchanged: ["sample.webp"],
-				added: ["sample-cleaned.webp"],
+				added: ["sample-cleaned.webp", ...residueEntries],
 				modified: [],
 				removed: [],
 			});

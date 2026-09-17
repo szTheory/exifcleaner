@@ -295,7 +295,18 @@ describe("installed runtime audit", () => {
 });
 
 describe("repository sealed state", () => {
-	test("pins the manifest, lock, and evidence to the audited registry version", () => {
+	// D-01/D-03 (Phase 47): the repository intentionally moved off the sealed
+	// registry dependency onto the admitted draft git SHA. While on the draft,
+	// `validateSealDependency` is REQUIRED to report exactly this fixed set of
+	// mismatches against the audited registry evidence — that non-ready seal
+	// verdict is what `yarn verify:native-dependency` prints as "DRAFT ONLY: ...
+	// seal verdict is intentionally non-ready." A regression back to `[]` here
+	// would mean the manifest/lock silently re-sealed to the registry version
+	// without an explicit D-01-equivalent decision, which is exactly the
+	// tamper case T-47-01 guards against. Phase 48 swaps back to a sealed
+	// exact registry dependency (D-04) and restores the `[]`/no-SHA-in-lock
+	// assertions this test used to make.
+	test("reports the accepted non-ready seal verdict against the admitted draft dependency", () => {
 		const root = path.resolve(import.meta.dirname, "../..");
 		const manifest = JSON.parse(
 			readFileSync(path.join(root, "package.json"), "utf8"),
@@ -307,10 +318,16 @@ describe("repository sealed state", () => {
 				"utf8",
 			),
 		);
-		expect(validateSealDependency({ manifest, lockText, evidence })).toEqual(
-			[],
-		);
-		expect(lockText).not.toContain(ALLOWED_DRAFT_SHA);
+		expect(validateSealDependency({ manifest, lockText, evidence })).toEqual([
+			"seal requires an exact registry semver dependency",
+			`seal requires audited registry version ${SEALED_VERSION}`,
+			"seal requires a matching exact lock resolution",
+			"seal evidence mismatch: package.version",
+			"seal evidence mismatch: releaseTag",
+			"seal evidence mismatch: dist.tarball",
+			"lock integrity does not match registry evidence",
+		]);
+		expect(lockText).toContain(ALLOWED_DRAFT_SHA);
 	});
 });
 

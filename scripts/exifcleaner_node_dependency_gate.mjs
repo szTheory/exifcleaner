@@ -5,7 +5,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-export const ALLOWED_DRAFT_SHA = "05f64cf6718ab2532ddac73429c7736ab31d95f3";
+export const ALLOWED_DRAFT_SHA = "9b0d7f34f3dbfa633b46cc5427481ae7212b0a88";
 export const SEALED_VERSION = "0.1.1";
 const PACKAGE_NAME = "exifcleaner-node";
 const EVIDENCE_PATH = "docs/evidence/native-webp-registry-package.json";
