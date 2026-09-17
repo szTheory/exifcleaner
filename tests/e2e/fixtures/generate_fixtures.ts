@@ -50,6 +50,7 @@ const ISSUE_344_MICROSOFT_PHOTO_XMP = `<?xpacket begin="﻿" id="W5M0MpCehiHzreS
 <?xpacket end="w"?>`;
 const ISSUE_344_EXPECTED_WARNING =
 	"[minor] Fixed incorrect URI for xmlns:MicrosoftPhoto";
+const ISSUE_344_COOCCURRENCE_NON_MINOR_WARNING = "Bad offset for IFD1 Make";
 
 // Minimal valid 1x1 white JPEG (JFIF)
 function createMinimalJpeg(): Buffer {
@@ -112,10 +113,75 @@ function buildXmpApp1Segment(xml: string): Buffer {
 	return Buffer.concat([Buffer.from([0xff, 0xe1]), length, payload]);
 }
 
-// Splice an APP1 XMP segment into a minimal JPEG immediately after the SOI marker (the first
-// two bytes), matching where real encoders place APP1.
-function spliceApp1(jpeg: Buffer, app1: Buffer): Buffer {
-	return Buffer.concat([jpeg.subarray(0, 2), app1, jpeg.subarray(2)]);
+// Splice one or more APP1 segments into a minimal JPEG immediately after the SOI marker
+// (the first two bytes), matching where real encoders place APP1. JPEG permits multiple
+// APP1 segments (one EXIF, one XMP is the real-world convention this mirrors).
+function spliceApp1(jpeg: Buffer, ...app1Segments: Buffer[]): Buffer {
+	return Buffer.concat([
+		jpeg.subarray(0, 2),
+		...app1Segments,
+		jpeg.subarray(2),
+	]);
+}
+
+// D-06 settlement fixture (issue #344 co-occurrence, Task 2): a minimal EXIF TIFF/IFD
+// structure with exactly one IFD1 entry (the Make tag, ASCII, count large enough to force
+// an out-of-line value pointer) whose value offset points past the end of the file. Read
+// this against Exif.pm's `$et->Warn("Bad offset for $dir $tagStr", $inMakerNotes)`
+// (Image-ExifTool-13.59/lib/Image/ExifTool/Exif.pm:6660): $inMakerNotes is falsy for an
+// ordinary IFD1 entry, so the warning carries no `[minor]` prefix -- a second, independent,
+// non-minor ExifTool-group diagnostic to co-occur with the D-10 MicrosoftPhoto one. Measured
+// this session: produces exactly "Bad offset for IFD1 Make".
+function buildExifApp1BadIfd1Offset(): Buffer {
+	const u16le = (n: number): Buffer => {
+		const b = Buffer.alloc(2);
+		b.writeUInt16LE(n, 0);
+		return b;
+	};
+	const u32le = (n: number): Buffer => {
+		const b = Buffer.alloc(4);
+		b.writeUInt32LE(n, 0);
+		return b;
+	};
+
+	const MAKE_TAG_ID = 0x010f;
+	const ASCII_TYPE = 2;
+	const OUT_OF_RANGE_VALUE_OFFSET = 0xfffffff0;
+
+	const tiffHeader = Buffer.concat([
+		Buffer.from("II", "ascii"), // little-endian byte order mark
+		u16le(42), // TIFF magic
+		u32le(8), // offset to IFD0, immediately after this 8-byte header
+	]);
+
+	// IFD0: zero entries, next-IFD offset points straight at IFD1 (the "Bad offset for
+	// IFD1 ..." dir name in Exif.pm's warning comes from processing IFD1, not IFD0).
+	const ifd1Start =
+		8 + 2 /* count */ + 0 * 12 /* entries */ + 4; /* next offset */
+	const ifd0 = Buffer.concat([
+		u16le(0), // entry count
+		u32le(ifd1Start), // next IFD offset -> IFD1
+	]);
+
+	// IFD1: one entry (Make, ASCII, count=20 so it needs an out-of-line value pointer),
+	// whose value offset is deliberately out of range.
+	const ifd1Entry = Buffer.concat([
+		u16le(MAKE_TAG_ID),
+		u16le(ASCII_TYPE),
+		u32le(20),
+		u32le(OUT_OF_RANGE_VALUE_OFFSET),
+	]);
+	const ifd1 = Buffer.concat([
+		u16le(1), // entry count
+		ifd1Entry,
+		u32le(0), // no further IFD
+	]);
+
+	const tiff = Buffer.concat([tiffHeader, ifd0, ifd1]);
+	const payload = Buffer.concat([Buffer.from("Exif\0\0", "ascii"), tiff]);
+	const length = Buffer.alloc(2);
+	length.writeUInt16BE(payload.length + 2, 0);
+	return Buffer.concat([Buffer.from([0xff, 0xe1]), length, payload]);
 }
 
 // Build a PNG chunk with correct CRC32 (covers type + data)
@@ -362,11 +428,14 @@ function assertIssue240Metadata(filePath: string): void {
 	}
 }
 
-// Reads the bundled binary's grouped (-G1:2) diagnostic output directly, rather than
-// reusing readFixtureMetadata's ungrouped -json, since ExifTool-group Error/Warning keys
-// (the values #344's fixtures must produce) only survive under -G.
-function readFixtureDiagnostics(filePath: string): Record<string, unknown> {
-	const output = execFileSync(EXIFTOOL, ["-j", "-G1:2", filePath], {
+// Reads the bundled binary's grouped diagnostic output directly, rather than reusing
+// readFixtureMetadata's ungrouped -json, since ExifTool-group Error/Warning keys (the
+// values #344's fixtures must produce) only survive under -G.
+function readFixtureDiagnostics(
+	filePath: string,
+	groupArg = "-G1:2",
+): Record<string, unknown> {
+	const output = execFileSync(EXIFTOOL, ["-j", groupArg, filePath], {
 		encoding: "utf8",
 		stdio: ["ignore", "pipe", "pipe"],
 	});
@@ -389,6 +458,25 @@ function assertIssue344Warning(filePath: string): void {
 	if (warning !== ISSUE_344_EXPECTED_WARNING) {
 		throw new Error(
 			`${filePath} ExifTool:Warning expected "${ISSUE_344_EXPECTED_WARNING}", got ${String(warning)}`,
+		);
+	}
+}
+
+// D-06 settlement check: under -G1:2 alone the two diagnostics collide onto one suppressed
+// JSON key (measured this session -- see 48-D06-SETTLEMENT.md), so this asserts the
+// disambiguated -G1:2:4 shape the adopted fix actually reads.
+function assertIssue344Cooccurrence(filePath: string): void {
+	const diagnostics = readFixtureDiagnostics(filePath, "-G1:2:4");
+	const primary = diagnostics["ExifTool:Warning"];
+	const secondary = diagnostics["ExifTool:Copy1:Warning"];
+	if (primary !== ISSUE_344_COOCCURRENCE_NON_MINOR_WARNING) {
+		throw new Error(
+			`${filePath} ExifTool:Warning expected "${ISSUE_344_COOCCURRENCE_NON_MINOR_WARNING}", got ${String(primary)}`,
+		);
+	}
+	if (secondary !== ISSUE_344_EXPECTED_WARNING) {
+		throw new Error(
+			`${filePath} ExifTool:Copy1:Warning expected "${ISSUE_344_EXPECTED_WARNING}", got ${String(secondary)}`,
 		);
 	}
 }
@@ -549,6 +637,27 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	assertIssue344Warning(issue344Path);
 	console.log(
 		"  Created issue344_microsoft_photo.jpg (malformed MicrosoftPhoto XMP URI)",
+	);
+
+	// issue344_cooccurrence.jpg - the same malformed MicrosoftPhoto XMP PLUS an independent,
+	// non-minor ExifTool-group diagnostic (a corrupted EXIF IFD1 value offset) on one
+	// record -- the D-06 settlement fixture: a benign [minor] warning must never mask a
+	// serious sibling.
+	const issue344CooccurrencePath = path.join(
+		fixturesDir,
+		"issue344_cooccurrence.jpg",
+	);
+	fs.writeFileSync(
+		issue344CooccurrencePath,
+		spliceApp1(
+			createMinimalJpeg(),
+			buildExifApp1BadIfd1Offset(),
+			buildXmpApp1Segment(ISSUE_344_MICROSOFT_PHOTO_XMP),
+		),
+	);
+	assertIssue344Cooccurrence(issue344CooccurrencePath);
+	console.log(
+		"  Created issue344_cooccurrence.jpg (co-occurring minor + non-minor ExifTool diagnostics)",
 	);
 
 	// sample.webp - WebP with metadata

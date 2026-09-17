@@ -28,6 +28,14 @@ const ISSUE_344_MICROSOFT_PHOTO_SIZE_BYTES = 723;
 const ISSUE_344_EXPECTED_WARNING =
 	"[minor] Fixed incorrect URI for xmlns:MicrosoftPhoto";
 
+// D-06 settlement fixture (Task 2): the same MicrosoftPhoto XMP defect PLUS an independent
+// non-minor ExifTool-group diagnostic (corrupted EXIF IFD1 value offset) on one record.
+const ISSUE_344_COOCCURRENCE_FIXTURE = "issue344_cooccurrence.jpg";
+const ISSUE_344_COOCCURRENCE_SHA256 =
+	"5b4769bdf1afde6ad6228e30fec3c309277dbe81aa33b02c9b6d69596fe8dde0";
+const ISSUE_344_COOCCURRENCE_SIZE_BYTES = 765;
+const ISSUE_344_COOCCURRENCE_NON_MINOR_WARNING = "Bad offset for IFD1 Make";
+
 function sha256(filePath: string): string {
 	return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
@@ -39,6 +47,12 @@ describe("issue #344 fixture pins", () => {
 		expect(fs.statSync(filePath).size).toBe(
 			ISSUE_344_MICROSOFT_PHOTO_SIZE_BYTES,
 		);
+	});
+
+	it("pins the co-occurrence fixture's genuine bytes (SHA-256 and size)", () => {
+		const filePath = path.join(FIXTURES_DIR, ISSUE_344_COOCCURRENCE_FIXTURE);
+		expect(sha256(filePath)).toBe(ISSUE_344_COOCCURRENCE_SHA256);
+		expect(fs.statSync(filePath).size).toBe(ISSUE_344_COOCCURRENCE_SIZE_BYTES);
 	});
 });
 
@@ -84,6 +98,22 @@ describe("issue #344 end-to-end: one path only", () => {
 		const parsed = JSON.parse(output) as Record<string, unknown>[];
 		expect(parsed).toHaveLength(1);
 		expect(parsed[0]!["ExifTool:Warning"]).toBe(ISSUE_344_EXPECTED_WARNING);
+	});
+
+	it("the display path stays fatal when a non-minor warning co-occurs with the [minor] one (D-06/NC-4: a benign warning must never mask a serious sibling)", async () => {
+		const filePath = path.join(FIXTURES_DIR, ISSUE_344_COOCCURRENCE_FIXTURE);
+		const result = await readMetadataQuery.execute({ filePath });
+
+		expect(result.ok).toBe(false);
+		if (result.ok) {
+			return;
+		}
+		expect(result.error.code).toBe("exiftool-error");
+		if (result.error.code === "exiftool-error") {
+			expect(result.error.detail).toBe(
+				ISSUE_344_COOCCURRENCE_NON_MINOR_WARNING,
+			);
+		}
 	});
 });
 

@@ -49,9 +49,13 @@ export class VerifyGeneratedOutputQuery {
 		// "File:Other:FileType", never "FileType"). This scan is the approved scope
 		// addition (see 48-01-PLAN.md base_architecture_amendment): this path previously
 		// checked only `record.Error`, never ExifTool-group Warning at all.
+		//
+		// G4 is required, not cosmetic, same as read_metadata_query.ts: measured against
+		// the bundled binary (48-D06-SETTLEMENT.md), -G1:2 alone can silently collapse two
+		// co-occurring ExifTool-group diagnostics onto one suppressed JSON key.
 		const diagnosticResult = await this.exiftool.readMetadata({
 			filePath: generatedPath,
-			args: ["-G1:2"],
+			args: ["-G1:2:4"],
 		});
 
 		if (!diagnosticResult.ok) {

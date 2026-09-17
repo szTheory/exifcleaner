@@ -32,7 +32,9 @@ it("reads and cleans metadata from a file", async () => {
 	}
 	expect(exiftool.calls[0]).toEqual({
 		method: "readMetadata",
-		args: ["/tmp/test.jpg", ["-G1:2"]],
+		// -G4 disambiguates co-occurring ExifTool-group diagnostics (48-D06-SETTLEMENT.md);
+		// cleanExifData strips the CopyN segment it adds back off ordinary tag names.
+		args: ["/tmp/test.jpg", ["-G1:2:4"]],
 	});
 });
 
@@ -76,4 +78,67 @@ it.each([
 		ok: false,
 		error: { code: "exiftool-error", detail },
 	});
+});
+
+it("is lenient on a [minor]-prefixed ExifTool:Warning (issue #344, D-03 display leniency)", async () => {
+	exiftool.readResult = {
+		ok: true,
+		value: [
+			{
+				"ExifTool:Warning":
+					"[minor] Fixed incorrect URI for xmlns:MicrosoftPhoto",
+				"File:Other:FileType": "JPEG",
+			},
+		],
+	};
+
+	const result = await query.execute({ filePath: "/tmp/issue344.jpg" });
+
+	expect(result.ok).toBe(true);
+});
+
+it("stays fatal when a non-minor warning co-occurs with a [minor] one under a family-4 CopyN key (NC-4, D-06)", async () => {
+	exiftool.readResult = {
+		ok: true,
+		value: [
+			{
+				"ExifTool:Warning": "Bad offset for IFD1 Make",
+				"ExifTool:Copy1:Warning":
+					"[minor] Fixed incorrect URI for xmlns:MicrosoftPhoto",
+				"File:Other:FileType": "JPEG",
+			},
+		],
+	};
+
+	const result = await query.execute({ filePath: "/tmp/cooccurrence.jpg" });
+
+	expect(result).toEqual({
+		ok: false,
+		error: {
+			code: "exiftool-error",
+			detail: "Bad offset for IFD1 Make",
+		},
+	});
+});
+
+it("normalizes a family-4 CopyN duplicate tag key back to its ordinary display name", async () => {
+	exiftool.readResult = {
+		ok: true,
+		value: [
+			{
+				"IFD0:Camera:Make": "TestCamera",
+				"IFD0:Camera:Copy1:Make": "TestCamera",
+			},
+		],
+	};
+
+	const result = await query.execute({ filePath: "/tmp/duplicate-tag.jpg" });
+
+	expect(result.ok).toBe(true);
+	if (result.ok) {
+		// Both duplicate JSON entries normalize to the same displayed key -- the second
+		// overwrites the first in the returned object, matching pre-#344 -G1:2 behaviour
+		// where only one survived in ExifTool's own JSON output.
+		expect(result.value).toEqual({ "Camera:Make": "TestCamera" });
+	}
 });

@@ -13,7 +13,7 @@ beforeEach(() => {
 });
 
 describe("VerifyGeneratedOutputQuery", () => {
-	it("reopens the supplied generated path with both the FileType guard and the -G1:2 diagnostic scan", async () => {
+	it("reopens the supplied generated path with both the FileType guard and the -G1:2:4 diagnostic scan", async () => {
 		const generatedPath = "/tmp/sample_cleaned.raf";
 
 		const result = await query.execute({ generatedPath });
@@ -21,7 +21,9 @@ describe("VerifyGeneratedOutputQuery", () => {
 		expect(result).toEqual({ ok: true, value: undefined });
 		// Two calls, not one merged arg set: ExifTool's -G option renames every JSON key
 		// (including File:FileType) to Group:Tag, so the plain-key FileType guard and the
-		// classifyInspectionDiagnostics scan cannot share one readMetadata call.
+		// classifyInspectionDiagnostics scan cannot share one readMetadata call. -G4 is
+		// required (not just -G1:2, see 48-D06-SETTLEMENT.md): co-occurring ExifTool-group
+		// diagnostics can otherwise collapse onto one suppressed JSON key.
 		expect(exiftool.calls).toEqual([
 			{
 				method: "readMetadata",
@@ -29,7 +31,7 @@ describe("VerifyGeneratedOutputQuery", () => {
 			},
 			{
 				method: "readMetadata",
-				args: [generatedPath, ["-G1:2"]],
+				args: [generatedPath, ["-G1:2:4"]],
 			},
 		]);
 	});
