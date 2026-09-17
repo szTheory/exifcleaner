@@ -3,6 +3,8 @@ node_modules
 /dist
 .env
 *.tgz
+/vitest-report.json
+/.issue344-vacuity-evidence.json
 
 # MORE ELECTRON
 .DS_Store

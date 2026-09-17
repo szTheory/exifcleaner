@@ -30,6 +30,17 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
 
+// P48-NC-5 has no vitest it(...) call site -- it is this whole-process mutation gate, not a
+// test. scripts/issue344_nc_evidence.mjs (Task 3) still needs run-log evidence that this
+// control executed and passed, so a successful run writes this small marker (gitignored,
+// like vitest-report.json). Absence or staleness is exactly "not executed" to the evidence
+// driver -- this is not an escape hatch, it is the only artifact a subprocess-based control
+// can leave behind for a sibling script to read.
+const EVIDENCE_MARKER_PATH = path.join(
+	REPO_ROOT,
+	".issue344-vacuity-evidence.json",
+);
+
 // Declared here, not derived: the exact set this ONE mutation must break, transcribed from
 // a measured dry run against a scratch copy (48-02-PLAN.md Task 2). vitest's JSON reporter
 // "fullName" is describe-path + title joined by a single space (no separator token).
@@ -190,6 +201,20 @@ async function main() {
 			return;
 		}
 
+		fs.writeFileSync(
+			EVIDENCE_MARKER_PATH,
+			JSON.stringify(
+				{
+					title:
+						"P48-NC-5: vacuity gate proves the #344 fix's tests are not vacuous",
+					passed: true,
+					timestamp: new Date().toISOString(),
+				},
+				null,
+				2,
+			),
+		);
+
 		console.log(
 			"✓ Issue #344 vacuity gate: baseline green, mutation restored the pre-fix D-05 predicate, and exactly the expected two tests failed.",
 		);
@@ -207,6 +232,7 @@ if (
 }
 
 export {
+	EVIDENCE_MARKER_PATH,
 	EXPECTED_FAILING_TITLES,
 	FIX_BLOCK,
 	PRE_FIX_BLOCK,
