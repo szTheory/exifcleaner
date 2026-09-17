@@ -204,7 +204,7 @@ declare module "*nc1_mutation_gate.mjs" {
 	export function evaluateMutationVerdict(input: {
 		baseline: { success: boolean; failingTitles: string[] };
 		mutated: { success: boolean; failingTitles: string[] };
-		expectedFailingTitle: string;
+		expectedFailingTitles: string[];
 	}): { ok: boolean; reason: string };
 }
 

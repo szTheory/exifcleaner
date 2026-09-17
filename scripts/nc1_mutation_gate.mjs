@@ -16,9 +16,17 @@
 // Then ONE mutation is applied: a code-keyed fallback branch is reintroduced into
 // hybrid_metadata_engine.ts's sanitize() — the exact shape of the switch D-05 deleted, matched on
 // nativeCode alone with no regard for write state. The mutated suite is run again and must fail
-// with EXACTLY ONE failing test, whose title is NC-1's. More failures (breaks something else) or
-// fewer (the mutation is a no-op against the suite) are both findings about the control's
-// precision, not gate bugs to relax away.
+// with EXACTLY the expected failing-test set (see EXPECTED_FAILING_TITLES below). More failures
+// (breaks something else) or fewer (the mutation is a no-op against the suite) are both findings
+// about the control's precision, not gate bugs to relax away.
+//
+// UPDATED (47-05 Task 3): plan 47-05's NC-9b (tests/contracts/native_seam_containment.test.ts)
+// independently scans hybrid_metadata_engine.ts for zero occurrences of the "nativeCode"
+// identifier. The same mutation that reintroduces the nativeCode-keyed switch to fire NC-1 also,
+// correctly, makes NC-9b fail — both gates are legitimately watching the same regression from two
+// independent angles (write-state-keyed behavior vs. source-text containment). The expected
+// failing set below was widened from "exactly NC-1" to "exactly NC-1 and NC-9b" to reflect that;
+// a mutation that stopped firing either one would still be caught as a precision finding.
 //
 // COMMENT-TEXT DISCIPLINE: the mutation text below necessarily contains native error-code
 // identifiers in a fallback-branch shape. This file lives under scripts/, outside the src/tests
@@ -39,6 +47,11 @@ import { fileURLToPath } from "node:url";
 const TARGET_SOURCE = "src/infrastructure/metadata/hybrid_metadata_engine.ts";
 const NC1_TEST_TITLE =
 	"NC-1: a post-write malformed-file error authorizes zero substitute writers, keyed on write state not error code";
+// 47-05 Task 3: NC-9b independently scans this same file for the nativeCode identifier and
+// legitimately also fails under this mutation — see the file-header note above.
+const NC9B_TEST_TITLE =
+	"NC-9b: hybrid_metadata_engine.ts contains zero occurrences of the nativeCode identifier";
+const EXPECTED_FAILING_TITLES = [NC1_TEST_TITLE, NC9B_TEST_TITLE];
 
 // The exact seam D-05 replaced the pre-existing error-code switch with. Matched as a plain
 // literal (no regex, no nested quantifiers — see dir_effect_gate.mjs's V5 note for why a gate's
@@ -90,14 +103,14 @@ export function applyNc1Mutation(source) {
  * @param {{
  *   baseline: {success: boolean, failingTitles: string[]},
  *   mutated: {success: boolean, failingTitles: string[]},
- *   expectedFailingTitle: string,
+ *   expectedFailingTitles: string[],
  * }} input
  * @returns {{ok: boolean, reason: string}}
  */
 export function evaluateMutationVerdict({
 	baseline,
 	mutated,
-	expectedFailingTitle,
+	expectedFailingTitles,
 }) {
 	if (!baseline.success || baseline.failingTitles.length > 0) {
 		return {
@@ -114,18 +127,23 @@ export function evaluateMutationVerdict({
 				"mutated run was fully green — NC-1 cannot fire, it is an unfirable check (Phase 46's defect class)",
 		};
 	}
+	const actualSorted = [...mutated.failingTitles].sort();
+	const expectedSorted = [...expectedFailingTitles].sort();
 	const isExactMatch =
-		mutated.failingTitles.length === 1 &&
-		mutated.failingTitles[0] === expectedFailingTitle;
+		actualSorted.length === expectedSorted.length &&
+		actualSorted.every((title, index) => title === expectedSorted[index]);
 	if (!isExactMatch) {
 		return {
 			ok: false,
 			reason:
-				`mutated run's failing-test set was not exactly [${JSON.stringify(expectedFailingTitle)}]: ` +
+				`mutated run's failing-test set was not exactly ${JSON.stringify(expectedSorted)}: ` +
 				JSON.stringify(mutated.failingTitles),
 		};
 	}
-	return { ok: true, reason: "mutated run failed with exactly the NC-1 title" };
+	return {
+		ok: true,
+		reason: "mutated run failed with exactly the expected failing-test set",
+	};
 }
 
 const COPY_EXCLUDE = new Set([
@@ -224,7 +242,7 @@ async function main() {
 		const verdict = evaluateMutationVerdict({
 			baseline,
 			mutated,
-			expectedFailingTitle: NC1_TEST_TITLE,
+			expectedFailingTitles: EXPECTED_FAILING_TITLES,
 		});
 
 		if (!verdict.ok) {
@@ -234,7 +252,8 @@ async function main() {
 		}
 		console.log(
 			`\n✓ NC-1 MUTATION GATE PASSED — baseline fully green (${baseline.failingTitles.length} failures), ` +
-				`mutated run failed with exactly 1 test: "${NC1_TEST_TITLE}"\n`,
+				`mutated run failed with exactly ${EXPECTED_FAILING_TITLES.length} test(s): ` +
+				`${JSON.stringify(EXPECTED_FAILING_TITLES)}\n`,
 		);
 	} finally {
 		fs.rmSync(scratchDir, { recursive: true, force: true });

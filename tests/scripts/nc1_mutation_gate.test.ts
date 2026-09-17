@@ -28,6 +28,9 @@ const SOURCE = `
 
 const NC1_TITLE =
 	"NC-1: a post-write malformed-file error authorizes zero substitute writers, keyed on write state not error code";
+// 47-05: NC-9b independently scans the same mutated file and legitimately also fails.
+const NC9B_TITLE =
+	"NC-9b: hybrid_metadata_engine.ts contains zero occurrences of the nativeCode identifier";
 
 describe("applyNc1Mutation", () => {
 	test("reintroduces a code-keyed fallback switch ahead of the grant-based check", () => {
@@ -64,10 +67,28 @@ describe("evaluateMutationVerdict", () => {
 		const verdict = evaluateMutationVerdict({
 			baseline: { success: true, failingTitles: [] },
 			mutated: { success: false, failingTitles: [NC1_TITLE] },
-			expectedFailingTitle: NC1_TITLE,
+			expectedFailingTitles: [NC1_TITLE],
 		});
 
 		expect(verdict.ok).toBe(true);
+	});
+
+	// 47-05: the real gate now expects TWO titles (NC-1 and NC-9b, which independently scans
+	// the same mutated file). Order in the actual failing-titles array must not matter.
+	test("passes when the mutated run fails with exactly the NC-1 and NC-9b titles, in either order", () => {
+		const verdictInOrder = evaluateMutationVerdict({
+			baseline: { success: true, failingTitles: [] },
+			mutated: { success: false, failingTitles: [NC1_TITLE, NC9B_TITLE] },
+			expectedFailingTitles: [NC1_TITLE, NC9B_TITLE],
+		});
+		const verdictReversed = evaluateMutationVerdict({
+			baseline: { success: true, failingTitles: [] },
+			mutated: { success: false, failingTitles: [NC9B_TITLE, NC1_TITLE] },
+			expectedFailingTitles: [NC1_TITLE, NC9B_TITLE],
+		});
+
+		expect(verdictInOrder.ok).toBe(true);
+		expect(verdictReversed.ok).toBe(true);
 	});
 
 	// Negative control 1: the mutated run was fully green — this is exactly the
@@ -77,24 +98,37 @@ describe("evaluateMutationVerdict", () => {
 		const verdict = evaluateMutationVerdict({
 			baseline: { success: true, failingTitles: [] },
 			mutated: { success: true, failingTitles: [] },
-			expectedFailingTitle: NC1_TITLE,
+			expectedFailingTitles: [NC1_TITLE],
 		});
 
 		expect(verdict.ok).toBe(false);
 		expect(verdict.reason).toMatch(/fully green/);
 	});
 
-	// Negative control 2: more than one test failed — the mutation's blast
-	// radius exceeded NC-1, which is a finding about the control's precision,
-	// not something this verdict function may wave through.
-	test("fails when more than one test failed", () => {
+	// Negative control 2: more than the expected titles failed — the mutation's blast radius
+	// exceeded expectations, which is a finding about the control's precision, not something
+	// this verdict function may wave through.
+	test("fails when more titles failed than expected", () => {
 		const verdict = evaluateMutationVerdict({
 			baseline: { success: true, failingTitles: [] },
 			mutated: {
 				success: false,
-				failingTitles: [NC1_TITLE, "some unrelated test"],
+				failingTitles: [NC1_TITLE, NC9B_TITLE, "some unrelated test"],
 			},
-			expectedFailingTitle: NC1_TITLE,
+			expectedFailingTitles: [NC1_TITLE, NC9B_TITLE],
+		});
+
+		expect(verdict.ok).toBe(false);
+		expect(verdict.reason).toMatch(/not exactly/);
+	});
+
+	// Negative control 3: only ONE of the two expected titles failed — a regression where one
+	// of the two independent gates stopped firing must also be caught, not waved through.
+	test("fails when only one of two expected titles failed", () => {
+		const verdict = evaluateMutationVerdict({
+			baseline: { success: true, failingTitles: [] },
+			mutated: { success: false, failingTitles: [NC1_TITLE] },
+			expectedFailingTitles: [NC1_TITLE, NC9B_TITLE],
 		});
 
 		expect(verdict.ok).toBe(false);
@@ -105,7 +139,7 @@ describe("evaluateMutationVerdict", () => {
 		const verdict = evaluateMutationVerdict({
 			baseline: { success: false, failingTitles: ["some other test"] },
 			mutated: { success: false, failingTitles: [NC1_TITLE] },
-			expectedFailingTitle: NC1_TITLE,
+			expectedFailingTitles: [NC1_TITLE],
 		});
 
 		expect(verdict.ok).toBe(false);
@@ -116,7 +150,7 @@ describe("evaluateMutationVerdict", () => {
 		const verdict = evaluateMutationVerdict({
 			baseline: { success: true, failingTitles: [] },
 			mutated: { success: false, failingTitles: ["an unrelated test"] },
-			expectedFailingTitle: NC1_TITLE,
+			expectedFailingTitles: [NC1_TITLE],
 		});
 
 		expect(verdict.ok).toBe(false);
