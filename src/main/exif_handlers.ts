@@ -88,7 +88,6 @@ export function setupExifHandlers({
 					preserveOrientation: settings.preserveOrientation,
 					preserveColorProfile: settings.preserveColorProfile,
 					preserveTimestamps: settings.preserveTimestamps,
-					signal: undefined,
 				});
 				if (transactionResult.ok) {
 					return applyXattrPostcondition({

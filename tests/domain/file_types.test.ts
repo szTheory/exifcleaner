@@ -76,7 +76,7 @@ it("classifies exactly the seven supported media extensions case-insensitively",
 	expect(isMediaFile({ filename: "sample.jpg" })).toBe(false);
 });
 
-it("requiresVerifiedWrite routes raw, media, and copy-mode webp through the verified transaction, but not overwrite-mode webp or an ordinary jpeg copy (D-23, D-24)", () => {
+it("requiresVerifiedWrite routes raw, media, and copy-mode webp through the verified transaction, but not overwrite-mode webp or an ordinary jpeg copy (D-23)", () => {
 	expect(
 		requiresVerifiedWrite({ filename: "sample.cr2", outputMode: "copy" }),
 	).toBe(true);
