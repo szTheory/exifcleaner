@@ -8,7 +8,11 @@ import { createValidatedHandler } from "./ipc/ipc_validation";
 import { exifReadSchema, exifRemoveSchema } from "./ipc/ipc_schemas";
 import { formatExifError } from "../domain";
 import { generateCleanedPath } from "../domain/files/cleaned_path";
-import { isMediaFile, isRafFile, isRawFile } from "../domain/files/file_types";
+import {
+	isRafFile,
+	isRawFile,
+	requiresVerifiedWrite,
+} from "../domain/files/file_types";
 import { refuseUnsafeRafWrite } from "../domain/files/file_processing_outcome";
 import type { OutputTransactionFailure } from "./output_transaction";
 
@@ -65,7 +69,6 @@ export function setupExifHandlers({
 				}
 			}
 			const isRaw = isRawFile({ filename: filePath });
-			const isMedia = isMediaFile({ filename: filePath });
 			const wasForcedCopy = isRaw && !settings.saveAsCopy;
 			const saveAsCopy = settings.saveAsCopy || wasForcedCopy;
 			const outputMode: "copy" | "overwrite" = saveAsCopy
@@ -75,7 +78,7 @@ export function setupExifHandlers({
 				? generateCleanedPath({ filePath, exists: existsSync })
 				: undefined;
 
-			if (isRaw || isMedia) {
+			if (requiresVerifiedWrite({ filename: filePath, outputMode })) {
 				const generatedPath =
 					outputPath ?? generateMediaStagePath({ filePath });
 				const transactionResult = await container.outputTransaction.execute({
@@ -85,6 +88,7 @@ export function setupExifHandlers({
 					preserveOrientation: settings.preserveOrientation,
 					preserveColorProfile: settings.preserveColorProfile,
 					preserveTimestamps: settings.preserveTimestamps,
+					signal: undefined,
 				});
 				if (transactionResult.ok) {
 					return applyXattrPostcondition({

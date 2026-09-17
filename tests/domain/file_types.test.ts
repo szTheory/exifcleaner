@@ -3,6 +3,7 @@ import {
 	isRawFile,
 	isSupportedFile,
 	isMediaFile,
+	requiresVerifiedWrite,
 	RAW_EXTENSIONS,
 	MEDIA_EXTENSIONS,
 } from "../../src/domain/files/file_types";
@@ -73,4 +74,33 @@ it("classifies exactly the seven supported media extensions case-insensitively",
 	expect(isMediaFile({ filename: "sample.M4A" })).toBe(true);
 	expect(isMediaFile({ filename: "sample.mkv" })).toBe(false);
 	expect(isMediaFile({ filename: "sample.jpg" })).toBe(false);
+});
+
+it("requiresVerifiedWrite routes raw, media, and copy-mode webp through the verified transaction, but not overwrite-mode webp or an ordinary jpeg copy (D-23, D-24)", () => {
+	expect(
+		requiresVerifiedWrite({ filename: "sample.cr2", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.cr2", outputMode: "overwrite" }),
+	).toBe(true);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.mp4", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.mp4", outputMode: "overwrite" }),
+	).toBe(true);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "copy" }),
+	).toBe(true);
+	// The deferred gap this phase leaves open: in-place webp overwrites stay on
+	// the unverified ExifTool path (D-19/D-24/D-42, out of scope for this plan).
+	expect(
+		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "overwrite" }),
+	).toBe(false);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.jpg", outputMode: "copy" }),
+	).toBe(false);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.jpg", outputMode: "overwrite" }),
+	).toBe(false);
 });
