@@ -197,6 +197,7 @@ describe("ExifToolAdapter.sanitize", () => {
 
 		const result = await adapter.sanitize({
 			source: "/tmp/photo.jpg",
+			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
 			preserveTimestamps: false,
@@ -319,7 +320,11 @@ describe("ExifToolAdapter.sanitize", () => {
 		const fakeProcess = makeFakeProcess();
 		const adapter = new ExifToolAdapter({ process: fakeProcess });
 
-		await adapter.sanitize({ source: "/tmp/photo.jpg", ...request });
+		await adapter.sanitize({
+			source: "/tmp/photo.jpg",
+			outputMode: "overwrite",
+			...request,
+		});
 
 		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
 			filePath: "/tmp/photo.jpg",
@@ -337,6 +342,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			await adapter.sanitize({
 				source: `/tmp/${fileName}`,
 				destination: `/tmp/${fileName}.cleaned`,
+				outputMode: "copy",
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveTimestamps: false,
@@ -369,6 +375,7 @@ describe("ExifToolAdapter.sanitize", () => {
 		await expect(
 			adapter.sanitize({
 				source: "/tmp/photo.jpg",
+				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveTimestamps: false,
@@ -396,6 +403,7 @@ describe("ExifToolAdapter.sanitize", () => {
 		await expect(
 			unsafeAdapter.sanitize({
 				source: "/tmp/photo\n.jpg",
+				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveTimestamps: false,
@@ -411,6 +419,7 @@ describe("ExifToolAdapter.sanitize", () => {
 		await expect(
 			unavailableAdapter.sanitize({
 				source: "/tmp/photo.jpg",
+				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveTimestamps: false,
@@ -433,6 +442,7 @@ describe("ExifToolAdapter.sanitize", () => {
 		await expect(
 			adapter.sanitize({
 				source: "/tmp/photo.jpg",
+				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveTimestamps: false,

@@ -24,6 +24,7 @@ describe("semantic sanitization", () => {
 		await expect(
 			command.execute({
 				filePath: "/tmp/photo.jpg",
+				outputMode: "copy",
 				preserveOrientation: true,
 				preserveColorProfile: true,
 				preserveTimestamps: true,
@@ -37,6 +38,7 @@ describe("semantic sanitization", () => {
 		expect(sanitize).toHaveBeenCalledWith({
 			source: "/tmp/photo.jpg",
 			destination: "/tmp/photo_cleaned.jpg",
+			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
 			preserveTimestamps: true,
@@ -47,6 +49,7 @@ describe("semantic sanitization", () => {
 	it("forwards an absent destination without forwarding saveAsCopy", async () => {
 		await command.execute({
 			filePath: "/tmp/photo.jpg",
+			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
 			preserveTimestamps: false,
@@ -56,6 +59,7 @@ describe("semantic sanitization", () => {
 		expect(sanitize).toHaveBeenCalledWith({
 			source: "/tmp/photo.jpg",
 			destination: undefined,
+			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
 			preserveTimestamps: false,
@@ -70,6 +74,7 @@ describe("semantic sanitization", () => {
 		await expect(
 			command.execute({
 				filePath: "/tmp/photo.jpg",
+				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveTimestamps: false,
@@ -93,6 +98,7 @@ describe("semantic sanitization", () => {
 		await expect(
 			command.execute({
 				filePath: "/tmp/photo.jpg",
+				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveTimestamps: false,

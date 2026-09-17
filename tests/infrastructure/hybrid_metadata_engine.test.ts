@@ -8,6 +8,7 @@ describe("HybridMetadataEngine", () => {
 	const sanitizeRequest = {
 		source: "/files/source.webp",
 		destination: "/files/clean.webp",
+		outputMode: "copy" as const,
 		preserveOrientation: true,
 		preserveColorProfile: true,
 		preserveTimestamps: true,
@@ -57,6 +58,7 @@ describe("HybridMetadataEngine", () => {
 		const request = {
 			source: "/files/source.webp",
 			destination: "/files/clean.webp",
+			outputMode: "copy" as const,
 			preserveOrientation: true,
 			preserveColorProfile: true,
 			preserveTimestamps: true,
@@ -124,7 +126,6 @@ describe("HybridMetadataEngine", () => {
 	);
 
 	it.each([
-		["non-WebP source", { ...sanitizeRequest, source: "/files/source.jpg" }],
 		["missing destination", { ...sanitizeRequest, destination: undefined }],
 		[
 			"same resolved path",
@@ -132,6 +133,10 @@ describe("HybridMetadataEngine", () => {
 				...sanitizeRequest,
 				destination: "/files/other/../source.webp",
 			},
+		],
+		[
+			"overwrite output mode",
+			{ ...sanitizeRequest, outputMode: "overwrite" as const },
 		],
 	] as const)("uses ExifTool directly for %s", async (_reason, request) => {
 		const exiftool = new FakeMetadataEngine();

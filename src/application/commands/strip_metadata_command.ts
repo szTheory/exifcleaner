@@ -18,6 +18,7 @@ export class StripMetadataCommand {
 
 	async execute({
 		filePath,
+		outputMode,
 		preserveOrientation,
 		preserveColorProfile,
 		preserveTimestamps,
@@ -25,6 +26,7 @@ export class StripMetadataCommand {
 		signal,
 	}: {
 		filePath: string;
+		outputMode: "copy" | "overwrite";
 		preserveOrientation: boolean;
 		preserveColorProfile: boolean;
 		preserveTimestamps: boolean;
@@ -43,6 +45,7 @@ export class StripMetadataCommand {
 		const result = await this.metadataEngine.sanitize({
 			source: filePath,
 			destination: outputPath,
+			outputMode,
 			preserveOrientation,
 			preserveColorProfile,
 			preserveTimestamps,

@@ -45,6 +45,7 @@ describe("NativeMetadataAdapter", () => {
 		const request = {
 			source: "/tmp/source.webp",
 			destination: "/tmp/clean.webp",
+			outputMode: "copy" as const,
 			preserveOrientation: true,
 			preserveColorProfile: true,
 			preserveTimestamps: true,
@@ -129,6 +130,7 @@ describe("NativeMetadataAdapter", () => {
 			const result = await adapter.sanitize({
 				source: "/tmp/source.webp",
 				destination: "/tmp/clean.webp",
+				outputMode: "copy",
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveTimestamps: false,

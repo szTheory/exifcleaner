@@ -82,6 +82,7 @@ describe("native WebP sanitization with an independent ExifTool oracle", () => {
 			const result = await hybrid.sanitize({
 				source,
 				destination,
+				outputMode: "copy",
 				preserveOrientation: preservation.preserveOrientation,
 				preserveColorProfile: preservation.preserveColorProfile,
 				preserveTimestamps: preservation.preserveTimestamps,

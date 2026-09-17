@@ -11,9 +11,9 @@ export interface NativeMetadataCapabilities {
 }
 
 export interface NativeFormatCapabilities {
-	readonly format: "webp";
+	readonly format: string;
 	readonly sanitize: boolean;
-	readonly detection: "magic" | string;
+	readonly detection: "magic";
 	readonly preserves: {
 		readonly orientation: boolean;
 		readonly colorProfile: boolean;
@@ -24,6 +24,9 @@ export interface NativeFormatCapabilities {
 export interface NativeSanitizeRequest {
 	readonly source: string;
 	readonly destination: string;
+	// Always "copy": by the time a request reaches the native port it has
+	// already been admitted by HybridMetadataEngine's outputMode check.
+	readonly outputMode: "copy";
 	readonly preserveOrientation: boolean;
 	readonly preserveColorProfile: boolean;
 	readonly preserveTimestamps: boolean;

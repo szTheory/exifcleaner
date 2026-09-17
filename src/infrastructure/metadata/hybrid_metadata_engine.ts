@@ -68,24 +68,28 @@ export class HybridMetadataEngine implements MetadataEnginePort {
 	private isNativeCopyCandidate(
 		request: Parameters<MetadataEnginePort["sanitize"]>[0],
 	): request is NativeSanitizeRequest {
+		if (request.outputMode !== "copy") {
+			return false;
+		}
+
+		// Defence-in-depth, not the policy: a copy request whose computed
+		// destination collides with the source must not be admitted, even though
+		// outputMode above is what actually decides eligibility.
 		if (
 			request.destination === undefined ||
-			path.resolve(request.source) === path.resolve(request.destination) ||
-			path.extname(request.source).toLowerCase() !== ".webp"
+			path.resolve(request.source) === path.resolve(request.destination)
 		) {
 			return false;
 		}
 
-		const webp = this.capabilities.formats.find(
-			(format) => format.format === "webp",
+		const candidate = this.capabilities.formats.find(
+			(format) =>
+				format.sanitize &&
+				format.detection === "magic" &&
+				(!request.preserveOrientation || format.preserves.orientation) &&
+				(!request.preserveColorProfile || format.preserves.colorProfile) &&
+				(!request.preserveTimestamps || format.preserves.timestamps),
 		);
-		return (
-			webp !== undefined &&
-			webp.sanitize &&
-			webp.detection === "magic" &&
-			(!request.preserveOrientation || webp.preserves.orientation) &&
-			(!request.preserveColorProfile || webp.preserves.colorProfile) &&
-			(!request.preserveTimestamps || webp.preserves.timestamps)
-		);
+		return candidate !== undefined;
 	}
 }

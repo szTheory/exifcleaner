@@ -68,6 +68,9 @@ export function setupExifHandlers({
 			const isMedia = isMediaFile({ filename: filePath });
 			const wasForcedCopy = isRaw && !settings.saveAsCopy;
 			const saveAsCopy = settings.saveAsCopy || wasForcedCopy;
+			const outputMode: "copy" | "overwrite" = saveAsCopy
+				? "copy"
+				: "overwrite";
 			const outputPath = saveAsCopy
 				? generateCleanedPath({ filePath, exists: existsSync })
 				: undefined;
@@ -96,6 +99,7 @@ export function setupExifHandlers({
 
 			const result = await container.stripMetadata.execute({
 				filePath,
+				outputMode,
 				preserveOrientation: settings.preserveOrientation,
 				preserveColorProfile: settings.preserveColorProfile,
 				preserveTimestamps: settings.preserveTimestamps,

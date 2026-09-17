@@ -24,6 +24,7 @@ export interface MetadataEnginePort {
 	sanitize({
 		source,
 		destination,
+		outputMode,
 		preserveOrientation,
 		preserveColorProfile,
 		preserveTimestamps,
@@ -31,6 +32,7 @@ export interface MetadataEnginePort {
 	}: {
 		source: string;
 		destination?: string | undefined;
+		outputMode: "copy" | "overwrite";
 		preserveOrientation: boolean;
 		preserveColorProfile: boolean;
 		preserveTimestamps: boolean;

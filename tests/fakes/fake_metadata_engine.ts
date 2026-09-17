@@ -15,6 +15,7 @@ type MetadataEngineCall =
 			readonly request: {
 				readonly source: string;
 				readonly destination?: string | undefined;
+				readonly outputMode: "copy" | "overwrite";
 				readonly preserveOrientation: boolean;
 				readonly preserveColorProfile: boolean;
 				readonly preserveTimestamps: boolean;
@@ -60,6 +61,7 @@ export class FakeMetadataEngine implements MetadataEnginePort {
 	async sanitize({
 		source,
 		destination,
+		outputMode,
 		preserveOrientation,
 		preserveColorProfile,
 		preserveTimestamps,
@@ -67,6 +69,7 @@ export class FakeMetadataEngine implements MetadataEnginePort {
 	}: {
 		source: string;
 		destination?: string | undefined;
+		outputMode: "copy" | "overwrite";
 		preserveOrientation: boolean;
 		preserveColorProfile: boolean;
 		preserveTimestamps: boolean;
@@ -77,6 +80,7 @@ export class FakeMetadataEngine implements MetadataEnginePort {
 			request: {
 				source,
 				destination,
+				outputMode,
 				preserveOrientation,
 				preserveColorProfile,
 				preserveTimestamps,

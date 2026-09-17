@@ -309,6 +309,7 @@ describe("exif:remove handler", () => {
 
 		expect(stripMetadata.execute).toHaveBeenCalledWith({
 			filePath: "/dir/photo.jpg",
+			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
 			preserveTimestamps: false,
