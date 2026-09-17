@@ -28,6 +28,7 @@ it("FakeMetadataEngine sanitize returns success by default", async () => {
 	const fake = new FakeMetadataEngine();
 	const result = await fake.sanitize({
 		source: "/test.jpg",
+		outputMode: "overwrite",
 		preserveOrientation: true,
 		preserveColorProfile: true,
 		preserveTimestamps: false,
@@ -37,6 +38,8 @@ it("FakeMetadataEngine sanitize returns success by default", async () => {
 		method: "sanitize",
 		request: {
 			source: "/test.jpg",
+			destination: undefined,
+			outputMode: "overwrite",
 			preserveOrientation: true,
 			preserveColorProfile: true,
 			preserveTimestamps: false,

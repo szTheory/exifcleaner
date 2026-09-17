@@ -1,8 +1,11 @@
 import path from "node:path";
 import type { MetadataEnginePort } from "../../application/metadata_engine_port";
 import type { Result } from "../../common/result";
-import { assertNever } from "../../common/types";
 import type { MetadataEngineError } from "../../domain/exif/exif_errors";
+import {
+	mintFallbackGrant,
+	redeemFallbackGrant,
+} from "./native_fallback_authority";
 import type {
 	NativeMetadataCapabilities,
 	NativeMetadataPort,
@@ -43,26 +46,13 @@ export class HybridMetadataEngine implements MetadataEnginePort {
 		const native = await this.native.sanitize(nativeRequest);
 		if (native.ok) return native;
 
-		switch (native.error.nativeCode) {
-			case "unsupported-format":
-			case "malformed-file":
-			case "unsafe-structure":
-			case "unsupported-feature":
-				return this.exiftool.sanitize(request);
-			case "aborted":
-			case "invalid-options":
-			case "not-found":
-			case "read-failed":
-			case "destination-exists":
-			case "destination-changed":
-			case "source-changed":
-			case "write-failed":
-			case "verification-failed":
-			case "cleanup-failed":
-				return native;
-			default:
-				return assertNever({ value: native.error.nativeCode });
+		// Authority comes solely from the library's own proven pre-write safe
+		// decline (native_fallback_authority.ts), never a restated table here.
+		const grant = mintFallbackGrant(native.error.libraryError);
+		if (grant === undefined || !redeemFallbackGrant(grant)) {
+			return native;
 		}
+		return this.exiftool.sanitize(request);
 	}
 
 	private isNativeCopyCandidate(

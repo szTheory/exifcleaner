@@ -50,5 +50,10 @@ function mapNativeError(error: MetadataError): NativeMetadataError {
 		code: "native-error",
 		nativeCode: error.code,
 		backend: "native",
+		// D-07: map explicitly, not via the spread above alone, so these fields
+		// are part of the declared type and readable without a cast.
+		phase: error.phase,
+		nativeWrite: error.nativeWrite,
+		libraryError: error,
 	};
 }

@@ -1,3 +1,4 @@
+import type { MetadataError } from "exifcleaner-node";
 import { describe, expect, it } from "vitest";
 import { HybridMetadataEngine } from "../../src/infrastructure/metadata/hybrid_metadata_engine";
 import type { NativeMetadataError } from "../../src/infrastructure/metadata/native_metadata_port";
@@ -14,15 +15,37 @@ describe("HybridMetadataEngine", () => {
 		preserveTimestamps: true,
 	};
 
-	function nativeError(
-		nativeCode: NativeMetadataError["nativeCode"],
-	): NativeMetadataError {
+	// D-26: every fixture error must be a shape the real library can actually
+	// emit (Details & FallbackProof) — never a code-only stand-in with no
+	// phase/nativeWrite. Fallback authority in native_fallback_authority.test
+	// coverage (see native_metadata_routing_tracer.test.ts) exercises the full
+	// admission-vs-post-write matrix; this file keeps only routing-predicate
+	// coverage.
+	function nativeError({
+		phase,
+		nativeWrite,
+		nativeCode = "aborted",
+	}: {
+		phase: MetadataError["phase"];
+		nativeWrite: MetadataError["nativeWrite"];
+		nativeCode?: NativeMetadataError["nativeCode"];
+	}): NativeMetadataError {
+		const libraryError: MetadataError = {
+			code: "aborted",
+			detail: "native failure",
+			path: sanitizeRequest.source,
+			phase,
+			nativeWrite,
+		};
 		return {
 			code: "native-error",
 			nativeCode,
-			detail: `native ${nativeCode}`,
+			detail: "native failure",
 			path: sanitizeRequest.source,
 			backend: "native",
+			phase,
+			nativeWrite,
+			libraryError,
 		};
 	}
 	it("keeps both inspection purposes on ExifTool", async () => {
@@ -80,11 +103,18 @@ describe("HybridMetadataEngine", () => {
 		"unsafe-structure",
 		"unsupported-feature",
 	] as const)(
-		"falls back to ExifTool exactly once after %s",
+		"falls back to ExifTool exactly once after a proven admission-shaped decline reported as %s",
 		async (nativeCode) => {
 			const exiftool = new FakeMetadataEngine();
 			const native = new FakeNativeMetadata();
-			native.sanitizeResult = { ok: false, error: nativeError(nativeCode) };
+			native.sanitizeResult = {
+				ok: false,
+				error: nativeError({
+					phase: "admission",
+					nativeWrite: "not-started",
+					nativeCode,
+				}),
+			};
 			const engine = new HybridMetadataEngine({ exiftool, native });
 			const controller = new AbortController();
 			const request = { ...sanitizeRequest, signal: controller.signal };
@@ -109,11 +139,15 @@ describe("HybridMetadataEngine", () => {
 		"verification-failed",
 		"cleanup-failed",
 	] as const)(
-		"never retries %s after native work begins",
+		"never retries once native write has started, regardless of error code (%s)",
 		async (nativeCode) => {
 			const exiftool = new FakeMetadataEngine();
 			const native = new FakeNativeMetadata();
-			const error = nativeError(nativeCode);
+			const error = nativeError({
+				phase: "transaction",
+				nativeWrite: "started",
+				nativeCode,
+			});
 			native.sanitizeResult = { ok: false, error };
 			const engine = new HybridMetadataEngine({ exiftool, native });
 

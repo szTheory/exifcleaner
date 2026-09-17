@@ -41,6 +41,15 @@ describe("MetadataEngineError", () => {
 				detail: "/private/output.webp write failed",
 				path: "/private/output.webp",
 				backend: "native",
+				phase: "transaction",
+				nativeWrite: "started",
+				libraryError: {
+					code: "write-failed",
+					detail: "/private/output.webp write failed",
+					path: "/private/output.webp",
+					phase: "transaction",
+					nativeWrite: "started",
+				},
 			});
 
 			expect(result).toContain("native processing failed");
@@ -61,6 +70,16 @@ describe("MetadataEngineError", () => {
 					feature: "orientation-preservation",
 					cause: { code: "EINVAL", message: "unsupported" },
 					backend: "native",
+					phase: "admission",
+					nativeWrite: "not-started",
+					libraryError: {
+						code: "unsupported-feature",
+						detail: "err",
+						path: "/files/source.webp",
+						feature: "orientation-preservation",
+						phase: "admission",
+						nativeWrite: "not-started",
+					},
 				},
 			];
 

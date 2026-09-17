@@ -1,3 +1,4 @@
+import type { MetadataError } from "exifcleaner-node";
 import { assertNever } from "../../common/types";
 
 export type NativeMetadataErrorCode =
@@ -31,6 +32,14 @@ export type MetadataEngineError =
 			readonly feature?: string;
 			readonly cause?: { readonly code?: string; readonly message: string };
 			readonly backend: "native";
+			// Declared explicitly (not smuggled through an object spread) so the
+			// fallback-authority check compiles with no cast.
+			readonly phase: MetadataError["phase"];
+			readonly nativeWrite: MetadataError["nativeWrite"];
+			// The unmapped library error, retained so fallback authority can be
+			// minted from the real proof the library produced, never a
+			// reconstructed stand-in.
+			readonly libraryError: MetadataError;
 	  };
 
 type LegacyExifError =
