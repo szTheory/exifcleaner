@@ -7,7 +7,7 @@ const { getCapabilities, sanitizeFile } = vi.hoisted(() => ({
 
 vi.mock("exifcleaner-node", () => ({ getCapabilities, sanitizeFile }));
 
-import { NativeWebpAdapter } from "../../src/infrastructure/native_webp/native_webp_adapter";
+import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_metadata_adapter";
 
 const capabilities = {
 	formats: [
@@ -24,7 +24,7 @@ const capabilities = {
 	],
 };
 
-describe("NativeWebpAdapter", () => {
+describe("NativeMetadataAdapter", () => {
 	beforeEach(() => {
 		getCapabilities.mockReset();
 		sanitizeFile.mockReset();
@@ -32,7 +32,7 @@ describe("NativeWebpAdapter", () => {
 	});
 
 	test("caches the immutable package capabilities", () => {
-		const adapter = new NativeWebpAdapter();
+		const adapter = new NativeMetadataAdapter();
 
 		expect(adapter.getCapabilities()).toBe(capabilities);
 		expect(adapter.getCapabilities()).toBe(capabilities);
@@ -40,7 +40,7 @@ describe("NativeWebpAdapter", () => {
 	});
 
 	test("forwards semantic sanitize inputs and the identical signal", async () => {
-		const adapter = new NativeWebpAdapter();
+		const adapter = new NativeMetadataAdapter();
 		const controller = new AbortController();
 		const request = {
 			source: "/tmp/source.webp",
@@ -123,7 +123,7 @@ describe("NativeWebpAdapter", () => {
 	] as const)(
 		"preserves complete typed package failure $code",
 		async (error) => {
-			const adapter = new NativeWebpAdapter();
+			const adapter = new NativeMetadataAdapter();
 			sanitizeFile.mockResolvedValue({ ok: false, error });
 
 			const result = await adapter.sanitize({
@@ -140,7 +140,7 @@ describe("NativeWebpAdapter", () => {
 					...error,
 					code: "native-error",
 					nativeCode: error.code,
-					backend: "native-webp",
+					backend: "native",
 				},
 			});
 		},
@@ -150,7 +150,7 @@ describe("NativeWebpAdapter", () => {
 		const source = await import("node:fs/promises").then((fs) =>
 			fs.readFile(
 				new URL(
-					"../../src/infrastructure/native_webp/native_webp_adapter.ts",
+					"../../src/infrastructure/metadata/native_metadata_adapter.ts",
 					import.meta.url,
 				),
 				"utf8",
@@ -158,6 +158,6 @@ describe("NativeWebpAdapter", () => {
 		);
 
 		expect(source).not.toContain("inspectFile");
-		expect("inspect" in new NativeWebpAdapter()).toBe(false);
+		expect("inspect" in new NativeMetadataAdapter()).toBe(false);
 	});
 });

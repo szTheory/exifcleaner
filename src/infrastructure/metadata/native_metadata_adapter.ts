@@ -5,26 +5,26 @@ import {
 import type { MetadataError } from "exifcleaner-node";
 import type { Result } from "../../common/result";
 import type {
-	NativeWebpCapabilities,
-	NativeWebpError,
-	NativeWebpPort,
-	NativeWebpSanitizeRequest,
-} from "../metadata/native_webp_port";
+	NativeMetadataCapabilities,
+	NativeMetadataError,
+	NativeMetadataPort,
+	NativeSanitizeRequest,
+} from "./native_metadata_port";
 
-export class NativeWebpAdapter implements NativeWebpPort {
-	private readonly capabilities: NativeWebpCapabilities;
+export class NativeMetadataAdapter implements NativeMetadataPort {
+	private readonly capabilities: NativeMetadataCapabilities;
 
 	constructor() {
 		this.capabilities = Object.freeze(getPackageCapabilities());
 	}
 
-	getCapabilities(): NativeWebpCapabilities {
+	getCapabilities(): NativeMetadataCapabilities {
 		return this.capabilities;
 	}
 
 	async sanitize(
-		request: NativeWebpSanitizeRequest,
-	): Promise<Result<void, NativeWebpError>> {
+		request: NativeSanitizeRequest,
+	): Promise<Result<void, NativeMetadataError>> {
 		const options = {
 			sourcePath: request.source,
 			destinationPath: request.destination,
@@ -44,11 +44,11 @@ export class NativeWebpAdapter implements NativeWebpPort {
 	}
 }
 
-function mapNativeError(error: MetadataError): NativeWebpError {
+function mapNativeError(error: MetadataError): NativeMetadataError {
 	return {
 		...error,
 		code: "native-error",
 		nativeCode: error.code,
-		backend: "native-webp",
+		backend: "native",
 	};
 }

@@ -5,7 +5,7 @@ import {
 	ExiftoolProcess,
 	ExifToolAdapter,
 	HybridMetadataEngine,
-	NativeWebpAdapter,
+	NativeMetadataAdapter,
 	SettingsService,
 	ConsoleLogger,
 	removeXattrs,
@@ -35,8 +35,8 @@ export function createContainer(): {
 	const logger = new ConsoleLogger();
 	const exiftoolProcess = new ExiftoolProcess({ binPath: exiftoolBinPath });
 	const exiftool = new ExifToolAdapter({ process: exiftoolProcess });
-	const nativeWebp = new NativeWebpAdapter();
-	const metadataEngine = new HybridMetadataEngine({ exiftool, nativeWebp });
+	const native = new NativeMetadataAdapter();
+	const metadataEngine = new HybridMetadataEngine({ exiftool, native });
 	const settingsPath = path.join(app.getPath("userData"), "settings.json");
 	const settings = new SettingsService({ filePath: settingsPath, logger });
 	const stripMetadata = new StripMetadataCommand({ metadataEngine });

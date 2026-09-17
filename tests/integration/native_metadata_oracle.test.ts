@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ExifToolAdapter } from "../../src/infrastructure/exiftool/exiftool_adapter";
 import { ExiftoolProcess } from "../../src/infrastructure/exiftool/ExiftoolProcess";
 import { HybridMetadataEngine } from "../../src/infrastructure/metadata/hybrid_metadata_engine";
-import { NativeWebpAdapter } from "../../src/infrastructure/native_webp/native_webp_adapter";
+import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_metadata_adapter";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -62,8 +62,8 @@ describe("native WebP sanitization with an independent ExifTool oracle", () => {
 		const beforeDir = snapshotDir(dir);
 		const process = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
 		const exiftool = new ExifToolAdapter({ process });
-		const native = new NativeWebpAdapter();
-		const hybrid = new HybridMetadataEngine({ exiftool, nativeWebp: native });
+		const native = new NativeMetadataAdapter();
+		const hybrid = new HybridMetadataEngine({ exiftool, native: native });
 		const exiftoolWrite = vi.spyOn(exiftool, "sanitize");
 		const nativeWrite = vi.spyOn(native, "sanitize");
 

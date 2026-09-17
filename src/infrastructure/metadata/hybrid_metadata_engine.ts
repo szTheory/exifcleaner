@@ -4,26 +4,26 @@ import type { Result } from "../../common/result";
 import { assertNever } from "../../common/types";
 import type { MetadataEngineError } from "../../domain/exif/exif_errors";
 import type {
-	NativeWebpCapabilities,
-	NativeWebpPort,
-	NativeWebpSanitizeRequest,
-} from "./native_webp_port";
+	NativeMetadataCapabilities,
+	NativeMetadataPort,
+	NativeSanitizeRequest,
+} from "./native_metadata_port";
 
 export class HybridMetadataEngine implements MetadataEnginePort {
 	private readonly exiftool: MetadataEnginePort;
-	private readonly nativeWebp: NativeWebpPort;
-	private readonly capabilities: NativeWebpCapabilities;
+	private readonly native: NativeMetadataPort;
+	private readonly capabilities: NativeMetadataCapabilities;
 
 	constructor({
 		exiftool,
-		nativeWebp,
+		native,
 	}: {
 		exiftool: MetadataEnginePort;
-		nativeWebp: NativeWebpPort;
+		native: NativeMetadataPort;
 	}) {
 		this.exiftool = exiftool;
-		this.nativeWebp = nativeWebp;
-		this.capabilities = nativeWebp.getCapabilities();
+		this.native = native;
+		this.capabilities = native.getCapabilities();
 	}
 
 	inspect(
@@ -35,12 +35,12 @@ export class HybridMetadataEngine implements MetadataEnginePort {
 	async sanitize(
 		request: Parameters<MetadataEnginePort["sanitize"]>[0],
 	): Promise<Result<void, MetadataEngineError>> {
-		if (!this.isNativeWebpCopyCandidate(request)) {
+		if (!this.isNativeCopyCandidate(request)) {
 			return this.exiftool.sanitize(request);
 		}
 
-		const nativeRequest: NativeWebpSanitizeRequest = request;
-		const native = await this.nativeWebp.sanitize(nativeRequest);
+		const nativeRequest: NativeSanitizeRequest = request;
+		const native = await this.native.sanitize(nativeRequest);
 		if (native.ok) return native;
 
 		switch (native.error.nativeCode) {
@@ -65,9 +65,9 @@ export class HybridMetadataEngine implements MetadataEnginePort {
 		}
 	}
 
-	private isNativeWebpCopyCandidate(
+	private isNativeCopyCandidate(
 		request: Parameters<MetadataEnginePort["sanitize"]>[0],
-	): request is NativeWebpSanitizeRequest {
+	): request is NativeSanitizeRequest {
 		if (
 			request.destination === undefined ||
 			path.resolve(request.source) === path.resolve(request.destination) ||

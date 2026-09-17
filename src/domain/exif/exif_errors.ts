@@ -30,7 +30,7 @@ export type MetadataEngineError =
 			readonly path?: string;
 			readonly feature?: string;
 			readonly cause?: { readonly code?: string; readonly message: string };
-			readonly backend: "native-webp";
+			readonly backend: "native";
 	  };
 
 type LegacyExifError =

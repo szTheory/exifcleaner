@@ -40,7 +40,7 @@ describe("MetadataEngineError", () => {
 				nativeCode: "write-failed",
 				detail: "/private/output.webp write failed",
 				path: "/private/output.webp",
-				backend: "native-webp",
+				backend: "native",
 			});
 
 			expect(result).toContain("native processing failed");
@@ -60,7 +60,7 @@ describe("MetadataEngineError", () => {
 					path: "/files/source.webp",
 					feature: "orientation-preservation",
 					cause: { code: "EINVAL", message: "unsupported" },
-					backend: "native-webp",
+					backend: "native",
 				},
 			];
 

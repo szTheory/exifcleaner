@@ -1,16 +1,16 @@
 import type { Result } from "../../common/result";
 import type { MetadataEngineError } from "../../domain/exif/exif_errors";
 
-export type NativeWebpError = Extract<
+export type NativeMetadataError = Extract<
 	MetadataEngineError,
 	{ readonly code: "native-error" }
 >;
 
-export interface NativeWebpCapabilities {
-	readonly formats: readonly NativeWebpFormatCapabilities[];
+export interface NativeMetadataCapabilities {
+	readonly formats: readonly NativeFormatCapabilities[];
 }
 
-export interface NativeWebpFormatCapabilities {
+export interface NativeFormatCapabilities {
 	readonly format: "webp";
 	readonly sanitize: boolean;
 	readonly detection: "magic" | string;
@@ -21,7 +21,7 @@ export interface NativeWebpFormatCapabilities {
 	};
 }
 
-export interface NativeWebpSanitizeRequest {
+export interface NativeSanitizeRequest {
 	readonly source: string;
 	readonly destination: string;
 	readonly preserveOrientation: boolean;
@@ -30,9 +30,9 @@ export interface NativeWebpSanitizeRequest {
 	readonly signal?: AbortSignal | undefined;
 }
 
-export interface NativeWebpPort {
-	getCapabilities(): NativeWebpCapabilities;
+export interface NativeMetadataPort {
+	getCapabilities(): NativeMetadataCapabilities;
 	sanitize(
-		request: NativeWebpSanitizeRequest,
-	): Promise<Result<void, NativeWebpError>>;
+		request: NativeSanitizeRequest,
+	): Promise<Result<void, NativeMetadataError>>;
 }
