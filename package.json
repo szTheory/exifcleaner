@@ -42,6 +42,7 @@
 		"docs:verify": "node scripts/verify_docs.mjs",
 		"verify:gatekeeper": "node scripts/gatekeeper_check.mjs",
 		"verify:direffect": "node scripts/dir_effect_gate.mjs",
+		"verify:issue344-vacuity": "node scripts/issue344_vacuity_gate.mjs",
 		"verify:known-gaps": "node scripts/known_gap_gate.mjs",
 		"verify:release-notes": "node scripts/release_notes_gate.mjs",
 		"release:evidence": "node scripts/release_evidence.mjs --write",

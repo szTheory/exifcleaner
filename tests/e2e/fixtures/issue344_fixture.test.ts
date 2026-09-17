@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ExiftoolProcess } from "../../../src/infrastructure/exiftool/ExiftoolProcess";
@@ -9,6 +10,9 @@ import { ExifToolAdapter } from "../../../src/infrastructure/exiftool/exiftool_a
 import { ReadMetadataQuery } from "../../../src/application/queries/read_metadata_query";
 import { VerifyGeneratedOutputQuery } from "../../../src/application/queries/verify_generated_output_query";
 import { classifyInspectionDiagnostics } from "../../../src/infrastructure/exiftool/exiftool_diagnostics";
+import { StripMetadataCommand } from "../../../src/application/commands/strip_metadata_command";
+import { generateCleanedPath } from "../../../src/domain/files/cleaned_path";
+import { snapshotDir, assertDirEffect } from "../../helpers/dir_effect";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = __dirname;
@@ -160,5 +164,67 @@ describe("classifyInspectionDiagnostics purity (TRI-01 concurrency edge)", () =>
 		expect(displayVerdict.fatal).toBe(false);
 		expect(verificationVerdict.fatal).toBe(true);
 		expect(record).toEqual(before);
+	});
+});
+
+// P48-NC-6 (48-02-PLAN.md Task 2, D-11): no named mutation -- the whole-directory listing
+// plus the source-SHA assertion IS the control. assertDirEffect has no ignore list and no
+// exemption by design (tests/helpers/dir_effect.ts header), so an undeclared side effect of
+// the #344 fix's save-as-copy path fails loudly here rather than passing silently.
+describe("P48-NC-6: blast radius", () => {
+	const process_ = new ExiftoolProcess({ binPath: EXIFTOOL });
+	const adapter = new ExifToolAdapter({ process: process_ });
+	const stripMetadataCommand = new StripMetadataCommand({ exiftool: adapter });
+
+	beforeAll(async () => {
+		await adapter.open();
+	});
+
+	afterAll(async () => {
+		await adapter.close();
+	});
+
+	it("P48-NC-6: cleaning the issue344 fixture changes exactly one output path and leaves the source byte-identical", async () => {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "issue344-nc6-"));
+		try {
+			const sourceCopy = path.join(dir, ISSUE_344_MICROSOFT_PHOTO_FIXTURE);
+			fs.copyFileSync(
+				path.join(FIXTURES_DIR, ISSUE_344_MICROSOFT_PHOTO_FIXTURE),
+				sourceCopy,
+			);
+			const sourceHashBefore = sha256(sourceCopy);
+
+			const outputPath = generateCleanedPath({
+				filePath: sourceCopy,
+				exists: (candidate) => fs.existsSync(candidate),
+			});
+
+			const before = snapshotDir(dir);
+
+			const result = await stripMetadataCommand.execute({
+				filePath: sourceCopy,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+				saveAsCopy: true,
+				outputPath,
+			});
+
+			expect(result.ok).toBe(true);
+
+			const after = snapshotDir(dir);
+
+			// Full expected effect declared: the new save-as-copy output is the only added
+			// entry, and the source copy is asserted unchanged -- no ignore list, no
+			// exemption.
+			assertDirEffect(before, after, {
+				added: [path.basename(outputPath)],
+				unchanged: [ISSUE_344_MICROSOFT_PHOTO_FIXTURE],
+			});
+
+			expect(sha256(sourceCopy)).toBe(sourceHashBefore);
+		} finally {
+			fs.rmSync(dir, { recursive: true, force: true });
+		}
 	});
 });
