@@ -313,4 +313,126 @@ describe("OutputTransaction", () => {
 			`unlink:${generatedPath}`,
 		]);
 	});
+
+	// D-27 NC-8: a webp save-as-copy whose generated output fails ExifTool
+	// reopen verification is unlinked, reported as a failure, and leaves the
+	// source untouched (T-47-31, T-47-32). Driven against a real temp
+	// directory with real bytes so the whole-directory delta and the source's
+	// content hash are both asserted against real filesystem effects, not a
+	// fake's bookkeeping. Placed here (not exif_handlers.test.ts) because the
+	// verification dependency can be made to decline directly, with fewer
+	// fakes than driving the handler-level wiring would require.
+	it("NC-8: a failed reopen verification unlinks the generated output, reports failure, and leaves the source byte-identical", async () => {
+		const fixtureDir = await mkdtemp(join(tmpdir(), "exifcleaner-nc8-"));
+		const sourcePath = join(fixtureDir, "sample.webp");
+		const outputPath = join(fixtureDir, "sample-cleaned.webp");
+		const originalBytes = Buffer.from("original webp bytes, untouched");
+		await writeFile(sourcePath, originalBytes);
+		const sourceDigestBefore = createHash("sha256")
+			.update(originalBytes)
+			.digest("hex");
+
+		try {
+			const transaction = new OutputTransaction({
+				stripMetadata: {
+					execute: async ({ outputPath: writtenPath }) => {
+						await writeFile(writtenPath, "generated but unverifiable bytes");
+						return { ok: true, value: { tagsRemoved: 1 } };
+					},
+				},
+				verifyGeneratedOutput: {
+					execute: async ({ generatedPath: verifiedPath }) => {
+						expect(verifiedPath).toBe(outputPath);
+						return {
+							ok: false,
+							error: {
+								code: "output-verification-failed",
+								detail: "reopen failed",
+							},
+						};
+					},
+				},
+				unlink: async (path) => {
+					await rm(path);
+				},
+				rename: async () => undefined,
+				delay: async () => undefined,
+			});
+
+			const beforeDir = snapshotDir(fixtureDir);
+			const result = await transaction.execute({
+				filePath: sourcePath,
+				generatedPath: outputPath,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			});
+
+			expect(result).toEqual({
+				ok: false,
+				error: { code: "verification-failed" },
+			});
+			assertDirEffect(beforeDir, snapshotDir(fixtureDir), {
+				added: [],
+				modified: [],
+				removed: [],
+				unchanged: ["sample.webp"],
+			});
+			const sourceDigestAfter = createHash("sha256")
+				.update(await readFile(sourcePath))
+				.digest("hex");
+			expect(sourceDigestAfter).toBe(sourceDigestBefore);
+		} finally {
+			await rm(fixtureDir, { recursive: true, force: true });
+		}
+	});
+
+	// Paired positive control (D-27): without this, NC-8's empty-delta
+	// assertion above would pass vacuously against any transaction that never
+	// writes anything at all. A successful webp copy must add exactly the
+	// generated path and modify nothing.
+	it("NC-8: a successful webp copy adds exactly one path and modifies none, with the source unchanged", async () => {
+		const fixtureDir = await mkdtemp(join(tmpdir(), "exifcleaner-nc8-ok-"));
+		const sourcePath = join(fixtureDir, "sample.webp");
+		const outputPath = join(fixtureDir, "sample-cleaned.webp");
+		await writeFile(sourcePath, Buffer.from("original webp bytes, untouched"));
+
+		try {
+			const transaction = new OutputTransaction({
+				stripMetadata: {
+					execute: async ({ outputPath: writtenPath }) => {
+						await writeFile(writtenPath, "generated and verified bytes");
+						return { ok: true, value: { tagsRemoved: 1 } };
+					},
+				},
+				verifyGeneratedOutput: {
+					execute: async () => ({ ok: true, value: undefined }),
+				},
+				unlink: async (path) => {
+					await rm(path);
+				},
+				rename: async () => undefined,
+				delay: async () => undefined,
+			});
+
+			const beforeDir = snapshotDir(fixtureDir);
+			const result = await transaction.execute({
+				filePath: sourcePath,
+				generatedPath: outputPath,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			});
+
+			expect(result).toEqual({ ok: true, value: { outputPath } });
+			assertDirEffect(beforeDir, snapshotDir(fixtureDir), {
+				added: ["sample-cleaned.webp"],
+				modified: [],
+				removed: [],
+				unchanged: ["sample.webp"],
+			});
+		} finally {
+			await rm(fixtureDir, { recursive: true, force: true });
+		}
+	});
 });
