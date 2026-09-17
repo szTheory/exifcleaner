@@ -115,6 +115,27 @@ describe("issue #344 end-to-end: one path only", () => {
 			);
 		}
 	});
+
+	// P48-NC-4 (48-02-PLAN.md Task 1): must run through ReadMetadataQuery against a real
+	// ExifToolAdapter over the bundled binary and the committed cooccurrence fixture, not a
+	// hand-built object -- a hand-built object cannot prove what ExifTool's own JSON
+	// serialization does under co-occurrence. Named mutation: revert D-05's full scan back
+	// to a first-match predicate (.find).
+	it("P48-NC-4: a record carrying both a minor and a non-minor warning is fatal on display", async () => {
+		const filePath = path.join(FIXTURES_DIR, ISSUE_344_COOCCURRENCE_FIXTURE);
+		const result = await readMetadataQuery.execute({ filePath });
+
+		expect(result.ok).toBe(false);
+		if (result.ok) {
+			return;
+		}
+		expect(result.error.code).toBe("exiftool-error");
+		if (result.error.code === "exiftool-error") {
+			expect(result.error.detail).toBe(
+				ISSUE_344_COOCCURRENCE_NON_MINOR_WARNING,
+			);
+		}
+	});
 });
 
 describe("classifyInspectionDiagnostics purity (TRI-01 concurrency edge)", () => {
