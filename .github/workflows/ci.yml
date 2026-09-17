@@ -95,6 +95,14 @@ jobs:
           path: vitest-report.json
           retention-days: 7
 
+      # D-27: asserts the nine negative-control titles were actually EXECUTED
+      # in the report above, not merely that the suite exited zero. Placed
+      # after the upload step (not always()) so the artifact is preserved
+      # even when this assertion is what fails, but this step itself gates
+      # the pipeline normally.
+      - name: Verify negative-control run-log evidence
+        run: yarn verify:nc-evidence
+
       - name: Check circular dependencies (madge)
         run: yarn check:deps
 
