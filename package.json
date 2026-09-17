@@ -47,6 +47,7 @@
 		"verify:issue344-nc-evidence": "node scripts/issue344_nc_evidence.mjs",
 		"verify:rename-equivalence": "node scripts/rename_equivalence_gate.mjs",
 		"verify:nc1-mutation": "node scripts/nc1_mutation_gate.mjs",
+		"measure:verification-cost": "node scripts/measure_verification_cost.mjs",
 		"verify:known-gaps": "node scripts/known_gap_gate.mjs",
 		"verify:native-dependency": "node scripts/exifcleaner_node_dependency_gate.mjs",
 		"verify:native-dependency:seal": "node scripts/exifcleaner_node_dependency_gate.mjs --seal",
