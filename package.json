@@ -33,7 +33,7 @@
 		"typecheck": "tsc --noEmit",
 		"preview": "ELECTRON_RUN_AS_NODE= electron-vite preview",
 		"test": "vitest run",
-		"test:ci": "vitest run --reporter=default --reporter=json --outputFile=vitest-report.json",
+		"test:ci": "vitest run --reporter=verbose --reporter=json --outputFile.json=vitest-report.json",
 		"test:watch": "vitest",
 		"test:e2e": "playwright test --project=dev",
 		"test:smoke": "playwright test --project=smoke",

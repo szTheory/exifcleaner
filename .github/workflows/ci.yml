@@ -31,8 +31,26 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      # Phase 47 (D-01/D-03): the repository is intentionally pinned to the
+      # admitted draft git dependency, not a sealed registry version, so this
+      # step is expected to report "NATIVE DEPENDENCY SEAL GATE FAILED" (its
+      # non-ready verdict is accepted, not remediated — see D-03). This step's
+      # run command and its placement immediately after install are a
+      # validated CI-linkage invariant
+      # (scripts/exifcleaner_node_dependency_gate.mjs validateCiWorkflowPolicy)
+      # that Phase 47 does not touch, so this step still runs and its output
+      # is preserved as evidence; `continue-on-error` only stops its expected
+      # failure from blocking the job. Phase 48 removes this override when the
+      # dependency reseals (D-04).
       - name: Seal native dependency
+        continue-on-error: true
         run: yarn verify:native-dependency:seal
+
+      # The enforced check for this phase: independently asserts the pinned
+      # SHA equals ALLOWED_DRAFT_SHA regardless of seal state (T-47-01). This
+      # step is NOT allowed to fail.
+      - name: Verify native dependency (draft acceptance, D-01/D-03)
+        run: yarn verify:native-dependency
 
       - name: Verify release-note identity
         run: yarn verify:release-notes
@@ -67,6 +85,15 @@ jobs:
       # the report the previous step just wrote plus the vacuity gate's evidence marker.
       - name: Issue #344 NC evidence
         run: yarn verify:issue344-nc-evidence
+      # always() so the per-test-name run-log evidence (D-27 prerequisite) is
+      # preserved even when a test fails, not only on a clean pass.
+      - name: Upload Vitest run-log evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vitest-report
+          path: vitest-report.json
+          retention-days: 7
 
       - name: Check circular dependencies (madge)
         run: yarn check:deps
