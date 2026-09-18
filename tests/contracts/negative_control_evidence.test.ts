@@ -4,28 +4,20 @@
 // would still exit zero; the presence (and non-skipped status) of these exact titles is the
 // actual evidence.
 //
-// GATING NOTE (read before editing): the real-report-reading driver test below is gated behind
-// process.env.GSD_NC_EVIDENCE_CHECK. This is NOT the same thing as "skip when the report is
-// absent" (that is explicitly forbidden — see the driver test itself, which fails loudly, never
-// skips, when gated-on and the report is missing). The gate exists because this file lives
-// under tests/contracts/ and is therefore picked up by the ALWAYS-RUN `tests/**/*.test.ts`
-// glob — including plain `yarn test`/`yarn test:ci`. `vitest-report.json` is written by
-// `test:ci` only at the very END of that run (json reporter), so DURING any test:ci invocation
-// on a fresh checkout (every CI run: the file is gitignored and never committed) the file
-// cannot yet exist. An ungated driver test would therefore fail unconditionally on every fresh
-// CI run and break the always-run suite outright. Gating the real-disk-read behind an explicit
-// opt-in, set only by the dedicated `verify:nc-evidence` script (run AFTER `yarn test:ci` has
-// completed and written the report), is what makes "yarn test:ci; yarn verify:nc-evidence" a
-// coherent two-step reproduction: the pure-function unit tests below (synthetic fixtures, no
-// disk access) always run as part of the normal suite; the real-report assertion only runs
-// when explicitly asked to verify evidence.
+// This file holds only the PURE-FUNCTION unit tests (synthetic fixtures, no disk access) —
+// always run as part of the normal `yarn test`/`yarn test:ci` suite. The real-report driver
+// that reads the actual `vitest-report.json` written by `yarn test:ci` lives in
+// `scripts/nc_evidence_gate.mjs` (invoked by `yarn verify:nc-evidence`, run AFTER `test:ci`
+// has completed), not here as a vitest test — a vitest test gated on an env var would need
+// `describe.runIf`, a conditional runner control the project's known-gap policy forbids
+// (scripts/known_gap_gate.mjs FORBIDDEN_RUNNER_CONTROL_PROPERTIES) because it can make a
+// runner silently omit coverage. A standalone script has no such ambiguity: it either isn't
+// invoked (never appears at all) or is invoked and always asserts for real, mirroring the
+// precedent in `scripts/issue344_nc_evidence.mjs`.
 
-import fs from "node:fs";
-import path from "node:path";
 import { describe, it, expect } from "vitest";
 
-const REPO_ROOT = path.resolve(__dirname, "../..");
-const REPORT_PATH = path.join(REPO_ROOT, "vitest-report.json");
+const REPORT_PATH = "vitest-report.json";
 const PRODUCING_SCRIPT = "yarn test:ci";
 
 export interface ReportAssertion {
@@ -255,7 +247,7 @@ describe("findMissingControlTitles", () => {
 		]);
 	});
 
-	it("negative control: a report entry marked pending/todo also counts as missing", () => {
+	it("negative control: a report entry marked pending also counts as missing", () => {
 		const entries = EXPECTED_CONTROL_TITLES.map((title) => ({
 			title,
 			status:
@@ -312,33 +304,5 @@ describe("parseRunReport", () => {
 	});
 });
 
-// ---------------------------------------------------------------------------------------
-// Real-report driver — gated (see the file-level comment). Never skips once gated on: an
-// absent report is a hard failure naming the producing script, exactly as D-27 requires.
-// ---------------------------------------------------------------------------------------
-
-const evidenceCheckRequested = process.env["GSD_NC_EVIDENCE_CHECK"] === "1";
-
-describe.runIf(evidenceCheckRequested)(
-	"Real CI run-log evidence (D-27)",
-	() => {
-		it(`all nine negative-control titles are present and executed in ${path.relative(REPO_ROOT, REPORT_PATH)}`, () => {
-			if (!fs.existsSync(REPORT_PATH)) {
-				expect.fail(
-					buildMissingReportMessage({
-						reportPath: REPORT_PATH,
-						producingScript: PRODUCING_SCRIPT,
-					}),
-				);
-				return;
-			}
-			const raw = fs.readFileSync(REPORT_PATH, "utf8");
-			const report = parseRunReport(raw);
-			const missing = findMissingControlTitles({
-				report,
-				expectedTitles: EXPECTED_CONTROL_TITLES,
-			});
-			expect(missing).toEqual([]);
-		});
-	},
-);
+// The real-report driver (reads the actual vitest-report.json and asserts every expected
+// title executed) now lives in scripts/nc_evidence_gate.mjs — see the file-level comment.

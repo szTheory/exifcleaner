@@ -92,8 +92,8 @@ it("requiresVerifiedWrite routes raw, media, and copy-mode webp through the veri
 	expect(
 		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "copy" }),
 	).toBe(true);
-	// The deferred gap this phase leaves open: in-place webp overwrites stay on
-	// the unverified ExifTool path (D-19/D-24/D-42, out of scope for this plan).
+	// This phase intentionally leaves in-place webp overwrites on the unverified
+	// ExifTool path (D-19/D-24/D-42); out of scope for this plan.
 	expect(
 		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "overwrite" }),
 	).toBe(false);

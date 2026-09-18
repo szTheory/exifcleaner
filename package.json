@@ -48,7 +48,7 @@
 		"verify:rename-equivalence": "node scripts/rename_equivalence_gate.mjs",
 		"verify:nc1-mutation": "node scripts/nc1_mutation_gate.mjs",
 		"measure:verification-cost": "node scripts/measure_verification_cost.mjs",
-		"verify:nc-evidence": "GSD_NC_EVIDENCE_CHECK=1 vitest run tests/contracts/negative_control_evidence.test.ts",
+		"verify:nc-evidence": "node scripts/nc_evidence_gate.mjs",
 		"verify:known-gaps": "node scripts/known_gap_gate.mjs",
 		"verify:native-dependency": "node scripts/exifcleaner_node_dependency_gate.mjs",
 		"verify:native-dependency:seal": "node scripts/exifcleaner_node_dependency_gate.mjs --seal",
