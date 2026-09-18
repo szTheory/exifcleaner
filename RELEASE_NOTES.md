@@ -1,21 +1,23 @@
-# ExifCleaner 4.2.1
+# ExifCleaner 4.3.0
 
-ExifCleaner 4.2.1 makes the supported-format promise match what the bundled metadata engine can safely process.
+ExifCleaner 4.3.0 routes WebP metadata removal through a new native engine, and stops a benign ExifTool warning from being reported as a failed inspection.
 
-## Format support
+## Native WebP handling
 
-- **M4A is now supported.** Audio metadata is removed through the same staged, verified publication path used by other media files.
-- **MKV is no longer accepted.** ExifTool can read Matroska metadata but cannot write MKV files, so rejecting the format before processing is the truthful behavior.
-- The README now lists the app's exact intake allowlist instead of ExifTool's much broader catalog, and CI prevents that list from drifting from source.
-- DOCX remains unsupported.
+- **WebP files are now cleaned by a native engine** rather than by shelling out to ExifTool. The native path is used only when it reports the capability for the exact request; anything it declines falls back to the existing ExifTool path.
+- **Every native write goes through a staged, verified publication.** The cleaned result is written to a private staging location, verified, and only then published over the original. A write that cannot be verified does not replace your file.
+- **Uncertain processing preserves the source.** If the native path fails in a way that is not provably safe to retry, the source file is left unchanged rather than being replaced by a partially processed result.
 
-The patch includes a metadata-bearing M4A fixture, explicit MKV rejection coverage, and installed-artifact M4A smoke coverage.
+## Fixes
+
+- **Benign ExifTool `[minor]` warnings no longer fail metadata display** ([#344](https://github.com/szTheory/exifcleaner/issues/344)). Files that cleaned correctly but produced a non-fatal warning previously surfaced as an inspection failure.
 
 <!-- exifcleaner-known-limitations:start v1 -->
-## Known limitations in 4.2.1
+## Known limitations in 4.3.0
 
 No executable release-blocking known gaps are approved for this release; documented format constraints follow below.
 <!-- exifcleaner-known-limitations:end -->
+
 
 
 ### Format constraints
@@ -29,13 +31,13 @@ No executable release-blocking known gaps are approved for this release; documen
 
 | Platform | File |
 | --- | --- |
-| **Windows portable (recommended)** | `ExifCleaner.4.2.1.exe` |
-| Windows installer | `ExifCleaner.Setup.4.2.1.exe` |
-| macOS (Apple Silicon) | `ExifCleaner-4.2.1-arm64.dmg` |
-| macOS (Intel) | `ExifCleaner-4.2.1.dmg` |
-| Linux (AppImage) | `ExifCleaner-4.2.1.AppImage` |
-| Linux (Debian/Ubuntu) | `exifcleaner_4.2.1_amd64.deb` |
-| Linux (Fedora/RHEL) | `exifcleaner-4.2.1.x86_64.rpm` |
+| **Windows portable (recommended)** | `ExifCleaner.4.3.0.exe` |
+| Windows installer | `ExifCleaner.Setup.4.3.0.exe` |
+| macOS (Apple Silicon) | `ExifCleaner-4.3.0-arm64.dmg` |
+| macOS (Intel) | `ExifCleaner-4.3.0.dmg` |
+| Linux (AppImage) | `ExifCleaner-4.3.0.AppImage` |
+| Linux (Debian/Ubuntu) | `exifcleaner_4.3.0_amd64.deb` |
+| Linux (Fedora/RHEL) | `exifcleaner-4.3.0.x86_64.rpm` |
 
 Verify downloads against the release's `SHASUMS256.txt` file.
 
@@ -46,10 +48,10 @@ ExifCleaner remains unsigned. Signing would require publishing the maintainer's 
 - **macOS 14 and earlier:** right-click or Control-click the app, choose **Open**, then choose **Open** again.
 - **macOS 15 and later:** open the app once, then use **System Settings → Privacy & Security → Open Anyway**.
 - **Windows:** if SmartScreen appears, choose **More info → Run anyway** after verifying the checksum.
-- **Linux:** make the AppImage executable with `chmod +x ExifCleaner-4.2.1.AppImage`; `.deb` and `.rpm` packages install normally.
+- **Linux:** make the AppImage executable with `chmod +x ExifCleaner-4.3.0.AppImage`; `.deb` and `.rpm` packages install normally.
 
 Every artifact is built publicly from tagged source by GitHub Actions. ExifCleaner makes no network requests during normal use.
 
 Only download ExifCleaner from the [GitHub releases page](https://github.com/szTheory/exifcleaner/releases).
 
-**Full changelog:** https://github.com/szTheory/exifcleaner/compare/v4.2.0...v4.2.1
+**Full changelog:** https://github.com/szTheory/exifcleaner/compare/v4.2.1...v4.3.0

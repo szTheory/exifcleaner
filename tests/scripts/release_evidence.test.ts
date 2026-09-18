@@ -90,7 +90,7 @@ describe("release evidence", () => {
 			smokeResult: "passed",
 		});
 
-		expect(record.packageVersion).toBe("4.2.1");
+		expect(record.packageVersion).toBe("4.3.0");
 		expect(record.artifactSha256).not.toBe(altered.artifactSha256);
 	});
 
