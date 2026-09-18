@@ -52,8 +52,18 @@ jobs:
       - name: Typecheck (tsc --noEmit)
         run: yarn typecheck
 
+      # P48-NC-5 (issue #344 vacuity gate): must run before the NC evidence step below,
+      # which reads this step's success marker as P48-NC-5's own run-log evidence.
+      - name: Issue #344 vacuity gate
+        run: yarn verify:issue344-vacuity
+
       - name: Unit tests (Vitest)
-        run: yarn test
+        run: yarn test:ci
+
+      # D-11: proves the six P48-NC controls EXECUTED (not skipped/platform-gated), reading
+      # the report the previous step just wrote plus the vacuity gate's evidence marker.
+      - name: Issue #344 NC evidence
+        run: yarn verify:issue344-nc-evidence
 
       - name: Check circular dependencies (madge)
         run: yarn check:deps

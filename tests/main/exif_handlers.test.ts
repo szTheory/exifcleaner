@@ -278,9 +278,13 @@ describe("exif:remove handler", () => {
 				(call) => call.method === "readMetadata",
 			);
 			expect(removeCalls).toHaveLength(1);
-			expect(verifierReads).toHaveLength(verifierPath === undefined ? 0 : 1);
+			// VerifyGeneratedOutputQuery now reopens the verifier path twice: once for the
+			// plain-key FileType guard, once for the -G1:2 ExifTool-group diagnostic scan
+			// (the approved scope addition -- see verify_generated_output_query.ts).
+			expect(verifierReads).toHaveLength(verifierPath === undefined ? 0 : 2);
 			if (verifierPath !== undefined) {
 				expect(verifierReads[0]?.args[0]).toBe(verifierPath);
+				expect(verifierReads[1]?.args[0]).toBe(verifierPath);
 			}
 		},
 	);

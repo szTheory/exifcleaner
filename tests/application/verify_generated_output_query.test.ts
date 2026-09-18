@@ -13,16 +13,25 @@ beforeEach(() => {
 });
 
 describe("VerifyGeneratedOutputQuery", () => {
-	it("reopens only the supplied generated path once", async () => {
+	it("reopens the supplied generated path with both the FileType guard and the -G1:2:4 diagnostic scan", async () => {
 		const generatedPath = "/tmp/sample_cleaned.raf";
 
 		const result = await query.execute({ generatedPath });
 
 		expect(result).toEqual({ ok: true, value: undefined });
+		// Two calls, not one merged arg set: ExifTool's -G option renames every JSON key
+		// (including File:FileType) to Group:Tag, so the plain-key FileType guard and the
+		// classifyInspectionDiagnostics scan cannot share one readMetadata call. -G4 is
+		// required (not just -G1:2, see 48-D06-SETTLEMENT.md): co-occurring ExifTool-group
+		// diagnostics can otherwise collapse onto one suppressed JSON key.
 		expect(exiftool.calls).toEqual([
 			{
 				method: "readMetadata",
 				args: [generatedPath, ["-File:FileType", "-File:Error"]],
+			},
+			{
+				method: "readMetadata",
+				args: [generatedPath, ["-G1:2:4"]],
 			},
 		]);
 	});
@@ -65,11 +74,39 @@ describe("VerifyGeneratedOutputQuery", () => {
 			},
 		},
 		{
-			description: "ExifTool Error",
+			description: "ExifTool-group Error",
 			setResult: () => {
 				exiftool.readResult = {
 					ok: true,
-					value: [{ FileType: "RAF", Error: "bad output" }],
+					value: [{ FileType: "RAF", "ExifTool:Error": "bad output" }],
+				};
+			},
+		},
+		{
+			description:
+				"ExifTool-group Warning (approved scope addition: this path had no Warning scan before)",
+			setResult: () => {
+				exiftool.readResult = {
+					ok: true,
+					value: [
+						{ FileType: "RAF", "ExifTool:Warning": "Bad offset for GPSInfo" },
+					],
+				};
+			},
+		},
+		{
+			description:
+				"ExifTool-group [minor] Warning (output-verification stays strict; only display is lenient)",
+			setResult: () => {
+				exiftool.readResult = {
+					ok: true,
+					value: [
+						{
+							FileType: "RAF",
+							"ExifTool:Warning":
+								"[minor] Fixed incorrect URI for xmlns:MicrosoftPhoto",
+						},
+					],
 				};
 			},
 		},
@@ -86,7 +123,7 @@ describe("VerifyGeneratedOutputQuery", () => {
 		}
 	});
 
-	it("accepts a warning-only recognized record", async () => {
+	it("accepts a non-ExifTool-group Warning tag (the policy only scans the ExifTool pseudo-group)", async () => {
 		exiftool.readResult = {
 			ok: true,
 			value: [{ FileType: "MP4", Warning: "minor container warning" }],

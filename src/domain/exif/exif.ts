@@ -41,9 +41,23 @@ function isComputedField({ key }: IsComputedFieldParams) {
 	);
 }
 
+// ExifTool's -G4 (family 4, "instance number") option inserts a "CopyN" segment just
+// before the tag name whenever two tags of the same group+name collide -- e.g.
+// "JFIF:Image:Copy1:ResolutionUnit" for the second of two same-named tags. Issue #344's
+// fix (exiftool_diagnostics.ts) needs -G4 in the read args so co-occurring ExifTool-group
+// diagnostics don't silently collide onto one suppressed JSON key (ExifTool's own
+// documented -json duplicate-suppression). Stripping any CopyN segment here keeps this
+// module's displayed tag names identical to what -G1:2 alone produced, so a file that
+// happens to carry a duplicate ordinary tag (e.g. a JFIF/Composite resolution dupe) is
+// unaffected by the diagnostic-args change -- only the ExifTool-group diagnostic keys
+// (already excluded by the ExifTool entry in STRUCTURAL_GROUPS) needed the disambiguation.
+const FAMILY_4_INSTANCE_PATTERN = /^Copy\d+$/;
+
 function normalizeMetadataKey(key: string): string {
-	const parts = key.split(":");
-	return parts.length >= 3 ? parts.slice(1).join(":") : key;
+	const parts = key
+		.split(":")
+		.filter((part) => !FAMILY_4_INSTANCE_PATTERN.test(part));
+	return parts.length >= 3 ? parts.slice(1).join(":") : parts.join(":");
 }
 
 interface CleanExifDataParams {
