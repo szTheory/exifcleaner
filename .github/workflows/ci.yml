@@ -242,9 +242,17 @@ jobs:
           "artifact=$($installer.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "executable=$app" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
+      # 48-07 diagnostic (maintainer-authorized, one deliberate dispatch): writes native
+      # crash dumps to a local, job-scoped RUNNER_TEMP directory when the packaged app
+      # dies. src/main/security/crash_dumps.ts's maybeEnableCrashDumps() is a no-op unless
+      # this exact env var is set -- no real user launch or release build ever sets it.
+      # uploadToServer:false + empty submitURL (verified by
+      # tests/main/security/crash_dumps.test.ts) mean nothing is ever phoned home; the
+      # dumps only ever leave this job as the CI artifact uploaded below.
       - name: Smoke test packaged app
         env:
           EXIFCLEANER_PACKAGED_APP: ${{ steps.install.outputs.executable }}
+          EXIFCLEANER_CRASH_DUMPS_DIR: ${{ runner.temp }}\crash-dumps
         run: yarn test:smoke
 
       - name: Write Windows release evidence
@@ -265,6 +273,19 @@ jobs:
           path: |
             playwright-report/
             test-results/
+          retention-days: 7
+
+      # Diagnostic-only, paired with the crash-dump capture above. Uploads whatever was
+      # written to the crash-dumps directory (nothing, if the app never crashed) so a
+      # native fault has a real minidump to analyze instead of only a Playwright
+      # "context closed" symptom.
+      - name: Upload Windows crash dumps
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-crash-dumps
+          path: ${{ runner.temp }}\crash-dumps
+          if-no-files-found: ignore
           retention-days: 7
 
       - name: Upload Windows artifacts

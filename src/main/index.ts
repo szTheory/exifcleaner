@@ -3,6 +3,13 @@ import { setupMenus } from "./menu/menu";
 import { attachWindow, initProcess } from "./init";
 import { createMainWindow, setupMainWindow } from "./window/window_setup";
 import { currentBrowserWindow } from "../infrastructure";
+import { maybeEnableCrashDumps } from "./security/crash_dumps";
+
+// CI/test-only diagnostic (48-07): no-op unless EXIFCLEANER_CRASH_DUMPS_DIR is set, which no
+// real user launch or release build ever has. Must run before app.whenReady() -- crash-dump
+// path and reporter registration are only honored when set early. See crash_dumps.ts for the
+// full no-telemetry gating rationale.
+maybeEnableCrashDumps();
 
 // Maintain reference to window to
 // prevent it from being garbage collected
