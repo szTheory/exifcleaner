@@ -23,26 +23,59 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     env:
-      GH_TOKEN: ${{ github.token }}
+      GH_TOKEN: ${{ secrets.RELEASE_PAT || github.token }}
+      USING_PAT: ${{ secrets.RELEASE_PAT && 'true' || 'false' }}
       HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
       REPOSITORY_OWNER: ${{ github.repository_owner }}
     steps:
-      - name: Enforce release PR trust and check policy
-        id: policy
+      # Eligibility and trust are deliberately separated.
+      #
+      # Eligibility ("is this even a release PR?") exits 0 and skips. Every CI run on every
+      # pull request in this repository reaches this workflow -- dependabot branches, feature
+      # branches, translation PRs -- and none of them are release candidates. Failing closed on
+      # those produced a red run per dependabot PR, which is noise that trains a reader to
+      # ignore this workflow's status.
+      #
+      # Trust ("this IS a release PR, but it fails a required condition") still fails loudly.
+      # Not merging is always the safe direction for a merge action, so skipping is safe; the
+      # reason to fail is to surface a genuinely misconfigured release, not to reject a PR that
+      # was never a release in the first place.
+      - name: Classify release eligibility
+        id: eligibility
         shell: bash
         run: |
           set -euo pipefail
           gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA/pulls" > associated-prs.json
-          test "$(jq length associated-prs.json)" -eq 1
 
-          number=$(jq -r '.[0].number' associated-prs.json)
+          pr_count=$(jq length associated-prs.json)
+          if [ "$pr_count" -ne 1 ]; then
+            echo "::notice::Not a release candidate: $pr_count pull requests are associated with $HEAD_SHA (expected exactly 1)."
+            echo "eligible=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           head_ref=$(jq -r '.[0].head.ref' associated-prs.json)
+          if [[ ! "$head_ref" =~ ^gsd/v[0-9]+\.[0-9]+\.[0-9]+-canonical$ ]]; then
+            echo "::notice::Not a release candidate: head ref '$head_ref' is not a canonical release branch."
+            echo "eligible=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "number=$(jq -r '.[0].number' associated-prs.json)" >> "$GITHUB_OUTPUT"
+          echo "eligible=true" >> "$GITHUB_OUTPUT"
+
+      - name: Enforce release PR trust and check policy
+        id: policy
+        if: steps.eligibility.outputs.eligible == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
           head_repo=$(jq -r '.[0].head.repo.full_name' associated-prs.json)
           author=$(jq -r '.[0].user.login' associated-prs.json)
           base_ref=$(jq -r '.[0].base.ref' associated-prs.json)
           draft=$(jq -r '.[0].draft' associated-prs.json)
 
-          [[ "$head_ref" =~ ^gsd/v[0-9]+\.[0-9]+\.[0-9]+-canonical$ ]]
           test "$head_repo" = "$GITHUB_REPOSITORY"
           test "$author" = "$REPOSITORY_OWNER"
           test "$base_ref" = master
@@ -60,7 +93,29 @@ jobs:
           for name in "${required[@]}"; do
             test "$(awk -F '\t' -v required="$name" '$1 == required && $2 == "success" { count++ } END { print count + 0 }' check-runs.tsv)" -eq 1
           done
-          echo "number=$number" >> "$GITHUB_OUTPUT"
+
+      # GITHUB_TOKEN cannot complete a release on its own.
+      #
+      # GitHub does not start new workflow runs for events created with GITHUB_TOKEN, to prevent
+      # a workflow from recursively triggering itself. A merge performed with GITHUB_TOKEN
+      # therefore pushes the merge commit to master WITHOUT triggering CI, and release.yml's
+      # `promote` job triggers on a CI workflow_run where event == 'push'. No CI run means no
+      # promote run, so the version bump lands on master and nothing is ever published.
+      #
+      # This is not hypothetical: PR #364 (4.3.0) merged cleanly here and produced no CI run at
+      # eabbb93, while PR #343, merged with a user token, did trigger CI run 35374105126 and
+      # then Release run 35375168085. Same repository, same workflows -- the only difference was
+      # the merge actor.
+      #
+      # Setting a RELEASE_PAT secret makes the merge trigger CI and the chain completes on its
+      # own. Without it the merge still happens and is still audited, but the release must be
+      # started by a push to master from a non-bot actor.
+      - name: Warn that a GITHUB_TOKEN merge will not trigger the release
+        if: steps.eligibility.outputs.eligible == 'true' && env.USING_PAT != 'true'
+        shell: bash
+        run: |
+          echo "::warning::Merging with GITHUB_TOKEN. GitHub will NOT trigger CI for this merge commit, so release.yml's promote job will NOT run and this version will NOT publish. Set a RELEASE_PAT secret to close the chain, or land the next commit on master from a non-bot actor to start the release."
 
       - name: Merge canonical release PR
-        run: gh pr merge -R "$GITHUB_REPOSITORY" "${{ steps.policy.outputs.number }}" --merge --delete-branch
+        if: steps.eligibility.outputs.eligible == 'true'
+        run: gh pr merge -R "$GITHUB_REPOSITORY" "${{ steps.eligibility.outputs.number }}" --merge --delete-branch
