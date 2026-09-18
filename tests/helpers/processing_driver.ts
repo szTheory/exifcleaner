@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 import { createFixtureDir } from "./fixture_copier";
-import { assertDirEffect, snapshotDir } from "./dir_effect";
+import { assertDirEffect, snapshotDir, type DirSnapshot } from "./dir_effect";
 import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
 import type { ElectronApplication, Page } from "playwright";
 import { waitForProcessing } from "../e2e/helpers/wait_for_processing";
@@ -129,6 +129,33 @@ export function createProcessingDriver(
 	};
 }
 
+// exifcleaner-node@0.2.1's native publication transaction (safe-transaction.js) creates a
+// private staging directory named `.exifcleaner-stage-<uuid>` next to the destination for
+// every native-routed write (currently: webp). On POSIX it is DELIBERATELY retained rather
+// than removed -- there is no atomic, identity-verified delete-by-handle primitive available
+// cross-platform, so the transaction fails closed into bounded residue instead of deleting by
+// (possibly stale) pathname (Phase 46 decisions: "POSIX retains bounded residue when
+// identity-conditional deletion is unavailable"). This is documented, accepted product
+// behavior of the sealed native package, not a defect this Electron-side test can fix --
+// assertDirEffect deliberately has no ignore-list parameter (see its own file header), so
+// this helper discovers the one concrete, randomly-named entry a run actually produced and
+// returns it to be named explicitly in `added`, exactly like every other observed mutation.
+const NATIVE_STAGE_RESIDUE_PATTERN =
+	/^\.exifcleaner-stage-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+function discoverNativeStageResidue(
+	before: DirSnapshot,
+	after: DirSnapshot,
+): string[] {
+	const residue: string[] = [];
+	for (const key of after.keys()) {
+		if (!before.has(key) && NATIVE_STAGE_RESIDUE_PATTERN.test(key)) {
+			residue.push(key);
+		}
+	}
+	return residue;
+}
+
 export async function runPositiveFormatScenario(
 	context: ProcessingLaunchContext,
 	fixture: SupportedFormatFixture,
@@ -153,7 +180,10 @@ export async function runPositiveFormatScenario(
 
 		assertDirEffect(before, after, {
 			modified: [],
-			added: [path.basename(outputPath)],
+			added: [
+				path.basename(outputPath),
+				...discoverNativeStageResidue(before, after),
+			],
 			removed: [],
 			unchanged: [fixture],
 		});
@@ -195,7 +225,10 @@ export async function runMixedFormatScenario(
 
 		assertDirEffect(before, after, {
 			modified: [],
-			added: outputPaths.map((outputPath) => path.basename(outputPath)),
+			added: [
+				...outputPaths.map((outputPath) => path.basename(outputPath)),
+				...discoverNativeStageResidue(before, after),
+			],
 			removed: [],
 			unchanged: SUPPORTED_FORMAT_FIXTURES,
 		});
