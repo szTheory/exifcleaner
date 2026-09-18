@@ -1,44 +1,65 @@
 import { it, expect } from "vitest";
-import { FakeExifTool } from "./fake_exiftool";
+import { FakeMetadataEngine } from "./fake_metadata_engine";
 import { FakeSettings } from "./fake_settings";
 import { FakeLogger } from "./fake_logger";
 
-it("FakeExifTool tracks calls and returns configured results", async () => {
-	const fake = new FakeExifTool();
-	const result = await fake.readMetadata({
-		filePath: "/test.jpg",
-		args: ["-all"],
+it("FakeMetadataEngine tracks semantic inspect calls and returns configured results", async () => {
+	const fake = new FakeMetadataEngine();
+	const result = await fake.inspect({
+		source: "/test.jpg",
+		purpose: "display",
 	});
 	expect(result.ok).toBe(true);
 	if (result.ok) {
-		expect(result.value).toEqual([{ FileName: "test.jpg" }]);
+		expect(result.value).toEqual({
+			metadata: { FileName: "test.jpg" },
+			recordCount: 1,
+			verification: { fileType: "JPEG", error: undefined },
+		});
 	}
 	expect(fake.calls).toHaveLength(1);
-	expect(fake.calls[0]?.method).toBe("readMetadata");
+	expect(fake.calls[0]).toEqual({
+		method: "inspect",
+		request: { source: "/test.jpg", purpose: "display" },
+	});
 });
 
-it("FakeExifTool removeMetadata returns success by default", async () => {
-	const fake = new FakeExifTool();
-	const result = await fake.removeMetadata({
-		filePath: "/test.jpg",
-		args: ["-all="],
+it("FakeMetadataEngine sanitize returns success by default", async () => {
+	const fake = new FakeMetadataEngine();
+	const result = await fake.sanitize({
+		source: "/test.jpg",
+		outputMode: "overwrite",
+		preserveOrientation: true,
+		preserveColorProfile: true,
+		preserveTimestamps: false,
 	});
 	expect(result.ok).toBe(true);
+	expect(fake.calls[0]).toEqual({
+		method: "sanitize",
+		request: {
+			source: "/test.jpg",
+			destination: undefined,
+			outputMode: "overwrite",
+			preserveOrientation: true,
+			preserveColorProfile: true,
+			preserveTimestamps: false,
+		},
+	});
 });
 
-it("FakeExifTool allows configuring error results", async () => {
-	const fake = new FakeExifTool();
-	fake.readResult = {
+it("FakeMetadataEngine allows configuring engine-neutral error results", async () => {
+	const fake = new FakeMetadataEngine();
+	fake.inspectResult = {
 		ok: false,
-		error: { code: "exiftool-error", detail: "File not found" },
+		error: { code: "engine-error", detail: "File not found" },
 	};
-	const result = await fake.readMetadata({
-		filePath: "/missing.jpg",
-		args: [],
+	const result = await fake.inspect({
+		source: "/missing.jpg",
+		purpose: "output-verification",
 	});
 	expect(result.ok).toBe(false);
 	if (!result.ok) {
-		expect(result.error.code).toBe("exiftool-error");
+		expect(result.error.code).toBe("engine-error");
 	}
 });
 

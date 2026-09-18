@@ -1,263 +1,109 @@
-import { it, expect, describe, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { StripMetadataCommand } from "../../src/application/commands/strip_metadata_command";
-import { FakeExifTool } from "../fakes/fake_exiftool";
+import type { MetadataEnginePort } from "../../src/application/metadata_engine_port";
 
-let exiftool: FakeExifTool;
+let metadataEngine: MetadataEnginePort;
+let sanitize: ReturnType<typeof vi.fn<MetadataEnginePort["sanitize"]>>;
 let command: StripMetadataCommand;
 
 beforeEach(() => {
-	exiftool = new FakeExifTool();
-	command = new StripMetadataCommand({ exiftool });
+	sanitize = vi
+		.fn<MetadataEnginePort["sanitize"]>()
+		.mockResolvedValue({ ok: true, value: undefined });
+	metadataEngine = {
+		inspect: vi.fn(),
+		sanitize,
+	};
+	command = new StripMetadataCommand({ metadataEngine });
 });
 
-describe("arg assembly", () => {
-	it("always starts with -all= as first element", async () => {
-		await command.execute({
-			filePath: "/tmp/photo.jpg",
-			preserveOrientation: false,
-			preserveColorProfile: false,
-			preserveTimestamps: false,
-			saveAsCopy: false,
-		});
+describe("semantic sanitization", () => {
+	it("forwards the complete request to the engine without interpreting output policy", async () => {
+		const controller = new AbortController();
 
-		const args = exiftool.calls[0]!.args[1] as string[];
-		expect(args[0]).toBe("-all=");
-	});
+		await expect(
+			command.execute({
+				filePath: "/tmp/photo.jpg",
+				outputMode: "copy",
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				preserveTimestamps: true,
+				saveAsCopy: true,
+				outputPath: "/tmp/photo_cleaned.jpg",
+				signal: controller.signal,
+			}),
+		).resolves.toEqual({ ok: true, value: { tagsRemoved: 0 } });
 
-	it("with preserveOrientation=true, preserveColorProfile=false: has -Orientation but NOT -ICC_Profile", async () => {
-		await command.execute({
-			filePath: "/tmp/photo.jpg",
-			preserveOrientation: true,
-			preserveColorProfile: false,
-			preserveTimestamps: false,
-			saveAsCopy: false,
-		});
-
-		const args = exiftool.calls[0]!.args[1] as string[];
-		expect(args).toContain("-TagsFromFile");
-		expect(args).toContain("@");
-		expect(args).toContain("-Orientation");
-		expect(args).not.toContain("-ICC_Profile");
-	});
-
-	it("with preserveOrientation=false, preserveColorProfile=true: has -ICC_Profile but NOT -Orientation", async () => {
-		await command.execute({
-			filePath: "/tmp/photo.jpg",
-			preserveOrientation: false,
-			preserveColorProfile: true,
-			preserveTimestamps: false,
-			saveAsCopy: false,
-		});
-
-		const args = exiftool.calls[0]!.args[1] as string[];
-		expect(args).toContain("-TagsFromFile");
-		expect(args).toContain("@");
-		expect(args).toContain("-ICC_Profile");
-		expect(args).not.toContain("-Orientation");
-	});
-
-	it("with both preserveOrientation=true and preserveColorProfile=true: has both tags", async () => {
-		await command.execute({
-			filePath: "/tmp/photo.jpg",
+		expect(sanitize).toHaveBeenCalledOnce();
+		expect(sanitize).toHaveBeenCalledWith({
+			source: "/tmp/photo.jpg",
+			destination: "/tmp/photo_cleaned.jpg",
+			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
-			preserveTimestamps: false,
-			saveAsCopy: false,
-		});
-
-		const args = exiftool.calls[0]!.args[1] as string[];
-		expect(args).toContain("-TagsFromFile");
-		expect(args).toContain("@");
-		expect(args).toContain("-Orientation");
-		expect(args).toContain("-ICC_Profile");
-	});
-
-	it("with both false: does NOT contain -TagsFromFile", async () => {
-		await command.execute({
-			filePath: "/tmp/photo.jpg",
-			preserveOrientation: false,
-			preserveColorProfile: false,
-			preserveTimestamps: false,
-			saveAsCopy: false,
-		});
-
-		const args = exiftool.calls[0]!.args[1] as string[];
-		expect(args).not.toContain("-TagsFromFile");
-	});
-
-	it("with preserveTimestamps=true: args contain -P", async () => {
-		await command.execute({
-			filePath: "/tmp/photo.jpg",
-			preserveOrientation: false,
-			preserveColorProfile: false,
 			preserveTimestamps: true,
-			saveAsCopy: false,
+			signal: controller.signal,
 		});
-
-		const args = exiftool.calls[0]!.args[1] as string[];
-		expect(args).toContain("-P");
 	});
 
-	it.each(["measured.mp4", "measured.m4a"])(
-		"explicitly clears measured QuickTime dates for %s",
-		async (fileName) => {
-			await command.execute({
-				filePath: `/tmp/${fileName}`,
-				preserveOrientation: false,
-				preserveColorProfile: false,
-				preserveTimestamps: false,
-				saveAsCopy: false,
-			});
-
-			const args = exiftool.calls[0]!.args[1] as string[];
-			expect(args).toEqual(
-				expect.arrayContaining([
-					"-QuickTime:CreateDate=",
-					"-QuickTime:ModifyDate=",
-					"-TrackCreateDate=",
-					"-TrackModifyDate=",
-					"-MediaCreateDate=",
-					"-MediaModifyDate=",
-				]),
-			);
-		},
-	);
-
-	it("with saveAsCopy=true: args contain -o and output path, NOT -overwrite_original", async () => {
+	it("forwards an absent destination without forwarding saveAsCopy", async () => {
 		await command.execute({
 			filePath: "/tmp/photo.jpg",
-			preserveOrientation: false,
-			preserveColorProfile: false,
-			preserveTimestamps: false,
-			saveAsCopy: true,
-			outputPath: "/tmp/photo_cleaned.jpg",
-		});
-
-		const args = exiftool.calls[0]!.args[1] as string[];
-		expect(args).toContain("-o");
-		expect(args).toContain("/tmp/photo_cleaned.jpg");
-		expect(args).not.toContain("-overwrite_original");
-	});
-
-	it("uses explicit outputPath as copy intent regardless of saveAsCopy", async () => {
-		const outputPath = "/tmp/sample_cleaned.raf";
-		await command.execute({
-			filePath: "/tmp/sample.raf",
-			preserveOrientation: false,
-			preserveColorProfile: false,
-			preserveTimestamps: false,
-			saveAsCopy: false,
-			outputPath,
-		});
-
-		const args = exiftool.calls[0]!.args[1] as string[];
-		expect(args.filter((arg) => arg === "-o")).toHaveLength(1);
-		expect(args[args.indexOf("-o") + 1]).toBe(outputPath);
-		expect(args).not.toContain("-overwrite_original");
-	});
-
-	it.each([
-		["raf", "/tmp/sample_cleaned.raf"],
-		["cr2", "/tmp/sample_cleaned.cr2"],
-		["cr3", "/tmp/sample_cleaned.cr3"],
-		["nef", "/tmp/sample_cleaned.nef"],
-		["arw", "/tmp/sample_cleaned.arw"],
-		["orf", "/tmp/sample_cleaned.orf"],
-		["rw2", "/tmp/sample_cleaned.rw2"],
-		["dng", "/tmp/sample_cleaned.dng"],
-		["pef", "/tmp/sample_cleaned.pef"],
-		["srw", "/tmp/sample_cleaned.srw"],
-		["RAF", "/tmp/sample_cleaned.RAF"],
-		["Cr3", "/tmp/sample_cleaned.Cr3"],
-	])(
-		"uses the exact copy destination for RAW .%s",
-		async (extension, outputPath) => {
-			await command.execute({
-				filePath: `/tmp/sample.${extension}`,
-				preserveOrientation: false,
-				preserveColorProfile: false,
-				preserveTimestamps: false,
-				saveAsCopy: false,
-				outputPath,
-			});
-
-			const args = exiftool.calls[0]!.args[1] as string[];
-			expect(args).toContain("-o");
-			expect(args[args.indexOf("-o") + 1]).toBe(outputPath);
-			expect(args).not.toContain("-overwrite_original");
-		},
-	);
-
-	it("with saveAsCopy=false: args contain -overwrite_original and NOT -o", async () => {
-		await command.execute({
-			filePath: "/tmp/photo.jpg",
+			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
 			preserveTimestamps: false,
 			saveAsCopy: false,
 		});
 
-		const args = exiftool.calls[0]!.args[1] as string[];
-		expect(args).toContain("-overwrite_original");
-		expect(args).not.toContain("-o");
-	});
-
-	it("uses correct flag order: -all= before -TagsFromFile", async () => {
-		await command.execute({
-			filePath: "/tmp/photo.jpg",
-			preserveOrientation: true,
+		expect(sanitize).toHaveBeenCalledWith({
+			source: "/tmp/photo.jpg",
+			destination: undefined,
+			outputMode: "overwrite",
+			preserveOrientation: false,
 			preserveColorProfile: false,
 			preserveTimestamps: false,
-			saveAsCopy: false,
+			signal: undefined,
 		});
-
-		const args = exiftool.calls[0]!.args[1] as string[];
-		const allIndex = args.indexOf("-all=");
-		const tagsFromFileIndex = args.indexOf("-TagsFromFile");
-		expect(allIndex).toBeLessThan(tagsFromFileIndex);
 	});
-});
 
-describe("signal handling", () => {
-	it("returns error when signal is already aborted", async () => {
+	it("rejects an already-aborted request before calling the engine", async () => {
 		const controller = new AbortController();
 		controller.abort();
 
-		const result = await command.execute({
-			filePath: "/tmp/photo.jpg",
-			preserveOrientation: false,
-			preserveColorProfile: false,
-			preserveTimestamps: false,
-			saveAsCopy: false,
-			signal: controller.signal,
-		});
-
-		expect(result.ok).toBe(false);
-		if (!result.ok) {
-			expect(result.error.code).toBe("exiftool-error");
-		}
-		expect(exiftool.calls).toHaveLength(0);
-	});
-});
-
-describe("error handling", () => {
-	it("returns error result when exiftool fails", async () => {
-		exiftool.removeResult = {
+		await expect(
+			command.execute({
+				filePath: "/tmp/photo.jpg",
+				outputMode: "overwrite",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+				saveAsCopy: false,
+				signal: controller.signal,
+			}),
+		).resolves.toEqual({
 			ok: false,
-			error: { code: "exiftool-error", detail: "Permission denied" },
-		};
-
-		const result = await command.execute({
-			filePath: "/tmp/photo.jpg",
-			preserveOrientation: false,
-			preserveColorProfile: false,
-			preserveTimestamps: false,
-			saveAsCopy: false,
+			error: { code: "engine-error", detail: "Aborted" },
 		});
 
-		expect(result.ok).toBe(false);
-		if (!result.ok) {
-			expect(result.error.code).toBe("exiftool-error");
-		}
+		expect(sanitize).not.toHaveBeenCalled();
+	});
+
+	it("propagates engine-neutral failures", async () => {
+		sanitize.mockResolvedValue({
+			ok: false,
+			error: { code: "engine-unavailable" },
+		});
+
+		await expect(
+			command.execute({
+				filePath: "/tmp/photo.jpg",
+				outputMode: "overwrite",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+				saveAsCopy: false,
+			}),
+		).resolves.toEqual({ ok: false, error: { code: "engine-unavailable" } });
 	});
 });

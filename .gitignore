@@ -312,5 +312,8 @@ devplans
 playwright-report/
 test-results/
 
+# CI run-log evidence (D-27 prerequisite) — generated per-run, never committed
+vitest-report.json
+
 # GSD planning lives in the parent workspace repo, not here
 .planning/

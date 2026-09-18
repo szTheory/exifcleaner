@@ -1,0 +1,244 @@
+{
+	"schemaVersion": 1,
+	"recordedAt": "2026-09-18T17:06:00Z",
+	"package": {
+		"name": "exifcleaner-node",
+		"version": "0.2.2",
+		"publishedAt": "2026-09-18T17:02:43.748Z",
+		"repository": "https://github.com/szTheory/exifcleaner-node",
+		"sourceCommit": "8474396f66c4d3e4199c17c369492f8717cce7d7",
+		"releaseTag": "v0.2.2"
+	},
+	"dist": {
+		"tarball": "https://registry.npmjs.org/exifcleaner-node/-/exifcleaner-node-0.2.2.tgz",
+		"integrity": "sha512-gpyjJY8bBfW5WSYG5RM1Q/+cPXSPDgzGAVfoTVlONX6ohsr3vXbMroaNDQEuhqj4SCoUUgP5coboJ9RxiNRhAA==",
+		"shasum": "61427897d7f345686d64c773a989175da91ad192",
+		"sha256": "2b454564345fdbaa3d26ace99b4ccee5fecfff9b74bdd374c1f6f97444e902ef",
+		"fileCount": 77,
+		"packedSize": 80303,
+		"unpackedSize": 442012
+	},
+	"provenance": {
+		"verified": true,
+		"url": "https://registry.npmjs.org/-/npm/v1/attestations/exifcleaner-node@0.2.2",
+		"predicateType": "https://slsa.dev/provenance/v1",
+		"workflow": "release.yml",
+		"workflowRun": "https://github.com/szTheory/exifcleaner-node/actions/runs/35370603372/attempts/1",
+		"environment": "npm",
+		"sourceCommit": "8474396f66c4d3e4199c17c369492f8717cce7d7"
+	},
+	"signatures": {
+		"verified": true,
+		"command": "npm audit signatures",
+		"verifiedRegistrySignatures": 568,
+		"verifiedAttestations": 125
+	},
+	"tarball": {
+		"verified": true,
+		"files": [
+			"LICENSE",
+			"README.md",
+			"dist/admission/registry.d.ts",
+			"dist/admission/registry.d.ts.map",
+			"dist/admission/registry.js",
+			"dist/admission/registry.js.map",
+			"dist/admission/webp-handler.d.ts",
+			"dist/admission/webp-handler.d.ts.map",
+			"dist/admission/webp-handler.js",
+			"dist/admission/webp-handler.js.map",
+			"dist/engine.d.ts",
+			"dist/engine.d.ts.map",
+			"dist/engine.js",
+			"dist/engine.js.map",
+			"dist/errors.d.ts",
+			"dist/errors.d.ts.map",
+			"dist/errors.js",
+			"dist/errors.js.map",
+			"dist/fallback.d.ts",
+			"dist/fallback.d.ts.map",
+			"dist/fallback.js",
+			"dist/fallback.js.map",
+			"dist/index.d.ts",
+			"dist/index.d.ts.map",
+			"dist/index.js",
+			"dist/index.js.map",
+			"dist/metadata/exif.d.ts",
+			"dist/metadata/exif.d.ts.map",
+			"dist/metadata/exif.js",
+			"dist/metadata/exif.js.map",
+			"dist/metadata/icc.d.ts",
+			"dist/metadata/icc.d.ts.map",
+			"dist/metadata/icc.js",
+			"dist/metadata/icc.js.map",
+			"dist/metadata/icc_admission.d.ts",
+			"dist/metadata/icc_admission.d.ts.map",
+			"dist/metadata/icc_admission.js",
+			"dist/metadata/icc_admission.js.map",
+			"dist/metadata/xmp.d.ts",
+			"dist/metadata/xmp.d.ts.map",
+			"dist/metadata/xmp.js",
+			"dist/metadata/xmp.js.map",
+			"dist/result.d.ts",
+			"dist/result.d.ts.map",
+			"dist/result.js",
+			"dist/result.js.map",
+			"dist/transaction/file-ops.d.ts",
+			"dist/transaction/file-ops.d.ts.map",
+			"dist/transaction/file-ops.js",
+			"dist/transaction/file-ops.js.map",
+			"dist/transaction/identity.d.ts",
+			"dist/transaction/identity.d.ts.map",
+			"dist/transaction/identity.js",
+			"dist/transaction/identity.js.map",
+			"dist/transaction/native-publication.d.ts",
+			"dist/transaction/native-publication.d.ts.map",
+			"dist/transaction/native-publication.js",
+			"dist/transaction/native-publication.js.map",
+			"dist/transaction/safe-transaction.d.ts",
+			"dist/transaction/safe-transaction.d.ts.map",
+			"dist/transaction/safe-transaction.js",
+			"dist/transaction/safe-transaction.js.map",
+			"dist/types.d.ts",
+			"dist/types.d.ts.map",
+			"dist/types.js",
+			"dist/types.js.map",
+			"dist/webp/riff.d.ts",
+			"dist/webp/riff.d.ts.map",
+			"dist/webp/riff.js",
+			"dist/webp/riff.js.map",
+			"package.json",
+			"prebuilds/darwin-arm64/publication.node",
+			"prebuilds/darwin-x64/publication.node",
+			"prebuilds/linux-arm64/publication.node",
+			"prebuilds/linux-x64/publication.node",
+			"prebuilds/win32-arm64/publication.node",
+			"prebuilds/win32-x64/publication.node"
+		]
+	},
+	"packageManifest": {
+		"runtimeDependencies": {},
+		"lifecycleScripts": {},
+		"engines": {
+			"node": ">=22"
+		},
+		"exports": {
+			".": {
+				"types": "./dist/index.d.ts",
+				"import": "./dist/index.js"
+			}
+		},
+		"runtimeExports": [
+			"classifyFallback",
+			"err",
+			"getCapabilities",
+			"inspectFile",
+			"ok",
+			"sanitizeFile"
+		]
+	},
+	"runtimeAudit": {
+		"runtimePaths": [
+			"dist/admission/registry.js",
+			"dist/admission/webp-handler.js",
+			"dist/engine.js",
+			"dist/errors.js",
+			"dist/fallback.js",
+			"dist/index.js",
+			"dist/metadata/exif.js",
+			"dist/metadata/icc.js",
+			"dist/metadata/icc_admission.js",
+			"dist/metadata/xmp.js",
+			"dist/result.js",
+			"dist/transaction/file-ops.js",
+			"dist/transaction/identity.js",
+			"dist/transaction/native-publication.js",
+			"dist/transaction/safe-transaction.js",
+			"dist/types.js",
+			"dist/webp/riff.js"
+		],
+		"digests": [
+			{
+				"path": "dist/admission/registry.js",
+				"sha256": "79f7d985b21ccce02e2463e8bf8d6b45a4cc703d4b9069a3ce92e3b7772288d4"
+			},
+			{
+				"path": "dist/admission/webp-handler.js",
+				"sha256": "39fa5b33b205ad2cf82a1ac0281a3f72091310bc9be22d75f9d267dd2d77800a"
+			},
+			{
+				"path": "dist/engine.js",
+				"sha256": "bc63986b9f0436ee0d568fed684c92d21d849f6ccb51f13d67d995af0e64ebb5"
+			},
+			{
+				"path": "dist/errors.js",
+				"sha256": "4795fe6165a032b267995d01f3191d1430b28e8181fe15b6265eeccf60bffbed"
+			},
+			{
+				"path": "dist/fallback.js",
+				"sha256": "dd8098147b70dc61a38c70ea4baf26b28860c89af01bd05bcd43bc1ff3922840"
+			},
+			{
+				"path": "dist/index.js",
+				"sha256": "160bff64f7d5b1e9687b385ba11a0127cc6104c6475a8adf3c36e25c2ef8abed"
+			},
+			{
+				"path": "dist/metadata/exif.js",
+				"sha256": "46bc5fed1a232afac4d327e55e1a1ebecae2faeb104d400e0f9909516f8e6f14"
+			},
+			{
+				"path": "dist/metadata/icc_admission.js",
+				"sha256": "3e05170d678814d5187ce5de3e769b37cac56accbcd7c5c87f61bd5ca5e058e1"
+			},
+			{
+				"path": "dist/metadata/icc.js",
+				"sha256": "c1b3a5795a3397cf08ce0be4e6b976e169e15edc4624f8e1ffd8909ab13c759c"
+			},
+			{
+				"path": "dist/metadata/xmp.js",
+				"sha256": "1e470f175a772df1d2e6b0c9a8699992dcd6e4d1c1c1bbbdd89cccb7131cedb2"
+			},
+			{
+				"path": "dist/result.js",
+				"sha256": "78e2e0ddab7e0d3d0bf6527ebf3a230093f6d5ab5d3cd7a75ca489ccdcbc5b2b"
+			},
+			{
+				"path": "dist/transaction/file-ops.js",
+				"sha256": "4bafb2f1971f1d3f1f792f0e54d5576adca8445833a2bcf0792d4b849988a88a"
+			},
+			{
+				"path": "dist/transaction/identity.js",
+				"sha256": "4f5ac39080becc8dd0c1423e88c2755c0430e47febba7f99bbc6ccca913f2acf"
+			},
+			{
+				"path": "dist/transaction/native-publication.js",
+				"sha256": "2c37212ef1dfd19719051467ef12b48b235f0601d0ee9fcce98a98160e608df5"
+			},
+			{
+				"path": "dist/transaction/safe-transaction.js",
+				"sha256": "3a2632838391c9dc004771bbab8a82986d14760820da9ae88202011316352361"
+			},
+			{
+				"path": "dist/types.js",
+				"sha256": "01ae2a5b120382f9a648ced7ee8507493a134f216d100fc61600c6c9738235d2"
+			},
+			{
+				"path": "dist/webp/riff.js",
+				"sha256": "5b1c4b152c592472fadbaaa40fc152cfa235e3f5982b44f4d2b5312f237c3c53"
+			}
+		],
+		"allowlistedImports": [
+			"node:crypto",
+			"node:fs",
+			"node:fs/promises",
+			"node:module",
+			"node:path"
+		],
+		"zeroForbiddenNetwork": true
+	},
+	"checks": {
+		"publicMetadata": true,
+		"provenance": true,
+		"signatures": true,
+		"tarballContent": true
+	}
+}

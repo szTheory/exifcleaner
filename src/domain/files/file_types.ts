@@ -52,6 +52,12 @@ export const RAW_EXTENSIONS: ReadonlySet<string> = new Set([
 
 const RAF_EXTENSIONS: ReadonlySet<string> = new Set([".raf"]);
 
+// Deliberately its own set, never folded into the media-format set below
+// (D-23): that set also drives the QuickTime date-removal argument list in
+// the ExifTool adapter, and adding webp to it would change ExifTool's write
+// behavior for webp files.
+const WEBP_EXTENSIONS: ReadonlySet<string> = new Set([".webp"]);
+
 export const MEDIA_EXTENSIONS: ReadonlySet<string> = new Set([
 	".mp4",
 	".mov",
@@ -85,6 +91,26 @@ export function isRafFile({ filename }: IsSupportedFileParams): boolean {
 
 export function isMediaFile({ filename }: IsSupportedFileParams): boolean {
 	return hasExtension({ filename, extensions: MEDIA_EXTENSIONS });
+}
+
+// A webp save-as-copy has no independent output verification unless it is
+// routed through the staged-write transaction (D-22). In-place webp
+// overwrites stay on the unverified ExifTool path — a deferred gap, not this
+// phase's work (D-23, D-24, 47-CONTEXT.md).
+export function requiresVerifiedWrite({
+	filename,
+	outputMode,
+}: {
+	filename: string;
+	outputMode: "copy" | "overwrite";
+}): boolean {
+	if (isRawFile({ filename }) || isMediaFile({ filename })) {
+		return true;
+	}
+	return (
+		outputMode === "copy" &&
+		hasExtension({ filename, extensions: WEBP_EXTENSIONS })
+	);
 }
 
 function hasExtension({

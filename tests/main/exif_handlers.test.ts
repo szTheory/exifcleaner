@@ -10,7 +10,7 @@ import {
 } from "../../src/main/ipc/ipc_validation";
 import { setupExifHandlers } from "../../src/main/exif_handlers";
 import { OutputTransaction } from "../../src/main/output_transaction";
-import { FakeExifTool } from "../fakes/fake_exiftool";
+import { FakeMetadataEngine } from "../fakes/fake_metadata_engine";
 
 const ipcHandleMock = vi.hoisted(() => vi.fn());
 const existsSyncMock = vi.hoisted(() => vi.fn());
@@ -133,15 +133,21 @@ function makeContainer({
 
 function makePortCountContainer({ saveAsCopy }: { saveAsCopy: boolean }): {
 	container: Container;
-	exiftool: FakeExifTool;
+	metadataEngine: FakeMetadataEngine;
 } {
-	const exiftool = new FakeExifTool();
-	exiftool.readResult = {
+	const metadataEngine = new FakeMetadataEngine();
+	metadataEngine.inspectResult = {
 		ok: true,
-		value: [{ FileType: "JPEG" }],
+		value: {
+			metadata: {},
+			recordCount: 1,
+			verification: { fileType: "JPEG", error: undefined },
+		},
 	};
-	const stripMetadata = new StripMetadataCommand({ exiftool });
-	const verifyGeneratedOutput = new VerifyGeneratedOutputQuery({ exiftool });
+	const stripMetadata = new StripMetadataCommand({ metadataEngine });
+	const verifyGeneratedOutput = new VerifyGeneratedOutputQuery({
+		metadataEngine,
+	});
 	const outputTransaction = new OutputTransaction({
 		stripMetadata,
 		verifyGeneratedOutput,
@@ -163,7 +169,7 @@ function makePortCountContainer({ saveAsCopy }: { saveAsCopy: boolean }): {
 		outputTransaction,
 	} as unknown as Container;
 
-	return { container, exiftool };
+	return { container, metadataEngine };
 }
 
 function makeAuthorizedEvent(): IpcMainInvokeEvent {
@@ -265,26 +271,31 @@ describe("exif:remove handler", () => {
 	])(
 		"uses the exact main-process port count for $name",
 		async ({ filePath, saveAsCopy, verifierPath }) => {
-			const { container, exiftool } = makePortCountContainer({ saveAsCopy });
+			const { container, metadataEngine } = makePortCountContainer({
+				saveAsCopy,
+			});
 			setupExifHandlers({ container });
 
 			const { handler } = captureInvokeHandler("exif:remove");
 			await handler(makeAuthorizedEvent(), filePath);
 
-			const removeCalls = exiftool.calls.filter(
-				(call) => call.method === "removeMetadata",
+			const sanitizeCalls = metadataEngine.calls.filter(
+				(call) => call.method === "sanitize",
 			);
-			const verifierReads = exiftool.calls.filter(
-				(call) => call.method === "readMetadata",
+			const verifierInspections = metadataEngine.calls.filter(
+				(call) =>
+					call.method === "inspect" &&
+					call.request.purpose === "output-verification",
 			);
-			expect(removeCalls).toHaveLength(1);
-			// VerifyGeneratedOutputQuery now reopens the verifier path twice: once for the
-			// plain-key FileType guard, once for the -G1:2 ExifTool-group diagnostic scan
-			// (the approved scope addition -- see verify_generated_output_query.ts).
-			expect(verifierReads).toHaveLength(verifierPath === undefined ? 0 : 2);
+			expect(sanitizeCalls).toHaveLength(1);
+			expect(verifierInspections).toHaveLength(
+				verifierPath === undefined ? 0 : 1,
+			);
 			if (verifierPath !== undefined) {
-				expect(verifierReads[0]?.args[0]).toBe(verifierPath);
-				expect(verifierReads[1]?.args[0]).toBe(verifierPath);
+				expect(verifierInspections[0]?.request).toEqual({
+					source: verifierPath,
+					purpose: "output-verification",
+				});
 			}
 		},
 	);
@@ -298,6 +309,7 @@ describe("exif:remove handler", () => {
 
 		expect(stripMetadata.execute).toHaveBeenCalledWith({
 			filePath: "/dir/photo.jpg",
+			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
 			preserveTimestamps: false,

@@ -31,6 +31,16 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      # Phase 48 (D-04, D-19 step 7, D-20): the repository now pins the published registry
+      # version exifcleaner-node@0.2.1, so this step is required to pass unconditionally.
+      # `continue-on-error` (Phase 47) is removed here — Phase 47 added it deliberately to
+      # keep this CI-linkage structural gate intact while the dependency was non-sealable;
+      # that condition no longer holds. This step's run command and its placement
+      # immediately after install remain the validated CI-linkage invariant
+      # (scripts/exifcleaner_node_dependency_gate.mjs validateCiWorkflowPolicy).
+      - name: Seal native dependency
+        run: yarn verify:native-dependency:seal
+
       - name: Verify release-note identity
         run: yarn verify:release-notes
 
@@ -64,6 +74,23 @@ jobs:
       # the report the previous step just wrote plus the vacuity gate's evidence marker.
       - name: Issue #344 NC evidence
         run: yarn verify:issue344-nc-evidence
+      # always() so the per-test-name run-log evidence (D-27 prerequisite) is
+      # preserved even when a test fails, not only on a clean pass.
+      - name: Upload Vitest run-log evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vitest-report
+          path: vitest-report.json
+          retention-days: 7
+
+      # D-27: asserts the nine negative-control titles were actually EXECUTED
+      # in the report above, not merely that the suite exited zero. Placed
+      # after the upload step (not always()) so the artifact is preserved
+      # even when this assertion is what fails, but this step itself gates
+      # the pipeline normally.
+      - name: Verify negative-control run-log evidence
+        run: yarn verify:nc-evidence
 
       - name: Check circular dependencies (madge)
         run: yarn check:deps
@@ -215,9 +242,17 @@ jobs:
           "artifact=$($installer.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "executable=$app" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
+      # 48-07 diagnostic (maintainer-authorized, one deliberate dispatch): writes native
+      # crash dumps to a local, job-scoped RUNNER_TEMP directory when the packaged app
+      # dies. src/main/security/crash_dumps.ts's maybeEnableCrashDumps() is a no-op unless
+      # this exact env var is set -- no real user launch or release build ever sets it.
+      # uploadToServer:false + empty submitURL (verified by
+      # tests/main/security/crash_dumps.test.ts) mean nothing is ever phoned home; the
+      # dumps only ever leave this job as the CI artifact uploaded below.
       - name: Smoke test packaged app
         env:
           EXIFCLEANER_PACKAGED_APP: ${{ steps.install.outputs.executable }}
+          EXIFCLEANER_CRASH_DUMPS_DIR: ${{ runner.temp }}\crash-dumps
         run: yarn test:smoke
 
       - name: Write Windows release evidence
@@ -238,6 +273,19 @@ jobs:
           path: |
             playwright-report/
             test-results/
+          retention-days: 7
+
+      # Diagnostic-only, paired with the crash-dump capture above. Uploads whatever was
+      # written to the crash-dumps directory (nothing, if the app never crashed) so a
+      # native fault has a real minidump to analyze instead of only a Playwright
+      # "context closed" symptom.
+      - name: Upload Windows crash dumps
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-crash-dumps
+          path: ${{ runner.temp }}\crash-dumps
+          if-no-files-found: ignore
           retention-days: 7
 
       - name: Upload Windows artifacts

@@ -10,6 +10,7 @@ export type OutputTransactionFailure =
 
 type StripMetadataRequest = {
 	filePath: string;
+	outputMode: "copy" | "overwrite";
 	preserveOrientation: boolean;
 	preserveColorProfile: boolean;
 	preserveTimestamps: boolean;
@@ -58,8 +59,13 @@ export class OutputTransaction {
 		preserveTimestamps: boolean;
 		signal?: AbortSignal | undefined;
 	}): Promise<Result<{ outputPath: string }, OutputTransactionFailure>> {
+		// The staged write always targets a path distinct from the source
+		// (generatedPath), so from the engine's perspective this call is by
+		// construction a copy, regardless of whether the transaction ultimately
+		// commits back over the original file.
 		const writeResult = await this.dependencies.stripMetadata.execute({
 			filePath,
+			outputMode: "copy",
 			preserveOrientation,
 			preserveColorProfile,
 			preserveTimestamps,

@@ -4,6 +4,8 @@ export type { ExifToolResult, ExifToolCloseResult } from "./exiftool/types";
 
 export { ExiftoolProcess } from "./exiftool/ExiftoolProcess";
 export { ExifToolAdapter } from "./exiftool/exiftool_adapter";
+export { HybridMetadataEngine } from "./metadata/hybrid_metadata_engine";
+export { NativeMetadataAdapter } from "./metadata/native_metadata_adapter";
 export { SettingsService } from "./settings_service";
 export { ConsoleLogger } from "./console_logger";
 export { removeXattrs } from "./xattr_service";

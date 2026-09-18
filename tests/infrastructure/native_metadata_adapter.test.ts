@@ -1,0 +1,218 @@
+import { beforeEach, describe, expect, test, vi } from "vitest";
+
+const { getCapabilities, sanitizeFile } = vi.hoisted(() => ({
+	getCapabilities: vi.fn(),
+	sanitizeFile: vi.fn(),
+}));
+
+vi.mock("exifcleaner-node", () => ({ getCapabilities, sanitizeFile }));
+
+import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_metadata_adapter";
+
+const capabilities = {
+	formats: [
+		{
+			format: "webp" as const,
+			sanitize: true,
+			detection: "magic" as const,
+			preserves: {
+				orientation: true,
+				colorProfile: true,
+				timestamps: true,
+			},
+		},
+	],
+};
+
+describe("NativeMetadataAdapter", () => {
+	beforeEach(() => {
+		getCapabilities.mockReset();
+		sanitizeFile.mockReset();
+		getCapabilities.mockReturnValue(capabilities);
+	});
+
+	test("caches the immutable package capabilities", () => {
+		const adapter = new NativeMetadataAdapter();
+
+		expect(adapter.getCapabilities()).toBe(capabilities);
+		expect(adapter.getCapabilities()).toBe(capabilities);
+		expect(getCapabilities).toHaveBeenCalledTimes(1);
+	});
+
+	test("forwards semantic sanitize inputs and the identical signal", async () => {
+		const adapter = new NativeMetadataAdapter();
+		const controller = new AbortController();
+		const request = {
+			source: "/tmp/source.webp",
+			destination: "/tmp/clean.webp",
+			outputMode: "copy" as const,
+			preserveOrientation: true,
+			preserveColorProfile: true,
+			preserveTimestamps: true,
+			signal: controller.signal,
+		};
+		sanitizeFile.mockResolvedValue({ ok: true, value: {} });
+
+		expect(await adapter.sanitize(request)).toEqual({
+			ok: true,
+			value: undefined,
+		});
+		expect(sanitizeFile).toHaveBeenCalledWith({
+			sourcePath: request.source,
+			destinationPath: request.destination,
+			preserveOrientation: request.preserveOrientation,
+			preserveColorProfile: request.preserveColorProfile,
+			preserveTimestamps: request.preserveTimestamps,
+			signal: request.signal,
+		});
+	});
+
+	test.each([
+		{
+			code: "aborted",
+			detail: "cancelled",
+			phase: "request",
+			nativeWrite: "not-started",
+		},
+		{
+			code: "invalid-options",
+			detail: "invalid",
+			phase: "request",
+			nativeWrite: "not-started",
+		},
+		{
+			code: "not-found",
+			detail: "missing",
+			path: "/tmp/source.webp",
+			cause: { message: "ENOENT" },
+			phase: "source-open",
+			nativeWrite: "not-started",
+		},
+		{
+			code: "unsupported-format",
+			detail: "wrong type",
+			path: "/tmp/source.webp",
+			phase: "admission",
+			nativeWrite: "not-started",
+		},
+		{
+			code: "malformed-file",
+			detail: "bad riff",
+			path: "/tmp/source.webp",
+			phase: "admission",
+			nativeWrite: "not-started",
+		},
+		{
+			code: "unsafe-structure",
+			detail: "unsafe",
+			path: "/tmp/source.webp",
+			phase: "admission",
+			nativeWrite: "not-started",
+		},
+		{
+			code: "unsupported-feature",
+			detail: "orientation",
+			path: "/tmp/source.webp",
+			feature: "orientation-preservation",
+			phase: "admission",
+			nativeWrite: "not-started",
+		},
+		{
+			code: "source-changed",
+			detail: "changed",
+			path: "/tmp/source.webp",
+			phase: "admission",
+			nativeWrite: "not-started",
+		},
+		{
+			code: "destination-exists",
+			detail: "exists",
+			path: "/tmp/clean.webp",
+			cause: { code: "EEXIST", message: "exists" },
+			phase: "admission",
+			nativeWrite: "not-started",
+		},
+		{
+			code: "destination-changed",
+			detail: "changed",
+			path: "/tmp/clean.webp",
+			phase: "transaction",
+			nativeWrite: "started",
+		},
+		{
+			code: "read-failed",
+			detail: "read",
+			path: "/tmp/source.webp",
+			cause: { message: "EIO" },
+			phase: "transaction",
+			nativeWrite: "started",
+		},
+		{
+			code: "write-failed",
+			detail: "write",
+			path: "/tmp/clean.webp",
+			cause: { message: "EIO" },
+			phase: "transaction",
+			nativeWrite: "started",
+		},
+		{
+			code: "verification-failed",
+			detail: "verify",
+			path: "/tmp/clean.webp",
+			cause: { message: "mismatch" },
+			phase: "transaction",
+			nativeWrite: "started",
+		},
+		{
+			code: "cleanup-failed",
+			detail: "cleanup",
+			path: "/tmp/clean.webp",
+			cause: { message: "EIO" },
+			phase: "transaction",
+			nativeWrite: "started",
+		},
+	] as const)(
+		"preserves complete typed package failure $code",
+		async (error) => {
+			const adapter = new NativeMetadataAdapter();
+			sanitizeFile.mockResolvedValue({ ok: false, error });
+
+			const result = await adapter.sanitize({
+				source: "/tmp/source.webp",
+				destination: "/tmp/clean.webp",
+				outputMode: "copy",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			});
+
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					...error,
+					code: "native-error",
+					nativeCode: error.code,
+					backend: "native",
+					phase: error.phase,
+					nativeWrite: error.nativeWrite,
+					libraryError: error,
+				},
+			});
+		},
+	);
+
+	test("does not import or expose native inspection", async () => {
+		const source = await import("node:fs/promises").then((fs) =>
+			fs.readFile(
+				new URL(
+					"../../src/infrastructure/metadata/native_metadata_adapter.ts",
+					import.meta.url,
+				),
+				"utf8",
+			),
+		);
+
+		expect(source).not.toContain("inspectFile");
+		expect("inspect" in new NativeMetadataAdapter()).toBe(false);
+	});
+});

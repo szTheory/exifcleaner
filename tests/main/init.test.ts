@@ -20,9 +20,12 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("electron", () => ({
-	app: { setAppUserModelId: vi.fn() },
+	app: { setAppUserModelId: vi.fn(), getPath: vi.fn(() => "/tmp") },
 }));
-vi.mock("../../src/infrastructure", () => ({ preloadI18nStrings: vi.fn() }));
+vi.mock("../../src/infrastructure", async (importOriginal) => ({
+	...(await importOriginal<typeof import("../../src/infrastructure")>()),
+	preloadI18nStrings: vi.fn(),
+}));
 vi.mock("../../src/main/container", () => ({
 	createContainer: mocks.createContainer,
 	initContainer: mocks.initContainer,
@@ -141,5 +144,39 @@ describe("main process initialization", () => {
 		expect(mocks.updateSettingsAndNotify).toHaveBeenCalledWith(
 			expect.objectContaining({ partial: { language: "fr" } }),
 		);
+	});
+
+	it("composes one hybrid metadata engine while retaining one ExifTool lifecycle owner", async () => {
+		vi.doUnmock("../../src/main/container");
+		vi.doUnmock("../../src/infrastructure");
+		const { createContainer, initContainer } =
+			await import("../../src/main/container");
+		const { HybridMetadataEngine } = await import("../../src/infrastructure");
+		const container = createContainer();
+		const sharedEngine = container.metadataEngine;
+		const dependencies = container as unknown as {
+			stripMetadata: { metadataEngine: unknown };
+			readMetadata: { metadataEngine: unknown };
+			verifyGeneratedOutput: { metadataEngine: unknown };
+		};
+		const open = vi
+			.spyOn(container.exiftoolProcess, "open")
+			.mockResolvedValue(1234);
+		const close = vi
+			.spyOn(container.exiftoolProcess, "close")
+			.mockResolvedValue({ success: true, error: null });
+
+		expect(sharedEngine).toBeInstanceOf(HybridMetadataEngine);
+		expect(dependencies.stripMetadata.metadataEngine).toBe(sharedEngine);
+		expect(dependencies.readMetadata.metadataEngine).toBe(sharedEngine);
+		expect(dependencies.verifyGeneratedOutput.metadataEngine).toBe(
+			sharedEngine,
+		);
+
+		await initContainer(container);
+		await container.exiftoolProcess.close();
+
+		expect(open).toHaveBeenCalledOnce();
+		expect(close).toHaveBeenCalledOnce();
 	});
 });

@@ -1,95 +1,107 @@
 import { describe, it, expect } from "vitest";
-import { formatExifError } from "../../src/domain/exif/exif_errors";
-import type { ExifError } from "../../src/domain/exif/exif_errors";
+import {
+	formatMetadataEngineError,
+	type MetadataEngineError,
+} from "../../src/domain/exif/exif_errors";
 
-describe("ExifError", () => {
-	describe("formatExifError", () => {
-		it("formats process-not-open with restart guidance", () => {
-			const result = formatExifError({ code: "process-not-open" });
+describe("MetadataEngineError", () => {
+	describe("formatMetadataEngineError", () => {
+		it("formats unavailable engines with restart guidance", () => {
+			const result = formatMetadataEngineError({ code: "engine-unavailable" });
 
 			expect(result).toContain("not running");
 			expect(result).toContain("Restart");
 		});
 
-		it("formats spawn-failed with binPath and reinstall guidance", () => {
-			const result = formatExifError({
-				code: "spawn-failed",
-				binPath: "/usr/bin/exiftool",
-			});
-
-			expect(result).toContain("/usr/bin/exiftool");
-			expect(result).toContain("Reinstall");
-		});
-
-		it("formats command-timeout with retry guidance", () => {
-			const result = formatExifError({
-				code: "command-timeout",
-				executeNum: 5,
-			});
-
-			expect(result).toContain("too long");
-			expect(result).toContain("Try");
-		});
-
-		it("formats process-exited with restart guidance", () => {
-			const result = formatExifError({
-				code: "process-exited",
-				exitCode: 1,
-				signal: null,
-			});
-
-			expect(result).toContain("crashed");
-			expect(result).toContain("Restart");
-		});
-
-		it("formats parse-failed with retry guidance", () => {
-			const result = formatExifError({
-				code: "parse-failed",
-				raw: "{bad json",
-			});
-
-			expect(result).toContain("unreadable");
-			expect(result).toContain("Try");
-		});
-
-		it("formats exiftool-error with detail", () => {
-			const result = formatExifError({
-				code: "exiftool-error",
+		it("preserves ExifTool detail only when its backend is supplied", () => {
+			const result = formatMetadataEngineError({
+				code: "engine-error",
 				detail: "File not found",
+				backend: "exiftool",
 			});
 
+			expect(result).toContain("ExifTool");
 			expect(result).toContain("File not found");
 		});
 
+		it("does not label a backend-neutral failure as ExifTool", () => {
+			const result = formatMetadataEngineError({
+				code: "engine-error",
+				detail: "Unsupported data",
+			});
+
+			expect(result).toContain("Metadata engine");
+			expect(result).not.toContain("ExifTool");
+		});
+
+		it("keeps native failure text generic", () => {
+			const result = formatMetadataEngineError({
+				code: "native-error",
+				nativeCode: "write-failed",
+				detail: "/private/output.webp write failed",
+				path: "/private/output.webp",
+				backend: "native",
+				phase: "transaction",
+				nativeWrite: "started",
+				libraryError: {
+					code: "write-failed",
+					detail: "/private/output.webp write failed",
+					path: "/private/output.webp",
+					phase: "transaction",
+					nativeWrite: "started",
+				},
+			});
+
+			expect(result).toContain("native processing failed");
+			expect(result).not.toContain("/private/output.webp");
+		});
+
 		it("produces non-empty strings for all codes", () => {
-			const errors: ExifError[] = [
-				{ code: "process-not-open" },
-				{ code: "spawn-failed", binPath: "/bin/exiftool" },
-				{ code: "command-timeout", executeNum: 1 },
-				{ code: "process-exited", exitCode: null, signal: "SIGKILL" },
-				{ code: "parse-failed", raw: "" },
-				{ code: "exiftool-error", detail: "err" },
+			const errors: MetadataEngineError[] = [
+				{ code: "engine-unavailable" },
+				{ code: "engine-unavailable", backend: "exiftool" },
+				{ code: "engine-error", detail: "err" },
+				{ code: "engine-error", detail: "err", backend: "exiftool" },
+				{
+					code: "native-error",
+					nativeCode: "unsupported-feature",
+					detail: "err",
+					path: "/files/source.webp",
+					feature: "orientation-preservation",
+					cause: { code: "EINVAL", message: "unsupported" },
+					backend: "native",
+					phase: "admission",
+					nativeWrite: "not-started",
+					libraryError: {
+						code: "unsupported-feature",
+						detail: "err",
+						path: "/files/source.webp",
+						feature: "orientation-preservation",
+						phase: "admission",
+						nativeWrite: "not-started",
+					},
+				},
 			];
 
 			for (const error of errors) {
-				expect(formatExifError(error).length).toBeGreaterThan(0);
+				expect(formatMetadataEngineError(error).length).toBeGreaterThan(0);
 			}
 		});
 	});
 
 	describe("serialization", () => {
-		it("all error variants survive JSON round-trip", () => {
-			const errors: ExifError[] = [
-				{ code: "process-not-open" },
-				{ code: "spawn-failed", binPath: "/bin/exiftool" },
-				{ code: "command-timeout", executeNum: 5 },
-				{ code: "process-exited", exitCode: 1, signal: null },
-				{ code: "parse-failed", raw: "{bad}" },
-				{ code: "exiftool-error", detail: "err" },
+		it("all engine-neutral variants survive JSON round-trip", () => {
+			const errors: MetadataEngineError[] = [
+				{ code: "engine-unavailable" },
+				{ code: "engine-unavailable", backend: "exiftool" },
+				{ code: "engine-error", detail: "err" },
+				{ code: "engine-error", detail: "err", backend: "exiftool" },
 			];
 
 			for (const error of errors) {
-				const roundTripped = JSON.parse(JSON.stringify(error)) as ExifError;
+				const roundTripped = JSON.parse(
+					JSON.stringify(error),
+				) as MetadataEngineError;
 				expect(roundTripped).toEqual(error);
 			}
 		});

@@ -10,10 +10,11 @@
 //   2. Run the full suite there and require it fully green -- proves the clone is faithful,
 //      not a tautologically broken control.
 //   3. Apply exactly ONE mutation: restore the PRE-FIX first-match predicate in
-//      src/application/queries/read_metadata_query.ts (the D-05 bug this plan's fix
-//      replaced) -- NOT the adapter, and NOT "engine-error" (see 48-02-PLAN.md
-//      base_architecture_amendment). The mutation text lives here, under scripts/, outside
-//      the src/+tests/ scope source-scan controls cover -- never copy it into src/.
+//      src/infrastructure/exiftool/exiftool_adapter.ts's inspectDisplay method (the D-05 bug
+//      the #344 fix replaced). Phase 48-06 relocated the fix's call site here from the
+//      retired src/application/queries/read_metadata_query.ts (see the EXPECTED_FAILING_TITLES
+//      comment below for the full history). The mutation text lives here, under scripts/,
+//      outside the src/+tests/ scope source-scan controls cover -- never copy it into src/.
 //   4. Run the mutated suite and require it to fail with EXACTLY the declared expected
 //      failing-title set. More failures or fewer are both findings about the control's
 //      precision, not gate bugs to relax away.
@@ -42,37 +43,49 @@ const EVIDENCE_MARKER_PATH = path.join(
 );
 
 // Declared here, not derived: the exact set this ONE mutation must break, transcribed from
-// a measured dry run against a scratch copy (48-02-PLAN.md Task 2). vitest's JSON reporter
-// "fullName" is describe-path + title joined by a single space (no separator token).
+// a measured dry run against a scratch copy. vitest's JSON reporter "fullName" is
+// describe-path + title joined by a single space (no separator token).
+//
+// Phase 48-06/48-07 update: the #344 fix's call site moved from
+// src/application/queries/read_metadata_query.ts (retired -- that query now delegates to
+// metadataEngine.inspect()) to ExifToolAdapter.inspectDisplay in
+// src/infrastructure/exiftool/exiftool_adapter.ts (Phase 41-01's engine-neutral refactor,
+// reconciled with the #344 fix during the 48-06 rebase, 48-RESEAL-EVIDENCE.md). The
+// application-layer unit test this mutation used to break
+// (tests/application/read_metadata_query.test.ts, pre-refactor "is lenient on a
+// [minor]-prefixed ExifTool:Warning" case) no longer exists in that shape -- the
+// engine-neutral ReadMetadataQuery has no ExifTool-specific assertion of its own. Only the
+// e2e fixture test exercises the real adapter call site end-to-end, so mutating the adapter
+// now breaks exactly that one title, not two.
 const EXPECTED_FAILING_TITLES = [
-	"is lenient on a [minor]-prefixed ExifTool:Warning (issue #344, D-03 display leniency)",
 	"issue #344 end-to-end: one path only the display path is lenient on a [minor] MicrosoftPhoto warning (NC-vacuity target)",
 ];
 
-const TARGET_SOURCE = "src/application/queries/read_metadata_query.ts";
+const TARGET_SOURCE = "src/infrastructure/exiftool/exiftool_adapter.ts";
 
 // The PRE-FIX block this mutation restores: a first-match predicate over ALL ExifTool-group
 // Error/Warning entries, unconditionally fatal -- no [minor] display leniency, no full scan.
-// This is the measured D-05 bug the #344 fix replaced (48-02-PLAN.md
-// base_architecture_amendment point 3), rewritten against read_metadata_query.ts's current
-// shape rather than the retired exiftool_adapter.ts call site.
+// This is the measured D-05 bug the #344 fix replaced, rewritten against
+// ExifToolAdapter.inspectDisplay's current shape (firstRecord variable, engine-error code,
+// exiftool backend) rather than the retired read_metadata_query.ts call site.
 const FIX_BLOCK =
 	"\t\tconst verdict = classifyInspectionDiagnostics({\n" +
-	"\t\t\trecord: firstItem,\n" +
+	"\t\t\trecord: firstRecord,\n" +
 	'\t\t\tpurpose: "display",\n' +
 	"\t\t});\n" +
 	"\t\tif (verdict.fatal) {\n" +
 	"\t\t\treturn {\n" +
 	"\t\t\t\tok: false,\n" +
 	"\t\t\t\terror: {\n" +
-	'\t\t\t\t\tcode: "exiftool-error",\n' +
+	'\t\t\t\t\tcode: "engine-error",\n' +
 	"\t\t\t\t\tdetail: verdict.detail,\n" +
+	'\t\t\t\t\tbackend: "exiftool",\n' +
 	"\t\t\t\t},\n" +
 	"\t\t\t};\n" +
 	"\t\t}";
 
 const PRE_FIX_BLOCK =
-	"\t\tconst diagnostic = Object.entries(firstItem).find(([key]) => {\n" +
+	"\t\tconst diagnostic = Object.entries(firstRecord).find(([key]) => {\n" +
 	'\t\t\tconst parts = key.split(":");\n' +
 	"\t\t\tconst tag = parts.at(-1);\n" +
 	'\t\t\treturn parts[0] === "ExifTool" && (tag === "Error" || tag === "Warning");\n' +
@@ -81,8 +94,9 @@ const PRE_FIX_BLOCK =
 	"\t\t\treturn {\n" +
 	"\t\t\t\tok: false,\n" +
 	"\t\t\t\terror: {\n" +
-	'\t\t\t\t\tcode: "exiftool-error",\n' +
+	'\t\t\t\t\tcode: "engine-error",\n' +
 	"\t\t\t\t\tdetail: String(diagnostic[1]),\n" +
+	'\t\t\t\t\tbackend: "exiftool",\n' +
 	"\t\t\t\t},\n" +
 	"\t\t\t};\n" +
 	"\t\t}";
@@ -216,7 +230,7 @@ async function main() {
 		);
 
 		console.log(
-			"✓ Issue #344 vacuity gate: baseline green, mutation restored the pre-fix D-05 predicate, and exactly the expected two tests failed.",
+			`✓ Issue #344 vacuity gate: baseline green, mutation restored the pre-fix D-05 predicate, and exactly the expected ${EXPECTED_FAILING_TITLES.length} test(s) failed.`,
 		);
 	} finally {
 		fs.rmSync(scratchDir, { recursive: true, force: true });

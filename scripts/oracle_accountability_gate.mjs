@@ -311,7 +311,7 @@ export function buildRepositorySubject(repoRoot = process.cwd()) {
 		),
 		fixtureGeneratorSource: read("tests/e2e/fixtures/generate_fixtures.ts"),
 		orientationCommandSource: read(
-			"src/application/commands/strip_metadata_command.ts",
+			"src/infrastructure/exiftool/exiftool_adapter.ts",
 		),
 		artifactPaths: walkFiles(repoRoot, testsRoot)
 			.concat(walkFiles(repoRoot, path.join(repoRoot, "docs", "evidence")))

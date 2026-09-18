@@ -26,6 +26,19 @@ declare module "*gatekeeper_check.mjs" {
 	};
 }
 
+declare module "*rename_equivalence_gate.mjs" {
+	export const IDENTIFIER_TOKEN_MAP: readonly (readonly [string, string])[];
+	export const LITERAL_TOKEN_MAP: readonly (readonly [string, string])[];
+	export const IMPORT_PATH_TOKEN_MAP: readonly (readonly [string, string])[];
+	export const PATH_MOVES: readonly (readonly [string, string])[];
+	export function transformContent(content: string): string;
+	export function transformPath(relPath: string): string;
+	export function diffRenamedTrees(
+		beforeFiles: ReadonlyMap<string, string>,
+		afterFiles: ReadonlyMap<string, string>,
+	): string[];
+}
+
 declare module "*dir_effect_gate.mjs" {
 	export function classifyTestFile(
 		source: string,
@@ -164,6 +177,7 @@ declare module "*oracle_accountability_gate.mjs" {
 	export function evaluateAccountabilitySubject(
 		subject: AccountabilitySubject,
 	): string[];
+	export function buildRepositorySubject(): AccountabilitySubject;
 	export function renderAccountabilityClaims(claims: {
 		schemaVersion: number;
 		issues: AccountabilityClaim[];
@@ -183,6 +197,15 @@ declare module "*orientation_mutation_gate.mjs" {
 			step: "compile" | "orientation-test",
 		) => Promise<{ status: number | null; output: string }>;
 	}): Promise<void>;
+}
+
+declare module "*nc1_mutation_gate.mjs" {
+	export function applyNc1Mutation(source: string): string;
+	export function evaluateMutationVerdict(input: {
+		baseline: { success: boolean; failingTitles: string[] };
+		mutated: { success: boolean; failingTitles: string[] };
+		expectedFailingTitles: string[];
+	}): { ok: boolean; reason: string };
 }
 
 declare module "*known_gap_gate.mjs" {

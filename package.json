@@ -33,7 +33,7 @@
 		"typecheck": "tsc --noEmit",
 		"preview": "ELECTRON_RUN_AS_NODE= electron-vite preview",
 		"test": "vitest run",
-		"test:ci": "vitest run --reporter=default --reporter=json --outputFile=vitest-report.json",
+		"test:ci": "vitest run --reporter=verbose --reporter=json --outputFile.json=vitest-report.json",
 		"test:watch": "vitest",
 		"test:e2e": "playwright test --project=dev",
 		"test:smoke": "playwright test --project=smoke",
@@ -45,7 +45,13 @@
 		"verify:direffect": "node scripts/dir_effect_gate.mjs",
 		"verify:issue344-vacuity": "node scripts/issue344_vacuity_gate.mjs",
 		"verify:issue344-nc-evidence": "node scripts/issue344_nc_evidence.mjs",
+		"verify:rename-equivalence": "node scripts/rename_equivalence_gate.mjs",
+		"verify:nc1-mutation": "node scripts/nc1_mutation_gate.mjs",
+		"measure:verification-cost": "node scripts/measure_verification_cost.mjs",
+		"verify:nc-evidence": "node scripts/nc_evidence_gate.mjs",
 		"verify:known-gaps": "node scripts/known_gap_gate.mjs",
+		"verify:native-dependency": "node scripts/exifcleaner_node_dependency_gate.mjs",
+		"verify:native-dependency:seal": "node scripts/exifcleaner_node_dependency_gate.mjs --seal",
 		"verify:release-notes": "node scripts/release_notes_gate.mjs",
 		"release:evidence": "node scripts/release_evidence.mjs --write",
 		"release:prepare-assets": "node scripts/release_asset_gate.mjs --write-checksums",
@@ -67,6 +73,7 @@
 		"check:deps": "madge --circular --extensions ts,tsx src/"
 	},
 	"dependencies": {
+		"exifcleaner-node": "0.2.2",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"zod": "^3.25.0"
@@ -187,7 +194,8 @@
 		]
 	},
 	"resolutions": {
-		"vite": "7.3.6"
+		"vite": "7.3.6",
+		"node-abi": "4.35.0"
 	},
 	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

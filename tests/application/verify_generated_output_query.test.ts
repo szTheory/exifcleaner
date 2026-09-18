@@ -1,113 +1,113 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { MetadataEnginePort } from "../../src/application/metadata_engine_port";
 import { VerifyGeneratedOutputQuery } from "../../src/application/queries/verify_generated_output_query";
-import { FakeExifTool } from "../fakes/fake_exiftool";
 
-let exiftool: FakeExifTool;
+let metadataEngine: MetadataEnginePort;
 let query: VerifyGeneratedOutputQuery;
 
 beforeEach(() => {
 	// A successful generated artifact is one structured, recognized ExifTool record.
-	exiftool = new FakeExifTool();
-	exiftool.readResult = { ok: true, value: [{ FileType: "RAF" }] };
-	query = new VerifyGeneratedOutputQuery({ exiftool });
+	metadataEngine = {
+		inspect: vi.fn().mockResolvedValue({
+			ok: true,
+			value: {
+				metadata: {},
+				recordCount: 1,
+				verification: { fileType: "RAF", error: undefined },
+			},
+		}),
+		sanitize: vi.fn(),
+	};
+	query = new VerifyGeneratedOutputQuery({ metadataEngine });
 });
 
 describe("VerifyGeneratedOutputQuery", () => {
-	it("reopens the supplied generated path with both the FileType guard and the -G1:2:4 diagnostic scan", async () => {
+	it("reopens only the supplied generated path once", async () => {
 		const generatedPath = "/tmp/sample_cleaned.raf";
 
 		const result = await query.execute({ generatedPath });
 
 		expect(result).toEqual({ ok: true, value: undefined });
-		// Two calls, not one merged arg set: ExifTool's -G option renames every JSON key
-		// (including File:FileType) to Group:Tag, so the plain-key FileType guard and the
-		// classifyInspectionDiagnostics scan cannot share one readMetadata call. -G4 is
-		// required (not just -G1:2, see 48-D06-SETTLEMENT.md): co-occurring ExifTool-group
-		// diagnostics can otherwise collapse onto one suppressed JSON key.
-		expect(exiftool.calls).toEqual([
-			{
-				method: "readMetadata",
-				args: [generatedPath, ["-File:FileType", "-File:Error"]],
-			},
-			{
-				method: "readMetadata",
-				args: [generatedPath, ["-G1:2:4"]],
-			},
-		]);
+		expect(metadataEngine.inspect).toHaveBeenCalledOnce();
+		expect(metadataEngine.inspect).toHaveBeenCalledWith({
+			source: generatedPath,
+			purpose: "output-verification",
+		});
 	});
 
 	it.each([
 		{
 			description: "port failure",
 			setResult: () => {
-				exiftool.readResult = {
+				vi.mocked(metadataEngine.inspect).mockResolvedValue({
 					ok: false,
-					error: { code: "exiftool-error", detail: "cannot read" },
-				};
+					error: { code: "engine-unavailable", backend: "exiftool" },
+				});
 			},
 		},
 		{
 			description: "no records",
 			setResult: () => {
-				exiftool.readResult = { ok: true, value: [] };
+				vi.mocked(metadataEngine.inspect).mockResolvedValue({
+					ok: true,
+					value: {
+						metadata: {},
+						recordCount: 0,
+						verification: { fileType: undefined, error: undefined },
+					},
+				});
 			},
 		},
 		{
 			description: "multiple records",
 			setResult: () => {
-				exiftool.readResult = {
+				vi.mocked(metadataEngine.inspect).mockResolvedValue({
 					ok: true,
-					value: [{ FileType: "RAF" }, { FileType: "RAF" }],
-				};
+					value: {
+						metadata: {},
+						recordCount: 2,
+						verification: { fileType: "RAF", error: undefined },
+					},
+				});
 			},
 		},
 		{
 			description: "missing file type",
 			setResult: () => {
-				exiftool.readResult = { ok: true, value: [{ FileName: "sample.raf" }] };
+				vi.mocked(metadataEngine.inspect).mockResolvedValue({
+					ok: true,
+					value: {
+						metadata: {},
+						recordCount: 1,
+						verification: { fileType: undefined, error: undefined },
+					},
+				});
 			},
 		},
 		{
 			description: "empty file type",
 			setResult: () => {
-				exiftool.readResult = { ok: true, value: [{ FileType: "" }] };
+				vi.mocked(metadataEngine.inspect).mockResolvedValue({
+					ok: true,
+					value: {
+						metadata: {},
+						recordCount: 1,
+						verification: { fileType: "", error: undefined },
+					},
+				});
 			},
 		},
 		{
-			description: "ExifTool-group Error",
+			description: "ExifTool Error",
 			setResult: () => {
-				exiftool.readResult = {
+				vi.mocked(metadataEngine.inspect).mockResolvedValue({
 					ok: true,
-					value: [{ FileType: "RAF", "ExifTool:Error": "bad output" }],
-				};
-			},
-		},
-		{
-			description:
-				"ExifTool-group Warning (approved scope addition: this path had no Warning scan before)",
-			setResult: () => {
-				exiftool.readResult = {
-					ok: true,
-					value: [
-						{ FileType: "RAF", "ExifTool:Warning": "Bad offset for GPSInfo" },
-					],
-				};
-			},
-		},
-		{
-			description:
-				"ExifTool-group [minor] Warning (output-verification stays strict; only display is lenient)",
-			setResult: () => {
-				exiftool.readResult = {
-					ok: true,
-					value: [
-						{
-							FileType: "RAF",
-							"ExifTool:Warning":
-								"[minor] Fixed incorrect URI for xmlns:MicrosoftPhoto",
-						},
-					],
-				};
+					value: {
+						metadata: {},
+						recordCount: 1,
+						verification: { fileType: "RAF", error: "bad output" },
+					},
+				});
 			},
 		},
 	])("rejects $description", async ({ setResult }) => {
@@ -123,11 +123,15 @@ describe("VerifyGeneratedOutputQuery", () => {
 		}
 	});
 
-	it("accepts a non-ExifTool-group Warning tag (the policy only scans the ExifTool pseudo-group)", async () => {
-		exiftool.readResult = {
+	it("accepts a warning-only recognized record", async () => {
+		vi.mocked(metadataEngine.inspect).mockResolvedValue({
 			ok: true,
-			value: [{ FileType: "MP4", Warning: "minor container warning" }],
-		};
+			value: {
+				metadata: {},
+				recordCount: 1,
+				verification: { fileType: "MP4", error: undefined },
+			},
+		});
 
 		await expect(
 			query.execute({ generatedPath: "/tmp/sample_cleaned.mp4" }),
