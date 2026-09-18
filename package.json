@@ -76,7 +76,7 @@
 		"exifcleaner-node": "0.2.2",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
-		"zod": "^3.25.0"
+		"zod": "^4.6.5"
 	},
 	"devDependencies": {
 		"@playwright/test": "1.62.1",
