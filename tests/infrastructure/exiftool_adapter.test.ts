@@ -56,7 +56,7 @@ describe("ExifToolAdapter.inspect", () => {
 		expect(fakeProcess.readMetadata).toHaveBeenCalledOnce();
 		expect(fakeProcess.readMetadata).toHaveBeenCalledWith({
 			filePath: "/tmp/photo.jpg",
-			args: ["-G1:2"],
+			args: ["-G1:2:4"],
 		});
 		expect(result).toEqual({
 			ok: true,

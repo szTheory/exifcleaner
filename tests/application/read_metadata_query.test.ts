@@ -42,7 +42,7 @@ it("traces display inspection through the semantic port and adapter", async () =
 	expect(process.readMetadata).toHaveBeenCalledOnce();
 	expect(process.readMetadata).toHaveBeenCalledWith({
 		filePath: "/tmp/test.jpg",
-		args: ["-G1:2"],
+		args: ["-G1:2:4"],
 	});
 });
 

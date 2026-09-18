@@ -6,14 +6,34 @@ import type { Result } from "../../common";
 import { assertNever } from "../../common/types";
 import type { ExifError } from "../../domain";
 import type { MetadataEngineError } from "../../domain/exif/exif_errors";
+import { classifyInspectionDiagnostics } from "./exiftool_diagnostics";
 import {
 	UnsafeExifToolPathError,
 	type ExiftoolProcess,
 } from "./ExiftoolProcess";
 
 const UNSAFE_PATH_MESSAGE = "The selected file path is not supported";
-const DISPLAY_INSPECTION_ARGS = ["-G1:2"];
+// G1 identifies the physical metadata family (System/File/JFIF/EXIF/etc.) while G2 supplies
+// the user-facing category. cleanExifData uses both to discard structural fields, then
+// normalizes retained keys back to G2:Tag.
+//
+// G4 (family 4, "instance number") is required, not cosmetic: measured against the bundled
+// binary (48-D06-SETTLEMENT.md), ExifTool's -json output suppresses duplicate same-name JSON
+// entries, so a genuinely co-occurring ExifTool-group Error/Warning pair can silently
+// collapse onto one JSON key -- which key survives is generation-order-dependent, not
+// something classifyInspectionDiagnostics could ever recover from a JSON object it never
+// received. -G4 disambiguates every duplicate (ExifTool-group or not) with a "CopyN"
+// segment; cleanExifData's normalizeMetadataKey strips that segment again so ordinary
+// displayed tag names are unaffected -- a single call, no added per-file round trip.
+const DISPLAY_INSPECTION_ARGS = ["-G1:2:4"];
 const OUTPUT_VERIFICATION_INSPECTION_ARGS = ["-File:FileType", "-File:Error"];
+// A second call, not a merged arg set: ExifTool's -G option renames every JSON key to
+// Group:Tag -- including File:FileType, which would break the plain-key guard above
+// (measured: `-G1:2 -File:FileType` still renders the key as "File:Other:FileType", never
+// "FileType"). This scan is the approved scope addition (48-01-PLAN.md
+// base_architecture_amendment): this path previously checked only a plain `Error` field,
+// never an ExifTool-group Warning at all.
+const OUTPUT_VERIFICATION_DIAGNOSTIC_ARGS = ["-G1:2:4"];
 
 // Adapter pattern: wraps the existing ExiftoolProcess with the semantic metadata engine
 // interface. Does NOT modify ExiftoolProcess.ts (working infrastructure code).
@@ -84,11 +104,21 @@ export class ExifToolAdapter implements MetadataEnginePort {
 		source: string;
 		purpose: "display" | "output-verification";
 	}): ReturnType<MetadataEnginePort["inspect"]> {
-		const args =
-			purpose === "display"
-				? DISPLAY_INSPECTION_ARGS
-				: OUTPUT_VERIFICATION_INSPECTION_ARGS;
-		const result = await this.readInspection({ filePath: source, args });
+		if (purpose === "output-verification") {
+			return this.inspectOutputVerification({ source });
+		}
+		return this.inspectDisplay({ source });
+	}
+
+	private async inspectDisplay({
+		source,
+	}: {
+		source: string;
+	}): ReturnType<MetadataEnginePort["inspect"]> {
+		const result = await this.readInspection({
+			filePath: source,
+			args: DISPLAY_INSPECTION_ARGS,
+		});
 		if (!result.ok) {
 			return { ok: false, error: toMetadataEngineError(result.error) };
 		}
@@ -105,17 +135,16 @@ export class ExifToolAdapter implements MetadataEnginePort {
 			};
 		}
 
-		const diagnostic = Object.entries(firstRecord).find(([key]) => {
-			const parts = key.split(":");
-			const tag = parts.at(-1);
-			return parts[0] === "ExifTool" && (tag === "Error" || tag === "Warning");
+		const verdict = classifyInspectionDiagnostics({
+			record: firstRecord,
+			purpose: "display",
 		});
-		if (diagnostic !== undefined) {
+		if (verdict.fatal) {
 			return {
 				ok: false,
 				error: {
 					code: "engine-error",
-					detail: String(diagnostic[1]),
+					detail: verdict.detail,
 					backend: "exiftool",
 				},
 			};
@@ -125,6 +154,73 @@ export class ExifToolAdapter implements MetadataEnginePort {
 			ok: true,
 			value: {
 				metadata: cleanExifData({ raw: firstRecord }),
+				recordCount: result.value.length,
+				verification: {
+					fileType: firstRecord.FileType,
+					error: firstRecord.Error,
+				},
+			},
+		};
+	}
+
+	private async inspectOutputVerification({
+		source,
+	}: {
+		source: string;
+	}): ReturnType<MetadataEnginePort["inspect"]> {
+		const result = await this.readInspection({
+			filePath: source,
+			args: OUTPUT_VERIFICATION_INSPECTION_ARGS,
+		});
+		if (!result.ok) {
+			return { ok: false, error: toMetadataEngineError(result.error) };
+		}
+
+		const firstRecord = result.value[0];
+		if (firstRecord === undefined) {
+			return {
+				ok: true,
+				value: {
+					metadata: {},
+					recordCount: 0,
+					verification: { fileType: undefined, error: undefined },
+				},
+			};
+		}
+
+		const diagnosticResult = await this.readInspection({
+			filePath: source,
+			args: OUTPUT_VERIFICATION_DIAGNOSTIC_ARGS,
+		});
+		if (!diagnosticResult.ok) {
+			return {
+				ok: false,
+				error: toMetadataEngineError(diagnosticResult.error),
+			};
+		}
+
+		const diagnosticRecord = diagnosticResult.value[0];
+		if (diagnosticRecord !== undefined) {
+			const verdict = classifyInspectionDiagnostics({
+				record: diagnosticRecord,
+				purpose: "output-verification",
+			});
+			if (verdict.fatal) {
+				return {
+					ok: false,
+					error: {
+						code: "engine-error",
+						detail: verdict.detail,
+						backend: "exiftool",
+					},
+				};
+			}
+		}
+
+		return {
+			ok: true,
+			value: {
+				metadata: {},
 				recordCount: result.value.length,
 				verification: {
 					fileType: firstRecord.FileType,

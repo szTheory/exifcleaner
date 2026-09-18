@@ -63,9 +63,9 @@ describe("issue #344 fixture pins", () => {
 describe("issue #344 end-to-end: one path only", () => {
 	const process_ = new ExiftoolProcess({ binPath: EXIFTOOL });
 	const adapter = new ExifToolAdapter({ process: process_ });
-	const readMetadataQuery = new ReadMetadataQuery({ exiftool: adapter });
+	const readMetadataQuery = new ReadMetadataQuery({ metadataEngine: adapter });
 	const verifyGeneratedOutputQuery = new VerifyGeneratedOutputQuery({
-		exiftool: adapter,
+		metadataEngine: adapter,
 	});
 
 	beforeAll(async () => {
@@ -112,8 +112,8 @@ describe("issue #344 end-to-end: one path only", () => {
 		if (result.ok) {
 			return;
 		}
-		expect(result.error.code).toBe("exiftool-error");
-		if (result.error.code === "exiftool-error") {
+		expect(result.error.code).toBe("engine-error");
+		if (result.error.code === "engine-error") {
 			expect(result.error.detail).toBe(
 				ISSUE_344_COOCCURRENCE_NON_MINOR_WARNING,
 			);
@@ -133,8 +133,8 @@ describe("issue #344 end-to-end: one path only", () => {
 		if (result.ok) {
 			return;
 		}
-		expect(result.error.code).toBe("exiftool-error");
-		if (result.error.code === "exiftool-error") {
+		expect(result.error.code).toBe("engine-error");
+		if (result.error.code === "engine-error") {
 			expect(result.error.detail).toBe(
 				ISSUE_344_COOCCURRENCE_NON_MINOR_WARNING,
 			);
@@ -203,6 +203,7 @@ describe("P48-NC-6: blast radius", () => {
 
 			const result = await stripMetadataCommand.execute({
 				filePath: sourceCopy,
+				outputMode: "copy",
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveTimestamps: false,
