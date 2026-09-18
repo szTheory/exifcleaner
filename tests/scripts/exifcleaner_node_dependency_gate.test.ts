@@ -10,12 +10,10 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import {
-	ALLOWED_DRAFT_SHA,
 	SEALED_VERSION,
 	auditInstalledRuntime,
 	classifyDependencySpec,
 	validateCiWorkflowPolicy,
-	validateDraftDependency,
 	validatePackageMetadata,
 	validateRegistryEvidence,
 	validateSealDependency,
@@ -66,6 +64,7 @@ function validEvidence() {
 			lifecycleScripts: {},
 			engines: { node: ">=22" },
 			runtimeExports: [
+				"classifyFallback",
 				"err",
 				"getCapabilities",
 				"inspectFile",
@@ -111,26 +110,6 @@ function fixture(files: Record<string, string>): {
 }
 
 describe("dependency source policy", () => {
-	test("allows only the full audited SHA for draft development", () => {
-		const exact = `https://github.com/szTheory/exifcleaner-node.git#${ALLOWED_DRAFT_SHA}`;
-		expect(
-			validateDraftDependency({ dependencies: { "exifcleaner-node": exact } }),
-		).toEqual([]);
-
-		for (const spec of [
-			"https://github.com/szTheory/exifcleaner-node.git#main",
-			"https://github.com/szTheory/exifcleaner-node.git#05f64cf",
-			"https://github.com/szTheory/exifcleaner-node.git#0000000000000000000000000000000000000000",
-			"^0.1.0",
-		]) {
-			expect(
-				validateDraftDependency({
-					dependencies: { "exifcleaner-node": spec },
-				})[0],
-			).toMatch(/draft dependency/i);
-		}
-	});
-
 	test("classifies non-registry dependency sources structurally", () => {
 		expect(classifyDependencySpec("file:../node").kind).toBe("file");
 		expect(classifyDependencySpec("link:../node").kind).toBe("link");
@@ -145,7 +124,8 @@ describe("dependency source policy", () => {
 	test("seal rejects every draft or inexact source and absent evidence", () => {
 		const manifest = {
 			dependencies: {
-				"exifcleaner-node": `git+https://example.test/node.git#${ALLOWED_DRAFT_SHA}`,
+				"exifcleaner-node":
+					"git+https://example.test/node.git#9b0d7f34f3dbfa633b46cc5427481ae7212b0a88",
 			},
 		};
 		expect(
@@ -192,6 +172,26 @@ describe("dependency source policy", () => {
 			"native or executable payload is forbidden: prebuilds/native.node",
 			"native or executable payload is forbidden: bin/helper.exe",
 		]);
+	});
+
+	// D-50 (exifcleaner-node's own CI): the published package legitimately ships six
+	// SHA-256-bound native-publication prebuilds, first exercised by this gate at 0.2.1
+	// (48-06) -- 0.1.1 shipped none. The allowlist is pinned to these exact six paths, not a
+	// `prebuilds/**` glob, so this positive control and the rejection test above together
+	// prove the six admitted paths pass while any other native/executable payload -- including
+	// a same-directory, differently-named one -- still fails.
+	test("accepts exactly the six admitted native-publication prebuild paths", () => {
+		expect(
+			validatePackageMetadata({}, [
+				"dist/engine.js",
+				"prebuilds/darwin-arm64/publication.node",
+				"prebuilds/darwin-x64/publication.node",
+				"prebuilds/linux-arm64/publication.node",
+				"prebuilds/linux-x64/publication.node",
+				"prebuilds/win32-arm64/publication.node",
+				"prebuilds/win32-x64/publication.node",
+			]),
+		).toEqual([]);
 	});
 });
 
@@ -295,18 +295,15 @@ describe("installed runtime audit", () => {
 });
 
 describe("repository sealed state", () => {
-	// D-01/D-03 (Phase 47): the repository intentionally moved off the sealed
-	// registry dependency onto the admitted draft git SHA. While on the draft,
-	// `validateSealDependency` is REQUIRED to report exactly this fixed set of
-	// mismatches against the audited registry evidence — that non-ready seal
-	// verdict is what `yarn verify:native-dependency` prints as "DRAFT ONLY: ...
-	// seal verdict is intentionally non-ready." A regression back to `[]` here
-	// would mean the manifest/lock silently re-sealed to the registry version
-	// without an explicit D-01-equivalent decision, which is exactly the
-	// tamper case T-47-01 guards against. Phase 48 swaps back to a sealed
-	// exact registry dependency (D-04) and restores the `[]`/no-SHA-in-lock
-	// assertions this test used to make.
-	test("reports the accepted non-ready seal verdict against the admitted draft dependency", () => {
+	// D-04/D-19/D-20 (Phase 48): the repository resealed to the published registry version
+	// exifcleaner-node@0.2.1. `validateSealDependency` against the live manifest/lock/evidence
+	// on disk MUST report `[]` -- a regression back to a non-empty result here would mean the
+	// manifest, lock, or evidence file drifted out of sync with each other or with the
+	// published registry identity, which is exactly the tamper case T-48-23/T-48-24 guard
+	// against. The prior draft-era assertions (Phase 47, D-01/D-03) are superseded: the draft
+	// git-SHA dependency this test used to assert against is now structurally unreachable —
+	// package.json holds an exact registry version, never a git spec, once sealed.
+	test("reports an empty seal verdict against the live sealed manifest, lock, and evidence", () => {
 		const root = path.resolve(import.meta.dirname, "../..");
 		const manifest = JSON.parse(
 			readFileSync(path.join(root, "package.json"), "utf8"),
@@ -318,16 +315,10 @@ describe("repository sealed state", () => {
 				"utf8",
 			),
 		);
-		expect(validateSealDependency({ manifest, lockText, evidence })).toEqual([
-			"seal requires an exact registry semver dependency",
-			`seal requires audited registry version ${SEALED_VERSION}`,
-			"seal requires a matching exact lock resolution",
-			"seal evidence mismatch: package.version",
-			"seal evidence mismatch: releaseTag",
-			"seal evidence mismatch: dist.tarball",
-			"lock integrity does not match registry evidence",
-		]);
-		expect(lockText).toContain(ALLOWED_DRAFT_SHA);
+		expect(validateSealDependency({ manifest, lockText, evidence })).toEqual(
+			[],
+		);
+		expect(manifest.dependencies["exifcleaner-node"]).toBe(SEALED_VERSION);
 	});
 });
 

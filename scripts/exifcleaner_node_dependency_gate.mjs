@@ -5,21 +5,40 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-export const ALLOWED_DRAFT_SHA = "9b0d7f34f3dbfa633b46cc5427481ae7212b0a88";
-export const SEALED_VERSION = "0.1.1";
+// Published version is 0.2.1, not the plan-literal 0.2.0: `v0.2.0` published nothing (the
+// `npm publish admitted/*.tgz` GitHub-shorthand parse bug, fixed in PR #9) and its tag is
+// permanently immutable under ruleset 21203101, so the version number is burnt. See
+// 48-NODE-020-IDENTITY.md "PUBLISHED IDENTITY" for the full registry read-back.
+export const SEALED_VERSION = "0.2.1";
 const PACKAGE_NAME = "exifcleaner-node";
 const EVIDENCE_PATH = "docs/evidence/native-webp-registry-package.json";
 const REPOSITORY_URL = "https://github.com/szTheory/exifcleaner-node";
 const REGISTRY_TARBALL_BASE =
 	"https://registry.npmjs.org/exifcleaner-node/-/exifcleaner-node";
+// Measured from the DOWNLOADED published 0.2.1 tarball (D-21), not assumed or read from the
+// local build -- six exports, alphabetical, exactly the D-21 expected list
+// (48-NODE-020-IDENTITY.md "Runtime exports"). classifyFallback is the only addition over
+// 0.1.1's five; the delta is purely additive (D-25).
 const EXPECTED_RUNTIME_EXPORTS = [
+	"classifyFallback",
 	"err",
 	"getCapabilities",
 	"inspectFile",
 	"ok",
 	"sanitizeFile",
 ];
-const ALLOWED_IMPORTS = new Set(["node:fs", "node:fs/promises", "node:path"]);
+// node:crypto and node:module were added for 0.2.1's native publication/transaction layer
+// (randomBytes/randomUUID for safe temp-file naming, createHash for content-addressing,
+// createRequire to load the native .node addon from ESM) -- measured via the seal's own
+// runtime scan against the installed 0.2.1 tree (48-06 Task 2), not assumed. Neither is a
+// network-capable module and neither appears in FORBIDDEN_MODULES below.
+const ALLOWED_IMPORTS = new Set([
+	"node:fs",
+	"node:fs/promises",
+	"node:path",
+	"node:crypto",
+	"node:module",
+]);
 const FORBIDDEN_MODULES = new Set([
 	"net",
 	"node:net",
@@ -64,16 +83,6 @@ export function classifyDependencySpec(spec) {
 
 function dependencyFrom(manifest) {
 	return manifest?.dependencies?.[PACKAGE_NAME];
-}
-
-export function validateDraftDependency(manifest) {
-	const spec = dependencyFrom(manifest);
-	const classified = classifyDependencySpec(spec);
-	if (classified.kind === "git" && classified.fragment === ALLOWED_DRAFT_SHA)
-		return [];
-	return [
-		`draft dependency must be the full audited Git SHA ${ALLOWED_DRAFT_SHA}`,
-	];
 }
 
 export function validateSealDependency({ manifest, lockText, evidence }) {
@@ -426,6 +435,22 @@ function emptyEvidence() {
 	};
 }
 
+// The exact six admitted native-publication prebuild paths (D-50: exact-six-tuple admission,
+// SHA-256 bound in exifcleaner-node's own CI before publish). Sealing against the published
+// 0.2.1 package (48-06, D-20) is the first time this gate runs against a version that
+// legitimately ships native binaries at all -- 0.1.1 shipped none. Rather than loosen the
+// native/executable-payload prohibition to any `prebuilds/**/*.node` glob, the allowlist is
+// pinned to these exact six paths so a seventh, renamed, or relocated `.node` file (a
+// plausible tamper/typosquat shape) is still rejected exactly as before.
+const EXPECTED_PREBUILD_PATHS = new Set([
+	"prebuilds/darwin-arm64/publication.node",
+	"prebuilds/darwin-x64/publication.node",
+	"prebuilds/linux-arm64/publication.node",
+	"prebuilds/linux-x64/publication.node",
+	"prebuilds/win32-arm64/publication.node",
+	"prebuilds/win32-x64/publication.node",
+]);
+
 export function validatePackageMetadata(packageJson, packedPaths = []) {
 	const problems = [];
 	if (Object.keys(packageJson.dependencies ?? {}).length > 0)
@@ -434,7 +459,10 @@ export function validatePackageMetadata(packageJson, packedPaths = []) {
 		if (packageJson.scripts?.[key] !== undefined)
 			problems.push(`lifecycle install script is forbidden: ${key}`);
 	for (const packedPath of packedPaths) {
-		if (/\.(node|exe|dll|dylib|so)$/i.test(packedPath)) {
+		if (
+			/\.(node|exe|dll|dylib|so)$/i.test(packedPath) &&
+			!EXPECTED_PREBUILD_PATHS.has(packedPath)
+		) {
 			problems.push(`native or executable payload is forbidden: ${packedPath}`);
 		}
 	}
@@ -532,8 +560,13 @@ function installedPackageRoot() {
 	throw new Error("installed package root not found");
 }
 
+// D-19 step 7 (Phase 48): the repository resealed to the published registry version, so the
+// draft-acceptance path (validateDraftDependency, ALLOWED_DRAFT_SHA) is now structurally
+// unsatisfiable -- package.json can never again hold a git spec matching a frozen draft SHA
+// once it holds an exact registry version. Removed together with its dedicated test rather
+// than retargeted, since a draft SHA has no future meaning post-publish. The CLI now always
+// validates the seal; the `--seal` flag is accepted but no longer changes behavior.
 function runCli() {
-	const seal = process.argv.includes("--seal");
 	const root = process.cwd();
 	const manifest = JSON.parse(
 		fs.readFileSync(path.join(root, "package.json"), "utf8"),
@@ -541,69 +574,60 @@ function runCli() {
 	const lockText = fs.readFileSync(path.join(root, "yarn.lock"), "utf8");
 	let evidence = {};
 	const evidenceProblems = [];
-	if (seal) {
-		try {
-			evidence = JSON.parse(
-				fs.readFileSync(path.join(root, EVIDENCE_PATH), "utf8"),
-			);
-		} catch {
-			evidenceProblems.push(`unreadable seal evidence: ${EVIDENCE_PATH}`);
-		}
-	}
-	const sourceProblems = seal
-		? validateSealDependency({ manifest, lockText, evidence })
-		: validateDraftDependency(manifest);
-	let runtimeProblems = [];
-	if (seal) {
-		const packageRoot = installedPackageRoot();
-		const packageJson = JSON.parse(
-			fs.readFileSync(path.join(packageRoot, "package.json"), "utf8"),
+	try {
+		evidence = JSON.parse(
+			fs.readFileSync(path.join(root, EVIDENCE_PATH), "utf8"),
 		);
-		const runtimeAudit = auditInstalledRuntime(packageRoot);
-		console.error(
-			`seal runtime evidence: ${JSON.stringify(runtimeAudit.evidence)}`,
-		);
-		runtimeProblems = [
-			...validatePackageMetadata(packageJson, evidence?.tarball?.files),
-			...runtimeAudit.problems,
-		];
-		if (
-			packageJson.name !== PACKAGE_NAME ||
-			packageJson.version !== SEALED_VERSION
-		)
-			runtimeProblems.push("installed package identity does not match seal");
-		if (
-			packageJson.repository?.url !==
-			"git+https://github.com/szTheory/exifcleaner-node.git"
-		)
-			runtimeProblems.push("installed package repository does not match seal");
-		if (
-			JSON.stringify(installedRuntimeExports(packageRoot)) !==
-			JSON.stringify(EXPECTED_RUNTIME_EXPORTS)
-		)
-			runtimeProblems.push("installed runtime exports do not match seal");
-		if (
-			JSON.stringify(runtimeAudit.evidence) !==
-			JSON.stringify(evidence?.runtimeAudit)
-		)
-			runtimeProblems.push(
-				"installed runtime audit does not match seal evidence",
-			);
+	} catch {
+		evidenceProblems.push(`unreadable seal evidence: ${EVIDENCE_PATH}`);
 	}
+	const sourceProblems = validateSealDependency({
+		manifest,
+		lockText,
+		evidence,
+	});
+	const packageRoot = installedPackageRoot();
+	const packageJson = JSON.parse(
+		fs.readFileSync(path.join(packageRoot, "package.json"), "utf8"),
+	);
+	const runtimeAudit = auditInstalledRuntime(packageRoot);
+	console.error(
+		`seal runtime evidence: ${JSON.stringify(runtimeAudit.evidence)}`,
+	);
+	const runtimeProblems = [
+		...validatePackageMetadata(packageJson, evidence?.tarball?.files),
+		...runtimeAudit.problems,
+	];
+	if (
+		packageJson.name !== PACKAGE_NAME ||
+		packageJson.version !== SEALED_VERSION
+	)
+		runtimeProblems.push("installed package identity does not match seal");
+	if (
+		packageJson.repository?.url !==
+		"git+https://github.com/szTheory/exifcleaner-node.git"
+	)
+		runtimeProblems.push("installed package repository does not match seal");
+	if (
+		JSON.stringify(installedRuntimeExports(packageRoot)) !==
+		JSON.stringify(EXPECTED_RUNTIME_EXPORTS)
+	)
+		runtimeProblems.push("installed runtime exports do not match seal");
+	if (
+		JSON.stringify(runtimeAudit.evidence) !==
+		JSON.stringify(evidence?.runtimeAudit)
+	)
+		runtimeProblems.push(
+			"installed runtime audit does not match seal evidence",
+		);
 	const problems = [...evidenceProblems, ...sourceProblems, ...runtimeProblems];
-	if (!seal && problems.length === 0) {
-		console.log(
-			`DRAFT ONLY: immutable Git SHA ${ALLOWED_DRAFT_SHA} accepted; seal verdict is intentionally non-ready.`,
-		);
-		return;
-	}
-	if (seal && problems.length === 0) {
+	if (problems.length === 0) {
 		console.log(
 			`NATIVE DEPENDENCY SEAL PASSED: ${PACKAGE_NAME}@${SEALED_VERSION}`,
 		);
 		return;
 	}
-	console.error(`NATIVE DEPENDENCY ${seal ? "SEAL" : "DRAFT"} GATE FAILED:`);
+	console.error("NATIVE DEPENDENCY SEAL GATE FAILED:");
 	for (const problem of problems) console.error(`- ${problem}`);
 	process.exitCode = 1;
 }

@@ -31,26 +31,15 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      # Phase 47 (D-01/D-03): the repository is intentionally pinned to the
-      # admitted draft git dependency, not a sealed registry version, so this
-      # step is expected to report "NATIVE DEPENDENCY SEAL GATE FAILED" (its
-      # non-ready verdict is accepted, not remediated — see D-03). This step's
-      # run command and its placement immediately after install are a
-      # validated CI-linkage invariant
-      # (scripts/exifcleaner_node_dependency_gate.mjs validateCiWorkflowPolicy)
-      # that Phase 47 does not touch, so this step still runs and its output
-      # is preserved as evidence; `continue-on-error` only stops its expected
-      # failure from blocking the job. Phase 48 removes this override when the
-      # dependency reseals (D-04).
+      # Phase 48 (D-04, D-19 step 7, D-20): the repository now pins the published registry
+      # version exifcleaner-node@0.2.1, so this step is required to pass unconditionally.
+      # `continue-on-error` (Phase 47) is removed here — Phase 47 added it deliberately to
+      # keep this CI-linkage structural gate intact while the dependency was non-sealable;
+      # that condition no longer holds. This step's run command and its placement
+      # immediately after install remain the validated CI-linkage invariant
+      # (scripts/exifcleaner_node_dependency_gate.mjs validateCiWorkflowPolicy).
       - name: Seal native dependency
-        continue-on-error: true
         run: yarn verify:native-dependency:seal
-
-      # The enforced check for this phase: independently asserts the pinned
-      # SHA equals ALLOWED_DRAFT_SHA regardless of seal state (T-47-01). This
-      # step is NOT allowed to fail.
-      - name: Verify native dependency (draft acceptance, D-01/D-03)
-        run: yarn verify:native-dependency
 
       - name: Verify release-note identity
         run: yarn verify:release-notes
