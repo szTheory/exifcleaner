@@ -73,7 +73,7 @@
 		"check:deps": "madge --circular --extensions ts,tsx src/"
 	},
 	"dependencies": {
-		"exifcleaner-node": "0.2.1",
+		"exifcleaner-node": "0.2.2",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"zod": "^3.25.0"

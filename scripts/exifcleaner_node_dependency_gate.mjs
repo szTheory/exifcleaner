@@ -5,11 +5,19 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-// Published version is 0.2.1, not the plan-literal 0.2.0: `v0.2.0` published nothing (the
+// Published version is 0.2.2, not the plan-literal 0.2.0: `v0.2.0` published nothing (the
 // `npm publish admitted/*.tgz` GitHub-shorthand parse bug, fixed in PR #9) and its tag is
 // permanently immutable under ruleset 21203101, so the version number is burnt. See
 // 48-NODE-020-IDENTITY.md "PUBLISHED IDENTITY" for the full registry read-back.
-export const SEALED_VERSION = "0.2.1";
+//
+// 0.2.2 supersedes 0.2.1 for a Windows-only correctness defect: 0.2.1's publication.node
+// carried a static import of the literal name "node.exe", so inside the packaged app -- where
+// the host is ExifCleaner.exe -- the loader mapped a SECOND Node runtime into the process and
+// the first N-API call faulted on a V8 pointer-compression cage mismatch. 0.2.2 binds the
+// N-API surface to the already-loaded host and declares no host dependency on either Windows
+// arch. Source commit 8474396, tag v0.2.2, release run 35370603372 -- all three confirmed
+// against the published SLSA provenance attestation, not assumed.
+export const SEALED_VERSION = "0.2.2";
 const PACKAGE_NAME = "exifcleaner-node";
 const EVIDENCE_PATH = "docs/evidence/native-webp-registry-package.json";
 const REPOSITORY_URL = "https://github.com/szTheory/exifcleaner-node";

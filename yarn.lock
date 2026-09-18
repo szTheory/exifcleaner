@@ -2175,10 +2175,10 @@ esutils@^2.0.2:
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.3.tgz#74d2eb4de0b8da1293711910d50775b9b710ef64"
   integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
-exifcleaner-node@0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/exifcleaner-node/-/exifcleaner-node-0.2.1.tgz#a16c2257485766fd5eec1836f3c1c937a2e521e2"
-  integrity sha512-zHhJJmGobmUH/kAYTltS62SOlUmN7R6GJSgTYGTeQLCSMnloT2nyyTHrdBJ7Gd6nMRAcSBxSrVXLtHDr57+r+w==
+exifcleaner-node@0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/exifcleaner-node/-/exifcleaner-node-0.2.2.tgz#61427897d7f345686d64c773a989175da91ad192"
+  integrity sha512-gpyjJY8bBfW5WSYG5RM1Q/+cPXSPDgzGAVfoTVlONX6ohsr3vXbMroaNDQEuhqj4SCoUUgP5coboJ9RxiNRhAA==
 
 expect-type@^1.3.0:
   version "1.4.0"
