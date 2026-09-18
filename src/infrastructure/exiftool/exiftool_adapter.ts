@@ -199,22 +199,37 @@ export class ExifToolAdapter implements MetadataEnginePort {
 			};
 		}
 
+		// Fail closed, matching master's pre-refactor VerifyGeneratedOutputQuery: a diagnostic
+		// scan that yields no record means the output could not be verified, NOT that it
+		// verified clean. The caller cannot detect this itself -- recordCount below reports the
+		// FIRST call's length, so an empty second scan would otherwise surface as a healthy
+		// recordCount of 1 with no error. Skipping the fatal check here would accept a file
+		// ExifTool never actually re-read.
 		const diagnosticRecord = diagnosticResult.value[0];
-		if (diagnosticRecord !== undefined) {
-			const verdict = classifyInspectionDiagnostics({
-				record: diagnosticRecord,
-				purpose: "output-verification",
-			});
-			if (verdict.fatal) {
-				return {
-					ok: false,
-					error: {
-						code: "engine-error",
-						detail: verdict.detail,
-						backend: "exiftool",
-					},
-				};
-			}
+		if (diagnosticRecord === undefined) {
+			return {
+				ok: false,
+				error: {
+					code: "engine-error",
+					detail: "Expected exactly one ExifTool metadata record",
+					backend: "exiftool",
+				},
+			};
+		}
+
+		const verdict = classifyInspectionDiagnostics({
+			record: diagnosticRecord,
+			purpose: "output-verification",
+		});
+		if (verdict.fatal) {
+			return {
+				ok: false,
+				error: {
+					code: "engine-error",
+					detail: verdict.detail,
+					backend: "exiftool",
+				},
+			};
 		}
 
 		return {

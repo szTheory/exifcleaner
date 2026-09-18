@@ -44,6 +44,38 @@ describe("ExifToolAdapter.inspect", () => {
 		});
 	});
 
+	it("fails closed when the output-verification diagnostic scan returns no record", async () => {
+		// Negative control for the #344 re-fold (48-06): master's pre-refactor
+		// VerifyGeneratedOutputQuery rejected an empty diagnostic scan. The adapter must too --
+		// recordCount reports the FIRST call's length, so a fail-open here would surface to the
+		// caller as a healthy recordCount of 1 with no error, accepting a file ExifTool never
+		// actually re-read. Mutating the guard back to `if (diagnosticRecord !== undefined)`
+		// must make this test fail.
+		const readMetadata = vi
+			.fn()
+			// First call: the plain-key FileType/Error scan succeeds with one record.
+			.mockResolvedValueOnce({ data: [{ FileType: "JPEG" }], error: null })
+			// Second call: the -G1:2:4 diagnostic scan yields nothing.
+			.mockResolvedValueOnce({ data: [], error: null });
+		const fakeProcess = makeFakeProcess({ readMetadata });
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		const result = await adapter.inspect({
+			source: "/tmp/generated.jpg",
+			purpose: "output-verification",
+		});
+
+		expect(readMetadata).toHaveBeenCalledTimes(2);
+		expect(result).toEqual({
+			ok: false,
+			error: {
+				code: "engine-error",
+				detail: "Expected exactly one ExifTool metadata record",
+				backend: "exiftool",
+			},
+		});
+	});
+
 	it("maps display inspection to the historical grouped preset", async () => {
 		const fakeProcess = makeFakeProcess();
 		const adapter = new ExifToolAdapter({ process: fakeProcess });
