@@ -281,6 +281,47 @@ function createMinimalTiff(): Buffer {
 	return Buffer.concat([header, page]);
 }
 
+// Phase 51-03 (D-22, D-25): a two-page TIFF built on the same per-page encoder, each page
+// carrying its own deterministic 4x4 8-bit strip and its own next-IFD offset. Page one's
+// next-IFD offset points at page two's IFD; page two's is 0 (last page). Page two's pixel
+// bytes use a distinct formula so the two strips are never accidentally identical.
+function createTwoPageTiff(): Buffer {
+	const header = Buffer.concat([
+		Buffer.from("II", "ascii"), // little-endian byte order mark
+		tiffU16le(42), // TIFF magic
+		tiffU32le(8), // offset to IFD0, immediately after this 8-byte header
+	]);
+	const page1Pixels = Buffer.alloc(16);
+	for (let i = 0; i < page1Pixels.length; i += 1) {
+		page1Pixels[i] = (i * 17) & 0xff;
+	}
+	const page2Pixels = Buffer.alloc(16);
+	for (let i = 0; i < page2Pixels.length; i += 1) {
+		page2Pixels[i] = (255 - i * 13) & 0xff;
+	}
+	const page1Start = 8;
+	// buildTiffPage's returned length does not depend on nextIfdOffset's VALUE (it is always
+	// a fixed 4-byte field) -- build once with a placeholder to learn page one's length, then
+	// rebuild with the real offset to page two's IFD.
+	const page1Probe = buildTiffPage({
+		ifdStart: page1Start,
+		nextIfdOffset: 0,
+		pixels: page1Pixels,
+	});
+	const page2Start = page1Start + page1Probe.length;
+	const page1 = buildTiffPage({
+		ifdStart: page1Start,
+		nextIfdOffset: page2Start,
+		pixels: page1Pixels,
+	});
+	const page2 = buildTiffPage({
+		ifdStart: page2Start,
+		nextIfdOffset: 0,
+		pixels: page2Pixels,
+	});
+	return Buffer.concat([header, page1, page2]);
+}
+
 // Build a PNG chunk with correct CRC32 (covers type + data)
 function pngChunk(type: string, data: Buffer): Buffer {
 	const typeBytes = Buffer.from(type, "ascii");
@@ -878,7 +919,54 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 		"  Created sample.tif (single-strip TIFF with IFD0 private tags and GPS)",
 	);
 
-	console.log("\nAll 13 fixture files generated successfully.");
+	// multipage.tif - two-page TIFF with distinct per-IFD private tags (IFD0 vs IFD1) and GPS
+	// on IFD0, for Phase 51-03's multi-page limitation pin (D-22, D-25).
+	const multipagePath = path.join(fixturesDir, "multipage.tif");
+	fs.writeFileSync(multipagePath, createTwoPageTiff());
+	const multipageValidation = execFileSync(EXIFTOOL, [
+		"-validate",
+		"-s3",
+		multipagePath,
+	])
+		.toString()
+		.trim();
+	if (multipageValidation !== "OK") {
+		throw new Error(
+			`multipage.tif failed -validate before seeding: expected OK, got "${multipageValidation}"`,
+		);
+	}
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-IFD0:ImageDescription=ZZP51-PAGE1-DESC",
+		"-IFD0:Software=ZZP51-PAGE1-SOFT",
+		"-IFD0:Artist=ZZP51-PAGE1-ARTIST",
+		"-IFD0:Copyright=ZZP51-PAGE1-COPY",
+		"-GPSLatitude=37.7749",
+		"-GPSLatitudeRef=N",
+		"-GPSLongitude=-122.4194",
+		"-GPSLongitudeRef=W",
+		"-IFD1:ImageDescription=ZZP51-PAGE2-DESC",
+		"-IFD1:Software=ZZP51-PAGE2-SOFT",
+		"-IFD1:Artist=ZZP51-PAGE2-ARTIST",
+		"-IFD1:Copyright=ZZP51-PAGE2-COPY",
+		multipagePath,
+	]);
+	assertTiffSeeds(multipagePath, {
+		"IFD0:ImageDescription": "ZZP51-PAGE1-DESC",
+		"IFD0:Software": "ZZP51-PAGE1-SOFT",
+		"IFD0:Artist": "ZZP51-PAGE1-ARTIST",
+		"IFD0:Copyright": "ZZP51-PAGE1-COPY",
+		"GPS:GPSLatitudeRef": "North",
+		"IFD1:ImageDescription": "ZZP51-PAGE2-DESC",
+		"IFD1:Software": "ZZP51-PAGE2-SOFT",
+		"IFD1:Artist": "ZZP51-PAGE2-ARTIST",
+		"IFD1:Copyright": "ZZP51-PAGE2-COPY",
+	});
+	console.log(
+		"  Created multipage.tif (two-page TIFF with distinct per-IFD private tags)",
+	);
+
+	console.log("\nAll 14 fixture files generated successfully.");
 }
 
 const outputFlag = process.argv.indexOf("--output-dir");

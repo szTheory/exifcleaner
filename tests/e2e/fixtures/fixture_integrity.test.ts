@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { snapshotDir, assertDirEffect } from "../../helpers/dir_effect";
+import { readTiffGroupedTags } from "../../helpers/tiff_probe";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = __dirname;
@@ -52,6 +53,8 @@ const WRITABLE_FIXTURES = [
 	"issue240.mp4",
 	"orientation.jpg",
 	"no_metadata.jpg",
+	"sample.tif",
+	"multipage.tif",
 ];
 
 /** Fixtures that exist precisely to exercise the error path. */
@@ -199,6 +202,49 @@ describe("E2E fixture integrity", () => {
 		const metadata = readFixtureMetadata("orientation.jpg");
 
 		expect(metadata.Orientation).toBe("Rotate 90 CW");
+	});
+
+	it("sample.tif pins its IFD0 private-tag and GPS seeds before processing", () => {
+		const filePath = path.join(FIXTURES_DIR, "sample.tif");
+		const tags = readTiffGroupedTags(filePath, EXIFTOOL);
+
+		expect(tags["IFD0:ImageDescription"]).toBe("ZZP51-DESC");
+		expect(tags["IFD0:Software"]).toBe("ZZP51-SOFT");
+		expect(tags["IFD0:Artist"]).toBe("ZZP51-ARTIST");
+		expect(tags["IFD0:Copyright"]).toBe("ZZP51-COPY");
+		expect(tags["GPS:GPSLatitudeRef"]).toBe("North");
+		expect(tags["GPS:GPSLongitudeRef"]).toBe("West");
+		expect(tags["File:FileType"]).toBe("TIFF");
+	});
+
+	it("multipage.tif pins distinct per-IFD seeds before processing", () => {
+		const filePath = path.join(FIXTURES_DIR, "multipage.tif");
+		const tags = readTiffGroupedTags(filePath, EXIFTOOL);
+
+		expect(tags["IFD0:ImageDescription"]).toBe("ZZP51-PAGE1-DESC");
+		expect(tags["IFD0:Software"]).toBe("ZZP51-PAGE1-SOFT");
+		expect(tags["IFD0:Artist"]).toBe("ZZP51-PAGE1-ARTIST");
+		expect(tags["IFD0:Copyright"]).toBe("ZZP51-PAGE1-COPY");
+		expect(tags["GPS:GPSLatitudeRef"]).toBe("North");
+		expect(tags["IFD1:ImageDescription"]).toBe("ZZP51-PAGE2-DESC");
+		expect(tags["IFD1:Software"]).toBe("ZZP51-PAGE2-SOFT");
+		expect(tags["IFD1:Artist"]).toBe("ZZP51-PAGE2-ARTIST");
+		expect(tags["IFD1:Copyright"]).toBe("ZZP51-PAGE2-COPY");
+	});
+
+	it("classifies both TIFF fixtures as binary checkout fixtures", () => {
+		for (const name of ["sample.tif", "multipage.tif"]) {
+			const output = execFileSync(
+				"git",
+				["check-attr", "binary", "--", `tests/e2e/fixtures/${name}`],
+				{
+					cwd: path.resolve(__dirname, "../../.."),
+					encoding: "utf8",
+				},
+			);
+
+			expect(output.trim()).toBe(`tests/e2e/fixtures/${name}: binary: set`);
+		}
 	});
 
 	it("pins the genuine RAF reader precondition and source identity", () => {
