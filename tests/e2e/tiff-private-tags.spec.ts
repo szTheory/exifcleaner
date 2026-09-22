@@ -13,6 +13,7 @@ import {
 	retainedPrivateTags,
 	gpsKeys,
 	findSentinels,
+	readSingleStrip,
 } from "../helpers/tiff_probe";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,6 +22,9 @@ const EXIFTOOL_PATH =
 	process.platform === "win32"
 		? path.resolve(__dirname, "../../.resources/win/bin/exiftool.exe")
 		: path.resolve(__dirname, "../../.resources/nix/bin/exiftool");
+// The pristine, committed fixture -- never the temp copy, since overwrite mode replaces the
+// temp copy in place (D-27).
+const PRISTINE_FIXTURE = path.resolve(__dirname, "fixtures/sample.tif");
 
 // This spec launches with NO settings override -- default settings are the point (RMV-03).
 // file-type-coverage.spec.ts launches with orientation/color-profile preservation switched
@@ -85,6 +89,94 @@ test.describe("TIFF private-tag removal — copy mode, default settings", () => 
 					"ZZP51-COPY",
 				]),
 			).toEqual([]);
+
+			const outputStrip = readSingleStrip(outputPath, "IFD0", EXIFTOOL_PATH);
+			const pristineStrip = readSingleStrip(
+				PRISTINE_FIXTURE,
+				"IFD0",
+				EXIFTOOL_PATH,
+			);
+			expect(outputStrip.bytes.length).toBe(16);
+			expect(pristineStrip.bytes.length).toBe(16);
+			expect(outputStrip.bytes.equals(pristineStrip.bytes)).toBe(true);
+		} finally {
+			cleanup();
+		}
+
+		expect(consoleErrors).toEqual([]);
+	});
+});
+
+// A default clean, overwrite mode: only saveAsCopy is overridden off default -- every other
+// setting stays default (RMV-03). D-24 routes TIFF through the verified transaction in BOTH
+// output modes, so this proves criterion 1's second half.
+test.describe("TIFF private-tag removal — overwrite mode", () => {
+	let app: ElectronApplication;
+	let window: Page;
+
+	test.beforeEach(async () => {
+		const launched = await launchApp({ settings: { saveAsCopy: false } });
+		app = launched.app;
+		window = launched.window;
+	});
+
+	test.afterEach(async () => {
+		if (app) await closeApp(app);
+	});
+
+	test("overwrite mode: a default clean removes the four IFD0 private tags and GPS in place through the real IPC path", async () => {
+		const driver = createProcessingDriver({
+			app,
+			window,
+			exiftoolPath: EXIFTOOL_PATH,
+		});
+		const { dir, copyFixture, cleanup } = createFixtureDir();
+		const consoleErrors: string[] = [];
+		window.on("console", (message) => {
+			if (message.type() === "error") consoleErrors.push(message.text());
+		});
+
+		try {
+			const filePath = copyFixture("sample.tif");
+			const before = snapshotDir(dir);
+			await driver.submitFiles([filePath]);
+			await driver.waitForTerminal();
+			const after = snapshotDir(dir);
+
+			// An empty `added` is the observable proof the verified transaction's stage file
+			// was renamed onto the original and left no residue (D-24).
+			assertDirEffect(before, after, {
+				modified: ["sample.tif"],
+				added: [],
+				removed: [],
+			});
+			expect(await driver.terminalRowCounts()).toEqual({
+				total: 1,
+				complete: 1,
+				error: 0,
+			});
+
+			const tags = readTiffGroupedTags(filePath, EXIFTOOL_PATH);
+			expect(retainedPrivateTags(tags, "IFD0")).toEqual([]);
+			expect(gpsKeys(tags)).toEqual([]);
+			expect(
+				findSentinels(filePath, [
+					"ZZP51-DESC",
+					"ZZP51-SOFT",
+					"ZZP51-ARTIST",
+					"ZZP51-COPY",
+				]),
+			).toEqual([]);
+
+			const outputStrip = readSingleStrip(filePath, "IFD0", EXIFTOOL_PATH);
+			const pristineStrip = readSingleStrip(
+				PRISTINE_FIXTURE,
+				"IFD0",
+				EXIFTOOL_PATH,
+			);
+			expect(outputStrip.bytes.length).toBe(16);
+			expect(pristineStrip.bytes.length).toBe(16);
+			expect(outputStrip.bytes.equals(pristineStrip.bytes)).toBe(true);
 		} finally {
 			cleanup();
 		}

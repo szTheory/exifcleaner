@@ -64,3 +64,52 @@ export function findSentinels(
 	const raw = readFileSync(filePath).toString("latin1");
 	return sentinels.filter((sentinel) => raw.includes(sentinel));
 }
+
+// D-27: pixel content identity without ImageMagick. ExifTool relocates strips on rewrite
+// (measured 122 -> 342 on the sample fixture), so callers must compare byte CONTENT, never
+// offsets. Single-strip fixtures keep this unambiguous -- a multi-strip image reports
+// StripOffsets/StripByteCounts as space-separated strings, which this function refuses
+// rather than silently comparing only the first strip.
+export function readSingleStrip(
+	filePath: string,
+	group: string,
+	exiftoolPath: string,
+): { offset: number; bytes: Buffer } {
+	const output = execFileSync(exiftoolPath, [
+		"-j",
+		"-n",
+		"-G1",
+		`-${group}:StripOffsets`,
+		`-${group}:StripByteCounts`,
+		filePath,
+	]).toString();
+	const parsed = JSON.parse(output) as unknown;
+	if (!Array.isArray(parsed) || parsed.length !== 1) {
+		throw new Error(`Expected one ExifTool result for ${filePath}`);
+	}
+	const first = parsed[0];
+	if (first === null || typeof first !== "object" || Array.isArray(first)) {
+		throw new Error(`Expected ExifTool object result for ${filePath}`);
+	}
+	const record = first as Record<string, unknown>;
+	const offsetKey = `${group}:StripOffsets`;
+	const countKey = `${group}:StripByteCounts`;
+	const rawOffset = record[offsetKey];
+	const rawCount = record[countKey];
+	if (typeof rawOffset !== "number" || typeof rawCount !== "number") {
+		throw new Error(
+			`MULTI_STRIP_UNSUPPORTED: ${filePath} did not report a single numeric ${offsetKey}/${countKey} pair (got ${JSON.stringify(
+				rawOffset,
+			)}/${JSON.stringify(rawCount)}) -- single-strip fixtures only`,
+		);
+	}
+	const offset = rawOffset;
+	const count = rawCount;
+	const fileBytes = readFileSync(filePath);
+	if (offset < 0 || count < 0 || offset + count > fileBytes.length) {
+		throw new Error(
+			`Strip range out of bounds for ${filePath}: offset=${offset} count=${count} fileSize=${fileBytes.length}`,
+		);
+	}
+	return { offset, bytes: fileBytes.subarray(offset, offset + count) };
+}
