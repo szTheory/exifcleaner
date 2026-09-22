@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { ExifToolAdapter } from "../../src/infrastructure/exiftool/exiftool_adapter";
 import type { ExiftoolProcess } from "../../src/infrastructure/exiftool/ExiftoolProcess";
 import { UnsafeExifToolPathError } from "../../src/infrastructure/exiftool/ExiftoolProcess";
+import { QUICKTIME_DATE_REMOVAL_ARGS } from "../../src/domain/exif/exif";
 
 function makeFakeProcess(overrides: Partial<Record<string, unknown>> = {}) {
 	return {
@@ -397,6 +398,92 @@ describe("ExifToolAdapter.sanitize", () => {
 			});
 		},
 	);
+
+	it("emits the exact default copy-mode TIFF argument list, including -CommonIFD0= (D-23)", async () => {
+		const fakeProcess = makeFakeProcess();
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		await adapter.sanitize({
+			source: "/tmp/scan.tif",
+			destination: "/tmp/scan.tif.cleaned",
+			outputMode: "copy",
+			preserveOrientation: true,
+			preserveColorProfile: true,
+			preserveTimestamps: false,
+		});
+
+		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/scan.tif",
+			metadata: {},
+			extraArgs: [
+				"-all=",
+				"-CommonIFD0=",
+				"-TagsFromFile",
+				"@",
+				"-Orientation",
+				"-ICC_Profile",
+				"-o",
+				"/tmp/scan.tif.cleaned",
+			],
+		});
+	});
+
+	it("emits the exact overwrite-mode .tiff argument list with preservation off (D-23)", async () => {
+		const fakeProcess = makeFakeProcess();
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		await adapter.sanitize({
+			source: "/tmp/scan.tiff",
+			outputMode: "overwrite",
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveTimestamps: false,
+		});
+
+		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/scan.tiff",
+			metadata: {},
+			extraArgs: ["-all=", "-CommonIFD0=", "-overwrite_original"],
+		});
+	});
+
+	it.each(["photo.dng", "photo.cr2", "photo.jpg", "video.mp4"])(
+		"never pushes -CommonIFD0= for a non-TIFF source: %s (D-23)",
+		async (fileName) => {
+			const fakeProcess = makeFakeProcess();
+			const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+			await adapter.sanitize({
+				source: `/tmp/${fileName}`,
+				outputMode: "overwrite",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			});
+
+			const call = vi.mocked(fakeProcess.writeMetadata).mock.calls[0]?.[0];
+			expect(call?.extraArgs).not.toContain("-CommonIFD0=");
+		},
+	);
+
+	it("a .tif source's extraArgs share no element with QUICKTIME_DATE_REMOVAL_ARGS (D-23)", async () => {
+		const fakeProcess = makeFakeProcess();
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		await adapter.sanitize({
+			source: "/tmp/scan.tif",
+			outputMode: "overwrite",
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveTimestamps: false,
+		});
+
+		const call = vi.mocked(fakeProcess.writeMetadata).mock.calls[0]?.[0];
+		const overlap = (call?.extraArgs ?? []).filter((arg) =>
+			(QUICKTIME_DATE_REMOVAL_ARGS as readonly string[]).includes(arg),
+		);
+		expect(overlap).toEqual([]);
+	});
 
 	it("does not start a process write for an already-aborted request", async () => {
 		const fakeProcess = makeFakeProcess();

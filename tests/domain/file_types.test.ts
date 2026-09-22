@@ -3,9 +3,11 @@ import {
 	isRawFile,
 	isSupportedFile,
 	isMediaFile,
+	isTiffFile,
 	requiresVerifiedWrite,
 	RAW_EXTENSIONS,
 	MEDIA_EXTENSIONS,
+	TIFF_EXTENSIONS,
 } from "../../src/domain/files/file_types";
 
 it("returns true for supported image extensions", () => {
@@ -76,7 +78,41 @@ it("classifies exactly the seven supported media extensions case-insensitively",
 	expect(isMediaFile({ filename: "sample.jpg" })).toBe(false);
 });
 
-it("requiresVerifiedWrite routes raw, media, and copy-mode webp through the verified transaction, but not overwrite-mode webp or an ordinary jpeg copy (D-23)", () => {
+it("classifies exactly the two supported TIFF extensions, case-insensitively, with last-extension and empty/degenerate edges (D-23)", () => {
+	expect([...TIFF_EXTENSIONS]).toEqual([".tif", ".tiff"]);
+	expect(isTiffFile({ filename: "scan.tif" })).toBe(true);
+	expect(isTiffFile({ filename: "scan.tiff" })).toBe(true);
+	expect(isTiffFile({ filename: "PHOTO.TIF" })).toBe(true);
+	expect(isTiffFile({ filename: "scan.TIFF" })).toBe(true);
+	expect(isTiffFile({ filename: "photo.dng.tif" })).toBe(true);
+	expect(isTiffFile({ filename: ".tif" })).toBe(true);
+	expect(isTiffFile({ filename: "photo.tif.dng" })).toBe(false);
+	expect(isTiffFile({ filename: "tif" })).toBe(false);
+	expect(isTiffFile({ filename: "" })).toBe(false);
+	expect(isTiffFile({ filename: "scan.btf" })).toBe(false);
+	expect(isTiffFile({ filename: "sample.jpg" })).toBe(false);
+	expect(isTiffFile({ filename: "sample.mp4" })).toBe(false);
+});
+
+it("isTiffFile is false for every RAW_EXTENSIONS member, .dng named explicitly (D-23)", () => {
+	for (const ext of RAW_EXTENSIONS) {
+		expect(isTiffFile({ filename: `sample${ext}` })).toBe(false);
+	}
+	expect(isTiffFile({ filename: "sample.dng" })).toBe(false);
+});
+
+it("TIFF_EXTENSIONS is disjoint from RAW_EXTENSIONS and from MEDIA_EXTENSIONS (D-23)", () => {
+	const tiffRawIntersection = [...TIFF_EXTENSIONS].filter((ext) =>
+		RAW_EXTENSIONS.has(ext),
+	);
+	const tiffMediaIntersection = [...TIFF_EXTENSIONS].filter((ext) =>
+		MEDIA_EXTENSIONS.has(ext),
+	);
+	expect(tiffRawIntersection).toEqual([]);
+	expect(tiffMediaIntersection).toEqual([]);
+});
+
+it("requiresVerifiedWrite routes raw, media, TIFF (both modes), and copy-mode webp through the verified transaction, but not overwrite-mode webp or an ordinary jpeg copy (D-23, D-24)", () => {
 	expect(
 		requiresVerifiedWrite({ filename: "sample.cr2", outputMode: "copy" }),
 	).toBe(true);
@@ -88,6 +124,18 @@ it("requiresVerifiedWrite routes raw, media, and copy-mode webp through the veri
 	).toBe(true);
 	expect(
 		requiresVerifiedWrite({ filename: "sample.mp4", outputMode: "overwrite" }),
+	).toBe(true);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.tif", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.tif", outputMode: "overwrite" }),
+	).toBe(true);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.tiff", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.tiff", outputMode: "overwrite" }),
 	).toBe(true);
 	expect(
 		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "copy" }),

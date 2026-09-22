@@ -268,6 +268,24 @@ describe("exif:remove handler", () => {
 			saveAsCopy: false,
 			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.m4a",
 		},
+		{
+			name: "copy-mode TIFF",
+			filePath: "/tmp/sample.tif",
+			saveAsCopy: true,
+			verifierPath: "/tmp/sample_cleaned.tif",
+		},
+		{
+			name: "overwrite-mode TIFF",
+			filePath: "/tmp/sample.tif",
+			saveAsCopy: false,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.tif",
+		},
+		{
+			name: "overwrite-mode .tiff",
+			filePath: "/tmp/sample.tiff",
+			saveAsCopy: false,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.tiff",
+		},
 	])(
 		"uses the exact main-process port count for $name",
 		async ({ filePath, saveAsCopy, verifierPath }) => {
