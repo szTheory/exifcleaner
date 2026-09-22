@@ -157,7 +157,7 @@
 			"runAfterFinish": false
 		},
 		"portable": {
-			"artifactName": "${productName}.${version}.${ext}"
+			"artifactName": "${productName}.${version}.portable.${ext}"
 		},
 		"win": {
 			"target": [

@@ -16,7 +16,7 @@ Pending.
 
 After.
 `;
-const SHAS = `${PORTABLE_HASH}  ExifCleaner.4.0.1.exe
+const SHAS = `${PORTABLE_HASH}  ExifCleaner.4.0.1.portable.exe
 ${INSTALLER_HASH}  ./nested/ExifCleaner.Setup.4.0.1.exe
 `;
 
@@ -38,7 +38,7 @@ function evidence(): Evidence {
 		schemaVersion: 1,
 		submissions: [
 			{
-				artifact: "ExifCleaner.4.0.1.exe",
+				artifact: "ExifCleaner.4.0.1.portable.exe",
 				sha256: PORTABLE_HASH,
 				virusTotalUrl: `https://www.virustotal.com/gui/file/${PORTABLE_HASH}`,
 				microsoftSubmissionId: "receipt-portable",
@@ -74,7 +74,7 @@ describe("release-note security finalizer", () => {
 	test("parses checksum paths by release filename", () => {
 		const checksums = parseChecksums(SHAS);
 
-		expect(checksums.get("ExifCleaner.4.0.1.exe")).toBe(PORTABLE_HASH);
+		expect(checksums.get("ExifCleaner.4.0.1.portable.exe")).toBe(PORTABLE_HASH);
 		expect(checksums.get("ExifCleaner.Setup.4.0.1.exe")).toBe(INSTALLER_HASH);
 	});
 

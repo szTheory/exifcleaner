@@ -42,7 +42,7 @@ See the [CHANGELOG](CHANGELOG.md) for the full list of changes.
 macOS 12+, Windows 10+, and Linux are supported (64-bit).
 
 - **macOS**: [Download the .dmg file](https://github.com/szTheory/exifcleaner/releases/latest) — pick the `arm64` build for Apple Silicon, the other for Intel
-- **Windows**: [Download the portable `.exe` (recommended) or installer](https://github.com/szTheory/exifcleaner/releases/latest)
+- **Windows**: [Download `ExifCleaner.<version>.portable.exe` (recommended) or `ExifCleaner.Setup.<version>.exe` (installer)](https://github.com/szTheory/exifcleaner/releases/latest)
 - **Linux**: [Download the .AppImage, .deb, or .rpm file](https://github.com/szTheory/exifcleaner/releases/latest)
 
 For Linux, the AppImage needs to be [made executable](https://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download.
