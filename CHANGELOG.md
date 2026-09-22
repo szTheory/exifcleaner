@@ -5,6 +5,11 @@
 ### Fixed
 
 - Corrected a 4.0.0 changelog entry that falsely claimed the release workflow performs macOS code signing and notarization; releases are unsigned by explicit maintainer policy (#362)
+- TIFF files cleaned with default settings no longer keep the descriptive and camera tags on their first page's main image directory (IFD0) — ImageDescription, Make, Model, Software, ModifyDate, Artist, Copyright, Rating and the Windows XP title, comment, author, keyword and subject tags — which ExifTool's blanket `-all=` delete cannot remove from a TIFF; image data is unchanged. TIFF writes now go through the staged, verified output path in both save-as-copy and overwrite mode, so a failed write leaves the original untouched (#199)
+
+### Known limitations
+
+- Only the first page of a multi-page TIFF is cleaned; later pages keep their own ImageDescription, Software, Artist and Copyright, because ExifTool cannot delete a later page's tag directory without also deleting its image data. HostComputer, DocumentName and CameraSerialNumber also remain on the first page — they sit outside the tag set the fix above removes.
 
 ## 4.2.1
 
