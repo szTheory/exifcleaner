@@ -90,7 +90,7 @@ describe("release asset gate", () => {
 			"${productName}.Setup.${version}.${ext}",
 		);
 		expect(packageJson.build?.portable?.artifactName).toBe(
-			"${productName}.${version}.${ext}",
+			"${productName}.${version}.portable.${ext}",
 		);
 	});
 

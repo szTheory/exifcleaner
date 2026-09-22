@@ -140,7 +140,7 @@ jobs:
         run: |
           set -euo pipefail
           version=$(node -p 'require("./package.json").version')
-          file "release-assets/ExifCleaner.${version}.exe" | grep -q 'PE32'
+          file "release-assets/ExifCleaner.${version}.portable.exe" | grep -q 'PE32'
           dpkg-deb --info "release-assets/exifcleaner_${version}_amd64.deb" >/dev/null
           file "release-assets/exifcleaner-${version}.x86_64.rpm" | grep -q 'RPM'
 

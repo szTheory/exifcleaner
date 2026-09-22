@@ -16,7 +16,7 @@ export function expectedAssetNames(version) {
 	return [
 		`ExifCleaner-${version}-arm64.dmg`,
 		`ExifCleaner-${version}.dmg`,
-		`ExifCleaner.${version}.exe`,
+		`ExifCleaner.${version}.portable.exe`,
 		`ExifCleaner.Setup.${version}.exe`,
 		`ExifCleaner-${version}.AppImage`,
 		`exifcleaner_${version}_amd64.deb`,

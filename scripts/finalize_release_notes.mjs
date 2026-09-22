@@ -120,7 +120,7 @@ export function buildFinalReleaseNotes({ notes, shas, evidence }) {
 		);
 	}
 	const expectedArtifacts = [
-		`ExifCleaner.${version}.exe`,
+		`ExifCleaner.${version}.portable.exe`,
 		`ExifCleaner.Setup.${version}.exe`,
 	];
 	const submissions = evidence.submissions.map((submission) =>
