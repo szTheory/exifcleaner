@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.4.0
+
+### Fixed
+
+- Corrected a 4.0.0 changelog entry that falsely claimed the release workflow performs macOS code signing and notarization; releases are unsigned by explicit maintainer policy (#362)
+
 ## 4.2.1
 
 ### Added
@@ -86,7 +92,11 @@ Complete modernization of ExifCleaner after a 5-year hiatus. Every layer of the 
 - Playwright E2E test suite (42 tests, 10 specs, ~30s)
 - Vitest unit test suite (265 tests, ~1.4s)
 - GitHub Actions CI — lint, typecheck, unit tests, E2E tests, cross-platform builds
-- GitHub Actions release workflow with macOS code signing and notarization
+- GitHub Actions release workflow builds and publishes unsigned installers for macOS, Windows, and Linux
+
+  _Correction, 2026-09-22: this entry originally and incorrectly described the release workflow
+  as performing macOS code signing and notarization. It never has. Releases are unsigned by
+  explicit maintainer policy (#362)._
 - SHASUMS256.txt generated automatically for all release artifacts
 - Translations: Persian, Catalan, Croatian updates merged
 
