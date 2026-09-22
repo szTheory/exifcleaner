@@ -7,8 +7,9 @@
 //
 // D-18a keeps three protection targets distinct, and none of them claims to cover the fourth:
 //   (a) the TABLE -- someone edits the allowlist -- covered by the toEqual literal assertions
-//   (b) the ExifTool BEHAVIOR -- an upgrade changes what is writable -- covered by the live
-//       -listw -File:all re-derivation plus the pinned version constant
+//   (b) the ExifTool BEHAVIOR -- an upgrade changes what is writable, or moves a writable
+//       tag to a different family-1 group -- covered by the live -listw -File:all and
+//       -listx -File:all re-derivations plus the pinned version constant
 //   (c) the END-TO-END outcome -- NOT covered here; that belongs to
 //       tests/e2e/file-type-coverage.spec.ts's comment-only JPEG case (Task 1 of this plan)
 
@@ -43,6 +44,36 @@ export function parseWritableFileTagNames(stdout: string): string[] {
 		.map((name) => name.trim())
 		.filter((name) => name.length > 0);
 	return names.slice().sort();
+}
+
+/**
+ * Pure parser for `-listx -File:all`: maps each writable tag name to its family-1 group(s).
+ * A tag inherits its table's g1 unless it carries its own g1 attribute. Proven against a
+ * synthetic string below before it is trusted against the real binary's output.
+ */
+export function parseWritableFileTagFamily1(
+	xml: string,
+): Record<string, string[]> {
+	const groups: Record<string, Set<string>> = {};
+	let tableGroup1: string | undefined;
+	for (const line of xml.split("\n")) {
+		const table = line.match(/<table\b[^>]*\bg1='([^']+)'/);
+		if (table) {
+			tableGroup1 = table[1];
+			continue;
+		}
+		const tag = line.match(/<tag\b[^>]*\bname='([^']+)'[^>]*\bwritable='true'/);
+		if (!tag || tag[1] === undefined) continue;
+		const ownGroup1 = line.match(/\bg1='([^']+)'/)?.[1];
+		const group1 = ownGroup1 ?? tableGroup1;
+		if (group1 === undefined) continue;
+		(groups[tag[1]] ??= new Set()).add(group1);
+	}
+	return Object.fromEntries(
+		Object.entries(groups)
+			.sort(([a], [b]) => a.localeCompare(b))
+			.map(([name, set]) => [name, [...set].sort()]),
+	);
 }
 
 // Hand-transcribed, one entry per line, from 50-SWEEP-MATRIX.md §3's family-0/family-1
@@ -100,6 +131,39 @@ const EXPECTED_ALL_WRITABLE_FILE_TAGS = [
 	...EXPECTED_WRITABLE_TAGS,
 	...EXPECTED_NON_FILE_FAMILY1_TAGS,
 ].sort();
+
+// Family-1 placement of every writable File tag, hand-transcribed from `-listx -File:all`
+// against the bundled 13.59 binary. PreviewImage's table-level g1 is ExifTool's "All"
+// placeholder (group assigned at read time); 50-SWEEP-MATRIX.md measured it reaching the
+// classifier as File under the app's real read args.
+const EXPECTED_FAMILY1_BY_TAG: Record<string, string[]> = {
+	Comment: ["File"],
+	Directory: ["System"],
+	ExifByteOrder: ["File"],
+	ExifUnicodeByteOrder: ["File"],
+	FileCreateDate: ["System"],
+	FileGroupID: ["System"],
+	FileModifyDate: ["System"],
+	FileName: ["System"],
+	FilePermissions: ["System"],
+	FileUserID: ["System"],
+	Geolocate: ["File"],
+	Geosync: ["File"],
+	Geotag: ["File"],
+	Geotime: ["File"],
+	HardLink: ["File"],
+	MDItemFSCreationDate: ["MacOS"],
+	MDItemFSLabel: ["MacOS"],
+	MDItemFinderComment: ["MacOS"],
+	MDItemUserTags: ["MacOS"],
+	PreviewImage: ["All"],
+	SymLink: ["File"],
+	TestName: ["File"],
+	Trailer: ["File"],
+	XAttrMDItemWhereFroms: ["MacOS"],
+	XAttrQuarantine: ["MacOS"],
+	ZoneIdentifier: ["System"],
+};
 
 describe("group1 File classification table (D-18a target a)", () => {
 	test("FILE_GROUP_WRITABLE_TAGS equals the hand-transcribed twelve-name literal", () => {
@@ -175,6 +239,33 @@ describe("ExifTool writability BEHAVIOR, re-derived live (D-18a target b)", () =
 		].sort();
 		expect(EXPECTED_ALL_WRITABLE_FILE_TAGS).toEqual(union);
 	});
+
+	// A future ExifTool version could keep a tag writable but move its family-1 group, which
+	// would silently change which classifier bucket it lands in. This pins the placement live.
+	test("-listx -File:all family-1 placement equals the pinned per-tag literal", () => {
+		const xml = execFileSync(EXIFTOOL_PATH, ["-listx", "-File:all"], {
+			encoding: "utf8",
+			maxBuffer: 64 * 1024 * 1024,
+		});
+		expect(parseWritableFileTagFamily1(xml)).toEqual(EXPECTED_FAMILY1_BY_TAG);
+	});
+
+	test("the pinned family-1 map partitions exactly into the writable and non-File sets", () => {
+		const fileBucket = Object.entries(EXPECTED_FAMILY1_BY_TAG)
+			.filter(([, groups]) => groups.some((g) => g === "File" || g === "All"))
+			.map(([name]) => name)
+			.sort();
+		const osSidecarBucket = Object.entries(EXPECTED_FAMILY1_BY_TAG)
+			.filter(([, groups]) =>
+				groups.every((g) => g === "System" || g === "MacOS"),
+			)
+			.map(([name]) => name)
+			.sort();
+		expect(fileBucket).toEqual([...FILE_GROUP_WRITABLE_TAGS].sort());
+		expect(osSidecarBucket).toEqual(
+			[...FILE_GROUP_NON_FILE_FAMILY1_TAGS].sort(),
+		);
+	});
 });
 
 describe("synthetic counter-examples (every check proven able to fire)", () => {
@@ -190,6 +281,29 @@ describe("synthetic counter-examples (every check proven able to fire)", () => {
 		expect(parseWritableFileTagNames(synthetic)).not.toEqual(
 			EXPECTED_ALL_WRITABLE_FILE_TAGS,
 		);
+	});
+
+	test("parseWritableFileTagFamily1 detects a synthetic tag moved to a different family-1 group", () => {
+		const synthetic = [
+			"<table name='Extra' g0='File' g1='File' g2='Image'>",
+			" <tag id='Comment' name='Comment' type='?' writable='true' g1='System'>",
+			"</table>",
+		].join("\n");
+		expect(parseWritableFileTagFamily1(synthetic)).toEqual({
+			Comment: ["System"],
+		});
+	});
+
+	test("parseWritableFileTagFamily1 inherits the table group and skips non-writable tags", () => {
+		const synthetic = [
+			"<table name='Extra' g0='File' g1='File' g2='Image'>",
+			" <tag id='Comment' name='Comment' type='?' writable='true'>",
+			" <tag id='FileSize' name='FileSize' type='?' writable='false'>",
+			"</table>",
+		].join("\n");
+		expect(parseWritableFileTagFamily1(synthetic)).toEqual({
+			Comment: ["File"],
+		});
 	});
 
 	test("isRemovableFileGroupTag returns false for a synthetic key naming a tag absent from the writable set", () => {

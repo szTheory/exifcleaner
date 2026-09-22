@@ -87,6 +87,22 @@ describe("cleanExifData", () => {
 		expect(result).toEqual({ "Image:Comment": "hello" });
 	});
 
+	it("retains a multi-digit CopyN-instanced group1 File comment key under Image:Comment", () => {
+		const result = cleanExifData({
+			raw: { "File:Image:Copy10:Comment": "hello" },
+		});
+
+		expect(result).toEqual({ "Image:Comment": "hello" });
+	});
+
+	it("excludes a multi-digit CopyN-instanced structural File tag", () => {
+		const result = cleanExifData({
+			raw: { "File:Image:Copy12:ExifByteOrder": "Big-endian" },
+		});
+
+		expect(result).toEqual({});
+	});
+
 	// Pre-existing normalizeMetadataKey behavior, untouched by this phase: both comment key
 	// shapes normalize to the identical key Image:Comment, so a raw object carrying both
 	// collides onto a single retained entry rather than producing two. Recorded here so a

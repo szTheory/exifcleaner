@@ -56,7 +56,7 @@ const FAMILY_4_INSTANCE_PATTERN = /^Copy\d+$/;
 // Both sets are transcribed verbatim from the family-0/family-1-reconciled sweep in
 // .planning/phases/50-comment-classifier-correctness/50-SWEEP-MATRIX.md §3, measured live
 // against the bundled ExifTool 13.59 binary.
-export const FILE_GROUP_WRITABLE_TAGS = new Set([
+export const FILE_GROUP_WRITABLE_TAGS: ReadonlySet<string> = new Set([
 	"Comment",
 	"ExifByteOrder",
 	"ExifUnicodeByteOrder",
@@ -71,7 +71,7 @@ export const FILE_GROUP_WRITABLE_TAGS = new Set([
 	"Trailer",
 ]);
 
-export const FILE_GROUP_STRUCTURAL_OVERRIDE = new Set([
+export const FILE_GROUP_STRUCTURAL_OVERRIDE: ReadonlySet<string> = new Set([
 	"ExifByteOrder",
 	"ExifUnicodeByteOrder",
 	"PreviewImage",
@@ -89,7 +89,7 @@ export const FILE_GROUP_STRUCTURAL_OVERRIDE = new Set([
 // File keys, because family 1 places them under System or MacOS instead (D-15d). Recorded
 // so the contract test can prove the classifier's set and ExifTool's own list partition
 // cleanly, and so the OS-sidecar exclusion (D-17) is a recorded decision, not an omission.
-export const FILE_GROUP_NON_FILE_FAMILY1_TAGS = new Set([
+export const FILE_GROUP_NON_FILE_FAMILY1_TAGS: ReadonlySet<string> = new Set([
 	"Directory",
 	"FileCreateDate",
 	"FileGroupID",
@@ -124,7 +124,7 @@ interface IsRemovableFileGroupTagParams {
 // instance segment; this per-tag lookup is not, so it must filter explicitly.
 export function isRemovableFileGroupTag({
 	key,
-}: IsRemovableFileGroupTagParams) {
+}: IsRemovableFileGroupTagParams): boolean {
 	const parts = key
 		.split(":")
 		.filter((part) => !FAMILY_4_INSTANCE_PATTERN.test(part));
