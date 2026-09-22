@@ -184,6 +184,103 @@ function buildExifApp1BadIfd1Offset(): Buffer {
 	return Buffer.concat([Buffer.from([0xff, 0xe1]), length, payload]);
 }
 
+// Phase 51 (RMV-03/RMV-04): a single-strip, single-page TIFF/IFD encoder. Factored so
+// Phase 51-03's two-page builder can call it once per page, passing each page's own
+// start offset and the offset of the next IFD (0 for the last page).
+function tiffU16le(n: number): Buffer {
+	const b = Buffer.alloc(2);
+	b.writeUInt16LE(n, 0);
+	return b;
+}
+function tiffU32le(n: number): Buffer {
+	const b = Buffer.alloc(4);
+	b.writeUInt32LE(n, 0);
+	return b;
+}
+
+const TIFF_TYPE_SHORT = 3;
+const TIFF_TYPE_LONG = 4;
+const TIFF_TYPE_RATIONAL = 5;
+
+function tiffIfdEntry(
+	tag: number,
+	type: number,
+	count: number,
+	value: number,
+): Buffer {
+	return Buffer.concat([
+		tiffU16le(tag),
+		tiffU16le(type),
+		tiffU32le(count),
+		tiffU32le(value),
+	]);
+}
+
+// Encodes one TIFF page: a 12-entry IFD0-shaped directory (ImageWidth, ImageLength,
+// BitsPerSample, Compression, PhotometricInterpretation, StripOffsets, SamplesPerPixel,
+// RowsPerStrip (single strip, equal to image height), StripByteCounts, XResolution,
+// YResolution, ResolutionUnit), the two out-of-line RATIONAL values the resolution tags
+// point at, then the raw pixel strip -- in that byte order, immediately following the IFD
+// at `ifdStart`. Callers own offset bookkeeping across pages (each page's IFD, rationals,
+// and strip are contiguous, so the next page's `ifdStart` is this function's return
+// length added to the current `ifdStart`).
+function buildTiffPage({
+	ifdStart,
+	nextIfdOffset,
+	pixels,
+}: {
+	ifdStart: number;
+	nextIfdOffset: number;
+	pixels: Buffer;
+}): Buffer {
+	const entryCount = 12;
+	const ifdSize = 2 + entryCount * 12 + 4;
+	const xResolutionOffset = ifdStart + ifdSize;
+	const yResolutionOffset = xResolutionOffset + 8;
+	const stripOffset = yResolutionOffset + 8;
+
+	const entries = Buffer.concat([
+		tiffIfdEntry(256, TIFF_TYPE_SHORT, 1, 4), // ImageWidth
+		tiffIfdEntry(257, TIFF_TYPE_SHORT, 1, 4), // ImageLength
+		tiffIfdEntry(258, TIFF_TYPE_SHORT, 1, 8), // BitsPerSample
+		tiffIfdEntry(259, TIFF_TYPE_SHORT, 1, 1), // Compression (none)
+		tiffIfdEntry(262, TIFF_TYPE_SHORT, 1, 1), // PhotometricInterpretation (BlackIsZero)
+		tiffIfdEntry(273, TIFF_TYPE_LONG, 1, stripOffset), // StripOffsets
+		tiffIfdEntry(277, TIFF_TYPE_SHORT, 1, 1), // SamplesPerPixel
+		tiffIfdEntry(278, TIFF_TYPE_SHORT, 1, 4), // RowsPerStrip (== ImageLength)
+		tiffIfdEntry(279, TIFF_TYPE_LONG, 1, pixels.length), // StripByteCounts
+		tiffIfdEntry(282, TIFF_TYPE_RATIONAL, 1, xResolutionOffset), // XResolution
+		tiffIfdEntry(283, TIFF_TYPE_RATIONAL, 1, yResolutionOffset), // YResolution
+		tiffIfdEntry(296, TIFF_TYPE_SHORT, 1, 2), // ResolutionUnit (inches)
+	]);
+	const ifd = Buffer.concat([
+		tiffU16le(entryCount),
+		entries,
+		tiffU32le(nextIfdOffset),
+	]);
+	const xResolution = Buffer.concat([tiffU32le(72), tiffU32le(1)]); // 72/1
+	const yResolution = Buffer.concat([tiffU32le(72), tiffU32le(1)]); // 72/1
+
+	return Buffer.concat([ifd, xResolution, yResolution, pixels]);
+}
+
+// 4x4, 8-bit greyscale, single strip. Pixel bytes are deterministic (byte i = (i * 17) &
+// 0xff) so the fixture is reproducible and its content is assertable without a rendering
+// library.
+function createMinimalTiff(): Buffer {
+	const header = Buffer.concat([
+		Buffer.from("II", "ascii"), // little-endian byte order mark
+		tiffU16le(42), // TIFF magic
+		tiffU32le(8), // offset to IFD0, immediately after this 8-byte header
+	]);
+	const pixels = Buffer.alloc(16);
+	for (let i = 0; i < pixels.length; i += 1) {
+		pixels[i] = (i * 17) & 0xff;
+	}
+	const page = buildTiffPage({ ifdStart: 8, nextIfdOffset: 0, pixels });
+	return Buffer.concat([header, page]);
+}
+
 // Build a PNG chunk with correct CRC32 (covers type + data)
 function pngChunk(type: string, data: Buffer): Buffer {
 	const typeBytes = Buffer.from(type, "ascii");
@@ -423,6 +520,24 @@ function assertIssue240Metadata(filePath: string): void {
 		if (actual !== expected) {
 			throw new Error(
 				`issue240.mp4 ${tag} expected ${expected}, got ${String(actual)}`,
+			);
+		}
+	}
+}
+
+// Phase 51 (D-25): re-reads sample.tif's seeded IFD0/GPS tags via the bundled binary and
+// throws naming the file, the tag, and the observed value on any mismatch -- no swallowed
+// try/catch, matching the sample.pdf fail-loud lesson above.
+function assertTiffSeeds(
+	filePath: string,
+	expected: Readonly<Record<string, string>>,
+): void {
+	const metadata = readFixtureMetadata(filePath);
+	for (const [tag, expectedValue] of Object.entries(expected)) {
+		const actual = metadata[tag];
+		if (actual !== expectedValue) {
+			throw new Error(
+				`${filePath} ${tag} expected ${expectedValue}, got ${String(actual)}`,
 			);
 		}
 	}
@@ -726,6 +841,42 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 		orientationPath,
 	]);
 	console.log("  Created orientation.jpg (Rotate 90 CW)");
+
+	// sample.tif - single-strip TIFF with IFD0 private tags (ImageDescription, Software,
+	// Artist, Copyright) and GPS, for Phase 51 (RMV-03/RMV-04). Validate the unseeded bytes
+	// first (after GPS seeding, ExifTool's validator warns about GPSProcessingMethod).
+	const tiffPath = path.join(fixturesDir, "sample.tif");
+	fs.writeFileSync(tiffPath, createMinimalTiff());
+	const tiffValidation = execFileSync(EXIFTOOL, ["-validate", "-s3", tiffPath])
+		.toString()
+		.trim();
+	if (tiffValidation !== "OK") {
+		throw new Error(
+			`sample.tif failed -validate before seeding: expected OK, got "${tiffValidation}"`,
+		);
+	}
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-ImageDescription=ZZP51-DESC",
+		"-Software=ZZP51-SOFT",
+		"-Artist=ZZP51-ARTIST",
+		"-Copyright=ZZP51-COPY",
+		"-GPSLatitude=37.7749",
+		"-GPSLatitudeRef=N",
+		"-GPSLongitude=-122.4194",
+		"-GPSLongitudeRef=W",
+		tiffPath,
+	]);
+	assertTiffSeeds(tiffPath, {
+		"IFD0:ImageDescription": "ZZP51-DESC",
+		"IFD0:Software": "ZZP51-SOFT",
+		"IFD0:Artist": "ZZP51-ARTIST",
+		"IFD0:Copyright": "ZZP51-COPY",
+		"GPS:GPSLatitudeRef": "North",
+	});
+	console.log(
+		"  Created sample.tif (single-strip TIFF with IFD0 private tags and GPS)",
+	);
 
 	console.log("\nAll 13 fixture files generated successfully.");
 }

@@ -68,6 +68,12 @@ export const MEDIA_EXTENSIONS: ReadonlySet<string> = new Set([
 	".wmv",
 ]);
 
+// Deliberately its own set, never folded into the media-format set above (D-23): that set
+// also drives the QuickTime date-removal argument list in the ExifTool adapter, and folding
+// TIFF in would change ExifTool's write behavior for TIFF files. Exported (unlike webp) so
+// the lock test can pin the literal.
+export const TIFF_EXTENSIONS: ReadonlySet<string> = new Set([".tif", ".tiff"]);
+
 interface IsSupportedFileParams {
 	filename: string;
 }
@@ -93,10 +99,16 @@ export function isMediaFile({ filename }: IsSupportedFileParams): boolean {
 	return hasExtension({ filename, extensions: MEDIA_EXTENSIONS });
 }
 
+export function isTiffFile({ filename }: IsSupportedFileParams): boolean {
+	return hasExtension({ filename, extensions: TIFF_EXTENSIONS });
+}
+
 // A webp save-as-copy has no independent output verification unless it is
 // routed through the staged-write transaction (D-22). In-place webp
 // overwrites stay on the unverified ExifTool path — a deferred gap, not this
-// phase's work (D-23, D-24, 47-CONTEXT.md).
+// phase's work (D-23, D-24, 47-CONTEXT.md). TIFF routes through the verified
+// transaction in BOTH output modes (D-24): this phase changes how TIFF is
+// written, and risky/uncertain processing must preserve the source.
 export function requiresVerifiedWrite({
 	filename,
 	outputMode,
@@ -104,7 +116,11 @@ export function requiresVerifiedWrite({
 	filename: string;
 	outputMode: "copy" | "overwrite";
 }): boolean {
-	if (isRawFile({ filename }) || isMediaFile({ filename })) {
+	if (
+		isRawFile({ filename }) ||
+		isMediaFile({ filename }) ||
+		isTiffFile({ filename })
+	) {
 		return true;
 	}
 	return (

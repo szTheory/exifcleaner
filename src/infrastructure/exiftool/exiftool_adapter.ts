@@ -1,7 +1,7 @@
 import type { MetadataEnginePort } from "../../application/metadata_engine_port";
 import { cleanExifData } from "../../domain";
 import { QUICKTIME_DATE_REMOVAL_ARGS } from "../../domain/exif/exif";
-import { isMediaFile } from "../../domain/files/file_types";
+import { isMediaFile, isTiffFile } from "../../domain/files/file_types";
 import type { Result } from "../../common";
 import { assertNever } from "../../common/types";
 import type { ExifError } from "../../domain";
@@ -262,6 +262,11 @@ export class ExifToolAdapter implements MetadataEnginePort {
 		const extraArgs = ["-all="];
 		if (isMediaFile({ filename: source })) {
 			extraArgs.push(...QUICKTIME_DATE_REMOVAL_ARGS);
+		}
+		// -all= cannot clear IFD0 on a TIFF because IFD0 is the image directory, so the
+		// CommonIFD0 shortcut deletes its descriptive/camera tags (EVIDENCE F-2, #199).
+		if (isTiffFile({ filename: source })) {
+			extraArgs.push("-CommonIFD0=");
 		}
 
 		const preserveTags: string[] = [];
