@@ -368,3 +368,215 @@ describe("migrateSettings", () => {
 		expect(settings.saveAsCopy).toBe(false);
 	});
 });
+
+describe("v4 → v5 preserveResolution migration (FID-05, D-40)", () => {
+	it("migrates a v4 object with non-default values for every other field to preserveResolution true, didMigrate true, and every other value unchanged (FID-05, D-40)", () => {
+		const file = {
+			version: 4,
+			settings: {
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				saveAsCopy: false,
+				removeXattrs: true,
+				preserveTimestamps: true,
+				language: "de",
+				themeMode: "dark",
+			},
+		} as unknown as SettingsFile;
+		const { settings, didMigrate } = migrateSettings({ file });
+		expect(didMigrate).toBe(true);
+		expect(settings).toEqual({
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: true,
+			saveAsCopy: false,
+			removeXattrs: true,
+			preserveTimestamps: true,
+			language: "de",
+			themeMode: "dark",
+		});
+	});
+
+	it("migrates a v4 object with a stray preserveResolution false to true unconditionally, never inferred from another toggle (FID-05, D-40)", () => {
+		const file = {
+			version: 4,
+			settings: {
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: false,
+				saveAsCopy: false,
+				removeXattrs: true,
+				preserveTimestamps: true,
+				language: "de",
+				themeMode: "dark",
+			},
+		} as unknown as SettingsFile;
+		const { settings, didMigrate } = migrateSettings({ file });
+		expect(didMigrate).toBe(true);
+		expect(settings).toEqual({
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: true,
+			saveAsCopy: false,
+			removeXattrs: true,
+			preserveTimestamps: true,
+			language: "de",
+			themeMode: "dark",
+		});
+	});
+
+	it("the full v1 to v5 chain lands on the v1 split, themeMode system and preserveResolution true (FID-05, D-40)", () => {
+		const file = {
+			version: 1,
+			settings: {
+				preserveRotation: false,
+				saveAsCopy: true,
+				removeXattrs: false,
+				preserveTimestamps: false,
+				language: "de",
+			},
+		} as unknown as SettingsFile;
+		const { settings, didMigrate } = migrateSettings({ file });
+		expect(didMigrate).toBe(true);
+		expect(settings).toEqual({
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: true,
+			saveAsCopy: true,
+			removeXattrs: false,
+			preserveTimestamps: false,
+			language: "de",
+			themeMode: "system",
+		});
+		expect("preserveRotation" in settings).toBe(false);
+	});
+
+	it("keeps a stored v5 preserveResolution false with didMigrate false (FID-05, D-40)", () => {
+		const file: SettingsFile = {
+			version: CURRENT_SCHEMA_VERSION,
+			settings: {
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				preserveResolution: false,
+				saveAsCopy: true,
+				removeXattrs: false,
+				preserveTimestamps: false,
+				language: "fr",
+				themeMode: "dark",
+			},
+		};
+		const { settings, didMigrate } = migrateSettings({ file });
+		expect(didMigrate).toBe(false);
+		expect(settings).toEqual({
+			preserveOrientation: true,
+			preserveColorProfile: true,
+			preserveResolution: false,
+			saveAsCopy: true,
+			removeXattrs: false,
+			preserveTimestamps: false,
+			language: "fr",
+			themeMode: "dark",
+		});
+	});
+
+	it("loads a v5 object missing preserveResolution as true via the defaults-merge short-circuit, every other stored value kept (FID-05, D-40)", () => {
+		const file = {
+			version: CURRENT_SCHEMA_VERSION,
+			settings: {
+				preserveOrientation: false,
+				preserveColorProfile: true,
+				saveAsCopy: false,
+				removeXattrs: true,
+				preserveTimestamps: true,
+				language: "es",
+				themeMode: "light",
+			},
+		} as unknown as SettingsFile;
+		const { settings, didMigrate } = migrateSettings({ file });
+		expect(didMigrate).toBe(false);
+		expect(settings).toEqual({
+			preserveOrientation: false,
+			preserveColorProfile: true,
+			preserveResolution: true,
+			saveAsCopy: false,
+			removeXattrs: true,
+			preserveTimestamps: true,
+			language: "es",
+			themeMode: "light",
+		});
+	});
+
+	it("migrating an already-migrated v5 result again is idempotent: identical settings, didMigrate false (FID-05, D-40)", () => {
+		const file = {
+			version: 4,
+			settings: {
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				saveAsCopy: false,
+				removeXattrs: true,
+				preserveTimestamps: true,
+				language: "de",
+				themeMode: "dark",
+			},
+		} as unknown as SettingsFile;
+		const first = migrateSettings({ file });
+		expect(first.didMigrate).toBe(true);
+
+		const second = migrateSettings({
+			file: { version: CURRENT_SCHEMA_VERSION, settings: first.settings },
+		});
+		expect(second.didMigrate).toBe(false);
+		expect(second.settings).toEqual(first.settings);
+	});
+});
+
+describe("preserveResolution guard and validation (D-40)", () => {
+	it("isSettingsFile accepts a valid boolean preserveResolution (FID-05, D-40)", () => {
+		const valid = {
+			version: CURRENT_SCHEMA_VERSION,
+			settings: { ...DEFAULT_SETTINGS, preserveResolution: false },
+		};
+		expect(isSettingsFile(valid)).toBe(true);
+	});
+
+	it("isSettingsFile rejects a settings object missing preserveResolution (FID-05, D-40)", () => {
+		const settings: Record<string, unknown> = { ...DEFAULT_SETTINGS };
+		delete settings["preserveResolution"];
+		expect(isSettingsFile({ version: CURRENT_SCHEMA_VERSION, settings })).toBe(
+			false,
+		);
+	});
+
+	it('isSettingsFile rejects a non-boolean preserveResolution ("yes") (FID-05, D-40)', () => {
+		expect(
+			isSettingsFile({
+				version: CURRENT_SCHEMA_VERSION,
+				settings: { ...DEFAULT_SETTINGS, preserveResolution: "yes" },
+			}),
+		).toBe(false);
+	});
+
+	it("validateSettings keeps a stored preserveResolution false (FID-05, D-40)", () => {
+		const result = validateSettings({ input: { preserveResolution: false } });
+		expect(result.ok).toBe(true);
+		if (result.ok) {
+			expect(result.value.preserveResolution).toBe(false);
+		}
+	});
+
+	it('validateSettings falls back to true for a non-boolean preserveResolution ("yes") (FID-05, D-40)', () => {
+		const result = validateSettings({ input: { preserveResolution: "yes" } });
+		expect(result.ok).toBe(true);
+		if (result.ok) {
+			expect(result.value.preserveResolution).toBe(true);
+		}
+	});
+
+	it("validateSettings defaults preserveResolution to true when missing (FID-05, D-40)", () => {
+		const result = validateSettings({ input: {} });
+		expect(result.ok).toBe(true);
+		if (result.ok) {
+			expect(result.value.preserveResolution).toBe(true);
+		}
+	});
+});
