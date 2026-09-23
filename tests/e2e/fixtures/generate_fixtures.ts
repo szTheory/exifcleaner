@@ -733,6 +733,87 @@ const RAW_FIXTURE_SPECS = [
 			"Canon:SerialNumber": "0123456789",
 		},
 	},
+	{
+		// Phase 51.1-02 (D-47): upstream digest re-measured this session -- the value
+		// transcribed into 51.1-02-PLAN.md's <interfaces> table did not match `shasum -a 256`
+		// on the vendored file (a documented, self-correcting transcription slip the plan
+		// itself warned the executor to re-measure, not copy).
+		name: "DNG.dng",
+		upstreamSha256:
+			"daa9ce7a2c6923815390d8566254ef4d4a75d68d1531afdb264bd4b39a8dfd89",
+		fileType: "DNG",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			// Upstream identifying values already present in the vendored file (not seeded by
+			// RAW_SEED_ARGS) -- re-read here to confirm the vendored bytes still carry them.
+			"IFD0:CameraSerialNumber": "012345678",
+			"IFD0:RawDataUniqueID": "0358DB4E08632D90925171A6BB8848A2",
+			"IFD0:OriginalRawFileName": "Canon350D.CR2",
+			"IFD0:UniqueCameraModel": "Canon EOS 350D",
+		},
+	},
+	{
+		name: "CanonRaw.cr3",
+		upstreamSha256:
+			"dc02aa55e277935b690879584e97c2d013f54d854afaec6f9d3274c99a918fd6",
+		fileType: "CR3",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			// Upstream identifying values already present in the vendored file.
+			"Canon:InternalSerialNumber": "CG0156580",
+			"ExifIFD:OffsetTime": "+00:00",
+			"ExifIFD:SubSecTimeOriginal": 21,
+			"ExifIFD:DateTimeOriginal": "2018:02:21 12:08:56",
+		},
+	},
+	{
+		// RW2's IFD0 seeds land ONLY in the embedded JpgFromRaw preview -- but
+		// readFixtureMetadata (below) reads with plain -G1 -s -json (no -a, no -G3), under
+		// which ExifTool's duplicate-key JSON suppression collapses the embedded preview's
+		// IFD0 group onto the SAME "IFD0:<Tag>" key used elsewhere in this table (measured
+		// this session; confirmed there is no separate main-IFD0 copy to collide with). Do
+		// not confuse this with raw_probe.ts's readRawTags, which uses -G3:1 and DOES report
+		// these under a "Doc1:IFD0:<Tag>" key (see RAW_CASES below).
+		name: "Panasonic.rw2",
+		upstreamSha256:
+			"431a1239713ce1bca8f0b422b9a094372246669432060e2a0a21d1fd2f761678",
+		fileType: "RW2",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			// Upstream identifying value already present in the vendored file.
+			"ExifIFD:DateTimeOriginal": "2008:08:06 15:21:56",
+		},
+	},
 ] as const;
 
 const RAW_SEED_ARGS = [
@@ -800,7 +881,7 @@ function generateRawFixtures(fixturesDir: string, upstreamDir: string): void {
 		execFileSync(EXIFTOOL, ["-overwrite_original", ...RAW_SEED_ARGS, filePath]);
 		assertRawSeeds(filePath, spec);
 		console.log(
-			`  Created ${spec.name} (vendored ExifTool 13.59 t/images sample, seeded)`,
+			`  Created ${spec.name} (vendored ExifTool 13.59 t/images sample, seeded, FileType=${spec.fileType})`,
 		);
 	}
 }
@@ -1072,7 +1153,7 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 
 	generateRawFixtures(fixturesDir, rawUpstreamDir);
 
-	console.log("\nAll 14 fixture files generated successfully.");
+	console.log("\nAll 17 fixture files generated successfully.");
 }
 
 const outputFlag = process.argv.indexOf("--output-dir");
