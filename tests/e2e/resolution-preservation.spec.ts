@@ -33,11 +33,16 @@ function sha256(filePath: string): string {
 // Helper functions, not inline arrows, so the local `window: Page` variable in the
 // describe block below never shadows the browser-global `window` referenced inside
 // page.evaluate's callback.
-async function getSettings(page: Page): Promise<{ preserveResolution: boolean }> {
+async function getSettings(
+	page: Page,
+): Promise<{ preserveResolution: boolean }> {
 	return page.evaluate(() => window.api.settings.get());
 }
 
-async function setPreserveResolution(page: Page, value: boolean): Promise<void> {
+async function setPreserveResolution(
+	page: Page,
+	value: boolean,
+): Promise<void> {
 	await page.evaluate(
 		(preserveResolution) => window.api.settings.set({ preserveResolution }),
 		value,
