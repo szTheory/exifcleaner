@@ -78,6 +78,27 @@ const SAMPLE_MP4 = path.resolve(__dirname, "../e2e/fixtures/sample.mp4");
 const WINDOWS_EXCLUSION_REASON =
 	"not run on Windows: the fixture relies on POSIX sparse ftruncate and st_blocks, and CI runs vitest only on ubuntu-24.04";
 
+// Shared by both describe blocks below (the regression lock and the D-52 timeout pin), so it
+// lives at module scope rather than nested inside one describe.
+function buildOutputTransaction(process: ExiftoolProcess): OutputTransaction {
+	const exiftool = new ExifToolAdapter({ process });
+	const stripMetadata = new StripMetadataCommand({
+		metadataEngine: exiftool,
+	});
+	const verifyGeneratedOutput = new VerifyGeneratedOutputQuery({
+		metadataEngine: exiftool,
+	});
+	return new OutputTransaction({
+		stripMetadata,
+		verifyGeneratedOutput,
+		unlink: fs.promises.unlink,
+		rename: fs.promises.rename,
+		delay: async (milliseconds) => {
+			await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
+		},
+	});
+}
+
 describe.skipIf(process.platform === "win32")(
 	`Large-file (>4 GiB) support on ExifTool's default (LRG-01, LRG-02) — ${WINDOWS_EXCLUSION_REASON}`,
 	() => {
@@ -88,29 +109,6 @@ describe.skipIf(process.platform === "win32")(
 				fs.rmSync(dir, { recursive: true, force: true });
 			}
 		});
-
-		function buildOutputTransaction(
-			process: ExiftoolProcess,
-		): OutputTransaction {
-			const exiftool = new ExifToolAdapter({ process });
-			const stripMetadata = new StripMetadataCommand({
-				metadataEngine: exiftool,
-			});
-			const verifyGeneratedOutput = new VerifyGeneratedOutputQuery({
-				metadataEngine: exiftool,
-			});
-			return new OutputTransaction({
-				stripMetadata,
-				verifyGeneratedOutput,
-				unlink: fs.promises.unlink,
-				rename: fs.promises.rename,
-				delay: async (milliseconds) => {
-					await new Promise<void>((resolve) =>
-						setTimeout(resolve, milliseconds),
-					);
-				},
-			});
-		}
 
 		it("cleans a normal MP4 then a >4 GiB MP4 in one -stay_open session with no -api argument", async () => {
 			const dir = fs.mkdtempSync(path.join(os.tmpdir(), "large-file-"));
@@ -319,6 +317,159 @@ describe.skipIf(process.platform === "win32")(
 				removed: [],
 				unchanged: ["normal.mp4", "large.mp4"],
 			});
+		}, 180_000);
+	},
+);
+
+// D-52: the 30s command timeout has no injectable seam on ExiftoolProcess.ts (a private
+// module-scope const, per D-48/D-52 forbidding a product edit to add one), so this is a
+// literal test-only copy of ExiftoolProcess.ts:9's EXIFTOOL_COMMAND_TIMEOUT_MS. The
+// constant-drift test below pins it against the real file, and a one-time mutation
+// (advancing by PRODUCT_COMMAND_TIMEOUT_MS - 1) proved this pin can fail -- see
+// 53-02-SUMMARY.md.
+const PRODUCT_COMMAND_TIMEOUT_MS = 30_000;
+
+describe.skipIf(process.platform === "win32")(
+	`large-file command timeout pin (criterion 4, D-52) — ${WINDOWS_EXCLUSION_REASON}`,
+	() => {
+		const temporaryDirs: string[] = [];
+
+		afterEach(() => {
+			vi.useRealTimers();
+			for (const dir of temporaryDirs.splice(0)) {
+				fs.rmSync(dir, { recursive: true, force: true });
+			}
+		});
+
+		it("the product timeout constant is still 30000 ms", () => {
+			const source = fs.readFileSync(
+				path.resolve(
+					__dirname,
+					"../../src/infrastructure/exiftool/ExiftoolProcess.ts",
+				),
+				"utf8",
+			);
+			expect(source).toMatch(/const EXIFTOOL_COMMAND_TIMEOUT_MS = 30000;/);
+		});
+
+		it("timeout pin: a 30 s timeout during a real >4 GiB overwrite-mode write reports failure, leaves the source unchanged and leaves an unreported full-size staged file", async () => {
+			const dir = fs.mkdtempSync(path.join(os.tmpdir(), "large-file-timeout-"));
+			temporaryDirs.push(dir);
+			assertLargeFileHost({ dir: os.tmpdir() });
+
+			const normalSource = path.join(dir, "normal.mp4");
+			fs.copyFileSync(SAMPLE_MP4, normalSource);
+
+			const largeSource = path.join(dir, "large.mp4");
+			createSparseLargeMp4({ destination: largeSource });
+			const largeSourceDigestBefore = sha256OfFileStreamed({
+				filePath: largeSource,
+			});
+
+			const before = snapshotDir(dir);
+
+			const exiftoolProcess = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+			const adapter = new ExifToolAdapter({ process: exiftoolProcess });
+			const transaction = buildOutputTransaction(exiftoolProcess);
+
+			// The literal stage-file name ExiftoolProcess.ts:214-220's private
+			// generateMediaStagePath would produce (randomUUID replaced with a fixed
+			// "test" token here since the test builds this path directly rather than
+			// calling that private helper).
+			const stagedPath = path.join(dir, ".large.exifcleaner-stage-test.mp4");
+
+			let unhandledRejectionCount = 0;
+			const onUnhandledRejection = (): void => {
+				unhandledRejectionCount += 1;
+			};
+			process.on("unhandledRejection", onUnhandledRejection);
+
+			await exiftoolProcess.open();
+			try {
+				let timedOutResult: Awaited<ReturnType<typeof transaction.execute>>;
+				try {
+					// Fake timers must be installed BEFORE the call that schedules the
+					// real setTimeout (ExiftoolProcess.ts:210), not after -- Sinon-fake-
+					// timers does not capture timers already pending at install time
+					// (53-01-SUMMARY.md Task 2 spike, Q1_TIMER_REGISTERED_AFTER_TURNS=0).
+					vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+
+					// Started, not awaited: this is the >4 GiB overwrite-mode write,
+					// and the FIRST (and only) command of this fresh -stay_open
+					// session (LRG-02's single-element edge).
+					const pendingWrite = transaction.execute({
+						filePath: largeSource,
+						generatedPath: stagedPath,
+						commitPath: largeSource,
+						preserveOrientation: true,
+						preserveColorProfile: true,
+						preserveResolution: true,
+						preserveTimestamps: false,
+					});
+
+					let turns = 0;
+					while (vi.getTimerCount() !== 1) {
+						if (turns >= 200) {
+							throw new Error("command timer never registered");
+						}
+						await Promise.resolve();
+						turns += 1;
+					}
+
+					await vi.advanceTimersByTimeAsync(PRODUCT_COMMAND_TIMEOUT_MS);
+					timedOutResult = await pendingWrite;
+					expect(timedOutResult).toEqual({
+						ok: false,
+						error: { code: "write-failed" },
+					});
+				} finally {
+					vi.useRealTimers();
+				}
+
+				// ExifTool's -stay_open protocol processes commands strictly in order
+				// over one pipe, so this display read of normal.mp4 resolves only
+				// after the real, still-running write from the timed-out command
+				// finishes and flushes its own late {readyN} marker (real timers).
+				const normalInspect = await adapter.inspect({
+					source: normalSource,
+					purpose: "display",
+				});
+				expect(normalInspect.ok).toBe(true);
+
+				// Hypothesis (a), measured: the timeout only deleted the pending-
+				// command entry and rejected (ExiftoolProcess.ts:209-213) -- it never
+				// killed the child process, and OutputTransaction's write-failed path
+				// returns without calling cleanup() (output_transaction.ts:80-82). So
+				// the real write finished a full-size staged file that nothing above
+				// ever reports back to the caller.
+				const stagedStat = fs.statSync(stagedPath);
+				expect(stagedStat.size).toBeGreaterThan(FOUR_GIB);
+
+				const stagedVerification = await adapter.inspect({
+					source: stagedPath,
+					purpose: "output-verification",
+				});
+				expect(stagedVerification.ok).toBe(true);
+			} finally {
+				await exiftoolProcess.close();
+				process.removeListener("unhandledRejection", onUnhandledRejection);
+			}
+
+			// D-51: the source is never touched by the interrupted write -- only the
+			// distinct staged path is.
+			expect(sha256OfFileStreamed({ filePath: largeSource })).toBe(
+				largeSourceDigestBefore,
+			);
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				added: [".large.exifcleaner-stage-test.mp4"],
+				modified: [],
+				removed: [],
+				unchanged: ["normal.mp4", "large.mp4"],
+			});
+
+			expect(unhandledRejectionCount).toBe(0);
 		}, 180_000);
 	},
 );
