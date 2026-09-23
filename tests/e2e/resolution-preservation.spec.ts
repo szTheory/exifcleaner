@@ -30,6 +30,20 @@ function sha256(filePath: string): string {
 	return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
+// Helper functions, not inline arrows, so the local `window: Page` variable in the
+// describe block below never shadows the browser-global `window` referenced inside
+// page.evaluate's callback.
+async function getSettings(page: Page): Promise<{ preserveResolution: boolean }> {
+	return page.evaluate(() => window.api.settings.get());
+}
+
+async function setPreserveResolution(page: Page, value: boolean): Promise<void> {
+	await page.evaluate(
+		(preserveResolution) => window.api.settings.set({ preserveResolution }),
+		value,
+	);
+}
+
 test.describe("Resolution preservation — default settings, real IPC path", () => {
 	let app: ElectronApplication;
 	let window: Page;
@@ -55,9 +69,7 @@ test.describe("Resolution preservation — default settings, real IPC path", () 
 			if (message.type() === "error") consoleErrors.push(message.text());
 		});
 
-		const defaultSettings = await window.evaluate(() =>
-			window.api.settings.get(),
-		);
+		const defaultSettings = await getSettings(window);
 		expect(defaultSettings.preserveResolution).toBe(true);
 
 		const { dir, copyFixture, cleanup } = createFixtureDir();
@@ -95,12 +107,10 @@ test.describe("Resolution preservation — default settings, real IPC path", () 
 			await driver.submitFiles([renamedOnPath]);
 			await driver.waitForTerminal();
 
-			await window.evaluate(() =>
-				window.api.settings.set({ preserveResolution: false }),
-			);
+			await setPreserveResolution(window, false);
 			const deadline = Date.now() + 5000;
 			for (;;) {
-				const current = await window.evaluate(() => window.api.settings.get());
+				const current = await getSettings(window);
 				if (current.preserveResolution === false) break;
 				if (Date.now() > deadline) {
 					throw new Error(
