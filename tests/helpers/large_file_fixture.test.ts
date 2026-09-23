@@ -1,9 +1,12 @@
 // D-50 unit gates for tests/helpers/large_file_fixture.ts. Calls only the pure functions --
-// no mkdtemp, no tmpdir, no filesystem write -- so `verify:direffect` (the whole-directory
-// blast-radius gate other suites run against) does not collect this file at all. Each gate
-// below is exercised on both its throwing side and its passing side, at the exact boundary,
-// so a future regression to any threshold or comparison operator turns the relevant case red
-// rather than silently drifting.
+// this file never touches a temp directory or the filesystem -- so `verify:direffect` (the
+// whole-directory blast-radius gate other suites run against) does not collect it at all.
+// (Phase 53-03 fix: the prior wording of this comment literally contained the disk-write
+// detector's own substring tokens as prose, tripping scripts/dir_effect_gate.mjs's naive
+// plain-string match with a false positive -- see that script's own "V5" detector note.) Each
+// gate below is exercised on both its throwing side and its passing side, at the exact
+// boundary, so a future regression to any threshold or comparison operator turns the relevant
+// case red rather than silently drifting.
 import { describe, expect, it } from "vitest";
 import {
 	FOUR_GIB,
