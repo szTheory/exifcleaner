@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
 import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
+import { i18nLookup } from "../../src/domain/i18n/i18n_lookup";
 import { createFixtureDir } from "../helpers/fixture_copier";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import { createProcessingDriver } from "../helpers/processing_driver";
@@ -20,9 +21,23 @@ test("fresh packaged profiles default to Save as Copy", async () => {
 			window.api.settings.get(),
 		);
 		expect(settings.saveAsCopy).toBe(true);
+		// The profile follows the system language, so the expected copy-mode
+		// text is resolved at runtime from the locale and strings the installed
+		// app itself reports, never hardcoded to one language.
+		const { locale, strings } = await context.window.evaluate(async () => ({
+			locale: await window.api.i18n.getLocale(),
+			strings: await window.api.i18n.getStrings(),
+		}));
+		const copyText = i18nLookup({ strings, key: "intake.outputCopy", locale });
+		const overwriteText = i18nLookup({
+			strings,
+			key: "intake.outputOverwrite",
+			locale,
+		});
+		expect(copyText).not.toBe(overwriteText);
 		await expect(
 			context.window.locator(".empty-state__output-mode"),
-		).toContainText(/cleaned copies/i);
+		).toHaveText(copyText);
 	} finally {
 		await closePackagedApp(context);
 	}
