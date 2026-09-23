@@ -1,15 +1,29 @@
 import { test, expect } from "@playwright/test";
 import type { ElectronApplication, Page } from "playwright";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { launchApp, closeApp } from "./helpers/app_launcher";
 import { createFixtureDir } from "../helpers/fixture_copier";
 import { readMetadataTags } from "./helpers/metadata_assertions";
 import { waitForProcessing } from "./helpers/wait_for_processing";
 import { snapshotDir, assertDirEffect } from "../helpers/dir_effect";
+import {
+	GENERIC_SEED_ARGS,
+	JPEG_CONFLICT_RESOLUTION_ARGS,
+	resolutionLines,
+	seedFile,
+	seededTagKeys,
+} from "../helpers/resolution_probe";
+import { readRawTagLines } from "../helpers/raw_probe";
 
 const german = readLocale("de");
 const french = readLocale("fr");
+
+const EXIFTOOL_PATH =
+	process.platform === "win32"
+		? path.resolve(".resources/win/bin/exiftool.exe")
+		: path.resolve(".resources/nix/bin/exiftool");
 
 test.describe("Settings", () => {
 	let app: ElectronApplication;
@@ -276,6 +290,191 @@ test.describe("Settings", () => {
 		await page.evaluate(() =>
 			window.api.settings.set({ preserveResolution: true }),
 		);
+	});
+
+	test("an existing v4 settings file upgrades with Preserve resolution on and every stored value kept (FID-05, D-40)", async () => {
+		const v4ProfileDir = fs.mkdtempSync(
+			path.join(os.tmpdir(), "exifcleaner-v4-profile-"),
+		);
+		const v4Settings = {
+			preserveOrientation: false,
+			preserveColorProfile: true,
+			saveAsCopy: false,
+			removeXattrs: false,
+			preserveTimestamps: true,
+			language: "en",
+			themeMode: "dark",
+		};
+		fs.writeFileSync(
+			path.join(v4ProfileDir, "settings.json"),
+			JSON.stringify({ version: 4, settings: v4Settings }, null, "\t"),
+		);
+
+		await closeApp(app);
+		const relaunched = await launchApp({
+			userDataDir: v4ProfileDir,
+			pinEnglish: false,
+		});
+		app = relaunched.app;
+		page = relaunched.window;
+		page.on("console", (msg) => {
+			if (msg.type() === "error") consoleErrors.push(msg.text());
+		});
+
+		const upgraded = { ...v4Settings, preserveResolution: true };
+		await expect
+			.poll(() => page.evaluate(() => window.api.settings.get()))
+			.toEqual(upgraded);
+
+		await page.locator(".gear-icon").click();
+		const drawer = page.locator('[role="dialog"]');
+		await expect(drawer.locator("#toggle-preserve-resolution")).toBeChecked();
+		await expect(
+			drawer.locator("#toggle-preserve-orientation"),
+		).not.toBeChecked();
+
+		await expect
+			.poll(() => {
+				try {
+					const raw = fs.readFileSync(
+						path.join(v4ProfileDir, "settings.json"),
+						"utf8",
+					);
+					return JSON.parse(raw) as unknown;
+				} catch {
+					return null;
+				}
+			})
+			.toEqual({ version: 5, settings: upgraded });
+	});
+
+	test("switching Preserve resolution off in the drawer restores pre-phase output for a JPEG (ROADMAP criterion 5)", async () => {
+		await page.evaluate(() => window.api.settings.set({ saveAsCopy: true }));
+
+		await page.locator(".gear-icon").click();
+		const drawer = page.locator('[role="dialog"]');
+		const resolutionRow = drawer.locator(
+			'label.toggle-switch[for="toggle-preserve-resolution"]',
+		);
+		await resolutionRow.click();
+		await expect
+			.poll(() => page.evaluate(() => window.api.settings.get()))
+			.toMatchObject({ preserveResolution: false });
+
+		const { dir, copyFixture, cleanup } = createFixtureDir();
+		try {
+			const tempFile = copyFixture("sample.jpg");
+			seedFile(
+				tempFile,
+				EXIFTOOL_PATH,
+				[...JPEG_CONFLICT_RESOLUTION_ARGS, ...GENERIC_SEED_ARGS],
+				{ "JFIF:XResolution": "300", "IFD0:Artist": "ZZP52-ARTIST" },
+			);
+
+			const before = snapshotDir(dir);
+
+			await app.evaluate(
+				({ BrowserWindow }, filePaths) => {
+					const win = BrowserWindow.getAllWindows()[0];
+					if (win) {
+						win.webContents.send("file-open-add-files", filePaths);
+					}
+				},
+				[tempFile],
+			);
+
+			await waitForProcessing(page, { timeout: 15000 });
+			const after = snapshotDir(dir);
+
+			assertDirEffect(before, after, {
+				added: ["sample_cleaned.jpg"],
+				unchanged: ["sample.jpg"],
+				modified: [],
+				removed: [],
+			});
+
+			const outputPath = path.join(dir, "sample_cleaned.jpg");
+			const outputLines = readRawTagLines(outputPath, EXIFTOOL_PATH);
+			expect(
+				resolutionLines(outputLines).filter(
+					(line) => line.startsWith("JFIF:") || line.startsWith("IFD0:"),
+				),
+			).toEqual([]);
+			expect(seededTagKeys(outputLines)).toEqual([]);
+		} finally {
+			await page.evaluate(() =>
+				window.api.settings.set({
+					preserveResolution: true,
+					saveAsCopy: false,
+				}),
+			);
+			cleanup();
+		}
+	});
+
+	test("the resolution row fits in German, Hungarian, Arabic and Persian (D-41)", async () => {
+		const locales = ["de", "hu", "ar", "fa"] as const;
+		for (const language of locales) {
+			await page.evaluate(
+				(lang) => window.api.settings.set({ language: lang }),
+				language,
+			);
+			await page.locator(".gear-icon").click();
+			const drawer = page.locator('[role="dialog"]');
+			const localeStrings = readLocale(language);
+			const expectedLabel = localeValue(
+				localeStrings,
+				"settings.preserveResolution.label",
+			);
+			const row = drawer.locator(
+				'label.toggle-switch[for="toggle-preserve-resolution"]',
+			);
+			await expect(row.locator(".toggle-switch__label")).toHaveText(
+				expectedLabel,
+			);
+
+			if (language === "ar" || language === "fa") {
+				await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+			}
+
+			// The drawer body scrolls; getBoundingClientRect reflects the row's
+			// actual scroll position, so it must be scrolled into view first or
+			// the fit check below spuriously fails against an off-screen rect.
+			await row.scrollIntoViewIfNeeded();
+
+			const fits = await row.evaluate((rowEl) => {
+				const textEl = rowEl.querySelector(".toggle-switch__text");
+				const inputEl = rowEl.querySelector('input[role="switch"]');
+				const dialogEl = rowEl.closest('[role="dialog"]');
+				if (!textEl || !inputEl || !dialogEl) return false;
+				const rowRect = rowEl.getBoundingClientRect();
+				const dialogRect = dialogEl.getBoundingClientRect();
+				const inputRect = (
+					inputEl.parentElement ?? inputEl
+				).getBoundingClientRect();
+				const TOLERANCE = 1;
+				const withinDialog =
+					rowRect.left >= dialogRect.left - TOLERANCE &&
+					rowRect.right <= dialogRect.right + TOLERANCE &&
+					rowRect.top >= dialogRect.top - TOLERANCE &&
+					rowRect.bottom <= dialogRect.bottom + TOLERANCE;
+				const inputWithinRow =
+					inputRect.left >= rowRect.left - TOLERANCE &&
+					inputRect.right <= rowRect.right + TOLERANCE;
+				return (
+					rowEl.scrollWidth <= rowEl.clientWidth &&
+					textEl.scrollWidth <= textEl.clientWidth &&
+					withinDialog &&
+					inputWithinRow
+				);
+			});
+			expect(fits, `row does not fit for locale ${language}`).toBe(true);
+
+			await drawer.locator(".settings-drawer__close").click();
+			await expect(drawer).toHaveCount(0);
+		}
+
+		await page.evaluate(() => window.api.settings.set({ language: "en" }));
 	});
 
 	test("preserves orientation metadata when toggle is enabled", async () => {
