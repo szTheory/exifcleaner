@@ -886,6 +886,103 @@ function generateRawFixtures(fixturesDir: string, upstreamDir: string): void {
 	}
 }
 
+// Phase 52-04 (FID-03, D-37): seven formats the D-37 negative-control matrix needs that the
+// RAW corpus above does not provide (BMP, SVG, AVI, WMV are unwritable; GIF, HEIC, MOV round
+// out the writable families). Vendored unmodified -- no seed args, unlike RAW_FIXTURE_SPECS --
+// mirroring RAF-PROVENANCE.md's "committed unmodified" precedent, not RAW_SEED_ARGS's
+// vendor-then-seed pattern.
+const MATRIX_FIXTURE_SPECS = [
+	{
+		name: "GIF.gif",
+		upstreamSha256:
+			"55f8d30ea6fac980f35d5af11a90b10ddc0186d961b0273e66df2f8b7c5aa6be",
+		fileType: "GIF",
+	},
+	{
+		name: "QuickTime.heic",
+		upstreamSha256:
+			"4e1785e9924600d0274176f52609a2d514481877103b91c714bd2088ea803ae7",
+		fileType: "HEIF",
+	},
+	{
+		name: "QuickTime.mov",
+		upstreamSha256:
+			"eea529609b6026e0cd7b3d9188b997889f905cd89a93421ad7a9063c670449ec",
+		fileType: "MOV",
+	},
+	{
+		name: "BMP.bmp",
+		upstreamSha256:
+			"fab182ec28064483847443e29982d592b64d7019fc4f1db85e02501a40e1dcf8",
+		fileType: "BMP",
+	},
+	{
+		name: "XMP.svg",
+		upstreamSha256:
+			"1e6449dc39a0e61bc9a4d27beaef5e68bc72fc59c6bf1772d174fd34f5f400c2",
+		fileType: "SVG",
+	},
+	{
+		name: "RIFF.avi",
+		upstreamSha256:
+			"7c03b77d115118e3293833e6c1b5d5795c998051d145674368e0b97f02719d4b",
+		fileType: "AVI",
+	},
+	{
+		name: "ASF.wmv",
+		upstreamSha256:
+			"c3cafee199bbf19bb2fdce56211d44d108454ea7efd8ecc7c4cdda7ebce87c97",
+		fileType: "WMV",
+	},
+] as const;
+
+// Vendors each MATRIX_FIXTURE_SPECS row from the same bundled-ExifTool upstream corpus
+// generateRawFixtures reads from: verify upstream digest, copy verbatim (no seeding), re-hash
+// the copy, then confirm -s3 -FileType matches the pinned value.
+function generateMatrixFixtures(
+	fixturesDir: string,
+	upstreamDir: string,
+): void {
+	for (const spec of MATRIX_FIXTURE_SPECS) {
+		const upstreamPath = path.join(upstreamDir, spec.name);
+		if (!fs.existsSync(upstreamPath)) {
+			throw new Error(
+				`Matrix fixture upstream source missing: ${upstreamPath}`,
+			);
+		}
+		const upstreamBytes = fs.readFileSync(upstreamPath);
+		const upstreamDigest = createHash("sha256")
+			.update(upstreamBytes)
+			.digest("hex");
+		if (upstreamDigest !== spec.upstreamSha256) {
+			throw new Error(
+				`Matrix fixture upstream digest mismatch for ${spec.name}: expected ${spec.upstreamSha256}, got ${upstreamDigest}`,
+			);
+		}
+		const filePath = path.join(fixturesDir, spec.name);
+		fs.copyFileSync(upstreamPath, filePath);
+		const copyDigest = createHash("sha256")
+			.update(fs.readFileSync(filePath))
+			.digest("hex");
+		if (copyDigest !== spec.upstreamSha256) {
+			throw new Error(
+				`Matrix fixture copy digest mismatch for ${spec.name}: expected ${spec.upstreamSha256}, got ${copyDigest}`,
+			);
+		}
+		const observedType = execFileSync(EXIFTOOL, ["-s3", "-FileType", filePath])
+			.toString()
+			.trim();
+		if (observedType !== spec.fileType) {
+			throw new Error(
+				`Matrix fixture ${spec.name} expected FileType ${spec.fileType}, got ${observedType}`,
+			);
+		}
+		console.log(
+			`  Created ${spec.name} (vendored ExifTool 13.59 t/images sample, unmodified)`,
+		);
+	}
+}
+
 function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	console.log("Generating E2E test fixtures...");
 	fs.mkdirSync(fixturesDir, { recursive: true });
@@ -1152,8 +1249,9 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	);
 
 	generateRawFixtures(fixturesDir, rawUpstreamDir);
+	generateMatrixFixtures(fixturesDir, rawUpstreamDir);
 
-	console.log("\nAll 17 fixture files generated successfully.");
+	console.log("\nAll 24 fixture files generated successfully.");
 }
 
 const outputFlag = process.argv.indexOf("--output-dir");

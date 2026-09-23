@@ -441,3 +441,89 @@ describe("RAW fixtures (RMV-05, D-47)", () => {
 		}
 	});
 });
+
+// Phase 52-04 (FID-03, D-37): pins for the seven matrix fixtures vendored unmodified by
+// generateMatrixFixtures -- committed digest/size and File:FileType. Unlike RAW_FIXTURE_PINS,
+// there is no seeded-tag check here: these fixtures are committed byte-identical to upstream,
+// with no seed applied to the committed bytes (see MATRIX-PROVENANCE.md).
+const MATRIX_FIXTURE_PINS = [
+	{
+		name: "GIF.gif",
+		sha256: "55f8d30ea6fac980f35d5af11a90b10ddc0186d961b0273e66df2f8b7c5aa6be",
+		sizeBytes: 2_321,
+		fileType: "GIF",
+	},
+	{
+		name: "QuickTime.heic",
+		sha256: "4e1785e9924600d0274176f52609a2d514481877103b91c714bd2088ea803ae7",
+		sizeBytes: 623,
+		fileType: "HEIF",
+	},
+	{
+		name: "QuickTime.mov",
+		sha256: "eea529609b6026e0cd7b3d9188b997889f905cd89a93421ad7a9063c670449ec",
+		sizeBytes: 3_871,
+		fileType: "MOV",
+	},
+	{
+		name: "BMP.bmp",
+		sha256: "fab182ec28064483847443e29982d592b64d7019fc4f1db85e02501a40e1dcf8",
+		sizeBytes: 1_142,
+		fileType: "BMP",
+	},
+	{
+		name: "XMP.svg",
+		sha256: "1e6449dc39a0e61bc9a4d27beaef5e68bc72fc59c6bf1772d174fd34f5f400c2",
+		sizeBytes: 2_071,
+		fileType: "SVG",
+	},
+	{
+		name: "RIFF.avi",
+		sha256: "7c03b77d115118e3293833e6c1b5d5795c998051d145674368e0b97f02719d4b",
+		sizeBytes: 1_262,
+		fileType: "AVI",
+	},
+	{
+		name: "ASF.wmv",
+		sha256: "c3cafee199bbf19bb2fdce56211d44d108454ea7efd8ecc7c4cdda7ebce87c97",
+		sizeBytes: 12_379,
+		fileType: "WMV",
+	},
+] as const;
+
+describe("Resolution matrix fixtures (FID-03, D-37)", () => {
+	it.each(MATRIX_FIXTURE_PINS)(
+		"$name matches its pinned committed digest and size (FID-03, D-37)",
+		({ name, sha256: expectedSha256, sizeBytes }) => {
+			const filePath = path.join(FIXTURES_DIR, name);
+			expect(fs.statSync(filePath).size).toBe(sizeBytes);
+			expect(sha256(filePath)).toBe(expectedSha256);
+		},
+	);
+
+	it.each(MATRIX_FIXTURE_PINS)(
+		"$name pins its FileType (FID-03, D-37)",
+		({ name, fileType }) => {
+			const filePath = path.join(FIXTURES_DIR, name);
+			const output = execFileSync(EXIFTOOL, ["-s3", "-FileType", filePath])
+				.toString()
+				.trim();
+			expect(output).toBe(fileType);
+		},
+	);
+
+	it.each(MATRIX_FIXTURE_PINS)(
+		"$name classifies as a binary checkout fixture (FID-03, D-37)",
+		({ name }) => {
+			const output = execFileSync(
+				"git",
+				["check-attr", "binary", "--", `tests/e2e/fixtures/${name}`],
+				{
+					cwd: path.resolve(__dirname, "../../.."),
+					encoding: "utf8",
+				},
+			);
+			expect(output.trim()).toBe(`tests/e2e/fixtures/${name}: binary: set`);
+		},
+	);
+});

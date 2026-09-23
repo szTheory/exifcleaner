@@ -5,7 +5,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { seedFile } from "./resolution_probe";
+import { GENERIC_SEED_ARGS, seedFile } from "./resolution_probe";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -93,3 +93,212 @@ export function materializeRow(
 
 	return dest;
 }
+
+// Task 2 (FID-03, D-37, D-38): one row per extension in the matrix, measured this session
+// (bundled ExifTool 13.59) by running the product's exact `sanitize()` argument shape (default
+// preserveOrientation/preserveColorProfile true) ON vs OFF on a scratch copy of each fixture
+// and diffing the resulting tag-line sets. `seedExpect` and `companions` are pinned from that
+// measurement, not assumed -- companions may only be a framing key that measured as ON-minus-OFF
+// added/changed AND is already present in the source (resolutionDeltaViolations enforces the
+// second half). Every writable row's measured ON-minus-OFF is exactly the row's own resolution
+// lines, except JPEG/JPEG (the two-group tracer companions from Task 1) -- no other row produced
+// a companion side-effect this session.
+export const RESOLUTION_MATRIX_ROWS: readonly MatrixRow[] = [
+	{
+		ext: ".jpg",
+		fixture: "sample.jpg",
+		fileType: "JPEG",
+		writable: true,
+		seedArgs: [...JPEG_BOTH_300_ARGS, ...GENERIC_SEED_ARGS],
+		seedExpect: { "IFD0:XResolution": "300", "IFD0:Artist": "ZZP52-ARTIST" },
+		companions: JPEG_EXIF_COMPANIONS,
+	},
+	{
+		ext: ".jpeg",
+		fixture: "sample.jpg",
+		fileType: "JPEG",
+		writable: true,
+		seedArgs: [...JPEG_BOTH_300_ARGS, ...GENERIC_SEED_ARGS],
+		seedExpect: { "IFD0:XResolution": "300", "IFD0:Artist": "ZZP52-ARTIST" },
+		companions: JPEG_EXIF_COMPANIONS,
+	},
+	{
+		ext: ".png",
+		fixture: "sample.png",
+		fileType: "PNG",
+		writable: true,
+		seedArgs: [...PNG_PHYS_SEED_ARGS],
+		seedExpect: {
+			"PNG-pHYs:PixelsPerUnitX": "11811",
+			"PNG:Artist": "ZZP52-ARTIST",
+		},
+		companions: [],
+	},
+	{
+		ext: ".gif",
+		fixture: "GIF.gif",
+		fileType: "GIF",
+		writable: true,
+		seedArgs: [...GENERIC_SEED_ARGS],
+		seedExpect: {
+			"XMP-tiff:Artist": "ZZP52-ARTIST",
+			"File:Comment": "ZZP52-COMMENT",
+		},
+		companions: [],
+	},
+	{
+		ext: ".tif",
+		fixture: "sample.tif",
+		fileType: "TIFF",
+		writable: true,
+		seedArgs: [...GENERIC_SEED_ARGS],
+		seedExpect: { "IFD0:Artist": "ZZP52-ARTIST" },
+		companions: [],
+	},
+	{
+		ext: ".tiff",
+		fixture: "sample.tif",
+		fileType: "TIFF",
+		writable: true,
+		seedArgs: [...GENERIC_SEED_ARGS],
+		seedExpect: { "IFD0:Artist": "ZZP52-ARTIST" },
+		companions: [],
+	},
+	{
+		ext: ".webp",
+		fixture: "sample.webp",
+		fileType: "Extended WEBP",
+		writable: true,
+		seedArgs: [
+			"-IFD0:XResolution=300",
+			"-IFD0:YResolution=300",
+			"-IFD0:ResolutionUnit=inches",
+			...GENERIC_SEED_ARGS,
+		],
+		seedExpect: { "IFD0:XResolution": "300", "IFD0:Artist": "ZZP52-ARTIST" },
+		companions: [],
+	},
+	{
+		ext: ".heic",
+		fixture: "QuickTime.heic",
+		fileType: "HEIF",
+		writable: true,
+		seedArgs: [...GENERIC_SEED_ARGS],
+		seedExpect: { "IFD0:Artist": "ZZP52-ARTIST" },
+		companions: [],
+	},
+	{
+		ext: ".heif",
+		fixture: "QuickTime.heic",
+		fileType: "HEIF",
+		writable: true,
+		seedArgs: [...GENERIC_SEED_ARGS],
+		seedExpect: { "IFD0:Artist": "ZZP52-ARTIST" },
+		companions: [],
+	},
+	{
+		ext: ".mp4",
+		fixture: "sample.mp4",
+		fileType: "MP4",
+		writable: true,
+		seedArgs: [...GENERIC_SEED_ARGS],
+		seedExpect: {
+			"XMP-tiff:Artist": "ZZP52-ARTIST",
+			"ItemList:Artist": "ZZP52-ARTIST",
+		},
+		companions: [],
+	},
+	{
+		ext: ".mov",
+		fixture: "QuickTime.mov",
+		fileType: "MOV",
+		writable: true,
+		seedArgs: [...GENERIC_SEED_ARGS],
+		seedExpect: {
+			"XMP-tiff:Artist": "ZZP52-ARTIST",
+			"Keys:Artist": "ZZP52-ARTIST",
+		},
+		companions: [],
+	},
+	{
+		ext: ".m4v",
+		fixture: "QuickTime.mov",
+		fileType: "M4V",
+		writable: true,
+		seedArgs: [...GENERIC_SEED_ARGS],
+		seedExpect: {
+			"XMP-tiff:Artist": "ZZP52-ARTIST",
+			"Keys:Artist": "ZZP52-ARTIST",
+		},
+		companions: [],
+	},
+	{
+		ext: ".3gp",
+		fixture: "QuickTime.mov",
+		fileType: "3GP",
+		writable: true,
+		seedArgs: [...GENERIC_SEED_ARGS],
+		seedExpect: {
+			"XMP-tiff:Artist": "ZZP52-ARTIST",
+			"Keys:Artist": "ZZP52-ARTIST",
+		},
+		companions: [],
+	},
+	{
+		ext: ".m4a",
+		fixture: "sample.m4a",
+		fileType: "MP4",
+		writable: true,
+		seedArgs: [...GENERIC_SEED_ARGS],
+		seedExpect: {
+			"XMP-tiff:Artist": "ZZP52-ARTIST",
+			"ItemList:Artist": "ZZP52-ARTIST",
+		},
+		companions: [],
+	},
+	{
+		ext: ".pdf",
+		fixture: "sample.pdf",
+		fileType: "PDF",
+		writable: true,
+		seedArgs: [...GENERIC_SEED_ARGS],
+		seedExpect: { "XMP-tiff:Artist": "ZZP52-ARTIST" },
+		companions: [],
+	},
+	{
+		ext: ".bmp",
+		fixture: "BMP.bmp",
+		fileType: "BMP",
+		writable: false,
+		seedArgs: [],
+		seedExpect: {},
+		companions: [],
+	},
+	{
+		ext: ".svg",
+		fixture: "XMP.svg",
+		fileType: "SVG",
+		writable: false,
+		seedArgs: [],
+		seedExpect: {},
+		companions: [],
+	},
+	{
+		ext: ".avi",
+		fixture: "RIFF.avi",
+		fileType: "AVI",
+		writable: false,
+		seedArgs: [],
+		seedExpect: {},
+		companions: [],
+	},
+	{
+		ext: ".wmv",
+		fixture: "ASF.wmv",
+		fileType: "WMV",
+		writable: false,
+		seedArgs: [],
+		seedExpect: {},
+		companions: [],
+	},
+];
