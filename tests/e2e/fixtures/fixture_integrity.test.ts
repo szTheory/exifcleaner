@@ -7,6 +7,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { snapshotDir, assertDirEffect } from "../../helpers/dir_effect";
 import { readTiffGroupedTags } from "../../helpers/tiff_probe";
+import { readRawTags } from "../../helpers/raw_probe";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = __dirname;
@@ -292,6 +293,151 @@ describe("E2E fixture integrity", () => {
 			expect(sourceHashBefore).toBe(RAF_SHA256);
 		} finally {
 			fs.rmSync(dir, { recursive: true, force: true });
+		}
+	});
+});
+
+// Phase 51.1-02 (RMV-05, D-47): pins for the four RAW fixtures vendored/seeded by
+// generateRawFixtures -- committed digest/size, File:FileType, and every seeded/pre-existing
+// identifying value readRawTags (-G3:1, tests/helpers/raw_probe.ts) reports. readRawTags is
+// the SAME reader the e2e spec (51.1-01/-02) and the negative control (51.1-03) use, so a
+// drift between the pin and either consumer is caught here first.
+const RAW_FIXTURE_PINS = [
+	{
+		name: "CanonRaw.cr2",
+		sha256: "a17c51b4a04f3eab2f276a5d44512a05b6d0237f21769fcd91b1415075431a59",
+		sizeBytes: 9_012,
+		fileType: "CR2",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			"ExifIFD:DateTimeOriginal": "2005:08:03 18:59:18",
+			"Canon:SerialNumber": "0123456789",
+		},
+	},
+	{
+		name: "DNG.dng",
+		sha256: "210f3b13106e4cca69ec16c393e3fe05bab41c86c5527ae3fc54f8764cdc250c",
+		sizeBytes: 14_204,
+		fileType: "DNG",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			// Upstream identifying values already present in the vendored file.
+			"IFD0:CameraSerialNumber": "012345678",
+			"IFD0:RawDataUniqueID": "0358DB4E08632D90925171A6BB8848A2",
+			"IFD0:OriginalRawFileName": "Canon350D.CR2",
+			"IFD0:UniqueCameraModel": "Canon EOS 350D",
+		},
+	},
+	{
+		name: "CanonRaw.cr3",
+		sha256: "48ada5656150bc7a252a633183c86a835c8975686626d4e7ed1aab87111a2d43",
+		sizeBytes: 53_283,
+		fileType: "CR3",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			// Upstream identifying values already present in the vendored file.
+			"Canon:InternalSerialNumber": "CG0156580",
+			"ExifIFD:OffsetTime": "+00:00",
+			"ExifIFD:SubSecTimeOriginal": 21,
+			"ExifIFD:DateTimeOriginal": "2018:02:21 12:08:56",
+		},
+	},
+	{
+		name: "Panasonic.rw2",
+		sha256: "a350097624881ad0007474bd7d3c1d7408eb52cd2abd8018ffa21f57cd807fc6",
+		sizeBytes: 12_444,
+		fileType: "RW2",
+		expected: {
+			// RW2's IFD0 seeds land only in the embedded JpgFromRaw preview -- readRawTags's
+			// -a -G3:1 grouping reports them under the Doc1: prefix (measured this session;
+			// see generate_fixtures.ts's comment on the same seed observed via plain -G1).
+			"Doc1:IFD0:Artist": "ZZP511-ARTIST",
+			"Doc1:IFD0:Software": "ZZP511-SOFT",
+			"Doc1:IFD0:ImageDescription": "ZZP511-DESC",
+			"Doc1:IFD0:Copyright": "ZZP511-COPY",
+			"Doc1:IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"Doc1:IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			// Upstream identifying value already present in the vendored file.
+			"ExifIFD:DateTimeOriginal": "2008:08:06 15:21:56",
+		},
+	},
+] as const;
+
+describe("RAW fixtures (RMV-05, D-47)", () => {
+	it.each(RAW_FIXTURE_PINS)(
+		"$name matches its pinned committed digest and size (RMV-05, D-47)",
+		({ name, sha256: expectedSha256, sizeBytes }) => {
+			const filePath = path.join(FIXTURES_DIR, name);
+			expect(fs.statSync(filePath).size).toBe(sizeBytes);
+			expect(sha256(filePath)).toBe(expectedSha256);
+		},
+	);
+
+	it.each(RAW_FIXTURE_PINS)(
+		"$name pins its FileType and every seeded/pre-existing identifying value (RMV-05, D-47)",
+		({ name, fileType, expected }) => {
+			const filePath = path.join(FIXTURES_DIR, name);
+			const tags = readRawTags(filePath, EXIFTOOL);
+			expect(tags["File:FileType"]).toBe(fileType);
+			for (const [key, value] of Object.entries(expected)) {
+				expect(tags[key]).toBe(value);
+			}
+		},
+	);
+
+	it("classifies all four RAW fixtures and sample.raf as binary checkout fixtures (RMV-05, D-47)", () => {
+		for (const name of [
+			"CanonRaw.cr2",
+			"DNG.dng",
+			"CanonRaw.cr3",
+			"Panasonic.rw2",
+			"sample.raf",
+		]) {
+			const output = execFileSync(
+				"git",
+				["check-attr", "binary", "--", `tests/e2e/fixtures/${name}`],
+				{
+					cwd: path.resolve(__dirname, "../../.."),
+					encoding: "utf8",
+				},
+			);
+
+			expect(output.trim()).toBe(`tests/e2e/fixtures/${name}: binary: set`);
 		}
 	});
 });
