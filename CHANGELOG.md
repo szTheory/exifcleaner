@@ -6,10 +6,12 @@
 
 - Corrected a 4.0.0 changelog entry that falsely claimed the release workflow performs macOS code signing and notarization; releases are unsigned by explicit maintainer policy (#362)
 - TIFF files cleaned with default settings no longer keep the descriptive and camera tags on their first page's main image directory (IFD0) — ImageDescription, Make, Model, Software, ModifyDate, Artist, Copyright, Rating and the Windows XP title, comment, author, keyword and subject tags — which ExifTool's blanket `-all=` delete cannot remove from a TIFF; image data is unchanged. TIFF writes now go through the staged, verified output path in both save-as-copy and overwrite mode, so a failed write leaves the original untouched (#199)
+- RAW files (CR2, CR3, DNG, RW2 and the other supported RAW formats) cleaned with default settings no longer keep identifying text (Artist, Software, ImageDescription, Copyright, the Windows XP title/comment/author/keyword/subject tags and the user comment), camera body and lens serial numbers, owner names, the DNG raw-data ID and original raw file name, or capture dates and time offsets that ExifTool can delete; Make, Model and the DNG camera and color tags are kept unchanged, and the image data is unchanged
 
 ### Known limitations
 
 - Only the first page of a multi-page TIFF is cleaned; later pages keep their own ImageDescription, Software, Artist and Copyright, because ExifTool cannot delete a later page's tag directory without also deleting its image data. HostComputer, DocumentName and CameraSerialNumber also remain on the first page — they sit outside the tag set the fix above removes.
+- Some RAW maker-note tags stay because ExifTool cannot delete them: on CR2, the Canon maker-note SerialNumber; on CR3, the Canon maker-note ImageUniqueID, TimeZone, TimeZoneCity and DaylightSavings, and the capture TimeStamp in its metadata track. The Canon maker-note OwnerName (CR2, CR3) and InternalSerialNumber (CR3) are emptied rather than removed. The app's still-present tag count includes these residual tags without telling them apart from ordinary structural fields. The RAW fix was measured on CR2, CR3, DNG and RW2 sample files — ARW, NEF, ORF, PEF and SRW have no test file and no claim is made for them. RAF files are still refused and left untouched.
 
 ## 4.2.1
 
