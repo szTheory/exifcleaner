@@ -31,6 +31,7 @@ it("FakeMetadataEngine sanitize returns success by default", async () => {
 		outputMode: "overwrite",
 		preserveOrientation: true,
 		preserveColorProfile: true,
+		preserveResolution: false,
 		preserveTimestamps: false,
 	});
 	expect(result.ok).toBe(true);
@@ -42,6 +43,7 @@ it("FakeMetadataEngine sanitize returns success by default", async () => {
 			outputMode: "overwrite",
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		},
 	});

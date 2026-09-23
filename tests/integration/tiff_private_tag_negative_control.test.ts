@@ -111,6 +111,7 @@ describe("TIFF private-tag assertion discriminates the defect from the fix (D-28
 				outputMode: "copy",
 				preserveOrientation: true,
 				preserveColorProfile: true,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			});
 			expect(result).toEqual({ ok: true, value: undefined });
@@ -152,6 +153,7 @@ describe("TIFF private-tag assertion discriminates the defect from the fix (D-28
 				outputMode: "copy",
 				preserveOrientation: true,
 				preserveColorProfile: true,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			});
 			expect(result).toEqual({ ok: true, value: undefined });

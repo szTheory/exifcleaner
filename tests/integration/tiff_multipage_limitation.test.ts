@@ -97,6 +97,7 @@ describe("multi-page TIFF: only IFD0 is cleaned; IFD1 residue is pinned (D-22)",
 				outputMode: "copy",
 				preserveOrientation: true,
 				preserveColorProfile: true,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			});
 			expect(result).toEqual({ ok: true, value: undefined });

@@ -81,6 +81,7 @@ describe("OutputTransaction", () => {
 			generatedPath,
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		});
 
@@ -101,6 +102,7 @@ describe("OutputTransaction", () => {
 			generatedPath,
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		});
 
@@ -121,6 +123,7 @@ describe("OutputTransaction", () => {
 			generatedPath,
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		});
 
@@ -182,6 +185,7 @@ describe("OutputTransaction", () => {
 				generatedPath: outputPath,
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			});
 			events.push("result-published");
@@ -227,6 +231,7 @@ describe("OutputTransaction", () => {
 				generatedPath,
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			}),
 		).resolves.toEqual({ ok: false, error: { code: "verification-failed" } });
@@ -253,6 +258,7 @@ describe("OutputTransaction", () => {
 				generatedPath,
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			}),
 		).resolves.toEqual({
@@ -279,6 +285,7 @@ describe("OutputTransaction", () => {
 			commitPath: originalPath,
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		});
 
@@ -301,6 +308,7 @@ describe("OutputTransaction", () => {
 			commitPath: originalPath,
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		});
 
@@ -365,6 +373,7 @@ describe("OutputTransaction", () => {
 				generatedPath: outputPath,
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			});
 
@@ -421,6 +430,7 @@ describe("OutputTransaction", () => {
 				generatedPath: outputPath,
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			});
 

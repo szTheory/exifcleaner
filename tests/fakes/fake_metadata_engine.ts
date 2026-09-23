@@ -18,6 +18,7 @@ type MetadataEngineCall =
 				readonly outputMode: "copy" | "overwrite";
 				readonly preserveOrientation: boolean;
 				readonly preserveColorProfile: boolean;
+				readonly preserveResolution: boolean;
 				readonly preserveTimestamps: boolean;
 				readonly signal?: AbortSignal | undefined;
 			};
@@ -64,6 +65,7 @@ export class FakeMetadataEngine implements MetadataEnginePort {
 		outputMode,
 		preserveOrientation,
 		preserveColorProfile,
+		preserveResolution,
 		preserveTimestamps,
 		signal,
 	}: {
@@ -72,6 +74,7 @@ export class FakeMetadataEngine implements MetadataEnginePort {
 		outputMode: "copy" | "overwrite";
 		preserveOrientation: boolean;
 		preserveColorProfile: boolean;
+		preserveResolution: boolean;
 		preserveTimestamps: boolean;
 		signal?: AbortSignal | undefined;
 	}): Promise<typeof this.sanitizeResult> {
@@ -83,6 +86,7 @@ export class FakeMetadataEngine implements MetadataEnginePort {
 				outputMode,
 				preserveOrientation,
 				preserveColorProfile,
+				preserveResolution,
 				preserveTimestamps,
 				...(destination === undefined ? {} : { destination }),
 				...(signal === undefined ? {} : { signal }),

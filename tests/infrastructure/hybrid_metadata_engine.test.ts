@@ -12,6 +12,7 @@ describe("HybridMetadataEngine", () => {
 		outputMode: "copy" as const,
 		preserveOrientation: true,
 		preserveColorProfile: true,
+		preserveResolution: false,
 		preserveTimestamps: true,
 	};
 
@@ -85,6 +86,7 @@ describe("HybridMetadataEngine", () => {
 			outputMode: "copy" as const,
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: true,
 			signal: controller.signal,
 		};

@@ -1015,6 +1015,7 @@ describe("RAW residue pin: what a default clean leaves behind (RMV-05, D-46)", (
 					outputMode: "copy",
 					preserveOrientation: true,
 					preserveColorProfile: true,
+					preserveResolution: false,
 					preserveTimestamps: false,
 				});
 				expect(result).toEqual({ ok: true, value: undefined });
@@ -1055,6 +1056,7 @@ describe("RAW residue pin: what a default clean leaves behind (RMV-05, D-46)", (
 					outputMode: "copy",
 					preserveOrientation: true,
 					preserveColorProfile: true,
+					preserveResolution: false,
 					preserveTimestamps: false,
 				});
 				expect(result).toEqual({ ok: true, value: undefined });

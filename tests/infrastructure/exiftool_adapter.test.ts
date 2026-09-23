@@ -277,6 +277,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		});
 
@@ -294,6 +295,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			request: {
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: true,
 			},
 			extraArgs: ["-all=", "-P", "-overwrite_original"],
@@ -303,6 +305,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			request: {
 				preserveOrientation: true,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			},
 			extraArgs: [
@@ -318,6 +321,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			request: {
 				preserveOrientation: false,
 				preserveColorProfile: true,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			},
 			extraArgs: [
@@ -333,6 +337,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			request: {
 				preserveOrientation: true,
 				preserveColorProfile: true,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			},
 			extraArgs: [
@@ -349,6 +354,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			request: {
 				preserveOrientation: true,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: true,
 			},
 			extraArgs: [
@@ -365,6 +371,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			request: {
 				preserveOrientation: false,
 				preserveColorProfile: true,
+				preserveResolution: false,
 				preserveTimestamps: true,
 			},
 			extraArgs: [
@@ -381,6 +388,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			request: {
 				preserveOrientation: true,
 				preserveColorProfile: true,
+				preserveResolution: false,
 				preserveTimestamps: true,
 			},
 			extraArgs: [
@@ -422,6 +430,7 @@ describe("ExifToolAdapter.sanitize", () => {
 				outputMode: "copy",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			});
 
@@ -453,6 +462,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		});
 
@@ -481,6 +491,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		});
 
@@ -502,6 +513,7 @@ describe("ExifToolAdapter.sanitize", () => {
 				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			});
 
@@ -519,6 +531,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		});
 
@@ -541,6 +554,7 @@ describe("ExifToolAdapter.sanitize", () => {
 				outputMode: "copy",
 				preserveOrientation: true,
 				preserveColorProfile: true,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			});
 
@@ -571,6 +585,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		});
 
@@ -597,6 +612,7 @@ describe("ExifToolAdapter.sanitize", () => {
 				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			});
 
@@ -625,6 +641,7 @@ describe("ExifToolAdapter.sanitize", () => {
 				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			});
 
@@ -650,6 +667,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		});
 
@@ -669,6 +687,7 @@ describe("ExifToolAdapter.sanitize", () => {
 				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 				signal: controller.signal,
 			}),
@@ -697,6 +716,7 @@ describe("ExifToolAdapter.sanitize", () => {
 				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			}),
 		).resolves.toEqual({
@@ -713,6 +733,7 @@ describe("ExifToolAdapter.sanitize", () => {
 				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			}),
 		).resolves.toEqual({
@@ -736,6 +757,7 @@ describe("ExifToolAdapter.sanitize", () => {
 				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			}),
 		).resolves.toEqual({

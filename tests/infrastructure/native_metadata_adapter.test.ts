@@ -48,6 +48,7 @@ describe("NativeMetadataAdapter", () => {
 			outputMode: "copy" as const,
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: true,
 			signal: controller.signal,
 		};
@@ -183,6 +184,7 @@ describe("NativeMetadataAdapter", () => {
 				outputMode: "copy",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 			});
 

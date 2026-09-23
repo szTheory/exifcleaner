@@ -85,6 +85,7 @@ describe("native WebP sanitization with an independent ExifTool oracle", () => {
 				outputMode: "copy",
 				preserveOrientation: preservation.preserveOrientation,
 				preserveColorProfile: preservation.preserveColorProfile,
+				preserveResolution: false,
 				preserveTimestamps: preservation.preserveTimestamps,
 			});
 
@@ -200,6 +201,7 @@ describe("native WebP sanitization with an independent ExifTool oracle", () => {
 				outputMode: "overwrite",
 				preserveOrientation: true,
 				preserveColorProfile: true,
+				preserveResolution: false,
 				preserveTimestamps: true,
 			});
 

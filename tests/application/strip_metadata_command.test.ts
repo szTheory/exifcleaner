@@ -27,6 +27,7 @@ describe("semantic sanitization", () => {
 				outputMode: "copy",
 				preserveOrientation: true,
 				preserveColorProfile: true,
+				preserveResolution: false,
 				preserveTimestamps: true,
 				saveAsCopy: true,
 				outputPath: "/tmp/photo_cleaned.jpg",
@@ -41,6 +42,7 @@ describe("semantic sanitization", () => {
 			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: true,
 			signal: controller.signal,
 		});
@@ -52,6 +54,7 @@ describe("semantic sanitization", () => {
 			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 			saveAsCopy: false,
 		});
@@ -62,6 +65,7 @@ describe("semantic sanitization", () => {
 			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 			signal: undefined,
 		});
@@ -77,6 +81,7 @@ describe("semantic sanitization", () => {
 				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 				saveAsCopy: false,
 				signal: controller.signal,
@@ -101,6 +106,7 @@ describe("semantic sanitization", () => {
 				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 				saveAsCopy: false,
 			}),

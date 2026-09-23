@@ -204,6 +204,7 @@ async function sanitizeWithProduct({
 			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: false,
 		});
 	} finally {
