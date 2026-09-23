@@ -100,13 +100,14 @@ describe("Resolution copy-back matrix, product adapter (FID-03, D-37, D-38)", ()
 			expect(sha256(source)).toBe(sourceDigestBefore);
 
 			if (!row.writable) {
-				// Measured (D-38c result-parity, not stderr-text): for a format ExifTool
-				// refuses to write, writeMetadata's stdout is empty on failure -- the refusal
-				// reaches stderr only, which this adapter deliberately never maps into
-				// ExifToolResult.error (the same retired mechanism CLAUDE.md pins for the
-				// -CommonIFD0= warning). The adapter therefore reports { ok: true } with no
-				// destination file written, identically for ON and OFF. What D-38 requires is
-				// parity and an untouched source, not a specific `ok` value -- both hold here.
+				// Measured (D-38c result-parity, never diagnostic-text matching): for a
+				// format ExifTool refuses to write, writeMetadata's stdout is empty on
+				// failure -- the refusal is diagnosed on a different channel entirely,
+				// which this adapter deliberately never maps into ExifToolResult.error
+				// (the same retired mechanism CLAUDE.md pins for the -CommonIFD0= write
+				// warning). The adapter therefore reports { ok: true } with no destination
+				// file written, identically for ON and OFF. What D-38 requires is parity
+				// and an untouched source, not a specific `ok` value -- both hold here.
 				expect(onResult).toEqual(offResult);
 				expect(fs.existsSync(onDest)).toBe(false);
 				expect(fs.existsSync(offDest)).toBe(false);
