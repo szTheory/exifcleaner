@@ -21,6 +21,13 @@ const EXIFTOOL =
 		: path.resolve(__dirname, "../../../.resources/nix/bin/exiftool");
 
 const DEFAULT_FIXTURES_DIR = __dirname;
+// Phase 51.1 (D-47): the bundled ExifTool distribution's own test-image corpus is the
+// source for the vendored RAW fixtures -- same provenance mechanism RAF-PROVENANCE.md
+// already documents for sample.raf.
+const RAW_UPSTREAM_DEFAULT_DIR = path.resolve(
+	__dirname,
+	"../../../exiftool_downloads/Image-ExifTool-13.59/t/images",
+);
 const QUICKTIME_DATE = "2019:10:02 00:49:04";
 const QUICKTIME_EPOCH_OFFSET_SECONDS = 2082844800;
 const ISSUE_240_TAGS = {
@@ -701,6 +708,103 @@ const WEBP_ORACLE_ICC_PROFILE = Buffer.from(
 	"base64",
 );
 
+// Phase 51.1 (D-42/D-43/D-47): each row's `expected` literal is what the fixture step
+// re-reads with the bundled binary immediately after seeding -- fail loudly if a seed did
+// not land, matching assertTiffSeeds's convention above.
+const RAW_FIXTURE_SPECS = [
+	{
+		name: "CanonRaw.cr2",
+		upstreamSha256:
+			"b5d3d26f3c85bcb35a52515eac060e2e362161893504013589ffd9ad2e9b004b",
+		fileType: "CR2",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			"ExifIFD:DateTimeOriginal": "2005:08:03 18:59:18",
+			"Canon:SerialNumber": "0123456789",
+		},
+	},
+] as const;
+
+const RAW_SEED_ARGS = [
+	"-GPSLatitude=37.7749",
+	"-GPSLatitudeRef=N",
+	"-GPSLongitude=-122.4194",
+	"-GPSLongitudeRef=W",
+	"-IFD0:Artist=ZZP511-ARTIST",
+	"-IFD0:Software=ZZP511-SOFT",
+	"-IFD0:ImageDescription=ZZP511-DESC",
+	"-IFD0:Copyright=ZZP511-COPY",
+	"-IFD0:XPComment=ZZP511-XPCOMMENT",
+	"-IFD0:XPAuthor=ZZP511-XPAUTHOR",
+	"-IFD0:XPTitle=ZZP511-XPTITLE",
+	"-IFD0:XPSubject=ZZP511-XPSUBJECT",
+	"-IFD0:XPKeywords=ZZP511-XPKEYWORDS",
+	"-ExifIFD:UserComment=ZZP511-COMMENT",
+	"-ExifIFD:SerialNumber=ZZP511-BODYSN",
+	"-ExifIFD:LensSerialNumber=ZZP511-LENSSN",
+	"-ExifIFD:OwnerName=ZZP511-OWNER",
+] as const;
+
+function assertRawSeeds(
+	filePath: string,
+	spec: (typeof RAW_FIXTURE_SPECS)[number],
+): void {
+	const metadata = readFixtureMetadata(filePath);
+	const fileType = metadata["File:FileType"];
+	if (fileType !== spec.fileType) {
+		throw new Error(
+			`${filePath} File:FileType expected ${spec.fileType}, got ${String(fileType)}`,
+		);
+	}
+	for (const [tag, expectedValue] of Object.entries(spec.expected)) {
+		const actual = metadata[tag];
+		if (actual !== expectedValue) {
+			throw new Error(
+				`${filePath} ${tag} expected ${expectedValue}, got ${String(actual)}`,
+			);
+		}
+	}
+}
+
+// Phase 51.1 (D-47): vendors the RAW fixture from the bundled ExifTool distribution's own
+// t/images/ corpus, verifies it against the pinned upstream digest, seeds it with the
+// RAW_SEED_ARGS literal argument array (never a string split -- CONTEXT D-43's zsh
+// word-splitting pitfall), then re-reads and fail-loudly confirms every seed landed.
+function generateRawFixtures(fixturesDir: string, upstreamDir: string): void {
+	for (const spec of RAW_FIXTURE_SPECS) {
+		const upstreamPath = path.join(upstreamDir, spec.name);
+		if (!fs.existsSync(upstreamPath)) {
+			throw new Error(`RAW fixture upstream source missing: ${upstreamPath}`);
+		}
+		const upstreamBytes = fs.readFileSync(upstreamPath);
+		const upstreamDigest = createHash("sha256")
+			.update(upstreamBytes)
+			.digest("hex");
+		if (upstreamDigest !== spec.upstreamSha256) {
+			throw new Error(
+				`RAW fixture upstream digest mismatch for ${spec.name}: expected ${spec.upstreamSha256}, got ${upstreamDigest}`,
+			);
+		}
+		const filePath = path.join(fixturesDir, spec.name);
+		fs.copyFileSync(upstreamPath, filePath);
+		execFileSync(EXIFTOOL, ["-overwrite_original", ...RAW_SEED_ARGS, filePath]);
+		assertRawSeeds(filePath, spec);
+		console.log(
+			`  Created ${spec.name} (vendored ExifTool 13.59 t/images sample, seeded)`,
+		);
+	}
+}
+
 function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	console.log("Generating E2E test fixtures...");
 	fs.mkdirSync(fixturesDir, { recursive: true });
@@ -966,6 +1070,8 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 		"  Created multipage.tif (two-page TIFF with distinct per-IFD private tags)",
 	);
 
+	generateRawFixtures(fixturesDir, rawUpstreamDir);
+
 	console.log("\nAll 14 fixture files generated successfully.");
 }
 
@@ -977,4 +1083,14 @@ const outputDir =
 	outputFlag === -1
 		? DEFAULT_FIXTURES_DIR
 		: path.resolve(process.argv[outputFlag + 1]!);
+
+const rawUpstreamFlag = process.argv.indexOf("--raw-upstream-dir");
+if (rawUpstreamFlag !== -1 && process.argv[rawUpstreamFlag + 1] === undefined) {
+	throw new Error("--raw-upstream-dir requires a path");
+}
+const rawUpstreamDir =
+	rawUpstreamFlag === -1
+		? RAW_UPSTREAM_DEFAULT_DIR
+		: path.resolve(process.argv[rawUpstreamFlag + 1]!);
+
 generateFixtures(outputDir);

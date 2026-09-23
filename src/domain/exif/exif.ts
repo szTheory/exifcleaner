@@ -19,6 +19,47 @@ export const QUICKTIME_DATE_REMOVAL_ARGS = [
 	"-MediaModifyDate=",
 ] as const;
 
+// RMV-05: on TIFF-based RAW (CR2/DNG/CR3/RW2), IFD0 is the image directory, so bare -all=
+// cannot clear it -- the same structural reason TIFF needed its own fix (Phase 51). The
+// TIFF shortcut (-CommonIFD0=) is deliberately NOT reused here: measured to delete Make and
+// Model on CR2, CR3 and DNG, tags RAW decoders need to open the file at all. Entries are
+// group-qualified, never bare names, because bare tag names also reach same-named tags other
+// manufacturers' MakerNotes tables define at their own WriteGroup (Nikon.pm, Sigma.pm). The
+// maker-note SerialNumber delete was dropped: measured a no-op on all four fixtures (CR2
+// refuses it as Permanent, DNG/CR3/RW2 already lose it to -all=).
+export const RAW_IDENTIFYING_TAG_DELETES = [
+	// Identifying text
+	"-IFD0:Artist=",
+	"-IFD0:Software=",
+	"-IFD0:ImageDescription=",
+	"-IFD0:Copyright=",
+	"-IFD0:XPComment=",
+	"-IFD0:XPAuthor=",
+	"-IFD0:XPTitle=",
+	"-IFD0:XPSubject=",
+	"-IFD0:XPKeywords=",
+	"-ExifIFD:UserComment=",
+	// Serials / IDs / owner
+	"-ExifIFD:SerialNumber=",
+	"-ExifIFD:LensSerialNumber=",
+	"-ExifIFD:OwnerName=",
+	"-IFD0:CameraSerialNumber=",
+	"-IFD0:OriginalRawFileName=",
+	"-IFD0:RawDataUniqueID=",
+	"-MakerNotes:OwnerName=",
+	"-MakerNotes:InternalSerialNumber=",
+	// Capture dates
+	"-ExifIFD:DateTimeOriginal=",
+	"-ExifIFD:CreateDate=",
+	"-IFD0:ModifyDate=",
+	"-ExifIFD:OffsetTime=",
+	"-ExifIFD:OffsetTimeOriginal=",
+	"-ExifIFD:OffsetTimeDigitized=",
+	"-ExifIFD:SubSecTime=",
+	"-ExifIFD:SubSecTimeOriginal=",
+	"-ExifIFD:SubSecTimeDigitized=",
+] as const;
+
 const COMPUTED_FIELDS = new Set(["SourceFile", "ImageSize", "Megapixels"]);
 // The File group is deliberately NOT a blanket entry here -- see the writability-anchored
 // rule below (FILE_GROUP_WRITABLE_TAGS / FILE_GROUP_STRUCTURAL_OVERRIDE /

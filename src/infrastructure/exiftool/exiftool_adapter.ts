@@ -1,7 +1,14 @@
 import type { MetadataEnginePort } from "../../application/metadata_engine_port";
 import { cleanExifData } from "../../domain";
-import { QUICKTIME_DATE_REMOVAL_ARGS } from "../../domain/exif/exif";
-import { isMediaFile, isTiffFile } from "../../domain/files/file_types";
+import {
+	QUICKTIME_DATE_REMOVAL_ARGS,
+	RAW_IDENTIFYING_TAG_DELETES,
+} from "../../domain/exif/exif";
+import {
+	isMediaFile,
+	isRawFile,
+	isTiffFile,
+} from "../../domain/files/file_types";
 import type { Result } from "../../common";
 import { assertNever } from "../../common/types";
 import type { ExifError } from "../../domain";
@@ -267,6 +274,15 @@ export class ExifToolAdapter implements MetadataEnginePort {
 		// CommonIFD0 shortcut deletes its descriptive/camera tags (EVIDENCE F-2, #199).
 		if (isTiffFile({ filename: source })) {
 			extraArgs.push("-CommonIFD0=");
+		}
+		// RMV-05: RAW's IFD0/ExifIFD/MakerNotes tags survive bare -all= the way TIFF's do, but
+		// -CommonIFD0= (TIFF's fix) deletes Make/Model on RAW -- measured, not assumed. Push the
+		// group-qualified named-tag deletes instead, plus RAW's own copy of the QuickTime args
+		// for CR3 (ISO-BMFF; isRawFile and isMediaFile are disjoint, so this branch must push
+		// its own copy rather than relying on the isMediaFile branch above).
+		if (isRawFile({ filename: source })) {
+			extraArgs.push(...RAW_IDENTIFYING_TAG_DELETES);
+			extraArgs.push(...QUICKTIME_DATE_REMOVAL_ARGS);
 		}
 
 		const preserveTags: string[] = [];

@@ -16,6 +16,11 @@
 *.webp binary
 *.tif binary
 *.tiff binary
+*.cr2 binary
+*.cr3 binary
+*.dng binary
+*.rw2 binary
+*.raf binary
 *.mp4 binary
 *.mov binary
 *.m4a binary
