@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { cleanExifData } from "../../src/domain/exif/exif";
+import {
+	cleanExifData,
+	QUICKTIME_DATE_REMOVAL_ARGS,
+	RAW_IDENTIFYING_TAG_DELETES,
+} from "../../src/domain/exif/exif";
 
 describe("cleanExifData", () => {
 	it("strips flat SourceFile key", () => {
@@ -147,5 +151,53 @@ describe("cleanExifData", () => {
 		const result = cleanExifData({ raw: {} });
 
 		expect(result).toEqual({});
+	});
+});
+
+describe("RAW_IDENTIFYING_TAG_DELETES (RMV-05, D-45)", () => {
+	it("equals the hand-written 27-entry literal in Task 1 order (RMV-05, D-45)", () => {
+		expect(RAW_IDENTIFYING_TAG_DELETES).toEqual([
+			"-IFD0:Artist=",
+			"-IFD0:Software=",
+			"-IFD0:ImageDescription=",
+			"-IFD0:Copyright=",
+			"-IFD0:XPComment=",
+			"-IFD0:XPAuthor=",
+			"-IFD0:XPTitle=",
+			"-IFD0:XPSubject=",
+			"-IFD0:XPKeywords=",
+			"-ExifIFD:UserComment=",
+			"-ExifIFD:SerialNumber=",
+			"-ExifIFD:LensSerialNumber=",
+			"-ExifIFD:OwnerName=",
+			"-IFD0:CameraSerialNumber=",
+			"-IFD0:OriginalRawFileName=",
+			"-IFD0:RawDataUniqueID=",
+			"-MakerNotes:OwnerName=",
+			"-MakerNotes:InternalSerialNumber=",
+			"-ExifIFD:DateTimeOriginal=",
+			"-ExifIFD:CreateDate=",
+			"-IFD0:ModifyDate=",
+			"-ExifIFD:OffsetTime=",
+			"-ExifIFD:OffsetTimeOriginal=",
+			"-ExifIFD:OffsetTimeDigitized=",
+			"-ExifIFD:SubSecTime=",
+			"-ExifIFD:SubSecTimeOriginal=",
+			"-ExifIFD:SubSecTimeDigitized=",
+		]);
+	});
+
+	it("every entry is group-qualified: -(IFD0|ExifIFD|MakerNotes):Tag= (RMV-05, D-45)", () => {
+		for (const entry of RAW_IDENTIFYING_TAG_DELETES) {
+			expect(entry).toMatch(/^-(IFD0|ExifIFD|MakerNotes):[A-Za-z]+=$/);
+		}
+	});
+
+	it("shares no element with QUICKTIME_DATE_REMOVAL_ARGS and never contains -CommonIFD0= (RMV-05, D-45)", () => {
+		const overlap = RAW_IDENTIFYING_TAG_DELETES.filter((entry) =>
+			(QUICKTIME_DATE_REMOVAL_ARGS as readonly string[]).includes(entry),
+		);
+		expect(overlap).toEqual([]);
+		expect(RAW_IDENTIFYING_TAG_DELETES).not.toContain("-CommonIFD0=");
 	});
 });

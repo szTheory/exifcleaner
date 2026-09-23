@@ -2,7 +2,51 @@ import { describe, it, expect, vi } from "vitest";
 import { ExifToolAdapter } from "../../src/infrastructure/exiftool/exiftool_adapter";
 import type { ExiftoolProcess } from "../../src/infrastructure/exiftool/ExiftoolProcess";
 import { UnsafeExifToolPathError } from "../../src/infrastructure/exiftool/ExiftoolProcess";
-import { QUICKTIME_DATE_REMOVAL_ARGS } from "../../src/domain/exif/exif";
+import {
+	QUICKTIME_DATE_REMOVAL_ARGS,
+	RAW_IDENTIFYING_TAG_DELETES,
+} from "../../src/domain/exif/exif";
+
+// Hand-written literals, never spread from the product constants -- a dropped or reordered
+// entry in RAW_IDENTIFYING_TAG_DELETES or QUICKTIME_DATE_REMOVAL_ARGS must show up as a red
+// diff here, not silently pass because both sides derive from the same source (RMV-05, D-45).
+const EXPECTED_RAW_DELETES = [
+	"-IFD0:Artist=",
+	"-IFD0:Software=",
+	"-IFD0:ImageDescription=",
+	"-IFD0:Copyright=",
+	"-IFD0:XPComment=",
+	"-IFD0:XPAuthor=",
+	"-IFD0:XPTitle=",
+	"-IFD0:XPSubject=",
+	"-IFD0:XPKeywords=",
+	"-ExifIFD:UserComment=",
+	"-ExifIFD:SerialNumber=",
+	"-ExifIFD:LensSerialNumber=",
+	"-ExifIFD:OwnerName=",
+	"-IFD0:CameraSerialNumber=",
+	"-IFD0:OriginalRawFileName=",
+	"-IFD0:RawDataUniqueID=",
+	"-MakerNotes:OwnerName=",
+	"-MakerNotes:InternalSerialNumber=",
+	"-ExifIFD:DateTimeOriginal=",
+	"-ExifIFD:CreateDate=",
+	"-IFD0:ModifyDate=",
+	"-ExifIFD:OffsetTime=",
+	"-ExifIFD:OffsetTimeOriginal=",
+	"-ExifIFD:OffsetTimeDigitized=",
+	"-ExifIFD:SubSecTime=",
+	"-ExifIFD:SubSecTimeOriginal=",
+	"-ExifIFD:SubSecTimeDigitized=",
+];
+const EXPECTED_QUICKTIME = [
+	"-QuickTime:CreateDate=",
+	"-QuickTime:ModifyDate=",
+	"-TrackCreateDate=",
+	"-TrackModifyDate=",
+	"-MediaCreateDate=",
+	"-MediaModifyDate=",
+];
 
 function makeFakeProcess(overrides: Partial<Record<string, unknown>> = {}) {
 	return {
@@ -483,6 +527,134 @@ describe("ExifToolAdapter.sanitize", () => {
 			(QUICKTIME_DATE_REMOVAL_ARGS as readonly string[]).includes(arg),
 		);
 		expect(overlap).toEqual([]);
+	});
+
+	it.each(["photo.cr2", "photo.dng", "photo.cr3", "photo.rw2"])(
+		"emits the exact default copy-mode RAW argument list for %s (RMV-05, D-45)",
+		async (fileName) => {
+			const fakeProcess = makeFakeProcess();
+			const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+			await adapter.sanitize({
+				source: `/tmp/${fileName}`,
+				destination: `/tmp/${fileName}.cleaned`,
+				outputMode: "copy",
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				preserveTimestamps: false,
+			});
+
+			expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+				filePath: `/tmp/${fileName}`,
+				metadata: {},
+				extraArgs: [
+					"-all=",
+					...EXPECTED_RAW_DELETES,
+					...EXPECTED_QUICKTIME,
+					"-TagsFromFile",
+					"@",
+					"-Orientation",
+					"-ICC_Profile",
+					"-o",
+					`/tmp/${fileName}.cleaned`,
+				],
+			});
+		},
+	);
+
+	it("emits the exact overwrite-mode .nef argument list with preservation off, an uncovered RAW extension (RMV-05, D-45)", async () => {
+		const fakeProcess = makeFakeProcess();
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		await adapter.sanitize({
+			source: "/tmp/photo.nef",
+			outputMode: "overwrite",
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveTimestamps: false,
+		});
+
+		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/photo.nef",
+			metadata: {},
+			extraArgs: [
+				"-all=",
+				...EXPECTED_RAW_DELETES,
+				...EXPECTED_QUICKTIME,
+				"-overwrite_original",
+			],
+		});
+	});
+
+	it.each(["scan.tif", "photo.jpg", "image.png", "video.mp4", "photo.cr2.tif"])(
+		"never pushes a RAW_IDENTIFYING_TAG_DELETES member for a non-RAW source: %s (RMV-05, D-45)",
+		async (fileName) => {
+			const fakeProcess = makeFakeProcess();
+			const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+			await adapter.sanitize({
+				source: `/tmp/${fileName}`,
+				outputMode: "overwrite",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			});
+
+			const call = vi.mocked(fakeProcess.writeMetadata).mock.calls[0]?.[0];
+			const overlap = (call?.extraArgs ?? []).filter((arg) =>
+				(RAW_IDENTIFYING_TAG_DELETES as readonly string[]).includes(arg),
+			);
+			expect(overlap).toEqual([]);
+		},
+	);
+
+	it.each([
+		"photo.cr3",
+		"photo.rw2",
+		"photo.nef",
+		"photo.tif.dng",
+		"PHOTO.CR3",
+	])(
+		"never pushes -CommonIFD0= for a RAW source, and pushes every delete with each QuickTime arg exactly once: %s (RMV-05, D-45)",
+		async (fileName) => {
+			const fakeProcess = makeFakeProcess();
+			const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+			await adapter.sanitize({
+				source: `/tmp/${fileName}`,
+				outputMode: "overwrite",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveTimestamps: false,
+			});
+
+			const call = vi.mocked(fakeProcess.writeMetadata).mock.calls[0]?.[0];
+			const extraArgs = call?.extraArgs ?? [];
+			expect(extraArgs).not.toContain("-CommonIFD0=");
+			for (const entry of RAW_IDENTIFYING_TAG_DELETES) {
+				expect(extraArgs).toContain(entry);
+			}
+			for (const entry of QUICKTIME_DATE_REMOVAL_ARGS) {
+				const count = extraArgs.filter((arg) => arg === entry).length;
+				expect(count).toBe(1);
+			}
+		},
+	);
+
+	it("photo.cr2.tif (last extension wins) receives -CommonIFD0=, never the RAW deletes (RMV-05, D-45)", async () => {
+		const fakeProcess = makeFakeProcess();
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		await adapter.sanitize({
+			source: "/tmp/photo.cr2.tif",
+			outputMode: "overwrite",
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveTimestamps: false,
+		});
+
+		const call = vi.mocked(fakeProcess.writeMetadata).mock.calls[0]?.[0];
+		expect(call?.extraArgs).toContain("-CommonIFD0=");
 	});
 
 	it("does not start a process write for an already-aborted request", async () => {
