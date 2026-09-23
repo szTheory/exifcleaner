@@ -41,6 +41,7 @@ test.describe("File type coverage", () => {
 			settings: {
 				preserveColorProfile: false,
 				preserveOrientation: false,
+				preserveResolution: false,
 				saveAsCopy: true,
 			},
 		});

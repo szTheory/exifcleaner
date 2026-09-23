@@ -69,6 +69,7 @@ test("#300 installed payload reports its stat-derived non-empty SIZE", async () 
 
 	try {
 		await driver.setSaveAsCopy(false);
+		await driver.setPreserveResolution(false);
 		const filePath = copyFixture("sample.jpg");
 		const sizeWhenAdded = fs.statSync(filePath).size;
 		expect(sizeWhenAdded).toBeGreaterThan(0);

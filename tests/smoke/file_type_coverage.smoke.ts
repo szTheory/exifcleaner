@@ -18,6 +18,7 @@ async function launchForFullStrip() {
 		globalThis.window.api.settings.set({
 			preserveColorProfile: false,
 			preserveOrientation: false,
+			preserveResolution: false,
 		}),
 	);
 	return context;

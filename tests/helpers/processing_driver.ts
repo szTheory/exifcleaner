@@ -37,6 +37,7 @@ export interface ProcessingDriver {
 		expectedFiles?: number;
 	}) => Promise<void>;
 	readonly setSaveAsCopy: (enabled: boolean) => Promise<void>;
+	readonly setPreserveResolution: (enabled: boolean) => Promise<void>;
 	readonly terminalRowCounts: () => Promise<{
 		readonly total: number;
 		readonly complete: number;
@@ -70,6 +71,12 @@ export function createProcessingDriver(
 		async setSaveAsCopy(enabled: boolean): Promise<void> {
 			await context.window.evaluate((saveAsCopy) => {
 				return window.api.settings.set({ saveAsCopy });
+			}, enabled);
+			await context.window.waitForTimeout(300);
+		},
+		async setPreserveResolution(enabled: boolean): Promise<void> {
+			await context.window.evaluate((preserveResolution) => {
+				return window.api.settings.set({ preserveResolution });
 			}, enabled);
 			await context.window.waitForTimeout(300);
 		},

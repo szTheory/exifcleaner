@@ -47,6 +47,7 @@ test("#304 save-as-copy preserves originals, resolves collisions, and reveals th
 		const reveal = await driver.interceptReveal();
 
 		await driver.setSaveAsCopy(true);
+		await driver.setPreserveResolution(false);
 		const before = snapshotDir(dir);
 		await driver.submitFiles([original]);
 		await driver.waitForTerminal({ timeout: 60000 });
