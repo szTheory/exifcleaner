@@ -177,6 +177,135 @@ export const RAW_SENTINELS = [
 	"ZZP511-OWNER",
 ] as const;
 
+// Phase 51.1-03 (D-44 blast-radius differential): the offset tags a fixture's decoder needs
+// to locate image data. These are excluded from tagLineDifferential's `changed` bucket
+// (their numeric value moves whenever the file layout moves, which is expected and not part
+// of the fix's tag-removal footprint) but are still required present on both sides -- a
+// vanished offset tag would mean the decoder can no longer find the pixel data at all.
+export const OFFSET_TAG_NAMES = [
+	"StripOffsets",
+	"TileOffsets",
+	"ThumbnailOffset",
+	"PreviewImageStart",
+	"JpgFromRawStart",
+	"RawDataOffset",
+	"MediaDataOffset",
+] as const;
+
+export interface RawTagLine {
+	readonly key: string;
+	readonly value: string;
+}
+
+// Parses `exiftool -a -G3:1 -s -n --System:all` output: one `[Group] Tag : value` line per
+// tag, duplicates preserved in file order (never deduplicated -- a second same-named tag in
+// an embedded document is a real, separate line). Throws on any line that doesn't match the
+// expected shape, rather than silently dropping it, so a future ExifTool output-format change
+// surfaces as a loud failure instead of a quietly incomplete tag-line list.
+export function readRawTagLines(
+	filePath: string,
+	exiftoolPath: string,
+): RawTagLine[] {
+	const output = execFileSync(exiftoolPath, [
+		"-a",
+		"-G3:1",
+		"-s",
+		"-n",
+		"--System:all",
+		filePath,
+	]).toString();
+	const lineRe = /^\[([^\]]+)]\s+(\S+)\s+:\s?(.*)$/;
+	const lines: RawTagLine[] = [];
+	for (const raw of output.split(/\r?\n/)) {
+		if (raw.length === 0) continue;
+		const match = lineRe.exec(raw);
+		if (match === null) {
+			throw new Error(
+				`readRawTagLines: unparseable ExifTool line for ${filePath}: ${JSON.stringify(raw)}`,
+			);
+		}
+		const group = match[1];
+		const tag = match[2];
+		const value = match[3];
+		if (group === undefined || tag === undefined || value === undefined) {
+			throw new Error(
+				`readRawTagLines: incomplete match for ${filePath}: ${JSON.stringify(raw)}`,
+			);
+		}
+		lines.push({ key: `${group}:${tag}`, value });
+	}
+	return lines;
+}
+
+function tagNameOf(key: string): string {
+	return key.includes(":") ? key.slice(key.lastIndexOf(":") + 1) : key;
+}
+
+function groupLinesByKey(lines: readonly RawTagLine[]): Map<string, string[]> {
+	const map = new Map<string, string[]>();
+	for (const { key, value } of lines) {
+		const existing = map.get(key);
+		if (existing) {
+			existing.push(value);
+		} else {
+			map.set(key, [value]);
+		}
+	}
+	return map;
+}
+
+export interface TagLineDifferential {
+	readonly removed: string[];
+	readonly added: string[];
+	readonly changed: { key: string; value: string }[];
+}
+
+// Multiset comparison by key: a key present before and absent after is `removed`; absent
+// before and present after is `added`; present on both sides with a different sorted value
+// multiset is `changed` (offset-tag keys excluded from `changed` per OFFSET_TAG_NAMES, but
+// still required present on both sides -- a key that vanishes entirely is caught by
+// `removed`, never silently treated as a benign offset move).
+export function tagLineDifferential(
+	before: readonly RawTagLine[],
+	after: readonly RawTagLine[],
+): TagLineDifferential {
+	const beforeMap = groupLinesByKey(before);
+	const afterMap = groupLinesByKey(after);
+	const removed: string[] = [];
+	const added: string[] = [];
+	const changed: { key: string; value: string }[] = [];
+
+	const allKeys = new Set<string>([...beforeMap.keys(), ...afterMap.keys()]);
+	for (const key of Array.from(allKeys).sort()) {
+		const beforeValues = beforeMap.get(key);
+		const afterValues = afterMap.get(key);
+		const isOffset = (OFFSET_TAG_NAMES as readonly string[]).includes(
+			tagNameOf(key),
+		);
+
+		if (beforeValues !== undefined && afterValues === undefined) {
+			removed.push(key);
+			continue;
+		}
+		if (beforeValues === undefined && afterValues !== undefined) {
+			added.push(key);
+			continue;
+		}
+		if (beforeValues !== undefined && afterValues !== undefined) {
+			if (isOffset) continue;
+			const sortedBefore = [...beforeValues].sort();
+			const sortedAfter = [...afterValues].sort();
+			const same =
+				sortedBefore.length === sortedAfter.length &&
+				sortedBefore.every((value, index) => value === sortedAfter[index]);
+			if (!same) {
+				changed.push({ key, value: afterValues[0] ?? "" });
+			}
+		}
+	}
+	return { removed, added, changed };
+}
+
 // The single per-fixture table the e2e spec (this plan), the negative control (51.1-03) and
 // the residue pin (51.1-04) all import, so the three can never drift apart.
 export const RAW_CASES = [
