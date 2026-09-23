@@ -106,6 +106,8 @@
 	"settings.preserveOrientation.description": "Meta veriler kaldırıldıktan sonra fotoğrafların doğru yönde kalmasını sağla",
 	"settings.preserveColorProfile.label": "Renk profilini koru",
 	"settings.preserveColorProfile.description": "Doğru renkler için ICC profilini koru",
+	"settings.preserveResolution.label": "Çözünürlüğü koru",
+	"settings.preserveResolution.description": "Baskıların doğru boyutta olması için DPI değerini koru",
 	"settings.saveAsCopy.label": "Kopya olarak kaydet",
 	"settings.saveAsCopy.description": "Temizlenmiş bir kopya oluştur ve orijinali değiştirmeden bırak",
 	"settings.preserveTimestamps.label": "Değiştirme tarihini koru",

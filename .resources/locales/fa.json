@@ -106,6 +106,8 @@
 	"settings.preserveOrientation.description": "پس از حذف فراداده، عکس‌ها را در جهت صحیح نگه دارید",
 	"settings.preserveColorProfile.label": "حفظ نمایهٔ رنگ",
 	"settings.preserveColorProfile.description": "برای نمایش دقیق رنگ، نمایهٔ ICC را حفظ کنید",
+	"settings.preserveResolution.label": "حفظ وضوح چاپ",
+	"settings.preserveResolution.description": "مقدار DPI را حفظ کنید تا چاپ‌ها در اندازهٔ درست باشند",
 	"settings.saveAsCopy.label": "ذخیره به‌صورت کپی",
 	"settings.saveAsCopy.description": "یک نسخهٔ پاک‌سازی‌شده ایجاد کنید و فایل اصلی را دست‌نخورده نگه دارید",
 	"settings.preserveTimestamps.label": "حفظ تاریخ تغییر",

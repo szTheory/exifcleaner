@@ -106,6 +106,8 @@
 	"settings.preserveOrientation.description": "Zadrži pravilan položaj fotografija nakon uklanjanja metapodataka",
 	"settings.preserveColorProfile.label": "Sačuvaj profil boja",
 	"settings.preserveColorProfile.description": "Sačuvaj ICC profil radi vjernog prikaza boja",
+	"settings.preserveResolution.label": "Sačuvaj rezoluciju",
+	"settings.preserveResolution.description": "Sačuvaj DPI kako bi ispisi imali ispravnu veličinu",
 	"settings.saveAsCopy.label": "Spremi kao kopiju",
 	"settings.saveAsCopy.description": "Izradi očišćenu kopiju, a izvornu datoteku ostavi netaknutom",
 	"settings.preserveTimestamps.label": "Sačuvaj datum izmjene",

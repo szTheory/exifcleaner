@@ -106,6 +106,8 @@
 	"settings.preserveOrientation.description": "Hold billeder korrekt orienteret efter fjernelse af metadata",
 	"settings.preserveColorProfile.label": "Bevar farveprofil",
 	"settings.preserveColorProfile.description": "Bevar ICC-profilen for præcise farver",
+	"settings.preserveResolution.label": "Bevar opløsning",
+	"settings.preserveResolution.description": "Bevar DPI, så udskrifter får den rigtige størrelse",
 	"settings.saveAsCopy.label": "Gem som kopi",
 	"settings.saveAsCopy.description": "Opret en renset kopi, og lad originalen være urørt",
 	"settings.preserveTimestamps.label": "Bevar ændringsdato",

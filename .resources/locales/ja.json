@@ -106,6 +106,8 @@
 	"settings.preserveOrientation.description": "メタデータの削除後も写真を正しい向きに保ちます",
 	"settings.preserveColorProfile.label": "カラープロファイルを保持",
 	"settings.preserveColorProfile.description": "正確な色を維持するため ICC プロファイルを保持します",
+	"settings.preserveResolution.label": "解像度を保持",
+	"settings.preserveResolution.description": "印刷サイズが正しく保たれるよう DPI を保持します",
 	"settings.saveAsCopy.label": "コピーとして保存",
 	"settings.saveAsCopy.description": "クリーニング済みのコピーを作成し、元のファイルは変更しません",
 	"settings.preserveTimestamps.label": "更新日時を保持",

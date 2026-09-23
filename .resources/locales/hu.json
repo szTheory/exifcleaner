@@ -106,6 +106,8 @@
 	"settings.preserveOrientation.description": "A fényképek maradjanak megfelelő tájolásúak a metaadatok eltávolítása után",
 	"settings.preserveColorProfile.label": "Színprofil megőrzése",
 	"settings.preserveColorProfile.description": "Az ICC-profil megőrzése a pontos színek érdekében",
+	"settings.preserveResolution.label": "Felbontás megőrzése",
+	"settings.preserveResolution.description": "A DPI megőrzése, hogy a nyomatok megfelelő méretűek legyenek",
 	"settings.saveAsCopy.label": "Mentés másolatként",
 	"settings.saveAsCopy.description": "Megtisztított másolat létrehozása az eredeti változatlanul hagyásával",
 	"settings.preserveTimestamps.label": "Módosítás dátumának megőrzése",

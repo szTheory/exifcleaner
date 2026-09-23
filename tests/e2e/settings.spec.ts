@@ -212,6 +212,72 @@ test.describe("Settings", () => {
 		);
 	});
 
+	test("toggles preserve resolution switch as the third row (FID-01, D-39)", async () => {
+		await page.locator(".gear-icon").click();
+		const drawer = page.locator('[role="dialog"]');
+
+		const initialSettings = await page.evaluate(() =>
+			window.api.settings.get(),
+		);
+		expect(initialSettings.preserveResolution).toBe(true);
+		const resolutionInput = page.locator("#toggle-preserve-resolution");
+		await expect(resolutionInput).toBeChecked();
+
+		const switchIds = await drawer
+			.locator('input[role="switch"]')
+			.evaluateAll((inputs) => inputs.map((input) => input.id));
+		expect(switchIds.slice(0, 3)).toEqual([
+			"toggle-preserve-orientation",
+			"toggle-preserve-color-profile",
+			"toggle-preserve-resolution",
+		]);
+		expect(switchIds[3]).toBe("toggle-save-as-copy");
+
+		const resolutionRow = page.locator(
+			'label.toggle-switch[for="toggle-preserve-resolution"]',
+		);
+		await expect(resolutionRow.locator(".toggle-switch__label")).toHaveText(
+			"Preserve resolution",
+		);
+		await expect(
+			resolutionRow.locator(".toggle-switch__description"),
+		).toHaveText("Keep the DPI so prints stay the right size");
+
+		// Click the row label (not the visually-hidden switch input directly) --
+		// native <label for> semantics forward the click to the associated
+		// input, matching how a real user activates this control.
+		await resolutionRow.click();
+
+		await expect
+			.poll(() => page.evaluate(() => window.api.settings.get()))
+			.toMatchObject({ preserveResolution: false });
+
+		await expect
+			.poll(() => {
+				try {
+					const raw = fs.readFileSync(
+						path.join(userDataDir, "settings.json"),
+						"utf8",
+					);
+					const parsed = JSON.parse(raw) as {
+						version: number;
+						settings: { preserveResolution: boolean };
+					};
+					return (
+						parsed.version === 5 && parsed.settings.preserveResolution === false
+					);
+				} catch {
+					return false;
+				}
+			})
+			.toBe(true);
+
+		// Restore default for subsequent tests.
+		await page.evaluate(() =>
+			window.api.settings.set({ preserveResolution: true }),
+		);
+	});
+
 	test("preserves orientation metadata when toggle is enabled", async () => {
 		await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
 		const { dir, copyFixture, cleanup } = createFixtureDir();

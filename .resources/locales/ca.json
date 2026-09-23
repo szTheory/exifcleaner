@@ -106,6 +106,8 @@
 	"settings.preserveOrientation.description": "Mantén les fotos ben orientades després d'eliminar les metadades",
 	"settings.preserveColorProfile.label": "Conserva el perfil de color",
 	"settings.preserveColorProfile.description": "Mantén el perfil ICC per obtenir colors precisos",
+	"settings.preserveResolution.label": "Conserva la resolució",
+	"settings.preserveResolution.description": "Mantén els DPI perquè les impressions tinguin la mida correcta",
 	"settings.saveAsCopy.label": "Desa com a còpia",
 	"settings.saveAsCopy.description": "Crea una còpia neta i deixa l'original intacte",
 	"settings.preserveTimestamps.label": "Conserva la data de modificació",

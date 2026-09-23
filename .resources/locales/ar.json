@@ -106,6 +106,8 @@
 	"settings.preserveOrientation.description": "إبقاء الصور بالاتجاه الصحيح بعد إزالة البيانات الوصفية",
 	"settings.preserveColorProfile.label": "الاحتفاظ بملف تعريف الألوان",
 	"settings.preserveColorProfile.description": "الاحتفاظ بملف تعريف ICC لضمان دقة الألوان",
+	"settings.preserveResolution.label": "الاحتفاظ بدقة الطباعة",
+	"settings.preserveResolution.description": "الاحتفاظ بقيمة DPI لتُطبع الصور بالحجم الصحيح",
 	"settings.saveAsCopy.label": "حفظ كنسخة",
 	"settings.saveAsCopy.description": "إنشاء نسخة منظَّفة وترك الملف الأصلي دون تغيير",
 	"settings.preserveTimestamps.label": "الاحتفاظ بتاريخ التعديل",

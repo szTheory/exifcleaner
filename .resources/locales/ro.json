@@ -106,6 +106,8 @@
 	"settings.preserveOrientation.description": "Păstrează fotografiile în poziție verticală după eliminarea metadatelor",
 	"settings.preserveColorProfile.label": "Păstrează profilul de culoare",
 	"settings.preserveColorProfile.description": "Păstrează profilul ICC pentru culori precise",
+	"settings.preserveResolution.label": "Păstrează rezoluția",
+	"settings.preserveResolution.description": "Păstrează DPI-ul pentru ca imprimările să aibă dimensiunea corectă",
 	"settings.saveAsCopy.label": "Salvează ca o copie",
 	"settings.saveAsCopy.description": "Creează o copie curățată și lasă originalul neatins",
 	"settings.preserveTimestamps.label": "Păstrează data modificării",

@@ -106,6 +106,8 @@
 	"settings.preserveOrientation.description": "Зберігати правильну орієнтацію фотографій після видалення метаданих",
 	"settings.preserveColorProfile.label": "Зберігати колірний профіль",
 	"settings.preserveColorProfile.description": "Зберігати профіль ICC для точної передачі кольорів",
+	"settings.preserveResolution.label": "Зберігати роздільну здатність",
+	"settings.preserveResolution.description": "Зберігати DPI, щоб відбитки мали правильний розмір",
 	"settings.saveAsCopy.label": "Зберігати як копію",
 	"settings.saveAsCopy.description": "Створювати очищену копію, залишаючи оригінал без змін",
 	"settings.preserveTimestamps.label": "Зберігати дату зміни",

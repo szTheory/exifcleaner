@@ -106,6 +106,8 @@
 	"settings.preserveOrientation.description": "Giữ ảnh đúng chiều sau khi xóa siêu dữ liệu",
 	"settings.preserveColorProfile.label": "Giữ nguyên cấu hình màu",
 	"settings.preserveColorProfile.description": "Giữ cấu hình ICC để màu sắc chính xác",
+	"settings.preserveResolution.label": "Giữ nguyên độ phân giải",
+	"settings.preserveResolution.description": "Giữ DPI để ảnh in ra đúng kích thước",
 	"settings.saveAsCopy.label": "Lưu dưới dạng bản sao",
 	"settings.saveAsCopy.description": "Tạo một bản sao đã làm sạch và giữ nguyên tệp gốc",
 	"settings.preserveTimestamps.label": "Giữ nguyên ngày sửa đổi",

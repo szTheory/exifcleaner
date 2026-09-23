@@ -106,6 +106,8 @@
 	"settings.preserveOrientation.description": "Po odstránení metadát ponechať fotografie správne otočené",
 	"settings.preserveColorProfile.label": "Zachovať farebný profil",
 	"settings.preserveColorProfile.description": "Zachovať profil ICC na presné zobrazenie farieb",
+	"settings.preserveResolution.label": "Zachovať rozlíšenie",
+	"settings.preserveResolution.description": "Zachovať DPI, aby výtlačky mali správnu veľkosť",
 	"settings.saveAsCopy.label": "Uložiť ako kópiu",
 	"settings.saveAsCopy.description": "Vytvoriť vyčistenú kópiu a ponechať originál nedotknutý",
 	"settings.preserveTimestamps.label": "Zachovať dátum úpravy",
