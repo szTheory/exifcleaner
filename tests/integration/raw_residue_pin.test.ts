@@ -1127,7 +1127,9 @@ describe("RAW coverage ledger (RMV-05 criterion 4)", () => {
 	});
 
 	it("every covered fixture name (other than the RAF refusal marker) is a RAW_CASES fixture", () => {
-		const rawCasesFixtures = new Set(RAW_CASES.map((raw) => raw.fixture));
+		const rawCasesFixtures: ReadonlySet<string> = new Set(
+			RAW_CASES.map((raw) => raw.fixture),
+		);
 		for (const [ext, fixture] of Object.entries(RAW_COVERAGE)) {
 			if (fixture === "refused-source-preserved") continue;
 			expect(rawCasesFixtures.has(fixture), `${ext} -> ${fixture}`).toBe(true);
