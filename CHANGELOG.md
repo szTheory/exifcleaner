@@ -17,6 +17,7 @@
 - Only the first page of a multi-page TIFF is cleaned; later pages keep their own ImageDescription, Software, Artist and Copyright, because ExifTool cannot delete a later page's tag directory without also deleting its image data. HostComputer, DocumentName and CameraSerialNumber also remain on the first page — they sit outside the tag set the fix above removes.
 - Some RAW maker-note tags stay because ExifTool cannot delete them: on CR2, the Canon maker-note SerialNumber; on CR3, the Canon maker-note ImageUniqueID, TimeZone, TimeZoneCity and DaylightSavings, and the capture TimeStamp in its metadata track. The Canon maker-note OwnerName (CR2, CR3) and InternalSerialNumber (CR3) are emptied rather than removed. The app's still-present tag count includes these residual tags without telling them apart from ordinary structural fields. The RAW fix was measured on CR2, CR3, DNG and RW2 sample files — ARW, NEF, ORF, PEF and SRW have no test file and no claim is made for them. RAF files are still refused and left untouched.
 - With Save as copy on, WebP files are cleaned by the built-in WebP cleaner, which does not keep resolution, whether Preserve resolution is on or off. WebP resolution is kept only when Save as copy is off.
+- A file whose write takes longer than 30 seconds is reported as a failed clean, but the cleaning engine keeps writing in the background: with Save as copy on, this leaves a full-size, unverified copy of the cleaned output that the app never reports; with Save as copy off, it leaves a hidden, similarly full-size file beside the original that the app also never reports (measured). The original file itself is never changed (measured). On the local SSD this was measured on (about 2.1 GB/s), that 30-second cutoff lands at around 62 GB; slower disks reach it at correspondingly smaller file sizes, which is not separately measured here. If that write is still running when the app moves on to the next file in the same batch, that next file can also fail with its own 30-second timeout (the mechanism is measured; the exact size threshold is derived from the measured throughput above, not independently measured per file). When the destination disk runs out of space entirely, the write fails outright and leaves no partial output file behind; the original file is confirmed unchanged (measured on a small dedicated test volume).
 
 ## 4.2.1
 
@@ -109,6 +110,7 @@ Complete modernization of ExifCleaner after a 5-year hiatus. Every layer of the 
   _Correction, 2026-09-22: this entry originally and incorrectly described the release workflow
   as performing macOS code signing and notarization. It never has. Releases are unsigned by
   explicit maintainer policy (#362)._
+
 - SHASUMS256.txt generated automatically for all release artifacts
 - Translations: Persian, Catalan, Croatian updates merged
 
