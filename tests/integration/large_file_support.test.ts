@@ -5,12 +5,11 @@
 // dual-half real-ExifTool proofs that are negative controls in substance but not in the
 // numbered ledger. The ~4 GiB output write below is an accepted, bounded cost that criterion
 // 3 does not cover -- only the sparse *input* fixture is free.
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ExifToolAdapter } from "../../src/infrastructure/exiftool/exiftool_adapter";
 import { ExiftoolProcess } from "../../src/infrastructure/exiftool/ExiftoolProcess";
 import { OutputTransaction } from "../../src/main/output_transaction";
@@ -23,6 +22,49 @@ import {
 	createSparseLargeMp4,
 	sha256OfFileStreamed,
 } from "../helpers/large_file_fixture";
+
+// D-50 negative control (Task 3). This constant and class are the ONLY place in the test tree
+// that injects `-api LargeFileSupport=0` -- product code (src/) never gains this argument
+// (D-48). Measured via Task 2's spike: the write/transaction path surfaces the exact #194 text
+// only on stderr (never in ExifToolResult.error, which carries ExifTool's generic
+// "0 image files updated" summary instead); the read/inspect path surfaces it through the
+// `-G1:2:4`-qualified `ExifTool:Warning` JSON key, which `classifyInspectionDiagnostics`
+// treats as fatal for `purpose: "display"`, landing in `inspect()`'s own `error.detail`.
+const LARGE_FILE_SUPPORT_DISABLED_ARGS = [
+	"-api",
+	"LargeFileSupport=0",
+] as const;
+
+class LargeFileSupportDisabledProcess extends ExiftoolProcess {
+	override async readMetadata({
+		filePath,
+		args,
+	}: {
+		filePath: string;
+		args: string[];
+	}): ReturnType<ExiftoolProcess["readMetadata"]> {
+		return super.readMetadata({
+			filePath,
+			args: [...LARGE_FILE_SUPPORT_DISABLED_ARGS, ...args],
+		});
+	}
+
+	override async writeMetadata({
+		filePath,
+		metadata,
+		extraArgs,
+	}: {
+		filePath: string;
+		metadata: Record<string, unknown>;
+		extraArgs: string[];
+	}): ReturnType<ExiftoolProcess["writeMetadata"]> {
+		return super.writeMetadata({
+			filePath,
+			metadata,
+			extraArgs: [...LARGE_FILE_SUPPORT_DISABLED_ARGS, ...extraArgs],
+		});
+	}
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const EXIFTOOL_PATH =
@@ -157,6 +199,122 @@ describe.skipIf(process.platform === "win32")(
 			const after = snapshotDir(dir);
 			assertDirEffect(before, after, {
 				added: ["normal_cleaned.mp4", "large_cleaned.mp4"],
+				modified: [],
+				removed: [],
+				unchanged: ["normal.mp4", "large.mp4"],
+			});
+		}, 180_000);
+
+		it("negative control: injecting -api LargeFileSupport=0 reproduces #194's exact text and fails only the >4 GiB file", async () => {
+			const dir = fs.mkdtempSync(path.join(os.tmpdir(), "large-file-nc-"));
+			temporaryDirs.push(dir);
+			assertLargeFileHost({ dir: os.tmpdir() });
+
+			const normalSource = path.join(dir, "normal.mp4");
+			fs.copyFileSync(SAMPLE_MP4, normalSource);
+
+			const largeSource = path.join(dir, "large.mp4");
+			createSparseLargeMp4({ destination: largeSource });
+			const largeSourceDigestBefore = sha256OfFileStreamed({
+				filePath: largeSource,
+			});
+
+			const before = snapshotDir(dir);
+
+			const exiftoolProcess = new LargeFileSupportDisabledProcess({
+				binPath: EXIFTOOL_PATH,
+			});
+			const adapter = new ExifToolAdapter({ process: exiftoolProcess });
+			const transaction = buildOutputTransaction(exiftoolProcess);
+
+			const normalGeneratedPath = path.join(dir, "normal_cleaned.mp4");
+			const largeGeneratedPath = path.join(dir, "large_cleaned.mp4");
+
+			const warnLines: string[] = [];
+			const warnSpy = vi
+				.spyOn(console, "warn")
+				.mockImplementation((...args: unknown[]) => {
+					warnLines.push(args.map((a) => String(a)).join(" "));
+				});
+
+			await exiftoolProcess.open();
+			let normalResult: Awaited<ReturnType<typeof transaction.execute>>;
+			let largeInspect: Awaited<ReturnType<typeof adapter.inspect>>;
+			let largeResult: Awaited<ReturnType<typeof transaction.execute>>;
+			try {
+				normalResult = await transaction.execute({
+					filePath: normalSource,
+					generatedPath: normalGeneratedPath,
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+					preserveTimestamps: false,
+				});
+				expect(normalResult).toEqual({
+					ok: true,
+					value: { outputPath: normalGeneratedPath },
+				});
+
+				// JSON-warning read channel (Task 2, Q2_READ_TEXT_CHANNEL): the exact
+				// text surfaces in the display inspect result's own error.detail.
+				largeInspect = await adapter.inspect({
+					source: largeSource,
+					purpose: "display",
+				});
+				expect(largeInspect).toEqual({
+					ok: false,
+					error: {
+						code: "engine-error",
+						detail:
+							"End of processing at large atom (LargeFileSupport not enabled)",
+						backend: "exiftool",
+					},
+				});
+
+				largeResult = await transaction.execute({
+					filePath: largeSource,
+					generatedPath: largeGeneratedPath,
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+					preserveTimestamps: false,
+				});
+				expect(largeResult).toEqual({
+					ok: false,
+					error: { code: "write-failed" },
+				});
+
+				// stderr channel (Task 2, Q2_WRITE_TEXT_CHANNEL): the write path never
+				// surfaces the exact text through ExifToolResult.error, only via the
+				// console.warn-routed stderr line. Poll with real timers since the line
+				// can arrive asynchronously relative to the rejected/resolved promise.
+				const deadline = Date.now() + 5000;
+				let found = warnLines.some((line) =>
+					line.includes(
+						"End of processing at large atom (LargeFileSupport not enabled)",
+					),
+				);
+				while (!found && Date.now() < deadline) {
+					await new Promise((resolve) => setTimeout(resolve, 50));
+					found = warnLines.some((line) =>
+						line.includes(
+							"End of processing at large atom (LargeFileSupport not enabled)",
+						),
+					);
+				}
+				expect(found).toBe(true);
+			} finally {
+				warnSpy.mockRestore();
+				await exiftoolProcess.close();
+			}
+
+			expect(sha256OfFileStreamed({ filePath: largeSource })).toBe(
+				largeSourceDigestBefore,
+			);
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				added: ["normal_cleaned.mp4"],
 				modified: [],
 				removed: [],
 				unchanged: ["normal.mp4", "large.mp4"],
