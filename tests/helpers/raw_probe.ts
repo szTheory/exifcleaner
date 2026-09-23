@@ -192,4 +192,85 @@ export const RAW_CASES = [
 		imageDataHash:
 			"d3304d1033409471ca0273565fc2244c3dcae35b1d4cfbd5d1d3b546ad55b729",
 	},
+	{
+		fixture: "DNG.dng",
+		decoderKeys: [
+			"IFD0:Make",
+			"IFD0:Model",
+			"IFD0:UniqueCameraModel",
+			"IFD0:LocalizedCameraModel",
+			"IFD0:DNGVersion",
+			"IFD0:DNGBackwardVersion",
+			"IFD0:ColorMatrix1",
+			"IFD0:ColorMatrix2",
+			"IFD0:CameraCalibration1",
+			"IFD0:CameraCalibration2",
+			"IFD0:AnalogBalance",
+			"IFD0:AsShotNeutral",
+			"IFD0:BaselineExposure",
+			"IFD0:CalibrationIlluminant1",
+			"IFD0:CalibrationIlluminant2",
+			"SubIFD:CFAPattern2",
+			"SubIFD:BlackLevel",
+			"SubIFD:WhiteLevel",
+			"SubIFD:DefaultCropOrigin",
+			"SubIFD:DefaultCropSize",
+			"SubIFD:ActiveArea",
+		],
+		residueAllowlist: [],
+		sourceIdentifyingKeys: [
+			"IFD0:Artist",
+			"IFD0:CameraSerialNumber",
+			"IFD0:RawDataUniqueID",
+			"GPS:GPSLatitude",
+		],
+		imageDataHash:
+			"a5d9ce3239ccd1a3fd6c754cf0687adc001e9c1a76eaf5629ea5254b84ffe36d",
+	},
+	{
+		fixture: "CanonRaw.cr3",
+		decoderKeys: ["IFD0:Make", "IFD0:Model"],
+		// Measured this session (-a -G3:1): the Track4 TimeStamp's own group-3 key carries a
+		// Doc2: prefix (not Doc1:), since Doc1 is the CTMD metadata track and Doc2 is the
+		// video track that owns Track4 -- confirm by measurement, never assume Doc1.
+		residueAllowlist: [
+			"Canon:ImageUniqueID",
+			"Canon:TimeZone",
+			"Canon:TimeZoneCity",
+			"Canon:DaylightSavings",
+			"Doc2:Track4:TimeStamp",
+		],
+		sourceIdentifyingKeys: [
+			"IFD0:Artist",
+			"ExifIFD:SubSecTimeOriginal",
+			"Canon:InternalSerialNumber",
+			"GPS:GPSLatitude",
+		],
+		imageDataHash:
+			"9cafd813dcbb0e052ed7fbc884b2d2effb48e21da450d4557799cbe12a28ee9a",
+	},
+	{
+		fixture: "Panasonic.rw2",
+		decoderKeys: [
+			"IFD0:Make",
+			"IFD0:Model",
+			"IFD0:PanasonicRawVersion",
+			"IFD0:SensorWidth",
+			"IFD0:SensorHeight",
+			"IFD0:CFAPattern",
+			"IFD0:BitsPerSample",
+			"IFD0:Compression",
+			"IFD0:WBRedLevel",
+			"IFD0:WBBlueLevel",
+		],
+		residueAllowlist: [],
+		sourceIdentifyingKeys: [
+			"Doc1:IFD0:Artist",
+			"ExifIFD:UserComment",
+			"ExifIFD:SerialNumber",
+			"GPS:GPSLatitude",
+		],
+		imageDataHash:
+			"9627274f585b59c68181d64b4e23d95e38d59eb68c3054cffc08755e7a79dac1",
+	},
 ] as const;
