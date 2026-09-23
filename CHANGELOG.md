@@ -2,6 +2,10 @@
 
 ## 4.4.0
 
+### Added
+
+- A **Preserve resolution** setting, on by default, keeps a cleaned file's print resolution (DPI) exactly as the source recorded it — JPEG JFIF and EXIF resolution and PNG pHYs — so printed sizes do not change; GPS, author, software and comment metadata are still removed. Existing settings pick it up turned on after upgrading. Turning it off restores the previous behavior of removing resolution too
+
 ### Fixed
 
 - Corrected a 4.0.0 changelog entry that falsely claimed the release workflow performs macOS code signing and notarization; releases are unsigned by explicit maintainer policy (#362)
@@ -12,6 +16,7 @@
 
 - Only the first page of a multi-page TIFF is cleaned; later pages keep their own ImageDescription, Software, Artist and Copyright, because ExifTool cannot delete a later page's tag directory without also deleting its image data. HostComputer, DocumentName and CameraSerialNumber also remain on the first page — they sit outside the tag set the fix above removes.
 - Some RAW maker-note tags stay because ExifTool cannot delete them: on CR2, the Canon maker-note SerialNumber; on CR3, the Canon maker-note ImageUniqueID, TimeZone, TimeZoneCity and DaylightSavings, and the capture TimeStamp in its metadata track. The Canon maker-note OwnerName (CR2, CR3) and InternalSerialNumber (CR3) are emptied rather than removed. The app's still-present tag count includes these residual tags without telling them apart from ordinary structural fields. The RAW fix was measured on CR2, CR3, DNG and RW2 sample files — ARW, NEF, ORF, PEF and SRW have no test file and no claim is made for them. RAF files are still refused and left untouched.
+- With Save as copy on, WebP files are cleaned by the built-in WebP cleaner, which does not keep resolution, whether Preserve resolution is on or off. WebP resolution is kept only when Save as copy is off.
 
 ## 4.2.1
 
