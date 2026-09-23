@@ -352,7 +352,7 @@ describe.skipIf(process.platform === "win32")(
 			expect(source).toMatch(/const EXIFTOOL_COMMAND_TIMEOUT_MS = 30000;/);
 		});
 
-		it("timeout pin: a 30 s timeout during a real >4 GiB overwrite-mode write reports failure, leaves the source unchanged and leaves an unreported full-size staged file", async () => {
+		it("timeout pin: a 30 s timeout during a real >4 GiB overwrite-mode write reports failure, leaves the source unchanged and leaves an unreported full-size staged file, the next command cascades, and the late ready is dropped", async () => {
 			const dir = fs.mkdtempSync(path.join(os.tmpdir(), "large-file-timeout-"));
 			temporaryDirs.push(dir);
 			assertLargeFileHost({ dir: os.tmpdir() });
@@ -422,19 +422,68 @@ describe.skipIf(process.platform === "win32")(
 						ok: false,
 						error: { code: "write-failed" },
 					});
+
+					// Hypothesis (b), the batch cascade: fake timers are still installed
+					// and the real >4 GiB write is still running in the background (a
+					// real write takes seconds; fake time above advanced instantly). This
+					// is the renderer's next command for the next file --
+					// use_process_files.ts:20's sequential per-file loop means a display
+					// read of normal.mp4 is what the queue sends next, and it registers
+					// its own real setTimeout under the same fake clock.
+					const cascadeRead = adapter.inspect({
+						source: normalSource,
+						purpose: "display",
+					});
+
+					let cascadeTurns = 0;
+					while (vi.getTimerCount() !== 1) {
+						if (cascadeTurns >= 200) {
+							throw new Error("cascade command timer never registered");
+						}
+						await Promise.resolve();
+						cascadeTurns += 1;
+					}
+
+					await vi.advanceTimersByTimeAsync(PRODUCT_COMMAND_TIMEOUT_MS);
+					const cascadeResult = await cascadeRead;
+					// Measured: readInspection's catch block maps the rejected
+					// sendCommand promise to { code: "process-not-open" }, which
+					// toMetadataEngineError widens to engine-unavailable -- the
+					// adapter's own timeout mapping, not a crash or a cross-wired
+					// result from the first (still-orphaned) command.
+					expect(cascadeResult).toEqual({
+						ok: false,
+						error: { code: "engine-unavailable", backend: "exiftool" },
+					});
 				} finally {
 					vi.useRealTimers();
 				}
 
-				// ExifTool's -stay_open protocol processes commands strictly in order
-				// over one pipe, so this display read of normal.mp4 resolves only
-				// after the real, still-running write from the timed-out command
-				// finishes and flushes its own late {readyN} marker (real timers).
+				// Hypothesis (c) and the LRG-02 concurrency edge: once the queue drains
+				// under real timers, a further display read of normal.mp4 resolves ok
+				// with its own record -- the dropped late {readyN} of the timed-out
+				// commands above is never delivered to a later command.
+				// adapter.inspect's cleaned "display" metadata excludes
+				// SourceFile/FileName/FileType as structural fields (measured: System/
+				// File-group tags are stripped by exif.ts's STRUCTURAL_GROUPS before
+				// this shape is built, so neither field ever reaches this result) --
+				// identity is proven instead by the fixture's own known embedded
+				// content, not a filename field.
 				const normalInspect = await adapter.inspect({
 					source: normalSource,
 					purpose: "display",
 				});
-				expect(normalInspect.ok).toBe(true);
+				expect(normalInspect).toEqual({
+					ok: true,
+					value: {
+						metadata: expect.objectContaining({
+							"Audio:Artist": "Test Author",
+							"Audio:Title": "Test Video",
+						}),
+						recordCount: 1,
+						verification: {},
+					},
+				});
 
 				// Hypothesis (a), measured: the timeout only deleted the pending-
 				// command entry and rejected (ExiftoolProcess.ts:209-213) -- it never
@@ -461,6 +510,11 @@ describe.skipIf(process.platform === "win32")(
 				largeSourceDigestBefore,
 			);
 
+			// assertDirEffect is unchanged from Task 1: the two extra display reads
+			// (hypotheses (b) and (c)) write nothing, so the only directory mutation is
+			// still the one orphaned staged file. Large-then-normal success ordering
+			// outside a timeout remains a deferred CONTEXT item (not claimed here) --
+			// a normal command follows a large one only in this timeout scenario.
 			const after = snapshotDir(dir);
 			assertDirEffect(before, after, {
 				added: [".large.exifcleaner-stage-test.mp4"],
