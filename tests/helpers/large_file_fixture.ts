@@ -114,18 +114,25 @@ export function assertSparse({
 
 /**
  * Pure classifier: returns a reason string when the host is unsuitable for a real multi-GiB
- * write, or null when it is fine. `fsType` is compared against the two magic numbers named
- * above; `freeBytes`/`minFreeBytes` are both in bytes.
+ * write, or null when it is fine. Windows is refused by name: the sparse fixture relies on
+ * POSIX truncate-past-EOF holes and `st_blocks`, and CI runs vitest only on ubuntu-24.04.
+ * `fsType` is compared against the two magic numbers named above; `freeBytes`/`minFreeBytes`
+ * are both in bytes.
  */
 export function classifyLargeFileHost({
+	platform,
 	freeBytes,
 	fsType,
 	minFreeBytes,
 }: {
+	platform: NodeJS.Platform;
 	freeBytes: number;
 	fsType: number;
 	minFreeBytes: number;
 }): string | null {
+	if (platform === "win32") {
+		return "Windows is unsupported -- the sparse fixture needs POSIX truncate-past-EOF holes and st_blocks, and CI runs vitest only on ubuntu-24.04";
+	}
 	if (freeBytes < minFreeBytes) {
 		return `only ${freeBytes} bytes free, need at least ${minFreeBytes}`;
 	}
@@ -143,6 +150,7 @@ export function assertLargeFileHost({ dir }: { dir: string }): void {
 	const stats = fs.statfsSync(dir);
 	const freeBytes = stats.bavail * stats.bsize;
 	const reason = classifyLargeFileHost({
+		platform: process.platform,
 		freeBytes,
 		fsType: stats.type,
 		minFreeBytes: LARGE_FILE_MIN_FREE_BYTES,

@@ -27,6 +27,7 @@ describe("large_file_fixture gates", () => {
 		it("returns a reason naming both free-byte figures when freeBytes is one below minFreeBytes", () => {
 			const minFreeBytes = 6 * 1024 * 1024 * 1024;
 			const reason = classifyLargeFileHost({
+				platform: "linux",
 				freeBytes: minFreeBytes - 1,
 				fsType: EXT4_MAGIC,
 				minFreeBytes,
@@ -38,6 +39,7 @@ describe("large_file_fixture gates", () => {
 
 		it("returns a tmpfs reason for fsType 0x01021994", () => {
 			const reason = classifyLargeFileHost({
+				platform: "linux",
 				freeBytes: 100 * 1024 * 1024 * 1024,
 				fsType: 0x01021994,
 				minFreeBytes: 6 * 1024 * 1024 * 1024,
@@ -48,6 +50,7 @@ describe("large_file_fixture gates", () => {
 
 		it("returns a ramfs reason for fsType 0x858458f6", () => {
 			const reason = classifyLargeFileHost({
+				platform: "linux",
 				freeBytes: 100 * 1024 * 1024 * 1024,
 				fsType: 0x858458f6,
 				minFreeBytes: 6 * 1024 * 1024 * 1024,
@@ -56,8 +59,20 @@ describe("large_file_fixture gates", () => {
 			expect(reason).toContain("ramfs");
 		});
 
+		it("returns a Windows reason for platform win32 even on an otherwise suitable host", () => {
+			const reason = classifyLargeFileHost({
+				platform: "win32",
+				freeBytes: 100 * 1024 * 1024 * 1024,
+				fsType: EXT4_MAGIC,
+				minFreeBytes: 6 * 1024 * 1024 * 1024,
+			});
+			expect(reason).not.toBeNull();
+			expect(reason).toContain("Windows");
+		});
+
 		it("returns null for a large-free ext4 host", () => {
 			const reason = classifyLargeFileHost({
+				platform: "linux",
 				freeBytes: 100 * 1024 * 1024 * 1024,
 				fsType: EXT4_MAGIC,
 				minFreeBytes: 6 * 1024 * 1024 * 1024,
