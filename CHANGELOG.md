@@ -12,6 +12,10 @@
 - TIFF files cleaned with default settings no longer keep the descriptive and camera tags on their first page's main image directory (IFD0) — ImageDescription, Make, Model, Software, ModifyDate, Artist, Copyright, Rating and the Windows XP title, comment, author, keyword and subject tags — which ExifTool's blanket `-all=` delete cannot remove from a TIFF; image data is unchanged. TIFF writes now go through the staged, verified output path in both save-as-copy and overwrite mode, so a failed write leaves the original untouched (#199)
 - RAW files (CR2, CR3, DNG, RW2 and the other supported RAW formats) cleaned with default settings no longer keep identifying text (Artist, Software, ImageDescription, Copyright, the Windows XP title/comment/author/keyword/subject tags and the user comment), camera body and lens serial numbers, owner names, the DNG raw-data ID and original raw file name, or capture dates and time offsets that ExifTool can delete; Make, Model and the DNG camera and color tags are kept unchanged, and the image data is unchanged
 
+### Verified
+
+- Files larger than 4 GB, such as long videos, have been cleaned successfully since 4.0.0. ExifTool 12.88 (July 2024) made its large-file support the default, and 4.0.0 was the first ExifCleaner release to bundle a newer ExifTool (13.50; this release bundles 13.59). ExifCleaner's own code did not change for this. 4.4.0 adds a regression test whose negative control reproduces the old "LargeFileSupport not enabled" failure, so a future ExifTool update cannot silently bring it back.
+
 ### Known limitations
 
 - Only the first page of a multi-page TIFF is cleaned; later pages keep their own ImageDescription, Software, Artist and Copyright, because ExifTool cannot delete a later page's tag directory without also deleting its image data. HostComputer, DocumentName and CameraSerialNumber also remain on the first page — they sit outside the tag set the fix above removes.
