@@ -13,6 +13,7 @@ type StripMetadataRequest = {
 	outputMode: "copy" | "overwrite";
 	preserveOrientation: boolean;
 	preserveColorProfile: boolean;
+	preserveResolution: boolean;
 	preserveTimestamps: boolean;
 	saveAsCopy: boolean;
 	outputPath: string;
@@ -48,6 +49,7 @@ export class OutputTransaction {
 		commitPath,
 		preserveOrientation,
 		preserveColorProfile,
+		preserveResolution,
 		preserveTimestamps,
 		signal,
 	}: {
@@ -56,6 +58,7 @@ export class OutputTransaction {
 		commitPath?: string | undefined;
 		preserveOrientation: boolean;
 		preserveColorProfile: boolean;
+		preserveResolution: boolean;
 		preserveTimestamps: boolean;
 		signal?: AbortSignal | undefined;
 	}): Promise<Result<{ outputPath: string }, OutputTransactionFailure>> {
@@ -68,6 +71,7 @@ export class OutputTransaction {
 			outputMode: "copy",
 			preserveOrientation,
 			preserveColorProfile,
+			preserveResolution,
 			preserveTimestamps,
 			saveAsCopy: true,
 			outputPath: generatedPath,

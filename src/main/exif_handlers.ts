@@ -87,6 +87,7 @@ export function setupExifHandlers({
 					commitPath: outputPath === undefined ? filePath : undefined,
 					preserveOrientation: settings.preserveOrientation,
 					preserveColorProfile: settings.preserveColorProfile,
+					preserveResolution: settings.preserveResolution,
 					preserveTimestamps: settings.preserveTimestamps,
 				});
 				if (transactionResult.ok) {
@@ -105,6 +106,7 @@ export function setupExifHandlers({
 				outputMode,
 				preserveOrientation: settings.preserveOrientation,
 				preserveColorProfile: settings.preserveColorProfile,
+				preserveResolution: settings.preserveResolution,
 				preserveTimestamps: settings.preserveTimestamps,
 				saveAsCopy,
 				outputPath,

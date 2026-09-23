@@ -60,6 +60,24 @@ export const RAW_IDENTIFYING_TAG_DELETES = [
 	"-ExifIFD:SubSecTimeDigitized=",
 ] as const;
 
+// FID-01/FID-02: each group is copied back to itself so the output's resolution is exactly
+// what the source recorded, where it recorded it. The bare un-grouped form was measured to
+// drop a JFIF DPI that conflicts with EXIF, synthesize an EXIF block on a JFIF-only JPEG and
+// duplicate resolution into XMP on CR3; PNG keeps its resolution in the pHYs chunk, which
+// only the PNG group reaches. Passed for every format (measured benign) because RAF is the
+// one RAW that loses resolution to the blanket delete.
+export const RESOLUTION_PRESERVE_ARGS = [
+	"-JFIF:XResolution>JFIF:XResolution",
+	"-JFIF:YResolution>JFIF:YResolution",
+	"-JFIF:ResolutionUnit>JFIF:ResolutionUnit",
+	"-IFD0:XResolution>IFD0:XResolution",
+	"-IFD0:YResolution>IFD0:YResolution",
+	"-IFD0:ResolutionUnit>IFD0:ResolutionUnit",
+	"-PNG:PixelsPerUnitX>PNG:PixelsPerUnitX",
+	"-PNG:PixelsPerUnitY>PNG:PixelsPerUnitY",
+	"-PNG:PixelUnits>PNG:PixelUnits",
+] as const;
+
 const COMPUTED_FIELDS = new Set(["SourceFile", "ImageSize", "Megapixels"]);
 // The File group is deliberately NOT a blanket entry here -- see the writability-anchored
 // rule below (FILE_GROUP_WRITABLE_TAGS / FILE_GROUP_STRUCTURAL_OVERRIDE /

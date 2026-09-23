@@ -330,6 +330,7 @@ describe("exif:remove handler", () => {
 			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: true,
 			preserveTimestamps: false,
 			saveAsCopy: true,
 			outputPath: "/dir/photo_cleaned.jpg",

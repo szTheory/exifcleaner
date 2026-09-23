@@ -3,13 +3,14 @@
 
 import type { Result } from "../common/result";
 
-export const CURRENT_SCHEMA_VERSION = 4;
+export const CURRENT_SCHEMA_VERSION = 5;
 
 export type ThemeMode = "light" | "dark" | "system";
 
 export interface Settings {
 	readonly preserveOrientation: boolean;
 	readonly preserveColorProfile: boolean;
+	readonly preserveResolution: boolean;
 	readonly saveAsCopy: boolean;
 	readonly removeXattrs: boolean;
 	readonly preserveTimestamps: boolean;
@@ -20,6 +21,7 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
 	preserveOrientation: true,
 	preserveColorProfile: true,
+	preserveResolution: true,
 	saveAsCopy: true,
 	removeXattrs: false,
 	preserveTimestamps: false,
@@ -66,6 +68,7 @@ export function isSettingsFile(value: unknown): value is SettingsFile {
 	if (
 		typeof settingsObj["preserveOrientation"] !== "boolean" ||
 		typeof settingsObj["preserveColorProfile"] !== "boolean" ||
+		typeof settingsObj["preserveResolution"] !== "boolean" ||
 		typeof settingsObj["saveAsCopy"] !== "boolean" ||
 		typeof settingsObj["removeXattrs"] !== "boolean" ||
 		typeof settingsObj["preserveTimestamps"] !== "boolean"
@@ -98,7 +101,13 @@ export function migrateSettings({ file }: MigrateSettingsParams): {
 	didMigrate: boolean;
 } {
 	if (file.version === CURRENT_SCHEMA_VERSION) {
-		return { settings: file.settings, didMigrate: false };
+		// Fills gaps only, never overwrites a stored value: a hand-edited or
+		// partially-written v5 file missing a field would otherwise load `undefined`
+		// while the type claims `boolean` (D-40).
+		return {
+			settings: { ...DEFAULT_SETTINGS, ...file.settings },
+			didMigrate: false,
+		};
 	}
 
 	let didMigrate = false;
@@ -117,6 +126,7 @@ export function migrateSettings({ file }: MigrateSettingsParams): {
 		settings = {
 			preserveOrientation: preserveRotation,
 			preserveColorProfile: preserveRotation,
+			preserveResolution: settings.preserveResolution,
 			saveAsCopy: settings.saveAsCopy,
 			removeXattrs: settings.removeXattrs,
 			preserveTimestamps: settings.preserveTimestamps,
@@ -138,6 +148,16 @@ export function migrateSettings({ file }: MigrateSettingsParams): {
 		settings = {
 			...settings,
 			language: settings.language === "vn" ? "vi" : settings.language,
+		};
+		didMigrate = true;
+	}
+
+	// v4 -> v5: add the preserve-resolution toggle at its default. Every preserve
+	// toggle is independent -- the value is never inferred from another toggle.
+	if (file.version < 5) {
+		settings = {
+			...settings,
+			preserveResolution: DEFAULT_SETTINGS.preserveResolution,
 		};
 		didMigrate = true;
 	}
@@ -168,6 +188,10 @@ export function validateSettings({
 			typeof raw["preserveColorProfile"] === "boolean"
 				? raw["preserveColorProfile"]
 				: DEFAULT_SETTINGS.preserveColorProfile,
+		preserveResolution:
+			typeof raw["preserveResolution"] === "boolean"
+				? raw["preserveResolution"]
+				: DEFAULT_SETTINGS.preserveResolution,
 		saveAsCopy:
 			typeof raw["saveAsCopy"] === "boolean"
 				? raw["saveAsCopy"]

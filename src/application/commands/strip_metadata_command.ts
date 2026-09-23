@@ -21,6 +21,7 @@ export class StripMetadataCommand {
 		outputMode,
 		preserveOrientation,
 		preserveColorProfile,
+		preserveResolution,
 		preserveTimestamps,
 		outputPath,
 		signal,
@@ -29,6 +30,7 @@ export class StripMetadataCommand {
 		outputMode: "copy" | "overwrite";
 		preserveOrientation: boolean;
 		preserveColorProfile: boolean;
+		preserveResolution: boolean;
 		preserveTimestamps: boolean;
 		saveAsCopy: boolean;
 		outputPath?: string | undefined;
@@ -48,6 +50,7 @@ export class StripMetadataCommand {
 			outputMode,
 			preserveOrientation,
 			preserveColorProfile,
+			preserveResolution,
 			preserveTimestamps,
 			signal,
 		});

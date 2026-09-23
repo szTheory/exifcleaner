@@ -16,6 +16,7 @@ export const settingsGetSchema = z.undefined();
 export const settingsSetSchema = z.object({
 	preserveOrientation: z.boolean().optional(),
 	preserveColorProfile: z.boolean().optional(),
+	preserveResolution: z.boolean().optional(),
 	saveAsCopy: z.boolean().optional(),
 	removeXattrs: z.boolean().optional(),
 	preserveTimestamps: z.boolean().optional(),

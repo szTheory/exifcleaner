@@ -9,8 +9,8 @@ import {
 import type { Settings, SettingsFile } from "../../src/domain/settings_schema";
 
 describe("CURRENT_SCHEMA_VERSION", () => {
-	it("is version 4", () => {
-		expect(CURRENT_SCHEMA_VERSION).toBe(4);
+	it("is version 5", () => {
+		expect(CURRENT_SCHEMA_VERSION).toBe(5);
 	});
 });
 
@@ -137,6 +137,7 @@ describe("isSettingsFile", () => {
 			settings: {
 				preserveOrientation: true,
 				preserveColorProfile: true,
+				preserveResolution: true,
 				saveAsCopy: false,
 				removeXattrs: false,
 				preserveTimestamps: false,
@@ -153,6 +154,7 @@ describe("isSettingsFile", () => {
 			settings: {
 				preserveOrientation: true,
 				preserveColorProfile: true,
+				preserveResolution: true,
 				saveAsCopy: false,
 				removeXattrs: false,
 				preserveTimestamps: false,

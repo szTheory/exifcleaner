@@ -27,6 +27,7 @@ export interface MetadataEnginePort {
 		outputMode,
 		preserveOrientation,
 		preserveColorProfile,
+		preserveResolution,
 		preserveTimestamps,
 		signal,
 	}: {
@@ -35,6 +36,7 @@ export interface MetadataEnginePort {
 		outputMode: "copy" | "overwrite";
 		preserveOrientation: boolean;
 		preserveColorProfile: boolean;
+		preserveResolution: boolean;
 		preserveTimestamps: boolean;
 		signal?: AbortSignal | undefined;
 	}): Promise<Result<void, MetadataEngineError>>;

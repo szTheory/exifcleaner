@@ -63,6 +63,7 @@ describe("Settings schema (D-28)", () => {
 			"language",
 			"preserveColorProfile",
 			"preserveOrientation",
+			"preserveResolution",
 			"preserveTimestamps",
 			"removeXattrs",
 			"saveAsCopy",
@@ -70,14 +71,15 @@ describe("Settings schema (D-28)", () => {
 		]);
 	});
 
-	it("CURRENT_SCHEMA_VERSION equals the literal 4", () => {
-		expect(CURRENT_SCHEMA_VERSION).toBe(4);
+	it("CURRENT_SCHEMA_VERSION equals the literal 5", () => {
+		expect(CURRENT_SCHEMA_VERSION).toBe(5);
 	});
 
 	it("DEFAULT_SETTINGS equals this literal object", () => {
 		expect(DEFAULT_SETTINGS).toEqual({
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: true,
 			saveAsCopy: true,
 			removeXattrs: false,
 			preserveTimestamps: false,

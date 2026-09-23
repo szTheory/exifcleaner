@@ -3,6 +3,7 @@ import { cleanExifData } from "../../domain";
 import {
 	QUICKTIME_DATE_REMOVAL_ARGS,
 	RAW_IDENTIFYING_TAG_DELETES,
+	RESOLUTION_PRESERVE_ARGS,
 } from "../../domain/exif/exif";
 import {
 	isMediaFile,
@@ -257,6 +258,7 @@ export class ExifToolAdapter implements MetadataEnginePort {
 		destination,
 		preserveOrientation,
 		preserveColorProfile,
+		preserveResolution,
 		preserveTimestamps,
 		signal,
 	}: Parameters<MetadataEnginePort["sanitize"]>[0]): ReturnType<
@@ -288,6 +290,7 @@ export class ExifToolAdapter implements MetadataEnginePort {
 		const preserveTags: string[] = [];
 		if (preserveOrientation) preserveTags.push("-Orientation");
 		if (preserveColorProfile) preserveTags.push("-ICC_Profile");
+		if (preserveResolution) preserveTags.push(...RESOLUTION_PRESERVE_ARGS);
 		if (preserveTags.length > 0) {
 			extraArgs.push("-TagsFromFile", "@", ...preserveTags);
 		}
