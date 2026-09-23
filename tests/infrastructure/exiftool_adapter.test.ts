@@ -5,6 +5,7 @@ import { UnsafeExifToolPathError } from "../../src/infrastructure/exiftool/Exift
 import {
 	QUICKTIME_DATE_REMOVAL_ARGS,
 	RAW_IDENTIFYING_TAG_DELETES,
+	RESOLUTION_PRESERVE_ARGS,
 } from "../../src/domain/exif/exif";
 
 // Hand-written literals, never spread from the product constants -- a dropped or reordered
@@ -46,6 +47,20 @@ const EXPECTED_QUICKTIME = [
 	"-TrackModifyDate=",
 	"-MediaCreateDate=",
 	"-MediaModifyDate=",
+];
+
+// Hand-written literal, never spread from the product constant -- a dropped, reordered or
+// bare token in RESOLUTION_PRESERVE_ARGS must show up as a red diff here (FID-01, FID-02, D-31).
+const EXPECTED_RESOLUTION_ARGS = [
+	"-JFIF:XResolution>JFIF:XResolution",
+	"-JFIF:YResolution>JFIF:YResolution",
+	"-JFIF:ResolutionUnit>JFIF:ResolutionUnit",
+	"-IFD0:XResolution>IFD0:XResolution",
+	"-IFD0:YResolution>IFD0:YResolution",
+	"-IFD0:ResolutionUnit>IFD0:ResolutionUnit",
+	"-PNG:PixelsPerUnitX>PNG:PixelsPerUnitX",
+	"-PNG:PixelsPerUnitY>PNG:PixelsPerUnitY",
+	"-PNG:PixelUnits>PNG:PixelUnits",
 ];
 
 function makeFakeProcess(overrides: Partial<Record<string, unknown>> = {}) {
@@ -674,6 +689,288 @@ describe("ExifToolAdapter.sanitize", () => {
 		const call = vi.mocked(fakeProcess.writeMetadata).mock.calls[0]?.[0];
 		expect(call?.extraArgs).toContain("-CommonIFD0=");
 	});
+
+	it("emits the exact overwrite-mode JPEG argument list with orientation, ICC and resolution preservation on (FID-01, FID-02, D-31)", async () => {
+		const fakeProcess = makeFakeProcess();
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		await adapter.sanitize({
+			source: "/tmp/photo.jpg",
+			outputMode: "overwrite",
+			preserveOrientation: true,
+			preserveColorProfile: true,
+			preserveResolution: true,
+			preserveTimestamps: false,
+		});
+
+		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/photo.jpg",
+			metadata: {},
+			extraArgs: [
+				"-all=",
+				"-TagsFromFile",
+				"@",
+				"-Orientation",
+				"-ICC_Profile",
+				...EXPECTED_RESOLUTION_ARGS,
+				"-overwrite_original",
+			],
+		});
+	});
+
+	it("emits the exact overwrite-mode JPEG argument list with resolution preservation only (FID-01, FID-02, D-31)", async () => {
+		const fakeProcess = makeFakeProcess();
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		await adapter.sanitize({
+			source: "/tmp/photo.jpg",
+			outputMode: "overwrite",
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: true,
+			preserveTimestamps: false,
+		});
+
+		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/photo.jpg",
+			metadata: {},
+			extraArgs: [
+				"-all=",
+				"-TagsFromFile",
+				"@",
+				...EXPECTED_RESOLUTION_ARGS,
+				"-overwrite_original",
+			],
+		});
+	});
+
+	it("emits the exact overwrite-mode JPEG argument list with resolution and timestamp preservation, the nine then -P then -overwrite_original (FID-01, FID-02, D-31)", async () => {
+		const fakeProcess = makeFakeProcess();
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		await adapter.sanitize({
+			source: "/tmp/photo.jpg",
+			outputMode: "overwrite",
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: true,
+			preserveTimestamps: true,
+		});
+
+		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/photo.jpg",
+			metadata: {},
+			extraArgs: [
+				"-all=",
+				"-TagsFromFile",
+				"@",
+				...EXPECTED_RESOLUTION_ARGS,
+				"-P",
+				"-overwrite_original",
+			],
+		});
+	});
+
+	it("emits the exact copy-mode PNG argument list with default preservation, the nine after -ICC_Profile (FID-01, FID-02, D-31)", async () => {
+		const fakeProcess = makeFakeProcess();
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		await adapter.sanitize({
+			source: "/tmp/image.png",
+			destination: "/tmp/image.png.cleaned",
+			outputMode: "copy",
+			preserveOrientation: true,
+			preserveColorProfile: true,
+			preserveResolution: true,
+			preserveTimestamps: false,
+		});
+
+		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/image.png",
+			metadata: {},
+			extraArgs: [
+				"-all=",
+				"-TagsFromFile",
+				"@",
+				"-Orientation",
+				"-ICC_Profile",
+				...EXPECTED_RESOLUTION_ARGS,
+				"-o",
+				"/tmp/image.png.cleaned",
+			],
+		});
+	});
+
+	it("emits the exact copy-mode TIFF argument list with default preservation, including the nine (FID-01, FID-02, D-31)", async () => {
+		const fakeProcess = makeFakeProcess();
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		await adapter.sanitize({
+			source: "/tmp/scan.tif",
+			destination: "/tmp/scan.tif.cleaned",
+			outputMode: "copy",
+			preserveOrientation: true,
+			preserveColorProfile: true,
+			preserveResolution: true,
+			preserveTimestamps: false,
+		});
+
+		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/scan.tif",
+			metadata: {},
+			extraArgs: [
+				"-all=",
+				"-CommonIFD0=",
+				"-TagsFromFile",
+				"@",
+				"-Orientation",
+				"-ICC_Profile",
+				...EXPECTED_RESOLUTION_ARGS,
+				"-o",
+				"/tmp/scan.tif.cleaned",
+			],
+		});
+	});
+
+	it("emits the exact copy-mode CR2 argument list with default preservation, including the nine (FID-01, FID-02, D-31)", async () => {
+		const fakeProcess = makeFakeProcess();
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		await adapter.sanitize({
+			source: "/tmp/photo.cr2",
+			destination: "/tmp/photo.cr2.cleaned",
+			outputMode: "copy",
+			preserveOrientation: true,
+			preserveColorProfile: true,
+			preserveResolution: true,
+			preserveTimestamps: false,
+		});
+
+		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/photo.cr2",
+			metadata: {},
+			extraArgs: [
+				"-all=",
+				...EXPECTED_RAW_DELETES,
+				...EXPECTED_QUICKTIME,
+				"-TagsFromFile",
+				"@",
+				"-Orientation",
+				"-ICC_Profile",
+				...EXPECTED_RESOLUTION_ARGS,
+				"-o",
+				"/tmp/photo.cr2.cleaned",
+			],
+		});
+	});
+
+	it("emits the exact copy-mode MP4 argument list with orientation and ICC off, resolution on (FID-01, FID-02, D-31)", async () => {
+		const fakeProcess = makeFakeProcess();
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		await adapter.sanitize({
+			source: "/tmp/video.mp4",
+			destination: "/tmp/video.mp4.cleaned",
+			outputMode: "copy",
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: true,
+			preserveTimestamps: false,
+		});
+
+		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
+			filePath: "/tmp/video.mp4",
+			metadata: {},
+			extraArgs: [
+				"-all=",
+				...EXPECTED_QUICKTIME,
+				"-TagsFromFile",
+				"@",
+				...EXPECTED_RESOLUTION_ARGS,
+				"-o",
+				"/tmp/video.mp4.cleaned",
+			],
+		});
+	});
+
+	it.each([
+		"photo.jpg",
+		"image.png",
+		"scan.tif",
+		"photo.cr2",
+		"photo.dng",
+		"video.mp4",
+		"photo.webp",
+		"doc.pdf",
+		"image.gif",
+		"photo.heic",
+	])(
+		"with resolution preservation off, no captured argument is a RESOLUTION_PRESERVE_ARGS member: %s (FID-01, FID-02, D-31)",
+		async (fileName) => {
+			const fakeProcess = makeFakeProcess();
+			const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+			await adapter.sanitize({
+				source: `/tmp/${fileName}`,
+				outputMode: "overwrite",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: false,
+				preserveTimestamps: false,
+			});
+
+			const call = vi.mocked(fakeProcess.writeMetadata).mock.calls[0]?.[0];
+			const extraArgs = call?.extraArgs ?? [];
+			const overlap = extraArgs.filter((arg) =>
+				(RESOLUTION_PRESERVE_ARGS as readonly string[]).includes(arg),
+			);
+			expect(overlap).toEqual([]);
+		},
+	);
+
+	it.each([
+		"photo.jpg",
+		"image.png",
+		"scan.tif",
+		"photo.cr2",
+		"photo.dng",
+		"video.mp4",
+		"photo.webp",
+		"doc.pdf",
+		"image.gif",
+		"photo.heic",
+	])(
+		"with resolution preservation on, each of the nine appears exactly once, contiguous and in constant order: %s (FID-01, FID-02, D-31)",
+		async (fileName) => {
+			const fakeProcess = makeFakeProcess();
+			const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+			await adapter.sanitize({
+				source: `/tmp/${fileName}`,
+				outputMode: "overwrite",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: true,
+				preserveTimestamps: false,
+			});
+
+			const call = vi.mocked(fakeProcess.writeMetadata).mock.calls[0]?.[0];
+			const extraArgs = call?.extraArgs ?? [];
+
+			for (const entry of RESOLUTION_PRESERVE_ARGS) {
+				const count = extraArgs.filter((arg) => arg === entry).length;
+				expect(count).toBe(1);
+			}
+
+			const startIndex = extraArgs.indexOf(RESOLUTION_PRESERVE_ARGS[0]);
+			expect(startIndex).toBeGreaterThanOrEqual(0);
+			const actualSlice = extraArgs.slice(
+				startIndex,
+				startIndex + RESOLUTION_PRESERVE_ARGS.length,
+			);
+			expect(actualSlice).toEqual(Array.from(RESOLUTION_PRESERVE_ARGS));
+		},
+	);
 
 	it("does not start a process write for an already-aborted request", async () => {
 		const fakeProcess = makeFakeProcess();

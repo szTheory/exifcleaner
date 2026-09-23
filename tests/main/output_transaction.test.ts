@@ -445,4 +445,36 @@ describe("OutputTransaction", () => {
 			await rm(fixtureDir, { recursive: true, force: true });
 		}
 	});
+
+	it.each([true, false])(
+		"forwards preserveResolution %s to stripMetadata.execute unchanged (FID-01, D-40)",
+		async (preserveResolution) => {
+			const requests: Array<{ preserveResolution: boolean }> = [];
+			const transaction = new OutputTransaction({
+				stripMetadata: {
+					execute: async (request) => {
+						requests.push({ preserveResolution: request.preserveResolution });
+						return { ok: true, value: { tagsRemoved: 0 } };
+					},
+				},
+				verifyGeneratedOutput: {
+					execute: async () => ({ ok: true, value: undefined }),
+				},
+				unlink: async () => undefined,
+				rename: async () => undefined,
+				delay: async () => undefined,
+			});
+
+			await transaction.execute({
+				filePath: originalPath,
+				generatedPath,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution,
+				preserveTimestamps: false,
+			});
+
+			expect(requests).toEqual([{ preserveResolution }]);
+		},
+	);
 });

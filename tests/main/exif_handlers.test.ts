@@ -871,3 +871,81 @@ describe("exif:remove handler", () => {
 		expect(stripMetadata.execute).not.toHaveBeenCalled();
 	});
 });
+
+function makeContainerWithPreserveResolution({
+	saveAsCopy,
+	preserveResolution,
+}: {
+	saveAsCopy: boolean;
+	preserveResolution: boolean;
+}): {
+	container: Container;
+	stripMetadata: { execute: ReturnType<typeof vi.fn> };
+	outputTransaction: { execute: ReturnType<typeof vi.fn> };
+} {
+	const stripMetadata = {
+		execute: vi.fn(async () => ({ ok: true, value: { tagsRemoved: 0 } })),
+	};
+	const outputTransaction = {
+		execute: vi.fn(async (request) => ({
+			ok: true,
+			value: { outputPath: request.commitPath ?? request.generatedPath },
+		})),
+	};
+	const removeXattrCommand = { execute: vi.fn(async () => undefined) };
+	const container = {
+		settings: {
+			get: () => ({
+				...DEFAULT_SETTINGS,
+				saveAsCopy,
+				preserveResolution,
+			}),
+		},
+		readMetadata: {
+			execute: vi.fn(async () => ({ ok: true, value: { Make: "camera" } })),
+		},
+		stripMetadata,
+		outputTransaction,
+		removeXattrCommand,
+	} as unknown as Container;
+	return { container, stripMetadata, outputTransaction };
+}
+
+describe("exif:remove forwards the actual preserveResolution setting (FID-01, D-40)", () => {
+	it.each([true, false])(
+		"a .jpg request reaches stripMetadata.execute with preserveResolution %s (FID-01, D-40)",
+		async (preserveResolution) => {
+			const { container, stripMetadata } = makeContainerWithPreserveResolution({
+				saveAsCopy: false,
+				preserveResolution,
+			});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+
+			expect(stripMetadata.execute).toHaveBeenCalledWith(
+				expect.objectContaining({ preserveResolution }),
+			);
+		},
+	);
+
+	it.each([true, false])(
+		"a .tif request reaches outputTransaction.execute with preserveResolution %s (FID-01, D-40)",
+		async (preserveResolution) => {
+			const { container, outputTransaction } =
+				makeContainerWithPreserveResolution({
+					saveAsCopy: false,
+					preserveResolution,
+				});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			await handler(makeAuthorizedEvent(), "/dir/scan.tif");
+
+			expect(outputTransaction.execute).toHaveBeenCalledWith(
+				expect.objectContaining({ preserveResolution }),
+			);
+		},
+	);
+});

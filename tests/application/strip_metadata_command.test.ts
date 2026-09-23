@@ -112,4 +112,23 @@ describe("semantic sanitization", () => {
 			}),
 		).resolves.toEqual({ ok: false, error: { code: "engine-unavailable" } });
 	});
+
+	it.each([true, false])(
+		"forwards preserveResolution %s to the engine unchanged (FID-01, D-40)",
+		async (preserveResolution) => {
+			await command.execute({
+				filePath: "/tmp/photo.jpg",
+				outputMode: "overwrite",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution,
+				preserveTimestamps: false,
+				saveAsCopy: false,
+			});
+
+			expect(sanitize).toHaveBeenCalledWith(
+				expect.objectContaining({ preserveResolution }),
+			);
+		},
+	);
 });

@@ -3,6 +3,7 @@ import {
 	cleanExifData,
 	QUICKTIME_DATE_REMOVAL_ARGS,
 	RAW_IDENTIFYING_TAG_DELETES,
+	RESOLUTION_PRESERVE_ARGS,
 } from "../../src/domain/exif/exif";
 
 describe("cleanExifData", () => {
@@ -199,5 +200,52 @@ describe("RAW_IDENTIFYING_TAG_DELETES (RMV-05, D-45)", () => {
 		);
 		expect(overlap).toEqual([]);
 		expect(RAW_IDENTIFYING_TAG_DELETES).not.toContain("-CommonIFD0=");
+	});
+});
+
+describe("RESOLUTION_PRESERVE_ARGS (FID-01, FID-02, D-31)", () => {
+	it("equals the hand-written nine-entry literal in Task 1 order (FID-01, FID-02, D-31)", () => {
+		expect(RESOLUTION_PRESERVE_ARGS).toEqual([
+			"-JFIF:XResolution>JFIF:XResolution",
+			"-JFIF:YResolution>JFIF:YResolution",
+			"-JFIF:ResolutionUnit>JFIF:ResolutionUnit",
+			"-IFD0:XResolution>IFD0:XResolution",
+			"-IFD0:YResolution>IFD0:YResolution",
+			"-IFD0:ResolutionUnit>IFD0:ResolutionUnit",
+			"-PNG:PixelsPerUnitX>PNG:PixelsPerUnitX",
+			"-PNG:PixelsPerUnitY>PNG:PixelsPerUnitY",
+			"-PNG:PixelUnits>PNG:PixelUnits",
+		]);
+	});
+
+	it("every entry copies a group to the same group and the same tag: -(JFIF|IFD0|PNG):Tag>Group:Tag (FID-01, FID-02, D-31)", () => {
+		for (const entry of RESOLUTION_PRESERVE_ARGS) {
+			const match = entry.match(
+				/^-(JFIF|IFD0|PNG):([A-Za-z]+)>([A-Za-z0-9]+):([A-Za-z]+)$/,
+			);
+			expect(match).not.toBeNull();
+			if (match !== null) {
+				const [, sourceGroup, sourceTag, destGroup, destTag] = match;
+				expect(destGroup).toBe(sourceGroup);
+				expect(destTag).toBe(sourceTag);
+			}
+		}
+	});
+
+	it("no entry is a bare -XResolution, -YResolution or -ResolutionUnit (the superseded F-3 form) (FID-01, FID-02, D-31)", () => {
+		for (const bare of ["-XResolution", "-YResolution", "-ResolutionUnit"]) {
+			expect(RESOLUTION_PRESERVE_ARGS).not.toContain(bare);
+		}
+	});
+
+	it("shares no element with QUICKTIME_DATE_REMOVAL_ARGS or RAW_IDENTIFYING_TAG_DELETES (FID-01, FID-02, D-31)", () => {
+		const quickTimeOverlap = RESOLUTION_PRESERVE_ARGS.filter((entry) =>
+			(QUICKTIME_DATE_REMOVAL_ARGS as readonly string[]).includes(entry),
+		);
+		const rawOverlap = RESOLUTION_PRESERVE_ARGS.filter((entry) =>
+			(RAW_IDENTIFYING_TAG_DELETES as readonly string[]).includes(entry),
+		);
+		expect(quickTimeOverlap).toEqual([]);
+		expect(rawOverlap).toEqual([]);
 	});
 });
