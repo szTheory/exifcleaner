@@ -84,7 +84,7 @@
 		"@types/react": "^19.3.0",
 		"@types/react-dom": "^19.3.0",
 		"@vitejs/plugin-react": "^5.2.0",
-		"electron": "43.4.1",
+		"electron": "44.4.3",
 		"electron-builder": "26.15.3",
 		"electron-vite": "^5.0.0",
 		"madge": "^8.0.0",
