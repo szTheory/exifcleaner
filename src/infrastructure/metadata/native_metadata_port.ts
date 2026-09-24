@@ -29,6 +29,12 @@ export interface NativeSanitizeRequest {
 	readonly outputMode: "copy";
 	readonly preserveOrientation: boolean;
 	readonly preserveColorProfile: boolean;
+	// Inert pass-through field (52-01 D-33 deviation, user-approved): present only
+	// so this type stays a structural subtype of MetadataEnginePort["sanitize"]'s
+	// request after preserveResolution became required there. Never read by
+	// isNativeCopyCandidate, HybridMetadataEngine or the native adapter — native
+	// WebP copy-mode routing is unchanged.
+	readonly preserveResolution: boolean;
 	readonly preserveTimestamps: boolean;
 	readonly signal?: AbortSignal | undefined;
 }

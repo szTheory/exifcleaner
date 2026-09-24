@@ -206,6 +206,7 @@ describe("P48-NC-6: blast radius", () => {
 				outputMode: "copy",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 				saveAsCopy: true,
 				outputPath,

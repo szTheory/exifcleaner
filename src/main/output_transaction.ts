@@ -3,7 +3,11 @@ import type { ExifError } from "../domain";
 import type { OutputVerificationError } from "../application/queries/verify_generated_output_query";
 
 export type OutputTransactionFailure =
-	| { readonly code: "write-failed" }
+	| {
+			readonly code: "write-failed";
+			readonly timedOut?: true;
+			readonly residualPath?: string;
+	  }
 	| { readonly code: "verification-failed" }
 	| { readonly code: "cleanup-failed"; readonly residualPath: string }
 	| { readonly code: "commit-failed" };
@@ -13,6 +17,7 @@ type StripMetadataRequest = {
 	outputMode: "copy" | "overwrite";
 	preserveOrientation: boolean;
 	preserveColorProfile: boolean;
+	preserveResolution: boolean;
 	preserveTimestamps: boolean;
 	saveAsCopy: boolean;
 	outputPath: string;
@@ -48,6 +53,7 @@ export class OutputTransaction {
 		commitPath,
 		preserveOrientation,
 		preserveColorProfile,
+		preserveResolution,
 		preserveTimestamps,
 		signal,
 	}: {
@@ -56,6 +62,7 @@ export class OutputTransaction {
 		commitPath?: string | undefined;
 		preserveOrientation: boolean;
 		preserveColorProfile: boolean;
+		preserveResolution: boolean;
 		preserveTimestamps: boolean;
 		signal?: AbortSignal | undefined;
 	}): Promise<Result<{ outputPath: string }, OutputTransactionFailure>> {
@@ -68,12 +75,36 @@ export class OutputTransaction {
 			outputMode: "copy",
 			preserveOrientation,
 			preserveColorProfile,
+			preserveResolution,
 			preserveTimestamps,
 			saveAsCopy: true,
 			outputPath: generatedPath,
 			signal,
 		});
 		if (!writeResult.ok) {
+			// D-63: cleanup only runs for the confirmed-dead timeout, never for a generic
+			// write-failed (D-53 stands) -- the writer's process tree is only known dead
+			// in the timeout case, so only that case is safe to unlink.
+			if (
+				writeResult.error.code === "engine-error" &&
+				writeResult.error.confirmedDeadTimeout === true
+			) {
+				const cleanupFailure = await this.cleanup({ generatedPath });
+				if (cleanupFailure === undefined) {
+					return { ok: false, error: { code: "write-failed", timedOut: true } };
+				}
+				// Never propagate cleanup-failed here: its summary says "Couldn't verify
+				// cleaned output", which would be false after a confirmed-dead timeout
+				// (D-66). Stay on write-failed and disclose the residual path instead.
+				return {
+					ok: false,
+					error: {
+						code: "write-failed",
+						timedOut: true,
+						residualPath: generatedPath,
+					},
+				};
+			}
 			return { ok: false, error: { code: "write-failed" } };
 		}
 

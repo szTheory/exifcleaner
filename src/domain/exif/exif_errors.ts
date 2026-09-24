@@ -23,6 +23,9 @@ export type MetadataEngineError =
 			readonly code: "engine-error";
 			readonly detail: string;
 			readonly backend?: "exiftool";
+			// Set only by ExifToolAdapter.sanitize, after ExiftoolProcess confirmed the
+			// writer's process tree exited (D-63). Gates OutputTransaction's cleanup() call.
+			readonly confirmedDeadTimeout?: true;
 	  }
 	| {
 			readonly code: "native-error";

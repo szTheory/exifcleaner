@@ -16,6 +16,11 @@
 *.webp binary
 *.tif binary
 *.tiff binary
+*.cr2 binary
+*.cr3 binary
+*.dng binary
+*.rw2 binary
+*.raf binary
 *.mp4 binary
 *.mov binary
 *.m4a binary
@@ -23,6 +28,11 @@
 *.ico binary
 *.icns binary
 *.icc binary
+*.heic binary
+*.bmp binary
+*.avi binary
+*.wmv binary
+*.svg binary
 
 # Bundled upstream ExifTool distributions (708 Perl files) are vendored, not our code.
 # Without this, GitHub Linguist counts them and labels the repo "Perl" instead of

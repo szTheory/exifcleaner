@@ -30,7 +30,7 @@ if (process.platform === "darwin") {
 
 		test.beforeEach(async () => {
 			({ app, window } = await launchApp({
-				settings: { saveAsCopy: false },
+				settings: { saveAsCopy: false, preserveResolution: false },
 			}));
 			await window.locator(".gear-icon").click();
 			await window.evaluate(() =>

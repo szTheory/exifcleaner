@@ -2,9 +2,31 @@
 
 ## 4.4.0
 
+### Added
+
+- A **Preserve resolution** setting, on by default, keeps a cleaned file's print resolution (DPI) exactly as the source recorded it — JPEG JFIF and EXIF resolution and PNG pHYs — so printed sizes do not change; GPS, author, software and comment metadata are still removed. Existing settings pick it up turned on after upgrading. Turning it off restores the previous behavior of removing resolution too
+
+### Changed
+
+- The Windows portable download is now named `ExifCleaner.<version>.portable.exe`, so it can be told apart from the installer (`ExifCleaner.Setup.<version>.exe`) by filename alone on the releases page (#261)
+
 ### Fixed
 
+- A file whose only removable metadata was a free-text comment, such as a JPEG comment, was reported as having no removable metadata and skipped. It is now counted as carrying metadata and cleaned, and the comment is removed. The same comment field was measured on GIF and RW2 files
 - Corrected a 4.0.0 changelog entry that falsely claimed the release workflow performs macOS code signing and notarization; releases are unsigned by explicit maintainer policy (#362)
+- TIFF files cleaned with default settings no longer keep the descriptive and camera tags on their first page's main image directory (IFD0) — ImageDescription, Make, Model, Software, ModifyDate, Artist, Copyright, Rating and the Windows XP title, comment, author, keyword and subject tags — which ExifTool's blanket `-all=` delete cannot remove from a TIFF; image data is unchanged. TIFF writes now go through the staged, verified output path in both save-as-copy and overwrite mode, so a failed write leaves the original untouched (#199)
+- RAW files (CR2, CR3, DNG, RW2 and the other supported RAW formats) cleaned with default settings no longer keep identifying text (Artist, Software, ImageDescription, Copyright, the Windows XP title/comment/author/keyword/subject tags and the user comment), camera body and lens serial numbers, owner names, the DNG raw-data ID and original raw file name, or capture dates and time offsets that ExifTool can delete; Make, Model and the DNG camera and color tags are kept unchanged, and the image data is unchanged
+
+### Verified
+
+- Files larger than 4 GB, such as long videos, have been cleaned successfully since 4.0.0. ExifTool 12.88 (July 2024) made its large-file support the default, and 4.0.0 was the first ExifCleaner release to bundle a newer ExifTool (13.50; this release bundles 13.59). ExifCleaner's own code did not change for this. 4.4.0 adds a regression test whose negative control reproduces the old "LargeFileSupport not enabled" failure, so a future ExifTool update cannot silently bring it back.
+
+### Known limitations
+
+- Only the first page of a multi-page TIFF is cleaned; later pages keep their own ImageDescription, Software, Artist and Copyright, because ExifTool cannot delete a later page's tag directory without also deleting its image data. HostComputer, DocumentName and CameraSerialNumber also remain on the first page — they sit outside the tag set the fix above removes.
+- Some RAW maker-note tags stay because ExifTool cannot delete them: on CR2, the Canon maker-note SerialNumber; on CR3, the Canon maker-note ImageUniqueID, TimeZone, TimeZoneCity and DaylightSavings, and the capture TimeStamp in its metadata track. The Canon maker-note OwnerName (CR2, CR3) and InternalSerialNumber (CR3) are emptied rather than removed. The app's still-present tag count includes these residual tags without telling them apart from ordinary structural fields. The RAW fix was measured on CR2, CR3, DNG and RW2 sample files — ARW, NEF, ORF, PEF and SRW have no test file and no claim is made for them. RAF files are still refused and left untouched.
+- With Save as copy on, WebP files are cleaned by the built-in WebP cleaner, which does not keep resolution, whether Preserve resolution is on or off. WebP resolution is kept only when Save as copy is off.
+- When a file's write runs past its time limit, the app now stops that ExifTool write, removes the partial output it left, and cleans the remaining files in the batch on a fresh ExifTool session; if the partial output cannot be removed, the file's row shows where it is. The original is unchanged when the write went to a separate output first: with Save as copy on, and for videos, RAW, TIFF and similar files in either mode (measured by the 4.4.0 tests). The time limit for a write is 30 seconds plus one second for every 20 MB of the file. 20 MB per second is an assumed floor for slow disks, not a measured speed, so a write that averages slower than that can still pass its limit and is then stopped and reported as failed. A write that truly hangs, such as on a disconnected network drive, now takes longer to be reported as failed: about 4 minutes for a 4.3 GB file (derived from that formula). With Save as copy off, for formats ExifTool rewrites in place, such as JPEG and PNG, a stop that lands just after ExifTool has replaced the original leaves the original cleaned even though the app reports a failure (traced in ExifTool's code, not measured). When the destination disk runs out of space entirely, the write fails outright and leaves no partial output file behind; the original file is confirmed unchanged (measured on a small dedicated test volume).
 
 ## 4.2.1
 
@@ -97,6 +119,7 @@ Complete modernization of ExifCleaner after a 5-year hiatus. Every layer of the 
   _Correction, 2026-09-22: this entry originally and incorrectly described the release workflow
   as performing macOS code signing and notarization. It never has. Releases are unsigned by
   explicit maintainer policy (#362)._
+
 - SHASUMS256.txt generated automatically for all release artifacts
 - Translations: Persian, Catalan, Croatian updates merged
 

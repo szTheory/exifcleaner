@@ -1,18 +1,30 @@
+import { lstat, stat, unlink } from "node:fs/promises";
 import type { MetadataEnginePort } from "../../application/metadata_engine_port";
 import { cleanExifData } from "../../domain";
-import { QUICKTIME_DATE_REMOVAL_ARGS } from "../../domain/exif/exif";
-import { isMediaFile } from "../../domain/files/file_types";
+import {
+	QUICKTIME_DATE_REMOVAL_ARGS,
+	RAW_IDENTIFYING_TAG_DELETES,
+	RESOLUTION_PRESERVE_ARGS,
+} from "../../domain/exif/exif";
+import {
+	isMediaFile,
+	isRawFile,
+	isTiffFile,
+} from "../../domain/files/file_types";
 import type { Result } from "../../common";
 import { assertNever } from "../../common/types";
 import type { ExifError } from "../../domain";
 import type { MetadataEngineError } from "../../domain/exif/exif_errors";
 import { classifyInspectionDiagnostics } from "./exiftool_diagnostics";
 import {
+	ExifToolCommandTimeoutError,
 	UnsafeExifToolPathError,
+	writeDeadlineMs,
 	type ExiftoolProcess,
 } from "./ExiftoolProcess";
 
 const UNSAFE_PATH_MESSAGE = "The selected file path is not supported";
+const WRITE_TIME_LIMIT_DETAIL = "exceeded the write time limit";
 // G1 identifies the physical metadata family (System/File/JFIF/EXIF/etc.) while G2 supplies
 // the user-facing category. cleanExifData uses both to discard structural fields, then
 // normalizes retained keys back to G2:Tag.
@@ -36,8 +48,9 @@ const OUTPUT_VERIFICATION_INSPECTION_ARGS = ["-File:FileType", "-File:Error"];
 const OUTPUT_VERIFICATION_DIAGNOSTIC_ARGS = ["-G1:2:4"];
 
 // Adapter pattern: wraps the existing ExiftoolProcess with the semantic metadata engine
-// interface. Does NOT modify ExiftoolProcess.ts (working infrastructure code).
-// Converts ExiftoolProcess's { data, error } / throw pattern to Result<T, ExifError>.
+// interface. Converts ExiftoolProcess's { data, error } / throw pattern to Result<T, ExifError>.
+// This adapter is the caller that supplies per-command write deadlines (writeDeadlineMs, D-57);
+// ExiftoolProcess itself stays free of file-type/size knowledge.
 
 export class ExifToolAdapter implements MetadataEnginePort {
 	private readonly process: ExiftoolProcess;
@@ -91,6 +104,14 @@ export class ExifToolAdapter implements MetadataEnginePort {
 				return {
 					ok: false,
 					error: { code: "exiftool-error", detail: UNSAFE_PATH_MESSAGE },
+				};
+			}
+			if (error instanceof ExifToolCommandTimeoutError) {
+				// A timed-out read maps to the existing legacy command-timeout shape --
+				// never "not running" (D-62).
+				return {
+					ok: false,
+					error: { code: "command-timeout", executeNum: error.executeNum },
 				};
 			}
 			return { ok: false, error: { code: "process-not-open" } };
@@ -250,6 +271,7 @@ export class ExifToolAdapter implements MetadataEnginePort {
 		destination,
 		preserveOrientation,
 		preserveColorProfile,
+		preserveResolution,
 		preserveTimestamps,
 		signal,
 	}: Parameters<MetadataEnginePort["sanitize"]>[0]): ReturnType<
@@ -263,10 +285,25 @@ export class ExifToolAdapter implements MetadataEnginePort {
 		if (isMediaFile({ filename: source })) {
 			extraArgs.push(...QUICKTIME_DATE_REMOVAL_ARGS);
 		}
+		// -all= cannot clear IFD0 on a TIFF because IFD0 is the image directory, so the
+		// CommonIFD0 shortcut deletes its descriptive/camera tags (EVIDENCE F-2, #199).
+		if (isTiffFile({ filename: source })) {
+			extraArgs.push("-CommonIFD0=");
+		}
+		// RMV-05: RAW's IFD0/ExifIFD/MakerNotes tags survive bare -all= the way TIFF's do, but
+		// -CommonIFD0= (TIFF's fix) deletes Make/Model on RAW -- measured, not assumed. Push the
+		// group-qualified named-tag deletes instead, plus RAW's own copy of the QuickTime args
+		// for CR3 (ISO-BMFF; isRawFile and isMediaFile are disjoint, so this branch must push
+		// its own copy rather than relying on the isMediaFile branch above).
+		if (isRawFile({ filename: source })) {
+			extraArgs.push(...RAW_IDENTIFYING_TAG_DELETES);
+			extraArgs.push(...QUICKTIME_DATE_REMOVAL_ARGS);
+		}
 
 		const preserveTags: string[] = [];
 		if (preserveOrientation) preserveTags.push("-Orientation");
 		if (preserveColorProfile) preserveTags.push("-ICC_Profile");
+		if (preserveResolution) preserveTags.push(...RESOLUTION_PRESERVE_ARGS);
 		if (preserveTags.length > 0) {
 			extraArgs.push("-TagsFromFile", "@", ...preserveTags);
 		}
@@ -277,11 +314,38 @@ export class ExifToolAdapter implements MetadataEnginePort {
 			extraArgs.push("-overwrite_original");
 		}
 
+		// D-57: the write deadline scales with the source's size, computed via a stat()
+		// done before dispatch. A failed stat (e.g. a source that no longer exists) omits
+		// deadlineMs entirely, which keeps the fixed 30s default and leaves today's
+		// behavior for a missing source unchanged.
+		let deadlineMs: number | undefined;
+		try {
+			const { size } = await stat(source);
+			deadlineMs = writeDeadlineMs({ sourceBytes: size });
+		} catch {
+			deadlineMs = undefined;
+		}
+
+		// D-64: a killed direct write can leave behind the thing ExifTool was writing to --
+		// `<source>_exiftool_tmp` for `-overwrite_original`, or the `-o` target itself for a
+		// direct copy. Recorded before dispatch so a confirmed-dead timeout (below) never
+		// deletes a file that already existed: an lstat failure other than ENOENT counts as
+		// "existed" (fail safe), matching OutputTransaction.cleanup()'s own fail-safe stance.
+		const leftoverPath = destination ?? source + "_exiftool_tmp";
+		let leftoverExistedBefore: boolean;
+		try {
+			await lstat(leftoverPath);
+			leftoverExistedBefore = true;
+		} catch (error) {
+			leftoverExistedBefore = !isEnoent(error);
+		}
+
 		try {
 			const result = await this.process.writeMetadata({
 				filePath: source,
 				metadata: {},
 				extraArgs,
+				...(deadlineMs !== undefined ? { deadlineMs } : {}),
 			});
 
 			if (result.error !== null) {
@@ -307,12 +371,85 @@ export class ExifToolAdapter implements MetadataEnginePort {
 					},
 				};
 			}
+			if (error instanceof ExifToolCommandTimeoutError) {
+				// ExiftoolProcess has already confirmed the writer's process tree
+				// exited (D-59) before this rejection, so OutputTransaction may safely
+				// clean up any leftover output (D-63).
+				let detail: string = WRITE_TIME_LIMIT_DETAIL;
+				if (!leftoverExistedBefore) {
+					const removed = await removeTimedOutLeftover({
+						path: leftoverPath,
+					});
+					if (!removed) {
+						detail = `${WRITE_TIME_LIMIT_DETAIL}; the partial output could not be removed: ${leftoverPath}`;
+					}
+				}
+				return {
+					ok: false,
+					error: {
+						code: "engine-error",
+						detail,
+						backend: "exiftool",
+						confirmedDeadTimeout: true,
+					},
+				};
+			}
 			return {
 				ok: false,
 				error: { code: "engine-unavailable", backend: "exiftool" },
 			};
 		}
 	}
+}
+
+function isEnoent(error: unknown): boolean {
+	return (
+		typeof error === "object" &&
+		error !== null &&
+		"code" in error &&
+		(error as { code: unknown }).code === "ENOENT"
+	);
+}
+
+function isTransientLeftoverLock(error: unknown): boolean {
+	if (typeof error !== "object" || error === null || !("code" in error)) {
+		return false;
+	}
+	const code = (error as { code: unknown }).code;
+	return code === "EBUSY" || code === "EPERM" || code === "EACCES";
+}
+
+function delay(milliseconds: number): Promise<void> {
+	return new Promise((resolve) => {
+		setTimeout(resolve, milliseconds);
+	});
+}
+
+// D-64: removes a direct-write leftover (`_exiftool_tmp` or an `-o` target) left behind by a
+// killed write, mirroring OutputTransaction.cleanup()'s retry shape. Only ever called after
+// leftoverExistedBefore has confirmed the path did not exist before dispatch -- this function
+// itself has no opinion on whether removal is safe.
+async function removeTimedOutLeftover({
+	path,
+}: {
+	path: string;
+}): Promise<boolean> {
+	const retryDelays = [20, 50];
+	for (let attempt = 0; attempt < retryDelays.length + 1; attempt += 1) {
+		try {
+			await unlink(path);
+			return true;
+		} catch (error) {
+			if (isEnoent(error)) {
+				return true;
+			}
+			if (!isTransientLeftoverLock(error) || attempt === retryDelays.length) {
+				return false;
+			}
+			await delay(retryDelays[attempt]!);
+		}
+	}
+	return false;
 }
 
 function toMetadataEngineError(error: ExifError): MetadataEngineError {

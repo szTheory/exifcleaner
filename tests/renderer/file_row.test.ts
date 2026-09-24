@@ -23,6 +23,8 @@ vi.mock("../../src/renderer/hooks/use_i18n", () => ({
 					"Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged.",
 				cleanupFailedSummary:
 					"Couldn’t verify cleaned output, and the incomplete output could not be removed. Your original is unchanged.",
+				writeFailedSummary:
+					"Couldn’t write the cleaned output. Your original is unchanged.",
 				"reveal.cleanedCopy": "Reveal cleaned copy in file manager",
 				"reveal.original": "Reveal in file manager",
 			};
@@ -199,6 +201,80 @@ describe("FileRow copy reveal context menu", () => {
 		);
 		expect((detail.props as { error?: string }).error).toBe(
 			"Could not remove incomplete output: /photos/.sample-incomplete.jpg",
+		);
+	});
+
+	it("renders the exact localized write failure summary with no reveal control", () => {
+		const row = FileRow({
+			file: makeCompletedFile({
+				status: FileProcessingStatus.Error,
+				afterTags: null,
+				afterMetadata: null,
+				outputPath: undefined,
+				failureKind: "write",
+				error: "Generated output write failed: exceeded the write time limit",
+				detail: "Generated output write failed: exceeded the write time limit",
+			}),
+			isExpanded: true,
+			onToggleExpand: vi.fn(),
+			staggerIndex: 0,
+			animatedCheckRef: { current: new Set<string>() },
+			onCopyToast: vi.fn(),
+		});
+
+		const summary = findElementByClass(row, "file-table__error-summary");
+		expect((summary.props as { children?: unknown }).children).toBe(
+			"Couldn’t write the cleaned output. Your original is unchanged.",
+		);
+		expect(() => findRevealControl(row)).toThrow();
+	});
+
+	it("shows the write failure detail with its residual path when one is carried", () => {
+		const row = FileRow({
+			file: makeCompletedFile({
+				status: FileProcessingStatus.Error,
+				afterTags: null,
+				afterMetadata: null,
+				outputPath: undefined,
+				failureKind: "write",
+				error: "Generated output write failed: exceeded the write time limit",
+				detail: "Generated output write failed: exceeded the write time limit",
+				residualPath: "/photos/.sample.exifcleaner-stage-x.mp4",
+			}),
+			isExpanded: true,
+			onToggleExpand: vi.fn(),
+			staggerIndex: 0,
+			animatedCheckRef: { current: new Set<string>() },
+			onCopyToast: vi.fn(),
+		});
+
+		const detail = findElementByType(row, ErrorExpansion);
+		expect((detail.props as { error?: string }).error).toBe(
+			"Generated output write failed: exceeded the write time limit: /photos/.sample.exifcleaner-stage-x.mp4",
+		);
+	});
+
+	it("shows the write failure detail alone when no residual path is carried", () => {
+		const row = FileRow({
+			file: makeCompletedFile({
+				status: FileProcessingStatus.Error,
+				afterTags: null,
+				afterMetadata: null,
+				outputPath: undefined,
+				failureKind: "write",
+				error: "Generated output write failed: exceeded the write time limit",
+				detail: "Generated output write failed: exceeded the write time limit",
+			}),
+			isExpanded: true,
+			onToggleExpand: vi.fn(),
+			staggerIndex: 0,
+			animatedCheckRef: { current: new Set<string>() },
+			onCopyToast: vi.fn(),
+		});
+
+		const detail = findElementByType(row, ErrorExpansion);
+		expect((detail.props as { error?: string }).error).toBe(
+			"Generated output write failed: exceeded the write time limit",
 		);
 	});
 

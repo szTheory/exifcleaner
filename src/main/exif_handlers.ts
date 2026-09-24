@@ -87,6 +87,7 @@ export function setupExifHandlers({
 					commitPath: outputPath === undefined ? filePath : undefined,
 					preserveOrientation: settings.preserveOrientation,
 					preserveColorProfile: settings.preserveColorProfile,
+					preserveResolution: settings.preserveResolution,
 					preserveTimestamps: settings.preserveTimestamps,
 				});
 				if (transactionResult.ok) {
@@ -105,6 +106,7 @@ export function setupExifHandlers({
 				outputMode,
 				preserveOrientation: settings.preserveOrientation,
 				preserveColorProfile: settings.preserveColorProfile,
+				preserveResolution: settings.preserveResolution,
 				preserveTimestamps: settings.preserveTimestamps,
 				saveAsCopy,
 				outputPath,
@@ -228,7 +230,13 @@ function transactionFailureResult(error: OutputTransactionFailure): {
 			return {
 				success: false,
 				failureKind: "write",
-				detail: "Generated output write failed",
+				detail:
+					error.timedOut === true
+						? "Generated output write failed: exceeded the write time limit"
+						: "Generated output write failed",
+				...(error.residualPath === undefined
+					? {}
+					: { residualPath: error.residualPath }),
 			};
 		case "verification-failed":
 			return {

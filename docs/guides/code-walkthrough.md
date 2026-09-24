@@ -209,7 +209,9 @@ ipcMain.handle("exif:remove", createValidatedHandler(exifRemoveSchema, async (fi
 
 The transaction writes a generated path, asks ExifTool to reopen it, removes an invalid
 candidate, and atomically renames a verified stage when overwrite mode requires it. A
-cleanup failure reports its residual path so the UI never implies that nothing was left.
+cleanup failure reports its residual path so the UI never implies that nothing was left. A
+write stopped at its deadline is cleaned up only after ExifTool's exit is confirmed; any
+other write failure returns without touching the candidate.
 
 ```ts
 // src/main/output_transaction.ts
@@ -219,7 +221,32 @@ const writeResult = await this.dependencies.stripMetadata.execute({
 	outputPath: generatedPath,
 	// ...
 });
-if (!writeResult.ok) return { ok: false, error: { code: "write-failed" } };
+if (!writeResult.ok) {
+	// D-63: cleanup only runs for the confirmed-dead timeout, never for a generic
+	// write-failed (D-53 stands) -- the writer's process tree is only known dead
+	// in the timeout case, so only that case is safe to unlink.
+	if (
+		writeResult.error.code === "engine-error" &&
+		writeResult.error.confirmedDeadTimeout === true
+	) {
+		const cleanupFailure = await this.cleanup({ generatedPath });
+		if (cleanupFailure === undefined) {
+			return { ok: false, error: { code: "write-failed", timedOut: true } };
+		}
+		// Never propagate cleanup-failed here: its summary says "Couldn't verify
+		// cleaned output", which would be false after a confirmed-dead timeout
+		// (D-66). Stay on write-failed and disclose the residual path instead.
+		return {
+			ok: false,
+			error: {
+				code: "write-failed",
+				timedOut: true,
+				residualPath: generatedPath,
+			},
+		};
+	}
+	return { ok: false, error: { code: "write-failed" } };
+}
 
 const verification = await this.dependencies.verifyGeneratedOutput.execute({ generatedPath });
 if (!verification.ok) {

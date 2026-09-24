@@ -248,6 +248,13 @@ export function SettingsDrawer({
 						description={t("settings.preserveColorProfile.description")}
 					/>
 					<ToggleSwitch
+						id="toggle-preserve-resolution"
+						checked={settings.preserveResolution}
+						onChange={(v) => handleToggle("preserveResolution", v)}
+						label={t("settings.preserveResolution.label")}
+						description={t("settings.preserveResolution.description")}
+					/>
+					<ToggleSwitch
 						id="toggle-save-as-copy"
 						checked={settings.saveAsCopy}
 						onChange={(v) => handleToggle("saveAsCopy", v)}

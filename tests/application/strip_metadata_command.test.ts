@@ -27,6 +27,7 @@ describe("semantic sanitization", () => {
 				outputMode: "copy",
 				preserveOrientation: true,
 				preserveColorProfile: true,
+				preserveResolution: false,
 				preserveTimestamps: true,
 				saveAsCopy: true,
 				outputPath: "/tmp/photo_cleaned.jpg",
@@ -41,6 +42,7 @@ describe("semantic sanitization", () => {
 			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: true,
 			signal: controller.signal,
 		});
@@ -52,6 +54,7 @@ describe("semantic sanitization", () => {
 			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 			saveAsCopy: false,
 		});
@@ -62,6 +65,7 @@ describe("semantic sanitization", () => {
 			outputMode: "overwrite",
 			preserveOrientation: false,
 			preserveColorProfile: false,
+			preserveResolution: false,
 			preserveTimestamps: false,
 			signal: undefined,
 		});
@@ -77,6 +81,7 @@ describe("semantic sanitization", () => {
 				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 				saveAsCopy: false,
 				signal: controller.signal,
@@ -101,9 +106,29 @@ describe("semantic sanitization", () => {
 				outputMode: "overwrite",
 				preserveOrientation: false,
 				preserveColorProfile: false,
+				preserveResolution: false,
 				preserveTimestamps: false,
 				saveAsCopy: false,
 			}),
 		).resolves.toEqual({ ok: false, error: { code: "engine-unavailable" } });
 	});
+
+	it.each([true, false])(
+		"forwards preserveResolution %s to the engine unchanged (FID-01, D-40)",
+		async (preserveResolution) => {
+			await command.execute({
+				filePath: "/tmp/photo.jpg",
+				outputMode: "overwrite",
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution,
+				preserveTimestamps: false,
+				saveAsCopy: false,
+			});
+
+			expect(sanitize).toHaveBeenCalledWith(
+				expect.objectContaining({ preserveResolution }),
+			);
+		},
+	);
 });

@@ -6,6 +6,8 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { snapshotDir, assertDirEffect } from "../../helpers/dir_effect";
+import { readTiffGroupedTags } from "../../helpers/tiff_probe";
+import { readRawTags } from "../../helpers/raw_probe";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = __dirname;
@@ -52,6 +54,8 @@ const WRITABLE_FIXTURES = [
 	"issue240.mp4",
 	"orientation.jpg",
 	"no_metadata.jpg",
+	"sample.tif",
+	"multipage.tif",
 ];
 
 /** Fixtures that exist precisely to exercise the error path. */
@@ -201,6 +205,49 @@ describe("E2E fixture integrity", () => {
 		expect(metadata.Orientation).toBe("Rotate 90 CW");
 	});
 
+	it("sample.tif pins its IFD0 private-tag and GPS seeds before processing", () => {
+		const filePath = path.join(FIXTURES_DIR, "sample.tif");
+		const tags = readTiffGroupedTags(filePath, EXIFTOOL);
+
+		expect(tags["IFD0:ImageDescription"]).toBe("ZZP51-DESC");
+		expect(tags["IFD0:Software"]).toBe("ZZP51-SOFT");
+		expect(tags["IFD0:Artist"]).toBe("ZZP51-ARTIST");
+		expect(tags["IFD0:Copyright"]).toBe("ZZP51-COPY");
+		expect(tags["GPS:GPSLatitudeRef"]).toBe("North");
+		expect(tags["GPS:GPSLongitudeRef"]).toBe("West");
+		expect(tags["File:FileType"]).toBe("TIFF");
+	});
+
+	it("multipage.tif pins distinct per-IFD seeds before processing", () => {
+		const filePath = path.join(FIXTURES_DIR, "multipage.tif");
+		const tags = readTiffGroupedTags(filePath, EXIFTOOL);
+
+		expect(tags["IFD0:ImageDescription"]).toBe("ZZP51-PAGE1-DESC");
+		expect(tags["IFD0:Software"]).toBe("ZZP51-PAGE1-SOFT");
+		expect(tags["IFD0:Artist"]).toBe("ZZP51-PAGE1-ARTIST");
+		expect(tags["IFD0:Copyright"]).toBe("ZZP51-PAGE1-COPY");
+		expect(tags["GPS:GPSLatitudeRef"]).toBe("North");
+		expect(tags["IFD1:ImageDescription"]).toBe("ZZP51-PAGE2-DESC");
+		expect(tags["IFD1:Software"]).toBe("ZZP51-PAGE2-SOFT");
+		expect(tags["IFD1:Artist"]).toBe("ZZP51-PAGE2-ARTIST");
+		expect(tags["IFD1:Copyright"]).toBe("ZZP51-PAGE2-COPY");
+	});
+
+	it("classifies both TIFF fixtures as binary checkout fixtures", () => {
+		for (const name of ["sample.tif", "multipage.tif"]) {
+			const output = execFileSync(
+				"git",
+				["check-attr", "binary", "--", `tests/e2e/fixtures/${name}`],
+				{
+					cwd: path.resolve(__dirname, "../../.."),
+					encoding: "utf8",
+				},
+			);
+
+			expect(output.trim()).toBe(`tests/e2e/fixtures/${name}: binary: set`);
+		}
+	});
+
 	it("pins the genuine RAF reader precondition and source identity", () => {
 		const fixturePath = path.join(FIXTURES_DIR, RAF_FIXTURE);
 
@@ -248,4 +295,235 @@ describe("E2E fixture integrity", () => {
 			fs.rmSync(dir, { recursive: true, force: true });
 		}
 	});
+});
+
+// Phase 51.1-02 (RMV-05, D-47): pins for the four RAW fixtures vendored/seeded by
+// generateRawFixtures -- committed digest/size, File:FileType, and every seeded/pre-existing
+// identifying value readRawTags (-G3:1, tests/helpers/raw_probe.ts) reports. readRawTags is
+// the SAME reader the e2e spec (51.1-01/-02) and the negative control (51.1-03) use, so a
+// drift between the pin and either consumer is caught here first.
+const RAW_FIXTURE_PINS = [
+	{
+		name: "CanonRaw.cr2",
+		sha256: "a17c51b4a04f3eab2f276a5d44512a05b6d0237f21769fcd91b1415075431a59",
+		sizeBytes: 9_012,
+		fileType: "CR2",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			"ExifIFD:DateTimeOriginal": "2005:08:03 18:59:18",
+			"Canon:SerialNumber": "0123456789",
+		},
+	},
+	{
+		name: "DNG.dng",
+		sha256: "210f3b13106e4cca69ec16c393e3fe05bab41c86c5527ae3fc54f8764cdc250c",
+		sizeBytes: 14_204,
+		fileType: "DNG",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			// Upstream identifying values already present in the vendored file.
+			"IFD0:CameraSerialNumber": "012345678",
+			"IFD0:RawDataUniqueID": "0358DB4E08632D90925171A6BB8848A2",
+			"IFD0:OriginalRawFileName": "Canon350D.CR2",
+			"IFD0:UniqueCameraModel": "Canon EOS 350D",
+		},
+	},
+	{
+		name: "CanonRaw.cr3",
+		sha256: "48ada5656150bc7a252a633183c86a835c8975686626d4e7ed1aab87111a2d43",
+		sizeBytes: 53_283,
+		fileType: "CR3",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			// Upstream identifying values already present in the vendored file.
+			"Canon:InternalSerialNumber": "CG0156580",
+			"ExifIFD:OffsetTime": "+00:00",
+			"ExifIFD:SubSecTimeOriginal": 21,
+			"ExifIFD:DateTimeOriginal": "2018:02:21 12:08:56",
+		},
+	},
+	{
+		name: "Panasonic.rw2",
+		sha256: "a350097624881ad0007474bd7d3c1d7408eb52cd2abd8018ffa21f57cd807fc6",
+		sizeBytes: 12_444,
+		fileType: "RW2",
+		expected: {
+			// RW2's IFD0 seeds land only in the embedded JpgFromRaw preview -- readRawTags's
+			// -a -G3:1 grouping reports them under the Doc1: prefix (measured this session;
+			// see generate_fixtures.ts's comment on the same seed observed via plain -G1).
+			"Doc1:IFD0:Artist": "ZZP511-ARTIST",
+			"Doc1:IFD0:Software": "ZZP511-SOFT",
+			"Doc1:IFD0:ImageDescription": "ZZP511-DESC",
+			"Doc1:IFD0:Copyright": "ZZP511-COPY",
+			"Doc1:IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"Doc1:IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			// Upstream identifying value already present in the vendored file.
+			"ExifIFD:DateTimeOriginal": "2008:08:06 15:21:56",
+		},
+	},
+] as const;
+
+describe("RAW fixtures (RMV-05, D-47)", () => {
+	it.each(RAW_FIXTURE_PINS)(
+		"$name matches its pinned committed digest and size (RMV-05, D-47)",
+		({ name, sha256: expectedSha256, sizeBytes }) => {
+			const filePath = path.join(FIXTURES_DIR, name);
+			expect(fs.statSync(filePath).size).toBe(sizeBytes);
+			expect(sha256(filePath)).toBe(expectedSha256);
+		},
+	);
+
+	it.each(RAW_FIXTURE_PINS)(
+		"$name pins its FileType and every seeded/pre-existing identifying value (RMV-05, D-47)",
+		({ name, fileType, expected }) => {
+			const filePath = path.join(FIXTURES_DIR, name);
+			const tags = readRawTags(filePath, EXIFTOOL);
+			expect(tags["File:FileType"]).toBe(fileType);
+			for (const [key, value] of Object.entries(expected)) {
+				expect(tags[key]).toBe(value);
+			}
+		},
+	);
+
+	it("classifies all four RAW fixtures and sample.raf as binary checkout fixtures (RMV-05, D-47)", () => {
+		for (const name of [
+			"CanonRaw.cr2",
+			"DNG.dng",
+			"CanonRaw.cr3",
+			"Panasonic.rw2",
+			"sample.raf",
+		]) {
+			const output = execFileSync(
+				"git",
+				["check-attr", "binary", "--", `tests/e2e/fixtures/${name}`],
+				{
+					cwd: path.resolve(__dirname, "../../.."),
+					encoding: "utf8",
+				},
+			);
+
+			expect(output.trim()).toBe(`tests/e2e/fixtures/${name}: binary: set`);
+		}
+	});
+});
+
+// Phase 52-04 (FID-03, D-37): pins for the seven matrix fixtures vendored unmodified by
+// generateMatrixFixtures -- committed digest/size and File:FileType. Unlike RAW_FIXTURE_PINS,
+// there is no seeded-tag check here: these fixtures are committed byte-identical to upstream,
+// with no seed applied to the committed bytes (see MATRIX-PROVENANCE.md).
+const MATRIX_FIXTURE_PINS = [
+	{
+		name: "GIF.gif",
+		sha256: "55f8d30ea6fac980f35d5af11a90b10ddc0186d961b0273e66df2f8b7c5aa6be",
+		sizeBytes: 2_321,
+		fileType: "GIF",
+	},
+	{
+		name: "QuickTime.heic",
+		sha256: "4e1785e9924600d0274176f52609a2d514481877103b91c714bd2088ea803ae7",
+		sizeBytes: 623,
+		fileType: "HEIF",
+	},
+	{
+		name: "QuickTime.mov",
+		sha256: "eea529609b6026e0cd7b3d9188b997889f905cd89a93421ad7a9063c670449ec",
+		sizeBytes: 3_871,
+		fileType: "MOV",
+	},
+	{
+		name: "BMP.bmp",
+		sha256: "fab182ec28064483847443e29982d592b64d7019fc4f1db85e02501a40e1dcf8",
+		sizeBytes: 1_142,
+		fileType: "BMP",
+	},
+	{
+		name: "XMP.svg",
+		sha256: "1e6449dc39a0e61bc9a4d27beaef5e68bc72fc59c6bf1772d174fd34f5f400c2",
+		sizeBytes: 2_071,
+		fileType: "SVG",
+	},
+	{
+		name: "RIFF.avi",
+		sha256: "7c03b77d115118e3293833e6c1b5d5795c998051d145674368e0b97f02719d4b",
+		sizeBytes: 1_262,
+		fileType: "AVI",
+	},
+	{
+		name: "ASF.wmv",
+		sha256: "c3cafee199bbf19bb2fdce56211d44d108454ea7efd8ecc7c4cdda7ebce87c97",
+		sizeBytes: 12_379,
+		fileType: "WMV",
+	},
+] as const;
+
+describe("Resolution matrix fixtures (FID-03, D-37)", () => {
+	it.each(MATRIX_FIXTURE_PINS)(
+		"$name matches its pinned committed digest and size (FID-03, D-37)",
+		({ name, sha256: expectedSha256, sizeBytes }) => {
+			const filePath = path.join(FIXTURES_DIR, name);
+			expect(fs.statSync(filePath).size).toBe(sizeBytes);
+			expect(sha256(filePath)).toBe(expectedSha256);
+		},
+	);
+
+	it.each(MATRIX_FIXTURE_PINS)(
+		"$name pins its FileType (FID-03, D-37)",
+		({ name, fileType }) => {
+			const filePath = path.join(FIXTURES_DIR, name);
+			const output = execFileSync(EXIFTOOL, ["-s3", "-FileType", filePath])
+				.toString()
+				.trim();
+			expect(output).toBe(fileType);
+		},
+	);
+
+	it.each(MATRIX_FIXTURE_PINS)(
+		"$name classifies as a binary checkout fixture (FID-03, D-37)",
+		({ name }) => {
+			const output = execFileSync(
+				"git",
+				["check-attr", "binary", "--", `tests/e2e/fixtures/${name}`],
+				{
+					cwd: path.resolve(__dirname, "../../.."),
+					encoding: "utf8",
+				},
+			);
+			expect(output.trim()).toBe(`tests/e2e/fixtures/${name}: binary: set`);
+		},
+	);
 });

@@ -17,7 +17,9 @@ test.describe("Error Handling", () => {
 
 	test.beforeEach(async () => {
 		consoleErrors = [];
-		const launched = await launchApp({ settings: { saveAsCopy: false } });
+		const launched = await launchApp({
+			settings: { saveAsCopy: false, preserveResolution: false },
+		});
 		app = launched.app;
 		window = launched.window;
 

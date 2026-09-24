@@ -44,6 +44,30 @@ jobs:
       - name: Verify release-note identity
         run: yarn verify:release-notes
 
+      # Phase 53.1-06 deviation (D-68 CI gap, Rule 3): the Oracle accountability policy
+      # step below re-runs tests/e2e/fixtures/generate_fixtures.ts's generateRawFixtures,
+      # which reads the bundled ExifTool distribution's own t/images/ corpus from the
+      # gitignored exiftool_downloads/ tree (Phase 51.1 commits 1206252/bfc9c1a,
+      # RAW-PROVENANCE.md). update_exiftool.pl populates that tree on a maintainer's
+      # machine, but this branch's `test` job has never run in CI before this plan, so
+      # the tree has never existed on a runner. This step fetches the exact pinned
+      # upstream tarball and fails closed if its SHA-256 does not match the digest
+      # pinned in update_exiftool.pl:134 / RAW-PROVENANCE.md, before extracting it.
+      - name: Fetch RAW fixture upstream source (Phase 53.1 D-68 CI gap)
+        run: |
+          set -euo pipefail
+          mkdir -p exiftool_downloads
+          curl -fL --retry 3 \
+            --output exiftool_downloads/Image-ExifTool-13.59.tar.gz \
+            https://downloads.sourceforge.net/project/exiftool/Image-ExifTool-13.59.tar.gz
+          EXPECTED=668ea3acececb7235fbd0f4900e72d5f12c9b07e5c778fd36cb1e9b5828fd65a
+          ACTUAL=$(shasum -a 256 exiftool_downloads/Image-ExifTool-13.59.tar.gz | cut -d' ' -f1)
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "FATAL: Image-ExifTool-13.59.tar.gz SHA-256 mismatch (expected $EXPECTED, got $ACTUAL)" >&2
+            exit 1
+          fi
+          tar -xzf exiftool_downloads/Image-ExifTool-13.59.tar.gz -C exiftool_downloads
+
       - name: Oracle accountability policy
         run: yarn verify:accountability:policy
 
@@ -225,6 +249,12 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+
+      # Phase 53.1 D-68: proves the deadline kill ends the exiftool.exe launcher (Perl runs
+      # in-process via perl532.dll, no perl.exe child) and releases the output file on a real
+      # Windows host. Never asserted without a run.
+      - name: Windows process-tree kill proof (LRG-03, D-68)
+        run: yarn tsx tests/manual/windows_tree_kill_probe.ts
 
       - name: Build Windows artifacts
         run: yarn packwin

@@ -159,6 +159,10 @@ test.describe("Metadata Inspection", () => {
 		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
 			const tempFile = copyFixture("orientation.jpg");
+			await window.evaluate(() =>
+				globalThis.window.api.settings.set({ preserveResolution: false }),
+			);
+			await window.waitForTimeout(300);
 
 			const before = snapshotDir(dir);
 

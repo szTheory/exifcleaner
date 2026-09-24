@@ -21,6 +21,13 @@ const EXIFTOOL =
 		: path.resolve(__dirname, "../../../.resources/nix/bin/exiftool");
 
 const DEFAULT_FIXTURES_DIR = __dirname;
+// Phase 51.1 (D-47): the bundled ExifTool distribution's own test-image corpus is the
+// source for the vendored RAW fixtures -- same provenance mechanism RAF-PROVENANCE.md
+// already documents for sample.raf.
+const RAW_UPSTREAM_DEFAULT_DIR = path.resolve(
+	__dirname,
+	"../../../exiftool_downloads/Image-ExifTool-13.59/t/images",
+);
 const QUICKTIME_DATE = "2019:10:02 00:49:04";
 const QUICKTIME_EPOCH_OFFSET_SECONDS = 2082844800;
 const ISSUE_240_TAGS = {
@@ -182,6 +189,144 @@ function buildExifApp1BadIfd1Offset(): Buffer {
 	const length = Buffer.alloc(2);
 	length.writeUInt16BE(payload.length + 2, 0);
 	return Buffer.concat([Buffer.from([0xff, 0xe1]), length, payload]);
+}
+
+// Phase 51 (RMV-03/RMV-04): a single-strip, single-page TIFF/IFD encoder. Factored so
+// Phase 51-03's two-page builder can call it once per page, passing each page's own
+// start offset and the offset of the next IFD (0 for the last page).
+function tiffU16le(n: number): Buffer {
+	const b = Buffer.alloc(2);
+	b.writeUInt16LE(n, 0);
+	return b;
+}
+function tiffU32le(n: number): Buffer {
+	const b = Buffer.alloc(4);
+	b.writeUInt32LE(n, 0);
+	return b;
+}
+
+const TIFF_TYPE_SHORT = 3;
+const TIFF_TYPE_LONG = 4;
+const TIFF_TYPE_RATIONAL = 5;
+
+function tiffIfdEntry(
+	tag: number,
+	type: number,
+	count: number,
+	value: number,
+): Buffer {
+	return Buffer.concat([
+		tiffU16le(tag),
+		tiffU16le(type),
+		tiffU32le(count),
+		tiffU32le(value),
+	]);
+}
+
+// Encodes one TIFF page: a 12-entry IFD0-shaped directory (ImageWidth, ImageLength,
+// BitsPerSample, Compression, PhotometricInterpretation, StripOffsets, SamplesPerPixel,
+// RowsPerStrip (single strip, equal to image height), StripByteCounts, XResolution,
+// YResolution, ResolutionUnit), the two out-of-line RATIONAL values the resolution tags
+// point at, then the raw pixel strip -- in that byte order, immediately following the IFD
+// at `ifdStart`. Callers own offset bookkeeping across pages (each page's IFD, rationals,
+// and strip are contiguous, so the next page's `ifdStart` is this function's return
+// length added to the current `ifdStart`).
+function buildTiffPage({
+	ifdStart,
+	nextIfdOffset,
+	pixels,
+}: {
+	ifdStart: number;
+	nextIfdOffset: number;
+	pixels: Buffer;
+}): Buffer {
+	const entryCount = 12;
+	const ifdSize = 2 + entryCount * 12 + 4;
+	const xResolutionOffset = ifdStart + ifdSize;
+	const yResolutionOffset = xResolutionOffset + 8;
+	const stripOffset = yResolutionOffset + 8;
+
+	const entries = Buffer.concat([
+		tiffIfdEntry(256, TIFF_TYPE_SHORT, 1, 4), // ImageWidth
+		tiffIfdEntry(257, TIFF_TYPE_SHORT, 1, 4), // ImageLength
+		tiffIfdEntry(258, TIFF_TYPE_SHORT, 1, 8), // BitsPerSample
+		tiffIfdEntry(259, TIFF_TYPE_SHORT, 1, 1), // Compression (none)
+		tiffIfdEntry(262, TIFF_TYPE_SHORT, 1, 1), // PhotometricInterpretation (BlackIsZero)
+		tiffIfdEntry(273, TIFF_TYPE_LONG, 1, stripOffset), // StripOffsets
+		tiffIfdEntry(277, TIFF_TYPE_SHORT, 1, 1), // SamplesPerPixel
+		tiffIfdEntry(278, TIFF_TYPE_SHORT, 1, 4), // RowsPerStrip (== ImageLength)
+		tiffIfdEntry(279, TIFF_TYPE_LONG, 1, pixels.length), // StripByteCounts
+		tiffIfdEntry(282, TIFF_TYPE_RATIONAL, 1, xResolutionOffset), // XResolution
+		tiffIfdEntry(283, TIFF_TYPE_RATIONAL, 1, yResolutionOffset), // YResolution
+		tiffIfdEntry(296, TIFF_TYPE_SHORT, 1, 2), // ResolutionUnit (inches)
+	]);
+	const ifd = Buffer.concat([
+		tiffU16le(entryCount),
+		entries,
+		tiffU32le(nextIfdOffset),
+	]);
+	const xResolution = Buffer.concat([tiffU32le(72), tiffU32le(1)]); // 72/1
+	const yResolution = Buffer.concat([tiffU32le(72), tiffU32le(1)]); // 72/1
+
+	return Buffer.concat([ifd, xResolution, yResolution, pixels]);
+}
+
+// 4x4, 8-bit greyscale, single strip. Pixel bytes are deterministic (byte i = (i * 17) &
+// 0xff) so the fixture is reproducible and its content is assertable without a rendering
+// library.
+function createMinimalTiff(): Buffer {
+	const header = Buffer.concat([
+		Buffer.from("II", "ascii"), // little-endian byte order mark
+		tiffU16le(42), // TIFF magic
+		tiffU32le(8), // offset to IFD0, immediately after this 8-byte header
+	]);
+	const pixels = Buffer.alloc(16);
+	for (let i = 0; i < pixels.length; i += 1) {
+		pixels[i] = (i * 17) & 0xff;
+	}
+	const page = buildTiffPage({ ifdStart: 8, nextIfdOffset: 0, pixels });
+	return Buffer.concat([header, page]);
+}
+
+// Phase 51-03 (D-22, D-25): a two-page TIFF built on the same per-page encoder, each page
+// carrying its own deterministic 4x4 8-bit strip and its own next-IFD offset. Page one's
+// next-IFD offset points at page two's IFD; page two's is 0 (last page). Page two's pixel
+// bytes use a distinct formula so the two strips are never accidentally identical.
+function createTwoPageTiff(): Buffer {
+	const header = Buffer.concat([
+		Buffer.from("II", "ascii"), // little-endian byte order mark
+		tiffU16le(42), // TIFF magic
+		tiffU32le(8), // offset to IFD0, immediately after this 8-byte header
+	]);
+	const page1Pixels = Buffer.alloc(16);
+	for (let i = 0; i < page1Pixels.length; i += 1) {
+		page1Pixels[i] = (i * 17) & 0xff;
+	}
+	const page2Pixels = Buffer.alloc(16);
+	for (let i = 0; i < page2Pixels.length; i += 1) {
+		page2Pixels[i] = (255 - i * 13) & 0xff;
+	}
+	const page1Start = 8;
+	// buildTiffPage's returned length does not depend on nextIfdOffset's VALUE (it is always
+	// a fixed 4-byte field) -- build once with a placeholder to learn page one's length, then
+	// rebuild with the real offset to page two's IFD.
+	const page1Probe = buildTiffPage({
+		ifdStart: page1Start,
+		nextIfdOffset: 0,
+		pixels: page1Pixels,
+	});
+	const page2Start = page1Start + page1Probe.length;
+	const page1 = buildTiffPage({
+		ifdStart: page1Start,
+		nextIfdOffset: page2Start,
+		pixels: page1Pixels,
+	});
+	const page2 = buildTiffPage({
+		ifdStart: page2Start,
+		nextIfdOffset: 0,
+		pixels: page2Pixels,
+	});
+	return Buffer.concat([header, page1, page2]);
 }
 
 // Build a PNG chunk with correct CRC32 (covers type + data)
@@ -428,6 +573,24 @@ function assertIssue240Metadata(filePath: string): void {
 	}
 }
 
+// Phase 51 (D-25): re-reads sample.tif's seeded IFD0/GPS tags via the bundled binary and
+// throws naming the file, the tag, and the observed value on any mismatch -- no swallowed
+// try/catch, matching the sample.pdf fail-loud lesson above.
+function assertTiffSeeds(
+	filePath: string,
+	expected: Readonly<Record<string, string>>,
+): void {
+	const metadata = readFixtureMetadata(filePath);
+	for (const [tag, expectedValue] of Object.entries(expected)) {
+		const actual = metadata[tag];
+		if (actual !== expectedValue) {
+			throw new Error(
+				`${filePath} ${tag} expected ${expectedValue}, got ${String(actual)}`,
+			);
+		}
+	}
+}
+
 // Reads the bundled binary's grouped diagnostic output directly, rather than reusing
 // readFixtureMetadata's ungrouped -json, since ExifTool-group Error/Warning keys (the
 // values #344's fixtures must produce) only survive under -G.
@@ -544,6 +707,281 @@ const WEBP_ORACLE_ICC_PROFILE = Buffer.from(
 	"AAAB7E5LT04CIAAAbW50clJHQiBYWVogB88ADAAHABIAOwAWYWNzcEFQUEwAAAAAbm9uZQAAAAEAAAAAAAAAAAAAAAAAAPbWAAEAAAAA0y0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJZGVzYwAAAPAAAABNclhZWgAAAUAAAAAUZ1hZWgAAAVQAAAAUYlhZWgAAAWgAAAAUclRSQwAAAXwAAAAOZ1RSQwAAAYwAAAAOYlRSQwAAAZwAAAAOd3RwdAAAAawAAAAUY3BydAAAAcAAAAAsZGVzYwAAAAAAAAAbTmlrb24gQWRvYmUgUkdCIDQuMC4wLjMwMDAAAAAAAAAAAAAAABtOaWtvbiBBZG9iZSBSR0IgNC4wLjAuMzAwMAAAAABYWVogAAAAAAAAnBkAAE+mAAAE/FhZWiAAAAAAAAA0iwAAoCsAAA+VWFlaIAAAAAAAACYyAAAQLwAAvqBjdXJ2AAAAAAAAAAECMwAAY3VydgAAAAAAAAABAjMAAGN1cnYAAAAAAAAAAQIzAABYWVogAAAAAAAA81QAAQAAAAEWz3RleHQAAAAATmlrb24gSW5jLiAmIE5pa29uIENvcnBvcmF0aW9uIDIwMDEA",
 	"base64",
 );
+
+// Phase 51.1 (D-42/D-43/D-47): each row's `expected` literal is what the fixture step
+// re-reads with the bundled binary immediately after seeding -- fail loudly if a seed did
+// not land, matching assertTiffSeeds's convention above.
+const RAW_FIXTURE_SPECS = [
+	{
+		name: "CanonRaw.cr2",
+		upstreamSha256:
+			"b5d3d26f3c85bcb35a52515eac060e2e362161893504013589ffd9ad2e9b004b",
+		fileType: "CR2",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			"ExifIFD:DateTimeOriginal": "2005:08:03 18:59:18",
+			"Canon:SerialNumber": "0123456789",
+		},
+	},
+	{
+		// Phase 51.1-02 (D-47): upstream digest re-measured this session -- the value
+		// transcribed into 51.1-02-PLAN.md's <interfaces> table did not match `shasum -a 256`
+		// on the vendored file (a documented, self-correcting transcription slip the plan
+		// itself warned the executor to re-measure, not copy).
+		name: "DNG.dng",
+		upstreamSha256:
+			"daa9ce7a2c6923815390d8566254ef4d4a75d68d1531afdb264bd4b39a8dfd89",
+		fileType: "DNG",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			// Upstream identifying values already present in the vendored file (not seeded by
+			// RAW_SEED_ARGS) -- re-read here to confirm the vendored bytes still carry them.
+			"IFD0:CameraSerialNumber": "012345678",
+			"IFD0:RawDataUniqueID": "0358DB4E08632D90925171A6BB8848A2",
+			"IFD0:OriginalRawFileName": "Canon350D.CR2",
+			"IFD0:UniqueCameraModel": "Canon EOS 350D",
+		},
+	},
+	{
+		name: "CanonRaw.cr3",
+		upstreamSha256:
+			"dc02aa55e277935b690879584e97c2d013f54d854afaec6f9d3274c99a918fd6",
+		fileType: "CR3",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			// Upstream identifying values already present in the vendored file.
+			"Canon:InternalSerialNumber": "CG0156580",
+			"ExifIFD:OffsetTime": "+00:00",
+			"ExifIFD:SubSecTimeOriginal": 21,
+			"ExifIFD:DateTimeOriginal": "2018:02:21 12:08:56",
+		},
+	},
+	{
+		// RW2's IFD0 seeds land ONLY in the embedded JpgFromRaw preview -- but
+		// readFixtureMetadata (below) reads with plain -G1 -s -json (no -a, no -G3), under
+		// which ExifTool's duplicate-key JSON suppression collapses the embedded preview's
+		// IFD0 group onto the SAME "IFD0:<Tag>" key used elsewhere in this table (measured
+		// this session; confirmed there is no separate main-IFD0 copy to collide with). Do
+		// not confuse this with raw_probe.ts's readRawTags, which uses -G3:1 and DOES report
+		// these under a "Doc1:IFD0:<Tag>" key (see RAW_CASES below).
+		name: "Panasonic.rw2",
+		upstreamSha256:
+			"431a1239713ce1bca8f0b422b9a094372246669432060e2a0a21d1fd2f761678",
+		fileType: "RW2",
+		expected: {
+			"IFD0:Artist": "ZZP511-ARTIST",
+			"IFD0:Software": "ZZP511-SOFT",
+			"IFD0:ImageDescription": "ZZP511-DESC",
+			"IFD0:Copyright": "ZZP511-COPY",
+			"IFD0:XPComment": "ZZP511-XPCOMMENT",
+			"IFD0:XPTitle": "ZZP511-XPTITLE",
+			"ExifIFD:UserComment": "ZZP511-COMMENT",
+			"ExifIFD:SerialNumber": "ZZP511-BODYSN",
+			"ExifIFD:LensSerialNumber": "ZZP511-LENSSN",
+			"ExifIFD:OwnerName": "ZZP511-OWNER",
+			"GPS:GPSLatitudeRef": "North",
+			// Upstream identifying value already present in the vendored file.
+			"ExifIFD:DateTimeOriginal": "2008:08:06 15:21:56",
+		},
+	},
+] as const;
+
+const RAW_SEED_ARGS = [
+	"-GPSLatitude=37.7749",
+	"-GPSLatitudeRef=N",
+	"-GPSLongitude=-122.4194",
+	"-GPSLongitudeRef=W",
+	"-IFD0:Artist=ZZP511-ARTIST",
+	"-IFD0:Software=ZZP511-SOFT",
+	"-IFD0:ImageDescription=ZZP511-DESC",
+	"-IFD0:Copyright=ZZP511-COPY",
+	"-IFD0:XPComment=ZZP511-XPCOMMENT",
+	"-IFD0:XPAuthor=ZZP511-XPAUTHOR",
+	"-IFD0:XPTitle=ZZP511-XPTITLE",
+	"-IFD0:XPSubject=ZZP511-XPSUBJECT",
+	"-IFD0:XPKeywords=ZZP511-XPKEYWORDS",
+	"-ExifIFD:UserComment=ZZP511-COMMENT",
+	"-ExifIFD:SerialNumber=ZZP511-BODYSN",
+	"-ExifIFD:LensSerialNumber=ZZP511-LENSSN",
+	"-ExifIFD:OwnerName=ZZP511-OWNER",
+] as const;
+
+function assertRawSeeds(
+	filePath: string,
+	spec: (typeof RAW_FIXTURE_SPECS)[number],
+): void {
+	const metadata = readFixtureMetadata(filePath);
+	const fileType = metadata["File:FileType"];
+	if (fileType !== spec.fileType) {
+		throw new Error(
+			`${filePath} File:FileType expected ${spec.fileType}, got ${String(fileType)}`,
+		);
+	}
+	for (const [tag, expectedValue] of Object.entries(spec.expected)) {
+		const actual = metadata[tag];
+		if (actual !== expectedValue) {
+			throw new Error(
+				`${filePath} ${tag} expected ${expectedValue}, got ${String(actual)}`,
+			);
+		}
+	}
+}
+
+// Phase 51.1 (D-47): vendors the RAW fixture from the bundled ExifTool distribution's own
+// t/images/ corpus, verifies it against the pinned upstream digest, seeds it with the
+// RAW_SEED_ARGS literal argument array (never a string split -- CONTEXT D-43's zsh
+// word-splitting pitfall), then re-reads and fail-loudly confirms every seed landed.
+function generateRawFixtures(fixturesDir: string, upstreamDir: string): void {
+	for (const spec of RAW_FIXTURE_SPECS) {
+		const upstreamPath = path.join(upstreamDir, spec.name);
+		if (!fs.existsSync(upstreamPath)) {
+			throw new Error(`RAW fixture upstream source missing: ${upstreamPath}`);
+		}
+		const upstreamBytes = fs.readFileSync(upstreamPath);
+		const upstreamDigest = createHash("sha256")
+			.update(upstreamBytes)
+			.digest("hex");
+		if (upstreamDigest !== spec.upstreamSha256) {
+			throw new Error(
+				`RAW fixture upstream digest mismatch for ${spec.name}: expected ${spec.upstreamSha256}, got ${upstreamDigest}`,
+			);
+		}
+		const filePath = path.join(fixturesDir, spec.name);
+		fs.copyFileSync(upstreamPath, filePath);
+		execFileSync(EXIFTOOL, ["-overwrite_original", ...RAW_SEED_ARGS, filePath]);
+		assertRawSeeds(filePath, spec);
+		console.log(
+			`  Created ${spec.name} (vendored ExifTool 13.59 t/images sample, seeded, FileType=${spec.fileType})`,
+		);
+	}
+}
+
+// Phase 52-04 (FID-03, D-37): seven formats the D-37 negative-control matrix needs that the
+// RAW corpus above does not provide (BMP, SVG, AVI, WMV are unwritable; GIF, HEIC, MOV round
+// out the writable families). Vendored unmodified -- no seed args, unlike RAW_FIXTURE_SPECS --
+// mirroring RAF-PROVENANCE.md's "committed unmodified" precedent, not RAW_SEED_ARGS's
+// vendor-then-seed pattern.
+const MATRIX_FIXTURE_SPECS = [
+	{
+		name: "GIF.gif",
+		upstreamSha256:
+			"55f8d30ea6fac980f35d5af11a90b10ddc0186d961b0273e66df2f8b7c5aa6be",
+		fileType: "GIF",
+	},
+	{
+		name: "QuickTime.heic",
+		upstreamSha256:
+			"4e1785e9924600d0274176f52609a2d514481877103b91c714bd2088ea803ae7",
+		fileType: "HEIF",
+	},
+	{
+		name: "QuickTime.mov",
+		upstreamSha256:
+			"eea529609b6026e0cd7b3d9188b997889f905cd89a93421ad7a9063c670449ec",
+		fileType: "MOV",
+	},
+	{
+		name: "BMP.bmp",
+		upstreamSha256:
+			"fab182ec28064483847443e29982d592b64d7019fc4f1db85e02501a40e1dcf8",
+		fileType: "BMP",
+	},
+	{
+		name: "XMP.svg",
+		upstreamSha256:
+			"1e6449dc39a0e61bc9a4d27beaef5e68bc72fc59c6bf1772d174fd34f5f400c2",
+		fileType: "SVG",
+	},
+	{
+		name: "RIFF.avi",
+		upstreamSha256:
+			"7c03b77d115118e3293833e6c1b5d5795c998051d145674368e0b97f02719d4b",
+		fileType: "AVI",
+	},
+	{
+		name: "ASF.wmv",
+		upstreamSha256:
+			"c3cafee199bbf19bb2fdce56211d44d108454ea7efd8ecc7c4cdda7ebce87c97",
+		fileType: "WMV",
+	},
+] as const;
+
+// Vendors each MATRIX_FIXTURE_SPECS row from the same bundled-ExifTool upstream corpus
+// generateRawFixtures reads from: verify upstream digest, copy verbatim (no seeding), re-hash
+// the copy, then confirm -s3 -FileType matches the pinned value.
+function generateMatrixFixtures(
+	fixturesDir: string,
+	upstreamDir: string,
+): void {
+	for (const spec of MATRIX_FIXTURE_SPECS) {
+		const upstreamPath = path.join(upstreamDir, spec.name);
+		if (!fs.existsSync(upstreamPath)) {
+			throw new Error(
+				`Matrix fixture upstream source missing: ${upstreamPath}`,
+			);
+		}
+		const upstreamBytes = fs.readFileSync(upstreamPath);
+		const upstreamDigest = createHash("sha256")
+			.update(upstreamBytes)
+			.digest("hex");
+		if (upstreamDigest !== spec.upstreamSha256) {
+			throw new Error(
+				`Matrix fixture upstream digest mismatch for ${spec.name}: expected ${spec.upstreamSha256}, got ${upstreamDigest}`,
+			);
+		}
+		const filePath = path.join(fixturesDir, spec.name);
+		fs.copyFileSync(upstreamPath, filePath);
+		const copyDigest = createHash("sha256")
+			.update(fs.readFileSync(filePath))
+			.digest("hex");
+		if (copyDigest !== spec.upstreamSha256) {
+			throw new Error(
+				`Matrix fixture copy digest mismatch for ${spec.name}: expected ${spec.upstreamSha256}, got ${copyDigest}`,
+			);
+		}
+		const observedType = execFileSync(EXIFTOOL, ["-s3", "-FileType", filePath])
+			.toString()
+			.trim();
+		if (observedType !== spec.fileType) {
+			throw new Error(
+				`Matrix fixture ${spec.name} expected FileType ${spec.fileType}, got ${observedType}`,
+			);
+		}
+		console.log(
+			`  Created ${spec.name} (vendored ExifTool 13.59 t/images sample, unmodified)`,
+		);
+	}
+}
 
 function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	console.log("Generating E2E test fixtures...");
@@ -727,7 +1165,93 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	]);
 	console.log("  Created orientation.jpg (Rotate 90 CW)");
 
-	console.log("\nAll 13 fixture files generated successfully.");
+	// sample.tif - single-strip TIFF with IFD0 private tags (ImageDescription, Software,
+	// Artist, Copyright) and GPS, for Phase 51 (RMV-03/RMV-04). Validate the unseeded bytes
+	// first (after GPS seeding, ExifTool's validator warns about GPSProcessingMethod).
+	const tiffPath = path.join(fixturesDir, "sample.tif");
+	fs.writeFileSync(tiffPath, createMinimalTiff());
+	const tiffValidation = execFileSync(EXIFTOOL, ["-validate", "-s3", tiffPath])
+		.toString()
+		.trim();
+	if (tiffValidation !== "OK") {
+		throw new Error(
+			`sample.tif failed -validate before seeding: expected OK, got "${tiffValidation}"`,
+		);
+	}
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-ImageDescription=ZZP51-DESC",
+		"-Software=ZZP51-SOFT",
+		"-Artist=ZZP51-ARTIST",
+		"-Copyright=ZZP51-COPY",
+		"-GPSLatitude=37.7749",
+		"-GPSLatitudeRef=N",
+		"-GPSLongitude=-122.4194",
+		"-GPSLongitudeRef=W",
+		tiffPath,
+	]);
+	assertTiffSeeds(tiffPath, {
+		"IFD0:ImageDescription": "ZZP51-DESC",
+		"IFD0:Software": "ZZP51-SOFT",
+		"IFD0:Artist": "ZZP51-ARTIST",
+		"IFD0:Copyright": "ZZP51-COPY",
+		"GPS:GPSLatitudeRef": "North",
+	});
+	console.log(
+		"  Created sample.tif (single-strip TIFF with IFD0 private tags and GPS)",
+	);
+
+	// multipage.tif - two-page TIFF with distinct per-IFD private tags (IFD0 vs IFD1) and GPS
+	// on IFD0, for Phase 51-03's multi-page limitation pin (D-22, D-25).
+	const multipagePath = path.join(fixturesDir, "multipage.tif");
+	fs.writeFileSync(multipagePath, createTwoPageTiff());
+	const multipageValidation = execFileSync(EXIFTOOL, [
+		"-validate",
+		"-s3",
+		multipagePath,
+	])
+		.toString()
+		.trim();
+	if (multipageValidation !== "OK") {
+		throw new Error(
+			`multipage.tif failed -validate before seeding: expected OK, got "${multipageValidation}"`,
+		);
+	}
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-IFD0:ImageDescription=ZZP51-PAGE1-DESC",
+		"-IFD0:Software=ZZP51-PAGE1-SOFT",
+		"-IFD0:Artist=ZZP51-PAGE1-ARTIST",
+		"-IFD0:Copyright=ZZP51-PAGE1-COPY",
+		"-GPSLatitude=37.7749",
+		"-GPSLatitudeRef=N",
+		"-GPSLongitude=-122.4194",
+		"-GPSLongitudeRef=W",
+		"-IFD1:ImageDescription=ZZP51-PAGE2-DESC",
+		"-IFD1:Software=ZZP51-PAGE2-SOFT",
+		"-IFD1:Artist=ZZP51-PAGE2-ARTIST",
+		"-IFD1:Copyright=ZZP51-PAGE2-COPY",
+		multipagePath,
+	]);
+	assertTiffSeeds(multipagePath, {
+		"IFD0:ImageDescription": "ZZP51-PAGE1-DESC",
+		"IFD0:Software": "ZZP51-PAGE1-SOFT",
+		"IFD0:Artist": "ZZP51-PAGE1-ARTIST",
+		"IFD0:Copyright": "ZZP51-PAGE1-COPY",
+		"GPS:GPSLatitudeRef": "North",
+		"IFD1:ImageDescription": "ZZP51-PAGE2-DESC",
+		"IFD1:Software": "ZZP51-PAGE2-SOFT",
+		"IFD1:Artist": "ZZP51-PAGE2-ARTIST",
+		"IFD1:Copyright": "ZZP51-PAGE2-COPY",
+	});
+	console.log(
+		"  Created multipage.tif (two-page TIFF with distinct per-IFD private tags)",
+	);
+
+	generateRawFixtures(fixturesDir, rawUpstreamDir);
+	generateMatrixFixtures(fixturesDir, rawUpstreamDir);
+
+	console.log("\nAll 24 fixture files generated successfully.");
 }
 
 const outputFlag = process.argv.indexOf("--output-dir");
@@ -738,4 +1262,14 @@ const outputDir =
 	outputFlag === -1
 		? DEFAULT_FIXTURES_DIR
 		: path.resolve(process.argv[outputFlag + 1]!);
+
+const rawUpstreamFlag = process.argv.indexOf("--raw-upstream-dir");
+if (rawUpstreamFlag !== -1 && process.argv[rawUpstreamFlag + 1] === undefined) {
+	throw new Error("--raw-upstream-dir requires a path");
+}
+const rawUpstreamDir =
+	rawUpstreamFlag === -1
+		? RAW_UPSTREAM_DEFAULT_DIR
+		: path.resolve(process.argv[rawUpstreamFlag + 1]!);
+
 generateFixtures(outputDir);

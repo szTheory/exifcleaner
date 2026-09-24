@@ -20,6 +20,7 @@ const sanitizeRequest = {
 	outputMode: "copy" as const,
 	preserveOrientation: true,
 	preserveColorProfile: true,
+	preserveResolution: false,
 	preserveTimestamps: true,
 };
 

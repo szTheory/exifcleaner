@@ -57,6 +57,7 @@ describe("native metadata routing tracer", () => {
 			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: true,
 		});
 
@@ -82,6 +83,7 @@ describe("native metadata routing tracer", () => {
 			outputMode: "overwrite",
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: true,
 		});
 
@@ -106,6 +108,7 @@ describe("native metadata routing tracer", () => {
 			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: true,
 		});
 
@@ -131,6 +134,7 @@ describe("native metadata routing tracer", () => {
 			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: true,
 		});
 
@@ -182,6 +186,7 @@ describe("native metadata routing tracer", () => {
 				outputMode: "copy",
 				preserveOrientation: true,
 				preserveColorProfile: true,
+				preserveResolution: false,
 				preserveTimestamps: true,
 			});
 
@@ -200,6 +205,7 @@ describe("native metadata routing tracer", () => {
 			outputMode: "copy" as const,
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: false,
 			preserveTimestamps: true,
 		};
 

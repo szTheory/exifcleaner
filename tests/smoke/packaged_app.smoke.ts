@@ -160,6 +160,7 @@ test.describe("Packaged artifact", () => {
 		try {
 			if (!context) throw new Error("packaged launch context is missing");
 			await createProcessingDriver(context).setSaveAsCopy(false);
+			await createProcessingDriver(context).setPreserveResolution(false);
 			const tempFile = copyFixture("sample.jpg");
 
 			const before = snapshotDir(dir);
@@ -197,6 +198,7 @@ test.describe("Packaged artifact", () => {
 		try {
 			if (!context) throw new Error("packaged launch context is missing");
 			await createProcessingDriver(context).setSaveAsCopy(false);
+			await createProcessingDriver(context).setPreserveResolution(false);
 			const tempFiles = copyFixtures([
 				"sample.jpg",
 				"sample.png",
@@ -286,6 +288,8 @@ test.describe("Packaged artifact", () => {
 				expect(await window.locator("#toggle-remove-xattrs").isChecked()).toBe(
 					true,
 				);
+				if (!context) throw new Error("packaged launch context is missing");
+				await createProcessingDriver(context).setPreserveResolution(false);
 
 				const filePath = copyFixture("sample.jpg");
 				await seedXattrs(filePath, SEEDED_XATTRS);

@@ -63,6 +63,7 @@ describe("Settings schema (D-28)", () => {
 			"language",
 			"preserveColorProfile",
 			"preserveOrientation",
+			"preserveResolution",
 			"preserveTimestamps",
 			"removeXattrs",
 			"saveAsCopy",
@@ -70,14 +71,15 @@ describe("Settings schema (D-28)", () => {
 		]);
 	});
 
-	it("CURRENT_SCHEMA_VERSION equals the literal 4", () => {
-		expect(CURRENT_SCHEMA_VERSION).toBe(4);
+	it("CURRENT_SCHEMA_VERSION equals the literal 5", () => {
+		expect(CURRENT_SCHEMA_VERSION).toBe(5);
 	});
 
 	it("DEFAULT_SETTINGS equals this literal object", () => {
 		expect(DEFAULT_SETTINGS).toEqual({
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: true,
 			saveAsCopy: true,
 			removeXattrs: false,
 			preserveTimestamps: false,
@@ -88,7 +90,7 @@ describe("Settings schema (D-28)", () => {
 });
 
 describe("English i18n key set (D-28)", () => {
-	it("equals this exact sorted set of 126 keys", () => {
+	it("equals this exact sorted set of 129 keys", () => {
 		const stringsPath = path.join(REPO_ROOT, ".resources/strings.json");
 		const strings: Record<string, Record<string, string>> = JSON.parse(
 			fs.readFileSync(stringsPath, "utf8"),
@@ -189,6 +191,8 @@ describe("English i18n key set (D-28)", () => {
 			"settings.preserveColorProfile.label",
 			"settings.preserveOrientation.description",
 			"settings.preserveOrientation.label",
+			"settings.preserveResolution.description",
+			"settings.preserveResolution.label",
 			"settings.preserveTimestamps.description",
 			"settings.preserveTimestamps.label",
 			"settings.removeXattrs.description",
@@ -219,10 +223,11 @@ describe("English i18n key set (D-28)", () => {
 			"usertasks:open-file.description",
 			"usertasks:open-file.label",
 			"verificationFailedSummary",
+			"writeFailedSummary",
 			"writtenToCopy",
 			"xattrFailedSummary",
 		]);
-		expect(sortedKeys).toHaveLength(126);
+		expect(sortedKeys).toHaveLength(129);
 	});
 });
 

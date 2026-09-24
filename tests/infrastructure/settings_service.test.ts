@@ -222,6 +222,96 @@ describe("SettingsService", () => {
 		await rm(dir, { recursive: true });
 	});
 
+	it("loads a v4 file on disk with preserveResolution true and rewrites it as version 5 with every other value unchanged (FID-05, D-40)", async () => {
+		const dir = makeTempDir();
+		const filePath = join(dir, "settings.json");
+		const logger = new FakeLogger();
+
+		const oldFile = {
+			version: 4,
+			settings: {
+				preserveOrientation: false,
+				preserveColorProfile: true,
+				saveAsCopy: false,
+				removeXattrs: true,
+				preserveTimestamps: true,
+				language: "de",
+				themeMode: "dark",
+			},
+		};
+
+		await writeFile(filePath, JSON.stringify(oldFile), "utf-8");
+
+		const service = new SettingsService({ filePath, logger });
+		const settings = await service.load();
+
+		expect(settings).toEqual({
+			preserveOrientation: false,
+			preserveColorProfile: true,
+			preserveResolution: true,
+			saveAsCopy: false,
+			removeXattrs: true,
+			preserveTimestamps: true,
+			language: "de",
+			themeMode: "dark",
+		});
+
+		const raw = await readFile(filePath, "utf-8");
+		const parsed = JSON.parse(raw);
+		expect(parsed.version).toBe(CURRENT_SCHEMA_VERSION);
+		expect(parsed.settings).toEqual({
+			preserveOrientation: false,
+			preserveColorProfile: true,
+			preserveResolution: true,
+			saveAsCopy: false,
+			removeXattrs: true,
+			preserveTimestamps: true,
+			language: "de",
+			themeMode: "dark",
+		});
+		await rm(dir, { recursive: true });
+	});
+
+	it("loads a v5 file missing preserveResolution as true and leaves the file on disk byte-unchanged (FID-05, D-40)", async () => {
+		const dir = makeTempDir();
+		const filePath = join(dir, "settings.json");
+		const logger = new FakeLogger();
+
+		const v5File = {
+			version: 5,
+			settings: {
+				preserveOrientation: true,
+				preserveColorProfile: false,
+				saveAsCopy: true,
+				removeXattrs: false,
+				preserveTimestamps: false,
+				language: "es",
+				themeMode: "light",
+			},
+		};
+
+		await writeFile(filePath, JSON.stringify(v5File), "utf-8");
+		const beforeBytes = await readFile(filePath);
+
+		const service = new SettingsService({ filePath, logger });
+		const settings = await service.load();
+
+		expect(settings).toEqual({
+			preserveOrientation: true,
+			preserveColorProfile: false,
+			preserveResolution: true,
+			saveAsCopy: true,
+			removeXattrs: false,
+			preserveTimestamps: false,
+			language: "es",
+			themeMode: "light",
+		});
+
+		const afterBytes = await readFile(filePath);
+		expect(afterBytes.equals(beforeBytes)).toBe(true);
+		await rm(dir, { recursive: true });
+	});
+
 	it("update merges partial settings", async () => {
 		const dir = makeTempDir();
 		const filePath = join(dir, "settings.json");

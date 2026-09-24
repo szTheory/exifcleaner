@@ -268,6 +268,24 @@ describe("exif:remove handler", () => {
 			saveAsCopy: false,
 			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.m4a",
 		},
+		{
+			name: "copy-mode TIFF",
+			filePath: "/tmp/sample.tif",
+			saveAsCopy: true,
+			verifierPath: "/tmp/sample_cleaned.tif",
+		},
+		{
+			name: "overwrite-mode TIFF",
+			filePath: "/tmp/sample.tif",
+			saveAsCopy: false,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.tif",
+		},
+		{
+			name: "overwrite-mode .tiff",
+			filePath: "/tmp/sample.tiff",
+			saveAsCopy: false,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.tiff",
+		},
 	])(
 		"uses the exact main-process port count for $name",
 		async ({ filePath, saveAsCopy, verifierPath }) => {
@@ -312,6 +330,7 @@ describe("exif:remove handler", () => {
 			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
+			preserveResolution: true,
 			preserveTimestamps: false,
 			saveAsCopy: true,
 			outputPath: "/dir/photo_cleaned.jpg",
@@ -810,6 +829,73 @@ describe("exif:remove handler", () => {
 		expect(result).not.toHaveProperty("outputPath");
 	});
 
+	it("returns a timed-out write failure detail with no residualPath key when none is carried", async () => {
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+			transactionResult: {
+				ok: false,
+				error: { code: "write-failed", timedOut: true },
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(outputTransaction.execute).toHaveBeenCalledOnce();
+		expect(result).toEqual({
+			success: false,
+			failureKind: "write",
+			detail: "Generated output write failed: exceeded the write time limit",
+		});
+		expect("residualPath" in (result as object)).toBe(false);
+	});
+
+	it("returns a timed-out write failure with the exact residual path when one is carried", async () => {
+		const residualPath = "/dir/.video.exifcleaner-stage-test-uuid.mp4";
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+			transactionResult: {
+				ok: false,
+				error: { code: "write-failed", timedOut: true, residualPath },
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(outputTransaction.execute).toHaveBeenCalledOnce();
+		expect(result).toEqual({
+			success: false,
+			failureKind: "write",
+			detail: "Generated output write failed: exceeded the write time limit",
+			residualPath,
+		});
+	});
+
+	it("returns a generic write failure detail with no residualPath key", async () => {
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+			transactionResult: {
+				ok: false,
+				error: { code: "write-failed" },
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(outputTransaction.execute).toHaveBeenCalledOnce();
+		expect(result).toEqual({
+			success: false,
+			failureKind: "write",
+			detail: "Generated output write failed",
+		});
+		expect("residualPath" in (result as object)).toBe(false);
+	});
+
 	it("returns a verification terminal failure without publishing an output path", async () => {
 		const { container, outputTransaction } = makeContainer({
 			saveAsCopy: false,
@@ -851,4 +937,82 @@ describe("exif:remove handler", () => {
 		await expect(handler(makeAuthorizedEvent(), null)).rejects.toThrow();
 		expect(stripMetadata.execute).not.toHaveBeenCalled();
 	});
+});
+
+function makeContainerWithPreserveResolution({
+	saveAsCopy,
+	preserveResolution,
+}: {
+	saveAsCopy: boolean;
+	preserveResolution: boolean;
+}): {
+	container: Container;
+	stripMetadata: { execute: ReturnType<typeof vi.fn> };
+	outputTransaction: { execute: ReturnType<typeof vi.fn> };
+} {
+	const stripMetadata = {
+		execute: vi.fn(async () => ({ ok: true, value: { tagsRemoved: 0 } })),
+	};
+	const outputTransaction = {
+		execute: vi.fn(async (request) => ({
+			ok: true,
+			value: { outputPath: request.commitPath ?? request.generatedPath },
+		})),
+	};
+	const removeXattrCommand = { execute: vi.fn(async () => undefined) };
+	const container = {
+		settings: {
+			get: () => ({
+				...DEFAULT_SETTINGS,
+				saveAsCopy,
+				preserveResolution,
+			}),
+		},
+		readMetadata: {
+			execute: vi.fn(async () => ({ ok: true, value: { Make: "camera" } })),
+		},
+		stripMetadata,
+		outputTransaction,
+		removeXattrCommand,
+	} as unknown as Container;
+	return { container, stripMetadata, outputTransaction };
+}
+
+describe("exif:remove forwards the actual preserveResolution setting (FID-01, D-40)", () => {
+	it.each([true, false])(
+		"a .jpg request reaches stripMetadata.execute with preserveResolution %s (FID-01, D-40)",
+		async (preserveResolution) => {
+			const { container, stripMetadata } = makeContainerWithPreserveResolution({
+				saveAsCopy: false,
+				preserveResolution,
+			});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+
+			expect(stripMetadata.execute).toHaveBeenCalledWith(
+				expect.objectContaining({ preserveResolution }),
+			);
+		},
+	);
+
+	it.each([true, false])(
+		"a .tif request reaches outputTransaction.execute with preserveResolution %s (FID-01, D-40)",
+		async (preserveResolution) => {
+			const { container, outputTransaction } =
+				makeContainerWithPreserveResolution({
+					saveAsCopy: false,
+					preserveResolution,
+				});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			await handler(makeAuthorizedEvent(), "/dir/scan.tif");
+
+			expect(outputTransaction.execute).toHaveBeenCalledWith(
+				expect.objectContaining({ preserveResolution }),
+			);
+		},
+	);
 });
