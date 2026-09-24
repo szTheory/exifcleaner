@@ -50,6 +50,7 @@
 	"verificationFailedSummary": "A megtisztított kimenetet nem sikerült ellenőrizni. A hiányos másolat el lett távolítva; az eredeti változatlan.",
 	"cleanupFailedSummary": "A megtisztított kimenetet nem sikerült ellenőrizni, és a hiányos kimenet nem távolítható el. Az eredeti változatlan.",
 	"xattrFailedSummary": "A metaadatok el lettek távolítva, de a macOS kiterjesztett attribútumait nem sikerült törölni.",
+	"writeFailedSummary": "A megtisztított kimenetet nem sikerült kiírni. Az eredeti változatlan.",
 	"complete": "Befejezve",
 	"empty.dropActive": "Ejtse ide a tisztítandó fájlokat.",
 	"menu.help.new-releases": "Új kiadások…",

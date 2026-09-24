@@ -75,6 +75,7 @@
 	"verificationFailedSummary": "Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged.",
 	"cleanupFailedSummary": "Couldn’t verify cleaned output, and the incomplete output could not be removed. Your original is unchanged.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
+	"writeFailedSummary": "Couldn’t write the cleaned output. Your original is unchanged.",
 	"complete": "Complete",
 	"status.pending": "Pending",
 	"status.error": "Error",

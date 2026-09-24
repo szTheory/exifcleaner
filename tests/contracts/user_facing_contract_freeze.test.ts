@@ -90,7 +90,7 @@ describe("Settings schema (D-28)", () => {
 });
 
 describe("English i18n key set (D-28)", () => {
-	it("equals this exact sorted set of 128 keys", () => {
+	it("equals this exact sorted set of 129 keys", () => {
 		const stringsPath = path.join(REPO_ROOT, ".resources/strings.json");
 		const strings: Record<string, Record<string, string>> = JSON.parse(
 			fs.readFileSync(stringsPath, "utf8"),
@@ -223,10 +223,11 @@ describe("English i18n key set (D-28)", () => {
 			"usertasks:open-file.description",
 			"usertasks:open-file.label",
 			"verificationFailedSummary",
+			"writeFailedSummary",
 			"writtenToCopy",
 			"xattrFailedSummary",
 		]);
-		expect(sortedKeys).toHaveLength(128);
+		expect(sortedKeys).toHaveLength(129);
 	});
 });
 

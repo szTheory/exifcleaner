@@ -48,6 +48,7 @@
 	"verificationFailedSummary": "No se pudo verificar la salida limpia. La copia incompleta se eliminó; el original no ha cambiado.",
 	"cleanupFailedSummary": "No se pudo verificar la salida limpia ni eliminar la salida incompleta. El original no ha cambiado.",
 	"xattrFailedSummary": "Se eliminaron los metadatos, pero no se pudieron borrar los atributos extendidos de macOS.",
+	"writeFailedSummary": "No se pudo escribir la salida limpia. El original no ha cambiado.",
 	"complete": "Completado",
 	"empty.dropActive": "Suelta los archivos para limpiarlos.",
 	"menu.help.new-releases": "Nuevas versiones…",

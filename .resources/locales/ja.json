@@ -48,6 +48,7 @@
 	"verificationFailedSummary": "クリーンな出力を検証できませんでした。不完全なコピーは削除され、元のファイルは変更されていません。",
 	"cleanupFailedSummary": "クリーンな出力を検証できず、不完全な出力を削除できませんでした。元のファイルは変更されていません。",
 	"xattrFailedSummary": "メタデータは削除されましたが、macOS の拡張属性を消去できませんでした。",
+	"writeFailedSummary": "クリーンな出力を書き込めませんでした。元のファイルは変更されていません。",
 	"complete": "完了",
 	"empty.dropActive": "ファイルをドロップしてクリーニングします。",
 	"menu.help.new-releases": "新しいリリース…",

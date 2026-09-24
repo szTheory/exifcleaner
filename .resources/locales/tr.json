@@ -50,6 +50,7 @@
 	"verificationFailedSummary": "Temizlenmiş çıktı doğrulanamadı. Tamamlanmamış kopya kaldırıldı; orijinaliniz değişmedi.",
 	"cleanupFailedSummary": "Temizlenmiş çıktı doğrulanamadı ve tamamlanmamış çıktı kaldırılamadı. Orijinaliniz değişmedi.",
 	"xattrFailedSummary": "Meta veriler kaldırıldı ancak macOS genişletilmiş öznitelikleri temizlenemedi.",
+	"writeFailedSummary": "Temizlenmiş çıktı yazılamadı. Orijinaliniz değişmedi.",
 	"complete": "Tamamlandı",
 	"empty.dropActive": "Temizlemek için dosyaları bırakın.",
 	"menu.help.new-releases": "Yeni sürümler…",

@@ -50,6 +50,7 @@
 	"verificationFailedSummary": "Não foi possível verificar a saída limpa. A cópia incompleta foi removida; seu original não foi alterado.",
 	"cleanupFailedSummary": "Não foi possível verificar a saída limpa, e a saída incompleta não pôde ser removida. Seu original não foi alterado.",
 	"xattrFailedSummary": "Os metadados foram removidos, mas não foi possível remover os atributos estendidos do macOS.",
+	"writeFailedSummary": "Não foi possível gravar a saída limpa. Seu original não foi alterado.",
 	"complete": "Concluído",
 	"empty.dropActive": "Solte os arquivos para limpá-los.",
 	"menu.help.new-releases": "Novas versões…",

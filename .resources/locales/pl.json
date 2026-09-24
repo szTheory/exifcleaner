@@ -50,6 +50,7 @@
 	"verificationFailedSummary": "Nie można było zweryfikować oczyszczonego wyniku. Niekompletna kopia została usunięta; oryginał pozostał bez zmian.",
 	"cleanupFailedSummary": "Nie można było zweryfikować oczyszczonego wyniku, a niekompletnego wyniku nie udało się usunąć. Oryginał pozostał bez zmian.",
 	"xattrFailedSummary": "Metadane zostały usunięte, ale nie udało się wyczyścić rozszerzonych atrybutów macOS.",
+	"writeFailedSummary": "Nie można było zapisać oczyszczonego wyniku. Oryginał pozostał bez zmian.",
 	"complete": "Ukończono",
 	"empty.dropActive": "Upuść pliki, aby je wyczyścić.",
 	"menu.help.new-releases": "Nowe wydania…",

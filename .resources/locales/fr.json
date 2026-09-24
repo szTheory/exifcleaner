@@ -73,6 +73,7 @@
 	"verificationFailedSummary": "Impossible de vérifier le résultat nettoyé. La copie incomplète a été supprimée ; votre original est inchangé.",
 	"cleanupFailedSummary": "Impossible de vérifier le résultat nettoyé et la sortie incomplète n'a pas pu être supprimée. Votre original est inchangé.",
 	"xattrFailedSummary": "Les métadonnées ont été supprimées, mais les attributs étendus de macOS n'ont pas pu être effacés.",
+	"writeFailedSummary": "Impossible d'écrire le résultat nettoyé. Votre original est inchangé.",
 	"complete": "Terminé",
 	"empty.dropActive": "Déposez les fichiers à nettoyer.",
 	"menu.help.new-releases": "Nouvelles versions…",

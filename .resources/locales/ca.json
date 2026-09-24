@@ -50,6 +50,7 @@
 	"verificationFailedSummary": "No s'ha pogut verificar la sortida neta. S'ha eliminat la còpia incompleta; l'original no ha canviat.",
 	"cleanupFailedSummary": "No s'ha pogut verificar la sortida neta i no s'ha pogut eliminar la sortida incompleta. L'original no ha canviat.",
 	"xattrFailedSummary": "S'han eliminat les metadades, però no s'han pogut esborrar els atributs estesos de macOS.",
+	"writeFailedSummary": "No s'ha pogut escriure la sortida neta. L'original no ha canviat.",
 	"complete": "Completat",
 	"empty.dropActive": "Deixeu anar els fitxers per netejar-los.",
 	"menu.help.new-releases": "Versions noves…",

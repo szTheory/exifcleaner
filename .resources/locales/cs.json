@@ -50,6 +50,7 @@
 	"verificationFailedSummary": "Vyčištěný výstup se nepodařilo ověřit. Neúplná kopie byla odstraněna; originál zůstal nezměněn.",
 	"cleanupFailedSummary": "Vyčištěný výstup se nepodařilo ověřit a neúplný výstup nelze odstranit. Originál zůstal nezměněn.",
 	"xattrFailedSummary": "Metadata byla odstraněna, ale rozšířené atributy macOS se nepodařilo vymazat.",
+	"writeFailedSummary": "Vyčištěný výstup se nepodařilo zapsat. Originál zůstal nezměněn.",
 	"complete": "Dokončeno",
 	"empty.dropActive": "Přetažením soubory vyčistíte.",
 	"menu.help.new-releases": "Nové verze…",

@@ -50,6 +50,7 @@
 	"verificationFailedSummary": "无法验证清理后的输出。不完整副本已删除；原始文件未更改。",
 	"cleanupFailedSummary": "无法验证清理后的输出，也无法删除不完整的输出。原始文件未更改。",
 	"xattrFailedSummary": "元数据已移除，但无法清除 macOS 扩展属性。",
+	"writeFailedSummary": "无法写入清理后的输出。原始文件未更改。",
 	"complete": "完成",
 	"empty.dropActive": "拖放文件以清理。",
 	"menu.help.new-releases": "新版本…",

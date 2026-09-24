@@ -50,6 +50,7 @@
 	"verificationFailedSummary": "Kunne ikke bekræfte det rensede output. Den ufuldstændige kopi blev fjernet; originalen er uændret.",
 	"cleanupFailedSummary": "Kunne ikke bekræfte det rensede output, og det ufuldstændige output kunne ikke fjernes. Originalen er uændret.",
 	"xattrFailedSummary": "Metadata blev fjernet, men de udvidede macOS-attributter kunne ikke fjernes.",
+	"writeFailedSummary": "Kunne ikke skrive det rensede output. Originalen er uændret.",
 	"complete": "Fuldført",
 	"empty.dropActive": "Slip filer for at rense dem.",
 	"menu.help.new-releases": "Nye udgivelser…",

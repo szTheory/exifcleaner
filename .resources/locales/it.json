@@ -50,6 +50,7 @@
 	"verificationFailedSummary": "Impossibile verificare l'output pulito. La copia incompleta è stata rimossa; l'originale non è stato modificato.",
 	"cleanupFailedSummary": "Impossibile verificare l'output pulito e rimuovere l'output incompleto. L'originale non è stato modificato.",
 	"xattrFailedSummary": "I metadati sono stati rimossi, ma non è stato possibile cancellare gli attributi estesi di macOS.",
+	"writeFailedSummary": "Impossibile scrivere l'output pulito. L'originale non è stato modificato.",
 	"complete": "Completato",
 	"empty.dropActive": "Rilascia i file per pulirli.",
 	"menu.help.new-releases": "Nuove versioni…",
