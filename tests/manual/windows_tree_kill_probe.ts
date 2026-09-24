@@ -157,6 +157,15 @@ async function main(): Promise<void> {
 		});
 		console.log(`PROBE_SESSION_TREE=${JSON.stringify(sessionDescendants)}`);
 		if (!sessionDescendants.some((d) => isPerl(d.name))) {
+			// Diagnostic-only (never weakens the check below): if the launcher premise
+			// itself is wrong -- e.g. the perl.exe child is reparented away from the
+			// launcher's own pid rather than missing entirely -- this distinguishes
+			// "no perl.exe exists anywhere" from "one exists but isn't our descendant".
+			const allProcesses = listProcesses();
+			const anyPerl = allProcesses.filter((p) => isPerl(p.name));
+			const launcherRow = allProcesses.find((p) => p.pid === launcherPid);
+			console.log(`PROBE_DIAG_LAUNCHER_ROW=${JSON.stringify(launcherRow)}`);
+			console.log(`PROBE_DIAG_ALL_PERL=${JSON.stringify(anyPerl)}`);
 			console.log("PROBE_NO_PERL_CHILD");
 			process.exit(1);
 		}
