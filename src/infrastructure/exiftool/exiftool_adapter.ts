@@ -1,3 +1,4 @@
+import { stat } from "node:fs/promises";
 import type { MetadataEnginePort } from "../../application/metadata_engine_port";
 import { cleanExifData } from "../../domain";
 import {
@@ -16,11 +17,14 @@ import type { ExifError } from "../../domain";
 import type { MetadataEngineError } from "../../domain/exif/exif_errors";
 import { classifyInspectionDiagnostics } from "./exiftool_diagnostics";
 import {
+	ExifToolCommandTimeoutError,
 	UnsafeExifToolPathError,
+	writeDeadlineMs,
 	type ExiftoolProcess,
 } from "./ExiftoolProcess";
 
 const UNSAFE_PATH_MESSAGE = "The selected file path is not supported";
+const WRITE_TIME_LIMIT_DETAIL = "exceeded the write time limit";
 // G1 identifies the physical metadata family (System/File/JFIF/EXIF/etc.) while G2 supplies
 // the user-facing category. cleanExifData uses both to discard structural fields, then
 // normalizes retained keys back to G2:Tag.
@@ -44,8 +48,9 @@ const OUTPUT_VERIFICATION_INSPECTION_ARGS = ["-File:FileType", "-File:Error"];
 const OUTPUT_VERIFICATION_DIAGNOSTIC_ARGS = ["-G1:2:4"];
 
 // Adapter pattern: wraps the existing ExiftoolProcess with the semantic metadata engine
-// interface. Does NOT modify ExiftoolProcess.ts (working infrastructure code).
-// Converts ExiftoolProcess's { data, error } / throw pattern to Result<T, ExifError>.
+// interface. Converts ExiftoolProcess's { data, error } / throw pattern to Result<T, ExifError>.
+// This adapter is the caller that supplies per-command write deadlines (writeDeadlineMs, D-57);
+// ExiftoolProcess itself stays free of file-type/size knowledge.
 
 export class ExifToolAdapter implements MetadataEnginePort {
 	private readonly process: ExiftoolProcess;
@@ -99,6 +104,14 @@ export class ExifToolAdapter implements MetadataEnginePort {
 				return {
 					ok: false,
 					error: { code: "exiftool-error", detail: UNSAFE_PATH_MESSAGE },
+				};
+			}
+			if (error instanceof ExifToolCommandTimeoutError) {
+				// A timed-out read maps to the existing legacy command-timeout shape --
+				// never "not running" (D-62).
+				return {
+					ok: false,
+					error: { code: "command-timeout", executeNum: error.executeNum },
 				};
 			}
 			return { ok: false, error: { code: "process-not-open" } };
@@ -301,11 +314,24 @@ export class ExifToolAdapter implements MetadataEnginePort {
 			extraArgs.push("-overwrite_original");
 		}
 
+		// D-57: the write deadline scales with the source's size, computed via a stat()
+		// done before dispatch. A failed stat (e.g. a source that no longer exists) omits
+		// deadlineMs entirely, which keeps the fixed 30s default and leaves today's
+		// behavior for a missing source unchanged.
+		let deadlineMs: number | undefined;
+		try {
+			const { size } = await stat(source);
+			deadlineMs = writeDeadlineMs({ sourceBytes: size });
+		} catch {
+			deadlineMs = undefined;
+		}
+
 		try {
 			const result = await this.process.writeMetadata({
 				filePath: source,
 				metadata: {},
 				extraArgs,
+				...(deadlineMs !== undefined ? { deadlineMs } : {}),
 			});
 
 			if (result.error !== null) {
@@ -328,6 +354,20 @@ export class ExifToolAdapter implements MetadataEnginePort {
 						code: "engine-error",
 						detail: UNSAFE_PATH_MESSAGE,
 						backend: "exiftool",
+					},
+				};
+			}
+			if (error instanceof ExifToolCommandTimeoutError) {
+				// ExiftoolProcess has already confirmed the writer's process tree
+				// exited (D-59) before this rejection, so OutputTransaction may safely
+				// clean up any leftover output (D-63).
+				return {
+					ok: false,
+					error: {
+						code: "engine-error",
+						detail: WRITE_TIME_LIMIT_DETAIL,
+						backend: "exiftool",
+						confirmedDeadTimeout: true,
 					},
 				};
 			}
