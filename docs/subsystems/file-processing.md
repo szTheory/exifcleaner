@@ -14,7 +14,10 @@ false product claim.
 ```mermaid
 stateDiagram-v2
     [*] --> WriteCandidate
-    WriteCandidate --> Failed: write fails
+    WriteCandidate --> Failed: write fails (not a timeout)
+    WriteCandidate --> TimedOut: write passes its deadline (ExifTool stopped, exit confirmed)
+    TimedOut --> Failed: partial output removed
+    TimedOut --> ResidualFailure: removal fails (path reported)
     WriteCandidate --> VerifyCandidate: write succeeds
     VerifyCandidate --> Cleanup: verification fails
     VerifyCandidate --> Commit: overwrite uses a stage
@@ -25,6 +28,15 @@ stateDiagram-v2
     Cleanup --> ResidualFailure: removal fails
     Published --> [*]
 ```
+
+Every ExifTool command has its own deadline, started when the command is dispatched: 30
+seconds for reads, and 30 seconds plus the source size divided by 20 MB/s for writes (the
+20 MB/s floor is an assumption, not a measured speed). `ExiftoolProcess` keeps one command in
+flight at a time. When a deadline passes, it kills the ExifTool process tree, waits for the
+exit to be confirmed, rejects only the timed-out command, then starts a fresh session and
+dispatches the next queued command. `OutputTransaction` removes the partial candidate only
+after that confirmed exit (`confirmedDeadTimeout`); every other write failure returns
+`write-failed` without cleanup, because only the timeout case knows the writer is dead.
 
 `StripMetadataCommand` owns flag construction. The order of `-all=` and
 `-TagsFromFile` is intentional: ExifTool applies arguments left-to-right, so preserved
