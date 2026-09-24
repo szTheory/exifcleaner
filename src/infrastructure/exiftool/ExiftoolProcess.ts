@@ -88,12 +88,7 @@ type InFlightEntry = QueueEntry & {
 	settled: boolean;
 };
 
-type ProcessState =
-	| "closed"
-	| "ready"
-	| "killing"
-	| "unavailable"
-	| "closing";
+type ProcessState = "closed" | "ready" | "killing" | "unavailable" | "closing";
 
 export class ExiftoolProcess {
 	private readonly binPath: string;
