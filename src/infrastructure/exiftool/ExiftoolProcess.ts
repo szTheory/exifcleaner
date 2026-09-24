@@ -109,6 +109,10 @@ export class ExiftoolProcess {
 	// Memoized per session so a second caller (the timeout path and close()) awaits the same
 	// kill instead of issuing a second SIGKILL/taskkill (D-61).
 	private killPromise: Promise<void> | null = null;
+	// Reset to 0 by startSession() for every new session. A replacement session that dies
+	// before resolving even one command is a failed respawn under D-61, not a healthy session
+	// having a bad day -- handleExit() reads this to decide whether to respawn again or give up.
+	private resolvedCommandCount = 0;
 
 	constructor({ binPath }: { binPath: string }) {
 		this.binPath = binPath;
@@ -452,6 +456,7 @@ export class ExiftoolProcess {
 		this.stdoutBuffer = "";
 		this.stderrBuffer = "";
 		this.killPromise = null;
+		this.resolvedCommandCount = 0;
 
 		const proc = spawn(this.binPath, ["-stay_open", "True", "-@", "-"]);
 		this.process = proc;
@@ -511,6 +516,20 @@ export class ExiftoolProcess {
 			),
 		);
 
+		// A replacement session that dies before resolving even one command is a failed
+		// respawn under D-61: looping here would spin as fast as the OS can hand back a pid on
+		// a permanently broken binary/perl install. Go straight to unavailable instead.
+		if (this.resolvedCommandCount === 0) {
+			this.state = "unavailable";
+			this.process = null;
+			this.rejectQueue(
+				new Error(
+					"ExifTool process is not open. The replacement ExifTool session exited before answering any command.",
+				),
+			);
+			return;
+		}
+
 		this.respawn();
 		this.pump();
 	}
@@ -562,6 +581,7 @@ export class ExiftoolProcess {
 		clearTimeout(entry.timer);
 		entry.settled = true;
 		this.inFlight = null;
+		this.resolvedCommandCount += 1;
 		entry.resolve(parseExiftoolOutput({ raw: output }));
 		this.pump();
 	}
