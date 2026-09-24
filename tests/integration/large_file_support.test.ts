@@ -11,7 +11,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ExifToolAdapter } from "../../src/infrastructure/exiftool/exiftool_adapter";
-import { ExiftoolProcess } from "../../src/infrastructure/exiftool/ExiftoolProcess";
+import {
+	ExifToolCommandTimeoutError,
+	ExiftoolProcess,
+} from "../../src/infrastructure/exiftool/ExiftoolProcess";
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { StripMetadataCommand } from "../../src/application/commands/strip_metadata_command";
 import { VerifyGeneratedOutputQuery } from "../../src/application/queries/verify_generated_output_query";
@@ -324,6 +327,19 @@ describe("Large-file (>4 GiB) support on ExifTool's default (LRG-01, LRG-02)", (
 // source text underneath this pin has not silently changed.
 const PRODUCT_COMMAND_TIMEOUT_MS = 30_000;
 
+/**
+ * Fails loudly (never skips) on a host without POSIX SIGSTOP/SIGKILL. Windows has neither, so
+ * the lifecycle-edge tests below refuse by name rather than through a runner-control skip
+ * (verify:known-gaps forbids skipIf/runIf; Phase 53 D-50 precedent).
+ */
+function assertPosixSignalHost(): void {
+	if (process.platform === "win32") {
+		throw new Error(
+			"Deadline-recovery test precondition failed: POSIX SIGSTOP/SIGKILL are unavailable on win32",
+		);
+	}
+}
+
 /** Polls a macrotask at a time until `condition()` is true, bounded by real wall-clock time. */
 async function pollUntil({
 	condition,
@@ -514,5 +530,277 @@ describe("ExifTool command deadline recovery (LRG-03)", () => {
 			expect(unhandledRejectionCount).toBe(0);
 		},
 		180_000,
+	);
+
+	it("deadline recovery: a deadline that fires after its command already resolved stops nothing (D-59 step 1)", async () => {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "large-file-resolved-"));
+		temporaryDirs.push(dir);
+		assertPosixSignalHost();
+
+		const normalSource = path.join(dir, "normal.mp4");
+		fs.copyFileSync(SAMPLE_MP4, normalSource);
+
+		const before = snapshotDir(dir);
+
+		const exiftoolProcess = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+		const adapter = new ExifToolAdapter({ process: exiftoolProcess });
+
+		let unhandledRejectionCount = 0;
+		const onUnhandledRejection = (): void => {
+			unhandledRejectionCount += 1;
+		};
+		process.on("unhandledRejection", onUnhandledRejection);
+
+		await exiftoolProcess.open();
+		const pidBefore = exiftoolProcess.pid;
+		if (pidBefore === undefined) {
+			throw new Error(
+				"Expected ExifTool to report a pid immediately after open()",
+			);
+		}
+
+		try {
+			// Fake timers plus a no-op clearTimeout spy make the deadline timer that
+			// the resolved read clears (but does not really clear, since clearTimeout
+			// is mocked) survive to fire again -- the stale callback under test.
+			vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+			const clearTimeoutSpy = vi
+				.spyOn(globalThis, "clearTimeout")
+				.mockImplementation(() => {});
+
+			try {
+				const readResult = await adapter.inspect({
+					source: normalSource,
+					purpose: "display",
+				});
+				expect(readResult.ok).toBe(true);
+				expect(vi.getTimerCount()).toBe(1);
+
+				vi.advanceTimersByTime(30_000);
+			} finally {
+				clearTimeoutSpy.mockRestore();
+				vi.useRealTimers();
+			}
+
+			for (let turn = 0; turn < 20; turn += 1) {
+				await new Promise<void>((resolve) => setImmediate(resolve));
+			}
+
+			expect(exiftoolProcess.pid).toBe(pidBefore);
+			expect(() => process.kill(pidBefore, 0)).not.toThrow();
+
+			const secondRead = await adapter.inspect({
+				source: normalSource,
+				purpose: "display",
+			});
+			expect(secondRead.ok).toBe(true);
+			expect(exiftoolProcess.pid).toBe(pidBefore);
+		} finally {
+			await exiftoolProcess.close();
+			process.removeListener("unhandledRejection", onUnhandledRejection);
+		}
+
+		const after = snapshotDir(dir);
+		assertDirEffect(before, after, {
+			added: [],
+			modified: [],
+			removed: [],
+			unchanged: ["normal.mp4"],
+		});
+		expect(unhandledRejectionCount).toBe(0);
+	});
+
+	it(
+		"deadline recovery: an unexpected ExifTool exit rejects only the in-flight command, never replays it, and the queued command succeeds on a fresh session (D-60, D-61)",
+		async () => {
+			const dir = fs.mkdtempSync(path.join(os.tmpdir(), "large-file-exit-"));
+			temporaryDirs.push(dir);
+			assertPosixSignalHost();
+
+			const normalSource = path.join(dir, "normal.mp4");
+			fs.copyFileSync(SAMPLE_MP4, normalSource);
+
+			const before = snapshotDir(dir);
+
+			const exiftoolProcess = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+			const adapter = new ExifToolAdapter({ process: exiftoolProcess });
+
+			let unhandledRejectionCount = 0;
+			const onUnhandledRejection = (): void => {
+				unhandledRejectionCount += 1;
+			};
+			process.on("unhandledRejection", onUnhandledRejection);
+
+			await exiftoolProcess.open();
+			const pidBefore = exiftoolProcess.pid;
+			if (pidBefore === undefined) {
+				throw new Error(
+					"Expected ExifTool to report a pid immediately after open()",
+				);
+			}
+
+			try {
+				const firstRead = await adapter.inspect({
+					source: normalSource,
+					purpose: "display",
+				});
+				expect(firstRead.ok).toBe(true);
+
+				process.kill(pidBefore, "SIGSTOP");
+
+				const readA = adapter.inspect({
+					source: normalSource,
+					purpose: "display",
+				});
+				const readB = adapter.inspect({
+					source: normalSource,
+					purpose: "display",
+				});
+
+				// Let A's command actually reach the (stopped) process's stdin pipe
+				// before killing it, so this genuinely exercises an in-flight command.
+				for (let turn = 0; turn < 20; turn += 1) {
+					await new Promise<void>((resolve) => setImmediate(resolve));
+				}
+
+				process.kill(pidBefore, "SIGKILL");
+
+				const resultA = await readA;
+				expect(resultA).toEqual({
+					ok: false,
+					error: { code: "engine-unavailable", backend: "exiftool" },
+				});
+
+				const resultB = await readB;
+				expect(resultB).toEqual({
+					ok: true,
+					value: {
+						metadata: expect.objectContaining({
+							"Audio:Artist": "Test Author",
+							"Audio:Title": "Test Video",
+						}),
+						recordCount: 1,
+						verification: {},
+					},
+				});
+
+				expect(exiftoolProcess.pid).toBeDefined();
+				expect(exiftoolProcess.pid).not.toBe(pidBefore);
+				expect(() => process.kill(pidBefore, 0)).toThrow();
+			} finally {
+				await exiftoolProcess.close();
+				process.removeListener("unhandledRejection", onUnhandledRejection);
+			}
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				added: [],
+				modified: [],
+				removed: [],
+				unchanged: ["normal.mp4"],
+			});
+			expect(unhandledRejectionCount).toBe(0);
+		},
+		30_000,
+	);
+
+	it(
+		"deadline recovery: close() during a deadline kill shares the kill, rejects the timed-out command once, and never respawns (D-61)",
+		async () => {
+			const dir = fs.mkdtempSync(
+				path.join(os.tmpdir(), "large-file-close-kill-"),
+			);
+			temporaryDirs.push(dir);
+			assertPosixSignalHost();
+
+			const normalSource = path.join(dir, "normal.mp4");
+			fs.copyFileSync(SAMPLE_MP4, normalSource);
+
+			const before = snapshotDir(dir);
+
+			const exiftoolProcess = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+
+			let unhandledRejectionCount = 0;
+			const onUnhandledRejection = (): void => {
+				unhandledRejectionCount += 1;
+			};
+			process.on("unhandledRejection", onUnhandledRejection);
+
+			const errorLines: string[] = [];
+			const errorSpy = vi
+				.spyOn(console, "error")
+				.mockImplementation((...args: unknown[]) => {
+					errorLines.push(args.map((value) => String(value)).join(" "));
+				});
+
+			await exiftoolProcess.open();
+			const pidBefore = exiftoolProcess.pid;
+			if (pidBefore === undefined) {
+				throw new Error(
+					"Expected ExifTool to report a pid immediately after open()",
+				);
+			}
+
+			try {
+				process.kill(pidBefore, "SIGSTOP");
+
+				// Fake timers must be installed BEFORE the call that schedules the
+				// real setTimeout (ExiftoolProcess.ts's pump()), not after -- fake
+				// timers do not capture timers already pending at install time.
+				vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+
+				let rejectionCount = 0;
+				let capturedRejection: unknown;
+				const rejectionCapture = exiftoolProcess
+					.readMetadata({ filePath: normalSource, args: ["-G1:2:4"] })
+					.catch((error: unknown) => {
+						rejectionCount += 1;
+						capturedRejection = error;
+					});
+
+				await pollUntil({
+					condition: () => vi.getTimerCount() === 1,
+					label: "the read command's deadline timer",
+					timeoutMs: 5000,
+				});
+
+				// Synchronous: the state is now "killing" and the real process exit
+				// event cannot have run yet.
+				vi.advanceTimersByTime(30_000);
+				const closing = exiftoolProcess.close();
+				vi.useRealTimers();
+
+				const closeResult = await closing;
+				expect(closeResult).toEqual({ success: true, error: null });
+
+				await rejectionCapture;
+				expect(rejectionCount).toBe(1);
+				expect(capturedRejection).toBeInstanceOf(ExifToolCommandTimeoutError);
+
+				expect(exiftoolProcess.pid).toBeUndefined();
+				expect(() => process.kill(pidBefore, 0)).toThrow();
+
+				await expect(
+					exiftoolProcess.readMetadata({ filePath: normalSource, args: [] }),
+				).rejects.toThrow("ExifTool process is not open");
+
+				expect(
+					errorLines.some((line) => line.includes("exited unexpectedly")),
+				).toBe(false);
+			} finally {
+				errorSpy.mockRestore();
+				process.removeListener("unhandledRejection", onUnhandledRejection);
+			}
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				added: [],
+				modified: [],
+				removed: [],
+				unchanged: ["normal.mp4"],
+			});
+			expect(unhandledRejectionCount).toBe(0);
+		},
+		30_000,
 	);
 });
