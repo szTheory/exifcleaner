@@ -1,43 +1,54 @@
-# ExifCleaner 4.3.0
+# ExifCleaner 4.4.0
 
-ExifCleaner 4.3.0 routes WebP metadata removal through a new native engine, and stops a benign ExifTool warning from being reported as a failed inspection.
-
-## Native WebP handling
-
-- **WebP files are now cleaned by a native engine** rather than by shelling out to ExifTool. The native path is used only when it reports the capability for the exact request; anything it declines falls back to the existing ExifTool path.
-- **Every native write goes through a staged, verified publication.** The cleaned result is written to a private staging location, verified, and only then published over the original. A write that cannot be verified does not replace your file.
-- **Uncertain processing preserves the source.** If the native path fails in a way that is not provably safe to retry, the source file is left unchanged rather than being replaced by a partially processed result.
+ExifCleaner 4.4.0 removes metadata that earlier versions left behind in comments, TIFF and RAW files, keeps a cleaned file's print resolution, and recovers from writes that run past their time limit.
 
 ## Fixes
 
-- **Benign ExifTool `[minor]` warnings no longer fail metadata display** ([#344](https://github.com/szTheory/exifcleaner/issues/344)). Files that cleaned correctly but produced a non-fatal warning previously surfaced as an inspection failure.
+- **Files whose only metadata was a comment are now cleaned.** A file whose only removable metadata was a free-text comment, such as a JPEG comment, was reported as having no removable metadata and skipped. It is now counted and the comment is removed. The same comment field was measured on GIF and RW2 files.
+- **TIFF: descriptive and camera tags are removed from the first page** ([#199](https://github.com/szTheory/exifcleaner/issues/199)). ImageDescription, Make, Model, Software, ModifyDate, Artist, Copyright, Rating and the Windows XP title, comment, author, keyword and subject tags no longer survive a default clean. Image data is unchanged, and TIFF writes now go through the staged, verified output path in both modes, so a failed write leaves the original untouched.
+- **RAW: identifying metadata is removed.** CR2, CR3, DNG, RW2 and the other supported RAW formats no longer keep identifying text, camera body and lens serial numbers, owner names, the DNG raw-data ID and original raw file name, or capture dates and time offsets that ExifTool can delete. Make, Model and the DNG camera and color tags are kept, and the image data is unchanged.
+- **Writes that run past their time limit are stopped cleanly.** The app stops that ExifTool write, removes the partial output it left, and cleans the remaining files in the batch on a fresh ExifTool session. If the partial output cannot be removed, the file's row shows where it is.
+
+## New: Preserve resolution
+
+A **Preserve resolution** setting, on by default, keeps a cleaned file's print resolution (DPI) exactly as the source recorded it: JPEG JFIF and EXIF resolution, and PNG pHYs. Printed sizes no longer change. GPS, author, software and comment metadata are still removed. Existing settings pick it up turned on after upgrading. Turning it off restores the previous behavior of removing resolution too.
+
+## Other changes
+
+- **The Windows portable download is renamed** to `ExifCleaner.4.4.0.portable.exe`, so it can be told apart from the installer by filename alone ([#261](https://github.com/szTheory/exifcleaner/issues/261)).
+- **Files larger than 4 GB** have been cleaned successfully since 4.0.0, because ExifTool 12.88 made large-file support its default. 4.4.0 adds a regression test so a future ExifTool update cannot silently bring the old failure back. This is verification, not a new fix.
+- A 4.0.0 changelog entry that claimed macOS code signing and notarization was corrected. Releases are unsigned by explicit maintainer policy ([#362](https://github.com/szTheory/exifcleaner/issues/362)).
 
 <!-- exifcleaner-known-limitations:start v1 -->
-## Known limitations in 4.3.0
+## Known limitations in 4.4.0
 
 No executable release-blocking known gaps are approved for this release; documented format constraints follow below.
 <!-- exifcleaner-known-limitations:end -->
 
 
-
 ### Format constraints
 
-- **RAF:** cleaning is refused and the source is left unchanged because a safe cleaned RAF artifact cannot currently be guaranteed.
+- **TIFF:** only the first page of a multi-page TIFF is cleaned; later pages keep their own ImageDescription, Software, Artist and Copyright. HostComputer, DocumentName and CameraSerialNumber also remain on the first page.
+- **RAW:** some Canon maker-note tags stay because ExifTool cannot delete them (for example the CR2 maker-note SerialNumber). The RAW fix was measured on CR2, CR3, DNG and RW2 samples; no claim is made for ARW, NEF, ORF, PEF or SRW. RAF cleaning is still refused and the source is left unchanged.
+- **WebP:** with Save as copy on, the built-in WebP cleaner does not keep resolution, whether Preserve resolution is on or off.
+- **Time limits:** a write's limit is 30 seconds plus one second per 20 MB of the file. 20 MB per second is an assumed floor for slow disks, not a measured speed. With Save as copy off, for formats ExifTool rewrites in place such as JPEG and PNG, a stop that lands just after ExifTool replaced the original leaves the original cleaned even though the app reports a failure.
 - **PDF:** ExifTool uses reversible updates, so prior metadata may remain recoverable.
 - **MKV:** unsupported because ExifTool does not expose a writable removal path.
-- **TIFF and AVIF:** user-reported partial-removal behavior remains under investigation.
+- **AVIF:** user-reported partial-removal behavior remains under investigation.
+
+The full list is in [CHANGELOG.md](https://github.com/szTheory/exifcleaner/blob/master/CHANGELOG.md).
 
 ## Downloads
 
 | Platform | File |
 | --- | --- |
-| **Windows portable (recommended)** | `ExifCleaner.4.3.0.exe` |
-| Windows installer | `ExifCleaner.Setup.4.3.0.exe` |
-| macOS (Apple Silicon) | `ExifCleaner-4.3.0-arm64.dmg` |
-| macOS (Intel) | `ExifCleaner-4.3.0.dmg` |
-| Linux (AppImage) | `ExifCleaner-4.3.0.AppImage` |
-| Linux (Debian/Ubuntu) | `exifcleaner_4.3.0_amd64.deb` |
-| Linux (Fedora/RHEL) | `exifcleaner-4.3.0.x86_64.rpm` |
+| **Windows portable (recommended)** | `ExifCleaner.4.4.0.portable.exe` |
+| Windows installer | `ExifCleaner.Setup.4.4.0.exe` |
+| macOS (Apple Silicon) | `ExifCleaner-4.4.0-arm64.dmg` |
+| macOS (Intel) | `ExifCleaner-4.4.0.dmg` |
+| Linux (AppImage) | `ExifCleaner-4.4.0.AppImage` |
+| Linux (Debian/Ubuntu) | `exifcleaner_4.4.0_amd64.deb` |
+| Linux (Fedora/RHEL) | `exifcleaner-4.4.0.x86_64.rpm` |
 
 Verify downloads against the release's `SHASUMS256.txt` file.
 
@@ -48,10 +59,10 @@ ExifCleaner remains unsigned. Signing would require publishing the maintainer's 
 - **macOS 14 and earlier:** right-click or Control-click the app, choose **Open**, then choose **Open** again.
 - **macOS 15 and later:** open the app once, then use **System Settings → Privacy & Security → Open Anyway**.
 - **Windows:** if SmartScreen appears, choose **More info → Run anyway** after verifying the checksum.
-- **Linux:** make the AppImage executable with `chmod +x ExifCleaner-4.3.0.AppImage`; `.deb` and `.rpm` packages install normally.
+- **Linux:** make the AppImage executable with `chmod +x ExifCleaner-4.4.0.AppImage`; `.deb` and `.rpm` packages install normally.
 
 Every artifact is built publicly from tagged source by GitHub Actions. ExifCleaner makes no network requests during normal use.
 
 Only download ExifCleaner from the [GitHub releases page](https://github.com/szTheory/exifcleaner/releases).
 
-**Full changelog:** https://github.com/szTheory/exifcleaner/compare/v4.2.1...v4.3.0
+**Full changelog:** https://github.com/szTheory/exifcleaner/compare/v4.3.0...v4.4.0

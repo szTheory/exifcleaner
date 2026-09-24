@@ -1,6 +1,6 @@
 # ExifCleaner engineering guide
 
-Current app version: 4.3.0
+Current app version: 4.4.0
 
 This is the shortest useful path through the codebase. It explains ExifCleaner’s own
 constraints and seams; it does not reteach Electron, React, or TypeScript.
