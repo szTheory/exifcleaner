@@ -394,10 +394,11 @@ export class ExiftoolProcess {
 					proc.kill();
 					return;
 				}
-				// exiftool.exe on Windows is a launcher wrapping a separate perl.exe
-				// child; a plain kill only terminates the launcher (D-59, RESEARCH
-				// Pattern 3). Issued only while the ChildProcess reports no exit, to
-				// guard against a recycled pid.
+				// The bundled exiftool.exe launcher loads perl532.dll and runs Perl in its
+				// own process (traced; no perl.exe child, checked on build-windows by
+				// tests/manual/windows_tree_kill_probe.ts, D-68). /T is kept so any
+				// descendant a future package might start is ended too. Issued only while
+				// the ChildProcess reports no exit, to guard against a recycled pid.
 				const taskkill = spawn(
 					"taskkill",
 					["/pid", String(proc.pid), "/T", "/F"],

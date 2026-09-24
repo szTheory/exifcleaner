@@ -250,8 +250,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      # Phase 53.1 D-68: proves the deadline kill takes down the whole exiftool.exe process
-      # tree (launcher + perl.exe child) on a real Windows host. Never asserted without a run.
+      # Phase 53.1 D-68: proves the deadline kill ends the exiftool.exe launcher (Perl runs
+      # in-process via perl532.dll, no perl.exe child) and releases the output file on a real
+      # Windows host. Never asserted without a run.
       - name: Windows process-tree kill proof (LRG-03, D-68)
         run: yarn tsx tests/manual/windows_tree_kill_probe.ts
 
