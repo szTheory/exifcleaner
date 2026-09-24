@@ -1322,6 +1322,95 @@ describe("ExifTool command deadline recovery (LRG-03)", () => {
 		expect(unhandledRejectionCount).toBe(0);
 	}, 30_000);
 
+	it("deadline recovery: a command issued after close() starts during a deadline kill rejects promptly instead of hanging (D-61, WR-01)", async () => {
+		const dir = fs.mkdtempSync(
+			path.join(os.tmpdir(), "large-file-close-kill-late-"),
+		);
+		temporaryDirs.push(dir);
+		assertPosixSignalHost();
+
+		const normalSource = path.join(dir, "normal.mp4");
+		fs.copyFileSync(SAMPLE_MP4, normalSource);
+
+		const before = snapshotDir(dir);
+
+		const exiftoolProcess = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+
+		let unhandledRejectionCount = 0;
+		const onUnhandledRejection = (): void => {
+			unhandledRejectionCount += 1;
+		};
+		process.on("unhandledRejection", onUnhandledRejection);
+
+		await exiftoolProcess.open();
+		const pidBefore = exiftoolProcess.pid;
+		if (pidBefore === undefined) {
+			throw new Error(
+				"Expected ExifTool to report a pid immediately after open()",
+			);
+		}
+
+		try {
+			process.kill(pidBefore, "SIGSTOP");
+
+			// Installed before the call that schedules the deadline timer (see the
+			// close()-during-kill test above for why the order matters).
+			vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+
+			const timedOut = exiftoolProcess
+				.readMetadata({ filePath: normalSource, args: ["-G1:2:4"] })
+				.catch((error: unknown) => error);
+
+			await pollUntil({
+				condition: () => vi.getTimerCount() === 1,
+				label: "the read command's deadline timer",
+				timeoutMs: 5000,
+			});
+
+			// Synchronous: the state is "killing", close() has started, and the
+			// real process exit event cannot have run yet, so the kill is in flight.
+			vi.advanceTimersByTime(30_000);
+			const closing = exiftoolProcess.close();
+			const late = exiftoolProcess.readMetadata({
+				filePath: normalSource,
+				args: [],
+			});
+			vi.useRealTimers();
+
+			const lateOutcome = await Promise.race([
+				late.then(
+					() => "resolved",
+					(error: unknown) => error,
+				),
+				new Promise<string>((resolve) =>
+					setTimeout(() => resolve("still pending"), 3000),
+				),
+			]);
+			expect(lateOutcome).toBeInstanceOf(Error);
+			expect((lateOutcome as Error).message).toBe(
+				"ExifTool process is not open",
+			);
+
+			expect(await closing).toEqual({ success: true, error: null });
+			expect(await timedOut).toBeInstanceOf(ExifToolCommandTimeoutError);
+
+			expect(exiftoolProcess.pid).toBeUndefined();
+			expect(() => process.kill(pidBefore, 0)).toThrow();
+		} finally {
+			vi.useRealTimers();
+			process.removeListener("unhandledRejection", onUnhandledRejection);
+		}
+
+		const after = snapshotDir(dir);
+		assertDirEffect(before, after, {
+			added: [],
+			modified: [],
+			removed: [],
+			unchanged: ["normal.mp4"],
+		});
+		expect(unhandledRejectionCount).toBe(0);
+	}, 30_000);
+
 	it("deadline recovery: a replacement session that cannot start fails queued commands fast as engine-unavailable and never retries (D-61)", async () => {
 		const dir = fs.mkdtempSync(
 			path.join(os.tmpdir(), "large-file-respawn-fail-"),

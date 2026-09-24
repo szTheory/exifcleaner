@@ -155,6 +155,9 @@ export class ExiftoolProcess {
 			if (this.killPromise !== null) {
 				await this.killPromise;
 			}
+			// assertDispatchable() refuses new work once closeRequested is set; this
+			// second flush is defense-in-depth so nothing queued can be left pending.
+			this.rejectQueue(new Error("ExifTool process closed"));
 			this.state = "closed";
 			this.process = null;
 			return { success: true, error: null };
@@ -260,7 +263,10 @@ export class ExiftoolProcess {
 	}
 
 	private assertDispatchable(): void {
+		// "killing" still admits work so a batch waits behind a deadline respawn (D-61),
+		// but once close() is requested no respawn will pump it, so refuse it (WR-01).
 		if (
+			(this.state === "killing" && this.closeRequested) ||
 			this.state === "closed" ||
 			this.state === "closing" ||
 			this.state === "unavailable"
