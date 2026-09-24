@@ -532,6 +532,168 @@ describe("ExifTool command deadline recovery (LRG-03)", () => {
 		180_000,
 	);
 
+	it(
+		"deadline recovery: a display read is stopped at exactly 30 s while a >4 GiB write is not stopped until 30 s + size / 20 MB/s (D-57)",
+		async () => {
+			const dir = fs.mkdtempSync(
+				path.join(os.tmpdir(), "large-file-scaled-"),
+			);
+			temporaryDirs.push(dir);
+			assertLargeFileHost({ dir: os.tmpdir() });
+			assertPosixSignalHost();
+
+			const normalSource = path.join(dir, "normal.mp4");
+			fs.copyFileSync(SAMPLE_MP4, normalSource);
+
+			const largeSource = path.join(dir, "large.mp4");
+			createSparseLargeMp4({ destination: largeSource });
+			const largeSourceDigestBefore = sha256OfFileStreamed({
+				filePath: largeSource,
+			});
+
+			const before = snapshotDir(dir);
+
+			const exiftoolProcess = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+			const adapter = new ExifToolAdapter({ process: exiftoolProcess });
+
+			await exiftoolProcess.open();
+			const firstPid = exiftoolProcess.pid;
+			if (firstPid === undefined) {
+				throw new Error(
+					"Expected ExifTool to report a pid immediately after open()",
+				);
+			}
+
+			try {
+				// Read half: a display read is stopped at exactly the fixed 30 s
+				// deadline, never scaled.
+				process.kill(firstPid, "SIGSTOP");
+				// Fake timers must be installed BEFORE the call that schedules the
+				// real setTimeout (ExiftoolProcess.ts's pump()), not after.
+				vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+
+				let readSettled = false;
+				const readPromise = adapter
+					.inspect({ source: normalSource, purpose: "display" })
+					.then((result) => {
+						readSettled = true;
+						return result;
+					});
+
+				await pollUntil({
+					condition: () => vi.getTimerCount() === 1,
+					label: "the display read's deadline timer",
+					timeoutMs: 5000,
+				});
+
+				await vi.advanceTimersByTimeAsync(29_999);
+				for (let turn = 0; turn < 20; turn += 1) {
+					await new Promise<void>((resolve) => setImmediate(resolve));
+				}
+				expect(readSettled).toBe(false);
+
+				await vi.advanceTimersByTimeAsync(1);
+				const readResult = await readPromise;
+				expect(readResult).toEqual({
+					ok: false,
+					error: {
+						code: "engine-error",
+						detail:
+							"The metadata engine could not inspect the selected file",
+						backend: "exiftool",
+					},
+				});
+
+				await pollUntil({
+					condition: () =>
+						exiftoolProcess.pid !== undefined &&
+						exiftoolProcess.pid !== firstPid,
+					label: "the respawned session's pid",
+					timeoutMs: 5000,
+				});
+				const secondPid = exiftoolProcess.pid;
+				if (secondPid === undefined) {
+					throw new Error("Expected a respawned ExifTool pid");
+				}
+
+				// Write half, on the respawned session: the write deadline scales
+				// with source size and is not stopped until the D-57 formula's
+				// deadline, well past the read's fixed 30 s.
+				process.kill(secondPid, "SIGSTOP");
+
+				const largeGeneratedPath = path.join(dir, "large_cleaned.mp4");
+				let writeSettled = false;
+				const writePromise = adapter
+					.sanitize({
+						source: largeSource,
+						destination: largeGeneratedPath,
+						outputMode: "copy",
+						preserveOrientation: true,
+						preserveColorProfile: true,
+						preserveResolution: true,
+						preserveTimestamps: false,
+					})
+					.then((result) => {
+						writeSettled = true;
+						return result;
+					});
+
+				await pollUntil({
+					condition: () => vi.getTimerCount() === 1,
+					label: "the staged write's deadline timer",
+					timeoutMs: 60_000,
+				});
+
+				// Hand-written literals, never writeDeadlineMs -- proves the
+				// formula against independently computed numbers (D-67).
+				const size = fs.statSync(largeSource).size;
+				const expected = 30_000 + Math.ceil((size * 1000) / 20_000_000);
+
+				await vi.advanceTimersByTimeAsync(30_000);
+				for (let turn = 0; turn < 20; turn += 1) {
+					await new Promise<void>((resolve) => setImmediate(resolve));
+				}
+				expect(writeSettled).toBe(false);
+				expect(exiftoolProcess.pid).toBe(secondPid);
+
+				await vi.advanceTimersByTimeAsync(expected - 30_000 - 1);
+				for (let turn = 0; turn < 20; turn += 1) {
+					await new Promise<void>((resolve) => setImmediate(resolve));
+				}
+				expect(writeSettled).toBe(false);
+				expect(exiftoolProcess.pid).toBe(secondPid);
+
+				await vi.advanceTimersByTimeAsync(1);
+				const writeResult = await writePromise;
+				expect(writeResult).toEqual({
+					ok: false,
+					error: {
+						code: "engine-error",
+						detail: "exceeded the write time limit",
+						backend: "exiftool",
+						confirmedDeadTimeout: true,
+					},
+				});
+			} finally {
+				vi.useRealTimers();
+				await exiftoolProcess.close();
+			}
+
+			expect(sha256OfFileStreamed({ filePath: largeSource })).toBe(
+				largeSourceDigestBefore,
+			);
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				added: [],
+				modified: [],
+				removed: [],
+				unchanged: ["normal.mp4", "large.mp4"],
+			});
+		},
+		180_000,
+	);
+
 	it("deadline recovery: a deadline that fires after its command already resolved stops nothing (D-59 step 1)", async () => {
 		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "large-file-resolved-"));
 		temporaryDirs.push(dir);
