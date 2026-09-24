@@ -803,6 +803,104 @@ describe("ExifTool command deadline recovery (LRG-03)", () => {
 		180_000,
 	);
 
+	it(
+		"deadline recovery: a direct -overwrite_original write stopped at its deadline has the _exiftool_tmp file it created removed (D-64)",
+		async () => {
+			const dir = fs.mkdtempSync(
+				path.join(os.tmpdir(), "large-file-tmp-leftover-"),
+			);
+			temporaryDirs.push(dir);
+			assertLargeFileHost({ dir: os.tmpdir() });
+			assertPosixSignalHost();
+
+			const largeSource = path.join(dir, "large.mp4");
+			createSparseLargeMp4({ destination: largeSource });
+			const largeSourceDigestBefore = sha256OfFileStreamed({
+				filePath: largeSource,
+			});
+			const leftoverPath = largeSource + "_exiftool_tmp";
+
+			const before = snapshotDir(dir);
+
+			const exiftoolProcess = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+			const adapter = new ExifToolAdapter({ process: exiftoolProcess });
+
+			await exiftoolProcess.open();
+			const pid = exiftoolProcess.pid;
+			if (pid === undefined) {
+				throw new Error(
+					"Expected ExifTool to report a pid immediately after open()",
+				);
+			}
+
+			let leftoverSizeAtKill = -1;
+			try {
+				// Fake timers must be installed BEFORE the call that schedules the
+				// real setTimeout (ExiftoolProcess.ts's pump()), not after.
+				vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+
+				// Started unstopped, on purpose: the process must actually run far
+				// enough to create the _exiftool_tmp file before it is frozen, which
+				// makes the later "leftover is absent" assertion non-vacuous (the
+				// killed write really created the file before it was removed).
+				const writePromise = adapter.sanitize({
+					source: largeSource,
+					outputMode: "overwrite",
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+					preserveTimestamps: false,
+				});
+
+				await pollUntil({
+					condition: () =>
+						vi.getTimerCount() === 1 && fs.existsSync(leftoverPath),
+					label: "the write's deadline timer and its _exiftool_tmp file",
+					timeoutMs: 60_000,
+				});
+				leftoverSizeAtKill = fs.statSync(leftoverPath).size;
+
+				// Freeze the real process now that it has made real progress, so the
+				// rest of the deadline is driven purely by the fake timer, never by
+				// the write racing to real completion.
+				process.kill(pid, "SIGSTOP");
+
+				const size = fs.statSync(largeSource).size;
+				const deadline = 30_000 + Math.ceil((size * 1000) / 20_000_000);
+				await vi.advanceTimersByTimeAsync(deadline);
+
+				const writeResult = await writePromise;
+				expect(writeResult).toEqual({
+					ok: false,
+					error: {
+						code: "engine-error",
+						detail: "exceeded the write time limit",
+						backend: "exiftool",
+						confirmedDeadTimeout: true,
+					},
+				});
+			} finally {
+				vi.useRealTimers();
+				await exiftoolProcess.close();
+			}
+
+			expect(leftoverSizeAtKill).toBeGreaterThanOrEqual(0);
+			expect(fs.existsSync(leftoverPath)).toBe(false);
+			expect(sha256OfFileStreamed({ filePath: largeSource })).toBe(
+				largeSourceDigestBefore,
+			);
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				added: [],
+				modified: [],
+				removed: [],
+				unchanged: ["large.mp4"],
+			});
+		},
+		180_000,
+	);
+
 	it("deadline recovery: a deadline that fires after its command already resolved stops nothing (D-59 step 1)", async () => {
 		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "large-file-resolved-"));
 		temporaryDirs.push(dir);

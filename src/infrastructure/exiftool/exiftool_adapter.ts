@@ -1,4 +1,4 @@
-import { stat } from "node:fs/promises";
+import { lstat, stat, unlink } from "node:fs/promises";
 import type { MetadataEnginePort } from "../../application/metadata_engine_port";
 import { cleanExifData } from "../../domain";
 import {
@@ -326,6 +326,20 @@ export class ExifToolAdapter implements MetadataEnginePort {
 			deadlineMs = undefined;
 		}
 
+		// D-64: a killed direct write can leave behind the thing ExifTool was writing to --
+		// `<source>_exiftool_tmp` for `-overwrite_original`, or the `-o` target itself for a
+		// direct copy. Recorded before dispatch so a confirmed-dead timeout (below) never
+		// deletes a file that already existed: an lstat failure other than ENOENT counts as
+		// "existed" (fail safe), matching OutputTransaction.cleanup()'s own fail-safe stance.
+		const leftoverPath = destination ?? source + "_exiftool_tmp";
+		let leftoverExistedBefore: boolean;
+		try {
+			await lstat(leftoverPath);
+			leftoverExistedBefore = true;
+		} catch (error) {
+			leftoverExistedBefore = !isEnoent(error);
+		}
+
 		try {
 			const result = await this.process.writeMetadata({
 				filePath: source,
@@ -361,11 +375,20 @@ export class ExifToolAdapter implements MetadataEnginePort {
 				// ExiftoolProcess has already confirmed the writer's process tree
 				// exited (D-59) before this rejection, so OutputTransaction may safely
 				// clean up any leftover output (D-63).
+				let detail: string = WRITE_TIME_LIMIT_DETAIL;
+				if (!leftoverExistedBefore) {
+					const removed = await removeTimedOutLeftover({
+						path: leftoverPath,
+					});
+					if (!removed) {
+						detail = `${WRITE_TIME_LIMIT_DETAIL}; the partial output could not be removed: ${leftoverPath}`;
+					}
+				}
 				return {
 					ok: false,
 					error: {
 						code: "engine-error",
-						detail: WRITE_TIME_LIMIT_DETAIL,
+						detail,
 						backend: "exiftool",
 						confirmedDeadTimeout: true,
 					},
@@ -377,6 +400,56 @@ export class ExifToolAdapter implements MetadataEnginePort {
 			};
 		}
 	}
+}
+
+function isEnoent(error: unknown): boolean {
+	return (
+		typeof error === "object" &&
+		error !== null &&
+		"code" in error &&
+		(error as { code: unknown }).code === "ENOENT"
+	);
+}
+
+function isTransientLeftoverLock(error: unknown): boolean {
+	if (typeof error !== "object" || error === null || !("code" in error)) {
+		return false;
+	}
+	const code = (error as { code: unknown }).code;
+	return code === "EBUSY" || code === "EPERM" || code === "EACCES";
+}
+
+function delay(milliseconds: number): Promise<void> {
+	return new Promise((resolve) => {
+		setTimeout(resolve, milliseconds);
+	});
+}
+
+// D-64: removes a direct-write leftover (`_exiftool_tmp` or an `-o` target) left behind by a
+// killed write, mirroring OutputTransaction.cleanup()'s retry shape. Only ever called after
+// leftoverExistedBefore has confirmed the path did not exist before dispatch -- this function
+// itself has no opinion on whether removal is safe.
+async function removeTimedOutLeftover({
+	path,
+}: {
+	path: string;
+}): Promise<boolean> {
+	const retryDelays = [20, 50];
+	for (let attempt = 0; attempt < retryDelays.length + 1; attempt += 1) {
+		try {
+			await unlink(path);
+			return true;
+		} catch (error) {
+			if (isEnoent(error)) {
+				return true;
+			}
+			if (!isTransientLeftoverLock(error) || attempt === retryDelays.length) {
+				return false;
+			}
+			await delay(retryDelays[attempt]!);
+		}
+	}
+	return false;
 }
 
 function toMetadataEngineError(error: ExifError): MetadataEngineError {
