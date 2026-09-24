@@ -53,7 +53,9 @@ export function FileRow({
 					? t("cleanupFailedSummary")
 					: file.failureKind === "xattr"
 						? t("xattrFailedSummary")
-						: undefined;
+						: file.failureKind === "write"
+							? t("writeFailedSummary")
+							: undefined;
 	const outcomeSummary =
 		file.outcomeKind === "already-clean"
 			? t("outcome.alreadyClean")
@@ -63,7 +65,9 @@ export function FileRow({
 					? t("outcome.cleaned")
 					: failureSummary;
 	const errorDetail =
-		(file.failureKind === "cleanup" || file.failureKind === "xattr") &&
+		(file.failureKind === "cleanup" ||
+			file.failureKind === "xattr" ||
+			file.failureKind === "write") &&
 		file.detail !== undefined &&
 		file.residualPath !== undefined
 			? `${file.detail}: ${file.residualPath}`

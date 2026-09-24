@@ -110,6 +110,102 @@ describe("OutputTransaction", () => {
 		expect(events).toEqual(["write"]);
 	});
 
+	it("a confirmed-dead write timeout removes the exact generated path and reports a timed-out write failure (D-63)", async () => {
+		const { transaction, events } = createTransaction({
+			writeResult: {
+				ok: false,
+				error: {
+					code: "engine-error",
+					detail: "exceeded the write time limit",
+					backend: "exiftool",
+					confirmedDeadTimeout: true,
+				},
+			},
+		});
+
+		const result = await transaction.execute({
+			filePath: originalPath,
+			generatedPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			error: { code: "write-failed", timedOut: true },
+		});
+		expect(events).toEqual(["write", `unlink:${generatedPath}`]);
+	});
+
+	it("a confirmed-dead write timeout whose leftover cannot be removed stays a write failure with the exact residual path (D-66)", async () => {
+		const eperm = Object.assign(new Error("locked"), { code: "EPERM" });
+		const { transaction, events } = createTransaction({
+			writeResult: {
+				ok: false,
+				error: {
+					code: "engine-error",
+					detail: "exceeded the write time limit",
+					backend: "exiftool",
+					confirmedDeadTimeout: true,
+				},
+			},
+			unlink: async () => Promise.reject(eperm),
+		});
+
+		const result = await transaction.execute({
+			filePath: originalPath,
+			generatedPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			error: {
+				code: "write-failed",
+				timedOut: true,
+				residualPath: generatedPath,
+			},
+		});
+		expect(events).toEqual([
+			"write",
+			`unlink:${generatedPath}`,
+			"delay:20",
+			`unlink:${generatedPath}`,
+			"delay:50",
+			`unlink:${generatedPath}`,
+		]);
+	});
+
+	it("an engine error without the confirmed-dead flag never triggers cleanup (D-53, D-63)", async () => {
+		const { transaction, events } = createTransaction({
+			writeResult: {
+				ok: false,
+				error: {
+					code: "engine-error",
+					detail: "exceeded the write time limit",
+					backend: "exiftool",
+				},
+			},
+		});
+
+		const result = await transaction.execute({
+			filePath: originalPath,
+			generatedPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		});
+
+		expect(result).toEqual({ ok: false, error: { code: "write-failed" } });
+		expect(events).toEqual(["write"]);
+	});
+
 	it("cleans the exact generated path before reporting verification-failed", async () => {
 		const { transaction, events } = createTransaction({
 			verifyResult: {

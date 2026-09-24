@@ -230,7 +230,13 @@ function transactionFailureResult(error: OutputTransactionFailure): {
 			return {
 				success: false,
 				failureKind: "write",
-				detail: "Generated output write failed",
+				detail:
+					error.timedOut === true
+						? "Generated output write failed: exceeded the write time limit"
+						: "Generated output write failed",
+				...(error.residualPath === undefined
+					? {}
+					: { residualPath: error.residualPath }),
 			};
 		case "verification-failed":
 			return {

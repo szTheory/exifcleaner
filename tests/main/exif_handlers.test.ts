@@ -829,6 +829,73 @@ describe("exif:remove handler", () => {
 		expect(result).not.toHaveProperty("outputPath");
 	});
 
+	it("returns a timed-out write failure detail with no residualPath key when none is carried", async () => {
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+			transactionResult: {
+				ok: false,
+				error: { code: "write-failed", timedOut: true },
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(outputTransaction.execute).toHaveBeenCalledOnce();
+		expect(result).toEqual({
+			success: false,
+			failureKind: "write",
+			detail: "Generated output write failed: exceeded the write time limit",
+		});
+		expect("residualPath" in (result as object)).toBe(false);
+	});
+
+	it("returns a timed-out write failure with the exact residual path when one is carried", async () => {
+		const residualPath = "/dir/.video.exifcleaner-stage-test-uuid.mp4";
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+			transactionResult: {
+				ok: false,
+				error: { code: "write-failed", timedOut: true, residualPath },
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(outputTransaction.execute).toHaveBeenCalledOnce();
+		expect(result).toEqual({
+			success: false,
+			failureKind: "write",
+			detail: "Generated output write failed: exceeded the write time limit",
+			residualPath,
+		});
+	});
+
+	it("returns a generic write failure detail with no residualPath key", async () => {
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+			transactionResult: {
+				ok: false,
+				error: { code: "write-failed" },
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(outputTransaction.execute).toHaveBeenCalledOnce();
+		expect(result).toEqual({
+			success: false,
+			failureKind: "write",
+			detail: "Generated output write failed",
+		});
+		expect("residualPath" in (result as object)).toBe(false);
+	});
+
 	it("returns a verification terminal failure without publishing an output path", async () => {
 		const { container, outputTransaction } = makeContainer({
 			saveAsCopy: false,
