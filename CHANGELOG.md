@@ -6,8 +6,13 @@
 
 - A **Preserve resolution** setting, on by default, keeps a cleaned file's print resolution (DPI) exactly as the source recorded it — JPEG JFIF and EXIF resolution and PNG pHYs — so printed sizes do not change; GPS, author, software and comment metadata are still removed. Existing settings pick it up turned on after upgrading. Turning it off restores the previous behavior of removing resolution too
 
+### Changed
+
+- The Windows portable download is now named `ExifCleaner.<version>.portable.exe`, so it can be told apart from the installer (`ExifCleaner.Setup.<version>.exe`) by filename alone on the releases page (#261)
+
 ### Fixed
 
+- A file whose only removable metadata was a free-text comment, such as a JPEG comment, was reported as having no removable metadata and skipped. It is now counted as carrying metadata and cleaned, and the comment is removed. The same comment field was measured on GIF and RW2 files
 - Corrected a 4.0.0 changelog entry that falsely claimed the release workflow performs macOS code signing and notarization; releases are unsigned by explicit maintainer policy (#362)
 - TIFF files cleaned with default settings no longer keep the descriptive and camera tags on their first page's main image directory (IFD0) — ImageDescription, Make, Model, Software, ModifyDate, Artist, Copyright, Rating and the Windows XP title, comment, author, keyword and subject tags — which ExifTool's blanket `-all=` delete cannot remove from a TIFF; image data is unchanged. TIFF writes now go through the staged, verified output path in both save-as-copy and overwrite mode, so a failed write leaves the original untouched (#199)
 - RAW files (CR2, CR3, DNG, RW2 and the other supported RAW formats) cleaned with default settings no longer keep identifying text (Artist, Software, ImageDescription, Copyright, the Windows XP title/comment/author/keyword/subject tags and the user comment), camera body and lens serial numbers, owner names, the DNG raw-data ID and original raw file name, or capture dates and time offsets that ExifTool can delete; Make, Model and the DNG camera and color tags are kept unchanged, and the image data is unchanged
