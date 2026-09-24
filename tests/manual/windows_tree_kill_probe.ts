@@ -130,31 +130,42 @@ async function main(): Promise<void> {
 	let opened = false;
 
 	try {
-		// Step 1: open the product's ExiftoolProcess and confirm a baseline read works.
+		// Step 1+2: open the product's ExiftoolProcess and confirm a baseline read
+		// works, while concurrently polling for the launcher's perl.exe descendant.
+		//
+		// D-68 finding (run 35943806396/35944821668, Rule 1): exiftool.exe's own perl.exe
+		// child is transient, not a persistent session-level process -- it is spawned to
+		// answer one -stay_open command and exits once that command's output has been
+		// written, all typically within tens of milliseconds. Polling for it AFTER the
+		// first command resolves (the original design) reliably observes an empty tree:
+		// PROBE_DIAG_ALL_PERL=[] confirmed no perl.exe existed anywhere on the runner by
+		// the time the check ran, even though the launcher (exiftool.exe) itself was
+		// still alive and had already answered correctly. Racing the poll against the
+		// still-pending command instead catches perl.exe while it is actually doing the
+		// work the command requires.
 		await exiftoolProcess.open();
 		opened = true;
-		const baselineRead = await exiftoolProcess.readMetadata({
+		const launcherPid = exiftoolProcess.pid;
+		if (launcherPid === undefined) {
+			console.log("PROBE_NO_PERL_CHILD");
+			process.exit(1);
+		}
+		const baselineReadPromise = exiftoolProcess.readMetadata({
 			filePath: copyPath,
 			args: ["-FileType"],
 		});
+		const sessionDescendants = await pollUntil({
+			fn: () => descendantsOf(launcherPid),
+			predicate: (descendants) => descendants.some((d) => isPerl(d.name)),
+			timeoutMs: POLL_TIMEOUT_MS,
+		});
+		const baselineRead = await baselineReadPromise;
 		if (baselineRead.error !== null) {
 			console.log(
 				`PROBE_WRONG_ERROR=baseline read failed: ${baselineRead.error}`,
 			);
 			process.exit(1);
 		}
-
-		// Step 2: the launcher must spawn a perl.exe descendant.
-		const launcherPid = exiftoolProcess.pid;
-		if (launcherPid === undefined) {
-			console.log("PROBE_NO_PERL_CHILD");
-			process.exit(1);
-		}
-		const sessionDescendants = await pollUntil({
-			fn: () => descendantsOf(launcherPid),
-			predicate: (descendants) => descendants.some((d) => isPerl(d.name)),
-			timeoutMs: POLL_TIMEOUT_MS,
-		});
 		console.log(`PROBE_SESSION_TREE=${JSON.stringify(sessionDescendants)}`);
 		if (!sessionDescendants.some((d) => isPerl(d.name))) {
 			// Diagnostic-only (never weakens the check below): if the launcher premise
