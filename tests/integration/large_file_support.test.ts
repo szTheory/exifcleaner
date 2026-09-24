@@ -901,6 +901,190 @@ describe("ExifTool command deadline recovery (LRG-03)", () => {
 		180_000,
 	);
 
+	it(
+		"deadline recovery: a direct -o copy write stopped at its deadline has the partial target it created removed (D-64)",
+		async () => {
+			const dir = fs.mkdtempSync(
+				path.join(os.tmpdir(), "large-file-o-leftover-"),
+			);
+			temporaryDirs.push(dir);
+			assertLargeFileHost({ dir: os.tmpdir() });
+			assertPosixSignalHost();
+
+			const largeSource = path.join(dir, "large.mp4");
+			createSparseLargeMp4({ destination: largeSource });
+			const largeSourceDigestBefore = sha256OfFileStreamed({
+				filePath: largeSource,
+			});
+			const targetPath = path.join(dir, "large_cleaned.mp4");
+
+			const before = snapshotDir(dir);
+
+			const exiftoolProcess = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+			const adapter = new ExifToolAdapter({ process: exiftoolProcess });
+
+			await exiftoolProcess.open();
+			const pid = exiftoolProcess.pid;
+			if (pid === undefined) {
+				throw new Error(
+					"Expected ExifTool to report a pid immediately after open()",
+				);
+			}
+
+			let targetSizeAtKill = -1;
+			try {
+				// Fake timers must be installed BEFORE the call that schedules the
+				// real setTimeout (ExiftoolProcess.ts's pump()), not after.
+				vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+
+				// Started unstopped, on purpose: see the _exiftool_tmp test above for
+				// why (real progress is required before freezing).
+				const writePromise = adapter.sanitize({
+					source: largeSource,
+					destination: targetPath,
+					outputMode: "copy",
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+					preserveTimestamps: false,
+				});
+
+				await pollUntil({
+					condition: () =>
+						vi.getTimerCount() === 1 && fs.existsSync(targetPath),
+					label: "the write's deadline timer and its partial -o target",
+					timeoutMs: 60_000,
+				});
+				targetSizeAtKill = fs.statSync(targetPath).size;
+
+				process.kill(pid, "SIGSTOP");
+
+				const size = fs.statSync(largeSource).size;
+				const deadline = 30_000 + Math.ceil((size * 1000) / 20_000_000);
+				await vi.advanceTimersByTimeAsync(deadline);
+
+				const writeResult = await writePromise;
+				expect(writeResult).toEqual({
+					ok: false,
+					error: {
+						code: "engine-error",
+						detail: "exceeded the write time limit",
+						backend: "exiftool",
+						confirmedDeadTimeout: true,
+					},
+				});
+			} finally {
+				vi.useRealTimers();
+				await exiftoolProcess.close();
+			}
+
+			expect(targetSizeAtKill).toBeGreaterThanOrEqual(0);
+			expect(fs.existsSync(targetPath)).toBe(false);
+			expect(sha256OfFileStreamed({ filePath: largeSource })).toBe(
+				largeSourceDigestBefore,
+			);
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				added: [],
+				modified: [],
+				removed: [],
+				unchanged: ["large.mp4"],
+			});
+		},
+		180_000,
+	);
+
+	it.each([
+		["_exiftool_tmp file", false],
+		["-o target", true],
+	] as const)(
+		"deadline recovery: a %s that existed before dispatch is kept byte-identical after the deadline (D-64 negative control)",
+		async (_kind, useDestination) => {
+			const dir = fs.mkdtempSync(
+				path.join(os.tmpdir(), "large-file-negctrl-"),
+			);
+			temporaryDirs.push(dir);
+			assertPosixSignalHost();
+
+			const normalSource = path.join(dir, "normal.mp4");
+			fs.copyFileSync(SAMPLE_MP4, normalSource);
+
+			const destination = useDestination
+				? path.join(dir, "normal_cleaned.mp4")
+				: undefined;
+			const leftoverPath = destination ?? normalSource + "_exiftool_tmp";
+			const SENTINEL = "sentinel written before dispatch";
+			fs.writeFileSync(leftoverPath, SENTINEL, "utf8");
+
+			const before = snapshotDir(dir);
+
+			const exiftoolProcess = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+			const adapter = new ExifToolAdapter({ process: exiftoolProcess });
+
+			await exiftoolProcess.open();
+			const pid = exiftoolProcess.pid;
+			if (pid === undefined) {
+				throw new Error(
+					"Expected ExifTool to report a pid immediately after open()",
+				);
+			}
+
+			try {
+				// SIGSTOP before dispatch: the session never processes this command,
+				// so ExifTool provably never touches the leftover that already
+				// existed before it was ever sent.
+				process.kill(pid, "SIGSTOP");
+				vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+
+				const writePromise = adapter.sanitize({
+					source: normalSource,
+					...(destination !== undefined ? { destination } : {}),
+					outputMode: destination !== undefined ? "copy" : "overwrite",
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+					preserveTimestamps: false,
+				});
+
+				await pollUntil({
+					condition: () => vi.getTimerCount() === 1,
+					label: "the write's deadline timer",
+					timeoutMs: 5000,
+				});
+
+				const size = fs.statSync(normalSource).size;
+				const deadline = 30_000 + Math.ceil((size * 1000) / 20_000_000);
+				await vi.advanceTimersByTimeAsync(deadline);
+
+				const writeResult = await writePromise;
+				expect(writeResult).toEqual({
+					ok: false,
+					error: {
+						code: "engine-error",
+						detail: "exceeded the write time limit",
+						backend: "exiftool",
+						confirmedDeadTimeout: true,
+					},
+				});
+			} finally {
+				vi.useRealTimers();
+				await exiftoolProcess.close();
+			}
+
+			expect(fs.readFileSync(leftoverPath, "utf8")).toBe(SENTINEL);
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				added: [],
+				modified: [],
+				removed: [],
+				unchanged: ["normal.mp4", path.basename(leftoverPath)],
+			});
+		},
+		180_000,
+	);
+
 	it("deadline recovery: a deadline that fires after its command already resolved stops nothing (D-59 step 1)", async () => {
 		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "large-file-resolved-"));
 		temporaryDirs.push(dir);
