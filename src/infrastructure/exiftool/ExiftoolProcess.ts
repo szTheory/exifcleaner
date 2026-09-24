@@ -8,6 +8,12 @@ import {
 const EXIFTOOL_CLOSE_TIMEOUT_MS = 5000;
 export const EXIFTOOL_COMMAND_TIMEOUT_MS = 30000;
 
+// Node's setTimeout maximum delay (2^31-1 ms, a 32-bit signed int of milliseconds). A delay
+// beyond this fires after 1 ms instead of waiting (Node clamps/overflows it), which would
+// silently truncate an uncapped write deadline (D-57). Deadlines longer than this are chained
+// across segments of at most this size instead.
+const MAX_TIMER_DELAY_MS = 2_147_483_647;
+
 // Assumed floor throughput for scaling a write command's deadline by source size (D-57). This
 // is an assumption, not a measurement -- the only measured throughput is 2078.5 MB/s on a
 // local APFS SSD (EVIDENCE A-4 item 8). The assumption itself is recorded in EVIDENCE A-5.
@@ -298,15 +304,37 @@ export class ExiftoolProcess {
 		const stdin = this.process.stdin;
 		stdin.write(next.command + "\n");
 
-		// The deadline timer starts here, at dispatch, never at enqueue (D-58).
+		// The deadline timer starts here, at dispatch, never at enqueue (D-58). A deadline
+		// beyond MAX_TIMER_DELAY_MS is chained across segments rather than truncated (D-57).
 		const entry: InFlightEntry = {
 			...next,
 			settled: false,
-			timer: setTimeout(() => {
-				this.handleDeadline(entry);
-			}, next.deadlineMs),
+			timer: null as unknown as NodeJS.Timeout,
 		};
+		entry.timer = this.armDeadlineSegment(entry, next.deadlineMs);
 		this.inFlight = entry;
+	}
+
+	/**
+	 * Arms one timer segment capped at MAX_TIMER_DELAY_MS. When that segment fires with time
+	 * still remaining, it re-arms on the same in-flight entry rather than firing the deadline,
+	 * so the entry always holds exactly one live handle that the ready path clears (D-57's "no
+	 * cap", chained instead of truncated). The D-59 guard only runs once the full deadline has
+	 * elapsed.
+	 */
+	private armDeadlineSegment(
+		entry: InFlightEntry,
+		remainingMs: number,
+	): NodeJS.Timeout {
+		const segmentMs = Math.min(remainingMs, MAX_TIMER_DELAY_MS);
+		return setTimeout(() => {
+			const leftoverMs = remainingMs - segmentMs;
+			if (leftoverMs > 0) {
+				entry.timer = this.armDeadlineSegment(entry, leftoverMs);
+				return;
+			}
+			this.handleDeadline(entry);
+		}, segmentMs);
 	}
 
 	/** D-59: kill-confirm-reject-respawn-dispatch, in order. */

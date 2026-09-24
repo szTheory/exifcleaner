@@ -14,6 +14,7 @@ import { ExifToolAdapter } from "../../src/infrastructure/exiftool/exiftool_adap
 import {
 	ExifToolCommandTimeoutError,
 	ExiftoolProcess,
+	writeDeadlineMs,
 } from "../../src/infrastructure/exiftool/ExiftoolProcess";
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { StripMetadataCommand } from "../../src/application/commands/strip_metadata_command";
@@ -320,12 +321,12 @@ describe("Large-file (>4 GiB) support on ExifTool's default (LRG-01, LRG-02)", (
 });
 
 
-// LRG-03 (53.1): EXIFTOOL_COMMAND_TIMEOUT_MS is now exported directly from
-// ExiftoolProcess.ts and used as the fixed read/verification deadline; a write command gets
-// a per-command, size-scaled deadline instead (writeDeadlineMs, D-57). This remains a literal
-// test-only copy rather than an import, so the constant-drift test below keeps proving the
-// source text underneath this pin has not silently changed.
-const PRODUCT_COMMAND_TIMEOUT_MS = 30_000;
+// LRG-03 (53.1): hand-written test literals, never imported from product code -- the
+// constant-drift pin test below keeps proving the literal source text underneath these copies
+// has not silently changed. writeDeadlineMs itself IS imported for the formula-behavior half
+// of that same pin, since a copied formula could silently drift out of step with the real one.
+const READ_DEADLINE_MS = 30_000;
+const ASSUMED_FLOOR_BYTES_PER_SECOND = 20_000_000;
 
 /**
  * Fails loudly (never skips) on a host without POSIX SIGSTOP/SIGKILL. Windows has neither, so
@@ -382,7 +383,7 @@ describe("ExifTool command deadline recovery (LRG-03)", () => {
 		}
 	});
 
-	it("the product timeout constant is still 30000 ms", () => {
+	it("the command deadline constants and write-deadline formula are pinned (D-57)", () => {
 		const source = fs.readFileSync(
 			path.resolve(
 				__dirname,
@@ -390,8 +391,114 @@ describe("ExifTool command deadline recovery (LRG-03)", () => {
 			),
 			"utf8",
 		);
-		expect(source).toMatch(/const EXIFTOOL_COMMAND_TIMEOUT_MS = 30000;/);
+		expect(source).toMatch(
+			/export const EXIFTOOL_COMMAND_TIMEOUT_MS = 30000;/,
+		);
+		expect(source).toMatch(
+			/export const ASSUMED_WRITE_FLOOR_BYTES_PER_SECOND = 20_000_000;/,
+		);
+
+		expect(writeDeadlineMs({ sourceBytes: 0 })).toBe(30_000);
+		expect(writeDeadlineMs({ sourceBytes: 4_294_971_412 })).toBe(244_749);
+		expect(writeDeadlineMs({ sourceBytes: 20_000_000_000_000 })).toBe(
+			1_000_030_000,
+		);
 	});
+
+	it(
+		"deadline recovery: a deadline beyond the 2^31-1 ms platform timer limit is chained, not truncated to 1 ms (D-57 no cap)",
+		async () => {
+			const dir = fs.mkdtempSync(path.join(os.tmpdir(), "large-file-chain-"));
+			temporaryDirs.push(dir);
+			assertPosixSignalHost();
+
+			const copy = path.join(dir, "sample.mp4");
+			fs.copyFileSync(SAMPLE_MP4, copy);
+			const outputPath = path.join(dir, "out.mp4");
+
+			const before = snapshotDir(dir);
+
+			const exiftoolProcess = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+
+			let unhandledRejectionCount = 0;
+			const onUnhandledRejection = (): void => {
+				unhandledRejectionCount += 1;
+			};
+			process.on("unhandledRejection", onUnhandledRejection);
+
+			await exiftoolProcess.open();
+			const pid = exiftoolProcess.pid;
+			if (pid === undefined) {
+				throw new Error(
+					"Expected ExifTool to report a pid immediately after open()",
+				);
+			}
+
+			try {
+				process.kill(pid, "SIGSTOP");
+				// Fake timers must be installed BEFORE the call that schedules the
+				// real setTimeout (ExiftoolProcess.ts's pump()), not after.
+				vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+
+				const overflowDeadlineMs = 2_147_483_647 + 5_000;
+				let settled = false;
+				let capturedError: unknown;
+				const writePromise = exiftoolProcess
+					.writeMetadata({
+						filePath: copy,
+						metadata: {},
+						extraArgs: ["-all=", "-o", outputPath],
+						deadlineMs: overflowDeadlineMs,
+					})
+					.catch((error: unknown) => {
+						capturedError = error;
+						throw error;
+					})
+					.finally(() => {
+						settled = true;
+					});
+				// Observed via capturedError/settled below; this keeps the rejection
+				// from surfacing as an unhandled rejection while it is in flight.
+				writePromise.catch(() => {});
+
+				await pollUntil({
+					condition: () => vi.getTimerCount() === 1,
+					label: "the overflow deadline's timer",
+					timeoutMs: 5000,
+				});
+
+				await vi.advanceTimersByTimeAsync(2_147_483_647);
+				for (let turn = 0; turn < 20; turn += 1) {
+					await new Promise<void>((resolve) => setImmediate(resolve));
+				}
+				expect(settled).toBe(false);
+
+				await vi.advanceTimersByTimeAsync(5_000);
+				await expect(writePromise).rejects.toBeInstanceOf(
+					ExifToolCommandTimeoutError,
+				);
+				expect(settled).toBe(true);
+				expect(capturedError).toBeInstanceOf(ExifToolCommandTimeoutError);
+				expect(
+					(capturedError as ExifToolCommandTimeoutError).deadlineMs,
+				).toBe(overflowDeadlineMs);
+			} finally {
+				vi.useRealTimers();
+				await exiftoolProcess.close();
+				process.removeListener("unhandledRejection", onUnhandledRejection);
+			}
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				added: [],
+				modified: [],
+				removed: [],
+				unchanged: ["sample.mp4"],
+			});
+			expect(unhandledRejectionCount).toBe(0);
+		},
+		180_000,
+	);
 
 	it.each(DEADLINE_RECOVERY_MODES)(
 		"deadline recovery: a >4 GiB $mode staged write past its write deadline is stopped, its partial output is removed, the source is unchanged, and the queued next-file read succeeds on a fresh ExifTool session",
@@ -586,7 +693,7 @@ describe("ExifTool command deadline recovery (LRG-03)", () => {
 					timeoutMs: 5000,
 				});
 
-				await vi.advanceTimersByTimeAsync(29_999);
+				await vi.advanceTimersByTimeAsync(READ_DEADLINE_MS - 1);
 				for (let turn = 0; turn < 20; turn += 1) {
 					await new Promise<void>((resolve) => setImmediate(resolve));
 				}
@@ -647,16 +754,18 @@ describe("ExifTool command deadline recovery (LRG-03)", () => {
 				// Hand-written literals, never writeDeadlineMs -- proves the
 				// formula against independently computed numbers (D-67).
 				const size = fs.statSync(largeSource).size;
-				const expected = 30_000 + Math.ceil((size * 1000) / 20_000_000);
+				const expected =
+					READ_DEADLINE_MS +
+					Math.ceil((size * 1000) / ASSUMED_FLOOR_BYTES_PER_SECOND);
 
-				await vi.advanceTimersByTimeAsync(30_000);
+				await vi.advanceTimersByTimeAsync(READ_DEADLINE_MS);
 				for (let turn = 0; turn < 20; turn += 1) {
 					await new Promise<void>((resolve) => setImmediate(resolve));
 				}
 				expect(writeSettled).toBe(false);
 				expect(exiftoolProcess.pid).toBe(secondPid);
 
-				await vi.advanceTimersByTimeAsync(expected - 30_000 - 1);
+				await vi.advanceTimersByTimeAsync(expected - READ_DEADLINE_MS - 1);
 				for (let turn = 0; turn < 20; turn += 1) {
 					await new Promise<void>((resolve) => setImmediate(resolve));
 				}
