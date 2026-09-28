@@ -30,6 +30,7 @@ export class NativeMetadataAdapter implements NativeMetadataPort {
 			destinationPath: request.destination,
 			preserveOrientation: request.preserveOrientation,
 			preserveColorProfile: request.preserveColorProfile,
+			preserveResolution: request.preserveResolution,
 			preserveTimestamps: request.preserveTimestamps,
 		};
 		const result = await sanitizeFile(

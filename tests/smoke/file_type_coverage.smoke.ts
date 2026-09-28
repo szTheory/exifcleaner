@@ -3,6 +3,7 @@ import {
 	runErrorFormatScenario,
 	runRafRefusalScenario,
 	runMixedFormatScenario,
+	runNativeDifferentialScenario,
 	runPositiveFormatScenario,
 } from "../helpers/processing_driver";
 import {
@@ -81,4 +82,54 @@ test("RAF is refused without modifying the original or writing an artifact", asy
 	} finally {
 		await closePackagedApp(context);
 	}
+});
+
+test.describe("native path on the installed artifact (ADP-05)", () => {
+	async function launchForDefaultPreservations() {
+		const context = await launchPackagedApp();
+		await context.window.evaluate(() =>
+			globalThis.window.api.settings.set({
+				preserveColorProfile: true,
+				preserveOrientation: true,
+				preserveResolution: true,
+				preserveTimestamps: false,
+				saveAsCopy: true,
+			}),
+		);
+		return context;
+	}
+
+	test("sample.jpg is cleaned by the native engine in the installed artifact", async () => {
+		const context = await launchForDefaultPreservations();
+		try {
+			await runNativeDifferentialScenario(context, {
+				fixture: "sample.jpg",
+				removedTags: [
+					"Artist",
+					"Copyright",
+					"GPSLatitude",
+					"GPSLongitude",
+					"Make",
+					"Model",
+					"DateTimeOriginal",
+				],
+				preservedTags: {},
+			});
+		} finally {
+			await closePackagedApp(context);
+		}
+	});
+
+	test("orientation.png is cleaned by the native engine in the installed artifact", async () => {
+		const context = await launchForDefaultPreservations();
+		try {
+			await runNativeDifferentialScenario(context, {
+				fixture: "orientation.png",
+				removedTags: ["Author", "Copyright"],
+				preservedTags: { Orientation: "Rotate 90 CW" },
+			});
+		} finally {
+			await closePackagedApp(context);
+		}
+	});
 });

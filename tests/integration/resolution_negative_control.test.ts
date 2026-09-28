@@ -12,9 +12,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ExifToolAdapter } from "../../src/infrastructure/exiftool/exiftool_adapter";
 import { ExiftoolProcess } from "../../src/infrastructure/exiftool/ExiftoolProcess";
+import { HybridMetadataEngine } from "../../src/infrastructure/metadata/hybrid_metadata_engine";
+import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_metadata_adapter";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import { readRawTagLines } from "../helpers/raw_probe";
 import {
@@ -146,6 +148,123 @@ describe("Resolution copy-back matrix, product adapter (FID-03, D-37, D-38)", ()
 			for (const sentinel of onSentinels) {
 				expect(offSentinels.has(sentinel)).toBe(true);
 			}
+			expect(
+				resolutionDeltaViolations({
+					source: sourceLines,
+					off: offLines,
+					on: onLines,
+					companions: row.companions,
+				}),
+			).toEqual([]);
+		},
+	);
+});
+
+// 58-08 (ADP-02, ADP-04): the same matrix rows as the ExifTool-only block above, but driven
+// through the real HybridMetadataEngine (real ExiftoolProcess + real NativeMetadataAdapter,
+// vi.spyOn tracking call counts only -- never mocking the engines themselves) so the NC gate
+// proves the native PNG/JPEG copy path and the WebP ExifTool/native split, not just ExifTool's
+// own writer. jpg/jpeg/png preserve resolution natively (HybridMetadataEngine routes both ON
+// and OFF to native); webp does not preserve resolution natively, so ON (preserveResolution
+// true) is native-ineligible and routes to ExifTool, while OFF (preserveResolution false)
+// bypasses the resolution gate and routes to native (D-01, D-03, 58-01).
+const HYBRID_MATRIX_ROWS = RESOLUTION_MATRIX_ROWS.filter((row) =>
+	([".jpg", ".jpeg", ".png", ".webp"] as readonly string[]).includes(row.ext),
+);
+
+describe("Resolution copy-back matrix, hybrid engine (ADP-02, ADP-04)", () => {
+	const temporaryDirs: string[] = [];
+
+	afterEach(() => {
+		for (const dir of temporaryDirs.splice(0)) {
+			fs.rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
+	it.each(HYBRID_MATRIX_ROWS)(
+		"$ext ($fileType) through the hybrid engine: ON removes no less than OFF and adds only the source's own resolution (ADP-02, ADP-04)",
+		async (row) => {
+			const dir = fs.mkdtempSync(
+				path.join(os.tmpdir(), "resolution-matrix-hybrid-"),
+			);
+			temporaryDirs.push(dir);
+			const source = materializeRow(
+				row,
+				dir,
+				`source${row.ext}`,
+				EXIFTOOL_PATH,
+			);
+			const sourceDigestBefore = sha256(source);
+			const onDest = path.join(dir, `on-out${row.ext}`);
+			const offDest = path.join(dir, `off-out${row.ext}`);
+			const before = snapshotDir(dir);
+
+			const process = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+			const exiftool = new ExifToolAdapter({ process });
+			const native = new NativeMetadataAdapter();
+			const hybrid = new HybridMetadataEngine({ exiftool, native });
+			const exiftoolWrite = vi.spyOn(exiftool, "sanitize");
+			const nativeWrite = vi.spyOn(native, "sanitize");
+
+			await process.open();
+			let onResult: Awaited<ReturnType<typeof hybrid.sanitize>>;
+			let offResult: Awaited<ReturnType<typeof hybrid.sanitize>>;
+			try {
+				onResult = await hybrid.sanitize({
+					source,
+					destination: onDest,
+					outputMode: "copy",
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+					preserveTimestamps: false,
+				});
+				offResult = await hybrid.sanitize({
+					source,
+					destination: offDest,
+					outputMode: "copy",
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: false,
+					preserveTimestamps: false,
+				});
+			} finally {
+				await process.close();
+			}
+
+			expect(sha256(source)).toBe(sourceDigestBefore);
+			expect(onResult).toMatchObject({ ok: true });
+			expect(offResult).toMatchObject({ ok: true });
+
+			if (row.ext === ".webp") {
+				expect(exiftoolWrite).toHaveBeenCalledOnce();
+				expect(nativeWrite).toHaveBeenCalledOnce();
+			} else {
+				expect(nativeWrite).toHaveBeenCalledTimes(2);
+				expect(exiftoolWrite).not.toHaveBeenCalled();
+			}
+
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, {
+				added: [path.basename(onDest), path.basename(offDest)],
+				modified: [],
+				removed: [],
+				unchanged: [path.basename(source)],
+			});
+
+			const sourceLines = readRawTagLines(source, EXIFTOOL_PATH);
+			const onLines = readRawTagLines(onDest, EXIFTOOL_PATH);
+			const offLines = readRawTagLines(offDest, EXIFTOOL_PATH);
+
+			expect(seededTagKeys(onLines)).toEqual([]);
+
+			if (row.ext === ".webp") {
+				const onXResolution = onLines.find(
+					(line) => line.key === "IFD0:XResolution",
+				);
+				expect(onXResolution?.value).toBe("300");
+			}
+
 			expect(
 				resolutionDeltaViolations({
 					source: sourceLines,

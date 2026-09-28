@@ -5,19 +5,25 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-// Published version is 0.2.2, not the plan-literal 0.2.0: `v0.2.0` published nothing (the
-// `npm publish admitted/*.tgz` GitHub-shorthand parse bug, fixed in PR #9) and its tag is
-// permanently immutable under ruleset 21203101, so the version number is burnt. See
-// 48-NODE-020-IDENTITY.md "PUBLISHED IDENTITY" for the full registry read-back.
+// Published version is 0.3.1 (58-12..58-15, ADP-04, "Fix in node first" maintainer decision):
+// the stage-residue fix. Source commit 312b4ad8371e9df5360d18e34fc7b44b9929c87b (supersedes
+// the 58-13 addendum's originally-recorded c9cfe6f -- a test-only benchmark-timeout fix landed
+// first), tag v0.3.1, release run 36487656246 attempt 1 -- all three confirmed against the
+// published SLSA provenance attestation (predicateType https://slsa.dev/provenance/v1, workflow
+// release.yml, environment npm, build ref refs/tags/v0.3.1), not assumed. 0.3.1 adds post-commit
+// removal of the `.exifcleaner-stage-<uuid>` atomic-publication staging directory the library
+// used to leave behind after every native copy publish; no export, prebuild, or allowed-import
+// surface changed from 0.3.0 (measured: this seal's own runtime scan reports the same
+// EXPECTED_RUNTIME_EXPORTS, the same six EXPECTED_PREBUILD_PATHS, and the same ALLOWED_IMPORTS
+// set below).
 //
-// 0.2.2 supersedes 0.2.1 for a Windows-only correctness defect: 0.2.1's publication.node
-// carried a static import of the literal name "node.exe", so inside the packaged app -- where
-// the host is ExifCleaner.exe -- the loader mapped a SECOND Node runtime into the process and
-// the first N-API call faulted on a V8 pointer-compression cage mismatch. 0.2.2 binds the
-// N-API surface to the already-loaded host and declares no host dependency on either Windows
-// arch. Source commit 8474396, tag v0.2.2, release run 35370603372 -- all three confirmed
-// against the published SLSA provenance attestation, not assumed.
-export const SEALED_VERSION = "0.2.2";
+// History: 0.3.0 (58-01, ADP-04) was the app-adoption bump that landed PNG + JPEG native
+// routing alongside WebP. Source commit 41bee192686281d23e8e4b9d9610235e3171c658, tag v0.3.0,
+// release run 36365018538 attempt 1. 0.2.2 superseded 0.2.1 for a Windows-only correctness
+// defect (0.2.1's publication.node statically imported the literal name "node.exe", faulting
+// inside the packaged ExifCleaner.exe host on a V8 pointer-compression cage mismatch). Source
+// commit 8474396, tag v0.2.2, release run 35370603372.
+export const SEALED_VERSION = "0.3.1";
 const PACKAGE_NAME = "exifcleaner-node";
 const EVIDENCE_PATH = "docs/evidence/native-webp-registry-package.json";
 const REPOSITORY_URL = "https://github.com/szTheory/exifcleaner-node";
@@ -38,14 +44,18 @@ const EXPECTED_RUNTIME_EXPORTS = [
 // node:crypto and node:module were added for 0.2.1's native publication/transaction layer
 // (randomBytes/randomUUID for safe temp-file naming, createHash for content-addressing,
 // createRequire to load the native .node addon from ESM) -- measured via the seal's own
-// runtime scan against the installed 0.2.1 tree (48-06 Task 2), not assumed. Neither is a
-// network-capable module and neither appears in FORBIDDEN_MODULES below.
+// runtime scan against the installed 0.2.1 tree (48-06 Task 2), not assumed. node:zlib was
+// added for 0.3.0's PNG handler (58-01): measured via the seal's own runtime scan against the
+// installed 0.3.0 tree, the only new bare import is dist/png/chunks.js's use of node:zlib for
+// PNG chunk CRC/deflate handling. None of these are network-capable modules and none appear
+// in FORBIDDEN_MODULES below.
 const ALLOWED_IMPORTS = new Set([
 	"node:fs",
 	"node:fs/promises",
 	"node:path",
 	"node:crypto",
 	"node:module",
+	"node:zlib",
 ]);
 const FORBIDDEN_MODULES = new Set([
 	"net",
@@ -70,6 +80,22 @@ const NETWORK_APIS = new Set([
 	"WebSocket",
 	"XMLHttpRequest",
 	"EventSource",
+]);
+// 58-01: exact-match allowlist for http(s)/wss(s)-prefixed string literals that are XMP/RDF
+// namespace identifiers, never dereferenced as URLs. Measured in 0.3.0's JPEG XMP handler
+// (dist/jpeg/xmp.js, dist/jpeg/parser.js): the Adobe-standard XMP and ExtendedXMP schema
+// identifiers are fixed byte sequences the parser matches against APPn segment contents, the
+// same way every XMP-bearing file on earth embeds them -- not passed to fetch/http/any
+// NETWORK_APIS call site (none matched in this scan). Exact string match, not a prefix or
+// substring rule, so this cannot be widened by adding an unrelated literal that merely starts
+// with "http:" elsewhere in the package.
+const ALLOWED_URL_LITERALS = new Set([
+	"http://ns.adobe.com/xap/1.0/",
+	"http://ns.adobe.com/xmp/extension/",
+	// Same two identifiers with the NUL terminator the raw APPn segment carries
+	// (dist/jpeg/parser.js matches the identifier as a Buffer, not a JS string).
+	"http://ns.adobe.com/xap/1.0/\0",
+	"http://ns.adobe.com/xmp/extension/\0",
 ]);
 
 export function classifyDependencySpec(spec) {
@@ -351,7 +377,7 @@ function scanRuntimeSource(relative, source) {
 		}
 		if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
 			const match = /^(https?|wss?):/i.exec(node.text);
-			if (match !== null)
+			if (match !== null && !ALLOWED_URL_LITERALS.has(node.text))
 				problems.push(
 					`forbidden network URL literal: ${match[1].toLowerCase()}:`,
 				);

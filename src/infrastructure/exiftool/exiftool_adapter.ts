@@ -256,7 +256,12 @@ export class ExifToolAdapter implements MetadataEnginePort {
 		return {
 			ok: true,
 			value: {
-				metadata: {},
+				// D-10: the diagnostic record was already fetched above (for
+				// classifyInspectionDiagnostics) -- surface it as metadata at zero added
+				// ExifTool invocations, rather than discarding it. Callers that need to check
+				// PNG/JPEG copy-mode output for a leaked tag (VerifyGeneratedOutputQuery's
+				// opt-in copyModeLeakCheck) consume this record directly.
+				metadata: diagnosticRecord,
 				recordCount: result.value.length,
 				verification: {
 					fileType: firstRecord.FileType,

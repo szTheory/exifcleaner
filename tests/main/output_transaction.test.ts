@@ -225,7 +225,10 @@ describe("OutputTransaction", () => {
 
 		expect(result).toEqual({
 			ok: false,
-			error: { code: "verification-failed" },
+			error: {
+				code: "verification-failed",
+				verificationCode: "output-verification-failed",
+			},
 		});
 		expect(result).not.toHaveProperty("outputPath");
 		expect(events).toEqual([
@@ -288,7 +291,10 @@ describe("OutputTransaction", () => {
 
 			expect(result).toEqual({
 				ok: false,
-				error: { code: "verification-failed" },
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-verification-failed",
+				},
 			});
 			expect(events).toEqual([
 				`write:${outputPath}`,
@@ -330,7 +336,13 @@ describe("OutputTransaction", () => {
 				preserveResolution: false,
 				preserveTimestamps: false,
 			}),
-		).resolves.toEqual({ ok: false, error: { code: "verification-failed" } });
+		).resolves.toEqual({
+			ok: false,
+			error: {
+				code: "verification-failed",
+				verificationCode: "output-verification-failed",
+			},
+		});
 		expect(events).toEqual([
 			"write",
 			`verify:${generatedPath}`,
@@ -475,7 +487,10 @@ describe("OutputTransaction", () => {
 
 			expect(result).toEqual({
 				ok: false,
-				error: { code: "verification-failed" },
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-verification-failed",
+				},
 			});
 			assertDirEffect(beforeDir, snapshotDir(fixtureDir), {
 				added: [],
@@ -573,4 +588,94 @@ describe("OutputTransaction", () => {
 			expect(requests).toEqual([{ preserveResolution }]);
 		},
 	);
+
+	it("forwards copyModeLeakCheck to verifyGeneratedOutput.execute exactly as given, undefined when omitted", async () => {
+		const leakCheck = {
+			preserveOrientation: true,
+			preserveColorProfile: false,
+			preserveResolution: true,
+		};
+		const requests: Array<{
+			copyModeLeakCheck:
+				| {
+						preserveOrientation: boolean;
+						preserveColorProfile: boolean;
+						preserveResolution: boolean;
+				  }
+				| undefined;
+		}> = [];
+		const transaction = new OutputTransaction({
+			stripMetadata: {
+				execute: async () => ({ ok: true, value: { tagsRemoved: 0 } }),
+			},
+			verifyGeneratedOutput: {
+				execute: async (request) => {
+					requests.push({ copyModeLeakCheck: request.copyModeLeakCheck });
+					return { ok: true, value: undefined };
+				},
+			},
+			unlink: async () => undefined,
+			rename: async () => undefined,
+			delay: async () => undefined,
+		});
+
+		await transaction.execute({
+			filePath: originalPath,
+			generatedPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+			copyModeLeakCheck: leakCheck,
+		});
+		await transaction.execute({
+			filePath: originalPath,
+			generatedPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		});
+
+		expect(requests).toEqual([
+			{ copyModeLeakCheck: leakCheck },
+			{ copyModeLeakCheck: undefined },
+		]);
+	});
+
+	it("a leak verdict unlinks the staged output and reports verification-failed with verificationCode output-metadata-leak", async () => {
+		const { transaction, events } = createTransaction({
+			verifyResult: {
+				ok: false,
+				error: {
+					code: "output-metadata-leak",
+					detail:
+						"Generated output kept 1 metadata tag(s) outside the permitted set: XMP-dc:Creator",
+					leakedTags: ["XMP-dc:Creator"],
+				},
+			},
+		});
+
+		const result = await transaction.execute({
+			filePath: originalPath,
+			generatedPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			error: {
+				code: "verification-failed",
+				verificationCode: "output-metadata-leak",
+			},
+		});
+		expect(events).toEqual([
+			"write",
+			`verify:${generatedPath}`,
+			`unlink:${generatedPath}`,
+		]);
+	});
 });

@@ -27,7 +27,7 @@ const cleanSubject = (): AccountabilitySubject => ({
 			'import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions"; assertMetadataStripped(file);',
 	},
 	fixtureGeneratorSource:
-		'write("issue240.mp4"); write("orientation.jpg"); // generator-owned synthetic fixtures',
+		'write("issue240.mp4"); write("orientation.jpg"); write("orientation.png"); write("orientation-xmp-only.png"); // generator-owned synthetic fixtures',
 	orientationCommandSource:
 		'if (preserveOrientation) preserveTags.push("-Orientation");',
 	artifactPaths: [
@@ -183,7 +183,7 @@ run: yarn test:e2e
 			"verify:accountability:policy":
 				"node scripts/oracle_accountability_gate.mjs",
 			"verify:accountability:mutation":
-				"node scripts/orientation_mutation_gate.mjs",
+				"node scripts/orientation_mutation_gate.mjs && node scripts/native_orientation_mutation_gate.mjs",
 		};
 
 		expect(evaluateCiWiring(workflow, scripts)).toEqual([]);
@@ -196,6 +196,52 @@ run: yarn test:e2e
 				scripts,
 			),
 		).toEqual(expect.arrayContaining([expect.stringContaining("ordering")]));
+	});
+
+	test("rejects the old single-gate mutation script string", () => {
+		const workflow = `
+run: yarn verify:accountability:policy
+run: yarn verify:known-gaps
+run: yarn verify:accountability:mutation
+run: yarn test:e2e
+`;
+		const scripts = {
+			"verify:accountability:policy":
+				"node scripts/oracle_accountability_gate.mjs",
+			"verify:accountability:mutation":
+				"node scripts/orientation_mutation_gate.mjs",
+		};
+
+		expect(evaluateCiWiring(workflow, scripts)).toEqual(
+			expect.arrayContaining([
+				expect.stringContaining(
+					"must invoke the ExifTool-line and native-path mutation gates",
+				),
+			]),
+		);
+	});
+
+	test("rejects a composite string that omits the ExifTool-line gate", () => {
+		const workflow = `
+run: yarn verify:accountability:policy
+run: yarn verify:known-gaps
+run: yarn verify:accountability:mutation
+run: yarn test:e2e
+`;
+		const scripts = {
+			"verify:accountability:policy":
+				"node scripts/oracle_accountability_gate.mjs",
+			"verify:accountability:mutation":
+				"node scripts/native_orientation_mutation_gate.mjs",
+		};
+
+		expect(evaluateCiWiring(workflow, scripts)).toEqual(
+			expect.arrayContaining([
+				expect.stringContaining(
+					"must invoke the ExifTool-line and native-path mutation gates",
+				),
+			]),
+		);
 	});
 });
 

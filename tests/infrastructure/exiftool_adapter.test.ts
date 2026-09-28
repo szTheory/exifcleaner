@@ -104,6 +104,36 @@ describe("ExifToolAdapter.inspect", () => {
 		});
 	});
 
+	it("returns the already-fetched -G1:2:4 diagnostic record as metadata for output verification (D-10)", async () => {
+		// D-10: the diagnostic scan the adapter already runs (for classifyInspectionDiagnostics)
+		// must be surfaced as `metadata`, at zero added ExifTool invocations -- still exactly two
+		// readMetadata calls (the plain-key scan, then the -G1:2:4 diagnostic scan).
+		const readMetadata = vi
+			.fn()
+			.mockResolvedValueOnce({ data: [{ FileType: "PNG" }], error: null })
+			.mockResolvedValueOnce({
+				data: [{ "PNG:BitDepth": 8, "XMP-dc:Creator": "leaked" }],
+				error: null,
+			});
+		const fakeProcess = makeFakeProcess({ readMetadata });
+		const adapter = new ExifToolAdapter({ process: fakeProcess });
+
+		const result = await adapter.inspect({
+			source: "/tmp/generated.png",
+			purpose: "output-verification",
+		});
+
+		expect(readMetadata).toHaveBeenCalledTimes(2);
+		expect(result).toEqual({
+			ok: true,
+			value: {
+				metadata: { "PNG:BitDepth": 8, "XMP-dc:Creator": "leaked" },
+				recordCount: 1,
+				verification: { fileType: "PNG", error: undefined },
+			},
+		});
+	});
+
 	it("fails closed when the output-verification diagnostic scan returns no record", async () => {
 		// Negative control for the #344 re-fold (48-06): master's pre-refactor
 		// VerifyGeneratedOutputQuery rejected an empty diagnostic scan. The adapter must too --

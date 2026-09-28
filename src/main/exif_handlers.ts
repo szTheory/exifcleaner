@@ -11,6 +11,7 @@ import { generateCleanedPath } from "../domain/files/cleaned_path";
 import {
 	isRafFile,
 	isRawFile,
+	requiresCopyModeLeakCheck,
 	requiresVerifiedWrite,
 } from "../domain/files/file_types";
 import { refuseUnsafeRafWrite } from "../domain/files/file_processing_outcome";
@@ -81,6 +82,16 @@ export function setupExifHandlers({
 			if (requiresVerifiedWrite({ filename: filePath, outputMode })) {
 				const generatedPath =
 					outputPath ?? generateMediaStagePath({ filePath });
+				const copyModeLeakCheck = requiresCopyModeLeakCheck({
+					filename: filePath,
+					outputMode,
+				})
+					? {
+							preserveOrientation: settings.preserveOrientation,
+							preserveColorProfile: settings.preserveColorProfile,
+							preserveResolution: settings.preserveResolution,
+						}
+					: undefined;
 				const transactionResult = await container.outputTransaction.execute({
 					filePath,
 					generatedPath,
@@ -89,6 +100,7 @@ export function setupExifHandlers({
 					preserveColorProfile: settings.preserveColorProfile,
 					preserveResolution: settings.preserveResolution,
 					preserveTimestamps: settings.preserveTimestamps,
+					...(copyModeLeakCheck === undefined ? {} : { copyModeLeakCheck }),
 				});
 				if (transactionResult.ok) {
 					return applyXattrPostcondition({

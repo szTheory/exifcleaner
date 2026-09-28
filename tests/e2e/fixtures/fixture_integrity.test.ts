@@ -53,6 +53,8 @@ const WRITABLE_FIXTURES = [
 	"sample.m4a",
 	"issue240.mp4",
 	"orientation.jpg",
+	"orientation.png",
+	"orientation-xmp-only.png",
 	"no_metadata.jpg",
 	"sample.tif",
 	"multipage.tif",

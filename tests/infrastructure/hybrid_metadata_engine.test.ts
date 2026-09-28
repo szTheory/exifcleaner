@@ -250,12 +250,14 @@ describe("HybridMetadataEngine", () => {
 			formats: [
 				{
 					format: "webp",
+					extensions: [".webp"],
 					sanitize: true,
 					detection: "magic",
 					preserves: {
 						orientation: false,
 						colorProfile: true,
 						timestamps: true,
+						resolution: true,
 					},
 				},
 			],
@@ -297,6 +299,7 @@ describe("HybridMetadataEngine", () => {
 			formats: [
 				{
 					format: "webp",
+					extensions: [".webp"],
 					sanitize: true,
 					// Runtime defense-in-depth: D-16 closes the *type* to the
 					// literal "magic", so this cast simulates a capability table
@@ -308,6 +311,7 @@ describe("HybridMetadataEngine", () => {
 						orientation: true,
 						colorProfile: true,
 						timestamps: true,
+						resolution: true,
 					},
 				},
 			],
@@ -331,23 +335,30 @@ describe("HybridMetadataEngine", () => {
 				{
 					// Deliberately NOT "webp" — this is the generalization control:
 					// the capability lookup (hybrid_metadata_engine.ts) must select
-					// by sanitize+detection+preserves alone (D-15), never by a
-					// format === "webp" equality. Reintroducing that equality check
-					// makes exactly this test go red.
+					// by extension against NativeFormatCapabilities.extensions (D-01),
+					// never by a format === "webp" equality. Reintroducing that
+					// equality check makes exactly this test go red.
 					format: "avif",
+					extensions: [".avif"],
 					sanitize: true,
 					detection: "magic",
 					preserves: {
 						orientation: true,
 						colorProfile: true,
 						timestamps: true,
+						resolution: true,
 					},
 				},
 			],
 		};
 		const engine = new HybridMetadataEngine({ exiftool, native });
+		const request = {
+			...sanitizeRequest,
+			source: "/files/source.avif",
+			destination: "/files/clean.avif",
+		};
 
-		const result = await engine.sanitize(sanitizeRequest);
+		const result = await engine.sanitize(request);
 
 		expect(result).toEqual({ ok: true, value: undefined });
 		expect(native.sanitizeCalls).toHaveLength(1);
@@ -356,11 +367,14 @@ describe("HybridMetadataEngine", () => {
 		);
 	});
 
-	// D-17 (both directions): content decides the reader, the name decides the
-	// written filename. Electron reads zero bytes before routing (D-13), so
-	// these two rows simulate the library's own content-vs-name outcome via
-	// the fake's sanitizeResult/sanitizeCalls rather than real bytes — the
-	// real-bytes proof lives in tests/integration/native_metadata_oracle.test.ts.
+	// D-01/D-17: the extension identifies the capability, not the bytes. Electron reads zero
+	// bytes before routing (D-13); a mismatch between a source's extension and its actual
+	// content is caught by the library's own admission decline (this D-17 row, simulated via
+	// the fake's sanitizeResult), never by app-level content sniffing. An unmatched or absent
+	// extension is not a candidate at all and never reaches the native port (the D-01 row
+	// below) — the WebP-era "content decides eligibility regardless of filename" rule this
+	// used to encode is inverted; the real-bytes proof for both lives in
+	// tests/integration/native_metadata_oracle.test.ts and tests/integration/native_copy_routing.test.ts.
 	it("D-17: a .webp-named source over non-webp bytes is declined by the library at admission and falls back exactly once", async () => {
 		const exiftool = new FakeMetadataEngine();
 		const native = new FakeNativeMetadata();
@@ -385,22 +399,22 @@ describe("HybridMetadataEngine", () => {
 		]);
 	});
 
-	it("D-17: webp bytes under a non-webp or absent extension are eligible for native routing regardless of filename", async () => {
-		const exiftool = new FakeMetadataEngine();
-		const native = new FakeNativeMetadata();
-		const engine = new HybridMetadataEngine({ exiftool, native });
-		const request = {
-			...sanitizeRequest,
-			source: "/files/source.bin",
-			destination: "/files/clean.bin",
-		};
+	it.each([
+		["a .bin extension", "/files/source.bin", "/files/clean.bin"],
+		["an extensionless source", "/files/source", "/files/clean"],
+	])(
+		"D-01: %s routes to ExifTool with zero native calls, regardless of bytes",
+		async (_label, source, destination) => {
+			const exiftool = new FakeMetadataEngine();
+			const native = new FakeNativeMetadata();
+			const engine = new HybridMetadataEngine({ exiftool, native });
+			const request = { ...sanitizeRequest, source, destination };
 
-		const result = await engine.sanitize(request);
+			const result = await engine.sanitize(request);
 
-		expect(result).toEqual({ ok: true, value: undefined });
-		expect(native.sanitizeCalls).toEqual([request]);
-		expect(exiftool.calls.filter((call) => call.method === "sanitize")).toEqual(
-			[],
-		);
-	});
+			expect(result).toBe(exiftool.sanitizeResult);
+			expect(native.sanitizeCalls).toEqual([]);
+			expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
+		},
+	);
 });

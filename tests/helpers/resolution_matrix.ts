@@ -176,7 +176,11 @@ export const RESOLUTION_MATRIX_ROWS: readonly MatrixRow[] = [
 			...GENERIC_SEED_ARGS,
 		],
 		seedExpect: { "IFD0:XResolution": "300", "IFD0:Artist": "ZZP52-ARTIST" },
-		companions: [],
+		// Measured 58-08 (bundled ExifTool 13.59): the hybrid engine's WebP-with-Preserve-
+		// resolution-on route goes through ExifTool (D-01/D-03), whose EXIF-block re-creation
+		// changes File:ExifByteOrder and re-adds IFD0:YCbCrPositioning -- the same JPEG framing
+		// companions JPEG_EXIF_COMPANIONS pins, both already present in the seeded source above.
+		companions: ["File:ExifByteOrder", "IFD0:YCbCrPositioning"],
 	},
 	{
 		ext: ".heic",
