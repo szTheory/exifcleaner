@@ -8,7 +8,6 @@
 // ExifCleaner ships.
 //
 // Usage:  node scripts/measure_copy_mode_batch_cost.mjs
-// (also: yarn measure:copy-mode-batch-cost)
 // Writes .planning/phases/58-app-adoption/58-BATCH-COST.json
 //
 // Not wired into CI: this is a committed, re-runnable reproducer and evidence artifact, not a
@@ -276,7 +275,7 @@ async function main() {
 	const report = {
 		measuredAt: new Date().toISOString(),
 		commitSha,
-		producingCommand: "yarn measure:copy-mode-batch-cost",
+		producingCommand: "node scripts/measure_copy_mode_batch_cost.mjs",
 		environment: {
 			os: os.platform(),
 			osRelease: os.release(),
