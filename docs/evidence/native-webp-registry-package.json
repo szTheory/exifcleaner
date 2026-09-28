@@ -1,31 +1,31 @@
 {
 	"schemaVersion": 1,
-	"recordedAt": "2026-09-28T15:32:44Z",
+	"recordedAt": "2026-09-28T22:10:00Z",
 	"package": {
 		"name": "exifcleaner-node",
-		"version": "0.3.0",
-		"publishedAt": "2026-09-28T01:27:02.661Z",
+		"version": "0.3.1",
+		"publishedAt": "2026-09-28T21:57:53.757Z",
 		"repository": "https://github.com/szTheory/exifcleaner-node",
-		"sourceCommit": "41bee192686281d23e8e4b9d9610235e3171c658",
-		"releaseTag": "v0.3.0"
+		"sourceCommit": "312b4ad8371e9df5360d18e34fc7b44b9929c87b",
+		"releaseTag": "v0.3.1"
 	},
 	"dist": {
-		"tarball": "https://registry.npmjs.org/exifcleaner-node/-/exifcleaner-node-0.3.0.tgz",
-		"integrity": "sha512-z3Tq9k9pLtFkZfliRQEFDN60cZsgy/1kn7uXdn6v0NRnMD/pjCoFNhTw6SypQn2vAJP6/DGHiRC7hUSpKcjEHA==",
-		"shasum": "2993cfd62c76a605817295287966aa359892a9c6",
-		"sha256": "6a3fd7ff07b1e2a52ff3815575525c7b04695fcba4c1db221d45d4cf1c6a3141",
+		"tarball": "https://registry.npmjs.org/exifcleaner-node/-/exifcleaner-node-0.3.1.tgz",
+		"integrity": "sha512-7alY1bKHZP9C25fsjo99Lu429F/ls75Oi7/lDaM4shAQsNizZNSiqS+LlaoBuyQAa58uucs1uICnfrNVlRewlA==",
+		"shasum": "629aeff72171090f9006084769da1715b29435c9",
+		"sha256": "ae20ef0599d8d58404c069a3087de2e8fb503846ceb1eb1751a6e21f2b87141e",
 		"fileCount": 117,
-		"packedSize": 152373,
-		"unpackedSize": 751067
+		"packedSize": 153364,
+		"unpackedSize": 754881
 	},
 	"provenance": {
 		"verified": true,
-		"url": "https://registry.npmjs.org/-/npm/v1/attestations/exifcleaner-node@0.3.0",
+		"url": "https://registry.npmjs.org/-/npm/v1/attestations/exifcleaner-node@0.3.1",
 		"predicateType": "https://slsa.dev/provenance/v1",
 		"workflow": "release.yml",
-		"workflowRun": "https://github.com/szTheory/exifcleaner-node/actions/runs/36365018538/attempts/1",
+		"workflowRun": "https://github.com/szTheory/exifcleaner-node/actions/runs/36487656246/attempts/1",
 		"environment": "npm",
-		"sourceCommit": "41bee192686281d23e8e4b9d9610235e3171c658"
+		"sourceCommit": "312b4ad8371e9df5360d18e34fc7b44b9929c87b"
 	},
 	"signatures": {
 		"verified": true,
@@ -213,7 +213,7 @@
 			},
 			{
 				"path": "dist/admission/jpeg-handler.js",
-				"sha256": "fde7e631d14758f8a2816186d21161fc92df25da40676f72df24e914a7e2137a"
+				"sha256": "f0411207fd69d5c457fa0da891ad23d0899bb629797898d7b65a54a8bd0e5b91"
 			},
 			{
 				"path": "dist/admission/png-handler.js",
@@ -249,11 +249,11 @@
 			},
 			{
 				"path": "dist/jpeg/markers.js",
-				"sha256": "1dd8ea30c7a1709913fd0a595511acb1791bffdacb3ffc64915245409c174a21"
+				"sha256": "45b18762e8a8ddc352afc45dadffb743dcb8ecff5c272f1e356fc52c6ef03c15"
 			},
 			{
 				"path": "dist/jpeg/parser.js",
-				"sha256": "c5f2c3e44a33ad1ae8e71c5e8bd55b0f757b980931702aebcf257a3ab6a71091"
+				"sha256": "cf2400603ec032f2c4fb3a796fd541f1862d9b3f2382d521f28aa0bedb61a246"
 			},
 			{
 				"path": "dist/jpeg/trailer.js",
@@ -293,7 +293,7 @@
 			},
 			{
 				"path": "dist/transaction/file-ops.js",
-				"sha256": "4bafb2f1971f1d3f1f792f0e54d5576adca8445833a2bcf0792d4b849988a88a"
+				"sha256": "2c0c825691c15c4d2c94cdf15d33c2e52df5841a9ce781c231cd7943cd783936"
 			},
 			{
 				"path": "dist/transaction/identity.js",
@@ -305,7 +305,7 @@
 			},
 			{
 				"path": "dist/transaction/safe-transaction.js",
-				"sha256": "e77dd798c65ad3c925e5970c0a03628d952b57de976221b0c95383cfd37c3aaa"
+				"sha256": "83cfcd3d9f3a857e0737d12d29a6fd1199157e53fa5734b7a5fe5bab0594ce2c"
 			},
 			{
 				"path": "dist/types.js",

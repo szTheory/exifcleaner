@@ -26,15 +26,6 @@ function sha256(filePath: string): string {
 	return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
-// Residue directories are the library's own atomic-publication staging leftovers
-// (see native_metadata_oracle.test.ts's identical comment) — discovered at runtime so this
-// helper stays a no-op on platforms where disposal succeeds.
-function residueEntries(dir: string): string[] {
-	return fs
-		.readdirSync(dir)
-		.filter((name) => name.startsWith(".exifcleaner-stage-"));
-}
-
 describe("58-01: extension-identified native copy routing with real bytes", () => {
 	const temporaryDirs: string[] = [];
 
@@ -85,7 +76,7 @@ describe("58-01: extension-identified native copy routing with real bytes", () =
 
 			assertDirEffect(beforeDir, snapshotDir(dir), {
 				unchanged: ["orientation.jpg"],
-				added: ["orientation-cleaned.jpg", ...residueEntries(dir)],
+				added: ["orientation-cleaned.jpg"],
 				modified: [],
 				removed: [],
 			});
@@ -140,7 +131,7 @@ describe("58-01: extension-identified native copy routing with real bytes", () =
 
 			assertDirEffect(beforeDir, snapshotDir(dir), {
 				unchanged: ["sample.png"],
-				added: ["sample-cleaned.png", ...residueEntries(dir)],
+				added: ["sample-cleaned.png"],
 				modified: [],
 				removed: [],
 			});
@@ -263,7 +254,7 @@ describe("58-01: extension-identified native copy routing with real bytes", () =
 
 			assertDirEffect(beforeDir, snapshotDir(dir), {
 				unchanged: ["sample.webp"],
-				added: ["sample-cleaned.webp", ...residueEntries(dir)],
+				added: ["sample-cleaned.webp"],
 				modified: [],
 				removed: [],
 			});

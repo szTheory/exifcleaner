@@ -295,8 +295,9 @@ describe("installed runtime audit", () => {
 });
 
 describe("repository sealed state", () => {
-	// D-04/D-19/D-20 (Phase 48, reconfirmed 58-01): the repository resealed to the published
-	// registry version exifcleaner-node@0.3.0 (resealed from 0.2.2 for app adoption, ADP-04).
+	// D-04/D-19/D-20 (Phase 48, reconfirmed 58-01, resealed 58-15): the repository resealed to
+	// the published registry version exifcleaner-node@0.3.1 (resealed from 0.3.0 to adopt the
+	// stage-residue fix, ADP-04).
 	// `validateSealDependency` against the live manifest/lock/evidence
 	// on disk MUST report `[]` -- a regression back to a non-empty result here would mean the
 	// manifest, lock, or evidence file drifted out of sync with each other or with the
