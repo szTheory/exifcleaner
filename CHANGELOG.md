@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.5.0
+
+### Changed
+
+- With Save as copy on, PNG and JPEG files are now cleaned by the app's own built-in cleaner when it supports every preservation setting that is turned on; for files it declines to handle, ExifTool cleans them as it always has
+- Every PNG and JPEG saved as a copy is now reopened and checked by ExifTool for leftover metadata before it is kept. If the check finds anything unexpected, the copy is discarded, the original file is left untouched, and the file is reported as failed
+- With Save as copy on and Preserve resolution on, WebP files are now cleaned by ExifTool and keep their resolution; with Preserve resolution off, WebP is still cleaned by the app's built-in cleaner. This removes the 4.4.0 known limitation that WebP resolution was never kept with Save as copy on
+- JPEG content credentials (C2PA/JUMBF data carried in APP11 segments) are now removed by the app's built-in cleaner, matching what ExifTool already removed
+- Cleaning many PNG or JPEG files as copies in one batch now costs a few extra milliseconds per file, from the new ExifTool reopen-and-check step above. Measured on a development machine under light background load: about +5.9 ms per JPEG and +6.6 ms per PNG compared to 4.4.0. The cost was judged worth paying so a copy with leftover metadata is never silently kept
+- A failing PNG or JPEG copy now reports a generic "Generated output write failed" message instead of ExifTool's own more specific error text, matching the message every other copy-mode format (RAW, TIFF, media and WebP) already shows on a failed write
+
 ## 4.4.0
 
 ### Added
