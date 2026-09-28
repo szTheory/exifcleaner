@@ -70,7 +70,8 @@ export function buildExiftoolReference({
 	const preserveTags: string[] = [];
 	if (preservation.preserveOrientation) preserveTags.push("-Orientation");
 	if (preservation.preserveColorProfile) preserveTags.push("-ICC_Profile");
-	if (preservation.preserveResolution) preserveTags.push(...RESOLUTION_PRESERVE_ARGS);
+	if (preservation.preserveResolution)
+		preserveTags.push(...RESOLUTION_PRESERVE_ARGS);
 	if (preserveTags.length > 0) {
 		args.push("-TagsFromFile", "@", ...preserveTags);
 	}

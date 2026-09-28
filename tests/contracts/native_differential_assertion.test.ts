@@ -45,8 +45,13 @@ const FULL_STRIP_PRESERVATION: DifferentialPreservation = {
 };
 
 function makeTempDir(): { dir: string; cleanup: () => void } {
-	const dir = fs.mkdtempSync(path.join(os.tmpdir(), "exifcleaner-differential-"));
-	return { dir, cleanup: (): void => fs.rmSync(dir, { recursive: true, force: true }) };
+	const dir = fs.mkdtempSync(
+		path.join(os.tmpdir(), "exifcleaner-differential-"),
+	);
+	return {
+		dir,
+		cleanup: (): void => fs.rmSync(dir, { recursive: true, force: true }),
+	};
 }
 
 // exifcleaner-node's native publication transaction leaves a documented, empty
@@ -126,14 +131,20 @@ describe("nativeDifferentialProblems (pure)", () => {
 			native: shared,
 			exiftool: shared,
 		});
-		expect(problems.some((p) => p.includes("references are identical"))).toBe(true);
+		expect(problems.some((p) => p.includes("references are identical"))).toBe(
+			true,
+		);
 	});
 
 	it('flags installed != native with "does not equal the native reference"', () => {
 		const native = Buffer.from("native-bytes");
 		const exiftool = Buffer.from("exiftool-bytes");
 		const installed = Buffer.from("something-else-entirely");
-		const problems = nativeDifferentialProblems({ installed, native, exiftool });
+		const problems = nativeDifferentialProblems({
+			installed,
+			native,
+			exiftool,
+		});
 		expect(
 			problems.some((p) => p.includes("does not equal the native reference")),
 		).toBe(true);
@@ -147,9 +158,9 @@ describe("nativeDifferentialProblems (pure)", () => {
 			native,
 			exiftool,
 		});
-		expect(problems.some((p) => p.includes("equals the ExifTool reference"))).toBe(
-			true,
-		);
+		expect(
+			problems.some((p) => p.includes("equals the ExifTool reference")),
+		).toBe(true);
 	});
 });
 
