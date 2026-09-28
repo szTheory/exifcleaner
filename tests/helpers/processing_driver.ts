@@ -1,14 +1,24 @@
 import { expect } from "@playwright/test";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { createFixtureDir } from "./fixture_copier";
 import { assertDirEffect, snapshotDir, type DirSnapshot } from "./dir_effect";
-import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
+import {
+	assertMetadataStripped,
+	readMetadataTags,
+} from "../e2e/helpers/metadata_assertions";
 import type { ElectronApplication, Page } from "playwright";
 import { waitForProcessing } from "../e2e/helpers/wait_for_processing";
 import { generateCleanedPath } from "../../src/domain/files/cleaned_path";
+import {
+	buildExiftoolReference,
+	buildNativeReference,
+	nativeDifferentialProblems,
+	type DifferentialPreservation,
+} from "./native_differential";
 
 const execFileAsync = promisify(execFile);
 
@@ -307,6 +317,111 @@ export async function runErrorFormatScenario(
 		}
 	} finally {
 		cleanup();
+	}
+
+	expect(consoleErrors).toEqual([]);
+}
+
+// ADP-05/SC4: the app's default preservations (Save as copy, orientation, color profile
+// and resolution on, timestamps off) -- see 58-10-PLAN.md D-14/D-15.
+const NATIVE_DIFFERENTIAL_PRESERVATION: DifferentialPreservation = {
+	preserveOrientation: true,
+	preserveColorProfile: true,
+	preserveResolution: true,
+	preserveTimestamps: false,
+};
+
+export interface NativeDifferentialScenarioSpec {
+	readonly fixture: "sample.jpg" | "orientation.png";
+	readonly removedTags: readonly string[];
+	readonly preservedTags: Readonly<Record<string, unknown>>;
+}
+
+/**
+ * Proves, on an installed artifact, that the native engine (not ExifTool) actually
+ * cleaned `fixture` under the app's default preservations. Submits the file through the
+ * real IPC path, then independently rebuilds both a native reference (exifcleaner-node's
+ * own sanitizeFile) and an ExifTool reference (the app's exact argument shape) from
+ * separate fresh copies of the fixture in a second, unwatched temp directory -- so the
+ * watched directory's assertDirEffect blast radius stays exactly the app's own output
+ * plus its documented native-publication stage residue. The installed output must equal
+ * the native reference and differ from the ExifTool reference (D-14), and the verified
+ * outcome (removed/preserved tags) must hold on the real output.
+ */
+export async function runNativeDifferentialScenario(
+	context: ProcessingLaunchContext,
+	{ fixture, removedTags, preservedTags }: NativeDifferentialScenarioSpec,
+): Promise<void> {
+	const driver = createProcessingDriver(context);
+	const { dir, copyFixture, cleanup } = createFixtureDir();
+	const references = createFixtureDir();
+	const consoleErrors: string[] = [];
+	context.window.on("console", (message) => {
+		if (message.type() === "error") consoleErrors.push(message.text());
+	});
+
+	try {
+		const filePath = copyFixture(fixture);
+		const outputPath = generateCleanedPath({
+			filePath,
+			exists: fs.existsSync,
+		});
+		const before = snapshotDir(dir);
+		await driver.submitFiles([filePath]);
+		await driver.waitForTerminal();
+		const after = snapshotDir(dir);
+
+		assertDirEffect(before, after, {
+			modified: [],
+			added: [
+				path.basename(outputPath),
+				...discoverNativeStageResidue(before, after),
+			],
+			removed: [],
+			unchanged: [fixture],
+		});
+		expect(await driver.terminalRowCounts()).toEqual({
+			total: 1,
+			complete: 1,
+			error: 0,
+		});
+
+		// Two independent fresh copies of the same source bytes, in a directory the
+		// app's own submission never touches.
+		const nativeSource = references.copyFixture(fixture);
+		const exiftoolSource = path.join(references.dir, `etool-${fixture}`);
+		fs.copyFileSync(nativeSource, exiftoolSource);
+
+		const nativeOutput = path.join(references.dir, `native-out-${fixture}`);
+		const native = await buildNativeReference({
+			sourcePath: nativeSource,
+			outputPath: nativeOutput,
+			preservation: NATIVE_DIFFERENTIAL_PRESERVATION,
+		});
+
+		const exiftoolOutput = path.join(references.dir, `etool-out-${fixture}`);
+		const exiftool = buildExiftoolReference({
+			exiftoolPath: context.exiftoolPath,
+			sourcePath: exiftoolSource,
+			outputPath: exiftoolOutput,
+			preservation: NATIVE_DIFFERENTIAL_PRESERVATION,
+		});
+
+		const installed = await readFile(outputPath);
+		expect(nativeDifferentialProblems({ installed, native, exiftool })).toEqual(
+			[],
+		);
+
+		const tags = await readMetadataTags(outputPath, context.exiftoolPath);
+		for (const tag of removedTags) {
+			expect(tags).not.toHaveProperty(tag);
+		}
+		for (const [key, value] of Object.entries(preservedTags)) {
+			expect(tags[key]).toEqual(value);
+		}
+	} finally {
+		cleanup();
+		references.cleanup();
 	}
 
 	expect(consoleErrors).toEqual([]);

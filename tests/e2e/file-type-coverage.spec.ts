@@ -11,6 +11,7 @@ import { createFixtureDir } from "../helpers/fixture_copier";
 import {
 	createProcessingDriver,
 	runMixedFormatScenario,
+	runNativeDifferentialScenario,
 	runPositiveFormatScenario,
 	runErrorFormatScenario,
 	runRafRefusalScenario,
@@ -175,5 +176,56 @@ test.describe("File type coverage", () => {
 		} finally {
 			cleanup();
 		}
+	});
+});
+
+test.describe("native path (ADP-05, default preservations)", () => {
+	let app: ElectronApplication;
+	let window: Page;
+
+	function context(): ProcessingLaunchContext {
+		return { app, window, exiftoolPath: EXIFTOOL_PATH };
+	}
+
+	test.beforeEach(async () => {
+		const launched = await launchApp({
+			settings: {
+				preserveColorProfile: true,
+				preserveOrientation: true,
+				preserveResolution: true,
+				preserveTimestamps: false,
+				saveAsCopy: true,
+			},
+		});
+		app = launched.app;
+		window = launched.window;
+	});
+
+	test.afterEach(async () => {
+		if (app) await closeApp(app);
+	});
+
+	test("sample.jpg is cleaned by the native engine in the installed artifact", async () => {
+		await runNativeDifferentialScenario(context(), {
+			fixture: "sample.jpg",
+			removedTags: [
+				"Artist",
+				"Copyright",
+				"GPSLatitude",
+				"GPSLongitude",
+				"Make",
+				"Model",
+				"DateTimeOriginal",
+			],
+			preservedTags: {},
+		});
+	});
+
+	test("orientation.png is cleaned by the native engine in the installed artifact", async () => {
+		await runNativeDifferentialScenario(context(), {
+			fixture: "orientation.png",
+			removedTags: ["Author", "Copyright"],
+			preservedTags: { Orientation: "Rotate 90 CW" },
+		});
 	});
 });
