@@ -8,9 +8,18 @@ export type OutputTransactionFailure =
 			readonly timedOut?: true;
 			readonly residualPath?: string;
 	  }
-	| { readonly code: "verification-failed" }
+	| {
+			readonly code: "verification-failed";
+			readonly verificationCode: OutputVerificationError["code"];
+	  }
 	| { readonly code: "cleanup-failed"; readonly residualPath: string }
 	| { readonly code: "commit-failed" };
+
+type CopyModeLeakCheck = {
+	preserveOrientation: boolean;
+	preserveColorProfile: boolean;
+	preserveResolution: boolean;
+};
 
 type StripMetadataRequest = {
 	filePath: string;
@@ -33,6 +42,7 @@ export type OutputTransactionDependencies = {
 	verifyGeneratedOutput: {
 		execute(request: {
 			generatedPath: string;
+			copyModeLeakCheck?: CopyModeLeakCheck | undefined;
 		}): Promise<Result<void, OutputVerificationError>>;
 	};
 	unlink(path: string): Promise<void>;
@@ -56,6 +66,7 @@ export class OutputTransaction {
 		preserveResolution,
 		preserveTimestamps,
 		signal,
+		copyModeLeakCheck,
 	}: {
 		filePath: string;
 		generatedPath: string;
@@ -65,6 +76,7 @@ export class OutputTransaction {
 		preserveResolution: boolean;
 		preserveTimestamps: boolean;
 		signal?: AbortSignal | undefined;
+		copyModeLeakCheck?: CopyModeLeakCheck | undefined;
 	}): Promise<Result<{ outputPath: string }, OutputTransactionFailure>> {
 		// The staged write always targets a path distinct from the source
 		// (generatedPath), so from the engine's perspective this call is by
@@ -111,12 +123,16 @@ export class OutputTransaction {
 		const verificationResult =
 			await this.dependencies.verifyGeneratedOutput.execute({
 				generatedPath,
+				...(copyModeLeakCheck === undefined ? {} : { copyModeLeakCheck }),
 			});
 		if (!verificationResult.ok) {
 			const cleanupFailure = await this.cleanup({ generatedPath });
 			return {
 				ok: false,
-				error: cleanupFailure ?? { code: "verification-failed" },
+				error: cleanupFailure ?? {
+					code: "verification-failed",
+					verificationCode: verificationResult.error.code,
+				},
 			};
 		}
 
