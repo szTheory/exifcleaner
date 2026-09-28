@@ -11,7 +11,7 @@ import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURE = path.resolve(__dirname, "../e2e/fixtures/sample.webp");
+const FIXTURES_DIR = path.resolve(__dirname, "../e2e/fixtures");
 const EXIFTOOL_PATH =
 	process.platform === "win32"
 		? path.resolve(__dirname, "../../.resources/win/bin/exiftool.exe")
@@ -21,7 +21,64 @@ function sha256(filePath: string): string {
 	return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
-describe("native WebP sanitization with an independent ExifTool oracle", () => {
+// 58-06 (D-21): per-format oracle table replacing the former WebP-only literals. Each
+// entry names its fixture, the FileType the reopened output must report, the keys the
+// fixture carries before processing (checked for presence, unconditionally removed
+// regardless of preservation settings), and the optional orientation/colorProfile keys
+// that toggle with preservation. All display-metadata keys are the G2:Tag form
+// cleanExifData/normalizeMetadataKey produce (Group1 is dropped).
+type OracleFixtureEntry = {
+	readonly fixture: string;
+	readonly fileTypePattern: RegExp;
+	// Keys present on the fixture before processing that are always removed, independent
+	// of the preservation flags under test (identifying metadata, never opt-in).
+	readonly alwaysRemovedKeys: readonly string[];
+	// Orientation key/value this fixture carries, when it carries one -- toggles with
+	// preserveOrientation. Undefined means this fixture has no Orientation tag at all.
+	readonly orientation?: { readonly key: string; readonly value: string };
+	// Color profile key/value this fixture carries, when it carries one -- toggles with
+	// preserveColorProfile.
+	readonly colorProfile?: { readonly key: string; readonly value: string };
+};
+
+const ORACLE_FIXTURES: readonly OracleFixtureEntry[] = [
+	{
+		fixture: "sample.webp",
+		fileTypePattern: /WEBP/u,
+		alwaysRemovedKeys: ["Camera:Make", "Author:Artist"],
+		orientation: { key: "Image:Orientation", value: "Rotate 90 CW" },
+		colorProfile: {
+			key: "Image:ProfileDescription",
+			value: "Nikon Adobe RGB 4.0.0.3000",
+		},
+	},
+	{
+		fixture: "orientation.jpg",
+		fileTypePattern: /JPEG/u,
+		alwaysRemovedKeys: [],
+		orientation: { key: "Image:Orientation", value: "Rotate 90 CW" },
+	},
+	{
+		fixture: "orientation.png",
+		fileTypePattern: /PNG/u,
+		alwaysRemovedKeys: ["Author:Author", "Author:Copyright"],
+		orientation: { key: "Image:Orientation", value: "Rotate 90 CW" },
+	},
+	{
+		fixture: "sample.jpg",
+		fileTypePattern: /JPEG/u,
+		alwaysRemovedKeys: [
+			"Camera:Make",
+			"Camera:Model",
+			"Author:Artist",
+			"Author:Copyright",
+			"Location:GPSLatitude",
+			"Location:GPSLongitude",
+		],
+	},
+];
+
+describe("native metadata oracle: WebP, JPEG and PNG against an independent ExifTool oracle", () => {
 	const temporaryDirs: string[] = [];
 
 	afterEach(() => {
@@ -30,144 +87,215 @@ describe("native WebP sanitization with an independent ExifTool oracle", () => {
 		}
 	});
 
-	it.each([
-		{
-			name: "preserves requested orientation, ICC profile, and timestamps",
-			preserveOrientation: true,
-			preserveColorProfile: true,
-			preserveTimestamps: true,
-			expectedOrientation: true,
-			expectedColorProfile: true,
-			expectedTimestampMatch: true,
-		},
-		{
-			name: "removes optional orientation and ICC data when preservation is disabled",
-			preserveOrientation: false,
-			preserveColorProfile: false,
-			preserveTimestamps: false,
-			expectedOrientation: false,
-			expectedColorProfile: false,
-			expectedTimestampMatch: false,
-		},
-	])("$name without an ExifTool write", async (preservation) => {
-		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "native-webp-oracle-"));
+	function makeTempDir(prefix: string): string {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
 		temporaryDirs.push(dir);
-		const source = path.join(dir, "sample.webp");
-		const destination = path.join(dir, "sample-cleaned.webp");
-		fs.copyFileSync(FIXTURE, source);
-		const fixtureTimestamp = new Date("2020-01-02T03:04:05.000Z");
-		fs.utimesSync(source, fixtureTimestamp, fixtureTimestamp);
+		return dir;
+	}
+
+	// Residue directories are the library's own atomic-publication staging leftovers (see
+	// native_copy_routing.test.ts's identical comment) -- discovered at runtime so this
+	// helper stays a no-op on platforms where disposal succeeds.
+	function residueEntries(dir: string): string[] {
+		return fs
+			.readdirSync(dir)
+			.filter((name) => name.startsWith(".exifcleaner-stage-"));
+	}
+
+	describe.each(ORACLE_FIXTURES)("$fixture", (entry) => {
+		async function runPreservationCase({
+			preserveAll,
+		}: {
+			preserveAll: boolean;
+		}): Promise<void> {
+			const dir = makeTempDir("native-oracle-");
+			const extension = path.extname(entry.fixture);
+			const source = path.join(dir, entry.fixture);
+			const destination = path.join(
+				dir,
+				`${path.basename(entry.fixture, extension)}-cleaned${extension}`,
+			);
+			fs.copyFileSync(path.join(FIXTURES_DIR, entry.fixture), source);
+			const fixtureTimestamp = new Date("2020-01-02T03:04:05.000Z");
+			fs.utimesSync(source, fixtureTimestamp, fixtureTimestamp);
+			const sourceDigest = sha256(source);
+			const sourceStats = fs.statSync(source);
+			const beforeDir = snapshotDir(dir);
+			const process = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+			const exiftool = new ExifToolAdapter({ process });
+			const native = new NativeMetadataAdapter();
+			const hybrid = new HybridMetadataEngine({ exiftool, native });
+			const exiftoolWrite = vi.spyOn(exiftool, "sanitize");
+			const nativeWrite = vi.spyOn(native, "sanitize");
+
+			await process.open();
+			try {
+				const before = await exiftool.inspect({ source, purpose: "display" });
+				expect(before).toMatchObject({ ok: true });
+				if (!before.ok) return;
+				for (const key of entry.alwaysRemovedKeys) {
+					expect(before.value.metadata).toHaveProperty(key);
+				}
+				if (entry.orientation) {
+					expect(before.value.metadata).toHaveProperty(
+						entry.orientation.key,
+						entry.orientation.value,
+					);
+				}
+				if (entry.colorProfile) {
+					expect(before.value.metadata).toHaveProperty(
+						entry.colorProfile.key,
+						entry.colorProfile.value,
+					);
+				}
+
+				const result = await hybrid.sanitize({
+					source,
+					destination,
+					outputMode: "copy",
+					preserveOrientation: preserveAll,
+					preserveColorProfile: preserveAll,
+					preserveResolution: false,
+					preserveTimestamps: preserveAll,
+				});
+
+				expect(result).toEqual({ ok: true, value: undefined });
+				expect(nativeWrite).toHaveBeenCalledOnce();
+				expect(exiftoolWrite).not.toHaveBeenCalled();
+				expect(destination).not.toBe(source);
+				expect(fs.existsSync(destination)).toBe(true);
+				expect(sha256(source)).toBe(sourceDigest);
+				expect(fs.statSync(source)).toMatchObject({
+					mtimeMs: sourceStats.mtimeMs,
+				});
+				// Library atomic-publication staging residue -- see the module-level
+				// comment on residueEntries above.
+				assertDirEffect(beforeDir, snapshotDir(dir), {
+					unchanged: [entry.fixture],
+					added: [path.basename(destination), ...residueEntries(dir)],
+					modified: [],
+					removed: [],
+				});
+
+				const outputVerification = await exiftool.inspect({
+					source: destination,
+					purpose: "output-verification",
+				});
+				expect(outputVerification).toMatchObject({
+					ok: true,
+					value: { recordCount: 1, verification: { error: undefined } },
+				});
+				if (!outputVerification.ok) return;
+				expect(String(outputVerification.value.verification.fileType)).toMatch(
+					entry.fileTypePattern,
+				);
+
+				const after = await exiftool.inspect({
+					source: destination,
+					purpose: "display",
+				});
+				expect(after).toMatchObject({ ok: true });
+				if (!after.ok) return;
+				for (const key of entry.alwaysRemovedKeys) {
+					expect(after.value.metadata).not.toHaveProperty(key);
+				}
+				if (entry.orientation) {
+					if (preserveAll) {
+						expect(after.value.metadata).toHaveProperty(
+							entry.orientation.key,
+							entry.orientation.value,
+						);
+					} else {
+						expect(after.value.metadata).not.toHaveProperty(
+							entry.orientation.key,
+						);
+					}
+				}
+				if (entry.colorProfile) {
+					if (preserveAll) {
+						expect(after.value.metadata).toHaveProperty(
+							entry.colorProfile.key,
+							entry.colorProfile.value,
+						);
+					} else {
+						expect(after.value.metadata).not.toHaveProperty(
+							entry.colorProfile.key,
+						);
+					}
+				}
+				const destinationTimestamp = fs.statSync(destination).mtimeMs;
+				if (preserveAll) {
+					expect(destinationTimestamp).toBeCloseTo(sourceStats.mtimeMs, 0);
+				} else {
+					expect(destinationTimestamp).not.toBeCloseTo(sourceStats.mtimeMs, 0);
+				}
+			} finally {
+				await process.close();
+			}
+		}
+
+		// 58-07's native orientation mutation gate greps this exact title for
+		// orientation.jpg and orientation.png -- keep it byte-identical.
+		it(`${entry.fixture} preserves requested orientation natively`, async () => {
+			await runPreservationCase({ preserveAll: true });
+		});
+
+		it(`${entry.fixture} removes optional orientation natively when preservation is disabled`, async () => {
+			await runPreservationCase({ preserveAll: false });
+		});
+	});
+
+	// 58-06 (D-21) negative fallback row: proves node's XMP-only-orientation admission
+	// decline falls back to ExifTool safely end to end, through the real HybridMetadataEngine.
+	it("orientation-xmp-only.png falls back to ExifTool once when node declines XMP-only orientation", async () => {
+		const dir = makeTempDir("native-oracle-fallback-");
+		const source = path.join(dir, "orientation-xmp-only.png");
+		const destination = path.join(dir, "orientation-xmp-only-cleaned.png");
+		fs.copyFileSync(
+			path.join(FIXTURES_DIR, "orientation-xmp-only.png"),
+			source,
+		);
 		const sourceDigest = sha256(source);
-		const sourceStats = fs.statSync(source);
 		const beforeDir = snapshotDir(dir);
 		const process = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
 		const exiftool = new ExifToolAdapter({ process });
 		const native = new NativeMetadataAdapter();
-		const hybrid = new HybridMetadataEngine({ exiftool, native: native });
+		const hybrid = new HybridMetadataEngine({ exiftool, native });
 		const exiftoolWrite = vi.spyOn(exiftool, "sanitize");
 		const nativeWrite = vi.spyOn(native, "sanitize");
 
 		await process.open();
 		try {
-			const before = await exiftool.inspect({ source, purpose: "display" });
-			expect(before).toMatchObject({ ok: true });
-			if (!before.ok) return;
-			expect(before.value.metadata).toMatchObject({
-				"Camera:Make": "TestCamera",
-				"Author:Artist": "Test Author",
-				"Image:Orientation": "Rotate 90 CW",
-				"Image:ProfileDescription": "Nikon Adobe RGB 4.0.0.3000",
-			});
-
 			const result = await hybrid.sanitize({
 				source,
 				destination,
 				outputMode: "copy",
-				preserveOrientation: preservation.preserveOrientation,
-				preserveColorProfile: preservation.preserveColorProfile,
+				preserveOrientation: true,
+				preserveColorProfile: false,
 				preserveResolution: false,
-				preserveTimestamps: preservation.preserveTimestamps,
+				preserveTimestamps: false,
 			});
 
 			expect(result).toEqual({ ok: true, value: undefined });
 			expect(nativeWrite).toHaveBeenCalledOnce();
-			expect(exiftoolWrite).not.toHaveBeenCalled();
-			expect(destination).not.toBe(source);
+			expect(exiftoolWrite).toHaveBeenCalledOnce();
+
+			// Safe: nativeWrite was asserted toHaveBeenCalledOnce above, so its first
+			// (only) result exists.
+			const nativeResult = await nativeWrite.mock.results[0]!.value;
+			expect(nativeResult).toMatchObject({
+				ok: false,
+				error: { phase: "admission", nativeWrite: "not-started" },
+			});
+
 			expect(fs.existsSync(destination)).toBe(true);
 			expect(sha256(source)).toBe(sourceDigest);
-			expect(fs.statSync(source)).toMatchObject({
-				mtimeMs: sourceStats.mtimeMs,
-			});
-			// The library's atomic-publication mechanism (exifcleaner-node
-			// Phase 45 D-41..D-44) stages each write beside the destination in a
-			// private ".exifcleaner-stage-<uuid>" directory and disposes of it
-			// after a successful publish. That disposal is a native,
-			// platform-specific best-effort operation: on a platform that
-			// reports ENOTSUP for the underlying syscall it leaves an empty
-			// residue directory behind rather than risk deleting the wrong
-			// thing (SanitizeResult.postCommitResidue,
-			// "private-empty-stage-directory-remains" — a documented, non-fatal
-			// outcome, not an app defect; the adapter's own write still
-			// succeeded and the destination file is correct). The residue
-			// directory's name is discovered at runtime rather than hardcoded
-			// so this assertion still fails loudly on any OTHER unexpected
-			// filesystem effect, and stays a no-op on platforms where disposal
-			// succeeds and no residue is left.
-			const residueEntries = fs
-				.readdirSync(dir)
-				.filter((name) => name.startsWith(".exifcleaner-stage-"));
 			assertDirEffect(beforeDir, snapshotDir(dir), {
-				unchanged: ["sample.webp"],
-				added: ["sample-cleaned.webp", ...residueEntries],
+				unchanged: ["orientation-xmp-only.png"],
+				added: ["orientation-xmp-only-cleaned.png"],
 				modified: [],
 				removed: [],
 			});
-
-			const outputVerification = await exiftool.inspect({
-				source: destination,
-				purpose: "output-verification",
-			});
-			expect(outputVerification).toMatchObject({
-				ok: true,
-				value: { recordCount: 1, verification: { error: undefined } },
-			});
-			if (!outputVerification.ok) return;
-			expect(String(outputVerification.value.verification.fileType)).toMatch(
-				/WEBP/u,
-			);
-
-			const after = await exiftool.inspect({
-				source: destination,
-				purpose: "display",
-			});
-			expect(after).toMatchObject({ ok: true });
-			if (!after.ok) return;
-			expect(after.value.metadata).not.toHaveProperty("Camera:Make");
-			expect(after.value.metadata).not.toHaveProperty("Author:Artist");
-			if (preservation.expectedOrientation) {
-				expect(after.value.metadata).toHaveProperty(
-					"Image:Orientation",
-					"Rotate 90 CW",
-				);
-			} else {
-				expect(after.value.metadata).not.toHaveProperty("Image:Orientation");
-			}
-			if (preservation.expectedColorProfile) {
-				expect(after.value.metadata).toHaveProperty(
-					"Image:ProfileDescription",
-					"Nikon Adobe RGB 4.0.0.3000",
-				);
-			} else {
-				expect(after.value.metadata).not.toHaveProperty(
-					"Image:ProfileDescription",
-				);
-			}
-			const destinationTimestamp = fs.statSync(destination).mtimeMs;
-			if (preservation.expectedTimestampMatch) {
-				expect(destinationTimestamp).toBeCloseTo(sourceStats.mtimeMs, 0);
-			} else {
-				expect(destinationTimestamp).not.toBeCloseTo(sourceStats.mtimeMs, 0);
-			}
 		} finally {
 			await process.close();
 		}
@@ -175,16 +303,13 @@ describe("native WebP sanitization with an independent ExifTool oracle", () => {
 
 	// NC-7 (D-27) whole-directory row: overwrite-mode routing never reaches the
 	// native engine, and the on-disk blast radius of an overwrite-mode
-	// sanitize is exactly one modified path with nothing added — asserted via
+	// sanitize is exactly one modified path with nothing added -- asserted via
 	// assertDirEffect against a real temp fixture directory, per the
 	// nc7_granularity_decision recorded in 47-03-PLAN.md.
 	it("NC-7: an overwrite-mode sanitize modifies exactly one path and adds none, with native call count 0 and ExifTool call count 1", async () => {
-		const dir = fs.mkdtempSync(
-			path.join(os.tmpdir(), "native-webp-oracle-overwrite-"),
-		);
-		temporaryDirs.push(dir);
+		const dir = makeTempDir("native-oracle-overwrite-");
 		const source = path.join(dir, "sample.webp");
-		fs.copyFileSync(FIXTURE, source);
+		fs.copyFileSync(path.join(FIXTURES_DIR, "sample.webp"), source);
 		const beforeDir = snapshotDir(dir);
 		const process = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
 		const exiftool = new ExifToolAdapter({ process });
