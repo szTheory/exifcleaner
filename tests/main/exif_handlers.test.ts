@@ -245,6 +245,18 @@ describe("exif:remove handler", () => {
 			verifierPath: undefined,
 		},
 		{
+			name: "copy-mode JPEG (D-11, ADP-03)",
+			filePath: "/tmp/sample.jpg",
+			saveAsCopy: true,
+			verifierPath: "/tmp/sample_cleaned.jpg",
+		},
+		{
+			name: "copy-mode PNG (D-11, ADP-03)",
+			filePath: "/tmp/sample.png",
+			saveAsCopy: true,
+			verifierPath: "/tmp/sample_cleaned.png",
+		},
+		{
 			name: "supported RAW copy",
 			filePath: "/tmp/sample.cr2",
 			saveAsCopy: false,
@@ -318,33 +330,36 @@ describe("exif:remove handler", () => {
 		},
 	);
 
-	it("returns and writes generated copy path when save-as-copy has no collision", async () => {
+	it("returns and writes generated copy path when save-as-copy has no collision (a format outside the verified copy set)", async () => {
+		// D-11/ADP-03 widened png/jpg/jpeg into the verified copy set, so this direct-stripMetadata
+		// exercise now uses .gif -- unaffected by that widening -- to keep testing the unverified
+		// path. Copy-mode jpg/png routing through the transaction is covered by its own tests below.
 		const { container, stripMetadata } = makeContainer({ saveAsCopy: true });
 		setupExifHandlers({ container });
 
 		const { handler } = captureInvokeHandler("exif:remove");
-		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.gif");
 
 		expect(stripMetadata.execute).toHaveBeenCalledWith({
-			filePath: "/dir/photo.jpg",
+			filePath: "/dir/photo.gif",
 			outputMode: "copy",
 			preserveOrientation: true,
 			preserveColorProfile: true,
 			preserveResolution: true,
 			preserveTimestamps: false,
 			saveAsCopy: true,
-			outputPath: "/dir/photo_cleaned.jpg",
+			outputPath: "/dir/photo_cleaned.gif",
 		});
 		expect(result).toEqual({
 			success: true,
-			outputPath: "/dir/photo_cleaned.jpg",
+			outputPath: "/dir/photo_cleaned.gif",
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
 		});
 	});
 
-	it("awaits xattr clearing on the main-owned output path only when enabled", async () => {
+	it("awaits xattr clearing on the main-owned output path only when enabled (a format outside the verified copy set)", async () => {
 		const { container, removeXattrCommand } = makeContainer({
 			saveAsCopy: true,
 			removeXattrs: true,
@@ -352,12 +367,43 @@ describe("exif:remove handler", () => {
 		setupExifHandlers({ container });
 
 		const { handler } = captureInvokeHandler("exif:remove");
-		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.gif");
 
 		expect(removeXattrCommand.execute).toHaveBeenCalledTimes(1);
 		expect(removeXattrCommand.execute).toHaveBeenCalledWith({
-			filePath: "/dir/photo_cleaned.jpg",
+			filePath: "/dir/photo_cleaned.gif",
 		});
+		expect(result).toEqual({
+			success: true,
+			outputPath: "/dir/photo_cleaned.gif",
+			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
+		});
+	});
+
+	it("routes a jpg save-as-copy through the verified transaction with copyModeLeakCheck built from settings (D-11, ADP-03)", async () => {
+		const { container, stripMetadata, outputTransaction } = makeContainer({
+			saveAsCopy: true,
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+
+		expect(stripMetadata.execute).not.toHaveBeenCalled();
+		expect(outputTransaction.execute).toHaveBeenCalledWith(
+			expect.objectContaining({
+				filePath: "/dir/photo.jpg",
+				generatedPath: "/dir/photo_cleaned.jpg",
+				commitPath: undefined,
+				copyModeLeakCheck: {
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+				},
+			}),
+		);
 		expect(result).toEqual({
 			success: true,
 			outputPath: "/dir/photo_cleaned.jpg",
@@ -366,6 +412,60 @@ describe("exif:remove handler", () => {
 			outputSize: 4096,
 		});
 	});
+
+	it("routes a png save-as-copy through the verified transaction with copyModeLeakCheck built from settings (D-11, ADP-03)", async () => {
+		const { container, stripMetadata, outputTransaction } = makeContainer({
+			saveAsCopy: true,
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.png");
+
+		expect(stripMetadata.execute).not.toHaveBeenCalled();
+		expect(outputTransaction.execute).toHaveBeenCalledWith(
+			expect.objectContaining({
+				filePath: "/dir/photo.png",
+				generatedPath: "/dir/photo_cleaned.png",
+				commitPath: undefined,
+				copyModeLeakCheck: {
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+				},
+			}),
+		);
+		expect(result).toEqual({
+			success: true,
+			outputPath: "/dir/photo_cleaned.png",
+			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
+		});
+	});
+
+	it.each([
+		["webp save-as-copy", "/dir/photo.webp", "/dir/photo_cleaned.webp"],
+		["tif save-as-copy", "/dir/scan.tif", "/dir/scan_cleaned.tif"],
+		["RAW save-as-copy", "/dir/sample.cr2", "/dir/sample_cleaned.cr2"],
+	])(
+		"omits copyModeLeakCheck for a %s (D-11)",
+		async (_name, filePath, generatedPath) => {
+			const { container, outputTransaction } = makeContainer({
+				saveAsCopy: true,
+			});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			await handler(makeAuthorizedEvent(), filePath);
+
+			expect(outputTransaction.execute).toHaveBeenCalledWith(
+				expect.objectContaining({ filePath, generatedPath }),
+			);
+			const call = outputTransaction.execute.mock.calls[0]?.[0];
+			expect(call).not.toHaveProperty("copyModeLeakCheck");
+		},
+	);
 
 	it("clears only xattrs without rewriting an already-clean file", async () => {
 		const { container, stripMetadata, outputTransaction, removeXattrCommand } =
@@ -393,7 +493,7 @@ describe("exif:remove handler", () => {
 		});
 	});
 
-	it("preserves copy-mode semantics for an already-clean xattr request", async () => {
+	it("preserves copy-mode semantics for an already-clean xattr request (a format outside the verified copy set)", async () => {
 		const { container, stripMetadata, removeXattrCommand } = makeContainer({
 			saveAsCopy: true,
 			removeXattrs: true,
@@ -402,21 +502,21 @@ describe("exif:remove handler", () => {
 		setupExifHandlers({ container });
 
 		const { handler } = captureInvokeHandler("exif:remove");
-		const result = await handler(makeAuthorizedEvent(), "/dir/clean.jpg");
+		const result = await handler(makeAuthorizedEvent(), "/dir/clean.gif");
 
 		expect(stripMetadata.execute).toHaveBeenCalledWith(
 			expect.objectContaining({
-				filePath: "/dir/clean.jpg",
+				filePath: "/dir/clean.gif",
 				saveAsCopy: true,
-				outputPath: "/dir/clean_cleaned.jpg",
+				outputPath: "/dir/clean_cleaned.gif",
 			}),
 		);
 		expect(removeXattrCommand.execute).toHaveBeenCalledWith({
-			filePath: "/dir/clean_cleaned.jpg",
+			filePath: "/dir/clean_cleaned.gif",
 		});
 		expect(result).toEqual({
 			success: true,
-			outputPath: "/dir/clean_cleaned.jpg",
+			outputPath: "/dir/clean_cleaned.gif",
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
@@ -656,48 +756,48 @@ describe("exif:remove handler", () => {
 		},
 	);
 
-	it("passes and returns an absolute root copy path", async () => {
+	it("passes and returns an absolute root copy path (a format outside the verified copy set)", async () => {
 		const { container, stripMetadata } = makeContainer({ saveAsCopy: true });
 		setupExifHandlers({ container });
 
 		const { handler } = captureInvokeHandler("exif:remove");
-		const result = await handler(makeAuthorizedEvent(), "/photo.jpg");
+		const result = await handler(makeAuthorizedEvent(), "/photo.gif");
 
 		expect(stripMetadata.execute).toHaveBeenCalledWith(
 			expect.objectContaining({
-				filePath: "/photo.jpg",
-				outputPath: "/photo_cleaned.jpg",
+				filePath: "/photo.gif",
+				outputPath: "/photo_cleaned.gif",
 			}),
 		);
 		expect(result).toEqual({
 			success: true,
-			outputPath: "/photo_cleaned.jpg",
+			outputPath: "/photo_cleaned.gif",
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
 		});
 	});
 
-	it("returns and writes collision suffix without mutating the request path", async () => {
+	it("returns and writes collision suffix without mutating the request path (a format outside the verified copy set)", async () => {
 		const { container, stripMetadata } = makeContainer({ saveAsCopy: true });
 		existsSyncMock.mockImplementation((candidate: string) => {
-			return candidate === "/dir/photo_cleaned.jpg";
+			return candidate === "/dir/photo_cleaned.gif";
 		});
 		setupExifHandlers({ container });
 
 		const { handler } = captureInvokeHandler("exif:remove");
-		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.gif");
 
 		expect(stripMetadata.execute).toHaveBeenCalledWith(
 			expect.objectContaining({
-				filePath: "/dir/photo.jpg",
+				filePath: "/dir/photo.gif",
 				saveAsCopy: true,
-				outputPath: "/dir/photo_cleaned_2.jpg",
+				outputPath: "/dir/photo_cleaned_2.gif",
 			}),
 		);
 		expect(result).toEqual({
 			success: true,
-			outputPath: "/dir/photo_cleaned_2.jpg",
+			outputPath: "/dir/photo_cleaned_2.gif",
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
@@ -727,7 +827,7 @@ describe("exif:remove handler", () => {
 		});
 	});
 
-	it("returns explicit error without a success output path when stripping fails", async () => {
+	it("returns explicit error without a success output path when stripping fails (a format outside the verified copy set)", async () => {
 		const { container, stripMetadata } = makeContainer({
 			saveAsCopy: true,
 			executeResult: {
@@ -738,7 +838,7 @@ describe("exif:remove handler", () => {
 		setupExifHandlers({ container });
 
 		const { handler } = captureInvokeHandler("exif:remove");
-		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.gif");
 
 		expect(stripMetadata.execute).toHaveBeenCalledOnce();
 		expect(result).toEqual({
@@ -901,13 +1001,41 @@ describe("exif:remove handler", () => {
 			saveAsCopy: false,
 			transactionResult: {
 				ok: false,
-				error: { code: "verification-failed" },
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-verification-failed",
+				},
 			},
 		});
 		setupExifHandlers({ container });
 
 		const { handler } = captureInvokeHandler("exif:remove");
 		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(outputTransaction.execute).toHaveBeenCalledOnce();
+		expect(result).toEqual({
+			success: false,
+			failureKind: "verification",
+			detail: "Generated output verification failed",
+		});
+		expect(result).not.toHaveProperty("outputPath");
+	});
+
+	it("maps a copy-mode leak verdict to the exact same unchanged IPC text (D-10, D-11)", async () => {
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: true,
+			transactionResult: {
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+				},
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
 
 		expect(outputTransaction.execute).toHaveBeenCalledOnce();
 		expect(result).toEqual({
