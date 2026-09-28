@@ -22,16 +22,6 @@ import { generateCleanedPath } from "../../src/domain/files/cleaned_path";
 
 const execFileAsync = promisify(execFile);
 
-// Residue directories are the library's own atomic-publication staging leftovers
-// (see tests/integration/native_metadata_oracle.test.ts's identical comment) --
-// discovered at runtime so this helper stays a no-op on platforms where disposal
-// succeeds. Phase 58-09: default settings now route JPEG/PNG copies natively.
-function residueEntries(dir: string): string[] {
-	return fs
-		.readdirSync(dir)
-		.filter((name) => name.startsWith(".exifcleaner-stage-"));
-}
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const EXIFTOOL_PATH =
@@ -155,7 +145,7 @@ test.describe("File type coverage", () => {
 
 			assertDirEffect(before, after, {
 				modified: [],
-				added: [path.basename(outputPath), ...residueEntries(dir)],
+				added: [path.basename(outputPath)],
 				removed: [],
 				unchanged: ["comment_only.jpg"],
 			});
