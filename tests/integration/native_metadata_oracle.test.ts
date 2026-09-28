@@ -93,15 +93,6 @@ describe("native metadata oracle: WebP, JPEG and PNG against an independent Exif
 		return dir;
 	}
 
-	// Residue directories are the library's own atomic-publication staging leftovers (see
-	// native_copy_routing.test.ts's identical comment) -- discovered at runtime so this
-	// helper stays a no-op on platforms where disposal succeeds.
-	function residueEntries(dir: string): string[] {
-		return fs
-			.readdirSync(dir)
-			.filter((name) => name.startsWith(".exifcleaner-stage-"));
-	}
-
 	describe.each(ORACLE_FIXTURES)("$fixture", (entry) => {
 		async function runPreservationCase({
 			preserveAll,
@@ -168,11 +159,9 @@ describe("native metadata oracle: WebP, JPEG and PNG against an independent Exif
 				expect(fs.statSync(source)).toMatchObject({
 					mtimeMs: sourceStats.mtimeMs,
 				});
-				// Library atomic-publication staging residue -- see the module-level
-				// comment on residueEntries above.
 				assertDirEffect(beforeDir, snapshotDir(dir), {
 					unchanged: [entry.fixture],
-					added: [path.basename(destination), ...residueEntries(dir)],
+					added: [path.basename(destination)],
 					modified: [],
 					removed: [],
 				});

@@ -160,15 +160,6 @@ describe("Resolution copy-back matrix, product adapter (FID-03, D-37, D-38)", ()
 	);
 });
 
-// 58-08 (ADP-02, ADP-04): residue directories are exifcleaner-node's own atomic-publication
-// staging leftovers for a native write -- discovered at runtime (mirrors the identical helper
-// in native_copy_routing.test.ts) so this stays a no-op on platforms where disposal succeeds.
-function residueEntries(dir: string): string[] {
-	return fs
-		.readdirSync(dir)
-		.filter((name) => name.startsWith(".exifcleaner-stage-"));
-}
-
 // 58-08 (ADP-02, ADP-04): the same matrix rows as the ExifTool-only block above, but driven
 // through the real HybridMetadataEngine (real ExiftoolProcess + real NativeMetadataAdapter,
 // vi.spyOn tracking call counts only -- never mocking the engines themselves) so the NC gate
@@ -255,11 +246,7 @@ describe("Resolution copy-back matrix, hybrid engine (ADP-02, ADP-04)", () => {
 
 			const after = snapshotDir(dir);
 			assertDirEffect(before, after, {
-				added: [
-					path.basename(onDest),
-					path.basename(offDest),
-					...residueEntries(dir),
-				],
+				added: [path.basename(onDest), path.basename(offDest)],
 				modified: [],
 				removed: [],
 				unchanged: [path.basename(source)],

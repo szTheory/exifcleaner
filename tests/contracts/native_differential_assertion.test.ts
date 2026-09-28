@@ -54,16 +54,6 @@ function makeTempDir(): { dir: string; cleanup: () => void } {
 	};
 }
 
-// exifcleaner-node's native publication transaction leaves a documented, empty
-// `.exifcleaner-stage-<uuid>` directory on POSIX for every native-routed write (see
-// tests/helpers/processing_driver.ts's identical discoverNativeStageResidue comment).
-// buildNativeReference calls sanitizeFile directly, so it hits this same residue.
-function residueEntries(dir: string): string[] {
-	return fs
-		.readdirSync(dir)
-		.filter((name) => name.startsWith(".exifcleaner-stage-"));
-}
-
 /**
  * Builds both real references from independent fresh copies of `fixture`, inside their
  * own mkdtemp directory, and asserts the directory's whole effect is exactly the four
@@ -108,7 +98,6 @@ async function buildRealReferences({
 			path.basename(nativeOutput),
 			path.basename(exiftoolSource),
 			path.basename(exiftoolOutput),
-			...residueEntries(dir),
 		],
 	});
 

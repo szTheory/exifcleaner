@@ -41,15 +41,6 @@ function sha256(filePath: string): string {
 	return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
-// Residue directories are the native adapter's own atomic-publication staging leftovers (see
-// native_copy_routing.test.ts's identical comment) -- discovered at runtime so this helper stays
-// a no-op on platforms where disposal succeeds.
-function residueEntries(dir: string): string[] {
-	return fs
-		.readdirSync(dir)
-		.filter((name) => name.startsWith(".exifcleaner-stage-"));
-}
-
 function injectJpegSentinel(filePath: string): void {
 	execFileSync(EXIFTOOL_PATH, [
 		"-overwrite_original",
@@ -282,7 +273,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 					expect(sha256(source)).toBe(sourceDigestBefore);
 					assertDirEffect(before, after, {
 						unchanged: [testCase.fixture],
-						added: residueEntries(dir),
+						added: [],
 						modified: [],
 						removed: [],
 					});
@@ -350,7 +341,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 					expect(sha256(source)).toBe(sourceDigestBefore);
 					assertDirEffect(before, after, {
 						unchanged: [testCase.fixture],
-						added: [path.basename(generatedPath), ...residueEntries(dir)],
+						added: [path.basename(generatedPath)],
 						modified: [],
 						removed: [],
 					});
