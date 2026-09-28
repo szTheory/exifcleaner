@@ -137,4 +137,106 @@ describe("VerifyGeneratedOutputQuery", () => {
 			query.execute({ generatedPath: "/tmp/sample_cleaned.mp4" }),
 		).resolves.toEqual({ ok: true, value: undefined });
 	});
+
+	describe("copyModeLeakCheck (D-10, opt-in)", () => {
+		const cleanPreservation = {
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+		};
+
+		it("does not affect any existing case when omitted", async () => {
+			// Identical to today for every existing case -- exercised via the RAF/warning-only
+			// cases above, which call execute() without copyModeLeakCheck at all.
+			const result = await query.execute({
+				generatedPath: "/tmp/sample_cleaned.raf",
+			});
+			expect(result).toEqual({ ok: true, value: undefined });
+		});
+
+		it("passes a clean PNG record", async () => {
+			vi.mocked(metadataEngine.inspect).mockResolvedValue({
+				ok: true,
+				value: {
+					metadata: { "PNG:BitDepth": 8, "File:FileType": "PNG" },
+					recordCount: 1,
+					verification: { fileType: "PNG", error: undefined },
+				},
+			});
+
+			const result = await query.execute({
+				generatedPath: "/tmp/sample_cleaned.png",
+				copyModeLeakCheck: cleanPreservation,
+			});
+
+			expect(result).toEqual({ ok: true, value: undefined });
+		});
+
+		it("passes a clean JPEG record", async () => {
+			vi.mocked(metadataEngine.inspect).mockResolvedValue({
+				ok: true,
+				value: {
+					metadata: { "File:FileType": "JPEG" },
+					recordCount: 1,
+					verification: { fileType: "JPEG", error: undefined },
+				},
+			});
+
+			const result = await query.execute({
+				generatedPath: "/tmp/sample_cleaned.jpg",
+				copyModeLeakCheck: cleanPreservation,
+			});
+
+			expect(result).toEqual({ ok: true, value: undefined });
+		});
+
+		it("flags a leaked XMP-dc:Creator tag with the distinct leak code, names only", async () => {
+			const leakedValue = "ZZLEAK-58-SENTINEL-VALUE";
+			vi.mocked(metadataEngine.inspect).mockResolvedValue({
+				ok: true,
+				value: {
+					metadata: {
+						"File:FileType": "JPEG",
+						"XMP-dc:Creator": leakedValue,
+					},
+					recordCount: 1,
+					verification: { fileType: "JPEG", error: undefined },
+				},
+			});
+
+			const result = await query.execute({
+				generatedPath: "/tmp/sample_cleaned.jpg",
+				copyModeLeakCheck: cleanPreservation,
+			});
+
+			expect(result.ok).toBe(false);
+			if (result.ok) return;
+			expect(result.error.code).toBe("output-metadata-leak");
+			if (result.error.code !== "output-metadata-leak") return;
+			expect(result.error.leakedTags).toEqual(["XMP-dc:Creator"]);
+			expect(result.error.detail).toContain("XMP-dc:Creator");
+			expect(result.error.detail).not.toContain(leakedValue);
+			expect(JSON.stringify(result.error)).not.toContain(leakedValue);
+		});
+
+		it("fails closed with output-metadata-leak when the reopened FileType is neither PNG nor JPEG", async () => {
+			vi.mocked(metadataEngine.inspect).mockResolvedValue({
+				ok: true,
+				value: {
+					metadata: { "File:FileType": "WEBP" },
+					recordCount: 1,
+					verification: { fileType: "WEBP", error: undefined },
+				},
+			});
+
+			const result = await query.execute({
+				generatedPath: "/tmp/sample_cleaned.webp",
+				copyModeLeakCheck: cleanPreservation,
+			});
+
+			expect(result.ok).toBe(false);
+			if (result.ok) return;
+			expect(result.error.code).toBe("output-metadata-leak");
+		});
+	});
 });

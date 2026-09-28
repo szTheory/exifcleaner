@@ -4,6 +4,12 @@ import type { MetadataEngineError } from "../domain/exif/exif_errors";
 export type MetadataInspectionPurpose = "display" | "output-verification";
 
 export interface MetadataInspection {
+	/**
+	 * For purpose "output-verification" (D-10), this carries the raw -G1:2:4 diagnostic
+	 * record ExifTool already reads while reopening the generated output, keyed
+	 * Group1:Group2[:CopyN]:Tag -- not a display-cleaned map. Consumed by
+	 * VerifyGeneratedOutputQuery's opt-in copyModeLeakCheck.
+	 */
 	readonly metadata: Record<string, unknown>;
 	readonly recordCount: number;
 	readonly verification: {
