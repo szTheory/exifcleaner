@@ -183,10 +183,16 @@ it("requiresCopyModeLeakCheck is true only for png/jpg/jpeg copies, false for we
 		requiresCopyModeLeakCheck({ filename: "PHOTO.JPG", outputMode: "copy" }),
 	).toBe(true);
 	expect(
-		requiresCopyModeLeakCheck({ filename: "sample.png", outputMode: "overwrite" }),
+		requiresCopyModeLeakCheck({
+			filename: "sample.png",
+			outputMode: "overwrite",
+		}),
 	).toBe(false);
 	expect(
-		requiresCopyModeLeakCheck({ filename: "sample.jpg", outputMode: "overwrite" }),
+		requiresCopyModeLeakCheck({
+			filename: "sample.jpg",
+			outputMode: "overwrite",
+		}),
 	).toBe(false);
 	expect(
 		requiresCopyModeLeakCheck({ filename: "sample.webp", outputMode: "copy" }),

@@ -44,8 +44,14 @@ const DEFAULT_PRESERVATION = {
 };
 
 const FIXTURES = [
-	{ name: "jpeg", file: path.resolve(REPO_ROOT, "tests/e2e/fixtures/sample.jpg") },
-	{ name: "png", file: path.resolve(REPO_ROOT, "tests/e2e/fixtures/sample.png") },
+	{
+		name: "jpeg",
+		file: path.resolve(REPO_ROOT, "tests/e2e/fixtures/sample.jpg"),
+	},
+	{
+		name: "png",
+		file: path.resolve(REPO_ROOT, "tests/e2e/fixtures/sample.png"),
+	},
 ];
 
 function percentile(sortedMs, p) {
@@ -267,7 +273,8 @@ async function main() {
 	try {
 		nativeVersion = readNodePackageVersion("exifcleaner-node");
 	} catch {
-		nativeVersion = "unknown (exifcleaner-node not resolvable from node_modules)";
+		nativeVersion =
+			"unknown (exifcleaner-node not resolvable from node_modules)";
 	}
 
 	const loadAverage = os.loadavg();

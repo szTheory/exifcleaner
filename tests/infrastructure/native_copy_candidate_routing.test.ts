@@ -19,10 +19,7 @@ type PreservationRequestKey =
 	| "preserveResolution";
 
 type PreservationCapabilityKey =
-	| "orientation"
-	| "colorProfile"
-	| "timestamps"
-	| "resolution";
+	"orientation" | "colorProfile" | "timestamps" | "resolution";
 
 function baseRequest({
 	source,
@@ -111,9 +108,9 @@ describe("native copy candidate routing (D-06)", () => {
 
 		expect(result).toEqual({ ok: true, value: undefined });
 		expect(native.sanitizeCalls).toEqual([request]);
-		expect(
-			exiftool.calls.filter((call) => call.method === "sanitize"),
-		).toEqual([]);
+		expect(exiftool.calls.filter((call) => call.method === "sanitize")).toEqual(
+			[],
+		);
 	});
 
 	it.each([
@@ -233,10 +230,7 @@ describe("native copy candidate routing (D-06)", () => {
 			};
 		}
 
-		function requestAsking(
-			requestKey: PreservationRequestKey,
-			value: boolean,
-		) {
+		function requestAsking(requestKey: PreservationRequestKey, value: boolean) {
 			return baseRequest({
 				source: "/files/source.png",
 				destination: "/files/clean.png",
@@ -244,10 +238,8 @@ describe("native copy candidate routing (D-06)", () => {
 					requestKey === "preserveOrientation" ? value : false,
 				preserveColorProfile:
 					requestKey === "preserveColorProfile" ? value : false,
-				preserveTimestamps:
-					requestKey === "preserveTimestamps" ? value : false,
-				preserveResolution:
-					requestKey === "preserveResolution" ? value : false,
+				preserveTimestamps: requestKey === "preserveTimestamps" ? value : false,
+				preserveResolution: requestKey === "preserveResolution" ? value : false,
 			});
 		}
 

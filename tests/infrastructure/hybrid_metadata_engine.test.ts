@@ -414,9 +414,7 @@ describe("HybridMetadataEngine", () => {
 
 			expect(result).toBe(exiftool.sanitizeResult);
 			expect(native.sanitizeCalls).toEqual([]);
-			expect(exiftool.calls).toEqual([
-				{ method: "sanitize", request },
-			]);
+			expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 		},
 	);
 });

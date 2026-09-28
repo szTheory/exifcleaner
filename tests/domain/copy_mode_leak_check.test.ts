@@ -134,30 +134,33 @@ describe("findLeakedTags", () => {
 	it.each([
 		["preserveOrientation" as const, "IFD0:Image:Orientation"],
 		["preserveResolution" as const, "IFD0:Image:XResolution"],
-	])("resolution keys follow the same permit-when-requested pattern (%s)", (flag, key) => {
-		const record = { [key]: "1" };
-		const off = findLeakedTags({
-			record,
-			format: "jpeg",
-			preservation: {
-				preserveOrientation: false,
-				preserveColorProfile: false,
-				preserveResolution: false,
-			},
-		});
-		expect(off).toEqual([`${key.split(":")[0]}:${key.split(":").at(-1)}`]);
+	])(
+		"resolution keys follow the same permit-when-requested pattern (%s)",
+		(flag, key) => {
+			const record = { [key]: "1" };
+			const off = findLeakedTags({
+				record,
+				format: "jpeg",
+				preservation: {
+					preserveOrientation: false,
+					preserveColorProfile: false,
+					preserveResolution: false,
+				},
+			});
+			expect(off).toEqual([`${key.split(":")[0]}:${key.split(":").at(-1)}`]);
 
-		const on = findLeakedTags({
-			record,
-			format: "jpeg",
-			preservation: {
-				preserveOrientation: flag === "preserveOrientation",
-				preserveColorProfile: false,
-				preserveResolution: flag === "preserveResolution",
-			},
-		});
-		expect(on).toEqual([]);
-	});
+			const on = findLeakedTags({
+				record,
+				format: "jpeg",
+				preservation: {
+					preserveOrientation: flag === "preserveOrientation",
+					preserveColorProfile: false,
+					preserveResolution: flag === "preserveResolution",
+				},
+			});
+			expect(on).toEqual([]);
+		},
+	);
 
 	it("permits ICC groups only when preserveColorProfile is true", () => {
 		const record = { "ICC_Profile:Image:ProfileDescription": "Test" };
@@ -305,11 +308,7 @@ describe("findLeakedTags", () => {
 
 		it.each(
 			writtenRows.map(
-				(row) =>
-					[
-						`${row.variant} ${row.combo} ${row.engine}`,
-						row,
-					] as const,
+				(row) => [`${row.variant} ${row.combo} ${row.engine}`, row] as const,
 			),
 		)("clean output %s has zero leaks", (_label, row) => {
 			const format: CopyModeLeakCheckFormat = row.format;

@@ -117,7 +117,9 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 				const exiftool = new ExifToolAdapter({ process });
 				const native = new NativeMetadataAdapter();
 				const hybrid = new HybridMetadataEngine({ exiftool, native });
-				const verify = new VerifyGeneratedOutputQuery({ metadataEngine: hybrid });
+				const verify = new VerifyGeneratedOutputQuery({
+					metadataEngine: hybrid,
+				});
 				const exiftoolWrite = vi.spyOn(exiftool, "sanitize");
 				const nativeWrite = vi.spyOn(native, "sanitize");
 
@@ -157,7 +159,9 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 				const exiftool = new ExifToolAdapter({ process });
 				const native = new NativeMetadataAdapter();
 				const hybrid = new HybridMetadataEngine({ exiftool, native });
-				const verify = new VerifyGeneratedOutputQuery({ metadataEngine: hybrid });
+				const verify = new VerifyGeneratedOutputQuery({
+					metadataEngine: hybrid,
+				});
 
 				await process.open();
 				try {
@@ -226,9 +230,9 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 				});
 
 				const injectingStripMetadata = {
-					execute: async (request: Parameters<
-						StripMetadataCommand["execute"]
-					>[0]) => {
+					execute: async (
+						request: Parameters<StripMetadataCommand["execute"]>[0],
+					) => {
 						const result = await realStripMetadata.execute(request);
 						if (result.ok) {
 							testCase.inject(request.outputPath as string);
@@ -301,7 +305,9 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 				const exiftool = new ExifToolAdapter({ process });
 				const native = new NativeMetadataAdapter();
 				const hybrid = new HybridMetadataEngine({ exiftool, native });
-				const stripMetadata = new StripMetadataCommand({ metadataEngine: hybrid });
+				const stripMetadata = new StripMetadataCommand({
+					metadataEngine: hybrid,
+				});
 				const verifyGeneratedOutput = new VerifyGeneratedOutputQuery({
 					metadataEngine: hybrid,
 				});

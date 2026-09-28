@@ -649,7 +649,8 @@ describe("OutputTransaction", () => {
 				ok: false,
 				error: {
 					code: "output-metadata-leak",
-					detail: "Generated output kept 1 metadata tag(s) outside the permitted set: XMP-dc:Creator",
+					detail:
+						"Generated output kept 1 metadata tag(s) outside the permitted set: XMP-dc:Creator",
 					leakedTags: ["XMP-dc:Creator"],
 				},
 			},

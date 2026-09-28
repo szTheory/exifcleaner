@@ -86,8 +86,7 @@ export class HybridMetadataEngine implements MetadataEnginePort {
 		}
 		const matches = this.capabilities.formats.filter((format) =>
 			format.extensions.some(
-				(candidateExtension) =>
-					candidateExtension.toLowerCase() === extension,
+				(candidateExtension) => candidateExtension.toLowerCase() === extension,
 			),
 		);
 		if (matches.length !== 1) {

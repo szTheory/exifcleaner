@@ -122,10 +122,14 @@ function buildGammaChromaSrgbSignificantChunks(): {
 } {
 	// cHRM: white/red/green/blue x,y as PNG-int (value * 100000), 8 * 4 bytes.
 	const chrmValues = [
-		0.3127, 0.329, // white
-		0.64, 0.33, // red
-		0.3, 0.6, // green
-		0.15, 0.06, // blue
+		0.3127,
+		0.329, // white
+		0.64,
+		0.33, // red
+		0.3,
+		0.6, // green
+		0.15,
+		0.06, // blue
 	].map((v) => Math.round(v * 100000));
 	const chrmData = Buffer.concat(chrmValues.map((v) => be32(v)));
 
@@ -185,11 +189,7 @@ function insertJpegAppSegmentAfterSoi(
 ): Buffer {
 	const lengthBuf = Buffer.alloc(2);
 	lengthBuf.writeUInt16BE(data.length + 2, 0);
-	const segment = Buffer.concat([
-		Buffer.from([0xff, marker]),
-		lengthBuf,
-		data,
-	]);
+	const segment = Buffer.concat([Buffer.from([0xff, marker]), lengthBuf, data]);
 	return Buffer.concat([buf.subarray(0, 2), segment, buf.subarray(2)]);
 }
 
@@ -237,7 +237,11 @@ interface Variant {
 	readonly build: (dir: string) => string; // returns the built file path
 }
 
-function copyFixture(dir: string, fixtureName: string, destName: string): string {
+function copyFixture(
+	dir: string,
+	fixtureName: string,
+	destName: string,
+): string {
 	const dest = path.join(dir, destName);
 	fs.copyFileSync(path.join(FIXTURES_DIR, fixtureName), dest);
 	return dest;
@@ -490,7 +494,11 @@ interface SweepRow {
 }
 
 async function readOutputKeys(filePath: string): Promise<string[]> {
-	const raw = execFileSync(EXIFTOOL_PATH, ["-j", "-G1:2:4", filePath]).toString();
+	const raw = execFileSync(EXIFTOOL_PATH, [
+		"-j",
+		"-G1:2:4",
+		filePath,
+	]).toString();
 	const parsed = JSON.parse(raw) as Record<string, unknown>[];
 	const record = parsed[0];
 	if (record === undefined) {
@@ -515,12 +523,17 @@ const IDENTIFYING_MARKERS = [
 ] as const;
 
 async function assertNoIdentifyingLeak(filePath: string): Promise<string[]> {
-	const raw = execFileSync(EXIFTOOL_PATH, ["-j", "-G1:2:4", filePath]).toString();
+	const raw = execFileSync(EXIFTOOL_PATH, [
+		"-j",
+		"-G1:2:4",
+		filePath,
+	]).toString();
 	const parsed = JSON.parse(raw) as Record<string, unknown>[];
 	const record = parsed[0] ?? {};
 	const hits: string[] = [];
 	for (const [key, value] of Object.entries(record)) {
-		const stringValue = typeof value === "string" ? value : JSON.stringify(value);
+		const stringValue =
+			typeof value === "string" ? value : JSON.stringify(value);
 		for (const marker of IDENTIFYING_MARKERS) {
 			if (stringValue.includes(marker)) {
 				hits.push(`${key}=${stringValue} (marker ${marker})`);
@@ -689,7 +702,9 @@ async function main(): Promise<void> {
 		}
 		process.exitCode = 1;
 	} else {
-		console.log("REMOVAL_CONFIRMATION=all identifying markers absent from every output");
+		console.log(
+			"REMOVAL_CONFIRMATION=all identifying markers absent from every output",
+		);
 	}
 
 	fs.rmSync(scratchRoot, { recursive: true, force: true });

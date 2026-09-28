@@ -183,7 +183,10 @@ function isPermitted({
 
 	if (format === "jpeg") {
 		if (JPEG_ALWAYS_PERMITTED.has(groupTag)) return true;
-		if (preservation.preserveOrientation && JPEG_ORIENTATION_ONLY.has(groupTag)) {
+		if (
+			preservation.preserveOrientation &&
+			JPEG_ORIENTATION_ONLY.has(groupTag)
+		) {
 			return true;
 		}
 		if (preservation.preserveColorProfile && ICC_GROUP_TAGS.has(groupTag)) {
@@ -199,7 +202,10 @@ function isPermitted({
 	if (preservation.preserveOrientation && PNG_ORIENTATION_ONLY.has(groupTag)) {
 		return true;
 	}
-	if (preservation.preserveColorProfile && PNG_COLOR_PROFILE_ONLY.has(groupTag)) {
+	if (
+		preservation.preserveColorProfile &&
+		PNG_COLOR_PROFILE_ONLY.has(groupTag)
+	) {
 		return true;
 	}
 	if (preservation.preserveResolution && PNG_RESOLUTION_ONLY.has(groupTag)) {
