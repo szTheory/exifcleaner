@@ -70,6 +70,9 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 	});
 
 	test("every non-RAW supported format removes no less with Preserve resolution on than off (FID-03)", async () => {
+		// One test drives every matrix row through the app twice; it measured 23s locally,
+		// past the 15s local default.
+		test.setTimeout(90_000);
 		const onFixtures = createFixtureDir();
 		const offFixtures = createFixtureDir();
 		try {
