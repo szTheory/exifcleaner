@@ -5,6 +5,7 @@ import {
 	isMediaFile,
 	isTiffFile,
 	requiresVerifiedWrite,
+	requiresCopyModeLeakCheck,
 	RAW_EXTENSIONS,
 	MEDIA_EXTENSIONS,
 	TIFF_EXTENSIONS,
@@ -112,7 +113,7 @@ it("TIFF_EXTENSIONS is disjoint from RAW_EXTENSIONS and from MEDIA_EXTENSIONS (D
 	expect(tiffMediaIntersection).toEqual([]);
 });
 
-it("requiresVerifiedWrite routes raw, media, TIFF (both modes), and copy-mode webp through the verified transaction, but not overwrite-mode webp or an ordinary jpeg copy (D-23, D-24)", () => {
+it("requiresVerifiedWrite routes raw, media, TIFF (both modes), and copy-mode webp/png/jpeg through the verified transaction, but not overwrite-mode webp/png/jpeg (D-11, D-23, D-24, ADP-03)", () => {
 	expect(
 		requiresVerifiedWrite({ filename: "sample.cr2", outputMode: "copy" }),
 	).toBe(true);
@@ -145,10 +146,64 @@ it("requiresVerifiedWrite routes raw, media, TIFF (both modes), and copy-mode we
 	expect(
 		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "overwrite" }),
 	).toBe(false);
+	// ADP-03/D-11: png and jpeg saves-as-copy are now verified (widened
+	// requiresVerifiedWrite copy clause), but in-place overwrites of those formats
+	// stay on the direct path.
+	expect(
+		requiresVerifiedWrite({ filename: "sample.png", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.png", outputMode: "overwrite" }),
+	).toBe(false);
 	expect(
 		requiresVerifiedWrite({ filename: "sample.jpg", outputMode: "copy" }),
-	).toBe(false);
+	).toBe(true);
 	expect(
 		requiresVerifiedWrite({ filename: "sample.jpg", outputMode: "overwrite" }),
 	).toBe(false);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.jpeg", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresVerifiedWrite({ filename: "PHOTO.JPG", outputMode: "copy" }),
+	).toBe(true);
+});
+
+it("requiresCopyModeLeakCheck is true only for png/jpg/jpeg copies, false for webp/tiff/raw/media copies and any overwrite (D-11)", () => {
+	expect(
+		requiresCopyModeLeakCheck({ filename: "sample.png", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresCopyModeLeakCheck({ filename: "sample.jpg", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresCopyModeLeakCheck({ filename: "sample.jpeg", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresCopyModeLeakCheck({ filename: "PHOTO.JPG", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresCopyModeLeakCheck({ filename: "sample.png", outputMode: "overwrite" }),
+	).toBe(false);
+	expect(
+		requiresCopyModeLeakCheck({ filename: "sample.jpg", outputMode: "overwrite" }),
+	).toBe(false);
+	expect(
+		requiresCopyModeLeakCheck({ filename: "sample.webp", outputMode: "copy" }),
+	).toBe(false);
+	expect(
+		requiresCopyModeLeakCheck({ filename: "sample.tif", outputMode: "copy" }),
+	).toBe(false);
+	expect(
+		requiresCopyModeLeakCheck({ filename: "sample.cr2", outputMode: "copy" }),
+	).toBe(false);
+	expect(
+		requiresCopyModeLeakCheck({ filename: "sample.mp4", outputMode: "copy" }),
+	).toBe(false);
+});
+
+it("isMediaFile is false for png, jpg and jpeg; MEDIA_EXTENSIONS keeps its existing literal assertion (D-11)", () => {
+	expect(isMediaFile({ filename: "sample.png" })).toBe(false);
+	expect(isMediaFile({ filename: "sample.jpg" })).toBe(false);
+	expect(isMediaFile({ filename: "sample.jpeg" })).toBe(false);
 });
