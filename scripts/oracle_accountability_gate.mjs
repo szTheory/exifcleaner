@@ -18,7 +18,12 @@ const REQUIRED_CONSUMERS = [
 	"tests/e2e/oracle-accountability.spec.ts",
 	"tests/smoke/packaged_app.smoke.ts",
 ];
-const REQUIRED_GENERATED_FIXTURES = ["issue240.mp4", "orientation.jpg"];
+const REQUIRED_GENERATED_FIXTURES = [
+	"issue240.mp4",
+	"orientation.jpg",
+	"orientation.png",
+	"orientation-xmp-only.png",
+];
 const FORBIDDEN_ISSUE_ARTIFACT = /(?:issue|#)(?:217|255)/i;
 const EXPECTED_OUTCOMES = new Map([
 	[217, "synthetic_probe_stripped_cleanly"],

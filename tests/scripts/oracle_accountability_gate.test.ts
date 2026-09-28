@@ -27,7 +27,7 @@ const cleanSubject = (): AccountabilitySubject => ({
 			'import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions"; assertMetadataStripped(file);',
 	},
 	fixtureGeneratorSource:
-		'write("issue240.mp4"); write("orientation.jpg"); // generator-owned synthetic fixtures',
+		'write("issue240.mp4"); write("orientation.jpg"); write("orientation.png"); write("orientation-xmp-only.png"); // generator-owned synthetic fixtures',
 	orientationCommandSource:
 		'if (preserveOrientation) preserveTags.push("-Orientation");',
 	artifactPaths: [

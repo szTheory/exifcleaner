@@ -1165,6 +1165,37 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	]);
 	console.log("  Created orientation.jpg (Rotate 90 CW)");
 
+	// orientation.png - PNG with Orientation written to an eXIf chunk (IFD0), plus
+	// removable tEXt Author/Copyright, for the native PNG oracle row (58-06, D-21).
+	const orientationPngPath = path.join(fixturesDir, "orientation.png");
+	fs.writeFileSync(orientationPngPath, createMinimalPng());
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-Author=Test Author",
+		"-Copyright=Test Copyright 2024",
+		"-Orientation#=6",
+		orientationPngPath,
+	]);
+	console.log(
+		"  Created orientation.png (eXIf Rotate 90 CW with tEXt metadata)",
+	);
+
+	// orientation-xmp-only.png - PNG whose only Orientation lives in XMP-tiff (no eXIf
+	// chunk), so exifcleaner-node's own pre-write admission decline is exercised end to
+	// end (58-06, D-21 negative fixture).
+	const orientationXmpOnlyPngPath = path.join(
+		fixturesDir,
+		"orientation-xmp-only.png",
+	);
+	fs.writeFileSync(orientationXmpOnlyPngPath, createMinimalPng());
+	execFileSync(EXIFTOOL, [
+		"-overwrite_original",
+		"-Author=Test Author",
+		"-XMP-tiff:Orientation#=6",
+		orientationXmpOnlyPngPath,
+	]);
+	console.log("  Created orientation-xmp-only.png (Orientation only in XMP)");
+
 	// sample.tif - single-strip TIFF with IFD0 private tags (ImageDescription, Software,
 	// Artist, Copyright) and GPS, for Phase 51 (RMV-03/RMV-04). Validate the unseeded bytes
 	// first (after GPS seeding, ExifTool's validator warns about GPSProcessingMethod).
@@ -1251,7 +1282,7 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	generateRawFixtures(fixturesDir, rawUpstreamDir);
 	generateMatrixFixtures(fixturesDir, rawUpstreamDir);
 
-	console.log("\nAll 24 fixture files generated successfully.");
+	console.log("\nAll 26 fixture files generated successfully.");
 }
 
 const outputFlag = process.argv.indexOf("--output-dir");
