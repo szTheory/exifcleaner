@@ -14,17 +14,6 @@ import {
 
 test.describe.configure({ mode: "serial" });
 
-// Residue directories are the library's own atomic-publication staging leftovers (see
-// tests/e2e/file-type-coverage.spec.ts's identical residueEntries() comment, added in
-// 58-09) -- discovered at runtime so this helper stays a no-op on platforms where
-// disposal succeeds. 58-10: the same native-routing reconciliation the dev e2e suite
-// already needed also applies here (smoke wasn't in 58-09's own scope).
-function residueEntries(dir: string): string[] {
-	return fs
-		.readdirSync(dir)
-		.filter((name) => name.startsWith(".exifcleaner-stage-"));
-}
-
 test("fresh packaged profiles default to Save as Copy", async () => {
 	const context = await launchPackagedApp({ language: null });
 	try {
@@ -80,7 +69,7 @@ test("#304 save-as-copy preserves originals, resolves collisions, and reveals th
 		const after = snapshotDir(dir);
 
 		assertDirEffect(before, after, {
-			added: ["sample_cleaned_2.jpg", ...residueEntries(dir)],
+			added: ["sample_cleaned_2.jpg"],
 			unchanged: ["sample.jpg", "sample_cleaned.jpg"],
 			modified: [],
 			removed: [],
