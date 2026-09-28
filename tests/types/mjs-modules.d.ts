@@ -188,6 +188,17 @@ declare module "*oracle_accountability_gate.mjs" {
 	): string[];
 }
 
+declare module "*native_orientation_mutation_gate.mjs" {
+	export function applyNativeOrientationMutation(source: string): string;
+	export function executeNativeOrientationMutation(dependencies: {
+		readSource: () => string;
+		writeSource: (source: string) => void;
+		run: (
+			step: "compile" | "orientation-test",
+		) => Promise<{ status: number | null; output: string }>;
+	}): Promise<void>;
+}
+
 declare module "*orientation_mutation_gate.mjs" {
 	export function applyOrientationMutation(source: string): string;
 	export function executeOrientationMutation(dependencies: {
