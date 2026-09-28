@@ -172,6 +172,30 @@ function normalizeMetadataKey(key: string): string {
 	return parts.length >= 3 ? parts.slice(1).join(":") : parts.join(":");
 }
 
+interface GroupAndTagOfParams {
+	key: string;
+}
+
+// 58-03 (D-09): a small pure helper for the copy-mode leak allowlist (copy_mode_leak_check.ts),
+// which needs Group1 -- normalizeMetadataKey deliberately drops it (keeps G2:Tag) and is
+// module-private, so this is a new export rather than a change to that function's contract.
+// Splits on ":", drops CopyN instance segments (same FAMILY_4_INSTANCE_PATTERN rule as
+// normalizeMetadataKey), and returns the first and last remaining segments -- e.g.
+// "JFIF:Image:Copy1:XResolution" -> { group1: "JFIF", tag: "XResolution" }. Not reused
+// elsewhere in this plan: no behaviour change to normalizeMetadataKey or cleanExifData.
+export function groupAndTagOf({
+	key,
+}: GroupAndTagOfParams): { group1: string; tag: string } | undefined {
+	const parts = key
+		.split(":")
+		.filter((part) => !FAMILY_4_INSTANCE_PATTERN.test(part));
+	if (parts.length < 2) return undefined;
+	const group1 = parts[0];
+	const tag = parts.at(-1);
+	if (group1 === undefined || tag === undefined) return undefined;
+	return { group1, tag };
+}
+
 interface IsRemovableFileGroupTagParams {
 	key: string;
 }
