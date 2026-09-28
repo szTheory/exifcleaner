@@ -1,43 +1,55 @@
 {
 	"schemaVersion": 1,
-	"recordedAt": "2026-09-18T17:06:00Z",
+	"recordedAt": "2026-09-28T15:32:44Z",
 	"package": {
 		"name": "exifcleaner-node",
-		"version": "0.2.2",
-		"publishedAt": "2026-09-18T17:02:43.748Z",
+		"version": "0.3.0",
+		"publishedAt": "2026-09-28T01:27:02.661Z",
 		"repository": "https://github.com/szTheory/exifcleaner-node",
-		"sourceCommit": "8474396f66c4d3e4199c17c369492f8717cce7d7",
-		"releaseTag": "v0.2.2"
+		"sourceCommit": "41bee192686281d23e8e4b9d9610235e3171c658",
+		"releaseTag": "v0.3.0"
 	},
 	"dist": {
-		"tarball": "https://registry.npmjs.org/exifcleaner-node/-/exifcleaner-node-0.2.2.tgz",
-		"integrity": "sha512-gpyjJY8bBfW5WSYG5RM1Q/+cPXSPDgzGAVfoTVlONX6ohsr3vXbMroaNDQEuhqj4SCoUUgP5coboJ9RxiNRhAA==",
-		"shasum": "61427897d7f345686d64c773a989175da91ad192",
-		"sha256": "2b454564345fdbaa3d26ace99b4ccee5fecfff9b74bdd374c1f6f97444e902ef",
-		"fileCount": 77,
-		"packedSize": 80303,
-		"unpackedSize": 442012
+		"tarball": "https://registry.npmjs.org/exifcleaner-node/-/exifcleaner-node-0.3.0.tgz",
+		"integrity": "sha512-z3Tq9k9pLtFkZfliRQEFDN60cZsgy/1kn7uXdn6v0NRnMD/pjCoFNhTw6SypQn2vAJP6/DGHiRC7hUSpKcjEHA==",
+		"shasum": "2993cfd62c76a605817295287966aa359892a9c6",
+		"sha256": "6a3fd7ff07b1e2a52ff3815575525c7b04695fcba4c1db221d45d4cf1c6a3141",
+		"fileCount": 117,
+		"packedSize": 152373,
+		"unpackedSize": 751067
 	},
 	"provenance": {
 		"verified": true,
-		"url": "https://registry.npmjs.org/-/npm/v1/attestations/exifcleaner-node@0.2.2",
+		"url": "https://registry.npmjs.org/-/npm/v1/attestations/exifcleaner-node@0.3.0",
 		"predicateType": "https://slsa.dev/provenance/v1",
 		"workflow": "release.yml",
-		"workflowRun": "https://github.com/szTheory/exifcleaner-node/actions/runs/35370603372/attempts/1",
+		"workflowRun": "https://github.com/szTheory/exifcleaner-node/actions/runs/36365018538/attempts/1",
 		"environment": "npm",
-		"sourceCommit": "8474396f66c4d3e4199c17c369492f8717cce7d7"
+		"sourceCommit": "41bee192686281d23e8e4b9d9610235e3171c658"
 	},
 	"signatures": {
 		"verified": true,
 		"command": "npm audit signatures",
-		"verifiedRegistrySignatures": 568,
-		"verifiedAttestations": 125
+		"verifiedRegistrySignatures": 572,
+		"verifiedAttestations": 131
 	},
 	"tarball": {
 		"verified": true,
 		"files": [
 			"LICENSE",
 			"README.md",
+			"dist/admission/handler.d.ts",
+			"dist/admission/handler.d.ts.map",
+			"dist/admission/handler.js",
+			"dist/admission/handler.js.map",
+			"dist/admission/jpeg-handler.d.ts",
+			"dist/admission/jpeg-handler.d.ts.map",
+			"dist/admission/jpeg-handler.js",
+			"dist/admission/jpeg-handler.js.map",
+			"dist/admission/png-handler.d.ts",
+			"dist/admission/png-handler.d.ts.map",
+			"dist/admission/png-handler.js",
+			"dist/admission/png-handler.js.map",
 			"dist/admission/registry.d.ts",
 			"dist/admission/registry.d.ts.map",
 			"dist/admission/registry.js",
@@ -62,6 +74,26 @@
 			"dist/index.d.ts.map",
 			"dist/index.js",
 			"dist/index.js.map",
+			"dist/jpeg/icc.d.ts",
+			"dist/jpeg/icc.d.ts.map",
+			"dist/jpeg/icc.js",
+			"dist/jpeg/icc.js.map",
+			"dist/jpeg/markers.d.ts",
+			"dist/jpeg/markers.d.ts.map",
+			"dist/jpeg/markers.js",
+			"dist/jpeg/markers.js.map",
+			"dist/jpeg/parser.d.ts",
+			"dist/jpeg/parser.d.ts.map",
+			"dist/jpeg/parser.js",
+			"dist/jpeg/parser.js.map",
+			"dist/jpeg/trailer.d.ts",
+			"dist/jpeg/trailer.d.ts.map",
+			"dist/jpeg/trailer.js",
+			"dist/jpeg/trailer.js.map",
+			"dist/jpeg/xmp.d.ts",
+			"dist/jpeg/xmp.d.ts.map",
+			"dist/jpeg/xmp.js",
+			"dist/jpeg/xmp.js.map",
 			"dist/metadata/exif.d.ts",
 			"dist/metadata/exif.d.ts.map",
 			"dist/metadata/exif.js",
@@ -78,6 +110,14 @@
 			"dist/metadata/xmp.d.ts.map",
 			"dist/metadata/xmp.js",
 			"dist/metadata/xmp.js.map",
+			"dist/png/chunks.d.ts",
+			"dist/png/chunks.d.ts.map",
+			"dist/png/chunks.js",
+			"dist/png/chunks.js.map",
+			"dist/png/orientation-sources.d.ts",
+			"dist/png/orientation-sources.d.ts.map",
+			"dist/png/orientation-sources.js",
+			"dist/png/orientation-sources.js.map",
 			"dist/result.d.ts",
 			"dist/result.d.ts.map",
 			"dist/result.js",
@@ -138,16 +178,26 @@
 	},
 	"runtimeAudit": {
 		"runtimePaths": [
+			"dist/admission/handler.js",
+			"dist/admission/jpeg-handler.js",
+			"dist/admission/png-handler.js",
 			"dist/admission/registry.js",
 			"dist/admission/webp-handler.js",
 			"dist/engine.js",
 			"dist/errors.js",
 			"dist/fallback.js",
 			"dist/index.js",
+			"dist/jpeg/icc.js",
+			"dist/jpeg/markers.js",
+			"dist/jpeg/parser.js",
+			"dist/jpeg/trailer.js",
+			"dist/jpeg/xmp.js",
 			"dist/metadata/exif.js",
 			"dist/metadata/icc.js",
 			"dist/metadata/icc_admission.js",
 			"dist/metadata/xmp.js",
+			"dist/png/chunks.js",
+			"dist/png/orientation-sources.js",
 			"dist/result.js",
 			"dist/transaction/file-ops.js",
 			"dist/transaction/identity.js",
@@ -158,16 +208,28 @@
 		],
 		"digests": [
 			{
+				"path": "dist/admission/handler.js",
+				"sha256": "17efe1efaba2d9be676bec573811b68f7eda0c55da5482e3557bb92d84ced1c7"
+			},
+			{
+				"path": "dist/admission/jpeg-handler.js",
+				"sha256": "fde7e631d14758f8a2816186d21161fc92df25da40676f72df24e914a7e2137a"
+			},
+			{
+				"path": "dist/admission/png-handler.js",
+				"sha256": "993283e01e4f4a02fb44a659b60b08044ab4f1a4bd9ee08756d7a7a16045ced3"
+			},
+			{
 				"path": "dist/admission/registry.js",
-				"sha256": "79f7d985b21ccce02e2463e8bf8d6b45a4cc703d4b9069a3ce92e3b7772288d4"
+				"sha256": "1ddbf83e3bcfcf622d16fa14d8a261526294ce95e48df1c91e2e249fc2f51834"
 			},
 			{
 				"path": "dist/admission/webp-handler.js",
-				"sha256": "39fa5b33b205ad2cf82a1ac0281a3f72091310bc9be22d75f9d267dd2d77800a"
+				"sha256": "e84e0a1c7e1eac737781f0f1adeb970b60a5d75751fab1bf243013353effc946"
 			},
 			{
 				"path": "dist/engine.js",
-				"sha256": "bc63986b9f0436ee0d568fed684c92d21d849f6ccb51f13d67d995af0e64ebb5"
+				"sha256": "0d5fbfe201eed4a83538ecaf38b7d7b420beed8af70cfd1c1244e2ef2078d04c"
 			},
 			{
 				"path": "dist/errors.js",
@@ -182,12 +244,32 @@
 				"sha256": "160bff64f7d5b1e9687b385ba11a0127cc6104c6475a8adf3c36e25c2ef8abed"
 			},
 			{
+				"path": "dist/jpeg/icc.js",
+				"sha256": "293f6d443c206a841d3f5ec86fc1f46ae700e86987a00664c30f19c54e31a90f"
+			},
+			{
+				"path": "dist/jpeg/markers.js",
+				"sha256": "1dd8ea30c7a1709913fd0a595511acb1791bffdacb3ffc64915245409c174a21"
+			},
+			{
+				"path": "dist/jpeg/parser.js",
+				"sha256": "c5f2c3e44a33ad1ae8e71c5e8bd55b0f757b980931702aebcf257a3ab6a71091"
+			},
+			{
+				"path": "dist/jpeg/trailer.js",
+				"sha256": "14aa0cced9978dba5753919665e515d9da9b17679f3691862269f9ab8e10be83"
+			},
+			{
+				"path": "dist/jpeg/xmp.js",
+				"sha256": "6aa2d75769b25dedc5402fb673ff89c374d66c9a64f432b6fcd406a5590f6bd4"
+			},
+			{
 				"path": "dist/metadata/exif.js",
-				"sha256": "46bc5fed1a232afac4d327e55e1a1ebecae2faeb104d400e0f9909516f8e6f14"
+				"sha256": "834ee105bd7b8c75081e6aac1b6d1305e74c1a9d6c1402c174fcdfe69c1ad6a6"
 			},
 			{
 				"path": "dist/metadata/icc_admission.js",
-				"sha256": "3e05170d678814d5187ce5de3e769b37cac56accbcd7c5c87f61bd5ca5e058e1"
+				"sha256": "77ae6198b185d5919f7ee33f471c58bdd4c95c568a39eeb1f6eccecee9ec65a1"
 			},
 			{
 				"path": "dist/metadata/icc.js",
@@ -195,7 +277,15 @@
 			},
 			{
 				"path": "dist/metadata/xmp.js",
-				"sha256": "1e470f175a772df1d2e6b0c9a8699992dcd6e4d1c1c1bbbdd89cccb7131cedb2"
+				"sha256": "958cb2101b9ebdf7f48b2183eb92bc922f5ef80c8d34325094e88bf9465530ae"
+			},
+			{
+				"path": "dist/png/chunks.js",
+				"sha256": "096684b02e8be0da8df7a587d12423d04de2f43faa760a2f46dae30a07568bb3"
+			},
+			{
+				"path": "dist/png/orientation-sources.js",
+				"sha256": "8b9ef214eccee2dde90a817cd5c9bd9ae3af6180e8e45b5cbe6ac90ddff8e442"
 			},
 			{
 				"path": "dist/result.js",
@@ -215,7 +305,7 @@
 			},
 			{
 				"path": "dist/transaction/safe-transaction.js",
-				"sha256": "3a2632838391c9dc004771bbab8a82986d14760820da9ae88202011316352361"
+				"sha256": "e77dd798c65ad3c925e5970c0a03628d952b57de976221b0c95383cfd37c3aaa"
 			},
 			{
 				"path": "dist/types.js",
@@ -231,7 +321,8 @@
 			"node:fs",
 			"node:fs/promises",
 			"node:module",
-			"node:path"
+			"node:path",
+			"node:zlib"
 		],
 		"zeroForbiddenNetwork": true
 	},
