@@ -165,16 +165,6 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 					expect(offSentinels).toContain(sentinel);
 				}
 
-				if (row.ext === ".webp") {
-					// D-33: WebP with the default Save-as-copy launch routes native
-					// regardless of preserveResolution (isNativeCopyCandidate never
-					// consults it) -- ON and OFF are therefore byte-identical, and both
-					// lose the seeded IFD0 resolution. Measured, not assumed; see Test 2
-					// for the ExifTool-route counterpart.
-					expect(onLines).toEqual(offLines);
-					continue;
-				}
-
 				expect(
 					resolutionDeltaViolations({
 						source: sourceLines,
@@ -218,7 +208,7 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 		}
 	});
 
-	test("WebP keeps its IFD0 resolution through ExifTool (overwrite mode) and loses it on the native Save-as-copy route (D-33)", async () => {
+	test("WebP keeps its IFD0 resolution through ExifTool in overwrite mode and in Save-as-copy with Preserve resolution on (ADP-02)", async () => {
 		const { dir, cleanup } = createFixtureDir();
 		try {
 			const overwritePath = path.join(dir, "overwrite.webp");
@@ -241,8 +231,8 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 				"-Comment=ZZP52-COMMENT",
 				overwritePath,
 			]);
-			const nativePath = path.join(dir, "native.webp");
-			fs.copyFileSync(overwritePath, nativePath);
+			const copyPath = path.join(dir, "copy.webp");
+			fs.copyFileSync(overwritePath, copyPath);
 
 			// ExifTool route: overwrite mode (saveAsCopy: false).
 			const launchedOverwrite = await launchApp({
@@ -274,37 +264,101 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 			);
 			expect(seededTagKeys(overwriteLines)).toEqual([]);
 
-			// Native route: Save-as-copy mode (default true).
-			const launchedNative = await launchApp({
-				settings: { saveAsCopy: true },
+			// ExifTool route: Save-as-copy with Preserve resolution on (ADP-02). WebP does
+			// not preserve resolution natively (D-01/D-03), so this launch routes the copy
+			// through ExifTool exactly like overwrite mode above -- the 4.4.0 native-route
+			// resolution loss (D-33) no longer applies once Preserve resolution is on.
+			const launchedCopyOn = await launchApp({
+				settings: { saveAsCopy: true, preserveResolution: true },
 			});
-			app = launchedNative.app;
-			window = launchedNative.window;
-			const nativeDriver = createProcessingDriver({
+			app = launchedCopyOn.app;
+			window = launchedCopyOn.window;
+			const copyOnDriver = createProcessingDriver({
 				app,
 				window,
 				exiftoolPath: EXIFTOOL_PATH,
 			});
-			await nativeDriver.submitFiles([nativePath]);
-			await nativeDriver.waitForTerminal();
+			await copyOnDriver.submitFiles([copyPath]);
+			await copyOnDriver.waitForTerminal();
 			await closeApp(app);
 			app = undefined;
 
-			const nativeOut = path.join(dir, "native_cleaned.webp");
-			expect(fs.existsSync(nativeOut)).toBe(true);
-			const nativeLines = readRawTagLines(nativeOut, EXIFTOOL_PATH);
+			const copyOut = path.join(dir, "copy_cleaned.webp");
+			expect(fs.existsSync(copyOut)).toBe(true);
+			const copyLines = readRawTagLines(copyOut, EXIFTOOL_PATH);
+			const copyResolution = copyLines
+				.filter((line) => line.key.startsWith("IFD0:"))
+				.map((line) => `${line.key} : ${line.value}`)
+				.filter((line) => /XResolution|YResolution|ResolutionUnit/.test(line));
+			expect(copyResolution.sort()).toEqual(
+				[
+					"IFD0:XResolution : 300",
+					"IFD0:YResolution : 300",
+					"IFD0:ResolutionUnit : 2",
+				].sort(),
+			);
+			expect(seededTagKeys(copyLines)).toEqual([]);
+		} finally {
+			cleanup();
+		}
+	});
+
+	test("WebP Save-as-copy with Preserve resolution off still drops resolution (native route)", async () => {
+		const { dir, cleanup } = createFixtureDir();
+		try {
+			const sourcePath = path.join(dir, "source.webp");
+			fs.copyFileSync(
+				path.resolve(__dirname, "fixtures/sample.webp"),
+				sourcePath,
+			);
+			const { execFileSync } = await import("node:child_process");
+			execFileSync(EXIFTOOL_PATH, [
+				"-overwrite_original",
+				"-IFD0:XResolution=300",
+				"-IFD0:YResolution=300",
+				"-IFD0:ResolutionUnit=inches",
+				"-GPSLatitude=37.7749",
+				"-GPSLatitudeRef=N",
+				"-GPSLongitude=-122.4194",
+				"-GPSLongitudeRef=W",
+				"-Artist=ZZP52-ARTIST",
+				"-Software=ZZP52-SOFT",
+				"-Comment=ZZP52-COMMENT",
+				sourcePath,
+			]);
+
+			// Native route: Save-as-copy with Preserve resolution off (D-01/D-03 gate
+			// bypassed, so WebP is native-eligible again).
+			const launchedCopyOff = await launchApp({
+				settings: { saveAsCopy: true, preserveResolution: false },
+			});
+			app = launchedCopyOff.app;
+			window = launchedCopyOff.window;
+			const copyOffDriver = createProcessingDriver({
+				app,
+				window,
+				exiftoolPath: EXIFTOOL_PATH,
+			});
+			await copyOffDriver.submitFiles([sourcePath]);
+			await copyOffDriver.waitForTerminal();
+			await closeApp(app);
+			app = undefined;
+
+			const cleanedOut = path.join(dir, "source_cleaned.webp");
+			expect(fs.existsSync(cleanedOut)).toBe(true);
+			const cleanedLines = readRawTagLines(cleanedOut, EXIFTOOL_PATH);
 			// D-33 measured: the native route preserves Orientation (an IFD0 tag, kept
 			// because preserveOrientation is true independent of this feature) but drops
 			// the entire rest of the EXIF chunk -- XResolution/YResolution/ResolutionUnit
-			// included, regardless of preserveResolution (isNativeCopyCandidate never
-			// consults it). Assert the resolution tags specifically, not the whole IFD0
-			// group, since Orientation surviving is correct, unrelated behavior.
+			// included -- when Preserve resolution is off. Assert the resolution tags
+			// specifically, not the whole IFD0 group, since Orientation surviving is
+			// correct, unrelated behavior.
 			expect(
-				nativeLines.some((line) =>
+				cleanedLines.some((line) =>
 					/^IFD0:(XResolution|YResolution|ResolutionUnit)$/.test(line.key),
 				),
 			).toBe(false);
-			expect(seededTagKeys(nativeLines)).toEqual([]);
+			expect(seededTagKeys(cleanedLines)).toEqual([]);
 		} finally {
 			cleanup();
 		}

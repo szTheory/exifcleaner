@@ -59,3 +59,14 @@ coverage ledger.
 The executable assertions in `fixture_integrity.test.ts` verify each committed digest and size
 against the upstream pin, confirm `-FileType`, and confirm each extension is classified
 `binary` in git.
+
+## 2026-09-28 (58-08, ADP-02, ADP-04)
+
+From app 4.5.0, the PNG and JPEG matrix rows (`.png`, `.jpg`, `.jpeg`) are written by
+`exifcleaner-node`'s native engine in copy mode, not ExifTool (58-01). The WebP row's Save-as-copy
+route now keeps IFD0 resolution when Preserve resolution is on: WebP does not preserve resolution
+natively, so a copy request with `preserveResolution: true` routes to ExifTool, matching overwrite
+mode; with `preserveResolution: false` it routes to the native engine and still drops resolution.
+The 4.4.0 limitation this file previously documented -- WebP Save-as-copy losing resolution
+regardless of the setting (D-33) -- no longer holds; `resolution-matrix.spec.ts` Test 1 no longer
+special-cases `.webp`, and Test 2/Test 3 assert the ExifTool and native routes explicitly.
