@@ -20,16 +20,6 @@ import { readRawTagLines } from "../helpers/raw_probe";
 const german = readLocale("de");
 const french = readLocale("fr");
 
-// Residue directories are the library's own atomic-publication staging leftovers
-// (see tests/integration/native_metadata_oracle.test.ts's identical comment) --
-// discovered at runtime so this helper stays a no-op on platforms where disposal
-// succeeds. Phase 58-09: default settings now route JPEG/PNG copies natively.
-function residueEntries(dir: string): string[] {
-	return fs
-		.readdirSync(dir)
-		.filter((name) => name.startsWith(".exifcleaner-stage-"));
-}
-
 const EXIFTOOL_PATH =
 	process.platform === "win32"
 		? path.resolve(".resources/win/bin/exiftool.exe")
@@ -397,7 +387,7 @@ test.describe("Settings", () => {
 			const after = snapshotDir(dir);
 
 			assertDirEffect(before, after, {
-				added: ["sample_cleaned.jpg", ...residueEntries(dir)],
+				added: ["sample_cleaned.jpg"],
 				unchanged: ["sample.jpg"],
 				modified: [],
 				removed: [],
@@ -584,7 +574,7 @@ test.describe("Settings", () => {
 			const after = snapshotDir(dir);
 
 			assertDirEffect(before, after, {
-				added: ["sample_cleaned.jpg", ...residueEntries(dir)],
+				added: ["sample_cleaned.jpg"],
 				unchanged: ["sample.jpg"],
 				modified: [],
 				removed: [],
@@ -726,7 +716,7 @@ test.describe("Settings", () => {
 
 			const after = snapshotDir(dir);
 			assertDirEffect(before, after, {
-				added: ["sample_cleaned_2.jpg", ...residueEntries(dir)],
+				added: ["sample_cleaned_2.jpg"],
 				unchanged: ["sample.jpg", "sample_cleaned.jpg"],
 				modified: [],
 				removed: [],

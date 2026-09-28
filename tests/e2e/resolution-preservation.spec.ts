@@ -37,16 +37,6 @@ function sha256(filePath: string): string {
 	return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
-// Residue directories are the library's own atomic-publication staging leftovers
-// (see tests/integration/native_metadata_oracle.test.ts's identical comment) --
-// discovered at runtime so this helper stays a no-op on platforms where disposal
-// succeeds. Phase 58-09: default settings now route JPEG/PNG copies natively.
-function residueEntries(dir: string): string[] {
-	return fs
-		.readdirSync(dir)
-		.filter((name) => name.startsWith(".exifcleaner-stage-"));
-}
-
 // Helper functions, not inline arrows, so the local `window: Page` variable in the
 // describe block below never shadows the browser-global `window` referenced inside
 // page.evaluate's callback.
@@ -147,7 +137,7 @@ test.describe("Resolution preservation — default settings, real IPC path", () 
 			const after = snapshotDir(dir);
 
 			assertDirEffect(before, after, {
-				added: ["on_cleaned.jpg", "off_cleaned.jpg", ...residueEntries(dir)],
+				added: ["on_cleaned.jpg", "off_cleaned.jpg"],
 				modified: [],
 				removed: [],
 				unchanged: ["on.jpg", "off.jpg"],
@@ -281,7 +271,6 @@ test.describe("Resolution preservation — default settings, real IPC path", () 
 					"both_off_cleaned.jpg",
 					"phys_off_cleaned.png",
 					"jfif_off_cleaned.jpg",
-					...residueEntries(dir),
 				],
 				modified: [],
 				removed: [],

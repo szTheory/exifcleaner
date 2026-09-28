@@ -17,16 +17,6 @@ import {
 	seedXattrs,
 } from "./helpers/xattr_assertions";
 
-// Residue directories are the library's own atomic-publication staging leftovers
-// (see tests/integration/native_metadata_oracle.test.ts's identical comment) --
-// discovered at runtime so this helper stays a no-op on platforms where disposal
-// succeeds. Phase 58-09: default settings now route JPEG/PNG copies natively.
-function residueEntries(dir: string): string[] {
-	return fs
-		.readdirSync(dir)
-		.filter((name) => name.startsWith(".exifcleaner-stage-"));
-}
-
 const SEEDED_XATTRS = [
 	{ name: "com.apple.quarantine", valueHex: "303038313b" },
 	{ name: "com.apple.metadata:kMDItemWhereFroms", valueHex: "706c616e" },
@@ -123,7 +113,7 @@ if (process.platform === "darwin") {
 				await waitForProcessing(window);
 
 				assertDirEffect(before, snapshotDir(dir), {
-					added: ["sample_cleaned_2.jpg", ...residueEntries(dir)],
+					added: ["sample_cleaned_2.jpg"],
 					unchanged: ["sample.jpg", "sample_cleaned.jpg"],
 				});
 				expect(fs.existsSync(copyPath)).toBe(true);

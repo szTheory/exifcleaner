@@ -30,28 +30,6 @@ function sha256(filePath: string): string {
 	return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
-// Mirrors processing_driver.ts's own (unexported) NATIVE_STAGE_RESIDUE_PATTERN /
-// discoverNativeStageResidue: exifcleaner-node's native-route publication transaction
-// deliberately retains a bounded, randomly-named staging directory on POSIX (Phase 46
-// decision -- no atomic, identity-verified delete-by-handle primitive is available
-// cross-platform). assertDirEffect has no ignore-list, so every run's actual residue
-// name is discovered and named explicitly, exactly like every other observed mutation.
-const NATIVE_STAGE_RESIDUE_PATTERN =
-	/^\.exifcleaner-stage-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-
-function discoverNativeStageResidue(
-	before: ReturnType<typeof snapshotDir>,
-	after: ReturnType<typeof snapshotDir>,
-): string[] {
-	const residue: string[] = [];
-	for (const key of after.keys()) {
-		if (!before.has(key) && NATIVE_STAGE_RESIDUE_PATTERN.test(key)) {
-			residue.push(key);
-		}
-	}
-	return residue;
-}
-
 function fileContainsSentinel(filePath: string, sentinel: string): boolean {
 	const raw = fs.readFileSync(filePath);
 	return (
@@ -179,16 +157,13 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 			}
 
 			assertDirEffect(onBefore, onAfter, {
-				added: [...addedOn, ...discoverNativeStageResidue(onBefore, onAfter)],
+				added: addedOn,
 				modified: [],
 				removed: [],
 				unchanged: [...onPaths.values()].map((p) => path.basename(p)),
 			});
 			assertDirEffect(offBefore, offAfter, {
-				added: [
-					...addedOff,
-					...discoverNativeStageResidue(offBefore, offAfter),
-				],
+				added: addedOff,
 				modified: [],
 				removed: [],
 				unchanged: [...offPaths.values()].map((p) => path.basename(p)),
