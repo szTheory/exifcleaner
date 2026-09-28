@@ -40,11 +40,12 @@ function nativeErrorFixture({
 	};
 }
 
-// This is the end-to-end proof of the single capability-driven admission path
-// (D-13, D-15, D-20): a save-as-copy request whose source is eligible by
-// registered capability alone reaches the native port exactly once, an
-// overwrite request never reaches it regardless of destination shape, and
-// content — not the source filename — decides eligibility.
+// This is the end-to-end proof of the single extension-identified admission path
+// (D-01, D-13, D-15, D-20): a save-as-copy request whose source extension matches
+// exactly one registered capability reaches the native port exactly once, an
+// overwrite request never reaches it regardless of destination shape, and the
+// extension — never the bytes — decides eligibility; content-mismatch handling is
+// owned entirely by exifcleaner-node's own pre-write admission decline (D-03).
 describe("native metadata routing tracer", () => {
 	it("routes an eligible save-as-copy request to native by capability alone", async () => {
 		const exiftool = new FakeMetadataEngine();
@@ -94,14 +95,16 @@ describe("native metadata routing tracer", () => {
 		expect(result).toBe(exiftool.sanitizeResult);
 	});
 
-	it("routes an eligible source to native even when its extension is not .webp", async () => {
+	it("routes a source to ExifTool with zero native calls when its extension is not registered", async () => {
 		const exiftool = new FakeMetadataEngine();
 		const native = new FakeNativeMetadata();
 		const engine = new HybridMetadataEngine({ exiftool, native });
 
-		// Content decides the reader; the name decides the written filename
-		// (the libvips rule, D-17). A source with WebP bytes under any extension
-		// is eligible — the capability table has no extension notion.
+		// The extension identifies the capability (D-01): a .bin source matches no
+		// registered format's extensions array, so it is never a native candidate —
+		// regardless of what bytes it actually carries. This inverts the WebP-era
+		// "content decides eligibility regardless of filename" rule this test used
+		// to encode.
 		const result = await engine.sanitize({
 			source: "/files/source.bin",
 			destination: "/files/clean.bin",
@@ -112,8 +115,11 @@ describe("native metadata routing tracer", () => {
 			preserveTimestamps: true,
 		});
 
-		expect(result).toEqual({ ok: true, value: undefined });
-		expect(native.sanitizeCalls).toHaveLength(1);
+		expect(result).toBe(exiftool.sanitizeResult);
+		expect(native.sanitizeCalls).toHaveLength(0);
+		expect(
+			exiftool.calls.filter((call) => call.method === "sanitize"),
+		).toHaveLength(1);
 	});
 
 	it("mints and redeems a grant for a proven pre-write safe decline, authorizing exactly one ExifTool sanitize call", async () => {

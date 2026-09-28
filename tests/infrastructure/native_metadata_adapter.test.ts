@@ -13,12 +13,14 @@ const capabilities = {
 	formats: [
 		{
 			format: "webp" as const,
+			extensions: [".webp"],
 			sanitize: true,
 			detection: "magic" as const,
 			preserves: {
 				orientation: true,
 				colorProfile: true,
 				timestamps: true,
+				resolution: false,
 			},
 		},
 	],
@@ -63,8 +65,36 @@ describe("NativeMetadataAdapter", () => {
 			destinationPath: request.destination,
 			preserveOrientation: request.preserveOrientation,
 			preserveColorProfile: request.preserveColorProfile,
+			preserveResolution: request.preserveResolution,
 			preserveTimestamps: request.preserveTimestamps,
 			signal: request.signal,
+		});
+	});
+
+	test("forwards preserveResolution true as-is", async () => {
+		const adapter = new NativeMetadataAdapter();
+		const request = {
+			source: "/tmp/source.png",
+			destination: "/tmp/clean.png",
+			outputMode: "copy" as const,
+			preserveOrientation: true,
+			preserveColorProfile: true,
+			preserveResolution: true,
+			preserveTimestamps: true,
+		};
+		sanitizeFile.mockResolvedValue({ ok: true, value: {} });
+
+		expect(await adapter.sanitize(request)).toEqual({
+			ok: true,
+			value: undefined,
+		});
+		expect(sanitizeFile).toHaveBeenCalledWith({
+			sourcePath: request.source,
+			destinationPath: request.destination,
+			preserveOrientation: request.preserveOrientation,
+			preserveColorProfile: request.preserveColorProfile,
+			preserveResolution: true,
+			preserveTimestamps: request.preserveTimestamps,
 		});
 	});
 
