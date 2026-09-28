@@ -12,12 +12,14 @@ export interface NativeMetadataCapabilities {
 
 export interface NativeFormatCapabilities {
 	readonly format: string;
+	readonly extensions: readonly string[];
 	readonly sanitize: boolean;
 	readonly detection: "magic";
 	readonly preserves: {
 		readonly orientation: boolean;
 		readonly colorProfile: boolean;
 		readonly timestamps: boolean;
+		readonly resolution: boolean;
 	};
 }
 
@@ -29,11 +31,11 @@ export interface NativeSanitizeRequest {
 	readonly outputMode: "copy";
 	readonly preserveOrientation: boolean;
 	readonly preserveColorProfile: boolean;
-	// Inert pass-through field (52-01 D-33 deviation, user-approved): present only
-	// so this type stays a structural subtype of MetadataEnginePort["sanitize"]'s
-	// request after preserveResolution became required there. Never read by
-	// isNativeCopyCandidate, HybridMetadataEngine or the native adapter — native
-	// WebP copy-mode routing is unchanged.
+	// Read by isNativeCopyCandidate (58-01, D-04/D-05): a request asking to keep
+	// resolution goes native only when the source format's capability preserves
+	// it (NativeFormatCapabilities.preserves.resolution). Forwarded to
+	// exifcleaner-node's sanitizeFile, which requires it as an explicit boolean
+	// (0.3.0 rejects a missing/non-boolean value with invalid-options).
 	readonly preserveResolution: boolean;
 	readonly preserveTimestamps: boolean;
 	readonly signal?: AbortSignal | undefined;

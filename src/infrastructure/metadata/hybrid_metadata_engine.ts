@@ -72,14 +72,38 @@ export class HybridMetadataEngine implements MetadataEnginePort {
 			return false;
 		}
 
-		const candidate = this.capabilities.formats.find(
-			(format) =>
-				format.sanitize &&
-				format.detection === "magic" &&
-				(!request.preserveOrientation || format.preserves.orientation) &&
-				(!request.preserveColorProfile || format.preserves.colorProfile) &&
-				(!request.preserveTimestamps || format.preserves.timestamps),
+		// The extension identifies the capability (D-01): a copy request is native-eligible
+		// only when its source extension matches exactly one registered format's declared
+		// extensions. Content never decides eligibility here — no bytes are read before
+		// routing — so a misnamed file (e.g. WebP bytes behind a .png extension) is not an
+		// app-level decline; it is caught by exifcleaner-node's own pre-write admission
+		// check, which the unchanged fallback grant in native_fallback_authority.ts already
+		// turns into an ExifTool retry (D-03). An ambiguous table — two formats claiming the
+		// same extension — fails closed to ExifTool rather than guessing.
+		const extension = path.extname(request.source).toLowerCase();
+		if (extension === "") {
+			return false;
+		}
+		const matches = this.capabilities.formats.filter((format) =>
+			format.extensions.some(
+				(candidateExtension) =>
+					candidateExtension.toLowerCase() === extension,
+			),
 		);
-		return candidate !== undefined;
+		if (matches.length !== 1) {
+			return false;
+		}
+		const [format] = matches;
+		if (format === undefined) {
+			return false;
+		}
+		return (
+			format.sanitize &&
+			format.detection === "magic" &&
+			(!request.preserveOrientation || format.preserves.orientation) &&
+			(!request.preserveColorProfile || format.preserves.colorProfile) &&
+			(!request.preserveTimestamps || format.preserves.timestamps) &&
+			(!request.preserveResolution || format.preserves.resolution)
+		);
 	}
 }
