@@ -263,3 +263,150 @@ describe("58-01: extension-identified native copy routing with real bytes", () =
 		}
 	});
 });
+
+describe("59: rollback route — a removed or declining native format reaches ExifTool from the app", () => {
+	const temporaryDirs: string[] = [];
+
+	afterEach(() => {
+		for (const dir of temporaryDirs.splice(0)) {
+			fs.rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
+	function makeTempDir(prefix: string): string {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
+		temporaryDirs.push(dir);
+		return dir;
+	}
+
+	it("a format absent from the real capability table (as after removing its HANDLERS entry) is cleaned by ExifTool with zero native calls", async () => {
+		const dir = makeTempDir("native-rollback-routing-a-");
+		const source = path.join(dir, "sample.png");
+		const destination = path.join(dir, "sample-cleaned.png");
+		fs.copyFileSync(path.join(FIXTURES, "sample.png"), source);
+		const sourceDigest = sha256(source);
+		const beforeDir = snapshotDir(dir);
+
+		const process = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+		const exiftool = new ExifToolAdapter({ process });
+		const native = new NativeMetadataAdapter();
+		const realCapabilities = native.getCapabilities();
+		vi.spyOn(native, "getCapabilities").mockReturnValue({
+			...realCapabilities,
+			formats: realCapabilities.formats.filter(
+				(format) => !format.extensions.includes(".png"),
+			),
+		});
+		// getCapabilities() is read once in HybridMetadataEngine's constructor
+		// (hybrid_metadata_engine.ts:29), so the spy above must be installed
+		// before the engine is constructed.
+		const hybrid = new HybridMetadataEngine({ exiftool, native });
+		const exiftoolWrite = vi.spyOn(exiftool, "sanitize");
+		const nativeWrite = vi.spyOn(native, "sanitize");
+
+		await process.open();
+		try {
+			const result = await hybrid.sanitize({
+				source,
+				destination,
+				outputMode: "copy",
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				preserveResolution: true,
+				preserveTimestamps: false,
+			});
+
+			expect(result).toEqual({ ok: true, value: undefined });
+			expect(nativeWrite).not.toHaveBeenCalled();
+			expect(exiftoolWrite).toHaveBeenCalledOnce();
+			expect(fs.existsSync(destination)).toBe(true);
+			expect(sha256(source)).toBe(sourceDigest);
+
+			assertDirEffect(beforeDir, snapshotDir(dir), {
+				unchanged: ["sample.png"],
+				added: ["sample-cleaned.png"],
+				modified: [],
+				removed: [],
+			});
+
+			const outputVerification = await exiftool.inspect({
+				source: destination,
+				purpose: "output-verification",
+			});
+			expect(outputVerification).toMatchObject({
+				ok: true,
+				value: { recordCount: 1, verification: { error: undefined } },
+			});
+			if (!outputVerification.ok) return;
+			expect(String(outputVerification.value.verification.fileType)).toMatch(
+				/PNG/u,
+			);
+		} finally {
+			await process.close();
+		}
+	});
+
+	it("a real exifcleaner-node unsupported-format decline is retried once through ExifTool with the source unchanged", async () => {
+		const dir = makeTempDir("native-rollback-routing-b-");
+		const source = path.join(dir, "misnamed.png");
+		const destination = path.join(dir, "misnamed-cleaned.png");
+		// Real GIF bytes named .png: the real exifcleaner-node package declines
+		// this with an unsupported-format error during pre-write admission,
+		// before any native write starts (measured 2026-09-28, 59-CONTEXT.md).
+		fs.copyFileSync(path.join(FIXTURES, "GIF.gif"), source);
+		const sourceDigest = sha256(source);
+		const beforeDir = snapshotDir(dir);
+
+		const process = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
+		const exiftool = new ExifToolAdapter({ process });
+		const native = new NativeMetadataAdapter();
+		const hybrid = new HybridMetadataEngine({ exiftool, native });
+		const exiftoolWrite = vi.spyOn(exiftool, "sanitize");
+		const nativeWrite = vi.spyOn(native, "sanitize");
+
+		const request = {
+			source,
+			destination,
+			outputMode: "copy" as const,
+			preserveOrientation: true,
+			preserveColorProfile: true,
+			preserveResolution: true,
+			preserveTimestamps: false,
+		};
+
+		await process.open();
+		try {
+			const result = await hybrid.sanitize(request);
+
+			expect(nativeWrite).toHaveBeenCalledOnce();
+			const nativeResult = await nativeWrite.mock.results[0]?.value;
+			expect(nativeResult).toMatchObject({
+				ok: false,
+				error: {
+					code: "native-error",
+					libraryError: {
+						code: "unsupported-format",
+						nativeWrite: "not-started",
+					},
+				},
+			});
+			expect(exiftoolWrite).toHaveBeenCalledOnce();
+			// Same request object reference, not merely an equal shape: the
+			// fallback path in hybrid_metadata_engine.ts's sanitize() forwards
+			// `request` unchanged to `this.exiftool.sanitize(request)`.
+			expect(exiftoolWrite.mock.calls[0]?.[0]).toBe(request);
+			expect(sha256(source)).toBe(sourceDigest);
+			expect(fs.existsSync(destination)).toBe(false);
+			expect(result.ok).toBe(false);
+
+			assertDirEffect(beforeDir, snapshotDir(dir), {
+				unchanged: ["misnamed.png"],
+				added: [],
+				modified: [],
+				removed: [],
+			});
+		} finally {
+			await process.close();
+		}
+	});
+});
