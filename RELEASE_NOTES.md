@@ -1,4 +1,4 @@
-# ExifCleaner 4.4.0
+# ExifCleaner 4.5.0
 
 ExifCleaner 4.4.0 removes metadata that earlier versions left behind in comments, TIFF and RAW files, keeps a cleaned file's print resolution, and recovers from writes that run past their time limit.
 
@@ -20,10 +20,11 @@ A **Preserve resolution** setting, on by default, keeps a cleaned file's print r
 - A 4.0.0 changelog entry that claimed macOS code signing and notarization was corrected. Releases are unsigned by explicit maintainer policy ([#362](https://github.com/szTheory/exifcleaner/issues/362)).
 
 <!-- exifcleaner-known-limitations:start v1 -->
-## Known limitations in 4.4.0
+## Known limitations in 4.5.0
 
 No executable release-blocking known gaps are approved for this release; documented format constraints follow below.
 <!-- exifcleaner-known-limitations:end -->
+
 
 
 ### Format constraints
