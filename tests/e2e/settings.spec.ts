@@ -105,7 +105,7 @@ test.describe("Settings", () => {
 			.poll(() => page.evaluate(() => window.api.settings.get()))
 			.toMatchObject({ language: "de" });
 
-		await closeApp(app);
+		await closeApp(app, { keepUserDataDir: true });
 		const relaunched = await launchApp({ userDataDir, pinEnglish: false });
 		app = relaunched.app;
 		page = relaunched.window;
