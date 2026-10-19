@@ -93,7 +93,7 @@ describe("HybridMetadataEngine", () => {
 
 		const result = await engine.sanitize(request);
 
-		expect(result).toEqual({ ok: true, value: undefined });
+		expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 		expect(native.sanitizeCalls).toEqual([request]);
 		expect(exiftool.calls.filter((call) => call.method === "sanitize")).toEqual(
 			[],
@@ -111,7 +111,7 @@ describe("HybridMetadataEngine", () => {
 
 		const result = await engine.sanitize(sanitizeRequest);
 
-		expect(result).toEqual({ ok: true, value: undefined });
+		expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 		expect(native.sanitizeCalls).toHaveLength(1);
 		expect(exiftool.calls.filter((call) => call.method === "sanitize")).toEqual(
 			[],
@@ -142,7 +142,7 @@ describe("HybridMetadataEngine", () => {
 
 			const result = await engine.sanitize(request);
 
-			expect(result).toBe(exiftool.sanitizeResult);
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			expect(native.sanitizeCalls).toEqual([request]);
 			expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 		},
@@ -238,7 +238,7 @@ describe("HybridMetadataEngine", () => {
 
 		const result = await engine.sanitize(request);
 
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(native.sanitizeCalls).toEqual([]);
 		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 	});
@@ -285,7 +285,7 @@ describe("HybridMetadataEngine", () => {
 
 		const result = await engine.sanitize(sanitizeRequest);
 
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(native.sanitizeCalls).toEqual([]);
 		expect(exiftool.calls).toEqual([
 			{ method: "sanitize", request: sanitizeRequest },
@@ -320,7 +320,7 @@ describe("HybridMetadataEngine", () => {
 
 		const result = await engine.sanitize(sanitizeRequest);
 
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(native.sanitizeCalls).toEqual([]);
 		expect(exiftool.calls).toEqual([
 			{ method: "sanitize", request: sanitizeRequest },
@@ -360,7 +360,7 @@ describe("HybridMetadataEngine", () => {
 
 		const result = await engine.sanitize(request);
 
-		expect(result).toEqual({ ok: true, value: undefined });
+		expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 		expect(native.sanitizeCalls).toHaveLength(1);
 		expect(exiftool.calls.filter((call) => call.method === "sanitize")).toEqual(
 			[],
@@ -392,7 +392,7 @@ describe("HybridMetadataEngine", () => {
 
 		const result = await engine.sanitize(sanitizeRequest);
 
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(native.sanitizeCalls).toEqual([sanitizeRequest]);
 		expect(exiftool.calls).toEqual([
 			{ method: "sanitize", request: sanitizeRequest },
@@ -412,7 +412,7 @@ describe("HybridMetadataEngine", () => {
 
 			const result = await engine.sanitize(request);
 
-			expect(result).toBe(exiftool.sanitizeResult);
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			expect(native.sanitizeCalls).toEqual([]);
 			expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 		},

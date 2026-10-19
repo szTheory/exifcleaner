@@ -62,7 +62,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 		const result = await engine.sanitize(request);
 
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(native.sanitizeCalls).toEqual([]);
 		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 	});
@@ -86,7 +86,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 			const result = await engine.sanitize(request);
 
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 			expect(native.sanitizeCalls).toEqual([request]);
 			expect(
 				exiftool.calls.filter((call) => call.method === "sanitize"),
@@ -106,7 +106,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 		const result = await engine.sanitize(request);
 
-		expect(result).toEqual({ ok: true, value: undefined });
+		expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 		expect(native.sanitizeCalls).toEqual([request]);
 		expect(exiftool.calls.filter((call) => call.method === "sanitize")).toEqual(
 			[],
@@ -127,7 +127,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 			const result = await engine.sanitize(request);
 
-			expect(result).toBe(exiftool.sanitizeResult);
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			expect(native.sanitizeCalls).toEqual([]);
 			expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 		},
@@ -159,7 +159,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 		const result = await engine.sanitize(request);
 
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(native.sanitizeCalls).toEqual([]);
 		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 	});
@@ -180,7 +180,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 		const result = await engine.sanitize(request);
 
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(native.sanitizeCalls).toEqual([]);
 		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 	});
@@ -253,7 +253,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 				const result = await engine.sanitize(request);
 
-				expect(result).toBe(exiftool.sanitizeResult);
+				expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 				expect(native.sanitizeCalls).toEqual([]);
 				expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 			});
@@ -267,7 +267,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 				const result = await engine.sanitize(request);
 
-				expect(result).toEqual({ ok: true, value: undefined });
+				expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 				expect(native.sanitizeCalls).toEqual([request]);
 				expect(
 					exiftool.calls.filter((call) => call.method === "sanitize"),
