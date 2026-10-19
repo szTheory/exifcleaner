@@ -16,10 +16,7 @@ import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { StripMetadataCommand } from "../../src/application/commands/strip_metadata_command";
 import { VerifyGeneratedOutputQuery } from "../../src/application/queries/verify_generated_output_query";
-import {
-	copyModeLeakCheckFormatOf,
-	findLeakedTags,
-} from "../../src/domain/exif/copy_mode_leak_check";
+import { copyModeLeakCheckFormatOf } from "../../src/domain/exif/copy_mode_leak_check";
 import { generateCleanedPath } from "../../src/domain/files/cleaned_path";
 import { copyModeLeakCheckDemandOf } from "../../src/domain/files/file_types";
 import { ExifToolAdapter } from "../../src/infrastructure/exiftool/exiftool_adapter";
@@ -59,13 +56,6 @@ function sha256(filePath: string): string {
 
 function exiftoolTag(filePath: string, tag: string): string {
 	return execFileSync(EXIFTOOL_PATH, ["-s3", tag, filePath]).toString().trim();
-}
-
-function reopenRecord(filePath: string): Record<string, unknown> {
-	const raw = execFileSync(EXIFTOOL_PATH, ["-j", "-G1:2:4", filePath], {
-		maxBuffer: 64 * 1024 * 1024,
-	}).toString();
-	return (JSON.parse(raw) as Record<string, unknown>[])[0] ?? {};
 }
 
 // Row 8 input: every `heic` brand in the ftyp box of sample-sips.heic (major brand at offset 8
@@ -317,6 +307,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 			exiftoolWrite,
 			nativeWrite,
 			verifySpy,
+			query,
 		};
 	}
 
@@ -399,6 +390,27 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 				).toBe("native");
 			}
 			assertSourceAndDir(ran, row, [path.basename(ran.generatedPath)]);
+			if (row.row === "7") {
+				// T-63-30: the SAME reopened output judged with native provenance leaks (the
+				// ICC survives only under the ExifTool-provenance exemption).
+				const asNative = await ran.query.execute({
+					generatedPath: ran.generatedPath,
+					copyModeLeakCheck: {
+						demand: "required",
+						preserveOrientation: row.settings.preserveOrientation,
+						preserveColorProfile: row.settings.preserveColorProfile,
+						preserveResolution: row.settings.preserveResolution,
+						writtenBy: "native",
+					},
+				});
+				expect(asNative.ok).toBe(false);
+				if (!asNative.ok) {
+					expect(asNative.error.code).toBe("output-metadata-leak");
+					expect(
+						"leakedTags" in asNative.error ? asNative.error.leakedTags : [],
+					).not.toHaveLength(0);
+				}
+			}
 		},
 	);
 
@@ -424,9 +436,179 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 		expect(h).toBeLessThanOrEqual(64);
 	});
 
-	// Silence "unused" for helpers used by the refusal rows below.
-	void RESOLUTION_ON;
-	void findLeakedTags;
-	void reopenRecord;
-	void assertEngine;
+	interface RefusalRow {
+		readonly row: string;
+		readonly title: string;
+		readonly fixture: string;
+		readonly sourceName: string;
+		readonly settings: Settings;
+		readonly nativeDecline?: "unsupported-format" | "unsupported-feature";
+		readonly demand: "required" | "when-allowlisted";
+	}
+
+	// Rows 6, 9, 13: ExifTool refuses (it chooses its writer by the file NAME, Writer.pl:2550-2558),
+	// the transaction ends write-failed, nothing is written, the source and directory are unchanged.
+	const REFUSALS: readonly RefusalRow[] = [
+		{
+			row: "6",
+			title:
+				"WebP bytes named .heic with preserveResolution: native declines unsupported-feature, ExifTool refuses",
+			fixture: "sample.webp",
+			sourceName: "photo.heic",
+			settings: RESOLUTION_ON,
+			nativeDecline: "unsupported-feature",
+			demand: "required",
+		},
+		{
+			row: "9",
+			title:
+				"GIF bytes named .heic: node declines unsupported-format, ExifTool refuses",
+			fixture: "GIF.gif",
+			sourceName: "photo.heic",
+			settings: DEFAULTS,
+			nativeDecline: "unsupported-format",
+			demand: "required",
+		},
+		{
+			row: "13",
+			title:
+				"JPEG bytes named .tif (D-08): not a native candidate, ExifTool refuses by the .tif name",
+			fixture: "sample.jpg",
+			sourceName: "photo.tif",
+			settings: DEFAULTS,
+			demand: "when-allowlisted",
+		},
+	];
+
+	it.each(REFUSALS)("mismatch row $row: $title", async (refusal) => {
+		const ran = await run({
+			...refusal,
+			expect: { engine: "native", outcome: "write-failed" },
+		});
+		expect(ran.handlerDescription).toBe("");
+		expect(ran.demand).toBe(refusal.demand);
+		if (refusal.nativeDecline === undefined) {
+			expect(ran.nativeWrite).not.toHaveBeenCalled();
+		} else {
+			expect(ran.nativeWrite).toHaveBeenCalledOnce();
+			const native = await ran.nativeWrite.mock.results[0]?.value;
+			expect(native.ok).toBe(false);
+			expect(native.error.code).toBe("native-error");
+			expect(native.error.nativeCode).toBe(refusal.nativeDecline);
+			expect(native.error.phase).toBe("admission");
+			expect(native.error.nativeWrite).toBe("not-started");
+		}
+		expect(ran.exiftoolWrite).toHaveBeenCalledOnce();
+		const exiftoolResult = await ran.exiftoolWrite.mock.results[0]?.value;
+		expect(exiftoolResult.ok).toBe(false);
+		expect(exiftoolResult.error.backend).toBe("exiftool");
+		expect(ran.outcome).toEqual({ ok: false, error: { code: "write-failed" } });
+		expect(ran.verifySpy).not.toHaveBeenCalled();
+		expect(fs.existsSync(ran.generatedPath)).toBe(false);
+		assertSourceAndDir(ran, { sourceName: refusal.sourceName } as Row, []);
+	});
+
+	// Rows 10 and 15: a write succeeds but the reopened FileType (WEBP / MP4) has no allowlist
+	// while the .png / .heic name demands the leak check: fail closed, output removed (F-63-9
+	// pinned, not changed).
+	const FAIL_CLOSED = [
+		{
+			row: "10",
+			title: "WebP bytes named .png: native writes, verify fails closed",
+			fixture: "sample.webp",
+			sourceName: "photo.png",
+			sourceFileType: "Extended WEBP",
+			engine: "native",
+		},
+		{
+			row: "15",
+			title:
+				"MP4 bytes (no visual track) named .heic: node declines, ExifTool writes, verify fails closed",
+			fixture: "sample.mp4",
+			sourceName: "photo.heic",
+			sourceFileType: "MP4",
+			engine: "exiftool-after-native-decline",
+		},
+	] as const;
+
+	it.each(FAIL_CLOSED)("mismatch row $row: $title", async (failClosed) => {
+		const row: Row = {
+			title: failClosed.title,
+			row: failClosed.row,
+			fixture: failClosed.fixture,
+			sourceName: failClosed.sourceName,
+			settings: DEFAULTS,
+			expect: {
+				engine: failClosed.engine,
+				nativeDecline: "unsupported-format",
+				outcome: "verification-failed",
+			},
+		};
+		const ran = await run(row);
+		expect(ran.handlerDescription).toBe("");
+		expect(exiftoolTag(ran.source, "-FileType")).toBe(
+			failClosed.sourceFileType,
+		);
+		// No allowlist exists for the reopened content, so the format mapping is undefined.
+		expect(
+			copyModeLeakCheckFormatOf({ fileType: failClosed.sourceFileType }),
+		).toBeUndefined();
+		await assertEngine(ran, row);
+		expect(ran.outcome).toEqual({
+			ok: false,
+			error: {
+				code: "verification-failed",
+				verificationCode: "output-metadata-leak",
+			},
+		});
+		expect(ran.verifySpy).toHaveBeenCalledOnce();
+		expect(ran.verifySpy.mock.calls[0]?.[0]?.copyModeLeakCheck?.demand).toBe(
+			"required",
+		);
+		await expect(ran.verifySpy.mock.results[0]?.value).resolves.toEqual({
+			ok: false,
+			error: {
+				code: "output-metadata-leak",
+				detail:
+					"Copy-mode leak check has no permitted-tag set for this file type",
+				leakedTags: [],
+			},
+		});
+		expect(fs.existsSync(ran.generatedPath)).toBe(false);
+		assertSourceAndDir(ran, row, []);
+	});
+
+	// Row 14 (D-08, T-63-51): ICC-bearing HEIC bytes named .mov are not a native candidate, ExifTool
+	// writes within the QuickTime family, the verify call carries the "when-allowlisted" demand, and
+	// the leak check demonstrably ran against the reopened HEIC allowlist: exemptionsApplied
+	// [F-HEIC-ICC] can only be produced by the leak check.
+	it("mismatch row 14: ICC HEIC bytes named .mov are leak-checked by the reopened FileType, not published unchecked", async () => {
+		const row: Row = {
+			title: "",
+			row: "14",
+			fixture: "sample-sips-icc.heic",
+			sourceName: "photo.mov",
+			settings: COLOR_OFF,
+			expect: { engine: "exiftool-only", outcome: "published" },
+		};
+		const ran = await run(row);
+		expect(ran.handlerDescription).toBe("");
+		expect(ran.demand).toBe("when-allowlisted");
+		await assertEngine(ran, row);
+		expect(ran.outcome).toEqual({
+			ok: true,
+			value: { outputPath: ran.generatedPath },
+		});
+		expect(exiftoolTag(ran.generatedPath, "-FileType")).toBe("HEIC");
+		expect(ran.verifySpy).toHaveBeenCalledOnce();
+		expect(ran.verifySpy.mock.calls[0]?.[0]?.copyModeLeakCheck).toMatchObject({
+			demand: "when-allowlisted",
+			writtenBy: "exiftool",
+		});
+		await expect(ran.verifySpy.mock.results[0]?.value).resolves.toEqual({
+			ok: true,
+			value: { exemptionsApplied: ["F-HEIC-ICC"] },
+		});
+		assertSourceAndDir(ran, row, ["photo_cleaned.mov"]);
+	});
 });
