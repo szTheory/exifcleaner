@@ -417,4 +417,114 @@ describe("HybridMetadataEngine", () => {
 			expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 		},
 	);
+	// D-05 #2: provenance is decided only by the router. Fake ExifTool engines here
+	// deliberately lie (claim "native") so an inner value forwarded unchanged is caught.
+	describe("router provenance (D-05 #2)", () => {
+		const heicRequest = {
+			source: "/files/photo.heic",
+			destination: "/files/photo_cleaned.heic",
+			outputMode: "copy" as const,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		};
+
+		function heicNative(): FakeNativeMetadata {
+			const native = new FakeNativeMetadata();
+			native.capabilities = {
+				formats: [
+					{
+						format: "heic",
+						extensions: [".heic", ".heif"],
+						sanitize: true,
+						detection: "magic",
+						preserves: {
+							orientation: true,
+							colorProfile: true,
+							timestamps: true,
+							resolution: true,
+						},
+					},
+				],
+			};
+			return native;
+		}
+
+		it("native success reports writtenBy native", async () => {
+			const exiftool = new FakeMetadataEngine();
+			const native = heicNative();
+			const engine = new HybridMetadataEngine({ exiftool, native });
+
+			const result = await engine.sanitize(heicRequest);
+
+			expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
+			expect(native.sanitizeCalls).toHaveLength(1);
+			expect(
+				exiftool.calls.filter((call) => call.method === "sanitize"),
+			).toEqual([]);
+		});
+
+		it("a granted native decline followed by ExifTool reports exiftool even when the fake ExifTool claims native", async () => {
+			const exiftool = new FakeMetadataEngine();
+			exiftool.sanitizeResult = { ok: true, value: { writtenBy: "native" } };
+			const native = heicNative();
+			native.sanitizeResult = {
+				ok: false,
+				error: nativeError({
+					phase: "admission",
+					nativeWrite: "not-started",
+					nativeCode: "unsupported-format",
+				}),
+			};
+			const engine = new HybridMetadataEngine({ exiftool, native });
+
+			const result = await engine.sanitize(heicRequest);
+
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
+			expect(
+				exiftool.calls.filter((call) => call.method === "sanitize"),
+			).toHaveLength(1);
+		});
+
+		it("a non-candidate overwrite-mode request reports exiftool even when the fake ExifTool claims native", async () => {
+			const exiftool = new FakeMetadataEngine();
+			exiftool.sanitizeResult = { ok: true, value: { writtenBy: "native" } };
+			const native = heicNative();
+			const engine = new HybridMetadataEngine({ exiftool, native });
+			const request = {
+				...heicRequest,
+				outputMode: "overwrite" as const,
+				destination: undefined,
+			};
+
+			const result = await engine.sanitize(request);
+
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
+			expect(native.sanitizeCalls).toEqual([]);
+			expect(
+				exiftool.calls.filter((call) => call.method === "sanitize"),
+			).toHaveLength(1);
+		});
+
+		it("an ungranted native error passes through unchanged without calling ExifTool", async () => {
+			const exiftool = new FakeMetadataEngine();
+			exiftool.sanitizeResult = { ok: true, value: { writtenBy: "native" } };
+			const native = heicNative();
+			native.sanitizeResult = {
+				ok: false,
+				error: nativeError({
+					phase: "transaction",
+					nativeWrite: "started",
+					nativeCode: "write-failed",
+				}),
+			};
+			const engine = new HybridMetadataEngine({ exiftool, native });
+
+			const result = await engine.sanitize(heicRequest);
+
+			expect(result).toBe(native.sanitizeResult);
+			expect(exiftool.calls).toEqual([]);
+		});
+	});
 });
