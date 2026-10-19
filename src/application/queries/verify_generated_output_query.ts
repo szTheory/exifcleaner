@@ -3,7 +3,7 @@ import {
 	copyModeLeakCheckFormatOf,
 	findLeakedTags,
 } from "../../domain/exif/copy_mode_leak_check";
-import type { MetadataEnginePort } from "../metadata_engine_port";
+import type { MetadataEnginePort, WrittenBy } from "../metadata_engine_port";
 
 export type OutputVerificationError =
 	| {
@@ -46,9 +46,12 @@ export class VerifyGeneratedOutputQuery {
 					preserveOrientation: boolean;
 					preserveColorProfile: boolean;
 					preserveResolution: boolean;
+					writtenBy: WrittenBy;
 			  }
 			| undefined;
-	}): Promise<Result<void, OutputVerificationError>> {
+	}): Promise<
+		Result<{ exemptionsApplied: readonly string[] }, OutputVerificationError>
+	> {
 		const result = await this.metadataEngine.inspect({
 			source: generatedPath,
 			purpose: "output-verification",
@@ -89,10 +92,12 @@ export class VerifyGeneratedOutputQuery {
 				});
 			}
 
-			const leakedTags = findLeakedTags({
+			const { leakedTags, exemptionsApplied } = findLeakedTags({
 				record: result.value.metadata,
 				format,
 				preservation: copyModeLeakCheck,
+				writtenBy: copyModeLeakCheck.writtenBy,
+				fileType,
 			});
 			if (leakedTags.length > 0) {
 				return leakFailure({
@@ -100,15 +105,16 @@ export class VerifyGeneratedOutputQuery {
 					leakedTags,
 				});
 			}
+			return { ok: true, value: { exemptionsApplied } };
 		}
 
-		return { ok: true, value: undefined };
+		return { ok: true, value: { exemptionsApplied: [] } };
 	}
 }
 
 function verificationFailure(
 	detail: string,
-): Result<void, OutputVerificationError> {
+): Result<{ exemptionsApplied: readonly string[] }, OutputVerificationError> {
 	return { ok: false, error: { code: "output-verification-failed", detail } };
 }
 
@@ -118,7 +124,7 @@ function leakFailure({
 }: {
 	detail: string;
 	leakedTags: readonly string[];
-}): Result<void, OutputVerificationError> {
+}): Result<{ exemptionsApplied: readonly string[] }, OutputVerificationError> {
 	return {
 		ok: false,
 		error: { code: "output-metadata-leak", detail, leakedTags },

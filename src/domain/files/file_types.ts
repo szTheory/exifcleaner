@@ -57,22 +57,30 @@ const RAF_EXTENSIONS: ReadonlySet<string> = new Set([".raf"]);
 // adding webp/png/jpeg to it would change ExifTool's write behavior for those files. Widened
 // in 58-04 (ADP-03) from webp-only to webp + png + jpeg -- every format the app can now write
 // natively (exifcleaner-node 0.3.0) needs its save-as-copy output independently verified,
-// regardless of which engine wrote it.
+// regardless of which engine wrote it. Widened again in 63-02 (D22) with heic/heif/avif
+// (exifcleaner-node 0.4.0): every ISOBMFF copy is reopened and leak-checked before publication.
 const VERIFIED_COPY_EXTENSIONS: ReadonlySet<string> = new Set([
 	".webp",
 	".png",
 	".jpg",
 	".jpeg",
+	".heic",
+	".heif",
+	".avif",
 ]);
 
 // Deliberately narrower than VERIFIED_COPY_EXTENSIONS (D-11): the leak check (D-07/D-08) has a
-// measured allowlist only for png and jpeg (58-SWEEP-MATRIX.md); webp copies are verified
-// (reopened, checked for a recognized FileType/no Error) but not leak-checked -- no allowlist
-// was measured for webp in this phase.
+// measured allowlist for png and jpeg (58-SWEEP-MATRIX.md) and, from 63-02, heic/heif
+// (63-SWEEP-MATRIX.md); webp copies are verified (reopened, checked for a recognized
+// FileType/no Error) but not leak-checked -- no allowlist was measured for webp. An .avif copy
+// is leak-checked but has no allowlist until 63-09, so it fails closed (source kept).
 const LEAK_CHECKED_COPY_EXTENSIONS: ReadonlySet<string> = new Set([
 	".png",
 	".jpg",
 	".jpeg",
+	".heic",
+	".heif",
+	".avif",
 ]);
 
 export const MEDIA_EXTENSIONS: ReadonlySet<string> = new Set([
@@ -151,7 +159,7 @@ export function requiresVerifiedWrite({
 
 // D-07/D-08/D-11: whether a save-as-copy's verified reopen should additionally run the
 // measured fail-closed leak allowlist (58-SWEEP-MATRIX.md). Narrower than
-// requiresVerifiedWrite's copy clause -- only png/jpg/jpeg have a measured allowlist.
+// requiresVerifiedWrite's copy clause -- only png/jpg/jpeg/heic/heif (and avif, failing closed until 63-09) are listed.
 export function requiresCopyModeLeakCheck({
 	filename,
 	outputMode,

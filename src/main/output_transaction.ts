@@ -1,5 +1,6 @@
 import type { Result } from "../common";
 import type { ExifError } from "../domain";
+import type { WrittenBy } from "../application/metadata_engine_port";
 import type { OutputVerificationError } from "../application/queries/verify_generated_output_query";
 
 export type OutputTransactionFailure =
@@ -37,13 +38,18 @@ export type OutputTransactionDependencies = {
 	stripMetadata: {
 		execute(
 			request: StripMetadataRequest,
-		): Promise<Result<{ tagsRemoved: number }, ExifError>>;
+		): Promise<
+			Result<{ tagsRemoved: number; writtenBy: WrittenBy }, ExifError>
+		>;
 	};
 	verifyGeneratedOutput: {
 		execute(request: {
 			generatedPath: string;
-			copyModeLeakCheck?: CopyModeLeakCheck | undefined;
-		}): Promise<Result<void, OutputVerificationError>>;
+			copyModeLeakCheck?:
+				(CopyModeLeakCheck & { writtenBy: WrittenBy }) | undefined;
+		}): Promise<
+			Result<{ exemptionsApplied: readonly string[] }, OutputVerificationError>
+		>;
 	};
 	unlink(path: string): Promise<void>;
 	rename(from: string, to: string): Promise<void>;
@@ -123,7 +129,16 @@ export class OutputTransaction {
 		const verificationResult =
 			await this.dependencies.verifyGeneratedOutput.execute({
 				generatedPath,
-				...(copyModeLeakCheck === undefined ? {} : { copyModeLeakCheck }),
+				// Provenance is the engine router's answer for THIS write (D-01/D-02); callers
+				// supply only the settings part.
+				...(copyModeLeakCheck === undefined
+					? {}
+					: {
+							copyModeLeakCheck: {
+								...copyModeLeakCheck,
+								writtenBy: writeResult.value.writtenBy,
+							},
+						}),
 			});
 		if (!verificationResult.ok) {
 			const cleanupFailure = await this.cleanup({ generatedPath });

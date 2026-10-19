@@ -12,7 +12,7 @@
 // ImageWidth).
 import { groupAndTagOf } from "./exif";
 
-export type CopyModeLeakCheckFormat = "png" | "jpeg";
+export type CopyModeLeakCheckFormat = "png" | "jpeg" | "heic";
 
 interface CopyModeLeakCheckFormatOfParams {
 	readonly fileType: unknown;
@@ -23,6 +23,9 @@ export function copyModeLeakCheckFormatOf({
 }: CopyModeLeakCheckFormatOfParams): CopyModeLeakCheckFormat | undefined {
 	if (fileType === "PNG") return "png";
 	if (fileType === "JPEG") return "jpeg";
+	// ExifTool reports a reopened HEIC or HEIF container as either FileType; both share the
+	// ISOBMFF allowlist. AVIF, WebP, MOV and anything else stay undefined (fail closed).
+	if (fileType === "HEIC" || fileType === "HEIF") return "heic";
 	return undefined;
 }
 
@@ -162,6 +165,77 @@ const PNG_RESOLUTION_ONLY: ReadonlySet<string> = new Set([
 	"PNG-pHYs:PixelsPerUnitY",
 ]);
 
+// 63-SWEEP-MATRIX.md "## Tracer rows (63-02)" -- HEIC, always permitted (no preservation
+// required): the all-off native row minus the System/ExifTool groups exempted wholesale.
+// Composite/File/Meta and the QuickTime keys are ISOBMFF structure facts (brands, HEVC
+// configuration, pixel geometry, item references). Every QuickTime key is listed ONE BY ONE and
+// no QuickTime group-wide allowance exists: QuickTime:HandlerDescription is deliberately absent
+// because the handler name is free text that can carry an encoder or user string (D-15, D-17).
+const HEIC_ALWAYS_PERMITTED: ReadonlySet<string> = new Set([
+	"Composite:ImageSize",
+	"Composite:Megapixels",
+	"File:FileType",
+	"File:FileTypeExtension",
+	"File:ImageHeight",
+	"File:ImageWidth",
+	"File:MIMEType",
+	"Meta:PrimaryItemReference",
+	"QuickTime:AverageFrameRate",
+	"QuickTime:BitDepthChroma",
+	"QuickTime:BitDepthLuma",
+	"QuickTime:ChromaFormat",
+	"QuickTime:CleanAperture",
+	"QuickTime:ColorPrimaries",
+	"QuickTime:ColorProfiles",
+	"QuickTime:CompatibleBrands",
+	"QuickTime:ConstantFrameRate",
+	"QuickTime:ConstraintIndicatorFlags",
+	"QuickTime:GenProfileCompatibilityFlags",
+	"QuickTime:GeneralLevelIDC",
+	"QuickTime:GeneralProfileIDC",
+	"QuickTime:GeneralProfileSpace",
+	"QuickTime:GeneralTierFlag",
+	"QuickTime:HEVCConfigurationVersion",
+	"QuickTime:HandlerType",
+	"QuickTime:ImagePixelDepth",
+	"QuickTime:ImageSpatialExtent",
+	"QuickTime:MajorBrand",
+	"QuickTime:MatrixCoefficients",
+	"QuickTime:MaxContentLightLevel",
+	"QuickTime:MaxPicAverageLightLevel",
+	"QuickTime:MediaDataOffset",
+	"QuickTime:MediaDataSize",
+	"QuickTime:MinSpatialSegmentationIDC",
+	"QuickTime:MinorVersion",
+	"QuickTime:NumTemporalLayers",
+	"QuickTime:ParallelismType",
+	"QuickTime:Rotation",
+	"QuickTime:TemporalIDNested",
+	"QuickTime:TransferCharacteristics",
+	"QuickTime:VideoFullRangeFlag",
+]);
+
+// 63-SWEEP-MATRIX.md "## Tracer rows (63-02)" -- HEIC, permitted only when preserveOrientation is
+// requested (orientation row minus the always set).
+const HEIC_ORIENTATION_ONLY: ReadonlySet<string> = new Set([
+	"File:ExifByteOrder",
+	"IFD0:Orientation",
+]);
+
+// 63-SWEEP-MATRIX.md "## Tracer rows (63-02)" -- HEIC, permitted only when preserveColorProfile is
+// requested. Empty from the tracer: the sips fixture has no ICC profile, so this row equals the
+// all-off row. 63-09 re-derives it from an ICC-bearing HEIC in the full two-engine sweep.
+const HEIC_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set<string>();
+
+// 63-SWEEP-MATRIX.md "## Tracer rows (63-02)" -- HEIC, permitted only when preserveResolution is
+// requested (resolution row minus the always set).
+const HEIC_RESOLUTION_ONLY: ReadonlySet<string> = new Set([
+	"File:ExifByteOrder",
+	"IFD0:ResolutionUnit",
+	"IFD0:XResolution",
+	"IFD0:YResolution",
+]);
+
 interface Preservation {
 	readonly preserveOrientation: boolean;
 	readonly preserveColorProfile: boolean;
@@ -181,43 +255,82 @@ function isPermitted({
 }): boolean {
 	const groupTag = `${group1}:${tag}`;
 
-	if (format === "jpeg") {
-		if (JPEG_ALWAYS_PERMITTED.has(groupTag)) return true;
-		if (
-			preservation.preserveOrientation &&
-			JPEG_ORIENTATION_ONLY.has(groupTag)
-		) {
-			return true;
+	// Exhaustive on purpose: a new format must add its own branch and can never fall into
+	// another format's sets.
+	switch (format) {
+		case "jpeg": {
+			if (JPEG_ALWAYS_PERMITTED.has(groupTag)) return true;
+			if (
+				preservation.preserveOrientation &&
+				JPEG_ORIENTATION_ONLY.has(groupTag)
+			) {
+				return true;
+			}
+			if (preservation.preserveColorProfile && ICC_GROUP_TAGS.has(groupTag)) {
+				return true;
+			}
+			return (
+				preservation.preserveResolution && JPEG_RESOLUTION_ONLY.has(groupTag)
+			);
 		}
-		if (preservation.preserveColorProfile && ICC_GROUP_TAGS.has(groupTag)) {
-			return true;
+		case "png": {
+			if (PNG_ALWAYS_PERMITTED.has(groupTag)) return true;
+			if (
+				preservation.preserveOrientation &&
+				PNG_ORIENTATION_ONLY.has(groupTag)
+			) {
+				return true;
+			}
+			if (
+				preservation.preserveColorProfile &&
+				PNG_COLOR_PROFILE_ONLY.has(groupTag)
+			) {
+				return true;
+			}
+			return (
+				preservation.preserveResolution && PNG_RESOLUTION_ONLY.has(groupTag)
+			);
 		}
-		if (preservation.preserveResolution && JPEG_RESOLUTION_ONLY.has(groupTag)) {
-			return true;
+		case "heic": {
+			if (HEIC_ALWAYS_PERMITTED.has(groupTag)) return true;
+			if (
+				preservation.preserveOrientation &&
+				HEIC_ORIENTATION_ONLY.has(groupTag)
+			) {
+				return true;
+			}
+			if (
+				preservation.preserveColorProfile &&
+				HEIC_COLOR_PROFILE_ONLY.has(groupTag)
+			) {
+				return true;
+			}
+			return (
+				preservation.preserveResolution && HEIC_RESOLUTION_ONLY.has(groupTag)
+			);
 		}
-		return false;
+		default: {
+			const unreachable: never = format;
+			throw new Error(`Unhandled leak-check format: ${String(unreachable)}`);
+		}
 	}
-
-	if (PNG_ALWAYS_PERMITTED.has(groupTag)) return true;
-	if (preservation.preserveOrientation && PNG_ORIENTATION_ONLY.has(groupTag)) {
-		return true;
-	}
-	if (
-		preservation.preserveColorProfile &&
-		PNG_COLOR_PROFILE_ONLY.has(groupTag)
-	) {
-		return true;
-	}
-	if (preservation.preserveResolution && PNG_RESOLUTION_ONLY.has(groupTag)) {
-		return true;
-	}
-	return false;
 }
 
 interface FindLeakedTagsParams {
 	readonly record: Record<string, unknown>;
 	readonly format: CopyModeLeakCheckFormat;
 	readonly preservation: Preservation;
+	// Router provenance (D-01; structurally the application layer's WrittenBy, repeated here so
+	// the domain imports nothing from application): which engine wrote the output. Consumed by the F-HEIC-ICC
+	// exemption rule that lands in 63-09; unused by every rule in this file today.
+	readonly writtenBy: "native" | "exiftool";
+	// The reopened FileType string (HEIC vs HEIF), likewise for 63-09.
+	readonly fileType: string;
+}
+
+export interface FindLeakedTagsResult {
+	readonly leakedTags: readonly string[];
+	readonly exemptionsApplied: readonly string[];
 }
 
 // Returns every key of `record` (a grouped -G1:2:4 record) not permitted for `format` and
@@ -228,7 +341,7 @@ export function findLeakedTags({
 	record,
 	format,
 	preservation,
-}: FindLeakedTagsParams): readonly string[] {
+}: FindLeakedTagsParams): FindLeakedTagsResult {
 	const leaks = new Set<string>();
 
 	for (const key of Object.keys(record)) {
@@ -248,5 +361,5 @@ export function findLeakedTags({
 		}
 	}
 
-	return [...leaks].sort();
+	return { leakedTags: [...leaks].sort(), exemptionsApplied: [] };
 }
