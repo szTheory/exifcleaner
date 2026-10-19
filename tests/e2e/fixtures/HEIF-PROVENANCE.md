@@ -79,3 +79,61 @@ a committed fixture into a temp directory and seed it with `seedHeifCopy` from
 `fixture_integrity.test.ts` (`HEIF_FIXTURE_PINS`) checks size, digest, `-FileType` and the Git
 `binary` attribute of each file; `tests/integration/heif_fixture_admission.test.ts` proves
 `exifcleaner-node` 0.4.0 admits each one natively in all 8 preservation combos.
+
+## Third-party fixture: link-u red-at-12-oclock
+
+`red-at-12-oclock-with-color-profile-lossy.avif` is the ExifTool-path AVIF (63-06, ADP-07, D-13,
+D-17). exifcleaner-node 0.4.0 declines it pre-write (`unsafe-structure`, decline class
+`surviving-offset-width-zero`), so the app reaches ExifTool for it through the real router.
+
+- Title: red-at-12-oclock-with-color-profile-lossy.avif
+- Author: Tony Payne <tpayne@chromium.org>
+- Source: https://raw.githubusercontent.com/link-u/avif-sample-images/c666a368b73006246694919b5dbcc078317af6cc/red-at-12-oclock-with-color-profile-lossy.avif
+- Pinned upstream commit: `c666a368b73006246694919b5dbcc078317af6cc`
+- Upstream SPDX: `LGPL-2.1-only OR BSD-2-Clause` (upstream README, section "Red at 12 o'clock with
+  color profile - ICC Profile tests": "GNU LGPL v2.1 or 2 claused BSD License"; the repository's
+  root `LICENSE.txt`, CC-BY-SA-4.0, does not govern this file per the README's per-image override)
+- ExifCleaner elects the BSD-2-Clause option. The file is not distributed under the LGPL option.
+- Vendored from `git -C ../exifcleaner-node show v0.4.0:tests/corpus/upstream/link-u-avif-sample-images-c666a36/red-at-12-oclock-with-color-profile-lossy.avif`
+- Modified: no
+- SHA-256: `79483242f2dca12c4ec18bd33ff8099216b3094fb55a26a909f046b2f9b4ce58` (equals the node manifest record `link-u-red-at-12-oclock`)
+- Size: 2,840 bytes; `-FileType` AVIF
+- Measured `QuickTime:HandlerDescription`: `cavif - https://github.com/link-u/cavif` (F-63-6). This
+  non-empty handler string is why the file is the fail-closed negative control for the F-HEIC-ICC
+  positive (D-17) and is never used as that positive.
+
+Licence text. The upstream repository ships no BSD-2-Clause licence file for this image (the only
+licence file at the pinned commit is the CC-BY-SA-4.0 `LICENSE.txt`, which the README overrides for
+this file; it names the Chromium/WebKit commit
+`https://chromium.googlesource.com/chromium/src/+/e89ab1941644ff34b262cac05f23e82b7e249377` as the
+origin and states no copyright line of its own). The standard BSD 2-Clause conditions, reproduced
+here under the election above:
+
+```
+Copyright (c) Tony Payne <tpayne@chromium.org> (attribution as given by the upstream README)
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
+
+`QuickTime.heic` (ExifTool 13.59 `t/images`, FileType `HEIF`, empty handler) is the other
+ExifTool-path fixture; node declines it as `unsupported-format` ("iinf version 2 is not
+supported").

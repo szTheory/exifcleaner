@@ -584,6 +584,53 @@ const HEIF_FIXTURE_PINS = [
 	},
 ] as const;
 
+// Phase 63-06 (ADP-07, D-13): ExifTool-path HEIF fixtures, declined by exifcleaner-node 0.4.0
+// pre-write. QuickTime.heic is pinned in MATRIX_FIXTURE_PINS; the link-u AVIF is vendored
+// unmodified (HEIF-PROVENANCE.md, BSD-2-Clause option) and the constructed declined-ICC files
+// are derived from sample-sips-icc.{heic,avif} by the documented byte edit.
+const EXIFTOOL_PATH_FIXTURE_PINS = [
+	{
+		name: "red-at-12-oclock-with-color-profile-lossy.avif",
+		sha256: "79483242f2dca12c4ec18bd33ff8099216b3094fb55a26a909f046b2f9b4ce58",
+		sizeBytes: 2_840,
+		fileType: "AVIF",
+	},
+] as const;
+
+describe("ExifTool-path HEIF fixtures (63-06)", () => {
+	it.each(EXIFTOOL_PATH_FIXTURE_PINS)(
+		"$name matches its pinned committed digest and size",
+		({ name, sha256: expectedSha256, sizeBytes }) => {
+			const filePath = path.join(FIXTURES_DIR, name);
+			expect(fs.statSync(filePath).size).toBe(sizeBytes);
+			expect(sha256(filePath)).toBe(expectedSha256);
+		},
+	);
+
+	it.each(EXIFTOOL_PATH_FIXTURE_PINS)(
+		"$name pins its FileType",
+		({ name, fileType }) => {
+			const filePath = path.join(FIXTURES_DIR, name);
+			const output = execFileSync(EXIFTOOL, ["-s3", "-FileType", filePath])
+				.toString()
+				.trim();
+			expect(output).toBe(fileType);
+		},
+	);
+
+	it.each(EXIFTOOL_PATH_FIXTURE_PINS)(
+		"$name classifies as a binary checkout fixture",
+		({ name }) => {
+			const output = execFileSync(
+				"git",
+				["check-attr", "binary", "--", `tests/e2e/fixtures/${name}`],
+				{ cwd: path.resolve(__dirname, "../../.."), encoding: "utf8" },
+			);
+			expect(output.trim()).toBe(`tests/e2e/fixtures/${name}: binary: set`);
+		},
+	);
+});
+
 describe("HEIF fixtures (D-12)", () => {
 	it.each(HEIF_FIXTURE_PINS)(
 		"$name matches its pinned committed digest and size (D-12)",

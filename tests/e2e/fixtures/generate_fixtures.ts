@@ -1028,6 +1028,12 @@ const HEIF_FIXTURE_SPECS = [
 		sha256: "682a1e626c4d8db4f7ccf4a2d5058d0104394f7a08d0a70fad3950bed4b0a85e",
 		fileType: "AVIF",
 	},
+	// 63-06 ExifTool-path fixtures (declined by node pre-write).
+	{
+		name: "red-at-12-oclock-with-color-profile-lossy.avif",
+		sha256: "79483242f2dca12c4ec18bd33ff8099216b3094fb55a26a909f046b2f9b4ce58",
+		fileType: "AVIF",
+	},
 ] as const;
 
 // Verify-only: re-hash the committed HEIF fixtures and check FileType; never writes.
