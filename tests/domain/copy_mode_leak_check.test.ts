@@ -658,6 +658,125 @@ describe("findLeakedTags", () => {
 		});
 	});
 
+	describe("F-HEIC-ICC exemption (63-09, D-05 #1)", () => {
+		const off = {
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+		};
+		const iccBase = [
+			"File:FileType",
+			"ICC-header:ProfileVersion",
+			"ICC_Profile:ProfileDescription",
+		];
+
+		function check(
+			keys: readonly string[],
+			over: {
+				format?: CopyModeLeakCheckFormat;
+				writtenBy?: "native" | "exiftool";
+				fileType?: string;
+				preservation?: typeof off;
+			} = {},
+		) {
+			return findLeakedTags({
+				record: Object.freeze(recordFromKeys(keys)),
+				format: over.format ?? "heic",
+				writtenBy: over.writtenBy ?? "native",
+				fileType: over.fileType ?? "HEIC",
+				preservation: over.preservation ?? off,
+			});
+		}
+
+		it("leaks ICC keys for native output with preserveColorProfile=false and reports no exemption", () => {
+			const result = check(iccBase);
+			expect(result.leakedTags).toEqual([
+				"ICC-header:ProfileVersion",
+				"ICC_Profile:ProfileDescription",
+			]);
+			expect(result.exemptionsApplied).toEqual([]);
+		});
+
+		it("accepts ICC keys for ExifTool output and reports F-HEIC-ICC", () => {
+			const result = check(iccBase, { writtenBy: "exiftool" });
+			expect(result.leakedTags).toEqual([]);
+			expect(result.exemptionsApplied).toEqual(["F-HEIC-ICC"]);
+		});
+
+		it.each([
+			["HEIF", "heic"],
+			["AVIF", "avif"],
+		] as const)("treats FileType %s like HEIC", (fileType, format) => {
+			expect(
+				check(iccBase, { writtenBy: "exiftool", fileType, format }),
+			).toEqual({ leakedTags: [], exemptionsApplied: ["F-HEIC-ICC"] });
+			expect(check(iccBase, { fileType, format }).leakedTags).toEqual([
+				"ICC-header:ProfileVersion",
+				"ICC_Profile:ProfileDescription",
+			]);
+		});
+
+		it("still leaks the ICC keys of a JPEG written by ExifTool", () => {
+			const result = check(iccBase, {
+				writtenBy: "exiftool",
+				format: "jpeg",
+				fileType: "JPEG",
+			});
+			expect(result.leakedTags).toEqual([
+				"ICC-header:ProfileVersion",
+				"ICC_Profile:ProfileDescription",
+			]);
+			expect(result.exemptionsApplied).toEqual([]);
+		});
+
+		it("still leaks a non-ICC sentinel next to exempted ICC keys", () => {
+			const result = check([...iccBase, "GPS:GPSLatitude"], {
+				writtenBy: "exiftool",
+			});
+			expect(result.leakedTags).toEqual(["GPS:GPSLatitude"]);
+			expect(result.exemptionsApplied).toEqual(["F-HEIC-ICC"]);
+		});
+
+		it("does not match ICC groups by prefix: ICC-zz63 still leaks", () => {
+			const result = check([...iccBase, "ICC-zz63:Probe"], {
+				writtenBy: "exiftool",
+			});
+			expect(result.leakedTags).toEqual(["ICC-zz63:Probe"]);
+		});
+
+		it("reports no exemption when preserveColorProfile=true even for ExifTool output", () => {
+			const result = check(iccBase, {
+				writtenBy: "exiftool",
+				preservation: { ...off, preserveColorProfile: true },
+			});
+			expect(result.leakedTags).toEqual([]);
+			expect(result.exemptionsApplied).toEqual([]);
+		});
+
+		it("reports no exemption when ExifTool output carries no ICC key", () => {
+			const result = check(["File:FileType"], { writtenBy: "exiftool" });
+			expect(result).toEqual({ leakedTags: [], exemptionsApplied: [] });
+		});
+
+		it("is idempotent and never mutates its frozen input", () => {
+			const record = Object.freeze(
+				recordFromKeys([...iccBase, "GPS:GPSLatitude"]),
+			);
+			const before = JSON.stringify(record);
+			const params = {
+				record,
+				format: "heic",
+				writtenBy: "exiftool",
+				fileType: "HEIC",
+				preservation: off,
+			} as const;
+			const first = findLeakedTags(params);
+			const second = findLeakedTags(params);
+			expect(second).toEqual(first);
+			expect(JSON.stringify(record)).toBe(before);
+		});
+	});
+
 	describe("sweep replay", () => {
 		const sweepPath = path.join(
 			__dirname,

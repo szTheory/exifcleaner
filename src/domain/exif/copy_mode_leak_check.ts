@@ -335,6 +335,23 @@ export const PERMITTED_SETS_FOR_TESTS: Readonly<
 	AVIF_RESOLUTION_ONLY,
 };
 
+// F-HEIC-ICC (D-03, D22): with preserveColorProfile=false the ExifTool engine still keeps the
+// source's ICC profile in a HEIC/HEIF/AVIF (Decision 15 (b); 80 measured ExifTool rows, 63-SWEEP-MATRIX.md
+// "## F-HEIC-ICC rows"), while native output never carries ICC unless requested (F-63-4). The ICC
+// keys are colour descriptors, not source identity, so an ExifTool-written copy is accepted with this
+// one named reason. It applies to the two exact Group1 names measured in "## ICC Group1 buckets" and
+// nothing else: no prefix match, so a future identifying ICC-* group still leaks.
+export const F_HEIC_ICC = "F-HEIC-ICC";
+const F_HEIC_ICC_GROUPS: ReadonlySet<string> = new Set([
+	"ICC-header",
+	"ICC_Profile",
+]);
+const F_HEIC_ICC_FILE_TYPES: ReadonlySet<string> = new Set([
+	"HEIC",
+	"HEIF",
+	"AVIF",
+]);
+
 interface Preservation {
 	readonly preserveOrientation: boolean;
 	readonly preserveColorProfile: boolean;
@@ -438,10 +455,10 @@ interface FindLeakedTagsParams {
 	readonly format: CopyModeLeakCheckFormat;
 	readonly preservation: Preservation;
 	// Router provenance (D-01; structurally the application layer's WrittenBy, repeated here so
-	// the domain imports nothing from application): which engine wrote the output. Consumed by the F-HEIC-ICC
-	// exemption rule that lands in 63-09; unused by every rule in this file today.
+	// the domain imports nothing from application): which engine wrote the output. Read only by the
+	// F-HEIC-ICC exemption below; no exemption path exists for native output (D-02).
 	readonly writtenBy: "native" | "exiftool";
-	// The reopened FileType string (HEIC vs HEIF), likewise for 63-09.
+	// The reopened FileType string (HEIC, HEIF or AVIF), likewise read only by the exemption.
 	readonly fileType: string;
 }
 
@@ -458,8 +475,15 @@ export function findLeakedTags({
 	record,
 	format,
 	preservation,
+	writtenBy,
+	fileType,
 }: FindLeakedTagsParams): FindLeakedTagsResult {
 	const leaks = new Set<string>();
+	const heicIccExemptionOpen =
+		writtenBy === "exiftool" &&
+		F_HEIC_ICC_FILE_TYPES.has(fileType) &&
+		preservation.preserveColorProfile === false;
+	let heicIccExempted = false;
 
 	for (const key of Object.keys(record)) {
 		if (key === "SourceFile") continue;
@@ -474,9 +498,16 @@ export function findLeakedTags({
 		if (EXEMPT_GROUPS.has(group1)) continue;
 
 		if (!isPermitted({ format, group1, tag, preservation })) {
+			if (heicIccExemptionOpen && F_HEIC_ICC_GROUPS.has(group1)) {
+				heicIccExempted = true;
+				continue;
+			}
 			leaks.add(`${group1}:${tag}`);
 		}
 	}
 
-	return { leakedTags: [...leaks].sort(), exemptionsApplied: [] };
+	return {
+		leakedTags: [...leaks].sort(),
+		exemptionsApplied: heicIccExempted ? [F_HEIC_ICC] : [],
+	};
 }
