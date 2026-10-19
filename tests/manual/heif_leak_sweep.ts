@@ -491,9 +491,12 @@ async function main(): Promise<void> {
 		await exiftoolProcess.close();
 	}
 
+	// One row per line keeps the committed record reviewable and small.
 	fs.writeFileSync(
 		cli.output,
-		`${JSON.stringify({ generatedBy: "tests/manual/heif_leak_sweep.ts", rows }, null, "\t")}\n`,
+		`{"generatedBy":"tests/manual/heif_leak_sweep.ts","rows":[\n${rows
+			.map((row) => JSON.stringify(row))
+			.join(",\n")}\n]}\n`,
 	);
 
 	for (const line of verdictLines) console.log(line);
