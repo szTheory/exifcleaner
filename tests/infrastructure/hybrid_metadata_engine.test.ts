@@ -367,15 +367,18 @@ describe("HybridMetadataEngine", () => {
 		);
 	});
 
-	// D-01/D-17: the extension identifies the capability, not the bytes. Electron reads zero
-	// bytes before routing (D-13); a mismatch between a source's extension and its actual
-	// content is caught by the library's own admission decline (this D-17 row, simulated via
-	// the fake's sanitizeResult), never by app-level content sniffing. An unmatched or absent
-	// extension is not a candidate at all and never reaches the native port (the D-01 row
-	// below) — the WebP-era "content decides eligibility regardless of filename" rule this
-	// used to encode is inverted; the real-bytes proof for both lives in
+	// D-01/D-17/D-10: the extension identifies the capability, not the bytes. Electron reads
+	// zero bytes before routing (D-13), and never sniffs content in the app. This row SIMULATES
+	// a native `unsupported-format` admission decline (nativeWrite not-started, via the fake's
+	// sanitizeResult) and proves the router then falls back to ExifTool exactly once. It does
+	// not claim the library declines WebP bytes behind another registered extension: measured
+	// (F-63-8), exifcleaner-node 0.3.1 and 0.4.0 select a handler by content and sanitize WebP
+	// bytes behind `.png` as WebP; only unregistered content (for example GIF) declines, which
+	// tests/integration/native_copy_routing.test.ts proves with real bytes. An unmatched or
+	// absent extension is not a candidate at all and never reaches the native port (the D-01 row
+	// below); the real-bytes proof for that lives in
 	// tests/integration/native_metadata_oracle.test.ts and tests/integration/native_copy_routing.test.ts.
-	it("D-17: a .webp-named source over non-webp bytes is declined by the library at admission and falls back exactly once", async () => {
+	it("D-17: a simulated native unsupported-format admission decline for a .webp-named source falls back to ExifTool exactly once", async () => {
 		const exiftool = new FakeMetadataEngine();
 		const native = new FakeNativeMetadata();
 		native.sanitizeResult = {
