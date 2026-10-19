@@ -80,7 +80,10 @@ function captureInvokeHandler(channel: string): {
 function makeContainer({
 	saveAsCopy,
 	removeXattrs = false,
-	executeResult = { ok: true, value: { tagsRemoved: 0 } },
+	executeResult = {
+		ok: true,
+		value: { tagsRemoved: 0, writtenBy: "exiftool" },
+	},
 	transactionResult,
 	readMetadataResult = { ok: true, value: { Make: "camera" } },
 }: {
@@ -1079,7 +1082,10 @@ function makeContainerWithPreserveResolution({
 	outputTransaction: { execute: ReturnType<typeof vi.fn> };
 } {
 	const stripMetadata = {
-		execute: vi.fn(async () => ({ ok: true, value: { tagsRemoved: 0 } })),
+		execute: vi.fn(async () => ({
+			ok: true,
+			value: { tagsRemoved: 0, writtenBy: "exiftool" },
+		})),
 	};
 	const outputTransaction = {
 		execute: vi.fn(async (request) => ({

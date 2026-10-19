@@ -27,7 +27,7 @@ describe("VerifyGeneratedOutputQuery", () => {
 
 		const result = await query.execute({ generatedPath });
 
-		expect(result).toEqual({ ok: true, value: undefined });
+		expect(result).toEqual({ ok: true, value: { exemptionsApplied: [] } });
 		expect(metadataEngine.inspect).toHaveBeenCalledOnce();
 		expect(metadataEngine.inspect).toHaveBeenCalledWith({
 			source: generatedPath,
@@ -135,7 +135,7 @@ describe("VerifyGeneratedOutputQuery", () => {
 
 		await expect(
 			query.execute({ generatedPath: "/tmp/sample_cleaned.mp4" }),
-		).resolves.toEqual({ ok: true, value: undefined });
+		).resolves.toEqual({ ok: true, value: { exemptionsApplied: [] } });
 	});
 
 	describe("copyModeLeakCheck (D-10, opt-in)", () => {
@@ -143,6 +143,7 @@ describe("VerifyGeneratedOutputQuery", () => {
 			preserveOrientation: false,
 			preserveColorProfile: false,
 			preserveResolution: false,
+			writtenBy: "exiftool" as const,
 		};
 
 		it("does not affect any existing case when omitted", async () => {
@@ -151,7 +152,7 @@ describe("VerifyGeneratedOutputQuery", () => {
 			const result = await query.execute({
 				generatedPath: "/tmp/sample_cleaned.raf",
 			});
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { exemptionsApplied: [] } });
 		});
 
 		it("passes a clean PNG record", async () => {
@@ -169,7 +170,7 @@ describe("VerifyGeneratedOutputQuery", () => {
 				copyModeLeakCheck: cleanPreservation,
 			});
 
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { exemptionsApplied: [] } });
 		});
 
 		it("passes a clean JPEG record", async () => {
@@ -187,7 +188,7 @@ describe("VerifyGeneratedOutputQuery", () => {
 				copyModeLeakCheck: cleanPreservation,
 			});
 
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { exemptionsApplied: [] } });
 		});
 
 		it("flags a leaked XMP-dc:Creator tag with the distinct leak code, names only", async () => {

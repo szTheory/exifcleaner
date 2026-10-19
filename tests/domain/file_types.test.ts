@@ -213,3 +213,29 @@ it("isMediaFile is false for png, jpg and jpeg; MEDIA_EXTENSIONS keeps its exist
 	expect(isMediaFile({ filename: "sample.jpg" })).toBe(false);
 	expect(isMediaFile({ filename: "sample.jpeg" })).toBe(false);
 });
+
+it.each([["sample.heic"], ["SAMPLE.HEIC"], ["sample.heif"], ["sample.avif"]])(
+	"%s is verified and leak-checked in copy mode, neither in overwrite mode, and is not a media file (D-08)",
+	(filename) => {
+		expect(requiresVerifiedWrite({ filename, outputMode: "copy" })).toBe(true);
+		expect(requiresCopyModeLeakCheck({ filename, outputMode: "copy" })).toBe(
+			true,
+		);
+		expect(requiresVerifiedWrite({ filename, outputMode: "overwrite" })).toBe(
+			false,
+		);
+		expect(
+			requiresCopyModeLeakCheck({ filename, outputMode: "overwrite" }),
+		).toBe(false);
+		expect(isMediaFile({ filename })).toBe(false);
+	},
+);
+
+it("webp copies stay verified but are not leak-checked (D-08)", () => {
+	expect(
+		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresCopyModeLeakCheck({ filename: "sample.webp", outputMode: "copy" }),
+	).toBe(false);
+});

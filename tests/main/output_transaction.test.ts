@@ -26,8 +26,8 @@ type TransactionTestOptions = {
 };
 
 function createTransaction({
-	writeResult = { ok: true, value: { tagsRemoved: 0 } },
-	verifyResult = { ok: true, value: undefined },
+	writeResult = { ok: true, value: { tagsRemoved: 0, writtenBy: "exiftool" } },
+	verifyResult = { ok: true, value: { exemptionsApplied: [] } },
 	unlink = async () => undefined,
 	rename = async () => undefined,
 }: TransactionTestOptions = {}): {
@@ -252,7 +252,10 @@ describe("OutputTransaction", () => {
 					execute: async ({ outputPath: writtenPath }) => {
 						await writeFile(writtenPath, "generated but unreadable bytes");
 						events.push(`write:${writtenPath}`);
-						return { ok: true, value: { tagsRemoved: 1 } };
+						return {
+							ok: true,
+							value: { tagsRemoved: 1, writtenBy: "exiftool" },
+						};
 					},
 				},
 				verifyGeneratedOutput: {
@@ -453,7 +456,10 @@ describe("OutputTransaction", () => {
 				stripMetadata: {
 					execute: async ({ outputPath: writtenPath }) => {
 						await writeFile(writtenPath, "generated but unverifiable bytes");
-						return { ok: true, value: { tagsRemoved: 1 } };
+						return {
+							ok: true,
+							value: { tagsRemoved: 1, writtenBy: "exiftool" },
+						};
 					},
 				},
 				verifyGeneratedOutput: {
@@ -522,11 +528,14 @@ describe("OutputTransaction", () => {
 				stripMetadata: {
 					execute: async ({ outputPath: writtenPath }) => {
 						await writeFile(writtenPath, "generated and verified bytes");
-						return { ok: true, value: { tagsRemoved: 1 } };
+						return {
+							ok: true,
+							value: { tagsRemoved: 1, writtenBy: "exiftool" },
+						};
 					},
 				},
 				verifyGeneratedOutput: {
-					execute: async () => ({ ok: true, value: undefined }),
+					execute: async () => ({ ok: true, value: { exemptionsApplied: [] } }),
 				},
 				unlink: async (path) => {
 					await rm(path);
@@ -565,11 +574,14 @@ describe("OutputTransaction", () => {
 				stripMetadata: {
 					execute: async (request) => {
 						requests.push({ preserveResolution: request.preserveResolution });
-						return { ok: true, value: { tagsRemoved: 0 } };
+						return {
+							ok: true,
+							value: { tagsRemoved: 0, writtenBy: "exiftool" },
+						};
 					},
 				},
 				verifyGeneratedOutput: {
-					execute: async () => ({ ok: true, value: undefined }),
+					execute: async () => ({ ok: true, value: { exemptionsApplied: [] } }),
 				},
 				unlink: async () => undefined,
 				rename: async () => undefined,
@@ -589,7 +601,7 @@ describe("OutputTransaction", () => {
 		},
 	);
 
-	it("forwards copyModeLeakCheck to verifyGeneratedOutput.execute exactly as given, undefined when omitted", async () => {
+	it("forwards copyModeLeakCheck to verifyGeneratedOutput.execute with the strip result's writtenBy, nothing when omitted", async () => {
 		const leakCheck = {
 			preserveOrientation: true,
 			preserveColorProfile: false,
@@ -601,44 +613,51 @@ describe("OutputTransaction", () => {
 						preserveOrientation: boolean;
 						preserveColorProfile: boolean;
 						preserveResolution: boolean;
+						writtenBy: "native" | "exiftool";
 				  }
 				| undefined;
 		}> = [];
+		const writtenByQueue: Array<"native" | "exiftool"> = [
+			"native",
+			"exiftool",
+			"native",
+		];
 		const transaction = new OutputTransaction({
 			stripMetadata: {
-				execute: async () => ({ ok: true, value: { tagsRemoved: 0 } }),
+				execute: async () => ({
+					ok: true,
+					value: {
+						tagsRemoved: 0,
+						writtenBy: writtenByQueue.shift() ?? "native",
+					},
+				}),
 			},
 			verifyGeneratedOutput: {
 				execute: async (request) => {
 					requests.push({ copyModeLeakCheck: request.copyModeLeakCheck });
-					return { ok: true, value: undefined };
+					return { ok: true, value: { exemptionsApplied: [] } };
 				},
 			},
 			unlink: async () => undefined,
 			rename: async () => undefined,
 			delay: async () => undefined,
 		});
+		const base = {
+			filePath: originalPath,
+			generatedPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		};
 
-		await transaction.execute({
-			filePath: originalPath,
-			generatedPath,
-			preserveOrientation: false,
-			preserveColorProfile: false,
-			preserveResolution: false,
-			preserveTimestamps: false,
-			copyModeLeakCheck: leakCheck,
-		});
-		await transaction.execute({
-			filePath: originalPath,
-			generatedPath,
-			preserveOrientation: false,
-			preserveColorProfile: false,
-			preserveResolution: false,
-			preserveTimestamps: false,
-		});
+		await transaction.execute({ ...base, copyModeLeakCheck: leakCheck });
+		await transaction.execute({ ...base, copyModeLeakCheck: leakCheck });
+		await transaction.execute(base);
 
 		expect(requests).toEqual([
-			{ copyModeLeakCheck: leakCheck },
+			{ copyModeLeakCheck: { ...leakCheck, writtenBy: "native" } },
+			{ copyModeLeakCheck: { ...leakCheck, writtenBy: "exiftool" } },
 			{ copyModeLeakCheck: undefined },
 		]);
 	});

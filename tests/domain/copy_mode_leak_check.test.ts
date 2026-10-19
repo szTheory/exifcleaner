@@ -39,7 +39,11 @@ describe("copyModeLeakCheckFormatOf", () => {
 		expect(copyModeLeakCheckFormatOf({ fileType: "JPEG" })).toBe("jpeg");
 	});
 
-	it.each([["WEBP"], [undefined], [42]])(
+	it.each([["HEIC"], ["HEIF"]])("maps %s to heic", (fileType) => {
+		expect(copyModeLeakCheckFormatOf({ fileType })).toBe("heic");
+	});
+
+	it.each([["WEBP"], ["AVIF"], [undefined], [42]])(
 		"returns undefined for %s",
 		(fileType) => {
 			expect(copyModeLeakCheckFormatOf({ fileType })).toBeUndefined();
@@ -57,13 +61,15 @@ describe("findLeakedTags", () => {
 		const result = findLeakedTags({
 			record,
 			format: "jpeg",
+			writtenBy: "exiftool",
+			fileType: "JPEG",
 			preservation: {
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveResolution: false,
 			},
 		});
-		expect(result).toEqual(["XMP-dc:Creator"]);
+		expect(result.leakedTags).toEqual(["XMP-dc:Creator"]);
 	});
 
 	it("includes a GPS identifying tag as a leak alongside XMP", () => {
@@ -76,14 +82,16 @@ describe("findLeakedTags", () => {
 		const result = findLeakedTags({
 			record,
 			format: "jpeg",
+			writtenBy: "exiftool",
+			fileType: "JPEG",
 			preservation: {
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveResolution: false,
 			},
 		});
-		expect(result).toContain("GPS:GPSLatitude");
-		expect(result).toContain("XMP-dc:Creator");
+		expect(result.leakedTags).toContain("GPS:GPSLatitude");
+		expect(result.leakedTags).toContain("XMP-dc:Creator");
 	});
 
 	it("reports a PNG text-chunk comment as a leak while ImageWidth stays permitted", () => {
@@ -94,13 +102,15 @@ describe("findLeakedTags", () => {
 		const result = findLeakedTags({
 			record,
 			format: "png",
+			writtenBy: "exiftool",
+			fileType: "PNG",
 			preservation: {
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveResolution: false,
 			},
 		});
-		expect(result).toEqual(["PNG:Comment"]);
+		expect(result.leakedTags).toEqual(["PNG:Comment"]);
 	});
 
 	it("treats IFD0:Orientation as a leak when preserveOrientation is false", () => {
@@ -108,13 +118,15 @@ describe("findLeakedTags", () => {
 		const result = findLeakedTags({
 			record,
 			format: "jpeg",
+			writtenBy: "exiftool",
+			fileType: "JPEG",
 			preservation: {
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveResolution: false,
 			},
 		});
-		expect(result).toEqual(["IFD0:Orientation"]);
+		expect(result.leakedTags).toEqual(["IFD0:Orientation"]);
 	});
 
 	it("permits IFD0:Orientation when preserveOrientation is true", () => {
@@ -122,13 +134,15 @@ describe("findLeakedTags", () => {
 		const result = findLeakedTags({
 			record,
 			format: "jpeg",
+			writtenBy: "exiftool",
+			fileType: "JPEG",
 			preservation: {
 				preserveOrientation: true,
 				preserveColorProfile: false,
 				preserveResolution: false,
 			},
 		});
-		expect(result).toEqual([]);
+		expect(result.leakedTags).toEqual([]);
 	});
 
 	it.each([
@@ -141,24 +155,30 @@ describe("findLeakedTags", () => {
 			const off = findLeakedTags({
 				record,
 				format: "jpeg",
+				writtenBy: "exiftool",
+				fileType: "JPEG",
 				preservation: {
 					preserveOrientation: false,
 					preserveColorProfile: false,
 					preserveResolution: false,
 				},
 			});
-			expect(off).toEqual([`${key.split(":")[0]}:${key.split(":").at(-1)}`]);
+			expect(off.leakedTags).toEqual([
+				`${key.split(":")[0]}:${key.split(":").at(-1)}`,
+			]);
 
 			const on = findLeakedTags({
 				record,
 				format: "jpeg",
+				writtenBy: "exiftool",
+				fileType: "JPEG",
 				preservation: {
 					preserveOrientation: flag === "preserveOrientation",
 					preserveColorProfile: false,
 					preserveResolution: flag === "preserveResolution",
 				},
 			});
-			expect(on).toEqual([]);
+			expect(on.leakedTags).toEqual([]);
 		},
 	);
 
@@ -167,24 +187,28 @@ describe("findLeakedTags", () => {
 		const off = findLeakedTags({
 			record,
 			format: "jpeg",
+			writtenBy: "exiftool",
+			fileType: "JPEG",
 			preservation: {
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveResolution: false,
 			},
 		});
-		expect(off).toEqual(["ICC_Profile:ProfileDescription"]);
+		expect(off.leakedTags).toEqual(["ICC_Profile:ProfileDescription"]);
 
 		const on = findLeakedTags({
 			record,
 			format: "jpeg",
+			writtenBy: "exiftool",
+			fileType: "JPEG",
 			preservation: {
 				preserveOrientation: false,
 				preserveColorProfile: true,
 				preserveResolution: false,
 			},
 		});
-		expect(on).toEqual([]);
+		expect(on.leakedTags).toEqual([]);
 	});
 
 	it("treats JFIF:Image:Copy1:XResolution as JFIF:XResolution", () => {
@@ -192,13 +216,15 @@ describe("findLeakedTags", () => {
 		const on = findLeakedTags({
 			record,
 			format: "jpeg",
+			writtenBy: "exiftool",
+			fileType: "JPEG",
 			preservation: {
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveResolution: true,
 			},
 		});
-		expect(on).toEqual([]);
+		expect(on.leakedTags).toEqual([]);
 	});
 
 	it("reports XMP-dc:Author:Copy1:Creator as a leak (duplicate of a forbidden tag)", () => {
@@ -206,13 +232,15 @@ describe("findLeakedTags", () => {
 		const result = findLeakedTags({
 			record,
 			format: "jpeg",
+			writtenBy: "exiftool",
+			fileType: "JPEG",
 			preservation: {
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveResolution: false,
 			},
 		});
-		expect(result).toEqual(["XMP-dc:Creator"]);
+		expect(result.leakedTags).toEqual(["XMP-dc:Creator"]);
 	});
 
 	it("reports a key with no Group1:Tag shape as a leak", () => {
@@ -220,13 +248,15 @@ describe("findLeakedTags", () => {
 		const result = findLeakedTags({
 			record,
 			format: "jpeg",
+			writtenBy: "exiftool",
+			fileType: "JPEG",
 			preservation: {
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveResolution: false,
 			},
 		});
-		expect(result).toEqual(["UnknownFlatKey"]);
+		expect(result.leakedTags).toEqual(["UnknownFlatKey"]);
 	});
 
 	it("never reports SourceFile", () => {
@@ -234,13 +264,15 @@ describe("findLeakedTags", () => {
 		const result = findLeakedTags({
 			record,
 			format: "jpeg",
+			writtenBy: "exiftool",
+			fileType: "JPEG",
 			preservation: {
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveResolution: false,
 			},
 		});
-		expect(result).toEqual([]);
+		expect(result.leakedTags).toEqual([]);
 	});
 
 	it.each(["System:Other:FileName", "ExifTool:ExifToolVersion"])(
@@ -250,13 +282,15 @@ describe("findLeakedTags", () => {
 			const result = findLeakedTags({
 				record,
 				format: "jpeg",
+				writtenBy: "exiftool",
+				fileType: "JPEG",
 				preservation: {
 					preserveOrientation: false,
 					preserveColorProfile: false,
 					preserveResolution: false,
 				},
 			});
-			expect(result).toEqual([]);
+			expect(result.leakedTags).toEqual([]);
 		},
 	);
 
@@ -269,13 +303,15 @@ describe("findLeakedTags", () => {
 		const result = findLeakedTags({
 			record,
 			format: "jpeg",
+			writtenBy: "exiftool",
+			fileType: "JPEG",
 			preservation: {
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveResolution: false,
 			},
 		});
-		expect(result).toEqual(["GPS:GPSLatitude", "XMP-dc:Creator"]);
+		expect(result.leakedTags).toEqual(["GPS:GPSLatitude", "XMP-dc:Creator"]);
 	});
 
 	it("never echoes tag values into the result (names only)", () => {
@@ -283,13 +319,119 @@ describe("findLeakedTags", () => {
 		const result = findLeakedTags({
 			record,
 			format: "jpeg",
+			writtenBy: "exiftool",
+			fileType: "JPEG",
 			preservation: {
 				preserveOrientation: false,
 				preserveColorProfile: false,
 				preserveResolution: false,
 			},
 		});
-		expect(result.join(" ")).not.toContain("super-secret-value");
+		expect(result.leakedTags.join(" ")).not.toContain("super-secret-value");
+	});
+
+	describe("HEIC (63-02 tracer rows)", () => {
+		const allOn = {
+			preserveOrientation: true,
+			preserveColorProfile: true,
+			preserveResolution: true,
+		};
+		const allOff = {
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+		};
+		const tracerAllOnKeys = [
+			"Composite:ImageSize",
+			"Composite:Megapixels",
+			"ExifTool:ExifToolVersion",
+			"File:ExifByteOrder",
+			"File:FileType",
+			"File:FileTypeExtension",
+			"File:ImageHeight",
+			"File:ImageWidth",
+			"File:MIMEType",
+			"IFD0:Orientation",
+			"IFD0:ResolutionUnit",
+			"IFD0:XResolution",
+			"IFD0:YResolution",
+			"Meta:PrimaryItemReference",
+			"QuickTime:AverageFrameRate",
+			"QuickTime:BitDepthChroma",
+			"QuickTime:BitDepthLuma",
+			"QuickTime:ChromaFormat",
+			"QuickTime:CleanAperture",
+			"QuickTime:ColorPrimaries",
+			"QuickTime:ColorProfiles",
+			"QuickTime:CompatibleBrands",
+			"QuickTime:ConstantFrameRate",
+			"QuickTime:ConstraintIndicatorFlags",
+			"QuickTime:GenProfileCompatibilityFlags",
+			"QuickTime:GeneralLevelIDC",
+			"QuickTime:GeneralProfileIDC",
+			"QuickTime:GeneralProfileSpace",
+			"QuickTime:GeneralTierFlag",
+			"QuickTime:HEVCConfigurationVersion",
+			"QuickTime:HandlerType",
+			"QuickTime:ImagePixelDepth",
+			"QuickTime:ImageSpatialExtent",
+			"QuickTime:MajorBrand",
+			"QuickTime:MatrixCoefficients",
+			"QuickTime:MaxContentLightLevel",
+			"QuickTime:MaxPicAverageLightLevel",
+			"QuickTime:MediaDataOffset",
+			"QuickTime:MediaDataSize",
+			"QuickTime:MinSpatialSegmentationIDC",
+			"QuickTime:MinorVersion",
+			"QuickTime:NumTemporalLayers",
+			"QuickTime:ParallelismType",
+			"QuickTime:Rotation",
+			"QuickTime:TemporalIDNested",
+			"QuickTime:TransferCharacteristics",
+			"QuickTime:VideoFullRangeFlag",
+			"System:Directory",
+			"System:FileAccessDate",
+			"System:FileInodeChangeDate",
+			"System:FileModifyDate",
+			"System:FileName",
+			"System:FilePermissions",
+			"System:FileSize",
+		];
+
+		it("reports a HEIC GPS tag as a leak", () => {
+			const result = findLeakedTags({
+				record: { "GPS:Location:GPSLatitude": "37 deg" },
+				format: "heic",
+				writtenBy: "native",
+				fileType: "HEIC",
+				preservation: allOn,
+			});
+			expect(result.leakedTags).toEqual(["GPS:GPSLatitude"]);
+		});
+
+		it("passes a HEIC record of exactly the tracer all-on keys with every preservation on", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys(tracerAllOnKeys),
+				format: "heic",
+				writtenBy: "native",
+				fileType: "HEIC",
+				preservation: allOn,
+			});
+			expect(result.leakedTags).toEqual([]);
+		});
+
+		it("flags QuickTime:HandlerDescription as a HEIC leak under every preservation", () => {
+			for (const preservation of [allOff, allOn]) {
+				const result = findLeakedTags({
+					record: { "QuickTime:Meta:HandlerDescription": "ZZ63-HANDLER" },
+					format: "heic",
+					writtenBy: "native",
+					fileType: "HEIF",
+					preservation,
+				});
+				expect(result.leakedTags).toEqual(["QuickTime:HandlerDescription"]);
+			}
+		});
 	});
 
 	describe("sweep replay", () => {
@@ -316,13 +458,15 @@ describe("findLeakedTags", () => {
 			const result = findLeakedTags({
 				record,
 				format,
+				writtenBy: row.engine,
+				fileType: row.format === "png" ? "PNG" : "JPEG",
 				preservation: {
 					preserveOrientation: row.preserveOrientation,
 					preserveColorProfile: row.preserveColorProfile,
 					preserveResolution: row.preserveResolution,
 				},
 			});
-			expect(result).toEqual([]);
+			expect(result.leakedTags).toEqual([]);
 		});
 	});
 });
