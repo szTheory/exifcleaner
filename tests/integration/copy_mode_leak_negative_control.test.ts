@@ -122,7 +122,10 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 						outputMode: "copy",
 						...DEFAULT_PRESERVATION,
 					});
-					expect(writeResult).toEqual({ ok: true, value: undefined });
+					expect(writeResult).toEqual({
+						ok: true,
+						value: { writtenBy: "native" },
+					});
 					expect(nativeWrite).toHaveBeenCalledOnce();
 					expect(exiftoolWrite).not.toHaveBeenCalled();
 
@@ -132,9 +135,13 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
+							writtenBy: "native",
 						},
 					});
-					expect(verifyResult).toEqual({ ok: true, value: undefined });
+					expect(verifyResult).toEqual({
+						ok: true,
+						value: { exemptionsApplied: [] },
+					});
 				} finally {
 					await process.close();
 				}
@@ -162,7 +169,10 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 						outputMode: "copy",
 						...DEFAULT_PRESERVATION,
 					});
-					expect(writeResult).toEqual({ ok: true, value: undefined });
+					expect(writeResult).toEqual({
+						ok: true,
+						value: { writtenBy: "native" },
+					});
 
 					// Sanity: clean output passes before injection.
 					const clean = await verify.execute({
@@ -171,9 +181,10 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
+							writtenBy: "native",
 						},
 					});
-					expect(clean).toEqual({ ok: true, value: undefined });
+					expect(clean).toEqual({ ok: true, value: { exemptionsApplied: [] } });
 
 					testCase.inject(destination);
 
@@ -183,6 +194,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
+							writtenBy: "native",
 						},
 					});
 					expect(leaked).toMatchObject({
@@ -382,7 +394,10 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 				preserveResolution: true,
 				preserveTimestamps: false,
 			});
-			expect(writeResult).toEqual({ ok: true, value: undefined });
+			expect(writeResult).toEqual({
+				ok: true,
+				value: { writtenBy: "exiftool" },
+			});
 			expect(nativeWrite).toHaveBeenCalledOnce();
 			expect(exiftoolWrite).toHaveBeenCalledOnce();
 
@@ -392,9 +407,13 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 					preserveOrientation: true,
 					preserveColorProfile: true,
 					preserveResolution: true,
+					writtenBy: "exiftool",
 				},
 			});
-			expect(verifyResult).toEqual({ ok: true, value: undefined });
+			expect(verifyResult).toEqual({
+				ok: true,
+				value: { exemptionsApplied: [] },
+			});
 		} finally {
 			await process.close();
 		}

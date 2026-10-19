@@ -100,7 +100,7 @@ describe("multi-page TIFF: only IFD0 is cleaned; IFD1 residue is pinned (D-22)",
 				preserveResolution: false,
 				preserveTimestamps: false,
 			});
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		} finally {
 			await process.close();
 		}

@@ -123,8 +123,8 @@ describe("Resolution copy-back matrix, product adapter (FID-03, D-37, D-38)", ()
 				return;
 			}
 
-			expect(onResult).toEqual({ ok: true, value: undefined });
-			expect(offResult).toEqual({ ok: true, value: undefined });
+			expect(onResult).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
+			expect(offResult).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 
 			const after = snapshotDir(dir);
 			assertDirEffect(before, after, {
@@ -606,7 +606,7 @@ describe("Resolution copy-back edges (FID-01, FID-03)", () => {
 				preserveResolution: true,
 				preserveTimestamps: false,
 			});
-			expect(first).toEqual({ ok: true, value: undefined });
+			expect(first).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			const second = await exiftool.sanitize({
 				source: firstOut,
 				destination: secondOut,
@@ -616,7 +616,7 @@ describe("Resolution copy-back edges (FID-01, FID-03)", () => {
 				preserveResolution: true,
 				preserveTimestamps: false,
 			});
-			expect(second).toEqual({ ok: true, value: undefined });
+			expect(second).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		} finally {
 			await process.close();
 		}
@@ -653,7 +653,7 @@ describe("Resolution copy-back edges (FID-01, FID-03)", () => {
 				preserveResolution: true,
 				preserveTimestamps: false,
 			});
-			expect(first).toEqual({ ok: true, value: undefined });
+			expect(first).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			const second = await exiftool.sanitize({
 				source: firstOut,
 				destination: secondOut,
@@ -663,7 +663,7 @@ describe("Resolution copy-back edges (FID-01, FID-03)", () => {
 				preserveResolution: true,
 				preserveTimestamps: false,
 			});
-			expect(second).toEqual({ ok: true, value: undefined });
+			expect(second).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		} finally {
 			await process.close();
 		}
@@ -696,7 +696,7 @@ describe("Resolution copy-back edges (FID-01, FID-03)", () => {
 				preserveResolution: true,
 				preserveTimestamps: false,
 			});
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		} finally {
 			await process.close();
 		}
