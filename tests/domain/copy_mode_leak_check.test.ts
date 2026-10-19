@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
 	findLeakedTags,
 	copyModeLeakCheckFormatOf,
+	PERMITTED_SETS_FOR_TESTS,
 	type CopyModeLeakCheckFormat,
 } from "../../src/domain/exif/copy_mode_leak_check";
 
@@ -20,6 +21,12 @@ interface SweepRow {
 	readonly engine: "exiftool" | "native";
 	readonly outcome: "written" | "declined" | "error";
 	readonly keys: readonly string[];
+}
+
+function alwaysSet(name: string): ReadonlySet<string> {
+	const set = PERMITTED_SETS_FOR_TESTS[name];
+	if (set === undefined) throw new Error(`no permitted set named ${name}`);
+	return set;
 }
 
 function recordFromKeys(keys: readonly string[]): Record<string, unknown> {
@@ -43,7 +50,11 @@ describe("copyModeLeakCheckFormatOf", () => {
 		expect(copyModeLeakCheckFormatOf({ fileType })).toBe("heic");
 	});
 
-	it.each([["WEBP"], ["AVIF"], [undefined], [42]])(
+	it("maps AVIF to avif", () => {
+		expect(copyModeLeakCheckFormatOf({ fileType: "AVIF" })).toBe("avif");
+	});
+
+	it.each([["WEBP"], ["MOV"], ["MP4"], [""], [undefined], [42]])(
 		"returns undefined for %s",
 		(fileType) => {
 			expect(copyModeLeakCheckFormatOf({ fileType })).toBeUndefined();
@@ -431,6 +442,219 @@ describe("findLeakedTags", () => {
 				});
 				expect(result.leakedTags).toEqual(["QuickTime:HandlerDescription"]);
 			}
+		});
+	});
+
+	describe("HEIC and AVIF allowlist shape (63-09)", () => {
+		const everySet = Object.entries(PERMITTED_SETS_FOR_TESTS);
+
+		it("has the eight per-format sets", () => {
+			expect(everySet.map(([name]) => name).sort()).toEqual([
+				"AVIF_ALWAYS_PERMITTED",
+				"AVIF_COLOR_PROFILE_ONLY",
+				"AVIF_ORIENTATION_ONLY",
+				"AVIF_RESOLUTION_ONLY",
+				"HEIC_ALWAYS_PERMITTED",
+				"HEIC_COLOR_PROFILE_ONLY",
+				"HEIC_ORIENTATION_ONLY",
+				"HEIC_RESOLUTION_ONLY",
+			]);
+		});
+
+		it.each(everySet)(
+			"%s never permits QuickTime:HandlerDescription",
+			(_n, set) => {
+				expect(
+					[...set].filter((key) => key.endsWith(":HandlerDescription")),
+				).toEqual([]);
+			},
+		);
+
+		it.each(everySet)(
+			"%s lists only full Group1:Tag keys, never a group",
+			(_n, set) => {
+				for (const key of set) {
+					expect(key).toMatch(/^[A-Za-z0-9_-]+:[A-Za-z0-9]+$/);
+				}
+			},
+		);
+
+		it.each(everySet)(
+			"%s holds no System, ExifTool, XMP or GPS key",
+			(_n, set) => {
+				expect(
+					[...set].filter((key) => /^(System|ExifTool|XMP|GPS)/.test(key)),
+				).toEqual([]);
+			},
+		);
+
+		it.each(
+			Object.entries(PERMITTED_SETS_FOR_TESTS).filter(
+				([name]) => !name.endsWith("COLOR_PROFILE_ONLY"),
+			),
+		)(
+			"%s holds no ICC key (colour-profile keys live only in the colour-profile set)",
+			(_n, set) => {
+				expect([...set].filter((key) => key.startsWith("ICC"))).toEqual([]);
+			},
+		);
+
+		it("lists the QuickTime entries of HEIC always one by one", () => {
+			const quickTime = [...alwaysSet("HEIC_ALWAYS_PERMITTED")].filter((key) =>
+				key.startsWith("QuickTime:"),
+			);
+			expect(quickTime.length).toBeGreaterThan(30);
+		});
+	});
+
+	describe("AVIF (63-09)", () => {
+		const allOff = {
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+		};
+
+		it.each([["GPS:GPSLatitude"], ["XMP-dc:Creator"]])(
+			"reports AVIF %s as a leak",
+			(key) => {
+				const result = findLeakedTags({
+					record: { [key]: "x" },
+					format: "avif",
+					writtenBy: "native",
+					fileType: "AVIF",
+					preservation: allOff,
+				});
+				expect(result.leakedTags).toEqual([key]);
+			},
+		);
+
+		it("passes an AVIF record of exactly the always set", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys([
+					...alwaysSet("AVIF_ALWAYS_PERMITTED"),
+					"System:FileName",
+					"ExifTool:ExifToolVersion",
+				]),
+				format: "avif",
+				writtenBy: "native",
+				fileType: "AVIF",
+				preservation: allOff,
+			});
+			expect(result.leakedTags).toEqual([]);
+		});
+
+		it("flags QuickTime:HandlerDescription as an AVIF leak under every preservation", () => {
+			for (const flag of [false, true]) {
+				const result = findLeakedTags({
+					record: { "QuickTime:Meta:HandlerDescription": "ZZ63-HANDLER" },
+					format: "avif",
+					writtenBy: "exiftool",
+					fileType: "AVIF",
+					preservation: {
+						preserveOrientation: flag,
+						preserveColorProfile: flag,
+						preserveResolution: flag,
+					},
+				});
+				expect(result.leakedTags).toEqual(["QuickTime:HandlerDescription"]);
+			}
+		});
+	});
+
+	// 63-09 decisions for the keys the 63-08 iPhone 13 Pro Max measurement found outside the
+	// 63-07 derivation. Encoded by key name only; no byte or value of the external file is used.
+	describe("iPhone-derived keys (63-09 decisions)", () => {
+		const off = {
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+		};
+		const colourOn = { ...off, preserveColorProfile: true };
+
+		function leaks(
+			key: string,
+			format: CopyModeLeakCheckFormat,
+			writtenBy: "native" | "exiftool",
+			preservation: typeof off,
+		): readonly string[] {
+			return findLeakedTags({
+				record: { [key]: "name-only" },
+				format,
+				writtenBy,
+				fileType: format === "avif" ? "AVIF" : "HEIC",
+				preservation,
+			}).leakedTags;
+		}
+
+		it("permits QuickTime:AuxiliaryImageType for HEIC under every engine and combination", () => {
+			for (const writtenBy of ["native", "exiftool"] as const) {
+				for (const preservation of [off, colourOn]) {
+					expect(
+						leaks(
+							"QuickTime:AuxiliaryImageType",
+							"heic",
+							writtenBy,
+							preservation,
+						),
+					).toEqual([]);
+				}
+			}
+		});
+
+		it("keeps QuickTime:AuxiliaryImageType a leak for AVIF (not measured there)", () => {
+			expect(
+				leaks("QuickTime:AuxiliaryImageType", "avif", "native", off),
+			).toEqual(["QuickTime:AuxiliaryImageType"]);
+		});
+
+		it.each(["heic", "avif"] as const)(
+			"permits ICC_Profile:ChromaticAdaptation for %s only with preserveColorProfile",
+			(format) => {
+				expect(
+					leaks("ICC_Profile:ChromaticAdaptation", format, "native", colourOn),
+				).toEqual([]);
+				expect(
+					leaks("ICC_Profile:ChromaticAdaptation", format, "native", off),
+				).toEqual(["ICC_Profile:ChromaticAdaptation"]);
+			},
+		);
+
+		it("keeps ICC_Profile:ChromaticAdaptation out of the shared PNG/JPEG colour-profile set", () => {
+			for (const format of ["png", "jpeg"] as const) {
+				expect(
+					findLeakedTags({
+						record: { "ICC_Profile:ChromaticAdaptation": "x" },
+						format,
+						writtenBy: "native",
+						fileType: format === "png" ? "PNG" : "JPEG",
+						preservation: colourOn,
+					}).leakedTags,
+				).toEqual(["ICC_Profile:ChromaticAdaptation"]);
+			}
+		});
+
+		it.each(["XMP-HDRGainMap:HDRGainMapVersion", "XMP-x:XMPToolkit"])(
+			"keeps %s a leak for every engine, format and combination (the input fails closed on the ExifTool path)",
+			(key) => {
+				for (const format of ["heic", "avif"] as const) {
+					for (const writtenBy of ["native", "exiftool"] as const) {
+						for (const preservation of [off, colourOn]) {
+							expect(leaks(key, format, writtenBy, preservation)).toEqual([
+								key,
+							]);
+						}
+					}
+				}
+			},
+		);
+
+		it("permits QuickTime:PixelAspectRatio for AVIF only, and keeps it a leak for HEIC", () => {
+			expect(
+				leaks("QuickTime:PixelAspectRatio", "avif", "exiftool", off),
+			).toEqual([]);
+			expect(
+				leaks("QuickTime:PixelAspectRatio", "heic", "exiftool", off),
+			).toEqual(["QuickTime:PixelAspectRatio"]);
 		});
 	});
 

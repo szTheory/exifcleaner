@@ -1,5 +1,9 @@
 // Pure domain logic — zero dependencies, zero I/O.
 //
+// Phase 63-09 (D-15): HEIC/HEIF/AVIF allowlists are measured in
+// .planning/phases/63-app-adoption/63-SWEEP-MATRIX.md ("## Allowlist derivation" and
+// "## 63-09 decisions"), per key, never group-wide.
+//
 // Phase 58-03 (D-07/D-08/D-09): a fail-closed leak allowlist for PNG/JPEG copy-mode output,
 // measured against the bundled ExifTool and exifcleaner-node in
 // .planning/phases/58-app-adoption/58-SWEEP-MATRIX.md. Every constant below is transcribed
@@ -12,7 +16,7 @@
 // ImageWidth).
 import { groupAndTagOf } from "./exif";
 
-export type CopyModeLeakCheckFormat = "png" | "jpeg" | "heic";
+export type CopyModeLeakCheckFormat = "png" | "jpeg" | "heic" | "avif";
 
 interface CopyModeLeakCheckFormatOfParams {
 	readonly fileType: unknown;
@@ -24,8 +28,10 @@ export function copyModeLeakCheckFormatOf({
 	if (fileType === "PNG") return "png";
 	if (fileType === "JPEG") return "jpeg";
 	// ExifTool reports a reopened HEIC or HEIF container as either FileType; both share the
-	// ISOBMFF allowlist. AVIF, WebP, MOV and anything else stay undefined (fail closed).
+	// HEVC ISOBMFF allowlist. AVIF has its own (AV1) allowlist. WebP, MOV and anything else stay
+	// undefined (fail closed).
 	if (fileType === "HEIC" || fileType === "HEIF") return "heic";
+	if (fileType === "AVIF") return "avif";
 	return undefined;
 }
 
@@ -165,12 +171,18 @@ const PNG_RESOLUTION_ONLY: ReadonlySet<string> = new Set([
 	"PNG-pHYs:PixelsPerUnitY",
 ]);
 
-// 63-SWEEP-MATRIX.md "## Tracer rows (63-02)" -- HEIC, always permitted (no preservation
-// required): the all-off native row minus the System/ExifTool groups exempted wholesale.
-// Composite/File/Meta and the QuickTime keys are ISOBMFF structure facts (brands, HEVC
+// 63-SWEEP-MATRIX.md "## Allowlist derivation" (HEIC) -- always permitted (no preservation
+// required): the union over both engines of the keys present with every preservation off, minus
+// the System/ExifTool groups exempted wholesale and minus the ICC residue (F-HEIC-ICC). Composite,
+// File and Meta keys and the QuickTime keys are ISOBMFF structure facts (brands, HEVC
 // configuration, pixel geometry, item references). Every QuickTime key is listed ONE BY ONE and
-// no QuickTime group-wide allowance exists: QuickTime:HandlerDescription is deliberately absent
-// because the handler name is free text that can carry an encoder or user string (D-15, D-17).
+// no QuickTime group-wide allowance exists. QuickTime:HandlerDescription is deliberately absent:
+// the handler name is free text that can carry an encoder or user string (D-15, D-17; maintainer
+// decision 2026-10-19: fail-closed).
+// QuickTime:AuxiliaryImageType is the 63-09 decision from the 63-08 iPhone measurement (matrix
+// "## 63-09 decisions"): the auxC type URN of an auxiliary image item (the HDR gain map) that both
+// engines keep at every combo; its value class is a fixed vocabulary URN naming the kind of
+// image, not source identity.
 const HEIC_ALWAYS_PERMITTED: ReadonlySet<string> = new Set([
 	"Composite:ImageSize",
 	"Composite:Megapixels",
@@ -179,7 +191,9 @@ const HEIC_ALWAYS_PERMITTED: ReadonlySet<string> = new Set([
 	"File:ImageHeight",
 	"File:ImageWidth",
 	"File:MIMEType",
+	"Meta:MetaImageSize",
 	"Meta:PrimaryItemReference",
+	"QuickTime:AuxiliaryImageType",
 	"QuickTime:AverageFrameRate",
 	"QuickTime:BitDepthChroma",
 	"QuickTime:BitDepthLuma",
@@ -215,26 +229,111 @@ const HEIC_ALWAYS_PERMITTED: ReadonlySet<string> = new Set([
 	"QuickTime:VideoFullRangeFlag",
 ]);
 
-// 63-SWEEP-MATRIX.md "## Tracer rows (63-02)" -- HEIC, permitted only when preserveOrientation is
-// requested (orientation row minus the always set).
+// 63-SWEEP-MATRIX.md "## Allowlist derivation" (HEIC) -- permitted only when preserveOrientation
+// is requested: per-engine delta over that engine's none bucket, unioned. IFD0:YCbCrPositioning is
+// the ExifTool-only Exif companion (Decision 15 (c)).
 const HEIC_ORIENTATION_ONLY: ReadonlySet<string> = new Set([
 	"File:ExifByteOrder",
 	"IFD0:Orientation",
+	"IFD0:YCbCrPositioning",
 ]);
 
-// 63-SWEEP-MATRIX.md "## Tracer rows (63-02)" -- HEIC, permitted only when preserveColorProfile is
-// requested. Empty from the tracer: the sips fixture has no ICC profile, so this row equals the
-// all-off row. 63-09 re-derives it from an ICC-bearing HEIC in the full two-engine sweep.
-const HEIC_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set<string>();
+// 63-SWEEP-MATRIX.md "## Allowlist derivation" (HEIC) -- permitted only when preserveColorProfile
+// is requested: the native engine's 25 ICC keys (ICC_GROUP_TAGS) plus ICC_Profile:ChromaticAdaptation
+// (the chad tag, 9 numbers of colorimetry, the same class as ICC_Profile:MediaWhitePoint), measured
+// on the iPhone sample in 63-08 and decided in 63-09 ("## 63-09 decisions"). It is not added to the
+// shared ICC_GROUP_TAGS because JPEG and PNG were not re-measured for it.
+const HEIC_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
+	...ICC_GROUP_TAGS,
+	"ICC_Profile:ChromaticAdaptation",
+]);
 
-// 63-SWEEP-MATRIX.md "## Tracer rows (63-02)" -- HEIC, permitted only when preserveResolution is
-// requested (resolution row minus the always set).
+// 63-SWEEP-MATRIX.md "## Allowlist derivation" (HEIC) -- permitted only when preserveResolution is
+// requested.
 const HEIC_RESOLUTION_ONLY: ReadonlySet<string> = new Set([
 	"File:ExifByteOrder",
 	"IFD0:ResolutionUnit",
 	"IFD0:XResolution",
+	"IFD0:YCbCrPositioning",
 	"IFD0:YResolution",
 ]);
+
+// 63-SWEEP-MATRIX.md "## Allowlist derivation" (AVIF) -- always permitted: same derivation rules as
+// HEIC. QuickTime:HandlerDescription is never permitted (D-15, D-17; the link-u cavif string stays
+// the fail-closed control). QuickTime:PixelAspectRatio is the 63-09 decision ("## 63-09 decisions"):
+// the pasp box, two integers of pixel spacing, the same class as the permitted CleanAperture and
+// ImageSpatialExtent; measured on ExifTool-written output only.
+const AVIF_ALWAYS_PERMITTED: ReadonlySet<string> = new Set([
+	"Composite:ImageSize",
+	"Composite:Megapixels",
+	"File:FileType",
+	"File:FileTypeExtension",
+	"File:ImageHeight",
+	"File:ImageWidth",
+	"File:MIMEType",
+	"Meta:PrimaryItemReference",
+	"QuickTime:AV1ConfigurationVersion",
+	"QuickTime:ChromaFormat",
+	"QuickTime:ChromaSamplePosition",
+	"QuickTime:CleanAperture",
+	"QuickTime:ColorPrimaries",
+	"QuickTime:ColorProfiles",
+	"QuickTime:CompatibleBrands",
+	"QuickTime:HandlerType",
+	"QuickTime:ImagePixelDepth",
+	"QuickTime:ImageSpatialExtent",
+	"QuickTime:MajorBrand",
+	"QuickTime:MatrixCoefficients",
+	"QuickTime:MaxContentLightLevel",
+	"QuickTime:MaxPicAverageLightLevel",
+	"QuickTime:MediaDataOffset",
+	"QuickTime:MediaDataSize",
+	"QuickTime:MinorVersion",
+	"QuickTime:PixelAspectRatio",
+	"QuickTime:Rotation",
+	"QuickTime:TransferCharacteristics",
+	"QuickTime:VideoFullRangeFlag",
+]);
+
+// 63-SWEEP-MATRIX.md "## Allowlist derivation" (AVIF) -- permitted only when preserveOrientation
+// is requested.
+const AVIF_ORIENTATION_ONLY: ReadonlySet<string> = new Set([
+	"File:ExifByteOrder",
+	"IFD0:Orientation",
+	"IFD0:YCbCrPositioning",
+]);
+
+// 63-SWEEP-MATRIX.md "## Allowlist derivation" (AVIF) -- permitted only when preserveColorProfile
+// is requested; ICC_Profile:ChromaticAdaptation measured on a Display P3 libavif AVIF in 63-09.
+const AVIF_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
+	...ICC_GROUP_TAGS,
+	"ICC_Profile:ChromaticAdaptation",
+]);
+
+// 63-SWEEP-MATRIX.md "## Allowlist derivation" (AVIF) -- permitted only when preserveResolution is
+// requested.
+const AVIF_RESOLUTION_ONLY: ReadonlySet<string> = new Set([
+	"File:ExifByteOrder",
+	"IFD0:ResolutionUnit",
+	"IFD0:XResolution",
+	"IFD0:YCbCrPositioning",
+	"IFD0:YResolution",
+]);
+
+// Test-only view of the per-format sets so the shape guards can iterate every set without a
+// production consumer.
+export const PERMITTED_SETS_FOR_TESTS: Readonly<
+	Record<string, ReadonlySet<string>>
+> = {
+	HEIC_ALWAYS_PERMITTED,
+	HEIC_ORIENTATION_ONLY,
+	HEIC_COLOR_PROFILE_ONLY,
+	HEIC_RESOLUTION_ONLY,
+	AVIF_ALWAYS_PERMITTED,
+	AVIF_ORIENTATION_ONLY,
+	AVIF_COLOR_PROFILE_ONLY,
+	AVIF_RESOLUTION_ONLY,
+};
 
 interface Preservation {
 	readonly preserveOrientation: boolean;
@@ -307,6 +406,24 @@ function isPermitted({
 			}
 			return (
 				preservation.preserveResolution && HEIC_RESOLUTION_ONLY.has(groupTag)
+			);
+		}
+		case "avif": {
+			if (AVIF_ALWAYS_PERMITTED.has(groupTag)) return true;
+			if (
+				preservation.preserveOrientation &&
+				AVIF_ORIENTATION_ONLY.has(groupTag)
+			) {
+				return true;
+			}
+			if (
+				preservation.preserveColorProfile &&
+				AVIF_COLOR_PROFILE_ONLY.has(groupTag)
+			) {
+				return true;
+			}
+			return (
+				preservation.preserveResolution && AVIF_RESOLUTION_ONLY.has(groupTag)
 			);
 		}
 		default: {
