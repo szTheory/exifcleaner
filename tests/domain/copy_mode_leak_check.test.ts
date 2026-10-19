@@ -23,6 +23,21 @@ interface SweepRow {
 	readonly keys: readonly string[];
 }
 
+interface HeifSweepRow {
+	readonly variant: string;
+	readonly fileType: string;
+	readonly engine: "exiftool" | "native";
+	readonly route: "router" | "exiftool-direct";
+	readonly combo: string;
+	readonly preserveOrientation: boolean;
+	readonly preserveColorProfile: boolean;
+	readonly preserveResolution: boolean;
+	readonly preserveTimestamps: boolean;
+	readonly outcome: "written" | "declined" | "error";
+	readonly handlerDescription: string | null;
+	readonly keys: readonly string[];
+}
+
 function alwaysSet(name: string): ReadonlySet<string> {
 	const set = PERMITTED_SETS_FOR_TESTS[name];
 	if (set === undefined) throw new Error(`no permitted set named ${name}`);
@@ -774,6 +789,88 @@ describe("findLeakedTags", () => {
 			const second = findLeakedTags(params);
 			expect(second).toEqual(first);
 			expect(JSON.stringify(record)).toBe(before);
+		});
+	});
+
+	describe("HEIF sweep replay (63-07 rows, copy_mode_heif_sweep.json)", () => {
+		const sweepPath = path.join(
+			__dirname,
+			"fixtures/copy_mode_heif_sweep.json",
+		);
+		const parsed = JSON.parse(fs.readFileSync(sweepPath, "utf8")) as {
+			readonly rows: readonly HeifSweepRow[];
+		};
+		const writtenRows = parsed.rows.filter((row) => row.outcome === "written");
+		const hasIccKey = (row: HeifSweepRow): boolean =>
+			row.keys.some(
+				(key) =>
+					key.startsWith("ICC-header:") || key.startsWith("ICC_Profile:"),
+			);
+		const hasHandlerDescription = (row: HeifSweepRow): boolean =>
+			row.keys.some((key) => key === "QuickTime:HandlerDescription");
+
+		function replay(row: HeifSweepRow) {
+			const format = copyModeLeakCheckFormatOf({ fileType: row.fileType });
+			if (format === undefined) {
+				throw new Error(`no leak-check format for FileType ${row.fileType}`);
+			}
+			return findLeakedTags({
+				record: Object.freeze(recordFromKeys(row.keys)),
+				format,
+				writtenBy: row.engine,
+				fileType: row.fileType,
+				preservation: {
+					preserveOrientation: row.preserveOrientation,
+					preserveColorProfile: row.preserveColorProfile,
+					preserveResolution: row.preserveResolution,
+				},
+			});
+		}
+
+		it("has at least 300 written rows to replay", () => {
+			expect(writtenRows.length).toBeGreaterThanOrEqual(300);
+		});
+
+		it("covers a populated native row set and an ExifTool row set", () => {
+			expect(writtenRows.some((row) => row.engine === "native")).toBe(true);
+			expect(writtenRows.some((row) => row.engine === "exiftool")).toBe(true);
+		});
+
+		it.each(
+			writtenRows.map(
+				(row) =>
+					[
+						`${row.variant} ${row.combo} ${row.route} ${row.engine}`,
+						row,
+					] as const,
+			),
+		)("replays %s exactly as the allowlist predicts", (_label, row) => {
+			const result = replay(row);
+			if (hasHandlerDescription(row)) {
+				// D-17 fail-closed: a non-empty handler name is pinned as the one and only leak.
+				expect(result.leakedTags).toEqual(["QuickTime:HandlerDescription"]);
+			} else {
+				expect(result.leakedTags).toEqual([]);
+			}
+			if (row.engine === "native") {
+				expect(result.exemptionsApplied).toEqual([]);
+			} else {
+				const expected =
+					!row.preserveColorProfile && hasIccKey(row) ? ["F-HEIC-ICC"] : [];
+				expect(result.exemptionsApplied).toEqual(expected);
+			}
+		});
+
+		it("never reports the exemption on a native row and uses it on ICC-bearing ExifTool rows", () => {
+			const native = writtenRows.filter((row) => row.engine === "native");
+			expect(
+				native.every((row) => replay(row).exemptionsApplied.length === 0),
+			).toBe(true);
+			const used = writtenRows.filter(
+				(row) => replay(row).exemptionsApplied.length > 0,
+			);
+			expect(used.length).toBe(80);
+			expect(used.every((row) => row.engine === "exiftool")).toBe(true);
 		});
 	});
 
