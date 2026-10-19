@@ -595,6 +595,18 @@ const EXIFTOOL_PATH_FIXTURE_PINS = [
 		sizeBytes: 2_840,
 		fileType: "AVIF",
 	},
+	{
+		name: "sample-sips-icc-declined.heic",
+		sha256: "7f3392df0c9923a07f9cfcb6d9d9d30edbeeaaa6ab6dc22f9ba9a49bf8a9ce1f",
+		sizeBytes: 1780,
+		fileType: "HEIC",
+	},
+	{
+		name: "sample-sips-icc-declined.avif",
+		sha256: "f8adaf6c03e0d2236dba9f3487be67a75bc58973930a7a5c9663163aa0257e72",
+		sizeBytes: 1662,
+		fileType: "AVIF",
+	},
 ] as const;
 
 describe("ExifTool-path HEIF fixtures (63-06)", () => {

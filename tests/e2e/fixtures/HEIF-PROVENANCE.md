@@ -137,3 +137,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 `QuickTime.heic` (ExifTool 13.59 `t/images`, FileType `HEIF`, empty handler) is the other
 ExifTool-path fixture; node declines it as `unsupported-format` ("iinf version 2 is not
 supported").
+
+## Constructed: sample-sips-icc-declined
+
+`sample-sips-icc-declined.heic` and `.avif` (63-06, ADP-07/ADP-08, D-17) are the F-HEIC-ICC
+positives: ICC-bearing, declined by exifcleaner-node 0.4.0 pre-write, empty
+`QuickTime:HandlerDescription`, writable by the bundled ExifTool. Each is its `sample-sips-icc.*`
+source plus ONE appended 8-byte top-level box `00 00 00 08 7a 7a 7a 7a` (size 8, type `zzzz`),
+which is outside node's admitted top-level set (`ftyp`/`meta`/`mdat`/`free`/`skip`). Candidate 1
+of the plan's ordered list satisfied every property, so candidates 2 and 3 were not needed. No
+existing byte is changed (`cmp -l` source vs output prints no differing byte; the output is 8 bytes longer).
+
+```sh
+node -e 'const fs=require("fs");const [i,o]=process.argv.slice(1);
+const b=fs.readFileSync(i);
+fs.writeFileSync(o,Buffer.concat([b,Buffer.from([0,0,0,8,0x7a,0x7a,0x7a,0x7a])]));' \
+  tests/e2e/fixtures/sample-sips-icc.heic <dest>/sample-sips-icc-declined.heic
+# same for .avif
+```
+
+| File | Input SHA-256 | Output SHA-256 | Bytes | Offsets touched |
+| --- | --- | --- | --- | --- |
+| `sample-sips-icc-declined.heic` | `ac0a8c04f1698002d1f764da4f151bc94bf576f5ef8af276e7a80cdeaabfa545` | `7f3392df0c9923a07f9cfcb6d9d9d30edbeeaaa6ab6dc22f9ba9a49bf8a9ce1f` | 1,780 | 1772..1779 (appended) |
+| `sample-sips-icc-declined.avif` | `758a42df68c0582fdda21b49460dd06f66582f8e0e39ac69f819deffb937db57` | `f8adaf6c03e0d2236dba9f3487be67a75bc58973930a7a5c9663163aa0257e72` | 1,662 | 1654..1661 (appended) |
+
+Measured node 0.4.0 error (both files): `{"code":"unsupported-format","detail":"Top-level box \"zzzz\" is not in the admitted set.","phase":"admission","nativeWrite":"not-started"}`, so `classifyFallback` grants the fallback.
+
+Measured with the bundled ExifTool 13.59: `-all=` rewrites each file (exit ok), the result reopens as
+HEIC / AVIF, `HandlerDescription` is empty before and after, and the ICC residue
+(`[ICC-header]` x15 keys and `[ICC_Profile]` x9 keys, e.g. `ProfileDescription : Nikon Adobe RGB
+4.0.0.3000`) remains. `heif_exiftool_path_fixtures.test.ts` asserts the same through the app's real
+`ExifToolAdapter.sanitize` with `preserveColorProfile: false`.

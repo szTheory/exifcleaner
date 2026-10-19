@@ -9,7 +9,9 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { classifyFallback, sanitizeFile } from "exifcleaner-node";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { ExifToolAdapter } from "../../src/infrastructure/exiftool/exiftool_adapter";
+import { ExiftoolProcess } from "../../src/infrastructure/exiftool/ExiftoolProcess";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -31,6 +33,22 @@ const EXIFTOOL_PATH_FIXTURES = [
 		expectedCode: "unsafe-structure",
 		handler: "cavif - https://github.com/link-u/cavif",
 	},
+	{
+		name: "sample-sips-icc-declined.heic",
+		expectedCode: "unsupported-format",
+		handler: "",
+	},
+	{
+		name: "sample-sips-icc-declined.avif",
+		expectedCode: "unsupported-format",
+		handler: "",
+	},
+] as const;
+
+// F-HEIC-ICC fixtures: ICC-bearing, declined by node, empty handler (D-17).
+const ICC_RESIDUE_FIXTURES = [
+	{ name: "sample-sips-icc-declined.heic", fileType: "HEIC" },
+	{ name: "sample-sips-icc-declined.avif", fileType: "AVIF" },
 ] as const;
 
 const COMBOS = Array.from({ length: 8 }, (_, mask) => ({
@@ -122,4 +140,86 @@ describe("63-06: ExifTool-path HEIF fixtures are declined by exifcleaner-node (i
 			}
 		},
 	);
+
+	describe("ExifTool clean keeps ICC on the constructed fixtures (F-HEIC-ICC, D-17)", () => {
+		const exiftoolProcess = new ExiftoolProcess({ binPath: EXIFTOOL });
+		const adapter = new ExifToolAdapter({ process: exiftoolProcess });
+
+		beforeAll(async () => {
+			await exiftoolProcess.open();
+		});
+		afterAll(async () => {
+			await exiftoolProcess.close();
+		});
+
+		function iccKeys(filePath: string): string[] {
+			return execFileSync(EXIFTOOL, ["-a", "-G1", "-s", filePath])
+				.toString()
+				.split("\n")
+				.filter((line) => /^\[(ICC-header|ICC_Profile)\]/.test(line));
+		}
+
+		function handlerOf(filePath: string): string {
+			return execFileSync(EXIFTOOL, [
+				"-a",
+				"-s3",
+				"-HandlerDescription",
+				filePath,
+			])
+				.toString()
+				.trim();
+		}
+
+		it.each(ICC_RESIDUE_FIXTURES)(
+			"$name: input has ICC and an empty handler, ExifTool writes it with preserveColorProfile=false and ICC remains",
+			async ({ name, fileType }) => {
+				const dir = makeTempDir();
+				const source = path.join(dir, name);
+				fs.copyFileSync(path.join(FIXTURES, name), source);
+				const destName = `cleaned-${name}`;
+				const destination = path.join(dir, destName);
+				const sourceDigest = sha256(source);
+				expect(iccKeys(source).length).toBeGreaterThan(0);
+				expect(handlerOf(source)).toBe("");
+				const before = snapshotDir(dir);
+
+				const result = await adapter.sanitize({
+					source,
+					destination,
+					outputMode: "copy",
+					preserveOrientation: false,
+					preserveColorProfile: false,
+					preserveResolution: false,
+					preserveTimestamps: false,
+				});
+
+				expect(result).toEqual({
+					ok: true,
+					value: { writtenBy: "exiftool" },
+				});
+				expect(
+					execFileSync(EXIFTOOL, ["-s3", "-FileType", destination])
+						.toString()
+						.trim(),
+				).toBe(fileType);
+				expect(iccKeys(destination).length).toBeGreaterThan(0);
+				expect(handlerOf(destination)).toBe("");
+				expect(sha256(source)).toBe(sourceDigest);
+				assertDirEffect(before, snapshotDir(dir), {
+					unchanged: [name],
+					added: [destName],
+					modified: [],
+					removed: [],
+				});
+			},
+		);
+
+		it("red.avif keeps a non-empty handler (fail-closed control, D-17)", () => {
+			expect(
+				handlerOf(
+					path.join(FIXTURES, "red-at-12-oclock-with-color-profile-lossy.avif"),
+				),
+			).not.toBe("");
+		});
+	});
 });

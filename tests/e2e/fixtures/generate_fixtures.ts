@@ -1034,6 +1034,16 @@ const HEIF_FIXTURE_SPECS = [
 		sha256: "79483242f2dca12c4ec18bd33ff8099216b3094fb55a26a909f046b2f9b4ce58",
 		fileType: "AVIF",
 	},
+	{
+		name: "sample-sips-icc-declined.heic",
+		sha256: "7f3392df0c9923a07f9cfcb6d9d9d30edbeeaaa6ab6dc22f9ba9a49bf8a9ce1f",
+		fileType: "HEIC",
+	},
+	{
+		name: "sample-sips-icc-declined.avif",
+		sha256: "f8adaf6c03e0d2236dba9f3487be67a75bc58973930a7a5c9663163aa0257e72",
+		fileType: "AVIF",
+	},
 ] as const;
 
 // Verify-only: re-hash the committed HEIF fixtures and check FileType; never writes.
