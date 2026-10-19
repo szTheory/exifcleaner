@@ -14,7 +14,7 @@ import { StripMetadataCommand } from "../../src/application/commands/strip_metad
 import { VerifyGeneratedOutputQuery } from "../../src/application/queries/verify_generated_output_query";
 import { DEFAULT_SETTINGS } from "../../src/domain/settings_schema";
 import { generateCleanedPath } from "../../src/domain/files/cleaned_path";
-import { requiresCopyModeLeakCheck } from "../../src/domain/files/file_types";
+import { copyModeLeakCheckDemandOf } from "../../src/domain/files/file_types";
 import { ExifToolAdapter } from "../../src/infrastructure/exiftool/exiftool_adapter";
 import { ExiftoolProcess } from "../../src/infrastructure/exiftool/ExiftoolProcess";
 import { HybridMetadataEngine } from "../../src/infrastructure/metadata/hybrid_metadata_engine";
@@ -98,16 +98,19 @@ describe("63-02 tracer: default-settings .heic copy goes native, reopens, leak-c
 		});
 
 		// Built exactly as exif_handlers does: only when the gating predicate says so.
-		const copyModeLeakCheck = requiresCopyModeLeakCheck({
+		const leakCheckDemand = copyModeLeakCheckDemandOf({
 			filename: source,
 			outputMode: "copy",
-		})
-			? {
-					preserveOrientation: DEFAULT_SETTINGS.preserveOrientation,
-					preserveColorProfile: DEFAULT_SETTINGS.preserveColorProfile,
-					preserveResolution: DEFAULT_SETTINGS.preserveResolution,
-				}
-			: undefined;
+		});
+		const copyModeLeakCheck =
+			leakCheckDemand !== undefined
+				? {
+						demand: leakCheckDemand,
+						preserveOrientation: DEFAULT_SETTINGS.preserveOrientation,
+						preserveColorProfile: DEFAULT_SETTINGS.preserveColorProfile,
+						preserveResolution: DEFAULT_SETTINGS.preserveResolution,
+					}
+				: undefined;
 		expect(copyModeLeakCheck).toBeDefined();
 
 		await exiftoolProcess.open();

@@ -173,6 +173,7 @@ describe("63-11: F-HEIC-ICC is applied only to ExifTool-written HEIF copies, thr
 				generatedPath,
 				...settings,
 				copyModeLeakCheck: {
+					demand: "required",
 					preserveOrientation: settings.preserveOrientation,
 					preserveColorProfile: settings.preserveColorProfile,
 					preserveResolution: settings.preserveResolution,

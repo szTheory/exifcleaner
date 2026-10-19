@@ -603,6 +603,7 @@ describe("OutputTransaction", () => {
 
 	it("forwards copyModeLeakCheck to verifyGeneratedOutput.execute with the strip result's writtenBy, nothing when omitted", async () => {
 		const leakCheck = {
+			demand: "when-allowlisted" as const,
 			preserveOrientation: true,
 			preserveColorProfile: false,
 			preserveResolution: true,

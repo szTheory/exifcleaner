@@ -173,6 +173,7 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 				preserveResolution: combo.preserveResolution,
 				preserveTimestamps: combo.preserveTimestamps,
 				copyModeLeakCheck: {
+					demand: "required",
 					preserveOrientation: leakCheckCombo.preserveOrientation,
 					preserveColorProfile: leakCheckCombo.preserveColorProfile,
 					preserveResolution: leakCheckCombo.preserveResolution,

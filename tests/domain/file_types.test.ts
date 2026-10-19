@@ -5,6 +5,7 @@ import {
 	isMediaFile,
 	isTiffFile,
 	requiresVerifiedWrite,
+	copyModeLeakCheckDemandOf,
 	requiresCopyModeLeakCheck,
 	RAW_EXTENSIONS,
 	MEDIA_EXTENSIONS,
@@ -238,4 +239,33 @@ it("webp copies stay verified but are not leak-checked (D-08)", () => {
 	expect(
 		requiresCopyModeLeakCheck({ filename: "sample.webp", outputMode: "copy" }),
 	).toBe(false);
+});
+
+it("copyModeLeakCheckDemandOf is required for leak-checked copies, when-allowlisted for other verified copies, undefined otherwise (D-08)", () => {
+	for (const filename of [
+		"a.png",
+		"a.jpg",
+		"a.jpeg",
+		"a.heic",
+		"a.HEIC",
+		"a.heif",
+		"a.avif",
+	]) {
+		expect(copyModeLeakCheckDemandOf({ filename, outputMode: "copy" })).toBe(
+			"required",
+		);
+	}
+	for (const filename of ["a.webp", "a.dng", "a.tif", "a.mp4", "a.mov"]) {
+		expect(copyModeLeakCheckDemandOf({ filename, outputMode: "copy" })).toBe(
+			"when-allowlisted",
+		);
+	}
+	for (const filename of ["a.webp", "a.dng", "a.tif", "a.mp4", "a.png"]) {
+		expect(
+			copyModeLeakCheckDemandOf({ filename, outputMode: "overwrite" }),
+		).toBeUndefined();
+	}
+	expect(
+		copyModeLeakCheckDemandOf({ filename: "a.txt", outputMode: "copy" }),
+	).toBeUndefined();
 });

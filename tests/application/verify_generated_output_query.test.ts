@@ -143,6 +143,7 @@ describe("VerifyGeneratedOutputQuery", () => {
 			preserveOrientation: false,
 			preserveColorProfile: false,
 			preserveResolution: false,
+			demand: "required" as const,
 			writtenBy: "exiftool" as const,
 		};
 
@@ -238,6 +239,88 @@ describe("VerifyGeneratedOutputQuery", () => {
 			expect(result.ok).toBe(false);
 			if (result.ok) return;
 			expect(result.error.code).toBe("output-metadata-leak");
+		});
+
+		describe("demand when-allowlisted (D-08, F-63-3)", () => {
+			const lenient = {
+				...cleanPreservation,
+				demand: "when-allowlisted" as const,
+			};
+			const reopened = (fileType: string, metadata: Record<string, unknown>) =>
+				vi.mocked(metadataEngine.inspect).mockResolvedValue({
+					ok: true,
+					value: {
+						metadata: { "File:FileType": fileType, ...metadata },
+						recordCount: 1,
+						verification: { fileType, error: undefined },
+					},
+				});
+
+			it("mismatch row 11: a .webp-named JPEG output with GPS fails the leak check", async () => {
+				reopened("JPEG", { "GPS:GPSLatitude": 12.5 });
+				const result = await query.execute({
+					generatedPath: "/tmp/sample_cleaned.webp",
+					copyModeLeakCheck: lenient,
+				});
+				expect(result.ok).toBe(false);
+				if (result.ok) return;
+				expect(result.error.code).toBe("output-metadata-leak");
+				if (result.error.code !== "output-metadata-leak") return;
+				expect(result.error.leakedTags).toContain("GPS:GPSLatitude");
+			});
+
+			it("mismatch row 11b: a .tif-named JPEG output with GPS fails the leak check", async () => {
+				reopened("JPEG", { "GPS:GPSLatitude": 12.5 });
+				const result = await query.execute({
+					generatedPath: "/tmp/scan_cleaned.tif",
+					copyModeLeakCheck: lenient,
+				});
+				expect(result.ok).toBe(false);
+				if (result.ok) return;
+				expect(result.error.code).toBe("output-metadata-leak");
+			});
+
+			it.each([
+				["WEBP", "/tmp/a_cleaned.webp"],
+				["TIFF", "/tmp/a_cleaned.tif"],
+				["DNG", "/tmp/a_cleaned.dng"],
+				["MP4", "/tmp/a_cleaned.mp4"],
+			])(
+				"keeps a genuine %s output verify-only",
+				async (fileType, generatedPath) => {
+					reopened(fileType, {});
+					const result = await query.execute({
+						generatedPath,
+						copyModeLeakCheck: lenient,
+					});
+					expect(result).toEqual({
+						ok: true,
+						value: { exemptionsApplied: [] },
+					});
+				},
+			);
+
+			it("passes a clean HEIC record", async () => {
+				reopened("HEIC", {});
+				const result = await query.execute({
+					generatedPath: "/tmp/a_cleaned.webp",
+					copyModeLeakCheck: lenient,
+				});
+				expect(result.ok).toBe(true);
+			});
+
+			it("demand required keeps the no permitted-tag set failure text for WEBP", async () => {
+				reopened("WEBP", {});
+				const result = await query.execute({
+					generatedPath: "/tmp/a_cleaned.png",
+					copyModeLeakCheck: cleanPreservation,
+				});
+				expect(result.ok).toBe(false);
+				if (result.ok) return;
+				expect(result.error.detail).toBe(
+					"Copy-mode leak check has no permitted-tag set for this file type",
+				);
+			});
 		});
 	});
 });

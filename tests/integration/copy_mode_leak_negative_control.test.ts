@@ -132,6 +132,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 					const verifyResult = await verify.execute({
 						generatedPath: destination,
 						copyModeLeakCheck: {
+							demand: "required",
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
@@ -178,6 +179,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 					const clean = await verify.execute({
 						generatedPath: destination,
 						copyModeLeakCheck: {
+							demand: "required",
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
@@ -191,6 +193,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 					const leaked = await verify.execute({
 						generatedPath: destination,
 						copyModeLeakCheck: {
+							demand: "required",
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
@@ -267,6 +270,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 						preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
 						preserveTimestamps: DEFAULT_PRESERVATION.preserveTimestamps,
 						copyModeLeakCheck: {
+							demand: "required",
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
@@ -338,6 +342,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 						preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
 						preserveTimestamps: DEFAULT_PRESERVATION.preserveTimestamps,
 						copyModeLeakCheck: {
+							demand: "required",
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
@@ -404,6 +409,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 			const verifyResult = await verify.execute({
 				generatedPath: destination,
 				copyModeLeakCheck: {
+					demand: "required",
 					preserveOrientation: true,
 					preserveColorProfile: true,
 					preserveResolution: true,

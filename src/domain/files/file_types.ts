@@ -173,6 +173,34 @@ export function requiresCopyModeLeakCheck({
 	);
 }
 
+export type CopyModeLeakCheckDemand = "required" | "when-allowlisted";
+
+// D-08/F-63-3: the leak check runs on every verified copy whose reopened FileType has an
+// allowlist, whatever the extension. "required" = the extension itself demands a check, so a
+// FileType without an allowlist fails closed. "when-allowlisted" = every other verified copy
+// name (.webp, RAW, TIFF, media): the check runs when the content reopens as an allowlisted
+// FileType (HEIC/JPEG bytes behind .webp or .tif), while genuine WebP/RAW/TIFF/media output
+// stays verify-only. Computed from the name only; the reopened FileType is the content signal.
+// Overwrite mode stays outside the copy-mode leak check.
+export function copyModeLeakCheckDemandOf({
+	filename,
+	outputMode,
+}: {
+	filename: string;
+	outputMode: "copy" | "overwrite";
+}): CopyModeLeakCheckDemand | undefined {
+	if (requiresCopyModeLeakCheck({ filename, outputMode })) {
+		return "required";
+	}
+	if (
+		outputMode === "copy" &&
+		requiresVerifiedWrite({ filename, outputMode })
+	) {
+		return "when-allowlisted";
+	}
+	return undefined;
+}
+
 function hasExtension({
 	filename,
 	extensions,
