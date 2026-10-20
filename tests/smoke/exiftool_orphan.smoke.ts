@@ -117,15 +117,41 @@ function killTwin(pid: number, exiftoolPath: string): void {
 
 test("a force-killed packaged app leaves no ExifTool child running (LIF-01, D-09)", async () => {
 	const context = await launchPackagedApp();
-	const appPid = context.app.process().pid;
-	expect(appPid, "D-09 step 2: app.process().pid is defined").toBeDefined();
-	if (appPid === undefined) {
+	const playwrightPid = context.app.process().pid;
+	expect(
+		playwrightPid,
+		"D-09 step 2: app.process().pid is defined",
+	).toBeDefined();
+	if (playwrightPid === undefined) {
 		throw new Error("D-09 step 2: Playwright reported no app pid");
 	}
-	expect(
-		await context.app.evaluate(() => process.pid),
-		"D-09 step 2: app.process().pid is the Electron main pid",
-	).toBe(appPid);
+	const mainPid = await context.app.evaluate(() => process.pid);
+	// POSIX: Playwright spawns the Electron main process directly, so the two pids are equal.
+	// Windows: PR #392 CI run 39353789499 measured them different (7648 vs 9436). ExifTool is a
+	// child of the Electron main process (the process whose libuv job object holds it), so the
+	// in-app pid is the one to look children up under and to kill.
+	if (process.platform === "win32") {
+		const table = listWindowsProcesses();
+		const describe = (pid: number): string => {
+			const row = table.find((candidate) => candidate.pid === pid);
+			return row === undefined
+				? "absent"
+				: `${row.name} ppid=${row.ppid} ${row.commandLine}`;
+		};
+		console.log(
+			`SMOKE_WIN_PIDS playwright=${playwrightPid} (${describe(playwrightPid)}) main=${mainPid} (${describe(mainPid)})`,
+		);
+		expect(
+			table.some((row) => row.pid === mainPid),
+			"D-09 step 2: the in-app Electron main pid is in the process table",
+		).toBe(true);
+	} else {
+		expect(
+			mainPid,
+			"D-09 step 2: app.process().pid is the Electron main pid",
+		).toBe(playwrightPid);
+	}
+	const appPid = mainPid;
 
 	const configPath = path.join(
 		context.resourcesPath,
@@ -262,6 +288,11 @@ test("a force-killed packaged app leaves no ExifTool child running (LIF-01, D-09
 
 		// D-09 step 3: kill only the app process. app.process().kill() sets .killed, so
 		// Playwright's group kill (which would end the ExifTool child itself) is skipped.
+		if (process.platform === "win32") {
+			// Kill the Electron main process itself (TerminateProcess), then mark Playwright's handle
+			// killed so its cleanup does not tree-kill the ExifTool child on our behalf.
+			process.kill(appPid, "SIGKILL");
+		}
 		context.app.process().kill("SIGKILL");
 
 		// D-09 step 4: the child must end by itself.
