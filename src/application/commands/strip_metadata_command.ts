@@ -1,6 +1,6 @@
 import type { Result } from "../../common";
 import type { ExifError } from "../../domain";
-import type { MetadataEnginePort } from "../metadata_engine_port";
+import type { MetadataEnginePort, WrittenBy } from "../metadata_engine_port";
 
 export class StripMetadataCommand {
 	private readonly metadataEngine: MetadataEnginePort;
@@ -35,7 +35,9 @@ export class StripMetadataCommand {
 		saveAsCopy: boolean;
 		outputPath?: string | undefined;
 		signal?: AbortSignal | undefined;
-	}): Promise<Result<{ tagsRemoved: number }, ExifError>> {
+	}): Promise<
+		Result<{ tagsRemoved: number; writtenBy: WrittenBy }, ExifError>
+	> {
 		// Example: an AbortController cancelled a queued cleanup before ExifTool started.
 		if (signal?.aborted) {
 			return {
@@ -59,6 +61,9 @@ export class StripMetadataCommand {
 			return result;
 		}
 
-		return { ok: true, value: { tagsRemoved: 0 } };
+		return {
+			ok: true,
+			value: { tagsRemoved: 0, writtenBy: result.value.writtenBy },
+		};
 	}
 }

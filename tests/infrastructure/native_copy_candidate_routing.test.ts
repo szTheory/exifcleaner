@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_SETTINGS } from "../../src/domain/settings_schema";
+import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_metadata_adapter";
 import { HybridMetadataEngine } from "../../src/infrastructure/metadata/hybrid_metadata_engine";
 import type { NativeFormatCapabilities } from "../../src/infrastructure/metadata/native_metadata_port";
 import { FakeMetadataEngine } from "../fakes/fake_metadata_engine";
@@ -62,7 +64,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 		const result = await engine.sanitize(request);
 
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(native.sanitizeCalls).toEqual([]);
 		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 	});
@@ -86,7 +88,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 			const result = await engine.sanitize(request);
 
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 			expect(native.sanitizeCalls).toEqual([request]);
 			expect(
 				exiftool.calls.filter((call) => call.method === "sanitize"),
@@ -106,7 +108,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 		const result = await engine.sanitize(request);
 
-		expect(result).toEqual({ ok: true, value: undefined });
+		expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 		expect(native.sanitizeCalls).toEqual([request]);
 		expect(exiftool.calls.filter((call) => call.method === "sanitize")).toEqual(
 			[],
@@ -127,7 +129,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 			const result = await engine.sanitize(request);
 
-			expect(result).toBe(exiftool.sanitizeResult);
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			expect(native.sanitizeCalls).toEqual([]);
 			expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 		},
@@ -159,7 +161,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 		const result = await engine.sanitize(request);
 
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(native.sanitizeCalls).toEqual([]);
 		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 	});
@@ -180,7 +182,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 		const result = await engine.sanitize(request);
 
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(native.sanitizeCalls).toEqual([]);
 		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 	});
@@ -253,7 +255,7 @@ describe("native copy candidate routing (D-06)", () => {
 
 				const result = await engine.sanitize(request);
 
-				expect(result).toBe(exiftool.sanitizeResult);
+				expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 				expect(native.sanitizeCalls).toEqual([]);
 				expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 			});
@@ -267,12 +269,115 @@ describe("native copy candidate routing (D-06)", () => {
 
 				const result = await engine.sanitize(request);
 
-				expect(result).toEqual({ ok: true, value: undefined });
+				expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 				expect(native.sanitizeCalls).toEqual([request]);
 				expect(
 					exiftool.calls.filter((call) => call.method === "sanitize"),
 				).toEqual([]);
 			});
 		}
+	});
+});
+
+describe("default settings route HEIF copies to native (D-18)", () => {
+	const defaults = {
+		preserveOrientation: DEFAULT_SETTINGS.preserveOrientation,
+		preserveColorProfile: DEFAULT_SETTINGS.preserveColorProfile,
+		preserveTimestamps: DEFAULT_SETTINGS.preserveTimestamps,
+		preserveResolution: DEFAULT_SETTINGS.preserveResolution,
+	};
+
+	it("the fake heic and avif capabilities equal the installed 0.4.0 routing fields", () => {
+		const project = (format: NativeFormatCapabilities) => ({
+			format: format.format,
+			extensions: format.extensions,
+			sanitize: format.sanitize,
+			detection: format.detection,
+			preserves: {
+				orientation: format.preserves.orientation,
+				colorProfile: format.preserves.colorProfile,
+				timestamps: format.preserves.timestamps,
+				resolution: format.preserves.resolution,
+			},
+		});
+		const real = new NativeMetadataAdapter().getCapabilities().formats;
+		const fake = new FakeNativeMetadata().capabilities.formats;
+		for (const name of ["heic", "avif"]) {
+			const realEntry = real.find((format) => format.format === name);
+			const fakeEntry = fake.find((format) => format.format === name);
+			expect(realEntry).toBeDefined();
+			expect(fakeEntry).toBeDefined();
+			expect(project(fakeEntry as NativeFormatCapabilities)).toEqual(
+				project(realEntry as NativeFormatCapabilities),
+			);
+		}
+		expect(fake.length).toBe(real.length);
+	});
+
+	it.each([
+		[".heic", "/files/source.heic", "/files/clean.heic"],
+		[".HEIC", "/files/source.HEIC", "/files/clean.HEIC"],
+		[".heif", "/files/source.heif", "/files/clean.heif"],
+		[".avif", "/files/source.avif", "/files/clean.avif"],
+	])(
+		"%s save-as-copy with DEFAULT_SETTINGS routes to native once, ExifTool zero times",
+		async (_label, source, destination) => {
+			const exiftool = new FakeMetadataEngine();
+			const native = new FakeNativeMetadata();
+			const engine = new HybridMetadataEngine({ exiftool, native });
+			const request = baseRequest({ source, destination, ...defaults });
+
+			const result = await engine.sanitize(request);
+
+			expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
+			expect(native.sanitizeCalls).toEqual([request]);
+			expect(
+				exiftool.calls.filter((call) => call.method === "sanitize"),
+			).toEqual([]);
+		},
+	);
+
+	it.each([
+		["/files/source.heic", "/files/clean.heic"],
+		["/files/source.avif", "/files/clean.avif"],
+	])(
+		"%s with preserveTimestamps true still routes to native",
+		async (source, destination) => {
+			const exiftool = new FakeMetadataEngine();
+			const native = new FakeNativeMetadata();
+			const engine = new HybridMetadataEngine({ exiftool, native });
+			const request = baseRequest({
+				source,
+				destination,
+				...defaults,
+				preserveTimestamps: true,
+			});
+
+			const result = await engine.sanitize(request);
+
+			expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
+			expect(native.sanitizeCalls).toEqual([request]);
+			expect(
+				exiftool.calls.filter((call) => call.method === "sanitize"),
+			).toEqual([]);
+		},
+	);
+
+	it("an overwrite-mode .heic routes to ExifTool once, native zero times", async () => {
+		const exiftool = new FakeMetadataEngine();
+		const native = new FakeNativeMetadata();
+		const engine = new HybridMetadataEngine({ exiftool, native });
+		const request = baseRequest({
+			source: "/files/source.heic",
+			destination: "/files/source.heic",
+			outputMode: "overwrite",
+			...defaults,
+		});
+
+		const result = await engine.sanitize(request);
+
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
+		expect(native.sanitizeCalls).toEqual([]);
+		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
 	});
 });

@@ -80,7 +80,10 @@ function captureInvokeHandler(channel: string): {
 function makeContainer({
 	saveAsCopy,
 	removeXattrs = false,
-	executeResult = { ok: true, value: { tagsRemoved: 0 } },
+	executeResult = {
+		ok: true,
+		value: { tagsRemoved: 0, writtenBy: "exiftool" },
+	},
 	transactionResult,
 	readMetadataResult = { ok: true, value: { Make: "camera" } },
 }: {
@@ -398,6 +401,7 @@ describe("exif:remove handler", () => {
 				generatedPath: "/dir/photo_cleaned.jpg",
 				commitPath: undefined,
 				copyModeLeakCheck: {
+					demand: "required",
 					preserveOrientation: true,
 					preserveColorProfile: true,
 					preserveResolution: true,
@@ -429,6 +433,7 @@ describe("exif:remove handler", () => {
 				generatedPath: "/dir/photo_cleaned.png",
 				commitPath: undefined,
 				copyModeLeakCheck: {
+					demand: "required",
 					preserveOrientation: true,
 					preserveColorProfile: true,
 					preserveResolution: true,
@@ -447,9 +452,10 @@ describe("exif:remove handler", () => {
 	it.each([
 		["webp save-as-copy", "/dir/photo.webp", "/dir/photo_cleaned.webp"],
 		["tif save-as-copy", "/dir/scan.tif", "/dir/scan_cleaned.tif"],
-		["RAW save-as-copy", "/dir/sample.cr2", "/dir/sample_cleaned.cr2"],
+		["RAW save-as-copy", "/dir/sample.dng", "/dir/sample_cleaned.dng"],
+		["mp4 save-as-copy", "/dir/clip.mp4", "/dir/clip_cleaned.mp4"],
 	])(
-		"omits copyModeLeakCheck for a %s (D-11)",
+		"passes copyModeLeakCheck with demand when-allowlisted for a %s (D-08)",
 		async (_name, filePath, generatedPath) => {
 			const { container, outputTransaction } = makeContainer({
 				saveAsCopy: true,
@@ -460,12 +466,46 @@ describe("exif:remove handler", () => {
 			await handler(makeAuthorizedEvent(), filePath);
 
 			expect(outputTransaction.execute).toHaveBeenCalledWith(
-				expect.objectContaining({ filePath, generatedPath }),
+				expect.objectContaining({
+					filePath,
+					generatedPath,
+					copyModeLeakCheck: expect.objectContaining({
+						demand: "when-allowlisted",
+					}),
+				}),
 			);
-			const call = outputTransaction.execute.mock.calls[0]?.[0];
-			expect(call).not.toHaveProperty("copyModeLeakCheck");
 		},
 	);
+
+	it("passes copyModeLeakCheck with demand required for a heic save-as-copy (D-08)", async () => {
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: true,
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		await handler(makeAuthorizedEvent(), "/dir/photo.heic");
+
+		expect(outputTransaction.execute).toHaveBeenCalledWith(
+			expect.objectContaining({
+				copyModeLeakCheck: expect.objectContaining({ demand: "required" }),
+			}),
+		);
+	});
+
+	it("passes no copyModeLeakCheck for a tif overwrite (D-08; a RAW overwrite is a forced copy)", async () => {
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		await handler(makeAuthorizedEvent(), "/dir/sample.tif");
+
+		const call = outputTransaction.execute.mock.calls[0]?.[0];
+		expect(call).toBeDefined();
+		expect(call).not.toHaveProperty("copyModeLeakCheck");
+	});
 
 	it("clears only xattrs without rewriting an already-clean file", async () => {
 		const { container, stripMetadata, outputTransaction, removeXattrCommand } =
@@ -1079,7 +1119,10 @@ function makeContainerWithPreserveResolution({
 	outputTransaction: { execute: ReturnType<typeof vi.fn> };
 } {
 	const stripMetadata = {
-		execute: vi.fn(async () => ({ ok: true, value: { tagsRemoved: 0 } })),
+		execute: vi.fn(async () => ({
+			ok: true,
+			value: { tagsRemoved: 0, writtenBy: "exiftool" },
+		})),
 	};
 	const outputTransaction = {
 		execute: vi.fn(async (request) => ({

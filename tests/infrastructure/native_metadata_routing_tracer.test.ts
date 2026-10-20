@@ -62,7 +62,7 @@ describe("native metadata routing tracer", () => {
 			preserveTimestamps: true,
 		});
 
-		expect(result).toEqual({ ok: true, value: undefined });
+		expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 		expect(native.sanitizeCalls).toHaveLength(1);
 		expect(
 			exiftool.calls.filter((call) => call.method === "sanitize"),
@@ -92,7 +92,7 @@ describe("native metadata routing tracer", () => {
 		expect(
 			exiftool.calls.filter((call) => call.method === "sanitize"),
 		).toHaveLength(1);
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 	});
 
 	it("routes a source to ExifTool with zero native calls when its extension is not registered", async () => {
@@ -115,7 +115,7 @@ describe("native metadata routing tracer", () => {
 			preserveTimestamps: true,
 		});
 
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(native.sanitizeCalls).toHaveLength(0);
 		expect(
 			exiftool.calls.filter((call) => call.method === "sanitize"),
@@ -144,7 +144,7 @@ describe("native metadata routing tracer", () => {
 			preserveTimestamps: true,
 		});
 
-		expect(result).toBe(exiftool.sanitizeResult);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(
 			exiftool.calls.filter((call) => call.method === "sanitize"),
 		).toHaveLength(1);
@@ -233,8 +233,8 @@ describe("native metadata routing tracer", () => {
 		};
 		const second = await engine.sanitize(request);
 
-		expect(first).toBe(exiftool.sanitizeResult);
-		expect(second).toBe(exiftool.sanitizeResult);
+		expect(first).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
+		expect(second).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(
 			exiftool.calls.filter((call) => call.method === "sanitize"),
 		).toHaveLength(2);

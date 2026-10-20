@@ -983,6 +983,96 @@ function generateMatrixFixtures(
 	}
 }
 
+// Phase 63-05 (ADP-07, D-12): native-path HEIC/AVIF fixtures. These are NEVER regenerated here:
+// sips is macOS-only and its output can differ across macOS builds, so the sha pin (also in
+// fixture_integrity.test.ts) is the authority. This step only re-hashes the committed files and
+// confirms -s3 -FileType. Recipe: HEIF-PROVENANCE.md.
+const HEIF_FIXTURE_SPECS = [
+	{
+		name: "sample-sips.heic",
+		sha256: "588fb84253201065e7511031b606e597a47e2e569dabe57d4b384249b7be7c78",
+		fileType: "HEIC",
+	},
+	{
+		name: "sample-sips.avif",
+		sha256: "8c4fe3915e7c4573872263dc0a29aabeb8550590fb848ed121b05ef551e75592",
+		fileType: "AVIF",
+	},
+	{
+		name: "sample-sips-icc.heic",
+		sha256: "ac0a8c04f1698002d1f764da4f151bc94bf576f5ef8af276e7a80cdeaabfa545",
+		fileType: "HEIC",
+	},
+	{
+		name: "sample-sips-icc.avif",
+		sha256: "758a42df68c0582fdda21b49460dd06f66582f8e0e39ac69f819deffb937db57",
+		fileType: "AVIF",
+	},
+	{
+		name: "sample-heifenc.heic",
+		sha256: "140bfc4339297cd8629732650ca760b6a0e0b74d1094d1ff7ed4f2e07ceb3c21",
+		fileType: "HEIC",
+	},
+	{
+		name: "sample-heifenc.avif",
+		sha256: "3e8d9bb7a60987c62efc52e02d91b47fa76b4adc899c5c7109ef9b1f6b7c0817",
+		fileType: "AVIF",
+	},
+	{
+		name: "grid-heifenc.heic",
+		sha256: "ae40a80f0a85cd984b9d8b1a2e811e138ac2c8c26f14b77360d62e1e4867bad6",
+		fileType: "HEIC",
+	},
+	{
+		name: "grid-heifenc.avif",
+		sha256: "682a1e626c4d8db4f7ccf4a2d5058d0104394f7a08d0a70fad3950bed4b0a85e",
+		fileType: "AVIF",
+	},
+	// 63-06 ExifTool-path fixtures (declined by node pre-write).
+	{
+		name: "red-at-12-oclock-with-color-profile-lossy.avif",
+		sha256: "79483242f2dca12c4ec18bd33ff8099216b3094fb55a26a909f046b2f9b4ce58",
+		fileType: "AVIF",
+	},
+	{
+		name: "sample-sips-icc-declined.heic",
+		sha256: "7f3392df0c9923a07f9cfcb6d9d9d30edbeeaaa6ab6dc22f9ba9a49bf8a9ce1f",
+		fileType: "HEIC",
+	},
+	{
+		name: "sample-sips-icc-declined.avif",
+		sha256: "f8adaf6c03e0d2236dba9f3487be67a75bc58973930a7a5c9663163aa0257e72",
+		fileType: "AVIF",
+	},
+] as const;
+
+// Verify-only: re-hash the committed HEIF fixtures and check FileType; never writes.
+function verifyHeifFixtures(): void {
+	for (const spec of HEIF_FIXTURE_SPECS) {
+		const filePath = path.join(DEFAULT_FIXTURES_DIR, spec.name);
+		if (!fs.existsSync(filePath)) {
+			throw new Error(`HEIF fixture missing: ${filePath}`);
+		}
+		const digest = createHash("sha256")
+			.update(fs.readFileSync(filePath))
+			.digest("hex");
+		if (digest !== spec.sha256) {
+			throw new Error(
+				`HEIF fixture digest mismatch for ${spec.name}: expected ${spec.sha256}, got ${digest}`,
+			);
+		}
+		const observedType = execFileSync(EXIFTOOL, ["-s3", "-FileType", filePath])
+			.toString()
+			.trim();
+		if (observedType !== spec.fileType) {
+			throw new Error(
+				`HEIF fixture ${spec.name} expected FileType ${spec.fileType}, got ${observedType}`,
+			);
+		}
+		console.log(`  Verified ${spec.name} (committed, not regenerated)`);
+	}
+}
+
 function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 	console.log("Generating E2E test fixtures...");
 	fs.mkdirSync(fixturesDir, { recursive: true });
@@ -1281,6 +1371,7 @@ function generateFixtures(fixturesDir = DEFAULT_FIXTURES_DIR): void {
 
 	generateRawFixtures(fixturesDir, rawUpstreamDir);
 	generateMatrixFixtures(fixturesDir, rawUpstreamDir);
+	verifyHeifFixtures();
 
 	console.log("\nAll 26 fixture files generated successfully.");
 }

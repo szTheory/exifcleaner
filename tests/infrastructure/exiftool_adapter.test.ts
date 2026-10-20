@@ -326,7 +326,7 @@ describe("ExifToolAdapter.sanitize", () => {
 			preserveTimestamps: false,
 		});
 
-		expect(result).toEqual({ ok: true, value: undefined });
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		expect(fakeProcess.writeMetadata).toHaveBeenCalledWith({
 			filePath: "/tmp/photo.jpg",
 			metadata: {},

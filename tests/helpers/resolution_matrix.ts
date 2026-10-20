@@ -53,16 +53,55 @@ export const JPEG_EXIF_COMPANIONS = [
 	"IFD0:YCbCrPositioning",
 ] as const;
 
+// Measured 63-16 (bundled ExifTool 13.59, exifcleaner-node 0.4.0, hybrid router,
+// sample-sips.{heic,avif}): HEIC and AVIF preserve resolution natively, so Preserve resolution
+// ON and OFF both route to the native writer (nativeWrite twice, ExifTool never), and ON-minus-OFF
+// carries the writer's framing: the mdat size and the EXIF byte order. Each is already present in
+// the seeded source, so both are legal companions. Driven through ExifTool alone (no router) the
+// same pair also synthesizes IFD0:YCbCrPositioning, which is absent from the source and so is not
+// a legal companion; these rows are therefore measured through the hybrid router only.
+export const HEIF_ROUTE_COMPANIONS = [
+	"QuickTime:MediaDataSize",
+	"File:ExifByteOrder",
+] as const;
+
+// True for the native HEIC/AVIF rows (matching and mismatched names): written by the native
+// engine for both settings, so only the hybrid engine block measures them.
+export function isNativeHeifRow(row: MatrixRow): boolean {
+	return row.fixture.startsWith("sample-sips");
+}
+
+export const HEIF_RESOLUTION_SEED_ARGS = [
+	"-IFD0:XResolution=300",
+	"-IFD0:YResolution=300",
+	"-IFD0:ResolutionUnit=inches",
+] as const;
+
 export const JFIF_ONLY_COMPANIONS = ["JFIF:JFIFVersion"] as const;
 
 export interface MatrixRow {
 	readonly ext: string;
+	// Optional unique name: rows that share an extension (mismatched-name rows) set it, and
+	// consumers key titles, file names and maps by `rowLabel(row)` instead of `ext` alone.
+	readonly label?: string;
 	readonly fixture: string;
 	readonly fileType: string;
 	readonly writable: boolean;
 	readonly seedArgs: readonly string[];
 	readonly seedExpect: Readonly<Record<string, string>>;
 	readonly companions: readonly string[];
+}
+
+export function rowLabel(row: MatrixRow): string {
+	return row.label ?? row.ext;
+}
+
+// File name for a row: `${prefix}${ext}` for unlabelled rows (unchanged names), and
+// `${prefix}-${label}${ext}` for labelled rows, so the extension stays the real last suffix.
+export function rowFileName(row: MatrixRow, prefix: string): string {
+	return row.label === undefined
+		? `${prefix}${row.ext}`
+		: `${prefix}-${row.label}${row.ext}`;
 }
 
 // materializeRow copies `row.fixture` into `dir/name`, asserts the copy still reports
@@ -199,6 +238,46 @@ export const RESOLUTION_MATRIX_ROWS: readonly MatrixRow[] = [
 		seedArgs: [...GENERIC_SEED_ARGS],
 		seedExpect: { "IFD0:Artist": "ZZP52-ARTIST" },
 		companions: [],
+	},
+	{
+		ext: ".heic",
+		label: "native-heic",
+		fixture: "sample-sips.heic",
+		fileType: "HEIC",
+		writable: true,
+		seedArgs: [...HEIF_RESOLUTION_SEED_ARGS, ...GENERIC_SEED_ARGS],
+		seedExpect: { "IFD0:XResolution": "300", "IFD0:Artist": "ZZP52-ARTIST" },
+		companions: HEIF_ROUTE_COMPANIONS,
+	},
+	{
+		ext: ".avif",
+		label: "native-avif",
+		fixture: "sample-sips.avif",
+		fileType: "AVIF",
+		writable: true,
+		seedArgs: [...HEIF_RESOLUTION_SEED_ARGS, ...GENERIC_SEED_ARGS],
+		seedExpect: { "IFD0:XResolution": "300", "IFD0:Artist": "ZZP52-ARTIST" },
+		companions: HEIF_ROUTE_COMPANIONS,
+	},
+	{
+		ext: ".avif",
+		label: "mismatch-heic-bytes-avif-name",
+		fixture: "sample-sips.heic",
+		fileType: "HEIC",
+		writable: true,
+		seedArgs: [...HEIF_RESOLUTION_SEED_ARGS, ...GENERIC_SEED_ARGS],
+		seedExpect: { "IFD0:XResolution": "300", "IFD0:Artist": "ZZP52-ARTIST" },
+		companions: HEIF_ROUTE_COMPANIONS,
+	},
+	{
+		ext: ".heic",
+		label: "mismatch-avif-bytes-heic-name",
+		fixture: "sample-sips.avif",
+		fileType: "AVIF",
+		writable: true,
+		seedArgs: [...HEIF_RESOLUTION_SEED_ARGS, ...GENERIC_SEED_ARGS],
+		seedExpect: { "IFD0:XResolution": "300", "IFD0:Artist": "ZZP52-ARTIST" },
+		companions: HEIF_ROUTE_COMPANIONS,
 	},
 	{
 		ext: ".mp4",

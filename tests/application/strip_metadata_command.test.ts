@@ -9,7 +9,7 @@ let command: StripMetadataCommand;
 beforeEach(() => {
 	sanitize = vi
 		.fn<MetadataEnginePort["sanitize"]>()
-		.mockResolvedValue({ ok: true, value: undefined });
+		.mockResolvedValue({ ok: true, value: { writtenBy: "exiftool" } });
 	metadataEngine = {
 		inspect: vi.fn(),
 		sanitize,
@@ -33,7 +33,10 @@ describe("semantic sanitization", () => {
 				outputPath: "/tmp/photo_cleaned.jpg",
 				signal: controller.signal,
 			}),
-		).resolves.toEqual({ ok: true, value: { tagsRemoved: 0 } });
+		).resolves.toEqual({
+			ok: true,
+			value: { tagsRemoved: 0, writtenBy: "exiftool" },
+		});
 
 		expect(sanitize).toHaveBeenCalledOnce();
 		expect(sanitize).toHaveBeenCalledWith({

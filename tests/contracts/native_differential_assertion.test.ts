@@ -7,6 +7,7 @@
 //      bytes per 58-10-PLAN.md's planning-time measurement) must be flagged as such rather
 //      than silently passing.
 
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -19,6 +20,7 @@ import {
 	type DifferentialPreservation,
 } from "../helpers/native_differential";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
+import { seedHeifCopy } from "../helpers/heif_seed";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +46,10 @@ const FULL_STRIP_PRESERVATION: DifferentialPreservation = {
 	preserveTimestamps: false,
 };
 
+function sha(buf: Buffer): string {
+	return createHash("sha256").update(buf).digest("hex").slice(0, 16);
+}
+
 function makeTempDir(): { dir: string; cleanup: () => void } {
 	const dir = fs.mkdtempSync(
 		path.join(os.tmpdir(), "exifcleaner-differential-"),
@@ -62,15 +68,20 @@ function makeTempDir(): { dir: string; cleanup: () => void } {
 async function buildRealReferences({
 	fixture,
 	preservation,
+	seed = false,
 }: {
 	fixture: string;
 	preservation: DifferentialPreservation;
+	seed?: boolean;
 }): Promise<{ native: Buffer; exiftool: Buffer; cleanup: () => void }> {
 	const { dir, cleanup } = makeTempDir();
 	const before = snapshotDir(dir);
 
 	const nativeSource = path.join(dir, `native-${fixture}`);
 	fs.copyFileSync(path.join(FIXTURES_DIR, fixture), nativeSource);
+	// D-13: the identifying seed is applied to the temp copy only; nothing seeded is committed.
+	if (seed)
+		seedHeifCopy({ exiftoolPath: EXIFTOOL_PATH, sourcePath: nativeSource });
 	const nativeOutput = path.join(dir, `native-out-${fixture}`);
 	const native = await buildNativeReference({
 		sourcePath: nativeSource,
@@ -80,6 +91,8 @@ async function buildRealReferences({
 
 	const exiftoolSource = path.join(dir, `exiftool-${fixture}`);
 	fs.copyFileSync(path.join(FIXTURES_DIR, fixture), exiftoolSource);
+	if (seed)
+		seedHeifCopy({ exiftoolPath: EXIFTOOL_PATH, sourcePath: exiftoolSource });
 	const exiftoolOutput = path.join(dir, `exiftool-out-${fixture}`);
 	const exiftool = buildExiftoolReference({
 		exiftoolPath: EXIFTOOL_PATH,
@@ -205,3 +218,67 @@ describe("D-17 red control: real fixtures, real bundled ExifTool", () => {
 		}
 	});
 });
+
+// 63-17 / D-20: the same two-sided red control for the native HEIC and AVIF engines, on
+// seeded temp copies of the committed ICC fixtures (D-13).
+describe.each(["sample-sips-icc.heic", "sample-sips-icc.avif"])(
+	"D-20 red control: seeded %s, real bundled ExifTool",
+	(fixture) => {
+		it(`discriminates: native and ExifTool references differ for seeded ${fixture} under default preservations`, async () => {
+			const { native, exiftool, cleanup } = await buildRealReferences({
+				fixture,
+				preservation: DEFAULT_PRESERVATION,
+				seed: true,
+			});
+			try {
+				if (native.equals(exiftool)) {
+					throw new Error(
+						`${fixture} is non-discriminating: native and ExifTool references are identical`,
+					);
+				}
+				console.info(
+					`63-17 discrimination ${fixture}: native sha256=${sha(native)} size=${native.length}; exiftool sha256=${sha(exiftool)} size=${exiftool.length}`,
+				);
+			} finally {
+				cleanup();
+			}
+		});
+
+		it(`rejects the ExifTool reference passed as installed (seeded ${fixture})`, async () => {
+			const { native, exiftool, cleanup } = await buildRealReferences({
+				fixture,
+				preservation: DEFAULT_PRESERVATION,
+				seed: true,
+			});
+			try {
+				expect(native.equals(exiftool)).toBe(false);
+				const problems = nativeDifferentialProblems({
+					installed: exiftool,
+					native,
+					exiftool,
+				});
+				expect(problems).not.toEqual([]);
+				expect(
+					problems.some((p) => p.includes("equals the ExifTool reference")),
+				).toBe(true);
+			} finally {
+				cleanup();
+			}
+		});
+
+		it(`accepts the native reference passed as installed (seeded ${fixture})`, async () => {
+			const { native, exiftool, cleanup } = await buildRealReferences({
+				fixture,
+				preservation: DEFAULT_PRESERVATION,
+				seed: true,
+			});
+			try {
+				expect(
+					nativeDifferentialProblems({ installed: native, native, exiftool }),
+				).toEqual([]);
+			} finally {
+				cleanup();
+			}
+		});
+	},
+);

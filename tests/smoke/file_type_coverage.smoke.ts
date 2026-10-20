@@ -84,6 +84,22 @@ test("RAF is refused without modifying the original or writing an artifact", asy
 	}
 });
 
+// Measured in 63-17 on a seeded temp copy through the native reference under default preservations.
+const HEIF_REMOVED_TAGS = [
+	"Artist",
+	"Copyright",
+	"GPSLatitude",
+	"GPSLongitude",
+	"Make",
+	"Model",
+	"DateTimeOriginal",
+	"Creator",
+];
+const HEIF_PRESERVED_TAGS = {
+	Orientation: "Rotate 90 CW",
+	ProfileDescription: "Nikon Adobe RGB 4.0.0.3000",
+};
+
 test.describe("native path on the installed artifact (ADP-05)", () => {
 	async function launchForDefaultPreservations() {
 		const context = await launchPackagedApp();
@@ -127,6 +143,34 @@ test.describe("native path on the installed artifact (ADP-05)", () => {
 				fixture: "orientation.png",
 				removedTags: ["Author", "Copyright"],
 				preservedTags: { Orientation: "Rotate 90 CW" },
+			});
+		} finally {
+			await closePackagedApp(context);
+		}
+	});
+
+	test("seeded sample-sips-icc.heic is cleaned by the native engine in the installed artifact", async () => {
+		const context = await launchForDefaultPreservations();
+		try {
+			await runNativeDifferentialScenario(context, {
+				fixture: "sample-sips-icc.heic",
+				seed: true,
+				removedTags: HEIF_REMOVED_TAGS,
+				preservedTags: HEIF_PRESERVED_TAGS,
+			});
+		} finally {
+			await closePackagedApp(context);
+		}
+	});
+
+	test("seeded sample-sips-icc.avif is cleaned by the native engine in the installed artifact", async () => {
+		const context = await launchForDefaultPreservations();
+		try {
+			await runNativeDifferentialScenario(context, {
+				fixture: "sample-sips-icc.avif",
+				seed: true,
+				removedTags: HEIF_REMOVED_TAGS,
+				preservedTags: HEIF_PRESERVED_TAGS,
 			});
 		} finally {
 			await closePackagedApp(context);
