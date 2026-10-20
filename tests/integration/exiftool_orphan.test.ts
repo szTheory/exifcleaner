@@ -1,7 +1,9 @@
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { afterAll, afterEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
+import { ExiftoolProcess } from "../../src/infrastructure/exiftool/ExiftoolProcess";
 import {
 	isGoneIn,
 	listPosixProcesses,
@@ -287,4 +289,102 @@ describe("ExifTool orphan watchdog (LIF-01)", () => {
 			expect(gone, `${label} child gone`).toBe(true);
 		}
 	}, 30_000);
+
+	it.each([
+		{
+			label: "missing file",
+			configPath: path.resolve(
+				REPO_ROOT,
+				".resources/nix/exiftool-config/missing.config",
+			),
+			expectWarning: true,
+		},
+		{ label: "empty file", configPath: "/dev/null", expectWarning: false },
+		{
+			label: "directory",
+			configPath: path.resolve(REPO_ROOT, ".resources/nix/exiftool-config"),
+			expectWarning: false,
+		},
+	])(
+		"a $label config still serves commands (D-05)",
+		async ({ configPath, expectWarning }) => {
+			assertPosixOrphanHost();
+			const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+			try {
+				const exiftool = new ExiftoolProcess({
+					binPath: EXIFTOOL_PATH,
+					configPath,
+				});
+				const pid = await exiftool.open();
+				ownedPids.push(pid);
+				everSpawned.push(pid);
+				const result = await exiftool.readMetadata({
+					filePath: READY_FIXTURE,
+					args: [],
+				});
+				expect(result.data?.[0] ?? {}).not.toEqual({});
+				if (expectWarning) {
+					const collect = () =>
+						warn.mock.calls.map((call) => call.join(" ")).join("\n");
+					const start = Date.now();
+					while (
+						!collect().includes("Config file not found") &&
+						Date.now() - start < 5000
+					) {
+						await sleep(50);
+					}
+					expect(collect()).toContain("Config file not found");
+				}
+				await exiftool.close();
+			} finally {
+				warn.mockRestore();
+			}
+		},
+		30_000,
+	);
+
+	it("-config is argv index 0 in the live child for both open() and respawn() (D-04)", async () => {
+		assertPosixOrphanHost();
+		const suffix = `${EXIFTOOL_PATH} -config ${WATCHDOG_CONFIG_PATH} -stay_open True -@ -`;
+		const exiftool = new ExiftoolProcess({
+			binPath: EXIFTOOL_PATH,
+			configPath: WATCHDOG_CONFIG_PATH,
+		});
+		const firstPid = await exiftool.open();
+		ownedPids.push(firstPid);
+		everSpawned.push(firstPid);
+		await exiftool.readMetadata({ filePath: READY_FIXTURE, args: [] });
+		expect(rowOf(firstPid)?.args.endsWith(suffix)).toBe(true);
+
+		killOwned(firstPid);
+		const start = Date.now();
+		let secondPid = exiftool.pid;
+		while (
+			(secondPid === undefined || secondPid === firstPid) &&
+			Date.now() - start < 5000
+		) {
+			await sleep(50);
+			secondPid = exiftool.pid;
+		}
+		expect(secondPid).toBeDefined();
+		expect(secondPid).not.toBe(firstPid);
+		if (secondPid !== undefined) {
+			ownedPids.push(secondPid);
+			everSpawned.push(secondPid);
+			expect(rowOf(secondPid)?.args.endsWith(suffix)).toBe(true);
+		}
+		const again = await exiftool.readMetadata({
+			filePath: READY_FIXTURE,
+			args: [],
+		});
+		expect(again.data?.[0] ?? {}).not.toEqual({});
+		await exiftool.close();
+	}, 30_000);
+
+	it("the bundled ExifTool still defines ReadStayOpen and the watchdog still matches it (D-08 drift)", () => {
+		const bundled = fs.readFileSync(EXIFTOOL_PATH, "utf8");
+		const watchdog = fs.readFileSync(WATCHDOG_CONFIG_PATH, "utf8");
+		expect(bundled).toContain("sub ReadStayOpen");
+		expect(watchdog).toContain("main::ReadStayOpen");
+	});
 });
