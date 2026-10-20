@@ -1,4 +1,4 @@
-# ExifCleaner 4.5.0
+# ExifCleaner 4.6.0
 
 ExifCleaner 4.5.0 cleans PNG and JPEG files with the app's own built-in cleaner when Save as copy is on, fixes WebP resolution loss in that same mode, and removes JPEG content credentials to match what the bundled ExifTool already removed.
 
@@ -13,10 +13,11 @@ ExifCleaner 4.5.0 cleans PNG and JPEG files with the app's own built-in cleaner 
 - A failing PNG or JPEG copy now reports a generic "Generated output write failed" message instead of ExifTool's own more specific error text, matching the message every other copy-mode format (RAW, TIFF, media and WebP) already shows on a failed write.
 
 <!-- exifcleaner-known-limitations:start v1 -->
-## Known limitations in 4.5.0
+## Known limitations in 4.6.0
 
 No executable release-blocking known gaps are approved for this release; documented format constraints follow below.
 <!-- exifcleaner-known-limitations:end -->
+
 
 ### Format constraints
 
