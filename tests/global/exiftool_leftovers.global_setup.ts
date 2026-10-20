@@ -64,26 +64,57 @@ async function spawnOrphanControl(): Promise<{
 		{ cwd: REPO_ROOT, detached: true, stdio: ["ignore", "pipe", "pipe"] },
 	);
 	parent.stderr.resume();
+	// The parent is detached, so it leads its own process group, and its raw ExifTool child
+	// inherits that group. Killing the group reaps both on any failure before the pid line.
+	const killGroup = (): void => {
+		if (parent.pid !== undefined) {
+			try {
+				process.kill(-parent.pid, "SIGKILL");
+			} catch {
+				// Group already gone.
+			}
+		}
+	};
 	const pids = await new Promise<{ parentPid: number; childPid: number }>(
 		(resolve, reject) => {
-			const timer = setTimeout(
-				() =>
-					reject(new Error("D-08 gate control parent printed no pid in 15 s")),
-				15_000,
-			);
+			// Once the pid line resolves, the caller SIGKILLs the parent on purpose: that later
+			// "exit" must not reap the control orphan the gate is about to look for.
+			let settled = false;
+			const fail = (error: Error): void => {
+				if (settled) {
+					return;
+				}
+				settled = true;
+				clearTimeout(timer);
+				killGroup();
+				reject(error);
+			};
+			const timer = setTimeout(() => {
+				if (settled) {
+					return;
+				}
+				settled = true;
+				killGroup();
+				reject(new Error("D-08 gate control parent printed no pid in 15 s"));
+			}, 15_000);
 			let seen = "";
 			parent.stdout.setEncoding("utf8");
 			parent.stdout.on("data", (chunk: string) => {
 				seen += chunk;
 				const line = seen.split("\n").find((l) => l.startsWith("{"));
-				if (line !== undefined) {
+				if (line !== undefined && !settled) {
+					settled = true;
 					clearTimeout(timer);
 					resolve(JSON.parse(line) as { parentPid: number; childPid: number });
 				}
 			});
-			parent.once("error", (error) => {
-				clearTimeout(timer);
-				reject(error);
+			parent.once("error", fail);
+			parent.once("exit", (code, signal) => {
+				fail(
+					new Error(
+						`D-08 gate control parent exited before printing its pid (code ${code}, signal ${signal})`,
+					),
+				);
 			});
 		},
 	);
@@ -95,6 +126,17 @@ async function spawnOrphanControl(): Promise<{
 }
 
 export async function teardown(): Promise<void> {
+	try {
+		await runLeftoverGate();
+	} catch (error: unknown) {
+		// vitest logs a throwing globalSetup teardown but still exits 0. Every gate failure,
+		// including a control that cannot start or is not detected, must make the run red.
+		process.exitCode = 1;
+		throw error;
+	}
+}
+
+async function runLeftoverGate(): Promise<void> {
 	if (process.platform === "win32") {
 		console.log("STAY_OPEN_LEFTOVERS=unsupported-platform");
 		return;
@@ -126,6 +168,10 @@ export async function teardown(): Promise<void> {
 	}).some((r) => r.pid === childPid);
 	if (!detected) {
 		const control = controlRows.find((r) => r.pid === childPid);
+		// Reap the deliberate orphan before failing, or a broken gate leaks one per run.
+		if (control?.args.includes(EXIFTOOL_PATH) === true) {
+			process.kill(childPid, "SIGKILL");
+		}
 		throw new Error(
 			`D-08 leftover gate control failed: a deliberate orphan (pid ${childPid}, ppid ${control?.ppid ?? "gone"}) was not detected`,
 		);
@@ -160,8 +206,6 @@ export async function teardown(): Promise<void> {
 	}
 	if (leftovers.length > 0) {
 		// Reported, never killed: a red run must leave the leak visible.
-		// vitest logs a throwing globalSetup teardown but still exits 0; make the run red.
-		process.exitCode = 1;
 		const lines = leftovers.map(
 			(r) => `${r.pid} ${r.ppid} ${r.stat} ${r.args}`,
 		);
