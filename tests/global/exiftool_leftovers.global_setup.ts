@@ -160,6 +160,8 @@ export async function teardown(): Promise<void> {
 	}
 	if (leftovers.length > 0) {
 		// Reported, never killed: a red run must leave the leak visible.
+		// vitest logs a throwing globalSetup teardown but still exits 0; make the run red.
+		process.exitCode = 1;
 		const lines = leftovers.map(
 			(r) => `${r.pid} ${r.ppid} ${r.stat} ${r.args}`,
 		);
