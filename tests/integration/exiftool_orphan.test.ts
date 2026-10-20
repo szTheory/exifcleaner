@@ -338,6 +338,33 @@ describe("ExifTool orphan watchdog (LIF-01)", () => {
 		await exiftool.close();
 	}, 30_000);
 
+	it("a session that exits before answering any command leaves ExifTool unavailable with an explicit error (D-02 OQ-1)", async () => {
+		assertPosixOrphanHost();
+		// /usr/bin/true exits 0 at once: the same observable as a watchdog self-exit before the
+		// first answer. Asserted first so a host without it fails loudly rather than vacuously.
+		expect(fs.existsSync("/usr/bin/true")).toBe(true);
+		const error = vi.spyOn(console, "error").mockImplementation(() => {});
+		try {
+			const exiftool = new ExiftoolProcess({
+				binPath: "/usr/bin/true",
+				configPath: WATCHDOG_CONFIG_PATH,
+			});
+			await exiftool.open();
+			const start = Date.now();
+			while (exiftool.pid !== undefined && Date.now() - start < 5000) {
+				await sleep(50);
+			}
+			expect(exiftool.pid).toBeUndefined();
+			await expect(
+				exiftool.readMetadata({ filePath: READY_FIXTURE, args: [] }),
+			).rejects.toThrow("ExifTool process is not open");
+			const logged = error.mock.calls.map((call) => call.join(" ")).join("\n");
+			expect(logged).toContain("exited unexpectedly");
+		} finally {
+			error.mockRestore();
+		}
+	}, 30_000);
+
 	it("the bundled ExifTool still defines ReadStayOpen and the watchdog still matches it (D-08 drift)", () => {
 		const bundled = fs.readFileSync(EXIFTOOL_PATH, "utf8");
 		const watchdog = fs.readFileSync(WATCHDOG_CONFIG_PATH, "utf8");
