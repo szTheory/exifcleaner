@@ -70,3 +70,78 @@ export async function pollUntilGone({
 		await new Promise<void>((resolve) => setTimeout(resolve, intervalMs));
 	}
 }
+
+function isInScopeStayOpen({
+	row,
+	scopeRoots,
+}: {
+	row: ProcessRow;
+	scopeRoots: string[];
+}): boolean {
+	return (
+		row.args.includes("-stay_open") &&
+		row.args.includes("exiftool") &&
+		scopeRoots.some((root) => row.args.includes(root))
+	);
+}
+
+function descendsFrom({
+	rows,
+	row,
+	ancestorPid,
+}: {
+	rows: ProcessRow[];
+	row: ProcessRow;
+	ancestorPid: number;
+}): boolean {
+	let current: ProcessRow | undefined = row;
+	for (let step = 0; step < 64 && current !== undefined; step++) {
+		if (current.ppid === ancestorPid) {
+			return true;
+		}
+		if (current.ppid <= 1) {
+			return false;
+		}
+		const parentPid: number = current.ppid;
+		current = rows.find((candidate) => candidate.pid === parentPid);
+	}
+	return false;
+}
+
+/**
+ * D-08 suite-wide leftover classifier: the exiftool `-stay_open` processes a vitest run
+ * created and failed to end.
+ *
+ * Scope: args contain `-stay_open`, `exiftool` and a scope root (the repo or the temp dir),
+ * so an installed ExifCleaner or a one-shot exiftool never counts. A row is a leftover only
+ * when it is not a zombie, was not present at setup, and is either parented to a reaper (init
+ * or the observed subreaper: an orphan) or descends from the runner (still owned by this run).
+ * A row parented to any other live process is a concurrent app or dev session and is excluded,
+ * so the gate cannot flake on a developer machine.
+ */
+export function classifyStayOpenLeftovers({
+	rows,
+	scopeRoots,
+	preexisting,
+	runnerPid,
+	reaperPids,
+}: {
+	rows: ProcessRow[];
+	scopeRoots: string[];
+	preexisting: ReadonlySet<number>;
+	runnerPid: number;
+	reaperPids: ReadonlySet<number>;
+}): ProcessRow[] {
+	return rows.filter((row) => {
+		if (!isInScopeStayOpen({ row, scopeRoots })) {
+			return false;
+		}
+		if (row.stat.startsWith("Z") || preexisting.has(row.pid)) {
+			return false;
+		}
+		return (
+			reaperPids.has(row.ppid) ||
+			descendsFrom({ rows, row, ancestorPid: runnerPid })
+		);
+	});
+}
