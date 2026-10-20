@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.6.0
+
+### Fixed
+
+- Force-quitting or crashing ExifCleaner no longer leaves a background ExifTool process running. On macOS and Linux, ExifTool now exits within about a second of losing the app once it is between files. On Windows it is ended immediately, even mid-write. The original file is preserved either way
+- On macOS and Linux, the bundled ExifTool no longer reads a personal `~/.ExifTool_config` file. Windows still does
+
 ## 4.5.0
 
 ### Changed
