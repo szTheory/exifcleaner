@@ -1,4 +1,3 @@
-import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,6 +7,8 @@ import {
 	isGoneIn,
 	listPosixProcesses,
 	pollUntilGone,
+	startOrphanParent,
+	type OrphanParentSpec,
 } from "../helpers/orphan_processes";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -21,10 +22,6 @@ const READY_FIXTURE = path.resolve(
 	REPO_ROOT,
 	"tests/e2e/fixtures/no_metadata.jpg",
 );
-const ORPHAN_PARENT = path.resolve(
-	REPO_ROOT,
-	"tests/integration/helpers/orphan_parent.ts",
-);
 
 /**
  * Fails loudly (never skips) on a host without POSIX parent-death semantics. The runner-control
@@ -36,20 +33,6 @@ function assertPosixOrphanHost(): void {
 			"Orphan-watchdog test precondition failed: POSIX parent-death semantics are unavailable on win32",
 		);
 	}
-}
-
-interface ParentSpec {
-	mode: "class" | "raw";
-	binPath: string;
-	configPath?: string;
-	readyFile?: string;
-	parentPidEnv?: string;
-	dieBeforeReady?: boolean;
-}
-
-interface StartedParent {
-	parentPid: number;
-	childPid: number;
 }
 
 /** Pids still to be killed by afterEach. */
@@ -87,42 +70,16 @@ function rowOf(pid: number) {
 	return listPosixProcesses().find((row) => row.pid === pid);
 }
 
-async function startParent(spec: ParentSpec): Promise<StartedParent> {
-	const proc = spawn(
-		process.execPath,
-		["--import", "tsx", ORPHAN_PARENT, JSON.stringify(spec)],
-		{ cwd: REPO_ROOT, detached: true, stdio: ["ignore", "pipe", "pipe"] },
-	);
-	if (proc.pid !== undefined) {
-		ownedPids.push(proc.pid);
-		everSpawned.push(proc.pid);
-	}
-	let stdout = "";
-	let stderr = "";
-	proc.stderr.setEncoding("utf8");
-	proc.stderr.on("data", (chunk: string) => {
-		stderr += chunk;
+async function startTracked(
+	spec: OrphanParentSpec,
+): Promise<{ parentPid: number; childPid: number }> {
+	const before = ownedPids.length;
+	const started = await startOrphanParent({
+		spec,
+		repoRoot: REPO_ROOT,
+		owned: ownedPids,
 	});
-	proc.stdout.setEncoding("utf8");
-	const started = await new Promise<StartedParent>((resolve, reject) => {
-		const timer = setTimeout(() => {
-			reject(new Error(`orphan parent did not report within 15 s: ${stderr}`));
-		}, 15_000);
-		proc.stdout.on("data", (chunk: string) => {
-			stdout += chunk;
-			const line = stdout.split("\n").find((l) => l.startsWith("{"));
-			if (line !== undefined) {
-				clearTimeout(timer);
-				resolve(JSON.parse(line) as StartedParent);
-			}
-		});
-		proc.once("exit", () => {
-			clearTimeout(timer);
-			reject(new Error(`orphan parent exited early: ${stderr}`));
-		});
-	});
-	ownedPids.push(started.parentPid, started.childPid);
-	everSpawned.push(started.parentPid, started.childPid);
+	everSpawned.push(...ownedPids.slice(before));
 	return started;
 }
 
@@ -151,7 +108,7 @@ afterAll(async () => {
 describe("ExifTool orphan watchdog (LIF-01)", () => {
 	it("the production ExiftoolProcess child exits within 5 s after its parent is SIGKILLed (D-01, D-08)", async () => {
 		assertPosixOrphanHost();
-		const { parentPid, childPid } = await startParent({
+		const { parentPid, childPid } = await startTracked({
 			mode: "class",
 			binPath: EXIFTOOL_PATH,
 			configPath: WATCHDOG_CONFIG_PATH,
@@ -176,7 +133,7 @@ describe("ExifTool orphan watchdog (LIF-01)", () => {
 
 	it("without -config the orphaned child keeps running (negative control, D-08)", async () => {
 		assertPosixOrphanHost();
-		const { parentPid, childPid } = await startParent({
+		const { parentPid, childPid } = await startTracked({
 			mode: "class",
 			binPath: EXIFTOOL_PATH,
 			readyFile: READY_FIXTURE,
@@ -192,7 +149,7 @@ describe("ExifTool orphan watchdog (LIF-01)", () => {
 
 	it("an expected pid that is not the real parent makes the idle child exit while the parent lives (D-02)", async () => {
 		assertPosixOrphanHost();
-		const { parentPid, childPid } = await startParent({
+		const { parentPid, childPid } = await startTracked({
 			mode: "raw",
 			binPath: EXIFTOOL_PATH,
 			configPath: WATCHDOG_CONFIG_PATH,
@@ -212,7 +169,7 @@ describe("ExifTool orphan watchdog (LIF-01)", () => {
 
 	it("the child still exits when its parent dies before ExifTool loads the config (D-02 gap)", async () => {
 		assertPosixOrphanHost();
-		const { childPid } = await startParent({
+		const { childPid } = await startTracked({
 			mode: "raw",
 			binPath: EXIFTOOL_PATH,
 			configPath: WATCHDOG_CONFIG_PATH,
@@ -230,7 +187,7 @@ describe("ExifTool orphan watchdog (LIF-01)", () => {
 
 	it("without -config the early-death child keeps running (negative control for the D-02 gap)", async () => {
 		assertPosixOrphanHost();
-		const { parentPid, childPid } = await startParent({
+		const { parentPid, childPid } = await startTracked({
 			mode: "raw",
 			binPath: EXIFTOOL_PATH,
 			parentPidEnv: "self",
@@ -246,7 +203,7 @@ describe("ExifTool orphan watchdog (LIF-01)", () => {
 
 	it("a missing or malformed expected pid falls back to getppid() (D-02 fallback)", async () => {
 		assertPosixOrphanHost();
-		const variants: { label: string; spec: Partial<ParentSpec> }[] = [
+		const variants: { label: string; spec: Partial<OrphanParentSpec> }[] = [
 			{ label: "unset", spec: {} },
 			{ label: "empty", spec: { parentPidEnv: "" } },
 			{ label: "abc", spec: { parentPidEnv: "abc" } },
@@ -256,7 +213,7 @@ describe("ExifTool orphan watchdog (LIF-01)", () => {
 		const started = await Promise.all(
 			variants.map(async ({ label, spec }) => ({
 				label,
-				...(await startParent({
+				...(await startTracked({
 					mode: "raw",
 					binPath: EXIFTOOL_PATH,
 					configPath: WATCHDOG_CONFIG_PATH,

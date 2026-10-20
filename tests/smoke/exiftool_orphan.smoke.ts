@@ -10,6 +10,7 @@ import {
 	listWindowsProcesses,
 	pollUntilGone,
 	pollUntilGoneWin32,
+	startOrphanParent,
 } from "../helpers/orphan_processes";
 import {
 	assertInstalledPayloadUnchanged,
@@ -96,6 +97,24 @@ function killRecorded(recorded: Map<number, ChildRow>): void {
 	}
 }
 
+/** SIGKILLs a twin pid only while its args still name the installed exiftool or the parent helper. */
+function killTwin(pid: number, exiftoolPath: string): void {
+	try {
+		const live = listPosixProcesses().find((row) => row.pid === pid);
+		if (
+			live === undefined ||
+			live.stat.startsWith("Z") ||
+			(!live.args.includes(exiftoolPath) &&
+				!live.args.includes("orphan_parent"))
+		) {
+			return;
+		}
+		process.kill(pid, "SIGKILL");
+	} catch {
+		// already gone
+	}
+}
+
 test("a force-killed packaged app leaves no ExifTool child running (LIF-01, D-09)", async () => {
 	const context = await launchPackagedApp();
 	const appPid = context.app.process().pid;
@@ -119,6 +138,7 @@ test("a force-killed packaged app leaves no ExifTool child running (LIF-01, D-09
 		process.platform,
 	);
 	const recorded = new Map<number, ChildRow>();
+	const twinOwned: number[] = [];
 
 	try {
 		// D-09 step 1: the packaged config is the reviewed one and ExifTool loads it cleanly.
@@ -276,9 +296,74 @@ test("a force-killed packaged app leaves no ExifTool child running (LIF-01, D-09
 			gone,
 			`D-09 step 4: ExifTool pid ${exiftoolRow.pid} outlived the app by ${elapsedMs} ms (${survivor})`,
 		).toBe(true);
+
+		// D-09 step 5 (POSIX): the installed ExifTool, hosted by the production ExiftoolProcess in a
+		// separate parent. Windows behaviour is covered by the job-object probe (D-10).
+		if (process.platform !== "win32") {
+			const readyFile = path.join(
+				REPO_ROOT,
+				"tests/e2e/fixtures/no_metadata.jpg",
+			);
+
+			const negative = await startOrphanParent({
+				spec: {
+					mode: "class",
+					binPath: context.exiftoolPath,
+					readyFile,
+				},
+				repoRoot: REPO_ROOT,
+				owned: twinOwned,
+			});
+			process.kill(negative.parentPid, "SIGKILL");
+			await sleep(2000);
+			const negativeRow = listPosixProcesses().find(
+				(row) => row.pid === negative.childPid,
+			);
+			expect(
+				negativeRow,
+				"D-09 step 5: without -config the installed ExifTool child survives its parent",
+			).toBeDefined();
+			expect(
+				negativeRow?.stat.startsWith("Z"),
+				"D-09 step 5: the surviving negative-control child is not a zombie",
+			).toBe(false);
+			expect(
+				negativeRow?.ppid,
+				"D-09 step 5: the surviving negative-control child was re-parented",
+			).not.toBe(negative.parentPid);
+			console.log(`SMOKE_TWIN_NEGATIVE_ALIVE_PPID=${negativeRow?.ppid}`);
+			killTwin(negative.childPid, context.exiftoolPath);
+
+			const positive = await startOrphanParent({
+				spec: {
+					mode: "class",
+					binPath: context.exiftoolPath,
+					configPath,
+					readyFile,
+				},
+				repoRoot: REPO_ROOT,
+				owned: twinOwned,
+			});
+			process.kill(positive.parentPid, "SIGKILL");
+			const twin = await pollUntilGone({
+				pid: positive.childPid,
+				timeoutMs: 5000,
+				intervalMs: 100,
+			});
+			console.log(`SMOKE_TWIN_POSITIVE_EXIT_MS=${twin.elapsedMs}`);
+			expect(
+				twin.gone,
+				`D-09 step 5: with the installed config the child ends after its parent (${twin.elapsedMs} ms)`,
+			).toBe(true);
+		}
 	} finally {
 		// D-09 step 6: no survivor, no temp dir, installed payload untouched.
 		killRecorded(recorded);
+		if (process.platform !== "win32") {
+			for (const pid of twinOwned) {
+				killTwin(pid, context.exiftoolPath);
+			}
+		}
 		if (process.platform !== "win32") {
 			try {
 				process.kill(-appPid, "SIGKILL");

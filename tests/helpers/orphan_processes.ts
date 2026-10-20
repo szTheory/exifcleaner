@@ -1,4 +1,5 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
+import path from "node:path";
 
 export interface ProcessRow {
 	pid: number;
@@ -224,4 +225,79 @@ export async function pollUntilGoneWin32({
 		}
 		await new Promise<void>((resolve) => setTimeout(resolve, intervalMs));
 	}
+}
+
+/** JSON contract of tests/integration/helpers/orphan_parent.ts. */
+export interface OrphanParentSpec {
+	mode: "class" | "raw";
+	binPath: string;
+	configPath?: string;
+	readyFile?: string;
+	parentPidEnv?: "self" | string;
+	dieBeforeReady?: boolean;
+	/** Raw mode: child stdout and stderr go to this file instead of pipes (FIFO write legs). */
+	stdoutFile?: string;
+	/** Raw mode, needs stdoutFile: after readiness, send a copy-mode write command. */
+	inflightWrite?: { source: string; dest: string };
+	/** Raw mode, forbids stdoutFile: after readiness, send an overwrite command over this dir. */
+	inflightOverwriteDir?: string;
+}
+
+/**
+ * Starts the detached tsx parent that hosts an ExifTool `-stay_open` child, waits for its
+ * `{parentPid, childPid}` line, and pushes both pids (and the launcher pid) into `owned` so the
+ * caller can sweep them. Shared by the vitest integration test and the installed-artifact smoke.
+ */
+export async function startOrphanParent({
+	spec,
+	repoRoot,
+	owned,
+}: {
+	spec: OrphanParentSpec;
+	repoRoot: string;
+	owned: number[];
+}): Promise<{ parentPid: number; childPid: number }> {
+	const proc = spawn(
+		process.execPath,
+		[
+			"--import",
+			"tsx",
+			path.join(repoRoot, "tests/integration/helpers/orphan_parent.ts"),
+			JSON.stringify(spec),
+		],
+		{ cwd: repoRoot, detached: true, stdio: ["ignore", "pipe", "pipe"] },
+	);
+	if (proc.pid !== undefined) {
+		owned.push(proc.pid);
+	}
+	let stdout = "";
+	let stderr = "";
+	proc.stderr.setEncoding("utf8");
+	proc.stderr.on("data", (chunk: string) => {
+		stderr += chunk;
+	});
+	proc.stdout.setEncoding("utf8");
+	const started = await new Promise<{ parentPid: number; childPid: number }>(
+		(resolve, reject) => {
+			const timer = setTimeout(() => {
+				reject(
+					new Error(`orphan parent did not report within 15 s: ${stderr}`),
+				);
+			}, 15_000);
+			proc.stdout.on("data", (chunk: string) => {
+				stdout += chunk;
+				const line = stdout.split("\n").find((l) => l.startsWith("{"));
+				if (line !== undefined) {
+					clearTimeout(timer);
+					resolve(JSON.parse(line) as { parentPid: number; childPid: number });
+				}
+			});
+			proc.once("exit", () => {
+				clearTimeout(timer);
+				reject(new Error(`orphan parent exited early: ${stderr}`));
+			});
+		},
+	);
+	owned.push(started.parentPid, started.childPid);
+	return started;
 }
