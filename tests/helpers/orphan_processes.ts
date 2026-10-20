@@ -145,3 +145,83 @@ export function classifyStayOpenLeftovers({
 		);
 	});
 }
+
+export interface WinProcessRow {
+	pid: number;
+	ppid: number;
+	name: string;
+	commandLine: string;
+}
+
+interface CimRecord {
+	ProcessId?: unknown;
+	ParentProcessId?: unknown;
+	Name?: unknown;
+	CommandLine?: unknown;
+}
+
+/**
+ * Parses `ConvertTo-Json -Compress` output of Win32_Process rows. PowerShell emits a bare object
+ * (not an array) for a single row and `null` for a process whose command line is unreadable.
+ */
+export function parseCimProcesses(raw: string): WinProcessRow[] {
+	const text = raw.trim();
+	if (text === "") {
+		return [];
+	}
+	const parsed: unknown = JSON.parse(text);
+	const records = (Array.isArray(parsed) ? parsed : [parsed]) as CimRecord[];
+	return records.map((record) => ({
+		pid: Number(record.ProcessId),
+		ppid: Number(record.ParentProcessId),
+		name: typeof record.Name === "string" ? record.Name : "",
+		commandLine:
+			typeof record.CommandLine === "string" ? record.CommandLine : "",
+	}));
+}
+
+export function listWindowsProcesses(): WinProcessRow[] {
+	const raw = execFileSync(
+		"powershell.exe",
+		[
+			"-NoProfile",
+			"-NonInteractive",
+			"-Command",
+			"Get-CimInstance Win32_Process | Select-Object ProcessId,ParentProcessId,Name,CommandLine | ConvertTo-Json -Compress",
+		],
+		{ encoding: "utf8", windowsHide: true, maxBuffer: 64 * 1024 * 1024 },
+	);
+	return parseCimProcesses(raw);
+}
+
+/** kill(pid, 0) probes without signalling: ESRCH is gone, EPERM is alive but not ours. */
+export function isPidAliveWin32(pid: number): boolean {
+	try {
+		process.kill(pid, 0);
+		return true;
+	} catch (error) {
+		return (error as NodeJS.ErrnoException).code === "EPERM";
+	}
+}
+
+/** Polls through kill(pid, 0): a CIM query costs 1-2 s on hosted runners, far above any interval here. */
+export async function pollUntilGoneWin32({
+	pid,
+	timeoutMs,
+	intervalMs,
+}: {
+	pid: number;
+	timeoutMs: number;
+	intervalMs: number;
+}): Promise<{ gone: boolean; elapsedMs: number }> {
+	const start = Date.now();
+	for (;;) {
+		if (!isPidAliveWin32(pid)) {
+			return { gone: true, elapsedMs: Date.now() - start };
+		}
+		if (Date.now() - start >= timeoutMs) {
+			return { gone: false, elapsedMs: Date.now() - start };
+		}
+		await new Promise<void>((resolve) => setTimeout(resolve, intervalMs));
+	}
+}

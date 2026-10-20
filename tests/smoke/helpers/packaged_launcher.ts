@@ -55,6 +55,20 @@ export function packagedExiftoolPath(
 	return path.join(resourcesPath, subdir, "bin", filename);
 }
 
+/**
+ * Resources directory of an installed artifact derived from its entrypoint: macOS keeps it in
+ * Contents/Resources next to MacOS/, Linux (AppRun and the binary) and Windows beside the executable.
+ */
+export function packagedResourcesPath(
+	executablePath: string,
+	platform: NodeJS.Platform,
+): string {
+	if (platform === "darwin") {
+		return path.resolve(path.dirname(executablePath), "../Resources");
+	}
+	return path.join(path.dirname(executablePath), "resources");
+}
+
 export function packagedFuseExecutablePath(
 	executablePath: string,
 	platform: NodeJS.Platform,
@@ -472,30 +486,38 @@ export async function launchPackagedApp(
 	}
 }
 
+/**
+ * Post-run integrity of the installed payload: launcher and fuse-bearing binary hashes are
+ * unchanged and the production fuse wire is intact. Callable without app.close() so a smoke that
+ * kills the app itself can still prove the payload was not modified.
+ */
+export async function assertInstalledPayloadUnchanged(
+	context: PackagedLaunchContext,
+): Promise<void> {
+	if (
+		sha256(context.originalExecutablePath) !== context.originalExecutableSha256
+	) {
+		throw new Error("Smoke execution modified the installed launcher");
+	}
+	if (
+		sha256(context.originalFuseExecutablePath) !==
+		context.originalFuseExecutableSha256
+	) {
+		throw new Error(
+			"Smoke execution modified the installed fuse-bearing executable",
+		);
+	}
+	const currentFuses = await getCurrentFuseWire(context.originalFuseWireTarget);
+	assertProductionHardeningFuses(currentFuses);
+	assertSameFuseWire(currentFuses, context.originalFuseWire);
+}
+
 export async function closePackagedApp(
 	context: PackagedLaunchContext,
 ): Promise<void> {
 	try {
 		await context.app.close();
-		if (
-			sha256(context.originalExecutablePath) !==
-			context.originalExecutableSha256
-		) {
-			throw new Error("Smoke execution modified the installed launcher");
-		}
-		if (
-			sha256(context.originalFuseExecutablePath) !==
-			context.originalFuseExecutableSha256
-		) {
-			throw new Error(
-				"Smoke execution modified the installed fuse-bearing executable",
-			);
-		}
-		const currentFuses = await getCurrentFuseWire(
-			context.originalFuseWireTarget,
-		);
-		assertProductionHardeningFuses(currentFuses);
-		assertSameFuseWire(currentFuses, context.originalFuseWire);
+		await assertInstalledPayloadUnchanged(context);
 	} finally {
 		rmSync(context.userDataDir, { recursive: true, force: true });
 		rmSync(context.neutralCwd, { recursive: true, force: true });

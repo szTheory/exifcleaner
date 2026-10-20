@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	classifyStayOpenLeftovers,
 	isGoneIn,
+	parseCimProcesses,
 	parsePsRows,
 	type ProcessRow,
 } from "../helpers/orphan_processes";
@@ -138,5 +139,59 @@ describe("classifyStayOpenLeftovers", () => {
 			row({ pid: 901, ppid: 10 }),
 		];
 		expect(classify(rows)).toEqual([]);
+	});
+});
+
+describe("parseCimProcesses", () => {
+	it("maps a JSON array of CIM rows", () => {
+		const raw = JSON.stringify([
+			{
+				ProcessId: 10,
+				ParentProcessId: 4,
+				Name: "node.exe",
+				CommandLine: "node a.js",
+			},
+			{
+				ProcessId: 11,
+				ParentProcessId: 10,
+				Name: "exiftool.exe",
+				CommandLine: "exiftool.exe -stay_open True -@ -",
+			},
+		]);
+		expect(parseCimProcesses(raw)).toEqual([
+			{ pid: 10, ppid: 4, name: "node.exe", commandLine: "node a.js" },
+			{
+				pid: 11,
+				ppid: 10,
+				name: "exiftool.exe",
+				commandLine: "exiftool.exe -stay_open True -@ -",
+			},
+		]);
+	});
+
+	it("accepts the single bare object PowerShell emits for one row", () => {
+		const raw = JSON.stringify({
+			ProcessId: 7,
+			ParentProcessId: 1,
+			Name: "x.exe",
+			CommandLine: "x.exe",
+		});
+		expect(parseCimProcesses(raw)).toEqual([
+			{ pid: 7, ppid: 1, name: "x.exe", commandLine: "x.exe" },
+		]);
+	});
+
+	it("turns a null CommandLine into an empty string", () => {
+		const raw = JSON.stringify([
+			{ ProcessId: 4, ParentProcessId: 0, Name: "System", CommandLine: null },
+		]);
+		expect(parseCimProcesses(raw)).toEqual([
+			{ pid: 4, ppid: 0, name: "System", commandLine: "" },
+		]);
+	});
+
+	it("returns no rows for empty output", () => {
+		expect(parseCimProcesses("")).toEqual([]);
+		expect(parseCimProcesses("  \r\n")).toEqual([]);
 	});
 });
