@@ -53,3 +53,15 @@ function getExifToolBinPath(): string {
 }
 
 export const exiftoolBinPath = getExifToolBinPath();
+
+/**
+ * Absolute path of the packaged POSIX parent-death watchdog config (LIF-01, D-03).
+ *
+ * Resolved only from `resourcesPath()`: never from settings, environment variables or argv,
+ * because ExifTool executes this file as Perl. There is deliberately no existence check or
+ * fallback spawn (D-05): if the file is missing ExifTool itself warns `Config file not found`,
+ * which reaches console.warn through the existing stderr path. The spawn builder ignores it
+ * on Windows.
+ */
+// prettier-ignore
+export const exiftoolConfigPath = path.resolve(resourcesPath(), "nix", "exiftool-config", "watchdog.config");

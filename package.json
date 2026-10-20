@@ -126,6 +126,13 @@
 					"filter": [
 						"**/*"
 					]
+				},
+				{
+					"from": ".resources/nix/exiftool-config",
+					"to": "nix/exiftool-config",
+					"filter": [
+						"**/*"
+					]
 				}
 			]
 		},
@@ -144,6 +151,13 @@
 				{
 					"from": ".resources/nix/bin",
 					"to": "nix/bin",
+					"filter": [
+						"**/*"
+					]
+				},
+				{
+					"from": ".resources/nix/exiftool-config",
+					"to": "nix/exiftool-config",
 					"filter": [
 						"**/*"
 					]
