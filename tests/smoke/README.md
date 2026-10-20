@@ -9,11 +9,11 @@ tests the dev build from `out/`.
 Four consecutive releases shipped broken while CI was green. CI proved the source tree
 compiles; nothing ever proved the shipped artifact runs.
 
-| Issue | What shipped broken | Why CI missed it |
-|---|---|---|
-| #288 | Packaged app failed to launch | Env detection read `NODE_ENV`, which is undefined in a packaged Electron app. The dev build set it, so dev tests passed. |
-| #289 | Release job died at the build step | `electron-builder` invoked bare; it is a devDependency and not on PATH. That step only ever ran during a real release. |
-| #290 | macOS reported the app as "damaged" | Gatekeeper blocks at the OS level, before process start. Nothing in CI ever assessed a packaged bundle. |
+| Issue | What shipped broken                 | Why CI missed it                                                                                                         |
+| ----- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| #288  | Packaged app failed to launch       | Env detection read `NODE_ENV`, which is undefined in a packaged Electron app. The dev build set it, so dev tests passed. |
+| #289  | Release job died at the build step  | `electron-builder` invoked bare; it is a devDependency and not on PATH. That step only ever ran during a real release.   |
+| #290  | macOS reported the app as "damaged" | Gatekeeper blocks at the OS level, before process start. Nothing in CI ever assessed a packaged bundle.                  |
 
 ## Running locally
 
@@ -40,12 +40,35 @@ $app = ./scripts/smoke/install-windows.ps1 -DistDir dist
 $env:EXIFCLEANER_PACKAGED_APP = $app; yarn test:smoke
 ```
 
+## exiftool_orphan.smoke.ts (LIF-01)
+
+Proves on the installed artifact that a force-killed app leaves no ExifTool child behind:
+
+- macOS and Linux: the packaged `nix/exiftool-config/watchdog.config` is byte-identical to the
+  repo copy, the live child's argv is `<exiftool> -config <config> -stay_open True -@ -`, and the
+  child is gone within 5 s of the app being killed. A second part runs the production
+  `ExiftoolProcess` with the installed ExifTool, first without the config (the child must survive
+  its parent: negative control) and then with it (the child must end).
+- Windows: no config ships, the child's command line has no `-config`, and the child is gone
+  within 5 s because the job object ends it.
+
+The test kills the app with `app.process().kill("SIGKILL")` and never with `app.close()`.
+Playwright launches Electron `detached`, and its own teardown group-kills the process group unless
+the spawned process is already marked `killed`; a group kill would end the ExifTool child itself
+and the check would pass without the watchdog doing anything. A `finally` block removes every
+recorded survivor and the temp directories.
+
+```bash
+EXIFCLEANER_PACKAGED_APP="$PWD/dist/mac-arm64/ExifCleaner.app/Contents/MacOS/ExifCleaner" \
+  yarn test:smoke tests/smoke/exiftool_orphan.smoke.ts
+```
+
 ## The Gatekeeper gate, and why it looks backwards
 
 `scripts/gatekeeper_check.mjs` runs two layers and **ignores `spctl`'s exit code**. That
 is deliberate. Do not "fix" it.
 
-An ad-hoc-signed app is *expected* by Apple's own model to be rejected by `spctl` — that
+An ad-hoc-signed app is _expected_ by Apple's own model to be rejected by `spctl` — that
 rejection is exactly what the bypassable "unidentified developer" dialog looks like from
 the CLI. A gate written as `spctl --assess || exit 1` is permanently red on a perfectly
 healthy build. It then gets `|| true`'d within a week and deleted within a month, which
@@ -53,7 +76,7 @@ is the same shortcut that let #290 reach users.
 
 So: layer 1 (`codesign --verify --deep --strict`) treats the exit code as authoritative,
 and layer 2 (`spctl -a -vv`) parses the **verdict text** only. Fatal markers are checked
-*before* the allow-list, because macOS can emit an acceptable-looking `source=` line and a
+_before_ the allow-list, because macOS can emit an acceptable-looking `source=` line and a
 sealed-resource complaint in the same output.
 
 The parser is unit-tested in `tests/scripts/gatekeeper_check.test.ts`, which runs on the
@@ -147,6 +170,7 @@ script, which puts `node_modules/.bin` on PATH.
   looked healthy. Launching from an empty temp dir reproduces what a real user gets
   from `/Applications` (cwd `/`, no `/.resources`), so a mis-resolved path fails here
   the same way it fails for them.
+
 - **`metadata_assertions` uses the repo's ExifTool, not the bundled one.** That is
   deliberate: it gives an independent oracle. If both pointed at the bundled binary, a
   broken bundle could produce a self-consistent false pass.
