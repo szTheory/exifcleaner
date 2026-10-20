@@ -26,7 +26,6 @@ No executable release-blocking known gaps are approved for this release; documen
 - **Time limits:** a write's limit is 30 seconds plus one second per 20 MB of the file. 20 MB per second is an assumed floor for slow disks, not a measured speed. With Save as copy off, for formats ExifTool rewrites in place such as JPEG and PNG, a stop that lands just after ExifTool replaced the original leaves the original cleaned even though the app reports a failure.
 - **PDF:** ExifTool uses reversible updates, so prior metadata may remain recoverable.
 - **MKV:** unsupported because ExifTool does not expose a writable removal path.
-- **AVIF:** user-reported partial-removal behavior remains under investigation.
 - **HEIC, HEIF and AVIF color profiles:** when the built-in cleaner declines a file and ExifTool cleans the copy with Preserve color profile off, ExifTool cannot remove the embedded color profile, so the copy keeps it.
 - **Leftover metadata check:** if ExifTool's copy of a declined HEIC, HEIF or AVIF file still fails the leftover-metadata check, the copy is discarded, the file is reported as failed, and the original is left untouched.
 - **iPhone HDR photos:** cleaning an iPhone HDR HEIC loses Apple's HDR brightness information, so the copy can display as standard dynamic range. This was measured on one iPhone 13 Pro Max photo on macOS. Earlier versions using ExifTool did the same, so this is not new in 4.6.0.
