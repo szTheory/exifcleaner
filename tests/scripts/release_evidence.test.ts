@@ -90,7 +90,10 @@ describe("release evidence", () => {
 			smokeResult: "passed",
 		});
 
-		expect(record.packageVersion).toBe("4.5.0");
+		const packageJson = JSON.parse(
+			fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8"),
+		);
+		expect(record.packageVersion).toBe(packageJson.version);
 		expect(record.artifactSha256).not.toBe(altered.artifactSha256);
 	});
 
