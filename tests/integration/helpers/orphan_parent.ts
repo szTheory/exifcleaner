@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 import { ExiftoolProcess } from "../../../src/infrastructure/exiftool/ExiftoolProcess";
 import {
 	EXIFCLEANER_PARENT_PID_ENV,
@@ -13,6 +14,12 @@ interface ParentSpec {
 	readyFile?: string;
 	parentPidEnv?: "self" | string;
 	dieBeforeReady?: boolean;
+	/** Raw mode: child stdout and stderr go to this file instead of pipes (FIFO write legs). */
+	stdoutFile?: string;
+	/** Raw mode, needs stdoutFile: after readiness, send a copy-mode write command. */
+	inflightWrite?: { source: string; dest: string };
+	/** Raw mode, forbids stdoutFile: after readiness, send an overwrite command over this dir. */
+	inflightOverwriteDir?: string;
 }
 
 function parseSpec(raw: string | undefined): ParentSpec {
@@ -38,6 +45,19 @@ async function startClass(spec: ParentSpec): Promise<number> {
 }
 
 async function startRaw(spec: ParentSpec): Promise<number> {
+	if (spec.inflightWrite !== undefined && spec.stdoutFile === undefined) {
+		throw new Error(
+			"orphan_parent: inflightWrite requires stdoutFile (a pipe would let a dead-parent SIGPIPE end the child)",
+		);
+	}
+	if (
+		spec.inflightOverwriteDir !== undefined &&
+		spec.stdoutFile !== undefined
+	) {
+		throw new Error(
+			"orphan_parent: inflightOverwriteDir requires production stdio and forbids stdoutFile",
+		);
+	}
 	const args =
 		spec.configPath === undefined
 			? ["-stay_open", "True", "-@", "-"]
@@ -57,7 +77,18 @@ async function startRaw(spec: ParentSpec): Promise<number> {
 	} else if (spec.parentPidEnv !== undefined) {
 		env = { ...base, [EXIFCLEANER_PARENT_PID_ENV]: spec.parentPidEnv };
 	}
-	const child = spawn(spec.binPath, args, { env });
+	const logFd =
+		spec.stdoutFile === undefined
+			? undefined
+			: fs.openSync(spec.stdoutFile, "w");
+	const child = spawn(spec.binPath, args, {
+		env,
+		stdio: logFd === undefined ? "pipe" : ["pipe", logFd, logFd],
+	});
+	const stdin = child.stdin;
+	if (stdin === null) {
+		throw new Error("orphan_parent: raw spawn returned no stdin pipe");
+	}
 	const childPid = child.pid;
 	if (childPid === undefined) {
 		throw new Error("orphan_parent: raw spawn returned no pid");
@@ -68,17 +99,47 @@ async function startRaw(spec: ParentSpec): Promise<number> {
 		return childPid;
 	}
 	await new Promise<void>((resolve, reject) => {
-		let seen = "";
 		child.once("error", reject);
-		child.stdout.setEncoding("utf8");
-		child.stdout.on("data", (chunk: string) => {
-			seen += chunk;
-			if (seen.includes("{ready}")) {
-				resolve();
+		if (spec.stdoutFile !== undefined) {
+			const file = spec.stdoutFile;
+			const deadline = Date.now() + 15_000;
+			const poll = setInterval(() => {
+				if (fs.readFileSync(file, "utf8").includes("{ready}")) {
+					clearInterval(poll);
+					resolve();
+				} else if (Date.now() > deadline) {
+					clearInterval(poll);
+					reject(
+						new Error("orphan_parent: no {ready} in stdoutFile within 15 s"),
+					);
+				}
+			}, 20);
+		} else {
+			const stdout = child.stdout;
+			if (stdout === null) {
+				reject(new Error("orphan_parent: raw spawn returned no stdout pipe"));
+				return;
 			}
-		});
-		child.stdin.write("-ver\n-execute\n");
+			let seen = "";
+			stdout.setEncoding("utf8");
+			stdout.on("data", (chunk: string) => {
+				seen += chunk;
+				if (seen.includes("{ready}")) {
+					resolve();
+				}
+			});
+		}
+		stdin.write("-ver\n-execute\n");
 	});
+	if (spec.inflightWrite !== undefined) {
+		const { source, dest } = spec.inflightWrite;
+		stdin.write(`-all=\n-o\n${dest}\n${source}\n-execute\n`);
+	}
+	if (spec.inflightOverwriteDir !== undefined) {
+		stdin.write(
+			`-all=\n-overwrite_original\n${spec.inflightOverwriteDir}\n-execute\n`,
+		);
+	}
 	return childPid;
 }
 
