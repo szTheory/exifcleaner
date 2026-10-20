@@ -439,6 +439,8 @@ describe("ExifTool orphan watchdog never interrupts a write (LIF-01)", () => {
 		assertPosixOrphanHost();
 		const leg = await runOverwriteBatchLeg(WATCHDOG_CONFIG_PATH);
 		console.log(`BATCH_COMPLETED_MS=${leg.goneAfterKillMs}`);
+		// Logged before asserting so a red CI run shows every value, not only the first failure.
+		console.log(`BATCH_LEG_RESULT=${JSON.stringify(leg)}`);
 		expect(leg.cleaned).toBe(leg.n);
 		expect(leg.original).toBe(0);
 		expect(leg.other).toBe(0);
