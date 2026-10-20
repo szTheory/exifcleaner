@@ -4,6 +4,7 @@ import {
 	extractReadySegments,
 	parseExiftoolOutput,
 } from "./exiftool_stdout_parser";
+import { exiftoolSpawnArgs, exiftoolSpawnEnv } from "./exiftool_spawn_args";
 
 const EXIFTOOL_CLOSE_TIMEOUT_MS = 5000;
 export const EXIFTOOL_COMMAND_TIMEOUT_MS = 30000;
@@ -92,6 +93,7 @@ type ProcessState = "closed" | "ready" | "killing" | "unavailable" | "closing";
 
 export class ExiftoolProcess {
 	private readonly binPath: string;
+	private readonly configPath: string | undefined;
 	private process: ChildProcess | null = null;
 	private executeCounter = 0;
 	private stdoutBuffer = "";
@@ -109,8 +111,15 @@ export class ExiftoolProcess {
 	// having a bad day -- handleExit() reads this to decide whether to respawn again or give up.
 	private resolvedCommandCount = 0;
 
-	constructor({ binPath }: { binPath: string }) {
+	constructor({
+		binPath,
+		configPath,
+	}: {
+		binPath: string;
+		configPath?: string | undefined;
+	}) {
 		this.binPath = binPath;
+		this.configPath = configPath;
 	}
 
 	/** The current live session's pid, or undefined when closed, unavailable or between sessions. */
@@ -460,7 +469,24 @@ export class ExiftoolProcess {
 		this.killPromise = null;
 		this.resolvedCommandCount = 0;
 
-		const proc = spawn(this.binPath, ["-stay_open", "True", "-@", "-"]);
+		// LIF-01: with a configPath the session loads the parent-death watchdog config.
+		const proc =
+			this.configPath === undefined
+				? spawn(this.binPath, ["-stay_open", "True", "-@", "-"])
+				: spawn(
+						this.binPath,
+						exiftoolSpawnArgs({
+							platform: process.platform,
+							configPath: this.configPath,
+						}),
+						{
+							env: exiftoolSpawnEnv({
+								platform: process.platform,
+								base: process.env,
+								parentPid: process.pid,
+							}),
+						},
+					);
 		this.process = proc;
 
 		proc.on("error", (err) => {

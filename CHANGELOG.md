@@ -9,6 +9,11 @@
 - A HEIC, HEIF or AVIF file whose name does not match its content (for example AVIF data named `.heic`) is cleaned according to its real content and keeps its name. When the built-in cleaner declines such a file and ExifTool cannot write that combination, the write fails and the original file is preserved
 - Cleaning many HEIC, HEIF or AVIF files as copies in one batch now costs extra milliseconds per file compared to 4.5.0, from the built-in write plus the reopen-and-check step above. Measured on a macOS development machine under background load: about +8.3 ms per small HEIC, +7.2 ms per small AVIF and +17.9 ms per 4032x3024 HEIC (about 4.1 s, 3.6 s and 8.9 s more per 500 files). Windows and Linux were not measured
 
+### Fixed
+
+- Force-quitting or crashing ExifCleaner no longer leaves a background ExifTool process running. On macOS and Linux, ExifTool now exits within about a second of losing the app once it is between files. On Windows it is ended immediately, even mid-write. The original file is preserved either way
+- On macOS and Linux, the bundled ExifTool no longer reads a personal `~/.ExifTool_config` file. Windows still does
+
 ## 4.5.0
 
 ### Changed

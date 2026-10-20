@@ -163,6 +163,27 @@ function failedTitles(report) {
 	return titles;
 }
 
+// The failure messages are the only record of WHY a scratch-clone test failed: the scratch copy,
+// and its JSON report with them, is deleted when the gate exits.
+function failedDetails(report) {
+	const details = [];
+	for (const suite of report.testResults ?? []) {
+		if (
+			suite.status === "failed" &&
+			(suite.assertionResults ?? []).length === 0
+		) {
+			details.push(`${suite.name}: ${suite.message ?? "(no message)"}`);
+		}
+		for (const assertion of suite.assertionResults ?? []) {
+			if (assertion.status === "failed") {
+				const messages = (assertion.failureMessages ?? []).join("\n");
+				details.push(`${assertion.fullName ?? assertion.title}\n${messages}`);
+			}
+		}
+	}
+	return details;
+}
+
 function applyMutation(scratchDir) {
 	const targetPath = path.join(scratchDir, TARGET_SOURCE);
 	const original = fs.readFileSync(targetPath, "utf8");
@@ -195,6 +216,9 @@ async function main() {
 				`✗ ISSUE344 VACUITY GATE FAILED: baseline is not green (numFailedTests=${baseline.numFailedTests}). The scratch clone must pass before any mutation is applied.`,
 			);
 			console.error(`Failed titles: ${JSON.stringify(failedTitles(baseline))}`);
+			for (const detail of failedDetails(baseline)) {
+				console.error(`--- failure detail ---\n${detail}`);
+			}
 			process.exitCode = 1;
 			return;
 		}
@@ -251,6 +275,7 @@ export {
 	FIX_BLOCK,
 	PRE_FIX_BLOCK,
 	applyMutation,
+	failedDetails,
 	failedTitles,
 	setsEqual,
 };
