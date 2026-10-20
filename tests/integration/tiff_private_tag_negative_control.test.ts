@@ -114,7 +114,7 @@ describe("TIFF private-tag assertion discriminates the defect from the fix (D-28
 				preserveResolution: false,
 				preserveTimestamps: false,
 			});
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		} finally {
 			await process.close();
 		}
@@ -156,7 +156,7 @@ describe("TIFF private-tag assertion discriminates the defect from the fix (D-28
 				preserveResolution: false,
 				preserveTimestamps: false,
 			});
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		} finally {
 			await process.close();
 		}

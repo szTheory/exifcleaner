@@ -14,7 +14,7 @@ import { RESOLUTION_MATRIX_ROWS } from "../helpers/resolution_matrix";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// One row per SUPPORTED_EXTENSIONS member that has been measured: 19 non-RAW extensions
+// One row per SUPPORTED_EXTENSIONS member that has been measured: 20 non-RAW extensions
 // through resolution-matrix.spec.ts (52-04), four RAW extensions through raw-resolution.spec.ts
 // (this plan, FID-04), and RAF's pre-existing refusal-before-sanitize() path.
 const RESOLUTION_COVERAGE: Readonly<Record<string, string>> = {
@@ -27,6 +27,7 @@ const RESOLUTION_COVERAGE: Readonly<Record<string, string>> = {
 	".webp": "resolution-matrix.spec.ts",
 	".heic": "resolution-matrix.spec.ts",
 	".heif": "resolution-matrix.spec.ts",
+	".avif": "resolution-matrix.spec.ts",
 	".mp4": "resolution-matrix.spec.ts",
 	".mov": "resolution-matrix.spec.ts",
 	".m4v": "resolution-matrix.spec.ts",
@@ -44,14 +45,10 @@ const RESOLUTION_COVERAGE: Readonly<Record<string, string>> = {
 	".raf": "raf-refused-before-sanitize",
 };
 
-// No redistributable sample exists for arw/orf/pef/srw at all; avif has no honest write path
-// (renaming the vendored HEIC fixture to .avif reports FileType HEIF, not AVIF -- measured,
-// 52-04-SUMMARY.md); the vendored Nikon.nef is a truncated stub ("Undersized IFD0
+// No redistributable sample exists for arw/orf/pef/srw at all; the vendored Nikon.nef is a truncated stub ("Undersized IFD0
 // StripByteCounts") that proves nothing either way (51.1-RESEARCH.md), the same reason
 // raw_residue_pin.test.ts's RAW_NOT_COVERED excludes it.
 const RESOLUTION_NOT_COVERED: Readonly<Record<string, string>> = {
-	".avif":
-		"no honest AVIF write path -- a renamed HEIC fixture reports FileType HEIF, not AVIF",
 	".arw": "no redistributable sample fixture",
 	".orf": "no redistributable sample fixture",
 	".pef": "no redistributable sample fixture",

@@ -3,7 +3,8 @@ import {
 	copyModeLeakCheckFormatOf,
 	findLeakedTags,
 } from "../../domain/exif/copy_mode_leak_check";
-import type { MetadataEnginePort } from "../metadata_engine_port";
+import type { CopyModeLeakCheckDemand } from "../../domain/files/file_types";
+import type { MetadataEnginePort, WrittenBy } from "../metadata_engine_port";
 
 export type OutputVerificationError =
 	| {
@@ -36,19 +37,24 @@ export class VerifyGeneratedOutputQuery {
 	}: {
 		generatedPath: string;
 		/**
-		 * Opt-in (D-10/D-11): populated only by PNG/JPEG copy-mode call sites. When present,
-		 * after every existing check passes, the reopened output's diagnostic record is
-		 * checked against the measured fail-closed allowlist (58-SWEEP-MATRIX.md). Absent for
-		 * every other verification call site -- RAW/TIFF/media/WebP behaviour is unchanged.
+		 * Opt-in (D-08/D-10/D-11): populated by every verified copy-mode call site. When present,
+		 * after every existing check passes, a reopened FileType with an allowlist is checked
+		 * against the measured fail-closed allowlist (58-SWEEP-MATRIX.md). `demand` decides the
+		 * outcome for a FileType without an allowlist: "required" fails closed, "when-allowlisted"
+		 * stays verify-only (genuine WebP/RAW/TIFF/media). Absent for overwrite-mode call sites.
 		 */
 		copyModeLeakCheck?:
 			| {
+					demand: CopyModeLeakCheckDemand;
 					preserveOrientation: boolean;
 					preserveColorProfile: boolean;
 					preserveResolution: boolean;
+					writtenBy: WrittenBy;
 			  }
 			| undefined;
-	}): Promise<Result<void, OutputVerificationError>> {
+	}): Promise<
+		Result<{ exemptionsApplied: readonly string[] }, OutputVerificationError>
+	> {
 		const result = await this.metadataEngine.inspect({
 			source: generatedPath,
 			purpose: "output-verification",
@@ -82,6 +88,9 @@ export class VerifyGeneratedOutputQuery {
 		if (copyModeLeakCheck !== undefined) {
 			const format = copyModeLeakCheckFormatOf({ fileType });
 			if (format === undefined) {
+				if (copyModeLeakCheck.demand === "when-allowlisted") {
+					return { ok: true, value: { exemptionsApplied: [] } };
+				}
 				return leakFailure({
 					detail:
 						"Copy-mode leak check has no permitted-tag set for this file type",
@@ -89,10 +98,12 @@ export class VerifyGeneratedOutputQuery {
 				});
 			}
 
-			const leakedTags = findLeakedTags({
+			const { leakedTags, exemptionsApplied } = findLeakedTags({
 				record: result.value.metadata,
 				format,
 				preservation: copyModeLeakCheck,
+				writtenBy: copyModeLeakCheck.writtenBy,
+				fileType,
 			});
 			if (leakedTags.length > 0) {
 				return leakFailure({
@@ -100,15 +111,16 @@ export class VerifyGeneratedOutputQuery {
 					leakedTags,
 				});
 			}
+			return { ok: true, value: { exemptionsApplied } };
 		}
 
-		return { ok: true, value: undefined };
+		return { ok: true, value: { exemptionsApplied: [] } };
 	}
 }
 
 function verificationFailure(
 	detail: string,
-): Result<void, OutputVerificationError> {
+): Result<{ exemptionsApplied: readonly string[] }, OutputVerificationError> {
 	return { ok: false, error: { code: "output-verification-failed", detail } };
 }
 
@@ -118,7 +130,7 @@ function leakFailure({
 }: {
 	detail: string;
 	leakedTags: readonly string[];
-}): Result<void, OutputVerificationError> {
+}): Result<{ exemptionsApplied: readonly string[] }, OutputVerificationError> {
 	return {
 		ok: false,
 		error: { code: "output-metadata-leak", detail, leakedTags },

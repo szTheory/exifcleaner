@@ -68,7 +68,7 @@ describe("58-01: extension-identified native copy routing with real bytes", () =
 				preserveTimestamps: false,
 			});
 
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 			expect(nativeWrite).toHaveBeenCalledOnce();
 			expect(exiftoolWrite).not.toHaveBeenCalled();
 			expect(fs.existsSync(destination)).toBe(true);
@@ -123,7 +123,7 @@ describe("58-01: extension-identified native copy routing with real bytes", () =
 				preserveTimestamps: false,
 			});
 
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 			expect(nativeWrite).toHaveBeenCalledOnce();
 			expect(exiftoolWrite).not.toHaveBeenCalled();
 			expect(fs.existsSync(destination)).toBe(true);
@@ -246,7 +246,7 @@ describe("58-01: extension-identified native copy routing with real bytes", () =
 				preserveTimestamps: false,
 			});
 
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 			expect(nativeWrite).toHaveBeenCalledOnce();
 			expect(exiftoolWrite).not.toHaveBeenCalled();
 			expect(fs.existsSync(destination)).toBe(true);
@@ -316,7 +316,7 @@ describe("59: rollback route — a removed or declining native format reaches Ex
 				preserveTimestamps: false,
 			});
 
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			expect(nativeWrite).not.toHaveBeenCalled();
 			expect(exiftoolWrite).toHaveBeenCalledOnce();
 			expect(fs.existsSync(destination)).toBe(true);

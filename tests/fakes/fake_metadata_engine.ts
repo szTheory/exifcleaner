@@ -1,4 +1,7 @@
-import type { MetadataEnginePort } from "../../src/application/metadata_engine_port";
+import type {
+	MetadataEnginePort,
+	WrittenBy,
+} from "../../src/application/metadata_engine_port";
 import type { Result } from "../../src/common/result";
 import type { MetadataEngineError } from "../../src/domain/exif/exif_errors";
 
@@ -43,9 +46,9 @@ export class FakeMetadataEngine implements MetadataEnginePort {
 		},
 	};
 
-	sanitizeResult: Result<void, MetadataEngineError> = {
+	sanitizeResult: Result<{ writtenBy: WrittenBy }, MetadataEngineError> = {
 		ok: true,
-		value: undefined,
+		value: { writtenBy: "exiftool" },
 	};
 
 	async inspect({

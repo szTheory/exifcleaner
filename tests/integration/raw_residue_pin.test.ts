@@ -1018,7 +1018,7 @@ describe("RAW residue pin: what a default clean leaves behind (RMV-05, D-46)", (
 					preserveResolution: false,
 					preserveTimestamps: false,
 				});
-				expect(result).toEqual({ ok: true, value: undefined });
+				expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			} finally {
 				await process.close();
 			}
@@ -1059,7 +1059,7 @@ describe("RAW residue pin: what a default clean leaves behind (RMV-05, D-46)", (
 					preserveResolution: false,
 					preserveTimestamps: false,
 				});
-				expect(result).toEqual({ ok: true, value: undefined });
+				expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			} finally {
 				await process.close();
 			}

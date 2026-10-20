@@ -1,5 +1,8 @@
 import path from "node:path";
-import type { MetadataEnginePort } from "../../application/metadata_engine_port";
+import type {
+	MetadataEnginePort,
+	WrittenBy,
+} from "../../application/metadata_engine_port";
 import type { Result } from "../../common/result";
 import type { MetadataEngineError } from "../../domain/exif/exif_errors";
 import {
@@ -37,14 +40,16 @@ export class HybridMetadataEngine implements MetadataEnginePort {
 
 	async sanitize(
 		request: Parameters<MetadataEnginePort["sanitize"]>[0],
-	): Promise<Result<void, MetadataEngineError>> {
+	): Promise<Result<{ readonly writtenBy: WrittenBy }, MetadataEngineError>> {
 		if (!this.isNativeCopyCandidate(request)) {
-			return this.exiftool.sanitize(request);
+			const viaExiftool = await this.exiftool.sanitize(request);
+			if (!viaExiftool.ok) return viaExiftool;
+			return { ok: true, value: { writtenBy: "exiftool" } };
 		}
 
 		const nativeRequest: NativeSanitizeRequest = request;
 		const native = await this.native.sanitize(nativeRequest);
-		if (native.ok) return native;
+		if (native.ok) return { ok: true, value: { writtenBy: "native" } };
 
 		// Authority comes solely from the library's own proven pre-write safe
 		// decline (native_fallback_authority.ts), never a restated table here.
@@ -52,7 +57,9 @@ export class HybridMetadataEngine implements MetadataEnginePort {
 		if (grant === undefined || !redeemFallbackGrant(grant)) {
 			return native;
 		}
-		return this.exiftool.sanitize(request);
+		const viaExiftool = await this.exiftool.sanitize(request);
+		if (!viaExiftool.ok) return viaExiftool;
+		return { ok: true, value: { writtenBy: "exiftool" } };
 	}
 
 	private isNativeCopyCandidate(

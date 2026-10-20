@@ -1023,7 +1023,7 @@ describe("RAW ON-output pin (FID-04, D-35)", () => {
 					preserveResolution: true,
 					preserveTimestamps: false,
 				});
-				expect(result).toEqual({ ok: true, value: undefined });
+				expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			} finally {
 				await process.close();
 			}
@@ -1104,7 +1104,10 @@ describe("RAW ON versus OFF on seeded input (FID-04, D-35)", () => {
 					preserveResolution: true,
 					preserveTimestamps: false,
 				});
-				expect(onResult).toEqual({ ok: true, value: undefined });
+				expect(onResult).toEqual({
+					ok: true,
+					value: { writtenBy: "exiftool" },
+				});
 				const offResult = await adapter.sanitize({
 					source: offSource,
 					destination: offDestination,
@@ -1114,7 +1117,10 @@ describe("RAW ON versus OFF on seeded input (FID-04, D-35)", () => {
 					preserveResolution: false,
 					preserveTimestamps: false,
 				});
-				expect(offResult).toEqual({ ok: true, value: undefined });
+				expect(offResult).toEqual({
+					ok: true,
+					value: { writtenBy: "exiftool" },
+				});
 			} finally {
 				await process.close();
 			}

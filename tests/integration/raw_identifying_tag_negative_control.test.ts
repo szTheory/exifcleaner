@@ -274,7 +274,7 @@ describe("RAW identifying-tag assertions discriminate the defect from the fix (D
 			const before = snapshotDir(dir);
 
 			const result = await sanitizeWithProduct({ source, destination });
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 
 			const after = snapshotDir(dir);
 			assertDirEffect(before, after, {
@@ -314,7 +314,7 @@ describe("RAW identifying-tag assertions discriminate the defect from the fix (D
 			const before = snapshotDir(dir);
 
 			const result = await sanitizeWithProduct({ source, destination });
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			fs.copyFileSync(destination, flipped);
 
 			const offsetKey = IMAGE_DATA_OFFSET_KEY_BY_FIXTURE[raw.fixture];
@@ -372,7 +372,7 @@ describe("RAW identifying-tag assertions discriminate the defect from the fix (D
 				source,
 				destination: productOut,
 			});
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 
 			const after = snapshotDir(dir);
 			assertDirEffect(before, after, {
@@ -422,7 +422,10 @@ describe("RAW identifying-tag assertions discriminate the defect from the fix (D
 				source,
 				destination: firstOut,
 			});
-			expect(firstResult).toEqual({ ok: true, value: undefined });
+			expect(firstResult).toEqual({
+				ok: true,
+				value: { writtenBy: "exiftool" },
+			});
 			// The already-cleaned first output carries none of the listed identifying tags --
 			// this second clean also covers the empty-input edge: every delete of an absent
 			// tag must be a no-op that never fails the write.
@@ -430,7 +433,10 @@ describe("RAW identifying-tag assertions discriminate the defect from the fix (D
 				source: firstOut,
 				destination: secondOut,
 			});
-			expect(secondResult).toEqual({ ok: true, value: undefined });
+			expect(secondResult).toEqual({
+				ok: true,
+				value: { writtenBy: "exiftool" },
+			});
 
 			const after = snapshotDir(dir);
 			assertDirEffect(before, after, {

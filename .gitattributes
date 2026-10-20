@@ -29,6 +29,8 @@
 *.icns binary
 *.icc binary
 *.heic binary
+*.heif binary
+*.avif binary
 *.bmp binary
 *.avi binary
 *.wmv binary

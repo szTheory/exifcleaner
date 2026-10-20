@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { createFixtureDir } from "./fixture_copier";
+import { seedHeifCopy } from "./heif_seed";
 import { assertDirEffect, snapshotDir } from "./dir_effect";
 import {
 	assertMetadataStripped,
@@ -299,9 +300,14 @@ const NATIVE_DIFFERENTIAL_PRESERVATION: DifferentialPreservation = {
 };
 
 export interface NativeDifferentialScenarioSpec {
-	readonly fixture: "sample.jpg" | "orientation.png";
+	readonly fixture:
+		| "sample.jpg"
+		| "orientation.png"
+		| "sample-sips-icc.heic"
+		| "sample-sips-icc.avif";
 	readonly removedTags: readonly string[];
 	readonly preservedTags: Readonly<Record<string, unknown>>;
+	readonly seed?: boolean;
 }
 
 /**
@@ -317,7 +323,7 @@ export interface NativeDifferentialScenarioSpec {
  */
 export async function runNativeDifferentialScenario(
 	context: ProcessingLaunchContext,
-	{ fixture, removedTags, preservedTags }: NativeDifferentialScenarioSpec,
+	{ fixture, removedTags, preservedTags, seed }: NativeDifferentialScenarioSpec,
 ): Promise<void> {
 	const driver = createProcessingDriver(context);
 	const { dir, copyFixture, cleanup } = createFixtureDir();
@@ -329,6 +335,12 @@ export async function runNativeDifferentialScenario(
 
 	try {
 		const filePath = copyFixture(fixture);
+		// D-13: seed the temp copy only; no identifying file is committed.
+		if (seed)
+			seedHeifCopy({
+				exiftoolPath: context.exiftoolPath,
+				sourcePath: filePath,
+			});
 		const outputPath = generateCleanedPath({
 			filePath,
 			exists: fs.existsSync,
@@ -353,6 +365,11 @@ export async function runNativeDifferentialScenario(
 		// Two independent fresh copies of the same source bytes, in a directory the
 		// app's own submission never touches.
 		const nativeSource = references.copyFixture(fixture);
+		if (seed)
+			seedHeifCopy({
+				exiftoolPath: context.exiftoolPath,
+				sourcePath: nativeSource,
+			});
 		const exiftoolSource = path.join(references.dir, `etool-${fixture}`);
 		fs.copyFileSync(nativeSource, exiftoolSource);
 

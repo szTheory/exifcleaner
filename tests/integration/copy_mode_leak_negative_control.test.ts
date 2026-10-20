@@ -122,19 +122,27 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 						outputMode: "copy",
 						...DEFAULT_PRESERVATION,
 					});
-					expect(writeResult).toEqual({ ok: true, value: undefined });
+					expect(writeResult).toEqual({
+						ok: true,
+						value: { writtenBy: "native" },
+					});
 					expect(nativeWrite).toHaveBeenCalledOnce();
 					expect(exiftoolWrite).not.toHaveBeenCalled();
 
 					const verifyResult = await verify.execute({
 						generatedPath: destination,
 						copyModeLeakCheck: {
+							demand: "required",
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
+							writtenBy: "native",
 						},
 					});
-					expect(verifyResult).toEqual({ ok: true, value: undefined });
+					expect(verifyResult).toEqual({
+						ok: true,
+						value: { exemptionsApplied: [] },
+					});
 				} finally {
 					await process.close();
 				}
@@ -162,27 +170,34 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 						outputMode: "copy",
 						...DEFAULT_PRESERVATION,
 					});
-					expect(writeResult).toEqual({ ok: true, value: undefined });
+					expect(writeResult).toEqual({
+						ok: true,
+						value: { writtenBy: "native" },
+					});
 
 					// Sanity: clean output passes before injection.
 					const clean = await verify.execute({
 						generatedPath: destination,
 						copyModeLeakCheck: {
+							demand: "required",
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
+							writtenBy: "native",
 						},
 					});
-					expect(clean).toEqual({ ok: true, value: undefined });
+					expect(clean).toEqual({ ok: true, value: { exemptionsApplied: [] } });
 
 					testCase.inject(destination);
 
 					const leaked = await verify.execute({
 						generatedPath: destination,
 						copyModeLeakCheck: {
+							demand: "required",
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
+							writtenBy: "native",
 						},
 					});
 					expect(leaked).toMatchObject({
@@ -255,6 +270,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 						preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
 						preserveTimestamps: DEFAULT_PRESERVATION.preserveTimestamps,
 						copyModeLeakCheck: {
+							demand: "required",
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
@@ -326,6 +342,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 						preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
 						preserveTimestamps: DEFAULT_PRESERVATION.preserveTimestamps,
 						copyModeLeakCheck: {
+							demand: "required",
 							preserveOrientation: DEFAULT_PRESERVATION.preserveOrientation,
 							preserveColorProfile: DEFAULT_PRESERVATION.preserveColorProfile,
 							preserveResolution: DEFAULT_PRESERVATION.preserveResolution,
@@ -382,19 +399,27 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 				preserveResolution: true,
 				preserveTimestamps: false,
 			});
-			expect(writeResult).toEqual({ ok: true, value: undefined });
+			expect(writeResult).toEqual({
+				ok: true,
+				value: { writtenBy: "exiftool" },
+			});
 			expect(nativeWrite).toHaveBeenCalledOnce();
 			expect(exiftoolWrite).toHaveBeenCalledOnce();
 
 			const verifyResult = await verify.execute({
 				generatedPath: destination,
 				copyModeLeakCheck: {
+					demand: "required",
 					preserveOrientation: true,
 					preserveColorProfile: true,
 					preserveResolution: true,
+					writtenBy: "exiftool",
 				},
 			});
-			expect(verifyResult).toEqual({ ok: true, value: undefined });
+			expect(verifyResult).toEqual({
+				ok: true,
+				value: { exemptionsApplied: [] },
+			});
 		} finally {
 			await process.close();
 		}

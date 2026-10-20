@@ -364,7 +364,7 @@ export class ExifToolAdapter implements MetadataEnginePort {
 				};
 			}
 
-			return { ok: true, value: undefined };
+			return { ok: true, value: { writtenBy: "exiftool" } };
 		} catch (error) {
 			if (error instanceof UnsafeExifToolPathError) {
 				return {

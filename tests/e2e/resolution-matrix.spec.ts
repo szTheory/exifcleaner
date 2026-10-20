@@ -15,8 +15,11 @@ import {
 	seededTagKeys,
 } from "../helpers/resolution_probe";
 import {
+	type MatrixRow,
 	RESOLUTION_MATRIX_ROWS,
 	materializeRow,
+	rowFileName,
+	rowLabel,
 } from "../helpers/resolution_matrix";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -25,6 +28,12 @@ const EXIFTOOL_PATH =
 	process.platform === "win32"
 		? path.resolve(__dirname, "../../.resources/win/bin/exiftool.exe")
 		: path.resolve(__dirname, "../../.resources/nix/bin/exiftool");
+
+// The product's Save-as-copy output name for `rowFileName(row, "row")`: `<stem>_cleaned<ext>`.
+function cleanedName(row: MatrixRow): string {
+	const name = rowFileName(row, "row");
+	return `${name.slice(0, -row.ext.length)}_cleaned${row.ext}`;
+}
 
 function sha256(filePath: string): string {
 	return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
@@ -60,7 +69,7 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 			const onPaths = new Map<string, string>();
 			const offPaths = new Map<string, string>();
 			for (const row of RESOLUTION_MATRIX_ROWS) {
-				const name = `row${row.ext}`;
+				const name = rowFileName(row, "row");
 				const onPath = materializeRow(row, onFixtures.dir, name, EXIFTOOL_PATH);
 				const offPath = materializeRow(
 					row,
@@ -69,8 +78,8 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 					EXIFTOOL_PATH,
 				);
 				expect(sha256(onPath)).toBe(sha256(offPath));
-				onPaths.set(row.ext, onPath);
-				offPaths.set(row.ext, offPath);
+				onPaths.set(rowLabel(row), onPath);
+				offPaths.set(rowLabel(row), offPath);
 			}
 
 			const onBefore = snapshotDir(onFixtures.dir);
@@ -121,9 +130,9 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 			const addedOff: string[] = [];
 			for (const row of RESOLUTION_MATRIX_ROWS) {
 				if (!row.writable) continue;
-				const onSrc = onPaths.get(row.ext)!;
-				const offSrc = offPaths.get(row.ext)!;
-				const onOutName = `row_cleaned${row.ext}`;
+				const onSrc = onPaths.get(rowLabel(row))!;
+				const offSrc = offPaths.get(rowLabel(row))!;
+				const onOutName = cleanedName(row);
 				addedOn.push(onOutName);
 				addedOff.push(onOutName);
 				const onOut = path.join(onFixtures.dir, onOutName);
@@ -171,13 +180,13 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 
 			for (const row of RESOLUTION_MATRIX_ROWS) {
 				if (row.writable) continue;
-				const onSrc = onPaths.get(row.ext)!;
-				const offSrc = offPaths.get(row.ext)!;
+				const onSrc = onPaths.get(rowLabel(row))!;
+				const offSrc = offPaths.get(rowLabel(row))!;
+				expect(fs.existsSync(path.join(onFixtures.dir, cleanedName(row)))).toBe(
+					false,
+				);
 				expect(
-					fs.existsSync(path.join(onFixtures.dir, `row_cleaned${row.ext}`)),
-				).toBe(false);
-				expect(
-					fs.existsSync(path.join(offFixtures.dir, `row_cleaned${row.ext}`)),
+					fs.existsSync(path.join(offFixtures.dir, cleanedName(row))),
 				).toBe(false);
 			}
 		} finally {

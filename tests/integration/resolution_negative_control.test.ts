@@ -29,9 +29,13 @@ import {
 } from "../helpers/resolution_probe";
 import {
 	JPEG_BOTH_300_ARGS,
+	type MatrixRow,
 	PNG_PHYS_SEED_ARGS,
 	RESOLUTION_MATRIX_ROWS,
+	isNativeHeifRow,
 	materializeRow,
+	rowFileName,
+	rowLabel,
 } from "../helpers/resolution_matrix";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -39,6 +43,11 @@ const EXIFTOOL_PATH =
 	process.platform === "win32"
 		? path.resolve(__dirname, "../../.resources/win/bin/exiftool.exe")
 		: path.resolve(__dirname, "../../.resources/nix/bin/exiftool");
+
+// it.each titles read `$title`; unlabelled rows fall back to their extension (titles unchanged).
+function withLabel(row: MatrixRow): MatrixRow & { readonly title: string } {
+	return { ...row, title: rowLabel(row) };
+}
 
 function sha256(filePath: string): string {
 	return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
@@ -53,8 +62,12 @@ describe("Resolution copy-back matrix, product adapter (FID-03, D-37, D-38)", ()
 		}
 	});
 
-	it.each(RESOLUTION_MATRIX_ROWS)(
-		"$ext ($fileType): ON removes no less than OFF and adds only the source's own resolution (FID-03, D-37, D-38)",
+	it.each(
+		RESOLUTION_MATRIX_ROWS.filter((row) => !isNativeHeifRow(row)).map(
+			withLabel,
+		),
+	)(
+		"$title ($fileType): ON removes no less than OFF and adds only the source's own resolution (FID-03, D-37, D-38)",
 		async (row) => {
 			const dir = fs.mkdtempSync(
 				path.join(os.tmpdir(), "resolution-matrix-nc-"),
@@ -63,12 +76,12 @@ describe("Resolution copy-back matrix, product adapter (FID-03, D-37, D-38)", ()
 			const source = materializeRow(
 				row,
 				dir,
-				`source${row.ext}`,
+				rowFileName(row, "source"),
 				EXIFTOOL_PATH,
 			);
 			const sourceDigestBefore = sha256(source);
-			const onDest = path.join(dir, `on-out${row.ext}`);
-			const offDest = path.join(dir, `off-out${row.ext}`);
+			const onDest = path.join(dir, rowFileName(row, "on-out"));
+			const offDest = path.join(dir, rowFileName(row, "off-out"));
 			const before = snapshotDir(dir);
 
 			const process = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
@@ -123,8 +136,8 @@ describe("Resolution copy-back matrix, product adapter (FID-03, D-37, D-38)", ()
 				return;
 			}
 
-			expect(onResult).toEqual({ ok: true, value: undefined });
-			expect(offResult).toEqual({ ok: true, value: undefined });
+			expect(onResult).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
+			expect(offResult).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 
 			const after = snapshotDir(dir);
 			assertDirEffect(before, after, {
@@ -168,8 +181,14 @@ describe("Resolution copy-back matrix, product adapter (FID-03, D-37, D-38)", ()
 // and OFF to native); webp does not preserve resolution natively, so ON (preserveResolution
 // true) is native-ineligible and routes to ExifTool, while OFF (preserveResolution false)
 // bypasses the resolution gate and routes to native (D-01, D-03, 58-01).
-const HYBRID_MATRIX_ROWS = RESOLUTION_MATRIX_ROWS.filter((row) =>
-	([".jpg", ".jpeg", ".png", ".webp"] as readonly string[]).includes(row.ext),
+// 63-16 (ADP-07, D-11): the four native HEIC/AVIF rows (matching and mismatched names) ride the
+// hybrid block too: heic/avif preserve resolution natively, so ON and OFF both route to native,
+// like jpg/png. The QuickTime.heic .heic/.heif rows stay ExifTool-only (FileType HEIF).
+const HYBRID_MATRIX_ROWS = RESOLUTION_MATRIX_ROWS.filter(
+	(row) =>
+		([".jpg", ".jpeg", ".png", ".webp"] as readonly string[]).includes(
+			row.ext,
+		) || isNativeHeifRow(row),
 );
 
 describe("Resolution copy-back matrix, hybrid engine (ADP-02, ADP-04)", () => {
@@ -181,8 +200,8 @@ describe("Resolution copy-back matrix, hybrid engine (ADP-02, ADP-04)", () => {
 		}
 	});
 
-	it.each(HYBRID_MATRIX_ROWS)(
-		"$ext ($fileType) through the hybrid engine: ON removes no less than OFF and adds only the source's own resolution (ADP-02, ADP-04)",
+	it.each(HYBRID_MATRIX_ROWS.map(withLabel))(
+		"$title ($fileType) through the hybrid engine: ON removes no less than OFF and adds only the source's own resolution (ADP-02, ADP-04)",
 		async (row) => {
 			const dir = fs.mkdtempSync(
 				path.join(os.tmpdir(), "resolution-matrix-hybrid-"),
@@ -191,12 +210,12 @@ describe("Resolution copy-back matrix, hybrid engine (ADP-02, ADP-04)", () => {
 			const source = materializeRow(
 				row,
 				dir,
-				`source${row.ext}`,
+				rowFileName(row, "source"),
 				EXIFTOOL_PATH,
 			);
 			const sourceDigestBefore = sha256(source);
-			const onDest = path.join(dir, `on-out${row.ext}`);
-			const offDest = path.join(dir, `off-out${row.ext}`);
+			const onDest = path.join(dir, rowFileName(row, "on-out"));
+			const offDest = path.join(dir, rowFileName(row, "off-out"));
 			const before = snapshotDir(dir);
 
 			const process = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
@@ -606,7 +625,7 @@ describe("Resolution copy-back edges (FID-01, FID-03)", () => {
 				preserveResolution: true,
 				preserveTimestamps: false,
 			});
-			expect(first).toEqual({ ok: true, value: undefined });
+			expect(first).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			const second = await exiftool.sanitize({
 				source: firstOut,
 				destination: secondOut,
@@ -616,7 +635,7 @@ describe("Resolution copy-back edges (FID-01, FID-03)", () => {
 				preserveResolution: true,
 				preserveTimestamps: false,
 			});
-			expect(second).toEqual({ ok: true, value: undefined });
+			expect(second).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		} finally {
 			await process.close();
 		}
@@ -653,7 +672,7 @@ describe("Resolution copy-back edges (FID-01, FID-03)", () => {
 				preserveResolution: true,
 				preserveTimestamps: false,
 			});
-			expect(first).toEqual({ ok: true, value: undefined });
+			expect(first).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			const second = await exiftool.sanitize({
 				source: firstOut,
 				destination: secondOut,
@@ -663,7 +682,7 @@ describe("Resolution copy-back edges (FID-01, FID-03)", () => {
 				preserveResolution: true,
 				preserveTimestamps: false,
 			});
-			expect(second).toEqual({ ok: true, value: undefined });
+			expect(second).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		} finally {
 			await process.close();
 		}
@@ -696,7 +715,7 @@ describe("Resolution copy-back edges (FID-01, FID-03)", () => {
 				preserveResolution: true,
 				preserveTimestamps: false,
 			});
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 		} finally {
 			await process.close();
 		}

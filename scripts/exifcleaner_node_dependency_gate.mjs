@@ -5,25 +5,27 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-// Published version is 0.3.1 (58-12..58-15, ADP-04, "Fix in node first" maintainer decision):
-// the stage-residue fix. Source commit 312b4ad8371e9df5360d18e34fc7b44b9929c87b (supersedes
-// the 58-13 addendum's originally-recorded c9cfe6f -- a test-only benchmark-timeout fix landed
-// first), tag v0.3.1, release run 36487656246 attempt 1 -- all three confirmed against the
-// published SLSA provenance attestation (predicateType https://slsa.dev/provenance/v1, workflow
-// release.yml, environment npm, build ref refs/tags/v0.3.1), not assumed. 0.3.1 adds post-commit
-// removal of the `.exifcleaner-stage-<uuid>` atomic-publication staging directory the library
-// used to leave behind after every native copy publish; no export, prebuild, or allowed-import
-// surface changed from 0.3.0 (measured: this seal's own runtime scan reports the same
-// EXPECTED_RUNTIME_EXPORTS, the same six EXPECTED_PREBUILD_PATHS, and the same ALLOWED_IMPORTS
-// set below).
+// Published version is 0.4.0 (63-01, ADP-06): native HEIC/HEIF/AVIF (ISOBMFF) sanitize. Source
+// commit b93507f357be4a564802373f92f76d595cbd9223 = the target of tag v0.4.0 (tag object
+// 0391bf954a7c658c85deee69cf0a88105ce0c195), release run 37163279172 attempt 1 -- the commit
+// and run confirmed against the published SLSA provenance attestation (predicateType
+// https://slsa.dev/provenance/v1, workflow release.yml, environment npm, build ref
+// refs/tags/v0.4.0), and the attestation subject sha512 equals dist.integrity. 0.4.0 adds the
+// dist/isobmff/* and dist/admission/{isobmff,heic,avif}-handler.js modules; measured by this
+// seal's own runtime scan: the same EXPECTED_RUNTIME_EXPORTS, the same six
+// EXPECTED_PREBUILD_PATHS, the same ALLOWED_IMPORTS set, and no new URL literal -- no
+// allowlist entry changed from 0.3.1.
 //
-// History: 0.3.0 (58-01, ADP-04) was the app-adoption bump that landed PNG + JPEG native
+// History: 0.3.1 (58-12..58-15, ADP-04) added post-commit removal of the
+// `.exifcleaner-stage-<uuid>` staging directory. Source commit
+// 312b4ad8371e9df5360d18e34fc7b44b9929c87b, tag v0.3.1, release run 36487656246 attempt 1.
+// 0.3.0 (58-01, ADP-04) was the app-adoption bump that landed PNG + JPEG native
 // routing alongside WebP. Source commit 41bee192686281d23e8e4b9d9610235e3171c658, tag v0.3.0,
 // release run 36365018538 attempt 1. 0.2.2 superseded 0.2.1 for a Windows-only correctness
 // defect (0.2.1's publication.node statically imported the literal name "node.exe", faulting
 // inside the packaged ExifCleaner.exe host on a V8 pointer-compression cage mismatch). Source
 // commit 8474396, tag v0.2.2, release run 35370603372.
-export const SEALED_VERSION = "0.3.1";
+export const SEALED_VERSION = "0.4.0";
 const PACKAGE_NAME = "exifcleaner-node";
 const EVIDENCE_PATH = "docs/evidence/native-webp-registry-package.json";
 const REPOSITORY_URL = "https://github.com/szTheory/exifcleaner-node";

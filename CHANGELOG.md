@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.6.0
+
+### Changed
+
+- With Save as copy on, HEIC, HEIF and AVIF files are now cleaned by the app's own built-in cleaner (exifcleaner-node 0.4.0) when it supports every preservation setting that is turned on; for files it declines to handle, ExifTool cleans them as it always has
+- Every HEIC, HEIF and AVIF saved as a copy is now reopened and checked by ExifTool for leftover metadata before it is kept. If the check finds anything unexpected, the copy is discarded, the original file is left untouched, and the file is reported as failed
+- A HEIC, HEIF or AVIF file whose name does not match its content (for example AVIF data named `.heic`) is cleaned according to its real content and keeps its name. When the built-in cleaner declines such a file and ExifTool cannot write that combination, the write fails and the original file is preserved
+- Cleaning many HEIC, HEIF or AVIF files as copies in one batch now costs extra milliseconds per file compared to 4.5.0, from the built-in write plus the reopen-and-check step above. Measured on a macOS development machine under background load: about +8.3 ms per small HEIC, +7.2 ms per small AVIF and +17.9 ms per 4032x3024 HEIC (about 4.1 s, 3.6 s and 8.9 s more per 500 files). Windows and Linux were not measured
+
 ## 4.5.0
 
 ### Changed
