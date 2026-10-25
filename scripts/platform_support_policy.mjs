@@ -97,7 +97,56 @@ export function checkPlatformPolicy(inputs) {
 			`installed electron ${inputs.installedElectronVersion} does not match pinned ${electron}`,
 		);
 	}
+	try {
+		const macTerm = `macOS ${macFloorMajor(floor)}`;
+		const section = changelogSection(inputs.changelog, "4.7.0");
+		if (section === null) {
+			reasons.push("CHANGELOG 4.7.0 section must exist");
+		} else {
+			for (const term of ["32-bit", "4.6.0", macTerm]) {
+				if (!section.includes(term)) {
+					reasons.push(`CHANGELOG 4.7.0 must mention ${term}`);
+				}
+			}
+			if (BANNED_WORDING.test(section)) {
+				reasons.push("CHANGELOG 4.7.0 uses banned wording");
+			}
+		}
+		const notes = inputs.releaseNotes ?? "";
+		if (/^# ExifCleaner 4\.7\.0$/m.test(notes)) {
+			for (const term of ["32-bit", "4.6.x", "4.6.0"]) {
+				if (!notes.includes(term)) {
+					reasons.push(`release notes must mention ${term}`);
+				}
+			}
+			if (!notes.includes(macTerm)) {
+				reasons.push(`release notes must state ${macTerm}`);
+			}
+			if (
+				!/^## Rollback$/m.test(notes) ||
+				!notes.includes("releases/tag/v4.6.0")
+			) {
+				reasons.push("release notes need a Rollback section linking v4.6.0");
+			}
+			if (BANNED_WORDING.test(notes)) {
+				reasons.push("release notes use banned wording");
+			}
+		}
+	} catch (e) {
+		reasons.push(`release communication unreadable: ${e.message}`);
+	}
 	return reasons;
+}
+
+const BANNED_WORDING = /\b(legacy|sunset|insecure)\b/i;
+
+export function changelogSection(text, version) {
+	const lines = String(text ?? "").split("\n");
+	const start = lines.findIndex((line) => line.trim() === `## ${version}`);
+	if (start < 0) return null;
+	let end = lines.findIndex((line, i) => i > start && line.startsWith("## "));
+	if (end < 0) end = lines.length;
+	return lines.slice(start, end).join("\n");
 }
 
 export function macFloorMajor(version) {
@@ -158,6 +207,8 @@ export function readRepositoryInputs(root) {
 		packageJson: JSON.parse(packageText),
 		packageText,
 		readme: read("README.md"),
+		changelog: read("CHANGELOG.md"),
+		releaseNotes: read("RELEASE_NOTES.md"),
 		workflows,
 		rootFiles: fs.readdirSync(root),
 		installedElectronVersion: fs.existsSync(electronPackage)
