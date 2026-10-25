@@ -1,0 +1,8 @@
+                    .....                      6931  $PLUGINSDIR\System.dll
+                    .....                     45608  $PLUGINSDIR\StdUtils.dll
+                    .....                      4615  $PLUGINSDIR\SpiderBanner.dll
+                    .....                      3299  $PLUGINSDIR\nsExec.dll
+2026-10-25 02:35:10 .....    135536637    135536637  $PLUGINSDIR\app-64.7z
+                    .....                    242382  $PLUGINSDIR\nsis7z.dll
+2026-10-25 02:35:10 .....                    139815  $R0\Uninstall ExifCleaner.exe
+                    .....                      1080  $PLUGINSDIR\WinShell.dll

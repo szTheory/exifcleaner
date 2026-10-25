@@ -4,10 +4,10 @@ Cross-platform Electron desktop app to strip EXIF/metadata from images, videos, 
 
 ## Tech Stack
 
-- **Runtime**: Electron 35 (Chromium + Node 22) with contextIsolation + sandbox
+- **Runtime**: Electron 44 (Chromium + Node 24) with contextIsolation + sandbox
 - **Language**: TypeScript 5.7 with `strict: true` + `verbatimModuleSyntax: true` (type-check only, electron-vite/esbuild compiles)
 - **Build**: electron-vite 5.x + Vite 7.x + esbuild (3 targets: main, preload, renderer)
-- **Packaging**: electron-builder 22.8 (produces .dmg, .AppImage, .deb, .rpm, .exe, portable)
+- **Packaging**: electron-builder 26 (produces .dmg, .AppImage, .deb, .rpm, .exe, portable)
 - **UI**: React 19 SPA with BEM CSS design system
 - **ExifTool**: Hand-rolled wrapper in `src/infrastructure/exiftool/` wrapping bundled exiftool Perl binaries
 - **Formatting**: Prettier 3.x with tabs
@@ -27,7 +27,7 @@ yarn packmac          # Build macOS .dmg (unsigned)
 yarn packwin          # Build Windows .exe (NSIS + portable)
 yarn packlinux        # Build Linux (.AppImage, .deb, .rpm)
 yarn build            # Build all platforms
-yarn publish          # Build all + publish to GitHub releases
+yarn publish          # Not part of the release flow; releases publish only through CI
 
 yarn run update-exiftool  # Update exiftool binaries (requires Perl, Linux/Mac only)
 ```
@@ -168,10 +168,9 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 
 `yarn pack{mac,win,linux}` = `yarn compile && electron-builder --{platform}`. Mac pack adds `-c.mac.identity=null` to skip code signing. Test build: `yarn packmactest` uses `--dir` (no DMG) with store compression.
 
-### Release Process (Two Steps)
+### Release Process
 
-1. `yarn release` → runs `np` → prompts for version → bumps `package.json` → git commit + tag → pushes → creates GitHub release draft
-2. `yarn publish` → `yarn compile && electron-builder --macos --linux --windows -p always` → builds all platforms → uploads artifacts to GitHub release → manually remove draft flag on GitHub
+A PR that bumps `package.json` version with a matching `RELEASE_NOTES.md` (the release-notes gate couples them) is merged to master only after explicit maintainer approval given at action time. Trusted post-merge CI and the Release workflow then tag, build, audit and publish. Nobody tags, uploads or un-drafts by hand. The `release` and `publish` commands in `package.json` and yarn are not part of the release flow.
 
 ### ExifTool Binary Update
 
@@ -214,12 +213,12 @@ Root config: `.prettierrc` (tabs), `.gitattributes` (`* text=auto eol=lf`), `ele
 
 | Package | Version | Purpose | Notes |
 | --- | --- | --- | --- |
-| `electron` | ^35.0 | App framework | contextIsolation + sandbox enabled |
-| `electron-builder` | ^22.8 | Packaging/distribution | Works but outdated |
+| `electron` | 44.9.3 | App framework | contextIsolation + sandbox enabled |
+| `electron-builder` | 26.15.3 | Packaging/distribution | Packaging/distribution |
 | `electron-vite` | ^5.0.0 | Build system | Vite-based, replaces electron-webpack |
 | `vite` | ^7.3.1 | Module bundler/dev server | Powers electron-vite |
 | `typescript` | ~5.7.0 | Language compiler | `strict: true` enabled |
-| `@types/node` | ^22.0 | Node.js type defs | Matches Electron 35's Node 22 |
+| `@types/node` | ^22.0 | Node.js type defs | Matches the Node 22 toolchain and CI (exifcleaner-node engines >=22) |
 | `prettier` | ^3.0 | Code formatter | Trailing commas default to "all" |
 
 ## Code Conventions
@@ -243,7 +242,7 @@ Config is in `package.json` under `"build"`. App ID: `com.exifcleaner`.
 
 - **macOS**: .dmg with custom layout. ExifTool binaries from `.resources/nix/bin/`
 - **Linux**: AppImage + .deb + .rpm. ExifTool binaries from `.resources/nix/bin/`
-- **Windows**: NSIS installer (x64 + ia32) + portable. ExifTool binaries from `.resources/win/bin/`
+- **Windows**: NSIS installer (x64) + portable. 32-bit Windows was dropped in 4.7.0; 4.6.x is the last 32-bit build. ExifTool binaries from `.resources/win/bin/`
 - **All platforms**: `strings.json` and `.png` icons copied via `extraResources`
 
 TypeScript config: standalone `tsconfig.json` with `strict: true`, `verbatimModuleSyntax: true`, target ES2021, `moduleResolution: "bundler"`. tsc is type-check only (`--noEmit`); electron-vite/esbuild handles compilation.
@@ -254,7 +253,7 @@ Cross-platform packaging will eventually be containerized with Docker for reprod
 
 ## Safety Rules
 
-- **NEVER push releases or publish packages to GitHub/npm.** All releases will be handled via CI in the future. Do not run `yarn publish`, `npm publish`, `gh release create`, or any command that pushes artifacts to GitHub releases.
+- **Never publish by hand.** Do not push to master, create or move release tags, run `gh release create`, `yarn publish` or `npm publish`, or upload release artifacts. Releases publish only through CI after the maintainer approves merging a version-bump PR.
 
 ## Security
 

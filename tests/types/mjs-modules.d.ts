@@ -102,6 +102,22 @@ declare module "*phase25_public_state_gate.mjs" {
 declare module "*release_evidence.mjs" {
 	export function buildReleaseEvidence(...args: any[]): any;
 	export function validateReleaseEvidenceSet(...args: any[]): any;
+	export function readPeMachine(filePath: string): string;
+	export function payloadArchsFromSevenZipListing(text: string): string[];
+	export function inspectWindowsBuild(input: {
+		executablePath: string;
+		payloadListingPath: string;
+		distDirectory: string;
+	}): {
+		peMachine: string;
+		payloadArchs: string[];
+		unpackedDirectories: string[];
+	};
+	export function windowsX64OnlyProblems(inspection: {
+		peMachine: string;
+		payloadArchs: string[];
+		unpackedDirectories: string[];
+	}): string[];
 	export function main(...args: any[]): any;
 }
 
@@ -120,6 +136,12 @@ declare module "*release_asset_gate.mjs" {
 			readonly [key: string]: unknown;
 		}[];
 	};
+	export const LEGACY_ARCH_ASSET_NAME: RegExp;
+	export function requireNoLegacyArchNames(
+		names: readonly unknown[],
+		label: string,
+	): void;
+	export function main(argv?: string[]): number;
 	export function expectedAssetNames(version: string): string[];
 	export function parseChecksumManifest(source: string): Map<string, string>;
 	export function buildPromotionManifest(input: {
@@ -303,4 +325,63 @@ declare module "*known_gap_gate.mjs" {
 	export function formatLocalDiagnostic(problem: KnownGapProblem): string;
 	export function formatGitHubAnnotation(problem: KnownGapProblem): string;
 	export function main(): number;
+}
+
+declare module "*platform_support_policy.mjs" {
+	export const SUPPORTED_ELECTRON_MAJOR: number;
+	export const ARCHLESS_TARGET_ALLOWLIST: string[];
+	export function normalizeWindowsTargets(win: any): {
+		error: string | null;
+		targets: { target: string; arch: string[] | null }[];
+	};
+	export function macFloorMajor(version: unknown): number;
+	export function checkPlatformPolicy(inputs: any): string[];
+	export function readRepositoryInputs(root: string): any;
+	export function main(argv?: string[]): number;
+}
+
+declare module "*release_public_audit.mjs" {
+	export function evaluatePublishedRelease(input: {
+		version: string;
+		release: unknown;
+		checksumsText: string;
+		assetSha256: Record<string, string>;
+		evidenceRecords: unknown[];
+		x64DmgSha256: string;
+	}): string[];
+	export function requireSuccessfulJob<
+		T extends { name: string; conclusion?: string | null },
+	>(jobs: T[], name: string): T;
+	export function x64DmgHashFromLog(text: string): string;
+	export function buildGateArguments(input: {
+		tag: string;
+		workDir: string;
+		sourceSha: string;
+		notesPath: string;
+	}): string[];
+	export function main(argv?: string[]): number;
+}
+
+declare module "*rel05_dependency_diff.mjs" {
+	export const RELEASE_DEPENDENCY_POLICY: Record<
+		string,
+		{ base: string; devDependencies: string[]; resolutions: string[] }
+	>;
+	export function changedKeys(
+		baseRecord: Record<string, string> | undefined,
+		headRecord: Record<string, string> | undefined,
+	): string[];
+	export function compareDependencySurfaces(input: {
+		basePackage: any;
+		headPackage: any;
+		policy: { devDependencies: string[]; resolutions: string[] };
+		baseLock?: string;
+		headLock?: string;
+	}): string[];
+	export function parseYarnLock(text: string): Map<string, any>;
+	export function productionClosure(
+		packageJson: any,
+		lockText: string,
+	): string[];
+	export function main(argv?: string[]): number;
 }

@@ -20,7 +20,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
+      # fetch-depth: 0 so scripts/rel05_dependency_diff.mjs can read the v4.6.0 tag
+      # (`git show v4.6.0:package.json`); it fails closed when the tag is absent.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -43,6 +47,9 @@ jobs:
 
       - name: Verify release-note identity
         run: yarn verify:release-notes
+
+      - name: REL-05 dependency diff (D-15)
+        run: node scripts/rel05_dependency_diff.mjs
 
       # Phase 53.1-06 deviation (D-68 CI gap, Rule 3): the Oracle accountability policy
       # step below re-runs tests/e2e/fixtures/generate_fixtures.ts's generateRawFixtures,
@@ -195,6 +202,17 @@ jobs:
             echo "bundle=${APP%/Contents/MacOS/*}"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Prove macOS 13 floor in the installed arm64 bundle (PLAT-01, D-07)
+        run: |
+          set -euo pipefail
+          expected=$(node -p 'require("./package.json").build.mac.minimumSystemVersion')
+          actual=$(plutil -extract LSMinimumSystemVersion raw "${{ steps.install.outputs.bundle }}/Contents/Info.plist")
+          echo "macOS floor arm64: actual=$actual expected=$expected"
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::LSMinimumSystemVersion $actual differs from package.json build.mac.minimumSystemVersion $expected in ${{ steps.install.outputs.bundle }}"
+            exit 1
+          fi
+
       # Regression gate for #290. Operates on its own quarantined copy.
       - name: Gatekeeper gate
         run: node scripts/gatekeeper_check.mjs --app "${{ steps.install.outputs.bundle }}"
@@ -228,6 +246,130 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: smoke-report-macos
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  # PLAT-01 (65-11): the x64 DMG is published for Intel Macs, so it must be installed and
+  # smoked on native x86_64 hardware. Smoke-only: it reuses the DMG build-macos already
+  # uploaded (no rebuild) and runs a scoped 4-test grep to earn its runner minutes.
+  # It uploads nothing matching ExifCleaner-* or release-evidence-* (release.yml promotes
+  # those patterns); its only upload is the failure-only report below.
+  smoke-macos-intel:
+    name: Smoke macOS x64 (Intel)
+    needs: build-macos
+    runs-on: macos-15-intel
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Download macOS DMGs
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ExifCleaner-macOS
+          path: ${{ runner.temp }}/macos-dmg
+
+      - name: Prove native Intel runner (PLAT-01)
+        run: |
+          set -euo pipefail
+          ARCH=$(uname -m)
+          TRANSLATED=$(sysctl -n sysctl.proc_translated 2>/dev/null || echo 0)
+          if [ "$ARCH" != "x86_64" ] || [ "$TRANSLATED" != "0" ]; then
+            echo "::error::runner is not native x86_64 (uname -m=$ARCH proc_translated=$TRANSLATED)"
+            exit 1
+          fi
+          echo "RUNNER ARCH: x86_64 native (proc_translated=$TRANSLATED)"
+
+      - name: Install x64 DMG on Intel (PLAT-01, D-07)
+        id: install_x64
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p 'require("./package.json").version')
+          ARTIFACT="$RUNNER_TEMP/macos-dmg/ExifCleaner-$VERSION.dmg"
+          test -f "$ARTIFACT"
+          APP=$(scripts/smoke/install-macos.sh "$ARTIFACT" "$RUNNER_TEMP/smoke-x64")
+          BUNDLE="${APP%/Contents/MacOS/*}"
+          EXEC_ARCHS=$(lipo -archs "$APP")
+          echo "lipo executable: $EXEC_ARCHS"
+          if [ "$EXEC_ARCHS" != "x86_64" ]; then
+            echo "::error::installed executable archs are '$EXEC_ARCHS', expected exactly x86_64"
+            exit 1
+          fi
+          FOUND_X64_ADDON=0
+          while IFS= read -r NODE_FILE; do
+            ADDON_ARCHS=$(lipo -archs "$NODE_FILE")
+            echo "lipo addon: $NODE_FILE -> $ADDON_ARCHS"
+            case "$NODE_FILE" in
+              *darwin-x64*) [ "$ADDON_ARCHS" = "x86_64" ] && FOUND_X64_ADDON=1 ;;
+            esac
+          done < <(find "$BUNDLE/Contents/Resources" -name '*.node' -path '*darwin-*')
+          if [ "$FOUND_X64_ADDON" != "1" ]; then
+            echo "::error::no darwin-x64 .node addon with archs exactly x86_64 in the bundle"
+            exit 1
+          fi
+          ACTUAL=$(plutil -extract LSMinimumSystemVersion raw "$BUNDLE/Contents/Info.plist")
+          EXPECTED=$(node -p 'require("./package.json").build.mac.minimumSystemVersion')
+          echo "macOS floor x64: actual=$ACTUAL expected=$EXPECTED"
+          if [ "$ACTUAL" != "$EXPECTED" ]; then exit 1; fi
+          DMG_SHA=$(shasum -a 256 "$ARTIFACT" | cut -d' ' -f1)
+          echo "$DMG_SHA" | grep -Eq '^[0-9a-f]{64}$'
+          echo "X64 DMG SHA256 $DMG_SHA"
+          {
+            echo "artifact=$ARTIFACT"
+            echo "executable=$APP"
+            echo "bundle=$BUNDLE"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Scoped x64 packaged smoke on Intel (PLAT-01, D-05, D-06)
+        env:
+          EXIFCLEANER_PACKAGED_APP: ${{ steps.install_x64.outputs.executable }}
+          PLAYWRIGHT_JSON_OUTPUT_NAME: ${{ runner.temp }}/x64-smoke.json
+        run: |
+          set -euo pipefail
+          yarn test:smoke --reporter=list,json --grep 'launches and mounts the UI|ships the approved Electron fuse values in the native executable|seeded sample-sips-icc\.(heic|avif) is cleaned by the native engine in the installed artifact'
+          node -e '
+            const fs = require("fs");
+            const report = JSON.parse(fs.readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_NAME, "utf8"));
+            const EXPECT_TOTAL = 4;
+            const EXPECT_NATIVE = 2;
+            const nativeTitle = /seeded sample-sips-icc\.(heic|avif) is cleaned by the native engine in the installed artifact/;
+            const specs = [];
+            const walk = (suite) => {
+              for (const spec of suite.specs || []) specs.push(spec);
+              for (const child of suite.suites || []) walk(child);
+            };
+            for (const suite of report.suites || []) walk(suite);
+            const passed = specs.filter((spec) =>
+              (spec.tests || []).length > 0 &&
+              spec.tests.every((t) => {
+                const last = (t.results || [])[(t.results || []).length - 1];
+                return t.status === "expected" && last && last.status === "passed";
+              }));
+            const native = passed.filter((spec) => nativeTitle.test(spec.title));
+            const s = report.stats;
+            if (s.unexpected !== 0 || s.flaky !== 0 || s.skipped !== 0 || passed.length !== EXPECT_TOTAL || native.length !== EXPECT_NATIVE) {
+              console.error("::error::Intel smoke count mismatch: " + JSON.stringify({ stats: s, passed: passed.length, native: native.length }));
+              process.exit(1);
+            }
+            console.log("X64 NATIVE HEIC/AVIF PASSED: " + native.length);
+            console.log("X64 INTEL SMOKE PASSED: " + passed.length + " (launch, fuses, native HEIC, native AVIF on macos-15-intel)");
+          '
+
+      - name: Upload Intel smoke report
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: smoke-report-macos-intel
           path: |
             playwright-report/
             test-results/
@@ -272,6 +414,21 @@ jobs:
           "artifact=$($installer.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "executable=$app" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
+      - name: List NSIS installer payload (PLAT-02, D-10)
+        shell: pwsh
+        run: |
+          $sevenZip = (Get-Command 7z -ErrorAction SilentlyContinue).Source
+          if (-not $sevenZip -and (Test-Path "C:\Program Files\7-Zip\7z.exe")) { $sevenZip = "C:\Program Files\7-Zip\7z.exe" }
+          if (-not $sevenZip) { throw "7-Zip not found" }
+          $listing = "${{ runner.temp }}\setup-payload.txt"
+          & $sevenZip l -ba "${{ steps.install.outputs.artifact }}" | Out-File -FilePath $listing -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw "7z l failed with exit code $LASTEXITCODE" }
+          if (-not (Test-Path $listing) -or (Get-Item $listing).Length -eq 0) { throw "7z produced an empty payload listing" }
+          Get-Content $listing
+
+      - name: Prove x64-only Windows build output (PLAT-02, D-10)
+        run: node scripts/release_evidence.mjs --inspect-windows --executable "${{ steps.install.outputs.executable }}" --payload-listing "${{ runner.temp }}\setup-payload.txt" --dist dist
+
       # 48-07 diagnostic (maintainer-authorized, one deliberate dispatch): writes native
       # crash dumps to a local, job-scoped RUNNER_TEMP directory when the packaged app
       # dies. src/main/security/crash_dumps.ts's maybeEnableCrashDumps() is a no-op unless
@@ -286,7 +443,7 @@ jobs:
         run: yarn test:smoke
 
       - name: Write Windows release evidence
-        run: yarn release:evidence --artifact "${{ steps.install.outputs.artifact }}" --executable "${{ steps.install.outputs.executable }}" --runner-os windows --runner-arch "${{ runner.arch }}" --smoke-result passed --output release-evidence-windows.json
+        run: yarn release:evidence --artifact "${{ steps.install.outputs.artifact }}" --executable "${{ steps.install.outputs.executable }}" --runner-os windows --runner-arch "${{ runner.arch }}" --smoke-result passed --payload-listing "${{ runner.temp }}\setup-payload.txt" --output release-evidence-windows.json
 
       - name: Upload Windows release evidence
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -398,7 +555,7 @@ jobs:
 
   verify-native-evidence:
     name: Verify Native Release Evidence
-    needs: [build-macos, build-windows, build-linux]
+    needs: [build-macos, smoke-macos-intel, build-windows, build-linux]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:

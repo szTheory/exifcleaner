@@ -117,6 +117,22 @@ test.describe("Packaged artifact", () => {
 			disabled,
 		);
 		expect(fuses[FuseV1Options.OnlyLoadAppFromAsar]).toBe(disabled);
+
+		// Full wire (65-06, D-06). 65-EVIDENCE recorded the wire byte-identical on
+		// Electron 43.4.1 and 44.x: keys 0-6 disabled, keys 7 and 8 enabled, so the fuse
+		// policy is unchanged. A fuse added or flipped by an Electron upgrade fails here.
+		// Key 8 has no named FuseV1Options member in @electron/fuses, so it is asserted by index.
+		const enabled = "1".charCodeAt(0);
+		expect(
+			Object.keys(fuses)
+				.filter((key) => key !== "version")
+				.sort(),
+		).toEqual(["0", "1", "2", "3", "4", "5", "6", "7", "8"]);
+		expect(fuses[FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]).toBe(
+			disabled,
+		);
+		expect(fuses[FuseV1Options.GrantFileProtocolExtraPrivileges]).toBe(enabled);
+		expect((fuses as Record<number, number>)[8]).toBe(enabled);
 	});
 
 	test("bundles a working ExifTool binary inside the app", async () => {

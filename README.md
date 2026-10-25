@@ -39,7 +39,7 @@ See the [CHANGELOG](CHANGELOG.md) for the full list of changes.
 
 ## Download and Install
 
-macOS 12+, Windows 10+, and Linux are supported (64-bit).
+macOS 13+, Windows 10+, and Linux are supported (64-bit).
 
 - **macOS**: [Download the .dmg file](https://github.com/szTheory/exifcleaner/releases/latest) — pick the `arm64` build for Apple Silicon, the other for Intel
 - **Windows**: [Download `ExifCleaner.<version>.portable.exe` (recommended) or `ExifCleaner.Setup.<version>.exe` (installer)](https://github.com/szTheory/exifcleaner/releases/latest)

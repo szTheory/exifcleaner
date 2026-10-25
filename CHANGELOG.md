@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.7.0
+
+### Changed
+
+- Updated to Electron 44
+- ExifCleaner no longer runs on 32-bit Windows. 4.6.0 is the last version that does
+- ExifCleaner now requires macOS 13 (Ventura) or later. 4.6.0 is the last version for macOS 12
+- File cleaning behaviour is unchanged
+
 ## 4.6.0
 
 ### Changed
