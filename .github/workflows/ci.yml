@@ -20,7 +20,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
+      # fetch-depth: 0 so scripts/rel05_dependency_diff.mjs can read the v4.6.0 tag
+      # (`git show v4.6.0:package.json`); it fails closed when the tag is absent.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -43,6 +47,9 @@ jobs:
 
       - name: Verify release-note identity
         run: yarn verify:release-notes
+
+      - name: REL-05 dependency diff (D-15)
+        run: node scripts/rel05_dependency_diff.mjs
 
       # Phase 53.1-06 deviation (D-68 CI gap, Rule 3): the Oracle accountability policy
       # step below re-runs tests/e2e/fixtures/generate_fixtures.ts's generateRawFixtures,
@@ -194,6 +201,17 @@ jobs:
             echo "executable=$APP"
             echo "bundle=${APP%/Contents/MacOS/*}"
           } >> "$GITHUB_OUTPUT"
+
+      - name: Prove macOS 13 floor in the installed arm64 bundle (PLAT-01, D-07)
+        run: |
+          set -euo pipefail
+          expected=$(node -p 'require("./package.json").build.mac.minimumSystemVersion')
+          actual=$(plutil -extract LSMinimumSystemVersion raw "${{ steps.install.outputs.bundle }}/Contents/Info.plist")
+          echo "macOS floor arm64: actual=$actual expected=$expected"
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::LSMinimumSystemVersion $actual differs from package.json build.mac.minimumSystemVersion $expected in ${{ steps.install.outputs.bundle }}"
+            exit 1
+          fi
 
       # Regression gate for #290. Operates on its own quarantined copy.
       - name: Gatekeeper gate
@@ -396,6 +414,21 @@ jobs:
           "artifact=$($installer.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "executable=$app" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
+      - name: List NSIS installer payload (PLAT-02, D-10)
+        shell: pwsh
+        run: |
+          $sevenZip = (Get-Command 7z -ErrorAction SilentlyContinue).Source
+          if (-not $sevenZip -and (Test-Path "C:\Program Files\7-Zip\7z.exe")) { $sevenZip = "C:\Program Files\7-Zip\7z.exe" }
+          if (-not $sevenZip) { throw "7-Zip not found" }
+          $listing = "${{ runner.temp }}\setup-payload.txt"
+          & $sevenZip l -ba "${{ steps.install.outputs.artifact }}" | Out-File -FilePath $listing -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw "7z l failed with exit code $LASTEXITCODE" }
+          if (-not (Test-Path $listing) -or (Get-Item $listing).Length -eq 0) { throw "7z produced an empty payload listing" }
+          Get-Content $listing
+
+      - name: Prove x64-only Windows build output (PLAT-02, D-10)
+        run: node scripts/release_evidence.mjs --inspect-windows --executable "${{ steps.install.outputs.executable }}" --payload-listing "${{ runner.temp }}\setup-payload.txt" --dist dist
+
       # 48-07 diagnostic (maintainer-authorized, one deliberate dispatch): writes native
       # crash dumps to a local, job-scoped RUNNER_TEMP directory when the packaged app
       # dies. src/main/security/crash_dumps.ts's maybeEnableCrashDumps() is a no-op unless
@@ -410,7 +443,7 @@ jobs:
         run: yarn test:smoke
 
       - name: Write Windows release evidence
-        run: yarn release:evidence --artifact "${{ steps.install.outputs.artifact }}" --executable "${{ steps.install.outputs.executable }}" --runner-os windows --runner-arch "${{ runner.arch }}" --smoke-result passed --output release-evidence-windows.json
+        run: yarn release:evidence --artifact "${{ steps.install.outputs.artifact }}" --executable "${{ steps.install.outputs.executable }}" --runner-os windows --runner-arch "${{ runner.arch }}" --smoke-result passed --payload-listing "${{ runner.temp }}\setup-payload.txt" --output release-evidence-windows.json
 
       - name: Upload Windows release evidence
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
