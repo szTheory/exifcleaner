@@ -396,32 +396,6 @@ jobs:
           "artifact=$($installer.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "executable=$app" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
-      - name: "TEMPORARY observation (65-11): installer payload, dist dirs, PE machine"
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          Get-ChildItem dist -Directory | ForEach-Object { "DIST DIR " + $_.Name }
-          $sz = (Get-Command 7z -ErrorAction SilentlyContinue).Source
-          if (-not $sz -and (Test-Path "C:\Program Files\7-Zip\7z.exe")) { $sz = "C:\Program Files\7-Zip\7z.exe" }
-          if (-not $sz) { throw "7-Zip not found" }
-          "=== 7Z 4.7.0-candidate BEGIN"
-          $out = & $sz l -ba "${{ steps.install.outputs.artifact }}"
-          if ($LASTEXITCODE -ne 0 -or -not $out) { throw "7z listing failed" }
-          $out
-          "=== 7Z 4.7.0-candidate END"
-          gh release download v4.6.0 --repo szTheory/exifcleaner --pattern "ExifCleaner.Setup.4.6.0.exe" --dir "$env:RUNNER_TEMP\v460"
-          "=== 7Z 4.6.0 BEGIN"
-          $out2 = & $sz l -ba "$env:RUNNER_TEMP\v460\ExifCleaner.Setup.4.6.0.exe"
-          if ($LASTEXITCODE -ne 0 -or -not $out2) { throw "7z 4.6.0 listing failed" }
-          $out2
-          "=== 7Z 4.6.0 END"
-          $bytes = [IO.File]::ReadAllBytes("${{ steps.install.outputs.executable }}")
-          $lfanew = [BitConverter]::ToUInt32($bytes, 0x3C)
-          if (-not ($bytes[$lfanew] -eq 0x50 -and $bytes[$lfanew+1] -eq 0x45 -and $bytes[$lfanew+2] -eq 0 -and $bytes[$lfanew+3] -eq 0)) { throw "not a PE header" }
-          $machine = [BitConverter]::ToUInt16($bytes, $lfanew + 4)
-          "PE MACHINE 0x" + $machine.ToString("x4")
-
       # 48-07 diagnostic (maintainer-authorized, one deliberate dispatch): writes native
       # crash dumps to a local, job-scoped RUNNER_TEMP directory when the packaged app
       # dies. src/main/security/crash_dumps.ts's maybeEnableCrashDumps() is a no-op unless
