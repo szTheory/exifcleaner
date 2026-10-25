@@ -304,3 +304,16 @@ declare module "*known_gap_gate.mjs" {
 	export function formatGitHubAnnotation(problem: KnownGapProblem): string;
 	export function main(): number;
 }
+
+declare module "*platform_support_policy.mjs" {
+	export const SUPPORTED_ELECTRON_MAJOR: number;
+	export const ARCHLESS_TARGET_ALLOWLIST: string[];
+	export function normalizeWindowsTargets(win: any): {
+		error: string | null;
+		targets: { target: string; arch: string[] | null }[];
+	};
+	export function macFloorMajor(version: unknown): number;
+	export function checkPlatformPolicy(inputs: any): string[];
+	export function readRepositoryInputs(root: string): any;
+	export function main(argv?: string[]): number;
+}
