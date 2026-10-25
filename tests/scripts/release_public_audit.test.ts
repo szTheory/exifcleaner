@@ -9,6 +9,7 @@ import {
 	buildGateArguments,
 	evaluatePublishedRelease,
 	main,
+	requireSuccessfulJob,
 	x64DmgHashFromLog,
 } from "../../scripts/release_public_audit.mjs";
 
@@ -195,5 +196,24 @@ describe("main", () => {
 		expect(main(["--work-dir", dir])).toBe(1);
 		// Refusing must leave the work directory exactly as it was found.
 		assertDirEffect(before, snapshotDir(dir), { unchanged: ["file"] });
+	});
+});
+
+describe("requireSuccessfulJob", () => {
+	const name = "Smoke macOS x64 (Intel)";
+	test("returns the job when it concluded success", () => {
+		const job = { name, databaseId: 7, conclusion: "success" };
+		expect(requireSuccessfulJob([job], name)).toBe(job);
+	});
+	test.each(["failure", "cancelled", "skipped", "", null])(
+		"negative control: conclusion %j is refused",
+		(conclusion) => {
+			expect(() =>
+				requireSuccessfulJob([{ name, databaseId: 7, conclusion }], name),
+			).toThrow(/expected success/);
+		},
+	);
+	test("refuses a missing job", () => {
+		expect(() => requireSuccessfulJob([], name)).toThrow(/no job named/);
 	});
 });

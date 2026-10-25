@@ -194,10 +194,24 @@ describe("platform support policy", () => {
 		expect(reasons.join("\n")).toContain(expected);
 	});
 
-	test("notes whose heading is 4.6.0 are not checked by the notes rule", () => {
+	test("a 4.7.0 package with a mistyped notes heading fails, not skips", () => {
 		const inputs = structuredClone(readRepositoryInputs(ROOT));
+		inputs.releaseNotes = inputs.releaseNotes.replace(
+			"# ExifCleaner 4.7.0",
+			"# ExifCleaner v4.7.0",
+		);
+		expect(checkPlatformPolicy(inputs).join("\n")).toContain(
+			"release notes must be headed '# ExifCleaner 4.7.0'",
+		);
+	});
+
+	test("notes rule is keyed on package version: other versions are not checked", () => {
+		const inputs = structuredClone(readRepositoryInputs(ROOT));
+		inputs.packageJson.version = "4.6.0";
 		inputs.releaseNotes = "# ExifCleaner 4.6.0\n\nNothing else.\n";
-		expect(checkPlatformPolicy(inputs)).toEqual([]);
+		expect(
+			checkPlatformPolicy(inputs).filter((r) => r.startsWith("release notes")),
+		).toEqual([]);
 	});
 
 	test("normalizeWindowsTargets accepts object and bare string entries", () => {

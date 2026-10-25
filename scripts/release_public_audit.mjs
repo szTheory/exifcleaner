@@ -109,6 +109,15 @@ export function evaluatePublishedRelease({
 	return problems;
 }
 
+export function requireSuccessfulJob(jobs, name) {
+	const job = jobs.find((candidate) => candidate.name === name);
+	if (!job) throw new Error(`CI run has no job named ${name}`);
+	if (job.conclusion !== "success") {
+		throw new Error(`${name} concluded ${job.conclusion}, expected success`);
+	}
+	return job;
+}
+
 export function x64DmgHashFromLog(text) {
 	const values = new Set();
 	for (const match of String(text).matchAll(/X64 DMG SHA256 ([0-9a-f]{64})/g)) {
@@ -257,8 +266,7 @@ export function main(argv = process.argv.slice(2)) {
 			const jobs = JSON.parse(
 				gh(["run", "view", ciRun, "--repo", repo, "--json", "jobs"]),
 			).jobs;
-			const job = jobs.find((candidate) => candidate.name === X64_JOB_NAME);
-			if (!job) throw new Error(`CI run has no job named ${X64_JOB_NAME}`);
+			const job = requireSuccessfulJob(jobs, X64_JOB_NAME);
 			x64Hash = x64DmgHashFromLog(
 				gh([
 					"run",

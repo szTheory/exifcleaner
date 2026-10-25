@@ -32,7 +32,7 @@ export default defineConfig({
 			testDir: "./tests/smoke",
 			testMatch: "*.smoke.ts",
 			// Cold-starting a packaged bundle on a hosted runner is materially
-			// slower than electron-vite dev, and the x64 leg adds Rosetta.
+			// slower than electron-vite dev (the x64 leg runs natively on macos-15-intel).
 			timeout: 120000,
 			// Semantic installed-artifact assertions are never retried. Any needed
 			// install/cold-launch stabilization belongs in a separate readiness step.

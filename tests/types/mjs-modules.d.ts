@@ -349,6 +349,9 @@ declare module "*release_public_audit.mjs" {
 		evidenceRecords: unknown[];
 		x64DmgSha256: string;
 	}): string[];
+	export function requireSuccessfulJob<
+		T extends { name: string; conclusion?: string | null },
+	>(jobs: T[], name: string): T;
 	export function x64DmgHashFromLog(text: string): string;
 	export function buildGateArguments(input: {
 		tag: string;

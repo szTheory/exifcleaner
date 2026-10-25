@@ -113,7 +113,10 @@ export function checkPlatformPolicy(inputs) {
 			}
 		}
 		const notes = inputs.releaseNotes ?? "";
-		if (/^# ExifCleaner 4\.7\.0$/m.test(notes)) {
+		if (inputs.packageJson?.version === "4.7.0") {
+			if (!/^# ExifCleaner 4\.7\.0$/m.test(notes)) {
+				reasons.push("release notes must be headed '# ExifCleaner 4.7.0'");
+			}
 			for (const term of ["32-bit", "4.6.x", "4.6.0"]) {
 				if (!notes.includes(term)) {
 					reasons.push(`release notes must mention ${term}`);
