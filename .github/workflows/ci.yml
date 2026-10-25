@@ -294,7 +294,7 @@ jobs:
             case "$NODE_FILE" in
               *darwin-x64*) [ "$ADDON_ARCHS" = "x86_64" ] && FOUND_X64_ADDON=1 ;;
             esac
-          done < <(find "$BUNDLE/Contents/Resources" -name '*.node')
+          done < <(find "$BUNDLE/Contents/Resources" -name '*.node' -path '*darwin-*')
           if [ "$FOUND_X64_ADDON" != "1" ]; then
             echo "::error::no darwin-x64 .node addon with archs exactly x86_64 in the bundle"
             exit 1
