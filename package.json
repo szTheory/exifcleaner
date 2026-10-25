@@ -74,8 +74,8 @@
 	},
 	"dependencies": {
 		"exifcleaner-node": "0.4.0",
-		"react": "^19.3.0",
-		"react-dom": "^19.3.0",
+		"react": "^19.3.1",
+		"react-dom": "^19.3.1",
 		"zod": "^3.25.0"
 	},
 	"devDependencies": {
