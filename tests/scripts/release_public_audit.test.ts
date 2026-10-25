@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { expectedAssetNames } from "../../scripts/release_asset_gate.mjs";
+import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import {
 	buildGateArguments,
 	evaluatePublishedRelease,
@@ -184,6 +185,7 @@ describe("main", () => {
 		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "audit-work-"));
 		temporaryDirectories.push(dir);
 		fs.writeFileSync(path.join(dir, "file"), "x");
+		const before = snapshotDir(dir);
 		expect(main(["--tag", "v4.7.0", "--work-dir", dir, "--ci-run", "1"])).toBe(
 			1,
 		);
@@ -191,5 +193,7 @@ describe("main", () => {
 			"work directory must be new or empty",
 		);
 		expect(main(["--work-dir", dir])).toBe(1);
+		// Refusing must leave the work directory exactly as it was found.
+		assertDirEffect(before, snapshotDir(dir), { unchanged: ["file"] });
 	});
 });
