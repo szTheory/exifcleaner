@@ -358,3 +358,27 @@ declare module "*release_public_audit.mjs" {
 	}): string[];
 	export function main(argv?: string[]): number;
 }
+
+declare module "*rel05_dependency_diff.mjs" {
+	export const RELEASE_DEPENDENCY_POLICY: Record<
+		string,
+		{ base: string; devDependencies: string[]; resolutions: string[] }
+	>;
+	export function changedKeys(
+		baseRecord: Record<string, string> | undefined,
+		headRecord: Record<string, string> | undefined,
+	): string[];
+	export function compareDependencySurfaces(input: {
+		basePackage: any;
+		headPackage: any;
+		policy: { devDependencies: string[]; resolutions: string[] };
+		baseLock?: string;
+		headLock?: string;
+	}): string[];
+	export function parseYarnLock(text: string): Map<string, any>;
+	export function productionClosure(
+		packageJson: any,
+		lockText: string,
+	): string[];
+	export function main(argv?: string[]): number;
+}
