@@ -1,22 +1,24 @@
-# ExifCleaner 4.6.0
+# ExifCleaner 4.7.0
 
-ExifCleaner 4.6.0 cleans HEIC, HEIF and AVIF files with the app's own built-in cleaner when Save as copy is on, and no longer leaves a background ExifTool process running after a force-quit or crash.
+ExifCleaner 4.7.0 updates the app to Electron 44. It no longer runs on 32-bit Windows or macOS 12. The 4.6.x line is the last that does, and 4.6.0 is the version to reinstall on those systems.
 
 ## What's new
 
-- **HEIC, HEIF and AVIF copies are now cleaned by the app's own built-in cleaner.** With Save as copy on, these files are cleaned by the built-in cleaner whenever it supports every preservation setting you have turned on. Files it declines to handle are cleaned by ExifTool as before. Every copy is reopened and checked for leftover metadata; if the check finds anything unexpected, the copy is discarded, your original file is left untouched, and the file is reported as failed.
-- **Files are cleaned according to their real content.** If a file's name does not match its content (for example, AVIF data named `.heic`), it is cleaned according to its real content and keeps its name. If the built-in cleaner declines the file and ExifTool cannot write that combination, the write fails and the original file is preserved.
-- **Force-quitting or crashing ExifCleaner no longer leaves a background ExifTool process running.** On macOS and Linux, ExifTool now exits within about a second of losing the app once it is between files. On Windows it is ended immediately, even mid-write. The original file is preserved either way.
+- **Updated to Electron 44.** Electron's own notes are at [electronjs.org/blog/electron-44-0](https://www.electronjs.org/blog/electron-44-0). File cleaning behaviour is unchanged.
 
-## Other changes
+## Requirements changed
 
-- On macOS and Linux, the bundled ExifTool no longer reads a personal `~/.ExifTool_config` file. Windows still does.
+- **32-bit Windows is no longer supported.** To check, right-click Start, choose **Settings**, select **System**, pick **About**, and look under **Device specifications**, which says whether Windows is 32-bit or 64-bit ([Microsoft's instructions](https://support.microsoft.com/en-us/windows/experience/find-information-about-your-windows-device)). If it says 32-bit, stay on 4.6.0.
+- **macOS 13 (Ventura) or later is now required.** macOS 12 users should stay on 4.6.0.
+
+Windows 10 or later (64-bit) and Linux (64-bit) are as before.
 
 <!-- exifcleaner-known-limitations:start v1 -->
-## Known limitations in 4.6.0
+## Known limitations in 4.7.0
 
 No executable release-blocking known gaps are approved for this release; documented format constraints follow below.
 <!-- exifcleaner-known-limitations:end -->
+
 
 
 ### Format constraints
@@ -33,9 +35,9 @@ No executable release-blocking known gaps are approved for this release; documen
 
 ## Rollback
 
-If a 4.6.0 HEIC, HEIF or AVIF copy looks wrong, reinstall 4.5.0 from the [releases page](https://github.com/szTheory/exifcleaner/releases/tag/v4.5.0). The built-in cleaner handles these formats only when Save as copy is on and it supports every preservation setting you have turned on. With Save as copy off, ExifTool cleans the file as before, so that mode is unaffected. Reinstalling 4.5.0 also gives up the 4.6.0 fix for a leftover background ExifTool process after a force-quit or crash.
+If 4.7.0 does not work on your computer, reinstall 4.6.0 from the [releases page](https://github.com/szTheory/exifcleaner/releases/tag/v4.6.0). Trade-offs: there will be no further 4.6.x changes, Electron 43 reaches end of life in January 2027, and ExifCleaner does not check for updates, so it will not prompt you to move.
 
-*For maintainers:* remove `heicHandler` and `avifHandler` from `HANDLERS` in `exifcleaner-node/src/admission/registry.ts`, publish a node patch, and bump the app's exact pin. This route is covered by `tests/integration/heif_rollback.test.ts` (“%s: native, rollback and restore runs agree on the user-visible outcome” for `.heic` and `.avif`), `exifcleaner-node/tests/qualification/kit/rollback.test.ts` (KIT-07), and `exifcleaner-node/docs/format-admission.md` §8. After a handler rollback, the reopen-and-leak-check still runs, so an ExifTool-written copy can fail the check and be reported failed with the original untouched; only reinstalling 4.5.0 restores the old behaviour.
+*For maintainers:* reverting the Electron bump in a 4.7.x release cannot restore 32-bit Windows or macOS 12.
 
 The full list is in [CHANGELOG.md](https://github.com/szTheory/exifcleaner/blob/master/CHANGELOG.md).
 
@@ -43,13 +45,13 @@ The full list is in [CHANGELOG.md](https://github.com/szTheory/exifcleaner/blob/
 
 | Platform | File |
 | --- | --- |
-| **Windows portable (recommended)** | `ExifCleaner.4.6.0.portable.exe` |
-| Windows installer | `ExifCleaner.Setup.4.6.0.exe` |
-| macOS (Apple Silicon) | `ExifCleaner-4.6.0-arm64.dmg` |
-| macOS (Intel) | `ExifCleaner-4.6.0.dmg` |
-| Linux (AppImage) | `ExifCleaner-4.6.0.AppImage` |
-| Linux (Debian/Ubuntu) | `exifcleaner_4.6.0_amd64.deb` |
-| Linux (Fedora/RHEL) | `exifcleaner-4.6.0.x86_64.rpm` |
+| **Windows portable (recommended)** | `ExifCleaner.4.7.0.portable.exe` |
+| Windows installer | `ExifCleaner.Setup.4.7.0.exe` |
+| macOS (Apple Silicon) | `ExifCleaner-4.7.0-arm64.dmg` |
+| macOS (Intel) | `ExifCleaner-4.7.0.dmg` |
+| Linux (AppImage) | `ExifCleaner-4.7.0.AppImage` |
+| Linux (Debian/Ubuntu) | `exifcleaner_4.7.0_amd64.deb` |
+| Linux (Fedora/RHEL) | `exifcleaner-4.7.0.x86_64.rpm` |
 
 Verify downloads against the release's `SHASUMS256.txt` file.
 
@@ -60,10 +62,10 @@ ExifCleaner remains unsigned. Signing would require publishing the maintainer's 
 - **macOS 14 and earlier:** right-click or Control-click the app, choose **Open**, then choose **Open** again.
 - **macOS 15 and later:** open the app once, then use **System Settings → Privacy & Security → Open Anyway**.
 - **Windows:** if SmartScreen appears, choose **More info → Run anyway** after verifying the checksum.
-- **Linux:** make the AppImage executable with `chmod +x ExifCleaner-4.6.0.AppImage`; `.deb` and `.rpm` packages install normally.
+- **Linux:** make the AppImage executable with `chmod +x ExifCleaner-4.7.0.AppImage`; `.deb` and `.rpm` packages install normally.
 
 Every artifact is built publicly from tagged source by GitHub Actions. ExifCleaner makes no network requests during normal use.
 
 Only download ExifCleaner from the [GitHub releases page](https://github.com/szTheory/exifcleaner/releases).
 
-**Full changelog:** https://github.com/szTheory/exifcleaner/compare/v4.5.0...v4.6.0
+**Full changelog:** https://github.com/szTheory/exifcleaner/compare/v4.6.0...v4.7.0
