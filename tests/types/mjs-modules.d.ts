@@ -136,6 +136,12 @@ declare module "*release_asset_gate.mjs" {
 			readonly [key: string]: unknown;
 		}[];
 	};
+	export const LEGACY_ARCH_ASSET_NAME: RegExp;
+	export function requireNoLegacyArchNames(
+		names: readonly unknown[],
+		label: string,
+	): void;
+	export function main(argv?: string[]): number;
 	export function expectedAssetNames(version: string): string[];
 	export function parseChecksumManifest(source: string): Map<string, string>;
 	export function buildPromotionManifest(input: {
@@ -331,5 +337,24 @@ declare module "*platform_support_policy.mjs" {
 	export function macFloorMajor(version: unknown): number;
 	export function checkPlatformPolicy(inputs: any): string[];
 	export function readRepositoryInputs(root: string): any;
+	export function main(argv?: string[]): number;
+}
+
+declare module "*release_public_audit.mjs" {
+	export function evaluatePublishedRelease(input: {
+		version: string;
+		release: unknown;
+		checksumsText: string;
+		assetSha256: Record<string, string>;
+		evidenceRecords: unknown[];
+		x64DmgSha256: string;
+	}): string[];
+	export function x64DmgHashFromLog(text: string): string;
+	export function buildGateArguments(input: {
+		tag: string;
+		workDir: string;
+		sourceSha: string;
+		notesPath: string;
+	}): string[];
 	export function main(argv?: string[]): number;
 }
