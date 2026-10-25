@@ -84,7 +84,7 @@
 		"@types/react": "^19.3.0",
 		"@types/react-dom": "^19.3.0",
 		"@vitejs/plugin-react": "^5.2.0",
-		"electron": "43.4.1",
+		"electron": "44.9.3",
 		"electron-builder": "26.15.3",
 		"electron-vite": "^5.0.0",
 		"madge": "^8.0.0",
@@ -105,7 +105,7 @@
 		},
 		"mac": {
 			"category": "public.app-category.graphics-and-images",
-			"minimumSystemVersion": "12.0",
+			"minimumSystemVersion": "13.0",
 			"darkModeSupport": true,
 			"target": [
 				{
@@ -178,8 +178,7 @@
 				{
 					"target": "nsis",
 					"arch": [
-						"x64",
-						"ia32"
+						"x64"
 					]
 				},
 				{
