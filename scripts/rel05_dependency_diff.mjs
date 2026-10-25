@@ -71,7 +71,113 @@ export function compareDependencySurfaces({
 			);
 		}
 	}
+	if (baseLock !== undefined && headLock !== undefined) {
+		const baseClosure = productionClosure(basePackage, baseLock);
+		const headClosure = productionClosure(headPackage, headLock);
+		const onlyBase = baseClosure.filter((id) => !headClosure.includes(id));
+		const onlyHead = headClosure.filter((id) => !baseClosure.includes(id));
+		if (onlyBase.length > 0 || onlyHead.length > 0) {
+			reasons.push(
+				`production closure differs: only at base [${onlyBase}]; only at head [${onlyHead}]`,
+			);
+		}
+	}
 	return reasons;
+}
+
+function splitSpec(raw) {
+	const spec = raw.trim().replace(/^"|"$/g, "");
+	const at = spec.lastIndexOf("@");
+	if (at <= 0) throw new Error(`unparsable yarn.lock spec: ${raw}`);
+	return { name: spec.slice(0, at), spec };
+}
+
+function unquote(token) {
+	return token.replace(/^"|"$/g, "");
+}
+
+/**
+ * Hand-written yarn v1 lockfile parser. Returns a Map from `name@range` to the resolved entry.
+ *
+ * @param {string} text
+ * @returns {Map<string, {name: string, version: string, dependencies: Array<[string, string]>}>}
+ */
+export function parseYarnLock(text) {
+	if (typeof text !== "string" || text.trim() === "") {
+		throw new Error("yarn.lock is empty");
+	}
+	const entries = new Map();
+	let current = null;
+	let section = null;
+	for (const line of text.split(/\r?\n/)) {
+		if (line.trim() === "" || line.startsWith("#")) {
+			if (line.trim() === "") {
+				current = null;
+				section = null;
+			}
+			continue;
+		}
+		if (!line.startsWith(" ")) {
+			if (!line.endsWith(":")) continue;
+			const specs = line
+				.slice(0, -1)
+				.split(",")
+				.map((raw) => splitSpec(raw));
+			const entry = {
+				name: specs[0].name,
+				version: "",
+				dependencies: /** @type {Array<[string, string]>} */ ([]),
+			};
+			for (const { spec } of specs) entries.set(spec, entry);
+			current = entry;
+			section = null;
+			continue;
+		}
+		if (current === null) continue;
+		const indent = line.length - line.trimStart().length;
+		const body = line.trim();
+		if (indent === 2) {
+			const version = /^version "(.*)"$/.exec(body);
+			if (version) current.version = version[1];
+			section =
+				body === "dependencies:" || body === "optionalDependencies:"
+					? body
+					: null;
+		} else if (indent === 4 && section !== null) {
+			const match = /^("[^"]+"|\S+) "(.*)"$/.exec(body);
+			if (match) current.dependencies.push([unquote(match[1]), match[2]]);
+		}
+	}
+	if (entries.size === 0) throw new Error("yarn.lock has no entries");
+	return entries;
+}
+
+/**
+ * Sorted unique `name@version` strings reachable from package dependencies through the lockfile.
+ *
+ * @param {{dependencies?: Record<string, string>}} packageJson
+ * @param {string} lockText
+ * @returns {string[]}
+ */
+export function productionClosure(packageJson, lockText) {
+	const lock = parseYarnLock(lockText);
+	const seen = new Set();
+	const result = new Set();
+	const queue = Object.entries(packageJson.dependencies ?? {}).map(
+		([name, range]) => `${name}@${range}`,
+	);
+	while (queue.length > 0) {
+		const spec = queue.shift();
+		if (seen.has(spec)) continue;
+		seen.add(spec);
+		const entry = lock.get(spec);
+		if (!entry) throw new Error(`yarn.lock has no entry for ${spec}`);
+		result.add(`${entry.name}@${entry.version}`);
+		for (const [name, range] of entry.dependencies) {
+			queue.push(`${name}@${range}`);
+		}
+	}
+	return [...result].sort();
 }
 
 function gitText(args) {
@@ -132,6 +238,8 @@ export function main(argv = process.argv.slice(2)) {
 			basePackage,
 			headPackage,
 			policy,
+			baseLock: gitText(["show", `${base}:yarn.lock`]),
+			headLock: fs.readFileSync(path.join(ROOT, "yarn.lock"), "utf8"),
 		});
 		if (reasons.length > 0) {
 			console.error(`✗ REL-05 DEPENDENCY DIFF FAILED: ${reasons.join("; ")}`);
