@@ -18,6 +18,12 @@ describe("Dependabot compatibility policy", () => {
 			/dependency-name: "@types\/node"[\s\S]*?update-types:\n\s+- "version-update:semver-major"/,
 		);
 		expect(config).toMatch(
+			/dependency-name: "electron"[\s\S]*?update-types:\n\s+- "version-update:semver-major"/,
+		);
+		expect(config).toMatch(
+			/dependency-name: "zod"[\s\S]*?update-types:\n\s+- "version-update:semver-major"/,
+		);
+		expect(config).toMatch(
 			/dependency-name: "vite"[\s\S]*?versions:\n\s+- ">=8"/,
 		);
 	});

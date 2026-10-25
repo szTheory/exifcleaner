@@ -52,6 +52,14 @@ updates:
       - dependency-name: "@types/node"
         update-types:
           - "version-update:semver-major"
+      # Majors of electron and zod are deliberate future requirements (Electron 45 changes
+      # preload globals and ipcRenderer; zod 4 is the IPC validation boundary), not routine bumps.
+      - dependency-name: "electron"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "zod"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "vite"
         versions:
           - ">=8"
