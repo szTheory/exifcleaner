@@ -102,6 +102,22 @@ declare module "*phase25_public_state_gate.mjs" {
 declare module "*release_evidence.mjs" {
 	export function buildReleaseEvidence(...args: any[]): any;
 	export function validateReleaseEvidenceSet(...args: any[]): any;
+	export function readPeMachine(filePath: string): string;
+	export function payloadArchsFromSevenZipListing(text: string): string[];
+	export function inspectWindowsBuild(input: {
+		executablePath: string;
+		payloadListingPath: string;
+		distDirectory: string;
+	}): {
+		peMachine: string;
+		payloadArchs: string[];
+		unpackedDirectories: string[];
+	};
+	export function windowsX64OnlyProblems(inspection: {
+		peMachine: string;
+		payloadArchs: string[];
+		unpackedDirectories: string[];
+	}): string[];
 	export function main(...args: any[]): any;
 }
 

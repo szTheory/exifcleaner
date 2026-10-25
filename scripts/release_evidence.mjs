@@ -31,11 +31,112 @@ function artifactSha256(artifactPath) {
 		.digest("hex");
 }
 
+const PE_MACHINES = { 0x8664: "amd64", 0x14c: "i386", 0xaa64: "arm64" };
+
+/**
+ * Read the PE Machine field of one Windows executable. Only the given exe is read; the install
+ * tree is never scanned because the bundled exiftool.exe is legitimately 32-bit.
+ *
+ * @param {string} filePath
+ * @returns {string}
+ */
+export function readPeMachine(filePath) {
+	const fd = fs.openSync(filePath, "r");
+	try {
+		const dos = Buffer.alloc(0x40);
+		const dosRead = fs.readSync(fd, dos, 0, 0x40, 0);
+		if (dosRead < 0x40 || dos.toString("latin1", 0, 2) !== "MZ") {
+			throw new Error(`not a PE file: ${filePath}`);
+		}
+		const peOffset = dos.readUInt32LE(0x3c);
+		const header = Buffer.alloc(6);
+		const headerRead = fs.readSync(fd, header, 0, 6, peOffset);
+		if (headerRead < 6 || header.toString("latin1", 0, 4) !== "PE\0\0") {
+			throw new Error(`missing PE signature: ${filePath}`);
+		}
+		const machine = header.readUInt16LE(4);
+		return (
+			PE_MACHINES[machine] ??
+			`unknown-0x${machine.toString(16).padStart(4, "0")}`
+		);
+	} finally {
+		fs.closeSync(fd);
+	}
+}
+
+// Payload rule: x64=$PLUGINSDIR\app-64.7z; ia32=$PLUGINSDIR\app-32.7z; single-arch=$PLUGINSDIR\app-64.7z
+/**
+ * Architectures embedded in an NSIS Setup, from `7z l -ba` entry names. Any app-32 or ia32 entry
+ * contributes ia32, so a dropped 32-bit payload cannot hide behind an unchanged installer name.
+ *
+ * @param {string} text
+ * @returns {string[]}
+ */
+export function payloadArchsFromSevenZipListing(text) {
+	if (typeof text !== "string" || text.trim() === "") {
+		throw new Error("payload listing is empty");
+	}
+	const archs = new Set();
+	for (const line of text.split(/\r?\n/)) {
+		if (/app-32|ia32/i.test(line)) archs.add("ia32");
+		if (/app-64\.7z/i.test(line)) archs.add("x64");
+	}
+	if (archs.size === 0) {
+		throw new Error("no recognizable payload in listing");
+	}
+	return [...archs].sort();
+}
+
+/**
+ * @param {{executablePath: string; payloadListingPath: string; distDirectory: string}} input
+ */
+export function inspectWindowsBuild({
+	executablePath,
+	payloadListingPath,
+	distDirectory,
+}) {
+	return {
+		peMachine: readPeMachine(executablePath),
+		payloadArchs: payloadArchsFromSevenZipListing(
+			fs.readFileSync(payloadListingPath, "utf8"),
+		),
+		unpackedDirectories: fs
+			.readdirSync(distDirectory, { withFileTypes: true })
+			.filter(
+				(entry) => entry.isDirectory() && /^win-.*unpacked$/.test(entry.name),
+			)
+			.map((entry) => entry.name)
+			.sort(),
+	};
+}
+
+/**
+ * @param {{peMachine: string; payloadArchs: string[]; unpackedDirectories: string[]}} inspection
+ * @returns {string[]}
+ */
+export function windowsX64OnlyProblems(inspection) {
+	const problems = [];
+	if (inspection.peMachine !== "amd64") {
+		problems.push(`peMachine is ${inspection.peMachine}, expected amd64`);
+	}
+	if (JSON.stringify(inspection.payloadArchs) !== '["x64"]') {
+		problems.push(
+			`payloadArchs is ${JSON.stringify(inspection.payloadArchs)}, expected ["x64"]`,
+		);
+	}
+	if (JSON.stringify(inspection.unpackedDirectories) !== '["win-unpacked"]') {
+		problems.push(
+			`unpackedDirectories is ${JSON.stringify(inspection.unpackedDirectories)}, expected ["win-unpacked"]`,
+		);
+	}
+	return problems;
+}
+
 /**
  * Build evidence for one installed native artifact. The hash and package identity are read
  * locally instead of trusted from caller input, so a green record cannot describe other bytes.
  *
- * @param {{sourceCommit?: unknown; runnerOs?: unknown; runnerArch?: unknown; artifactPath?: unknown; executablePath?: unknown; smokeResult?: unknown}} input
+ * @param {{sourceCommit?: unknown; runnerOs?: unknown; runnerArch?: unknown; artifactPath?: unknown; executablePath?: unknown; payloadListingPath?: unknown; smokeResult?: unknown}} input
  */
 export function buildReleaseEvidence(input) {
 	const sourceCommit = requireNonEmptyString(
@@ -70,6 +171,23 @@ export function buildReleaseEvidence(input) {
 		throw new Error('smokeResult must be the literal value "passed"');
 	}
 
+	/** @type {Record<string, unknown>} */
+	const windowsProof = {};
+	if (runnerOs === "windows") {
+		const listingPath = input.payloadListingPath;
+		if (
+			typeof listingPath !== "string" ||
+			!fs.existsSync(listingPath) ||
+			!fs.statSync(listingPath).isFile()
+		) {
+			throw new Error("payloadListingPath is required for windows evidence");
+		}
+		windowsProof.peMachine = readPeMachine(executablePath);
+		windowsProof.payloadArchs = payloadArchsFromSevenZipListing(
+			fs.readFileSync(listingPath, "utf8"),
+		);
+	}
+
 	return {
 		sourceCommit,
 		packageVersion: packageVersion(),
@@ -80,6 +198,7 @@ export function buildReleaseEvidence(input) {
 		artifactSha256: artifactSha256(artifactPath),
 		executablePath,
 		smokeResult: "passed",
+		...windowsProof,
 	};
 }
 
@@ -145,6 +264,21 @@ export function validateReleaseEvidenceSet(records) {
 		if (record.smokeResult !== "passed") {
 			return invalid(`${platform} smokeResult must be passed`);
 		}
+		if (platform === "windows") {
+			if (record.peMachine !== "amd64") {
+				return invalid("windows peMachine must be amd64");
+			}
+			if (JSON.stringify(record.payloadArchs) !== '["x64"]') {
+				return invalid("windows payloadArchs must be exactly [x64]");
+			}
+		} else {
+			if ("peMachine" in record) {
+				return invalid(`${platform} peMachine is windows-only`);
+			}
+			if ("payloadArchs" in record) {
+				return invalid(`${platform} payloadArchs is windows-only`);
+			}
+		}
 		for (const field of ["sourceCommit", "packageVersion"]) {
 			if (record[field] !== reference[field]) {
 				return invalid(
@@ -168,7 +302,11 @@ function parseArguments(argv) {
 	const values = new Map();
 	for (let index = 0; index < argv.length; index += 1) {
 		const argument = argv[index];
-		if (argument === "--write" || argument === "--validate-set") {
+		if (
+			argument === "--write" ||
+			argument === "--inspect-windows" ||
+			argument === "--validate-set"
+		) {
 			values.set(argument, argv[index + 1] ?? true);
 			if (argument === "--validate-set") index += 1;
 			continue;
@@ -199,11 +337,41 @@ export function main() {
 				runnerArch: argumentsByName.get("--runner-arch"),
 				artifactPath: argumentsByName.get("--artifact"),
 				executablePath: argumentsByName.get("--executable"),
+				payloadListingPath: argumentsByName.get("--payload-listing"),
 				smokeResult: argumentsByName.get("--smoke-result"),
 			});
 			fs.mkdirSync(path.dirname(path.resolve(output)), { recursive: true });
 			fs.writeFileSync(output, `${JSON.stringify(record, null, 2)}\n`);
 			console.log(`✓ wrote release evidence: ${output}`);
+			return 0;
+		}
+		if (argumentsByName.has("--inspect-windows")) {
+			const inspection = inspectWindowsBuild({
+				executablePath: path.resolve(
+					requireNonEmptyString(
+						argumentsByName.get("--executable"),
+						"executable",
+					),
+				),
+				payloadListingPath: path.resolve(
+					requireNonEmptyString(
+						argumentsByName.get("--payload-listing"),
+						"payload-listing",
+					),
+				),
+				distDirectory: path.resolve(
+					requireNonEmptyString(argumentsByName.get("--dist"), "dist"),
+				),
+			});
+			console.log(JSON.stringify(inspection, null, 2));
+			const problems = windowsX64OnlyProblems(inspection);
+			if (problems.length > 0) {
+				console.error(
+					`✗ WINDOWS X64-ONLY CHECK FAILED: ${problems.join("; ")}`,
+				);
+				return 1;
+			}
+			console.log("✓ WINDOWS X64-ONLY BUILD OUTPUT PASSED");
 			return 0;
 		}
 		if (argumentsByName.has("--validate-set")) {
@@ -220,7 +388,9 @@ export function main() {
 			console.log("✓ RELEASE EVIDENCE SET PASSED");
 			return 0;
 		}
-		throw new Error("use either --write or --validate-set <directory>");
+		throw new Error(
+			"use --write, --inspect-windows, or --validate-set <directory>",
+		);
 	} catch (error) {
 		console.error(
 			`✗ RELEASE EVIDENCE FAILED: ${error instanceof Error ? error.message : String(error)}`,

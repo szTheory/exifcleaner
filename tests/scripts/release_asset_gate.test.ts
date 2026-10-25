@@ -51,6 +51,9 @@ function createBundle(): { assets: string; evidence: string } {
 				artifactSha256: sha256(bytes),
 				executablePath: `/installed/${runnerOs}/ExifCleaner`,
 				smokeResult: "passed",
+				...(runnerOs === "windows"
+					? { peMachine: "amd64", payloadArchs: ["x64"] }
+					: {}),
 			})}\n`,
 		);
 	}
