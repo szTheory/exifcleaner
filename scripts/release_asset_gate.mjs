@@ -8,6 +8,8 @@ const FULL_SHA = /^[0-9a-f]{40}$/;
 const SHA256 = /^[0-9a-f]{64}$/;
 const VERSION = /^\d+\.\d+\.\d+$/;
 const CHECKSUM_FILE = "SHASUMS256.txt";
+// x86_64 passes: `x86` must be followed by a non-word character (_ is a word character).
+export const LEGACY_ARCH_ASSET_NAME = /ia32|x86\b/i;
 
 export function expectedAssetNames(version) {
 	if (!VERSION.test(version)) {
@@ -48,6 +50,17 @@ function requireExactNames(actual, expected, label) {
 	if (JSON.stringify(actualSorted) !== JSON.stringify(expectedSorted)) {
 		throw new Error(
 			`${label} mismatch: expected ${expectedSorted.join(", ")}; got ${actualSorted.join(", ")}`,
+		);
+	}
+}
+
+export function requireNoLegacyArchNames(names, label) {
+	const legacy = names.find((name) =>
+		LEGACY_ARCH_ASSET_NAME.test(String(name)),
+	);
+	if (legacy !== undefined) {
+		throw new Error(
+			`${label} contain a legacy architecture asset name: ${legacy}`,
 		);
 	}
 }
@@ -109,11 +122,9 @@ export function buildPromotionManifest({
 	const expectedFiles = requireChecksums
 		? [...expected, CHECKSUM_FILE]
 		: expected;
-	requireExactNames(
-		regularFiles(assetDirectory),
-		expectedFiles,
-		"release assets",
-	);
+	const presentFiles = regularFiles(assetDirectory);
+	requireNoLegacyArchNames(presentFiles, "release assets");
+	requireExactNames(presentFiles, expectedFiles, "release assets");
 
 	const assets = expected.map((name) => {
 		const filePath = path.join(assetDirectory, name);
@@ -144,6 +155,14 @@ export function buildPromotionManifest({
 		}
 		if (record.packageVersion !== version) {
 			throw new Error(`${record.runnerOs} packageVersion mismatch`);
+		}
+		if (
+			record.runnerOs === "windows" &&
+			record.artifactName !== `ExifCleaner.Setup.${version}.exe`
+		) {
+			throw new Error(
+				`windows evidence must name the Setup installer ExifCleaner.Setup.${version}.exe`,
+			);
 		}
 		const asset = assets.find(
 			(candidate) => candidate.name === record.artifactName,
@@ -192,6 +211,10 @@ export function validateRemoteRelease({
 	if (!Array.isArray(release.assets)) {
 		throw new Error("remote release assets must be an array");
 	}
+	requireNoLegacyArchNames(
+		release.assets.map((asset) => asset?.name),
+		"remote release assets",
+	);
 	requireExactNames(
 		release.assets.map((asset) => asset?.name),
 		[...manifest.assets.map((asset) => asset.name), CHECKSUM_FILE],
