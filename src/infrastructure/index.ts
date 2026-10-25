@@ -9,7 +9,7 @@ export { NativeMetadataAdapter } from "./metadata/native_metadata_adapter";
 export { SettingsService } from "./settings_service";
 export { ConsoleLogger } from "./console_logger";
 export { removeXattrs } from "./xattr_service";
-export { exiftoolBinPath } from "./electron/binaries";
+export { exiftoolBinPath, exiftoolConfigPath } from "./electron/binaries";
 export {
 	currentBrowserWindow,
 	defaultBrowserWindow,

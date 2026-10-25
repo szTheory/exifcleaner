@@ -4,6 +4,7 @@ import {
 	packagedExiftoolPath,
 	packagedFuseExecutablePath,
 	packagedFuseWireTarget,
+	packagedResourcesPath,
 } from "./packaged_launcher";
 
 describe("packagedExiftoolPath", () => {
@@ -75,5 +76,45 @@ describe("packagedFuseExecutablePath", () => {
 	test("uses the installed executable directly on Windows", () => {
 		const executable = path.join("installed", "ExifCleaner.exe");
 		expect(packagedFuseExecutablePath(executable, "win32")).toBe(executable);
+	});
+});
+
+describe("packagedResourcesPath", () => {
+	test("resolves Contents/Resources next to MacOS on darwin", () => {
+		const executable = path.join(
+			"/Applications",
+			"ExifCleaner.app",
+			"Contents",
+			"MacOS",
+			"ExifCleaner",
+		);
+		expect(packagedResourcesPath(executable, "darwin")).toBe(
+			path.join("/Applications", "ExifCleaner.app", "Contents", "Resources"),
+		);
+	});
+
+	test("resolves resources/ beside both the AppRun launcher and the binary on linux", () => {
+		const expected = path.join("/x", "squashfs-root", "resources");
+		expect(
+			packagedResourcesPath(
+				path.join("/x", "squashfs-root", "AppRun"),
+				"linux",
+			),
+		).toBe(expected);
+		expect(
+			packagedResourcesPath(
+				path.join("/x", "squashfs-root", "exifcleaner"),
+				"linux",
+			),
+		).toBe(expected);
+	});
+
+	test("resolves resources/ beside the executable on win32", () => {
+		expect(
+			packagedResourcesPath(
+				path.join("C:", "ExifCleaner", "ExifCleaner.exe"),
+				"win32",
+			),
+		).toBe(path.join("C:", "ExifCleaner", "resources"));
 	});
 });

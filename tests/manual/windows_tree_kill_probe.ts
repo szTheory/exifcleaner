@@ -32,7 +32,23 @@
 // It prints WINDOWS_TREE_KILL_PROOF_OK only if all four held. It also measures -- never
 // asserts -- a negative control: exiftool.exe spawned directly and ended with a plain
 // `proc.kill()` (PLAIN_KILL_LEAVES_PERL=true|false).
+// LIF-01 / D-10 / D-12 (Phase 63.1): the final section, proveJobObjectOrphanKill, executes the
+// Windows half of the orphaned-ExifTool protection. A node parent spawns exiftool.exe attached
+// (detached:false) with `-stay_open True -@ <empty argfile>`; `taskkill /PID <parent> /F` WITHOUT
+// /T must still end the child within 5 s (libuv puts non-detached children in a kill-on-close job
+// object), else PROBE_ORPHAN_SURVIVED. The same with detached:true is the control: libuv skips job
+// assignment for detached children (process.c 1117-1129), so the child must still be alive at 2 s,
+// else PROBE_CONTROL_VACUOUS. Execution is required because libuv swallows ERROR_ACCESS_DENIED
+// from AssignProcessToJobObject (1147-1167): a source trace cannot show the assignment held.
+// Asymmetry (D-12): on Windows a force-quit ends ExifTool immediately, even mid-write, because the
+// job object uses TerminateProcess; POSIX exits only when idle. Pair 3 executes the Windows half of
+// "the source is preserved either way": it job-kills a parent while a calibrated
+// `-all= -overwrite_original` batch is in flight and requires every file to be byte-identical to
+// the original or the fully cleaned reference (at least one of each), with at most one
+// `_exiftool_tmp` leftover whose source is untouched (PROBE_SOURCE_PARTIAL, PROBE_TMP_LEFTOVERS,
+// PROBE_MIDWRITE_VACUOUS). taskkill only ever targets pids this probe recorded.
 import { execFileSync, spawn, type ChildProcess } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -41,6 +57,10 @@ import {
 	ExifToolCommandTimeoutError,
 	ExiftoolProcess,
 } from "../../src/infrastructure/exiftool/ExiftoolProcess";
+import {
+	isPidAliveWin32,
+	pollUntilGoneWin32,
+} from "../helpers/orphan_processes";
 
 if (process.platform !== "win32") {
 	console.log("PROBE_UNSUPPORTED_PLATFORM");
@@ -539,6 +559,451 @@ async function measurePlainKillControl({
 	}
 }
 
+interface OrphanParent {
+	readonly proc: ChildProcess;
+	readonly parentPid: number;
+	readonly childPid: number;
+}
+
+// The tiny parent is a node script run from a file (not -e), so Windows command-line quoting
+// never touches the paths. It spawns ExifTool, prints one JSON pid line, and idles. Killing it
+// with taskkill /F (TerminateProcess, no /T) leaves ExifTool's fate to the job object alone.
+function writeParentScript({
+	scriptPath,
+	exiftoolArgs,
+	detached,
+	logPath,
+	stdinPipe,
+}: {
+	scriptPath: string;
+	exiftoolArgs: string[];
+	detached: boolean;
+	logPath: string | undefined;
+	stdinPipe: boolean;
+}): void {
+	const source = [
+		'const { spawn } = require("node:child_process");',
+		'const fs = require("node:fs");',
+		`const logPath = ${JSON.stringify(logPath ?? null)};`,
+		'const fd = logPath === null ? "ignore" : fs.openSync(logPath, "w");',
+		`const stdio = [${JSON.stringify(stdinPipe ? "pipe" : "ignore")}, fd, fd];`,
+		`const child = spawn(${JSON.stringify(EXIFTOOL_PATH)}, ${JSON.stringify(exiftoolArgs)}, { windowsHide: true, stdio, detached: ${String(detached)} });`,
+		detached ? "child.unref();" : "",
+		'process.stdout.write(JSON.stringify({ parentPid: process.pid, childPid: child.pid }) + "\\n");',
+		"setInterval(() => {}, 2147483647);",
+		"",
+	].join("\n");
+	fs.writeFileSync(scriptPath, source);
+}
+
+async function startOrphanParent({
+	tempDir,
+	label,
+	exiftoolArgs,
+	detached,
+	logPath,
+	stdinPipe,
+}: {
+	tempDir: string;
+	label: string;
+	exiftoolArgs: string[];
+	detached: boolean;
+	logPath?: string | undefined;
+	stdinPipe?: boolean | undefined;
+}): Promise<OrphanParent> {
+	const scriptPath = path.join(tempDir, `orphan_parent_${label}.cjs`);
+	writeParentScript({
+		scriptPath,
+		exiftoolArgs,
+		detached,
+		logPath,
+		stdinPipe: stdinPipe ?? false,
+	});
+	const proc = spawn(process.execPath, [scriptPath], {
+		windowsHide: true,
+		stdio: ["ignore", "pipe", "pipe"],
+	});
+	proc.stderr?.resume();
+	const pids = await new Promise<{ parentPid: number; childPid: number }>(
+		(resolve, reject) => {
+			let buffer = "";
+			const timer = setTimeout(
+				() => reject(new Error(`${label}: parent reported no pids in 10 s`)),
+				10_000,
+			);
+			proc.stdout?.on("data", (chunk: Buffer) => {
+				buffer += chunk.toString("utf8");
+				const newline = buffer.indexOf("\n");
+				if (newline < 0) {
+					return;
+				}
+				clearTimeout(timer);
+				try {
+					const parsed = JSON.parse(buffer.slice(0, newline)) as {
+						parentPid?: unknown;
+						childPid?: unknown;
+					};
+					if (
+						typeof parsed.parentPid !== "number" ||
+						typeof parsed.childPid !== "number"
+					) {
+						reject(new Error(`${label}: bad pid line ${buffer}`));
+						return;
+					}
+					resolve({ parentPid: parsed.parentPid, childPid: parsed.childPid });
+				} catch (error: unknown) {
+					reject(error instanceof Error ? error : new Error(String(error)));
+				}
+			});
+			proc.once("exit", (code) => {
+				clearTimeout(timer);
+				reject(new Error(`${label}: parent exited early (code ${code})`));
+			});
+		},
+	).catch((error: unknown) =>
+		fail({ marker: "PROBE_PARENT_START_FAILED", detail: String(error) }),
+	);
+	return { proc, ...pids };
+}
+
+// Confirms the pair is real before the kill: the child row exists as exiftool.exe, the parent
+// row exists, and no perl.exe hangs under the child (in-process Perl premise).
+function assertPairObserved({
+	pair,
+	label,
+}: {
+	pair: OrphanParent;
+	label: string;
+}): void {
+	const snapshot = listProcesses();
+	const childRow = snapshot.find((proc) => proc.pid === pair.childPid);
+	if (childRow === undefined || !isLauncher(childRow.name)) {
+		fail({
+			marker: "PROBE_CHILD_NOT_OBSERVED",
+			detail: `${label}: child ${pair.childPid} row ${JSON.stringify(childRow)}`,
+		});
+	}
+	if (!snapshot.some((proc) => proc.pid === pair.parentPid)) {
+		fail({
+			marker: "PROBE_CHILD_NOT_OBSERVED",
+			detail: `${label}: parent ${pair.parentPid} missing`,
+		});
+	}
+	const perl = descendantsIn({ snapshot, rootPid: pair.childPid }).filter(
+		(proc) => isPerl(proc.name),
+	);
+	if (perl.length > 0) {
+		fail({
+			marker: "PROBE_UNEXPECTED_PERL_CHILD",
+			detail: JSON.stringify(perl),
+		});
+	}
+}
+
+// Kill the recorded parent only. Never /T: the child must be ended by the job object or not at all.
+function killParentWithoutTree(parentPid: number): void {
+	execFileSync("taskkill", ["/PID", String(parentPid), "/F"], {
+		windowsHide: true,
+	});
+}
+
+// A live pid is an orphan only if the process table still names it exiftool.exe (pid reuse guard).
+function isStillExiftool(childPid: number): boolean {
+	const row = listProcesses().find((proc) => proc.pid === childPid);
+	return row !== undefined && isLauncher(row.name);
+}
+
+function sha256File(filePath: string): string {
+	return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+}
+
+async function expectJobKillsChild({
+	pair,
+	label,
+}: {
+	pair: OrphanParent;
+	label: string;
+}): Promise<number> {
+	const { gone, elapsedMs } = await pollUntilGoneWin32({
+		pid: pair.childPid,
+		timeoutMs: 5000,
+		intervalMs: 100,
+	});
+	if (!gone && isStillExiftool(pair.childPid)) {
+		fail({
+			marker: "PROBE_ORPHAN_SURVIVED",
+			detail: `${label}: child ${pair.childPid} alive ${elapsedMs} ms after the parent was killed`,
+		});
+	}
+	return elapsedMs;
+}
+
+// D-10 / D-12 / LIF-01 -- see the header paragraph. Pair 1 is the proof, pair 2 the control,
+// pair 3 the Windows half of "the source is preserved either way".
+async function proveJobObjectOrphanKill({
+	tempDir,
+}: {
+	tempDir: string;
+}): Promise<void> {
+	const recorded = new Set<number>();
+	const remember = (pair: OrphanParent): void => {
+		recorded.add(pair.parentPid);
+		recorded.add(pair.childPid);
+	};
+	try {
+		// An empty argfile: at EOF ExifTool re-polls forever, so it cannot exit through a stdin
+		// pipe and the job object is the only possible cause of the child's death.
+		const emptyArgfile = path.join(tempDir, "orphan_argfile.txt");
+		fs.writeFileSync(emptyArgfile, "");
+		const stayOpenArgs = ["-stay_open", "True", "-@", emptyArgfile];
+
+		// Pair 1: attached child, parent killed without /T, job object must end the child.
+		const attached = await startOrphanParent({
+			tempDir,
+			label: "attached",
+			exiftoolArgs: stayOpenArgs,
+			detached: false,
+		});
+		remember(attached);
+		assertPairObserved({ pair: attached, label: "attached" });
+		killParentWithoutTree(attached.parentPid);
+		const killMs = await expectJobKillsChild({
+			pair: attached,
+			label: "attached",
+		});
+		console.log(`PROBE_JOB_KILL_MS=${killMs}`);
+
+		// Pair 2: detached child (libuv skips job assignment) must outlive the same kill.
+		const detached = await startOrphanParent({
+			tempDir,
+			label: "detached",
+			exiftoolArgs: stayOpenArgs,
+			detached: true,
+		});
+		remember(detached);
+		assertPairObserved({ pair: detached, label: "detached" });
+		killParentWithoutTree(detached.parentPid);
+		await sleep(2000);
+		if (
+			!isPidAliveWin32(detached.childPid) ||
+			!isStillExiftool(detached.childPid)
+		) {
+			fail({
+				marker: "PROBE_CONTROL_VACUOUS",
+				detail: `detached child ${detached.childPid} did not survive the parent kill`,
+			});
+		}
+		console.log("PROBE_DETACHED_ALIVE_AT_2S=true");
+		killRecordedPids([detached.childPid]);
+
+		// Measured only: does a detached child with a stdin pipe exit when the parent dies?
+		try {
+			const piped = await startOrphanParent({
+				tempDir,
+				label: "piped",
+				exiftoolArgs: ["-stay_open", "True", "-@", "-"],
+				detached: true,
+				stdinPipe: true,
+			});
+			remember(piped);
+			killParentWithoutTree(piped.parentPid);
+			await sleep(2000);
+			console.log(
+				`PIPE_EOF_EXITS=${!(isPidAliveWin32(piped.childPid) && isStillExiftool(piped.childPid))}`,
+			);
+			killRecordedPids([piped.childPid]);
+		} catch (error: unknown) {
+			if (
+				error instanceof ProbeFailure &&
+				error.marker !== "PROBE_PARENT_START_FAILED"
+			) {
+				throw error;
+			}
+			console.log("PIPE_EOF_EXITS=unmeasured");
+		}
+
+		await proveMidWriteSourcePreserved({ tempDir, remember });
+	} finally {
+		killRecordedPids([...recorded]);
+	}
+}
+
+// Best-effort cleanup of pids this probe recorded. Re-checks the name first so a reused pid is
+// never touched.
+function killRecordedPids(pids: number[]): void {
+	try {
+		const snapshot = listProcesses();
+		for (const pid of pids) {
+			const row = snapshot.find((proc) => proc.pid === pid);
+			if (
+				row === undefined ||
+				!(isLauncher(row.name) || row.name.toLowerCase() === "node.exe")
+			) {
+				continue;
+			}
+			try {
+				execFileSync("taskkill", ["/PID", String(pid), "/F"], {
+					windowsHide: true,
+				});
+			} catch {
+				// already gone
+			}
+		}
+	} catch {
+		// best-effort cleanup only
+	}
+}
+
+async function proveMidWriteSourcePreserved({
+	tempDir,
+	remember,
+}: {
+	tempDir: string;
+	remember: (pair: OrphanParent) => void;
+}): Promise<void> {
+	const pair3Start = Date.now();
+
+	// Calibrate every phase so the batch is about 3 s of ExifTool work and the per-file phases
+	// stay within about 5 s on any host speed.
+	const calDir = path.join(tempDir, "cal");
+	fs.mkdirSync(calDir);
+	const copyStart = Date.now();
+	for (let i = 0; i < 100; i++) {
+		fs.copyFileSync(SAMPLE_JPEG_PATH, path.join(calDir, `c${i}.jpg`));
+	}
+	const copyMs = Date.now() - copyStart;
+	const verStart = Date.now();
+	execFileSync(EXIFTOOL_PATH, ["-ver"], { windowsHide: true });
+	const t0 = Date.now() - verStart;
+	const cleanStart = Date.now();
+	execFileSync(EXIFTOOL_PATH, ["-q", "-all=", "-overwrite_original", calDir], {
+		windowsHide: true,
+	});
+	const t1 = Date.now() - cleanStart;
+	const hashStart = Date.now();
+	for (const name of fs.readdirSync(calDir)) {
+		sha256File(path.join(calDir, name));
+	}
+	const hashMs = Date.now() - hashStart;
+	const rmStart = Date.now();
+	fs.rmSync(calDir, { recursive: true, force: true });
+	const rmMs = Date.now() - rmStart;
+	const execMs = t1 - t0;
+	const perFileExecMs = Math.max(0.05, execMs / 100);
+	const perFileLegMs = (copyMs + execMs + hashMs + rmMs) / 100;
+	const batchCount = Math.min(
+		Math.ceil(3000 / perFileExecMs),
+		Math.floor(5000 / perFileLegMs),
+	);
+	console.log(`PROBE_MIDWRITE_N=${batchCount}`);
+	console.log(
+		`PROBE_MIDWRITE_CALIBRATION=${JSON.stringify({ copyMs, execMs, hashMs, rmMs })}`,
+	);
+	if (batchCount < 100) {
+		fail({
+			marker: "PROBE_MIDWRITE_VACUOUS",
+			detail: `host too slow to hold a batch in flight within budget (N=${batchCount})`,
+		});
+	}
+
+	const refPath = path.join(tempDir, "ref.jpg");
+	execFileSync(
+		EXIFTOOL_PATH,
+		["-q", "-all=", "-o", refPath, SAMPLE_JPEG_PATH],
+		{
+			windowsHide: true,
+		},
+	);
+	const refHash = sha256File(refPath);
+	const origHash = sha256File(SAMPLE_JPEG_PATH);
+	const batchDir = path.join(tempDir, "batch");
+	fs.mkdirSync(batchDir);
+	for (let i = 0; i < batchCount; i++) {
+		fs.copyFileSync(SAMPLE_JPEG_PATH, path.join(batchDir, `f${i}.jpg`));
+	}
+
+	// The in-flight batch: after the second -execute ExifTool re-polls the argfile forever.
+	const argfile = path.join(tempDir, "midwrite_argfile.txt");
+	fs.writeFileSync(
+		argfile,
+		["-ver", "-execute", "-all=", "-overwrite_original", batchDir, "-execute"]
+			.map((line) => `${line}\n`)
+			.join(""),
+	);
+	const logPath = path.join(tempDir, "midwrite.log");
+	const pair = await startOrphanParent({
+		tempDir,
+		label: "midwrite",
+		exiftoolArgs: ["-stay_open", "True", "-@", argfile],
+		detached: false,
+		logPath,
+	});
+	remember(pair);
+	const readyDeadline = Date.now() + 30_000;
+	while (!(
+		fs.existsSync(logPath) &&
+		fs.readFileSync(logPath, "utf8").includes("{ready}")
+	)) {
+		if (Date.now() > readyDeadline) {
+			fail({
+				marker: "PROBE_MIDWRITE_NO_READY",
+				detail: "no {ready} in midwrite.log within 30 s",
+			});
+		}
+		await sleep(50);
+	}
+	await sleep(1000);
+	killParentWithoutTree(pair.parentPid);
+	await expectJobKillsChild({ pair, label: "midwrite" });
+
+	let cleaned = 0;
+	let original = 0;
+	let other = 0;
+	const tmpNames: string[] = [];
+	for (const name of fs.readdirSync(batchDir)) {
+		if (name.includes("_exiftool_tmp")) {
+			tmpNames.push(name);
+			continue;
+		}
+		const hash = sha256File(path.join(batchDir, name));
+		if (hash === refHash) {
+			cleaned += 1;
+		} else if (hash === origHash) {
+			original += 1;
+		} else {
+			other += 1;
+		}
+	}
+	console.log(
+		`PROBE_MIDWRITE_SOURCE=${JSON.stringify({ cleaned, original, other, tmp: tmpNames.length })}`,
+	);
+	if (other > 0 || cleaned + original !== batchCount) {
+		fail({
+			marker: "PROBE_SOURCE_PARTIAL",
+			detail: JSON.stringify({ cleaned, original, other, batchCount }),
+		});
+	}
+	// D-12 residue: TerminateProcess skips ExifTool's own temp-file cleanup, so the one in-flight
+	// file may leave a temporary, but its source must be untouched.
+	const tmpProblem =
+		tmpNames.length > 1 ||
+		tmpNames.some((name) => {
+			const source = path.join(batchDir, name.replace("_exiftool_tmp", ""));
+			return !fs.existsSync(source) || sha256File(source) !== origHash;
+		});
+	if (tmpProblem) {
+		fail({ marker: "PROBE_TMP_LEFTOVERS", detail: JSON.stringify(tmpNames) });
+	}
+	if (cleaned === 0 || original === 0) {
+		fail({
+			marker: "PROBE_MIDWRITE_VACUOUS",
+			detail: `the kill did not land mid-batch: ${JSON.stringify({ cleaned, original })}`,
+		});
+	}
+	fs.rmSync(batchDir, { recursive: true, force: true });
+	console.log(`PAIR3_TOTAL_MS=${Date.now() - pair3Start}`);
+}
+
 async function main(): Promise<number> {
 	const tempDir = fs.mkdtempSync(
 		path.join(os.tmpdir(), "gsd531-06-windows-tree-kill-"),
@@ -571,6 +1036,7 @@ async function main(): Promise<number> {
 		});
 		await proveRespawnAndClose({ exiftoolProcess, launcherPid, readPath });
 		await measurePlainKillControl({ readPath });
+		await proveJobObjectOrphanKill({ tempDir });
 
 		console.log("WINDOWS_TREE_KILL_PROOF_OK");
 		return 0;

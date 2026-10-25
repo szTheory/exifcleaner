@@ -150,7 +150,7 @@ describe("native metadata oracle: WebP, JPEG and PNG against an independent Exif
 					preserveTimestamps: preserveAll,
 				});
 
-				expect(result).toEqual({ ok: true, value: undefined });
+				expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
 				expect(nativeWrite).toHaveBeenCalledOnce();
 				expect(exiftoolWrite).not.toHaveBeenCalled();
 				expect(destination).not.toBe(source);
@@ -265,7 +265,7 @@ describe("native metadata oracle: WebP, JPEG and PNG against an independent Exif
 				preserveTimestamps: false,
 			});
 
-			expect(result).toEqual({ ok: true, value: undefined });
+			expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
 			expect(nativeWrite).toHaveBeenCalledOnce();
 			expect(exiftoolWrite).toHaveBeenCalledOnce();
 

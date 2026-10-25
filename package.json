@@ -1,7 +1,7 @@
 {
 	"name": "exifcleaner",
 	"productName": "ExifCleaner",
-	"version": "4.5.0",
+	"version": "4.6.0",
 	"description": "Clean exif metadata from images, media files, and PDF documents",
 	"license": "MIT",
 	"repository": "github:szTheory/exifcleaner",
@@ -73,7 +73,7 @@
 		"check:deps": "madge --circular --extensions ts,tsx src/"
 	},
 	"dependencies": {
-		"exifcleaner-node": "0.3.1",
+		"exifcleaner-node": "0.4.0",
 		"react": "^19.3.0",
 		"react-dom": "^19.3.0",
 		"zod": "^3.25.0"
@@ -126,6 +126,13 @@
 					"filter": [
 						"**/*"
 					]
+				},
+				{
+					"from": ".resources/nix/exiftool-config",
+					"to": "nix/exiftool-config",
+					"filter": [
+						"**/*"
+					]
 				}
 			]
 		},
@@ -144,6 +151,13 @@
 				{
 					"from": ".resources/nix/bin",
 					"to": "nix/bin",
+					"filter": [
+						"**/*"
+					]
+				},
+				{
+					"from": ".resources/nix/exiftool-config",
+					"to": "nix/exiftool-config",
 					"filter": [
 						"**/*"
 					]

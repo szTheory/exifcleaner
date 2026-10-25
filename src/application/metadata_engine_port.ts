@@ -1,6 +1,12 @@
 import type { Result } from "../common";
 import type { MetadataEngineError } from "../domain/exif/exif_errors";
 
+/**
+ * Which engine actually wrote a sanitize output (D-01). Set only by the router branch that ran
+ * (HybridMetadataEngine) -- never inferred from output bytes, never defaulted.
+ */
+export type WrittenBy = "native" | "exiftool";
+
 export type MetadataInspectionPurpose = "display" | "output-verification";
 
 export interface MetadataInspection {
@@ -45,5 +51,5 @@ export interface MetadataEnginePort {
 		preserveResolution: boolean;
 		preserveTimestamps: boolean;
 		signal?: AbortSignal | undefined;
-	}): Promise<Result<void, MetadataEngineError>>;
+	}): Promise<Result<{ readonly writtenBy: WrittenBy }, MetadataEngineError>>;
 }

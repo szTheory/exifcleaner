@@ -10,6 +10,7 @@ import {
 	ConsoleLogger,
 	removeXattrs,
 	exiftoolBinPath,
+	exiftoolConfigPath,
 } from "../infrastructure";
 import {
 	StripMetadataCommand,
@@ -33,7 +34,10 @@ export function createContainer(): {
 	outputTransaction: OutputTransaction;
 } {
 	const logger = new ConsoleLogger();
-	const exiftoolProcess = new ExiftoolProcess({ binPath: exiftoolBinPath });
+	const exiftoolProcess = new ExiftoolProcess({
+		binPath: exiftoolBinPath,
+		configPath: exiftoolConfigPath,
+	});
 	const exiftool = new ExifToolAdapter({ process: exiftoolProcess });
 	const native = new NativeMetadataAdapter();
 	const metadataEngine = new HybridMetadataEngine({ exiftool, native });
