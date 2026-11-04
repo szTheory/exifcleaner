@@ -160,11 +160,28 @@ const PNG_ORIENTATION_ONLY: ReadonlySet<string> = new Set([
 	"IFD0:YCbCrPositioning",
 ]);
 
+// JPEG and PNG, permitted only when preserveColorProfile is requested: the shared ICC set plus
+// two colorimetry tags that common camera/phone sRGB profiles carry and the 58 sweep's
+// synthetic profiles did not -- ICC_Profile:ChromaticAdaptation (the 'chad' matrix, already
+// permitted for HEIC/AVIF in 63-09) and ICC_Profile:MediaBlackPoint (the 'bkpt' tag, the same
+// class as ICC_Profile:MediaWhitePoint). Measured on a Pixel JPEG's "sRGB IEC61966-2.1"
+// profile. Kept out of ICC_GROUP_TAGS so the HEIC/AVIF derivations are unchanged.
+const JPEG_PNG_ICC_COLORIMETRY: readonly string[] = [
+	"ICC_Profile:ChromaticAdaptation",
+	"ICC_Profile:MediaBlackPoint",
+];
+
+const JPEG_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
+	...ICC_GROUP_TAGS,
+	...JPEG_PNG_ICC_COLORIMETRY,
+]);
+
 // 58-SWEEP-MATRIX.md — PNG, permitted only when preserveColorProfile is requested.
 // PNG:ProfileName is the iCCP chunk's profile-name field (ExifTool's own naming, not
 // content), additional to the shared ICC_GROUP_TAGS set.
 const PNG_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
 	...ICC_GROUP_TAGS,
+	...JPEG_PNG_ICC_COLORIMETRY,
 	"PNG:ProfileName",
 ]);
 
@@ -246,7 +263,7 @@ const HEIC_ORIENTATION_ONLY: ReadonlySet<string> = new Set([
 // is requested: the native engine's 25 ICC keys (ICC_GROUP_TAGS) plus ICC_Profile:ChromaticAdaptation
 // (the chad tag, 9 numbers of colorimetry, the same class as ICC_Profile:MediaWhitePoint), measured
 // on the iPhone sample in 63-08 and decided in 63-09 ("## 63-09 decisions"). It is not added to the
-// shared ICC_GROUP_TAGS because JPEG and PNG were not re-measured for it.
+// shared ICC_GROUP_TAGS; JPEG and PNG permit it through JPEG_PNG_ICC_COLORIMETRY instead.
 const HEIC_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
 	...ICC_GROUP_TAGS,
 	"ICC_Profile:ChromaticAdaptation",
@@ -386,7 +403,10 @@ function isPermitted({
 			) {
 				return true;
 			}
-			if (preservation.preserveColorProfile && ICC_GROUP_TAGS.has(groupTag)) {
+			if (
+				preservation.preserveColorProfile &&
+				JPEG_COLOR_PROFILE_ONLY.has(groupTag)
+			) {
 				return true;
 			}
 			return (

@@ -695,17 +695,33 @@ describe("findLeakedTags", () => {
 			},
 		);
 
-		it("keeps ICC_Profile:ChromaticAdaptation out of the shared PNG/JPEG colour-profile set", () => {
-			for (const format of ["png", "jpeg"] as const) {
+		// Measured on a Pixel JPEG whose embedded "sRGB IEC61966-2.1" profile carries both
+		// tags: kept profile colorimetry, the same class as ICC_Profile:MediaWhitePoint.
+		it.each(["ICC_Profile:ChromaticAdaptation", "ICC_Profile:MediaBlackPoint"])(
+			"permits %s for PNG/JPEG only with preserveColorProfile, for both writers",
+			(key) => {
+				for (const format of ["png", "jpeg"] as const) {
+					for (const writtenBy of ["native", "exiftool"] as const) {
+						const check = (preservation: typeof off) =>
+							findLeakedTags({
+								record: { [key]: "x" },
+								format,
+								writtenBy,
+								fileType: format === "png" ? "PNG" : "JPEG",
+								preservation,
+							}).leakedTags;
+						expect(check(colourOn)).toEqual([]);
+						expect(check(off)).toEqual([key]);
+					}
+				}
+			},
+		);
+
+		it("does not widen HEIC or AVIF: ICC_Profile:MediaBlackPoint stays a leak there", () => {
+			for (const format of ["heic", "avif"] as const) {
 				expect(
-					findLeakedTags({
-						record: { "ICC_Profile:ChromaticAdaptation": "x" },
-						format,
-						writtenBy: "native",
-						fileType: format === "png" ? "PNG" : "JPEG",
-						preservation: colourOn,
-					}).leakedTags,
-				).toEqual(["ICC_Profile:ChromaticAdaptation"]);
+					leaks("ICC_Profile:MediaBlackPoint", format, "native", colourOn),
+				).toEqual(["ICC_Profile:MediaBlackPoint"]);
 			}
 		});
 
