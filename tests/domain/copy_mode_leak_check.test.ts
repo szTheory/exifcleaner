@@ -78,6 +78,67 @@ describe("copyModeLeakCheckFormatOf", () => {
 });
 
 describe("findLeakedTags", () => {
+	describe("color JPEG frame-header facts", () => {
+		// ExifTool reports File:YCbCrSubSampling from the SOF header of every three-component
+		// JPEG (an ordinary color photo). It describes the pixel encoding, not the photo, and
+		// cannot be removed without re-encoding, so it must never count as a leak.
+		const colorJpegRecord = {
+			SourceFile: "/tmp/photo_cleaned.jpg",
+			"File:Other:FileType": "JPEG",
+			"File:Other:FileTypeExtension": "jpg",
+			"File:Other:MIMEType": "image/jpeg",
+			"File:Image:ImageWidth": 2816,
+			"File:Image:ImageHeight": 1536,
+			"File:Image:EncodingProcess": "Baseline DCT, Huffman coding",
+			"File:Image:BitsPerSample": 8,
+			"File:Image:ColorComponents": 3,
+			"File:Image:YCbCrSubSampling": "YCbCr4:2:0 (2 2)",
+			"Composite:Image:ImageSize": "2816x1536",
+			"Composite:Image:Megapixels": 4.3,
+		};
+
+		it.each([
+			[false, false, false],
+			[true, false, false],
+			[false, true, false],
+			[false, false, true],
+			[true, true, true],
+		])(
+			"permits File:YCbCrSubSampling (orientation=%s, colorProfile=%s, resolution=%s)",
+			(preserveOrientation, preserveColorProfile, preserveResolution) => {
+				for (const writtenBy of ["exiftool", "native"] as const) {
+					const result = findLeakedTags({
+						record: colorJpegRecord,
+						format: "jpeg",
+						writtenBy,
+						fileType: "JPEG",
+						preservation: {
+							preserveOrientation,
+							preserveColorProfile,
+							preserveResolution,
+						},
+					});
+					expect(result.leakedTags).toEqual([]);
+				}
+			},
+		);
+
+		it("still reports a real leak next to File:YCbCrSubSampling", () => {
+			const result = findLeakedTags({
+				record: { ...colorJpegRecord, "GPS:Location:GPSLatitude": 51.5 },
+				format: "jpeg",
+				writtenBy: "native",
+				fileType: "JPEG",
+				preservation: {
+					preserveOrientation: false,
+					preserveColorProfile: false,
+					preserveResolution: false,
+				},
+			});
+			expect(result.leakedTags).toEqual(["GPS:GPSLatitude"]);
+		});
+	});
+
 	it("reports a JPEG XMP-dc identifying tag as a leak", () => {
 		const record = {
 			SourceFile: "/tmp/a.jpg",
