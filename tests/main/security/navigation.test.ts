@@ -5,6 +5,19 @@ import {
 	createFakeNavigateEvent,
 } from "../../fakes/electron_fakes";
 import type { FakeBrowserWindow } from "../../fakes/electron_fakes";
+import type { AppUrlPolicy } from "../../../src/main/security/app_url";
+
+const ENTRY_URL =
+	"file:///Applications/ExifCleaner.app/Contents/Resources/app.asar/out/renderer/index.html";
+const PACKAGED: AppUrlPolicy = {
+	isPackaged: true,
+	rendererEntryUrl: ENTRY_URL,
+};
+const DEV: AppUrlPolicy = {
+	isPackaged: false,
+	rendererEntryUrl: ENTRY_URL,
+	devServerUrl: "http://localhost:5173/",
+};
 
 describe("hardenNavigation", () => {
 	let fakeWin: FakeBrowserWindow;
@@ -14,23 +27,39 @@ describe("hardenNavigation", () => {
 		fakeWin = createFakeBrowserWindow();
 		openExternalCalls = [];
 		// Inject fake openExternal for testability (no vi.mock needed)
-		hardenNavigation(fakeWin as never, (url: string) => {
+		hardenNavigation(fakeWin as never, PACKAGED, (url: string) => {
 			openExternalCalls.push(url);
 		});
 	});
 
 	describe("will-navigate", () => {
-		function triggerNavigate(url: string) {
+		function triggerNavigate(url: string, win: FakeBrowserWindow = fakeWin) {
 			const event = createFakeNavigateEvent();
-			const handler = fakeWin.webContents.handlers.get("will-navigate");
+			const handler = win.webContents.handlers.get("will-navigate");
 			if (!handler) throw new Error("will-navigate handler not installed");
 			handler(event, url);
 			return event;
 		}
 
-		it("allows file:// URL", () => {
-			const event = triggerNavigate("file:///Users/test/app/index.html");
+		function devWindow(): FakeBrowserWindow {
+			const win = createFakeBrowserWindow();
+			hardenNavigation(win as never, DEV, () => {});
+			return win;
+		}
+
+		it("allows the bundled renderer entry", () => {
+			const event = triggerNavigate(ENTRY_URL);
 			expect(event.defaultPrevented).toBe(false);
+		});
+
+		it("allows the bundled renderer entry with a hash", () => {
+			const event = triggerNavigate(`${ENTRY_URL}#/settings`);
+			expect(event.defaultPrevented).toBe(false);
+		});
+
+		it("blocks a dropped HTML file (other file:// documents)", () => {
+			const event = triggerNavigate("file:///Users/test/Downloads/evil.html");
+			expect(event.defaultPrevented).toBe(true);
 		});
 
 		it("blocks https://evil.com", () => {
@@ -38,26 +67,30 @@ describe("hardenNavigation", () => {
 			expect(event.defaultPrevented).toBe(true);
 		});
 
-		it("allows http://localhost:5173 in dev mode", () => {
-			const origEnv = process.env.NODE_ENV;
-			process.env.NODE_ENV = "development";
-			try {
-				const event = triggerNavigate("http://localhost:5173/");
-				expect(event.defaultPrevented).toBe(false);
-			} finally {
-				process.env.NODE_ENV = origEnv;
-			}
+		it("blocks http://localhost in packaged builds", () => {
+			const event = triggerNavigate("http://localhost:5173/");
+			expect(event.defaultPrevented).toBe(true);
 		});
 
-		it("blocks http://localhost:5173 in production", () => {
-			const origEnv = process.env.NODE_ENV;
-			process.env.NODE_ENV = "production";
-			try {
-				const event = triggerNavigate("http://localhost:5173/");
-				expect(event.defaultPrevented).toBe(true);
-			} finally {
-				process.env.NODE_ENV = origEnv;
-			}
+		it("allows the dev server origin in unpackaged builds", () => {
+			const event = triggerNavigate(
+				"http://localhost:5173/index.html",
+				devWindow(),
+			);
+			expect(event.defaultPrevented).toBe(false);
+		});
+
+		it("blocks other localhost ports in unpackaged builds", () => {
+			const event = triggerNavigate("http://localhost:8080/", devWindow());
+			expect(event.defaultPrevented).toBe(true);
+		});
+
+		it("blocks userinfo tricks that only look like the dev server", () => {
+			const event = triggerNavigate(
+				"http://localhost:5173@evil.com/",
+				devWindow(),
+			);
+			expect(event.defaultPrevented).toBe(true);
 		});
 	});
 

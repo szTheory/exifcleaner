@@ -39,6 +39,23 @@ describe("exifReadSchema", () => {
 	);
 });
 
+describe("absolute path requirement", () => {
+	it.each(["photo.jpg", "./photo.jpg", "-overwrite_original", "-execute"])(
+		"rejects the relative path %s",
+		(filePath) => {
+			expect(() => exifRemoveSchema.parse(filePath)).toThrow(
+				"Only absolute paths are supported",
+			);
+			expect(() => exifReadSchema.parse(filePath)).toThrow(
+				"Only absolute paths are supported",
+			);
+			expect(() => folderExpandSchema.parse(filePath)).toThrow(
+				"Only absolute paths are supported",
+			);
+		},
+	);
+});
+
 describe("exifRemoveSchema", () => {
 	it("accepts a non-empty string", () => {
 		expect(exifRemoveSchema.parse("/path/to/file.jpg")).toBe(

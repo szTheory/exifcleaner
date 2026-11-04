@@ -1,4 +1,8 @@
 import { test, expect } from "@playwright/test";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import type { ElectronApplication, Page } from "playwright";
 import { launchApp, closeApp } from "./helpers/app_launcher";
 
@@ -114,5 +118,33 @@ test.describe("Security", () => {
 		const urlAfter = page.url();
 		expect(urlAfter).toBe(urlBefore);
 		expect(urlAfter).not.toContain("example.com");
+	});
+
+	test("blocks navigation to a foreign file:// document such as a dropped HTML file", async () => {
+		// Chromium navigates to a file dropped outside the drop zone. The preload runs in
+		// whatever document the window shows, so a foreign file:// page must never load.
+		const dir = mkdtempSync(path.join(tmpdir(), "exifcleaner-nav-"));
+		const htmlPath = path.join(dir, "dropped.html");
+		writeFileSync(htmlPath, "<!doctype html><title>dropped</title>");
+		const foreignUrl = pathToFileURL(htmlPath).href;
+		const urlBefore = page.url();
+
+		try {
+			const navigated = page
+				.waitForEvent("framenavigated", { timeout: 1_000 })
+				.then(() => true)
+				.catch(() => false);
+			await page.evaluate((url) => {
+				window.location.href = url;
+			}, foreignUrl);
+
+			expect(await navigated).toBe(false);
+			expect(page.url()).toBe(urlBefore);
+			expect(
+				await page.evaluate(() => typeof window.api?.exif?.readMetadata),
+			).toBe("function");
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
 	});
 });

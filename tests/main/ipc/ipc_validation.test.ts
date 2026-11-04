@@ -6,6 +6,7 @@ import {
 	unregisterSender,
 	createValidatedHandler,
 	createValidatedListener,
+	setTrustedSenderUrlPolicy,
 } from "../../../src/main/ipc/ipc_validation";
 import { createFakeIpcEvent } from "../../fakes/electron_fakes";
 import type { IpcMainInvokeEvent, IpcMainEvent } from "electron";
@@ -33,6 +34,60 @@ describe("sender validation", () => {
 		unregisterSender(TEST_SENDER_ID);
 		const event = createFakeIpcEvent(TEST_SENDER_ID);
 		expect(validateSender(event)).toBe(false);
+	});
+});
+
+describe("sender frame URL validation", () => {
+	const APP_URL = "file:///app/out/renderer/index.html";
+
+	beforeEach(() => {
+		registerAllowedSender(TEST_SENDER_ID);
+		setTrustedSenderUrlPolicy((url) => url === APP_URL);
+	});
+
+	afterEach(() => {
+		setTrustedSenderUrlPolicy(null);
+		unregisterSender(TEST_SENDER_ID);
+	});
+
+	it("accepts the app document in a registered window", () => {
+		expect(
+			validateSender({
+				sender: { id: TEST_SENDER_ID },
+				senderFrame: { url: APP_URL },
+			}),
+		).toBe(true);
+	});
+
+	it("rejects another document loaded into a registered window", () => {
+		expect(
+			validateSender({
+				sender: { id: TEST_SENDER_ID },
+				senderFrame: { url: "file:///Users/test/Downloads/evil.html" },
+			}),
+		).toBe(false);
+	});
+
+	it("rejects a message whose sender frame is gone", () => {
+		expect(
+			validateSender({ sender: { id: TEST_SENDER_ID }, senderFrame: null }),
+		).toBe(false);
+	});
+
+	it("rejects an invoke from another document before running the handler", async () => {
+		let called = false;
+		const handler = createValidatedHandler(z.string(), async () => {
+			called = true;
+		});
+		const event = {
+			sender: { id: TEST_SENDER_ID },
+			senderFrame: { url: "file:///tmp/evil.html" },
+		} as unknown as IpcMainInvokeEvent;
+
+		await expect(handler(event, "/tmp/a.jpg")).rejects.toThrow(
+			"Unauthorized IPC sender",
+		);
+		expect(called).toBe(false);
 	});
 });
 
