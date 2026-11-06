@@ -30,6 +30,9 @@ yarn build            # Build all platforms
 yarn publish          # Not part of the release flow; releases publish only through CI
 
 yarn run update-exiftool  # Update exiftool binaries (requires Perl, Linux/Mac only)
+
+yarn brand:fetch      # Fetch + verify the pinned brand zip into .brand-cache/ (runs automatically before compile/dev)
+yarn brand:update [sha]  # Re-pin brand.pin.json to a commit of szTheory/exifcleaner-brand (default: latest main)
 ```
 
 ## Debugging
@@ -181,6 +184,16 @@ A PR that bumps `package.json` version with a matching `RELEASE_NOTES.md` (the r
 3. Verifies SHA1 checksums (dies on mismatch)
 4. Extracts and copies: Unix `exiftool` + `lib/` → `.resources/nix/bin/`, Windows `.exe` → `.resources/win/bin/`
 5. Flag `--cache-downloads-working-dir` preserves downloads between runs (useful for CI)
+
+### Pinned brand assets
+
+Brand files are never committed here. `brand.pin.json` pins one commit of `szTheory/exifcleaner-brand` plus the size and sha256 of its committed `exifcleaner-brand.zip` (never GitHub's generated archive). `scripts/brand_fetch.mjs` runs as `precompile`/`predev`/`predev:debug` (so `yarn build`, `yarn pack*`, `yarn dev` all run it):
+
+1. Cached zip in gitignored `.brand-cache/` matches the pin: no download (works offline).
+2. Otherwise download, then verify size and sha256. **A mismatch, unreadable zip or missing OFL licence exits non-zero and fails the build** (fail closed). A corrupt cache is discarded and only replaced by bytes that match the pin.
+3. Unpack with the built-in `scripts/brand_lib.mjs` reader (node:zlib only; zip-slip, symlink and CRC checks), then stage `brand.ship.allowlist` files plus every `assets/fonts/OFL-*.txt` into `.brand-cache/ship/`, which `build.extraResources` packages as `Resources/brand/`.
+
+`BRAND_FETCH=offline` never touches the network (cache must verify); `BRAND_FETCH=skip` does nothing (the packaged app then has no `brand/` resources; electron-builder only warns "file source doesn't exist"). `yarn brand:update` rewrites `brand.pin.json` so each brand change is one reviewable diff. The allowlist is intentionally licence-only until the UI adopts brand assets.
 
 ### Postinstall
 
