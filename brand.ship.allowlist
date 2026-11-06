@@ -1,0 +1,6 @@
+# Brand files packaged into the app, relative to the exifcleaner-brand/ root of the pinned zip,
+# one path per line. The OFL font licences (assets/fonts/OFL-*.txt) always ship and need no
+# entry here. Add a line only when the app actually uses the file; a path missing from the
+# pinned brand fails the build.
+#
+# Initially empty on purpose: the app still uses its old UI, tokens and system fonts.
