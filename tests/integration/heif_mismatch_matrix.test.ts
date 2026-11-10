@@ -446,19 +446,10 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 		readonly demand: "required" | "when-allowlisted";
 	}
 
-	// Rows 6, 9, 13: ExifTool refuses (it chooses its writer by the file NAME, Writer.pl:2550-2558),
+	// Rows 9, 13 (row 6 moved to the fail-closed table below when exifcleaner-node 0.5.0 made the
+	// WebP handler preserve resolution, so native no longer declines it): ExifTool refuses (it chooses its writer by the file NAME, Writer.pl:2550-2558),
 	// the transaction ends write-failed, nothing is written, the source and directory are unchanged.
 	const REFUSALS: readonly RefusalRow[] = [
-		{
-			row: "6",
-			title:
-				"WebP bytes named .heic with preserveResolution: native declines unsupported-feature, ExifTool refuses",
-			fixture: "sample.webp",
-			sourceName: "photo.heic",
-			settings: RESOLUTION_ON,
-			nativeDecline: "unsupported-feature",
-			demand: "required",
-		},
 		{
 			row: "9",
 			title:
@@ -508,10 +499,22 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 		assertSourceAndDir(ran, { sourceName: refusal.sourceName } as Row, []);
 	});
 
-	// Rows 10 and 15: a write succeeds but the reopened FileType (WEBP / MP4) has no allowlist
+	// Rows 6, 10 and 15: a write succeeds but the reopened FileType (WEBP / MP4) has no allowlist
 	// while the .png / .heic name demands the leak check: fail closed, output removed (F-63-9
-	// pinned, not changed).
+	// pinned, not changed). Row 6 was a native decline (unsupported-feature) on 0.4.0 because the
+	// content-selected WebP handler did not preserve resolution; 0.5.0 declares it and writes, so
+	// the same bytes now end exactly like row 10 (69-06, measured on the installed package).
 	const FAIL_CLOSED = [
+		{
+			row: "6",
+			title:
+				"WebP bytes named .heic with preserveResolution: native writes (0.5.0), verify fails closed",
+			fixture: "sample.webp",
+			sourceName: "photo.heic",
+			sourceFileType: "Extended WEBP",
+			engine: "native",
+			settings: RESOLUTION_ON,
+		},
 		{
 			row: "10",
 			title: "WebP bytes named .png: native writes, verify fails closed",
@@ -519,6 +522,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 			sourceName: "photo.png",
 			sourceFileType: "Extended WEBP",
 			engine: "native",
+			settings: DEFAULTS,
 		},
 		{
 			row: "15",
@@ -528,6 +532,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 			sourceName: "photo.heic",
 			sourceFileType: "MP4",
 			engine: "exiftool-after-native-decline",
+			settings: DEFAULTS,
 		},
 	] as const;
 
@@ -537,7 +542,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 			row: failClosed.row,
 			fixture: failClosed.fixture,
 			sourceName: failClosed.sourceName,
-			settings: DEFAULTS,
+			settings: failClosed.settings,
 			expect: {
 				engine: failClosed.engine,
 				nativeDecline: "unsupported-format",

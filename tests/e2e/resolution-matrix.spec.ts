@@ -195,7 +195,7 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 		}
 	});
 
-	test("WebP keeps its IFD0 resolution through ExifTool in overwrite mode and in Save-as-copy with Preserve resolution on (ADP-02)", async () => {
+	test("WebP keeps its IFD0 resolution in overwrite mode (ExifTool) and in Save-as-copy with Preserve resolution on (native since exifcleaner-node 0.5.0) (ADP-02)", async () => {
 		const { dir, cleanup } = createFixtureDir();
 		try {
 			const overwritePath = path.join(dir, "overwrite.webp");
@@ -251,10 +251,11 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 			);
 			expect(seededTagKeys(overwriteLines)).toEqual([]);
 
-			// ExifTool route: Save-as-copy with Preserve resolution on (ADP-02). WebP does
-			// not preserve resolution natively (D-01/D-03), so this launch routes the copy
-			// through ExifTool exactly like overwrite mode above -- the 4.4.0 native-route
-			// resolution loss (D-33) no longer applies once Preserve resolution is on.
+			// Native route: Save-as-copy with Preserve resolution on (ADP-02). On
+			// exifcleaner-node 0.4.0 WebP did not preserve resolution natively (D-01/D-03), so this
+			// launch went through ExifTool; 0.5.0 declares WebP resolution true, so the copy is
+			// written natively and must still carry the seeded resolution (69-06). The 4.4.0
+			// native-route resolution loss (D-33) does not apply once Preserve resolution is on.
 			const launchedCopyOn = await launchApp({
 				settings: { saveAsCopy: true, preserveResolution: true },
 			});
@@ -314,8 +315,8 @@ test.describe("Resolution preservation matrix — real IPC path (FID-03, D-37, D
 				sourcePath,
 			]);
 
-			// Native route: Save-as-copy with Preserve resolution off (D-01/D-03 gate
-			// bypassed, so WebP is native-eligible again).
+			// Native route: Save-as-copy with Preserve resolution off (native since 0.4.0 for
+			// this setting, and for the on setting too since 0.5.0).
 			const launchedCopyOff = await launchApp({
 				settings: { saveAsCopy: true, preserveResolution: false },
 			});

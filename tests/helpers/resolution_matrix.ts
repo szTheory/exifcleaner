@@ -53,7 +53,7 @@ export const JPEG_EXIF_COMPANIONS = [
 	"IFD0:YCbCrPositioning",
 ] as const;
 
-// Measured 63-16 (bundled ExifTool 13.59, exifcleaner-node 0.4.0, hybrid router,
+// Measured 63-16 (bundled ExifTool 13.59, exifcleaner-node 0.4.0 and re-run on 0.5.0 at 69-06, hybrid router,
 // sample-sips.{heic,avif}): HEIC and AVIF preserve resolution natively, so Preserve resolution
 // ON and OFF both route to the native writer (nativeWrite twice, ExifTool never), and ON-minus-OFF
 // carries the writer's framing: the mdat size and the EXIF byte order. Each is already present in
@@ -215,11 +215,13 @@ export const RESOLUTION_MATRIX_ROWS: readonly MatrixRow[] = [
 			...GENERIC_SEED_ARGS,
 		],
 		seedExpect: { "IFD0:XResolution": "300", "IFD0:Artist": "ZZP52-ARTIST" },
-		// Measured 58-08 (bundled ExifTool 13.59): the hybrid engine's WebP-with-Preserve-
-		// resolution-on route goes through ExifTool (D-01/D-03), whose EXIF-block re-creation
-		// changes File:ExifByteOrder and re-adds IFD0:YCbCrPositioning -- the same JPEG framing
-		// companions JPEG_EXIF_COMPANIONS pins, both already present in the seeded source above.
-		companions: ["File:ExifByteOrder", "IFD0:YCbCrPositioning"],
+		// Measured 69-06 (bundled ExifTool 13.59, exifcleaner-node 0.5.0): WebP preserves resolution
+		// natively, so the hybrid engine writes both the Preserve-resolution ON and OFF copies natively
+		// (nativeWrite twice, ExifTool never) and ON-minus-OFF adds nothing beyond the source's own
+		// resolution. The ExifTool-only block of the matrix passes without extras too, so the 58-08
+		// companions (File:ExifByteOrder, IFD0:YCbCrPositioning, measured when this row went through
+		// ExifTool on 0.4.0) are dropped rather than left as an allowance nothing needs.
+		companions: [],
 	},
 	{
 		ext: ".heic",

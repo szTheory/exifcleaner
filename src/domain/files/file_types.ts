@@ -58,7 +58,7 @@ const RAF_EXTENSIONS: ReadonlySet<string> = new Set([".raf"]);
 // in 58-04 (ADP-03) from webp-only to webp + png + jpeg -- every format the app can now write
 // natively (exifcleaner-node 0.3.0) needs its save-as-copy output independently verified,
 // regardless of which engine wrote it. Widened again in 63-02 (D22) with heic/heif/avif
-// (exifcleaner-node 0.4.0): every ISOBMFF copy is reopened and leak-checked before publication.
+// (added by exifcleaner-node 0.4.0, unchanged on 0.5.0): every ISOBMFF copy is reopened and leak-checked before publication.
 const VERIFIED_COPY_EXTENSIONS: ReadonlySet<string> = new Set([
 	".webp",
 	".png",
