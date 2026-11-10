@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import path from "node:path";
 import type { IpcMainInvokeEvent } from "electron";
 import type { Container } from "../../src/main/container";
 import { StripMetadataCommand } from "../../src/application/commands/strip_metadata_command";
@@ -229,25 +230,25 @@ describe("exif:remove handler", () => {
 			name: "JPEG",
 			filePath: "/tmp/sample.jpg",
 			saveAsCopy: false,
-			verifierPath: undefined,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.jpg",
 		},
 		{
 			name: "JPEG alias",
 			filePath: "/tmp/sample.jpeg",
 			saveAsCopy: false,
-			verifierPath: undefined,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.jpeg",
 		},
 		{
 			name: "mixed-case JPEG",
 			filePath: "/tmp/sample.JpG",
 			saveAsCopy: false,
-			verifierPath: undefined,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.JpG",
 		},
 		{
 			name: "PNG",
 			filePath: "/tmp/sample.png",
 			saveAsCopy: false,
-			verifierPath: undefined,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.png",
 		},
 		{
 			name: "copy-mode JPEG (D-11, ADP-03)",
@@ -522,6 +523,121 @@ describe("exif:remove handler", () => {
 			}),
 		);
 	});
+
+	it.each([
+		"/dir/photo.jpg",
+		"/dir/photo.jpeg",
+		"/dir/PHOTO.JPG",
+		"/dir/photo.png",
+		"/dir/photo.webp",
+		"/dir/PHOTO.WEBP",
+		"/dir/photo.heic",
+		"/dir/photo.heif",
+		"/dir/photo.avif",
+	])(
+		"routes an overwrite of %s through the verified staged transaction with the leak demand required (OVR-01, D-08)",
+		async (filePath) => {
+			const { container, stripMetadata, outputTransaction } = makeContainer({
+				saveAsCopy: false,
+			});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			const result = await handler(makeAuthorizedEvent(), filePath);
+
+			// The legacy in-place branch is not taken; the transaction owns the write.
+			expect(stripMetadata.execute).not.toHaveBeenCalled();
+			expect(outputTransaction.execute).toHaveBeenCalledTimes(1);
+			const parsed = path.parse(filePath);
+			const stage = `${parsed.dir}/.${parsed.name}.exifcleaner-stage-test-uuid${parsed.ext}`;
+			expect(outputTransaction.execute).toHaveBeenCalledWith({
+				filePath,
+				generatedPath: stage,
+				commitPath: filePath,
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				preserveResolution: true,
+				preserveTimestamps: false,
+				copyModeLeakCheck: {
+					demand: "required",
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+				},
+			});
+			expect(result).toEqual({
+				success: true,
+				outputPath: filePath,
+				wasForcedCopy: false,
+				wroteFile: true,
+				outputSize: 4096,
+			});
+		},
+	);
+
+	it("carries the current preserve settings into the overwrite demand (OVR-01)", async () => {
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+		});
+		const base = container.settings.get();
+		(container as unknown as { settings: { get: () => unknown } }).settings = {
+			get: () => ({
+				...base,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: true,
+			}),
+		};
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		await handler(makeAuthorizedEvent(), "/dir/photo.webp");
+
+		expect(outputTransaction.execute).toHaveBeenCalledWith(
+			expect.objectContaining({
+				commitPath: "/dir/photo.webp",
+				copyModeLeakCheck: {
+					demand: "required",
+					preserveOrientation: false,
+					preserveColorProfile: false,
+					preserveResolution: true,
+				},
+			}),
+		);
+	});
+
+	it.each([
+		{
+			error: {
+				code: "verification-failed" as const,
+				verificationCode: "output-metadata-leak" as const,
+				diagnostic: "GPS:GPSLatitude",
+			},
+			failureKind: "verification",
+			detail:
+				"Generated output verification failed (output-metadata-leak): GPS:GPSLatitude",
+		},
+		{
+			error: { code: "commit-failed" as const },
+			failureKind: "commit",
+			detail: "Generated output commit failed",
+		},
+	])(
+		"a failed staged overwrite of a webp is reported as failureKind $failureKind and does not claim a written file (OVR-01, D-09)",
+		async ({ error, failureKind, detail }) => {
+			const { container, stripMetadata } = makeContainer({
+				saveAsCopy: false,
+				transactionResult: { ok: false, error },
+			});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			const result = await handler(makeAuthorizedEvent(), "/dir/photo.webp");
+
+			expect(stripMetadata.execute).not.toHaveBeenCalled();
+			expect(result).toEqual({ success: false, failureKind, detail });
+		},
+	);
 
 	it("passes no copyModeLeakCheck for a tif overwrite (D-08; a RAW overwrite is a forced copy)", async () => {
 		const { container, outputTransaction } = makeContainer({

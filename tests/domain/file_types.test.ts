@@ -114,108 +114,75 @@ it("TIFF_EXTENSIONS is disjoint from RAW_EXTENSIONS and from MEDIA_EXTENSIONS (D
 	expect(tiffMediaIntersection).toEqual([]);
 });
 
-it("requiresVerifiedWrite routes raw, media, TIFF (both modes), and copy-mode webp/png/jpeg through the verified transaction, but not overwrite-mode webp/png/jpeg (D-11, D-23, D-24, ADP-03)", () => {
-	expect(
-		requiresVerifiedWrite({ filename: "sample.cr2", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.cr2", outputMode: "overwrite" }),
-	).toBe(true);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.mp4", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.mp4", outputMode: "overwrite" }),
-	).toBe(true);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.tif", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.tif", outputMode: "overwrite" }),
-	).toBe(true);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.tiff", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.tiff", outputMode: "overwrite" }),
-	).toBe(true);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "copy" }),
-	).toBe(true);
-	// This phase intentionally leaves in-place webp overwrites on the unverified
-	// ExifTool path (D-19/D-24/D-42); out of scope for this plan.
-	expect(
-		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "overwrite" }),
-	).toBe(false);
-	// ADP-03/D-11: png and jpeg saves-as-copy are now verified (widened
-	// requiresVerifiedWrite copy clause), but in-place overwrites of those formats
-	// stay on the direct path.
-	expect(
-		requiresVerifiedWrite({ filename: "sample.png", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.png", outputMode: "overwrite" }),
-	).toBe(false);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.jpg", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.jpg", outputMode: "overwrite" }),
-	).toBe(false);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.jpeg", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresVerifiedWrite({ filename: "PHOTO.JPG", outputMode: "copy" }),
-	).toBe(true);
+it("requiresVerifiedWrite routes raw, media and TIFF in both modes and the seven native image extensions in both modes from 4.8.0 (OVR-01, D-08)", () => {
+	for (const filename of [
+		"sample.cr2",
+		"sample.mp4",
+		"sample.tif",
+		"sample.tiff",
+	]) {
+		expect(requiresVerifiedWrite({ filename, outputMode: "copy" })).toBe(true);
+		expect(requiresVerifiedWrite({ filename, outputMode: "overwrite" })).toBe(
+			true,
+		);
+	}
+	for (const filename of [
+		"sample.jpg",
+		"sample.jpeg",
+		"sample.png",
+		"sample.webp",
+		"sample.heic",
+		"sample.heif",
+		"sample.avif",
+		"PHOTO.JPG",
+		"PHOTO.JPEG",
+		"PHOTO.PNG",
+		"PHOTO.WEBP",
+		"PHOTO.HEIC",
+		"PHOTO.HEIF",
+		"PHOTO.AVIF",
+	]) {
+		expect(requiresVerifiedWrite({ filename, outputMode: "copy" })).toBe(true);
+		expect(requiresVerifiedWrite({ filename, outputMode: "overwrite" })).toBe(
+			true,
+		);
+	}
+	// Unsupported or extension-less names are never routed through the transaction.
+	for (const filename of ["sample.gif", "sample.bmp", "notes.txt", "noext"]) {
+		expect(requiresVerifiedWrite({ filename, outputMode: "copy" })).toBe(false);
+		expect(requiresVerifiedWrite({ filename, outputMode: "overwrite" })).toBe(
+			false,
+		);
+	}
 });
 
-it("requiresCopyModeLeakCheck is true for png/jpg/jpeg/webp copies (webp from 4.8.0, 69-09), false for tiff/raw/media copies and any overwrite (D-11)", () => {
-	expect(
-		requiresCopyModeLeakCheck({ filename: "sample.png", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresCopyModeLeakCheck({ filename: "sample.jpg", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresCopyModeLeakCheck({ filename: "sample.jpeg", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresCopyModeLeakCheck({ filename: "PHOTO.JPG", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresCopyModeLeakCheck({
-			filename: "sample.png",
-			outputMode: "overwrite",
-		}),
-	).toBe(false);
-	expect(
-		requiresCopyModeLeakCheck({
-			filename: "sample.jpg",
-			outputMode: "overwrite",
-		}),
-	).toBe(false);
-	expect(
-		requiresCopyModeLeakCheck({ filename: "sample.webp", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresCopyModeLeakCheck({ filename: "PHOTO.WEBP", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresCopyModeLeakCheck({
-			filename: "sample.webp",
-			outputMode: "overwrite",
-		}),
-	).toBe(false);
-	expect(
-		requiresCopyModeLeakCheck({ filename: "sample.tif", outputMode: "copy" }),
-	).toBe(false);
-	expect(
-		requiresCopyModeLeakCheck({ filename: "sample.cr2", outputMode: "copy" }),
-	).toBe(false);
-	expect(
-		requiresCopyModeLeakCheck({ filename: "sample.mp4", outputMode: "copy" }),
-	).toBe(false);
+it("requiresCopyModeLeakCheck is true for the seven native image extensions in both modes (overwrite from 4.8.0, OVR-01), false for tiff/raw/media in either mode (D-11)", () => {
+	for (const filename of [
+		"sample.png",
+		"sample.jpg",
+		"sample.jpeg",
+		"PHOTO.JPG",
+		"sample.webp",
+		"PHOTO.WEBP",
+		"sample.heic",
+		"sample.heif",
+		"sample.avif",
+	]) {
+		expect(requiresCopyModeLeakCheck({ filename, outputMode: "copy" })).toBe(
+			true,
+		);
+		expect(
+			requiresCopyModeLeakCheck({ filename, outputMode: "overwrite" }),
+		).toBe(true);
+	}
+	for (const filename of ["sample.tif", "sample.cr2", "sample.mp4"]) {
+		expect(requiresCopyModeLeakCheck({ filename, outputMode: "copy" })).toBe(
+			false,
+		);
+		expect(
+			requiresCopyModeLeakCheck({ filename, outputMode: "overwrite" }),
+		).toBe(false);
+	}
 });
 
 it("isMediaFile is false for png, jpg and jpeg; MEDIA_EXTENSIONS keeps its existing literal assertion (D-11)", () => {
@@ -225,38 +192,31 @@ it("isMediaFile is false for png, jpg and jpeg; MEDIA_EXTENSIONS keeps its exist
 });
 
 it.each([["sample.heic"], ["SAMPLE.HEIC"], ["sample.heif"], ["sample.avif"]])(
-	"%s is verified and leak-checked in copy mode, neither in overwrite mode, and is not a media file (D-08)",
+	"%s is verified and leak-checked in both modes from 4.8.0 (overwrite: OVR-01, D-08) and is not a media file",
 	(filename) => {
 		expect(requiresVerifiedWrite({ filename, outputMode: "copy" })).toBe(true);
 		expect(requiresCopyModeLeakCheck({ filename, outputMode: "copy" })).toBe(
 			true,
 		);
 		expect(requiresVerifiedWrite({ filename, outputMode: "overwrite" })).toBe(
-			false,
+			true,
 		);
 		expect(
 			requiresCopyModeLeakCheck({ filename, outputMode: "overwrite" }),
-		).toBe(false);
+		).toBe(true);
 		expect(isMediaFile({ filename })).toBe(false);
 	},
 );
 
-it("webp copies are verified and leak-checked from 4.8.0 against a measured allowlist, overwrites stay outside (D-03, D-06)", () => {
-	expect(
-		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresCopyModeLeakCheck({ filename: "sample.webp", outputMode: "copy" }),
-	).toBe(true);
-	expect(
-		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "overwrite" }),
-	).toBe(false);
-	expect(
-		requiresCopyModeLeakCheck({
-			filename: "sample.webp",
-			outputMode: "overwrite",
-		}),
-	).toBe(false);
+it("webp copies and overwrites are verified and leak-checked from 4.8.0 against a measured allowlist (D-03, D-06, OVR-01)", () => {
+	for (const outputMode of ["copy", "overwrite"] as const) {
+		expect(requiresVerifiedWrite({ filename: "sample.webp", outputMode })).toBe(
+			true,
+		);
+		expect(
+			requiresCopyModeLeakCheck({ filename: "sample.webp", outputMode }),
+		).toBe(true);
+	}
 	expect(isMediaFile({ filename: "sample.webp" })).toBe(false);
 });
 
@@ -281,9 +241,31 @@ it("copyModeLeakCheckDemandOf is required for leak-checked copies, when-allowlis
 			"when-allowlisted",
 		);
 	}
-	for (const filename of ["a.webp", "a.dng", "a.tif", "a.mp4", "a.png"]) {
+	// From 4.8.0 (OVR-01, D-08) overwrite of the seven native image extensions is leak-checked too.
+	for (const filename of [
+		"a.png",
+		"a.jpg",
+		"a.jpeg",
+		"a.JPG",
+		"a.heic",
+		"a.heif",
+		"a.avif",
+		"a.webp",
+		"a.WEBP",
+	]) {
 		expect(
 			copyModeLeakCheckDemandOf({ filename, outputMode: "overwrite" }),
+		).toBe("required");
+	}
+	// RAW, TIFF and media overwrite stay verify-only (no leak demand).
+	for (const filename of ["a.dng", "a.tif", "a.tiff", "a.mp4", "a.mov"]) {
+		expect(
+			copyModeLeakCheckDemandOf({ filename, outputMode: "overwrite" }),
+		).toBeUndefined();
+	}
+	for (const outputMode of ["copy", "overwrite"] as const) {
+		expect(
+			copyModeLeakCheckDemandOf({ filename: "a.gif", outputMode }),
 		).toBeUndefined();
 	}
 	expect(
