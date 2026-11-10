@@ -559,6 +559,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 			error: {
 				code: "verification-failed",
 				verificationCode: "output-metadata-leak",
+				diagnostic: `Copy-mode leak check has no permitted-tag set for this file type (${failClosed.sourceFileType})`,
 			},
 		});
 		expect(ran.verifySpy).toHaveBeenCalledOnce();
@@ -569,8 +570,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 			ok: false,
 			error: {
 				code: "output-metadata-leak",
-				detail:
-					"Copy-mode leak check has no permitted-tag set for this file type",
+				detail: `Copy-mode leak check has no permitted-tag set for this file type (${failClosed.sourceFileType})`,
 				leakedTags: [],
 			},
 		});

@@ -257,7 +257,10 @@ function transactionFailureResult(error: OutputTransactionFailure): {
 			return {
 				success: false,
 				failureKind: "verification",
-				detail: "Generated output verification failed",
+				detail:
+					error.diagnostic === undefined
+						? "Generated output verification failed"
+						: `Generated output verification failed (${error.verificationCode}): ${error.diagnostic}`,
 			};
 		case "cleanup-failed":
 			return {

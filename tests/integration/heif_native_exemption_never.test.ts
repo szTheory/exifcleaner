@@ -234,6 +234,8 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 					error: {
 						code: "verification-failed",
 						verificationCode: "output-metadata-leak",
+						diagnostic:
+							"ICC-header:CMMFlags, ICC-header:ColorSpaceData, ICC-header:ConnectionSpaceIlluminant, ICC-header:DeviceAttributes, ICC-header:DeviceManufacturer, ICC-header:DeviceModel, ICC-header:PrimaryPlatform, ICC-header:ProfileCMMType +17 more",
 					},
 				});
 				expect(stack.nativeWrite).toHaveBeenCalledOnce();

@@ -228,6 +228,7 @@ describe("OutputTransaction", () => {
 			error: {
 				code: "verification-failed",
 				verificationCode: "output-verification-failed",
+				diagnostic: "not reopenable",
 			},
 		});
 		expect(result).not.toHaveProperty("outputPath");
@@ -297,6 +298,7 @@ describe("OutputTransaction", () => {
 				error: {
 					code: "verification-failed",
 					verificationCode: "output-verification-failed",
+					diagnostic: "re-open failed",
 				},
 			});
 			expect(events).toEqual([
@@ -344,6 +346,7 @@ describe("OutputTransaction", () => {
 			error: {
 				code: "verification-failed",
 				verificationCode: "output-verification-failed",
+				diagnostic: "not reopenable",
 			},
 		});
 		expect(events).toEqual([
@@ -496,6 +499,7 @@ describe("OutputTransaction", () => {
 				error: {
 					code: "verification-failed",
 					verificationCode: "output-verification-failed",
+					diagnostic: "reopen failed",
 				},
 			});
 			assertDirEffect(beforeDir, snapshotDir(fixtureDir), {
@@ -713,7 +717,7 @@ describe("OutputTransaction", () => {
 		function leakResult(
 			leakedTags: readonly string[],
 			extra: Record<string, unknown> = {},
-		): TransactionTestOptions["verifyResult"] {
+		): NonNullable<TransactionTestOptions["verifyResult"]> {
 			return {
 				ok: false,
 				error: {

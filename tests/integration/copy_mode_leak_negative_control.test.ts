@@ -64,6 +64,8 @@ type Case = {
 	readonly fixture: string;
 	readonly inject: (filePath: string) => void;
 	readonly leakedTagPrefix: string;
+	// Exact diagnostic the real transaction carries (tag names only, never the sentinel value).
+	readonly diagnostic: string;
 };
 
 const CASES: readonly Case[] = [
@@ -72,12 +74,15 @@ const CASES: readonly Case[] = [
 		fixture: "sample.jpg",
 		inject: injectJpegSentinel,
 		leakedTagPrefix: "XMP-dc:Creator",
+		diagnostic:
+			"Composite:GPSLatitude, GPS:GPSLatitude, GPS:GPSLatitudeRef, GPS:GPSVersionID, XMP-dc:Creator, XMP-x:XMPToolkit",
 	},
 	{
 		name: "png",
 		fixture: "sample.png",
 		inject: injectPngSentinel,
 		leakedTagPrefix: "PNG:Comment",
+		diagnostic: "PNG:Comment",
 	},
 ];
 
@@ -283,6 +288,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 						error: {
 							code: "verification-failed",
 							verificationCode: "output-metadata-leak",
+							diagnostic: testCase.diagnostic,
 						},
 					});
 					expect(fs.existsSync(generatedPath)).toBe(false);

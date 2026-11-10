@@ -92,8 +92,9 @@ export class VerifyGeneratedOutputQuery {
 					return { ok: true, value: { exemptionsApplied: [] } };
 				}
 				return leakFailure({
-					detail:
-						"Copy-mode leak check has no permitted-tag set for this file type",
+					// The reopened FileType is the only discriminator when no tag is listed;
+					// it comes from ExifTool's fixed type vocabulary, never from a tag value.
+					detail: `Copy-mode leak check has no permitted-tag set for this file type (${fileType})`,
 					leakedTags: [],
 				});
 			}

@@ -1036,7 +1036,7 @@ describe("exif:remove handler", () => {
 		expect("residualPath" in (result as object)).toBe(false);
 	});
 
-	it("returns a verification terminal failure without publishing an output path", async () => {
+	it("returns a verification terminal failure without publishing an output path, old text when no diagnostic is carried", async () => {
 		const { container, outputTransaction } = makeContainer({
 			saveAsCopy: false,
 			transactionResult: {
@@ -1061,7 +1061,7 @@ describe("exif:remove handler", () => {
 		expect(result).not.toHaveProperty("outputPath");
 	});
 
-	it("maps a copy-mode leak verdict to the exact same unchanged IPC text (D-10, D-11)", async () => {
+	it("a leak verdict carrying no diagnostic keeps the old fixed IPC text (D-10, D-11)", async () => {
 		const { container, outputTransaction } = makeContainer({
 			saveAsCopy: true,
 			transactionResult: {

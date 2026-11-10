@@ -13,6 +13,8 @@ export type OutputTransactionFailure =
 	| {
 			readonly code: "verification-failed";
 			readonly verificationCode: OutputVerificationError["code"];
+			/** Tag names (never values or paths) or the fixed verification detail; see verificationDiagnostic. */
+			readonly diagnostic?: string;
 	  }
 	| { readonly code: "cleanup-failed"; readonly residualPath: string }
 	| { readonly code: "commit-failed" };
@@ -149,6 +151,7 @@ export class OutputTransaction {
 				error: cleanupFailure ?? {
 					code: "verification-failed",
 					verificationCode: verificationResult.error.code,
+					diagnostic: verificationDiagnostic(verificationResult.error),
 				},
 			};
 		}
@@ -192,6 +195,31 @@ export class OutputTransaction {
 
 		return { code: "cleanup-failed", residualPath: generatedPath };
 	}
+}
+
+const MAX_DIAGNOSTIC_TAGS = 8;
+const MAX_DIAGNOSTIC_TAG_LENGTH = 80;
+
+// Names only: a leak verdict also reaches this point with the record's values
+// nearby, so the text is built from `leakedTags` and `detail` alone. Tag names can
+// originate in file content (PNG text keywords, XMP property names), so each name
+// and the list are capped; the copied line cannot be flooded by a hostile file.
+function verificationDiagnostic(error: OutputVerificationError): string {
+	if (error.code === "output-verification-failed") {
+		return error.detail;
+	}
+	if (error.leakedTags.length === 0) {
+		return error.detail;
+	}
+	const shown = error.leakedTags
+		.slice(0, MAX_DIAGNOSTIC_TAGS)
+		.map((name) =>
+			name.length > MAX_DIAGNOSTIC_TAG_LENGTH
+				? `${name.slice(0, MAX_DIAGNOSTIC_TAG_LENGTH)}…`
+				: name,
+		);
+	const hidden = error.leakedTags.length - shown.length;
+	return hidden > 0 ? `${shown.join(", ")} +${hidden} more` : shown.join(", ");
 }
 
 function isTransientFileLock(error: unknown): boolean {

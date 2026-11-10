@@ -307,6 +307,8 @@ describe("63-11: F-HEIC-ICC is applied only to ExifTool-written HEIF copies, thr
 					error: {
 						code: "verification-failed",
 						verificationCode: "output-metadata-leak",
+						diagnostic:
+							"ICC-header:CMMFlags, ICC-header:ColorSpaceData, ICC-header:ConnectionSpaceIlluminant, ICC-header:DeviceAttributes, ICC-header:DeviceManufacturer, ICC-header:DeviceModel, ICC-header:PrimaryPlatform, ICC-header:ProfileCMMType +17 more",
 					},
 				});
 				await nativeDeclined(stack);
@@ -419,6 +421,7 @@ describe("63-11: F-HEIC-ICC is applied only to ExifTool-written HEIF copies, thr
 					error: {
 						code: "verification-failed",
 						verificationCode: "output-metadata-leak",
+						diagnostic: "QuickTime:HandlerDescription",
 					},
 				});
 				expect(stack.nativeWrite).toHaveBeenCalledOnce();
