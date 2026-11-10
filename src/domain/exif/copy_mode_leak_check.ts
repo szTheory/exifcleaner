@@ -172,7 +172,18 @@ const PNG_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
 ]);
 
 // 58-SWEEP-MATRIX.md — PNG, permitted only when preserveResolution is requested.
+// The five IFD0/File keys are the 69-03 decision (69-COLOR-SWEEP-MATRIX.md "## Classification of
+// new keys"): a colour PNG that carries eXIf resolution tags, written by the ExifTool engine
+// (fallback or rollback route) with preserveResolution, keeps IFD0:XResolution/YResolution/
+// ResolutionUnit plus the File:ExifByteOrder and IFD0:YCbCrPositioning companions ExifTool
+// re-creates with them. The native engine does not carry them. Resolution values are what the
+// user asked to keep, the same class JPEG, HEIC and AVIF already permit under preserveResolution.
 const PNG_RESOLUTION_ONLY: ReadonlySet<string> = new Set([
+	"File:ExifByteOrder",
+	"IFD0:ResolutionUnit",
+	"IFD0:XResolution",
+	"IFD0:YCbCrPositioning",
+	"IFD0:YResolution",
 	"PNG-pHYs:PixelUnits",
 	"PNG-pHYs:PixelsPerUnitX",
 	"PNG-pHYs:PixelsPerUnitY",
