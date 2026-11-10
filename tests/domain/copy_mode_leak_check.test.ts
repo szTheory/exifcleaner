@@ -634,15 +634,29 @@ describe("findLeakedTags", () => {
 			},
 		);
 
-		it("keeps ICC_Profile:ChromaticAdaptation out of the shared PNG/JPEG colour-profile set", () => {
+		// 63-09 kept ICC_Profile:ChromaticAdaptation out of the shared set because JPEG and PNG were
+		// not re-measured. 69-03 measured them (Display P3 profile, both engines, 8 combinations):
+		// JPEG and PNG now permit it, only under preserveColorProfile, through their own
+		// measured extension (the shared ICC_GROUP_TAGS set is unchanged).
+		it("permits ICC_Profile:ChromaticAdaptation for PNG/JPEG only under preserveColorProfile", () => {
 			for (const format of ["png", "jpeg"] as const) {
+				const fileType = format === "png" ? "PNG" : "JPEG";
 				expect(
 					findLeakedTags({
 						record: { "ICC_Profile:ChromaticAdaptation": "x" },
 						format,
 						writtenBy: "native",
-						fileType: format === "png" ? "PNG" : "JPEG",
+						fileType,
 						preservation: colourOn,
+					}).leakedTags,
+				).toEqual([]);
+				expect(
+					findLeakedTags({
+						record: { "ICC_Profile:ChromaticAdaptation": "x" },
+						format,
+						writtenBy: "native",
+						fileType,
+						preservation: off,
 					}).leakedTags,
 				).toEqual(["ICC_Profile:ChromaticAdaptation"]);
 			}

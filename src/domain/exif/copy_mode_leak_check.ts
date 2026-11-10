@@ -109,6 +109,44 @@ const ICC_GROUP_TAGS: ReadonlySet<string> = new Set([
 	"ICC_Profile:RedTRC",
 ]);
 
+// 69-03 (OVR-01; amendment A2, review B3): ICC tags measured on the profiles people actually have
+// (69-COLOR-SWEEP-MATRIX.md "## ICC decisions"), JPEG and PNG only, both engines. The Phase 58 set
+// above came from one simple profile. The macOS system sRGB IEC61966-2.1 v2 profile (the layout
+// cameras, Windows and Photoshop embed) adds the measurement (ICC-meas), viewing condition
+// (ICC-view), device description, luminance and technology tags and the bkpt tag; Adobe RGB (1998)
+// adds ICC_Profile:MediaBlackPoint; Display P3 (v4) adds ICC_Profile:ChromaticAdaptation. They are
+// colorimetry and descriptor text of the colour profile itself, the same class as the permitted
+// ProfileDescription and ProfileCopyright, and they exist in the output only because the caller
+// asked to keep the profile: with preserveColorProfile off every ICC key is absent on both engines
+// (measured). They are therefore permitted ONLY under preserveColorProfile and never in an
+// always-permitted set. Any ICC tag that was not measured (for example a LUT tag of a printer
+// profile) stays a leak. HEIC and AVIF were not re-measured with these profiles and do not get
+// them.
+const ICC_MEASURED_EXTENSION_TAGS: ReadonlySet<string> = new Set([
+	"ICC-meas:MeasurementBacking",
+	"ICC-meas:MeasurementFlare",
+	"ICC-meas:MeasurementGeometry",
+	"ICC-meas:MeasurementIlluminant",
+	"ICC-meas:MeasurementObserver",
+	"ICC-view:ViewingCondIlluminant",
+	"ICC-view:ViewingCondIlluminantType",
+	"ICC-view:ViewingCondSurround",
+	"ICC_Profile:ChromaticAdaptation",
+	"ICC_Profile:DeviceMfgDesc",
+	"ICC_Profile:DeviceModelDesc",
+	"ICC_Profile:Luminance",
+	"ICC_Profile:MediaBlackPoint",
+	"ICC_Profile:Technology",
+	"ICC_Profile:ViewingCondDesc",
+]);
+
+// JPEG, permitted only when preserveColorProfile is requested: the Phase 58 ICC set plus the 69-03
+// measured extension.
+const JPEG_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
+	...ICC_GROUP_TAGS,
+	...ICC_MEASURED_EXTENSION_TAGS,
+]);
+
 // 58-SWEEP-MATRIX.md — JPEG, permitted only when preserveResolution is requested.
 const JPEG_RESOLUTION_ONLY: ReadonlySet<string> = new Set([
 	"File:ExifByteOrder",
@@ -165,9 +203,10 @@ const PNG_ORIENTATION_ONLY: ReadonlySet<string> = new Set([
 
 // 58-SWEEP-MATRIX.md — PNG, permitted only when preserveColorProfile is requested.
 // PNG:ProfileName is the iCCP chunk's profile-name field (ExifTool's own naming, not
-// content), additional to the shared ICC_GROUP_TAGS set.
+// content), additional to the shared ICC_GROUP_TAGS set and the 69-03 measured extension.
 const PNG_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
 	...ICC_GROUP_TAGS,
+	...ICC_MEASURED_EXTENSION_TAGS,
 	"PNG:ProfileName",
 ]);
 
@@ -400,7 +439,10 @@ function isPermitted({
 			) {
 				return true;
 			}
-			if (preservation.preserveColorProfile && ICC_GROUP_TAGS.has(groupTag)) {
+			if (
+				preservation.preserveColorProfile &&
+				JPEG_COLOR_PROFILE_ONLY.has(groupTag)
+			) {
 				return true;
 			}
 			return (
