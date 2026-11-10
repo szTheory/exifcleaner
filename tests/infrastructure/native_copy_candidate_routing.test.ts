@@ -10,7 +10,8 @@ import { FakeNativeMetadata } from "../fakes/fake_native_metadata";
 // preservation clause, over the fake capability table mirroring exifcleaner-node
 // 0.3.0 (three real formats: webp/png/jpeg, real extension arrays — never an
 // empty extensions array, which would make every case fall through to
-// ExifTool and pass for the wrong reason). Task 2 shows this file red on both
+// ExifTool and pass for the wrong reason; the fake now mirrors the installed
+// package for all five formats, see the deep-equal guard below). Task 2 shows this file red on both
 // regressions it exists to catch (missing resolution clause, any-format
 // lookup) and restores hybrid_metadata_engine.ts byte-for-byte afterward.
 
@@ -52,7 +53,7 @@ function baseRequest({
 }
 
 describe("native copy candidate routing (D-06)", () => {
-	it("D-06: a WebP save-as-copy asking to keep resolution routes to ExifTool and never to native", async () => {
+	it("D-06: a WebP save-as-copy asking to keep resolution routes to native once and never to ExifTool (0.5.0 declares WebP resolution true)", async () => {
 		const exiftool = new FakeMetadataEngine();
 		const native = new FakeNativeMetadata();
 		const engine = new HybridMetadataEngine({ exiftool, native });
@@ -64,9 +65,11 @@ describe("native copy candidate routing (D-06)", () => {
 
 		const result = await engine.sanitize(request);
 
-		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
-		expect(native.sanitizeCalls).toEqual([]);
-		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
+		expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
+		expect(native.sanitizeCalls).toEqual([request]);
+		expect(exiftool.calls.filter((call) => call.method === "sanitize")).toEqual(
+			[],
+		);
 	});
 
 	it.each([
@@ -287,7 +290,7 @@ describe("default settings route HEIF copies to native (D-18)", () => {
 		preserveResolution: DEFAULT_SETTINGS.preserveResolution,
 	};
 
-	it("the fake heic and avif capabilities equal the installed 0.4.0 routing fields", () => {
+	it("the fake capabilities equal the installed package routing fields for all five formats", () => {
 		const project = (format: NativeFormatCapabilities) => ({
 			format: format.format,
 			extensions: format.extensions,
@@ -302,7 +305,7 @@ describe("default settings route HEIF copies to native (D-18)", () => {
 		});
 		const real = new NativeMetadataAdapter().getCapabilities().formats;
 		const fake = new FakeNativeMetadata().capabilities.formats;
-		for (const name of ["heic", "avif"]) {
+		for (const name of ["webp", "png", "jpeg", "heic", "avif"]) {
 			const realEntry = real.find((format) => format.format === name);
 			const fakeEntry = fake.find((format) => format.format === name);
 			expect(realEntry).toBeDefined();
@@ -370,6 +373,60 @@ describe("default settings route HEIF copies to native (D-18)", () => {
 		const request = baseRequest({
 			source: "/files/source.heic",
 			destination: "/files/source.heic",
+			outputMode: "overwrite",
+			...defaults,
+		});
+
+		const result = await engine.sanitize(request);
+
+		expect(result).toEqual({ ok: true, value: { writtenBy: "exiftool" } });
+		expect(native.sanitizeCalls).toEqual([]);
+		expect(exiftool.calls).toEqual([{ method: "sanitize", request }]);
+	});
+});
+
+describe("default settings route WebP copies to native (WEBP-08, D-01)", () => {
+	const defaults = {
+		preserveOrientation: DEFAULT_SETTINGS.preserveOrientation,
+		preserveColorProfile: DEFAULT_SETTINGS.preserveColorProfile,
+		preserveTimestamps: DEFAULT_SETTINGS.preserveTimestamps,
+		preserveResolution: DEFAULT_SETTINGS.preserveResolution,
+	};
+
+	it("the defaults keep orientation, colour profile and resolution (the case that used to leave WebP on ExifTool)", () => {
+		expect(defaults.preserveOrientation).toBe(true);
+		expect(defaults.preserveColorProfile).toBe(true);
+		expect(defaults.preserveResolution).toBe(true);
+	});
+
+	it.each([
+		[".webp", "/files/source.webp", "/files/clean.webp"],
+		[".WEBP", "/files/source.WEBP", "/files/clean.WEBP"],
+	])(
+		"%s save-as-copy with DEFAULT_SETTINGS routes to native once with zero ExifTool writer calls",
+		async (_label, source, destination) => {
+			const exiftool = new FakeMetadataEngine();
+			const native = new FakeNativeMetadata();
+			const engine = new HybridMetadataEngine({ exiftool, native });
+			const request = baseRequest({ source, destination, ...defaults });
+
+			const result = await engine.sanitize(request);
+
+			expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
+			expect(native.sanitizeCalls).toEqual([request]);
+			expect(
+				exiftool.calls.filter((call) => call.method === "sanitize"),
+			).toEqual([]);
+		},
+	);
+
+	it("an overwrite-mode .webp with DEFAULT_SETTINGS still routes to ExifTool (the overwrite predicate is a later plan)", async () => {
+		const exiftool = new FakeMetadataEngine();
+		const native = new FakeNativeMetadata();
+		const engine = new HybridMetadataEngine({ exiftool, native });
+		const request = baseRequest({
+			source: "/files/source.webp",
+			destination: "/files/source.webp",
 			outputMode: "overwrite",
 			...defaults,
 		});
