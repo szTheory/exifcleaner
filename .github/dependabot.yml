@@ -63,6 +63,8 @@ updates:
       - dependency-name: "vite"
         versions:
           - ">=8"
+      # sealed: promotion is a deliberate act, see scripts/exifcleaner_node_dependency_gate.mjs
+      - dependency-name: "exifcleaner-node"
 
   - package-ecosystem: github-actions
     directory: /
