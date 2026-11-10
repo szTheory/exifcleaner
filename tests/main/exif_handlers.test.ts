@@ -87,10 +87,12 @@ function makeContainer({
 		value: { tagsRemoved: 0, writtenBy: "exiftool" },
 	},
 	transactionResult,
+	writtenBy = "exiftool",
 	readMetadataResult = { ok: true, value: { Make: "camera" } },
 }: {
 	saveAsCopy: boolean;
 	removeXattrs?: boolean;
+	writtenBy?: "native" | "exiftool";
 	executeResult?: Awaited<ReturnType<Container["stripMetadata"]["execute"]>>;
 	transactionResult?: Awaited<
 		ReturnType<Container["outputTransaction"]["execute"]>
@@ -112,7 +114,10 @@ function makeContainer({
 			return (
 				transactionResult ?? {
 					ok: true,
-					value: { outputPath: request.commitPath ?? request.generatedPath },
+					value: {
+						outputPath: request.commitPath ?? request.generatedPath,
+						writtenBy,
+					},
 				}
 			);
 		}),
@@ -417,6 +422,7 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: { engine: "exiftool", outputMode: "copy", leakCheck: "passed" },
 		});
 	});
 
@@ -449,6 +455,7 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: { engine: "exiftool", outputMode: "copy", leakCheck: "passed" },
 		});
 	});
 
@@ -571,6 +578,11 @@ describe("exif:remove handler", () => {
 				wasForcedCopy: false,
 				wroteFile: true,
 				outputSize: 4096,
+				evidence: {
+					engine: "exiftool",
+					outputMode: "overwrite",
+					leakCheck: "passed",
+				},
 			});
 		},
 	);
@@ -653,6 +665,136 @@ describe("exif:remove handler", () => {
 		expect(call).not.toHaveProperty("copyModeLeakCheck");
 	});
 
+	it.each([
+		{
+			name: "a natively written webp copy (the 4.8.0 default)",
+			filePath: "/dir/photo.webp",
+			saveAsCopy: true,
+			writtenBy: "native" as const,
+			expected: { engine: "native", outputMode: "copy", leakCheck: "passed" },
+		},
+		{
+			name: "a natively written jpg overwrite",
+			filePath: "/dir/photo.jpg",
+			saveAsCopy: false,
+			writtenBy: "native" as const,
+			expected: {
+				engine: "native",
+				outputMode: "overwrite",
+				leakCheck: "passed",
+			},
+		},
+		{
+			name: "an ExifTool-written png overwrite",
+			filePath: "/dir/photo.png",
+			saveAsCopy: false,
+			writtenBy: "exiftool" as const,
+			expected: {
+				engine: "exiftool",
+				outputMode: "overwrite",
+				leakCheck: "passed",
+			},
+		},
+		{
+			name: "a RAW file with save-as-copy off (forced copy, the optional check is not claimed)",
+			filePath: "/dir/sample.dng",
+			saveAsCopy: false,
+			writtenBy: "exiftool" as const,
+			expected: {
+				engine: "exiftool",
+				outputMode: "copy",
+				leakCheck: "not-run",
+			},
+		},
+		{
+			name: "a tif copy written natively (demand when-allowlisted is not claimed as passed)",
+			filePath: "/dir/scan.tif",
+			saveAsCopy: true,
+			writtenBy: "native" as const,
+			expected: { engine: "native", outputMode: "copy", leakCheck: "not-run" },
+		},
+	])(
+		"reports exact evidence for $name (69-14, D-17)",
+		async ({ filePath, saveAsCopy, writtenBy, expected }) => {
+			const { container } = makeContainer({ saveAsCopy, writtenBy });
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			const result = (await handler(makeAuthorizedEvent(), filePath)) as {
+				success: true;
+				evidence?: Record<string, unknown>;
+			};
+
+			expect(result.success).toBe(true);
+			expect(result.evidence).toStrictEqual(expected);
+			// Privacy: three enums, no path, tag value or hash.
+			const evidence = result.evidence ?? {};
+			expect(Object.keys(evidence).sort()).toEqual([
+				"engine",
+				"leakCheck",
+				"outputMode",
+			]);
+			expect(["native", "exiftool"]).toContain(evidence["engine"]);
+			expect(["copy", "overwrite"]).toContain(evidence["outputMode"]);
+			expect(["passed", "not-run"]).toContain(evidence["leakCheck"]);
+			for (const value of Object.values(evidence)) {
+				expect(String(value)).not.toMatch(/[\\/.]/);
+			}
+		},
+	);
+
+	it("carries the evidence through the xattr postcondition when remove-xattrs is on (69-14)", async () => {
+		const { container, removeXattrCommand } = makeContainer({
+			saveAsCopy: true,
+			removeXattrs: true,
+			writtenBy: "native",
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.webp");
+
+		expect(removeXattrCommand.execute).toHaveBeenCalledTimes(1);
+		expect(result).toStrictEqual({
+			success: true,
+			outputPath: "/dir/photo_cleaned.webp",
+			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
+			evidence: { engine: "native", outputMode: "copy", leakCheck: "passed" },
+		});
+	});
+
+	it("omits the evidence key on the legacy branch and on the zero-tag xattr early exit (69-14)", async () => {
+		const legacyCopy = makeContainer({ saveAsCopy: true });
+		setupExifHandlers({ container: legacyCopy.container });
+		let { handler } = captureInvokeHandler("exif:remove");
+		const gifCopy = await handler(makeAuthorizedEvent(), "/dir/photo.gif");
+		expect(gifCopy).toMatchObject({ success: true });
+		expect(Object.keys(gifCopy as object)).not.toContain("evidence");
+
+		const legacyOverwrite = makeContainer({ saveAsCopy: false });
+		ipcHandleMock.mockClear();
+		setupExifHandlers({ container: legacyOverwrite.container });
+		({ handler } = captureInvokeHandler("exif:remove"));
+		const gifOverwrite = await handler(makeAuthorizedEvent(), "/dir/photo.gif");
+		expect(gifOverwrite).toMatchObject({ success: true });
+		expect(Object.keys(gifOverwrite as object)).not.toContain("evidence");
+
+		const zeroTag = makeContainer({
+			saveAsCopy: false,
+			removeXattrs: true,
+			readMetadataResult: { ok: true, value: {} },
+		});
+		ipcHandleMock.mockClear();
+		setupExifHandlers({ container: zeroTag.container });
+		({ handler } = captureInvokeHandler("exif:remove"));
+		const early = await handler(makeAuthorizedEvent(), "/dir/clean.jpg");
+		expect(early).toMatchObject({ success: true, wroteFile: false });
+		expect(Object.keys(early as object)).not.toContain("evidence");
+		expect(zeroTag.outputTransaction.execute).not.toHaveBeenCalled();
+	});
+
 	it("clears only xattrs without rewriting an already-clean file", async () => {
 		const { container, stripMetadata, outputTransaction, removeXattrCommand } =
 			makeContainer({
@@ -725,6 +867,11 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: {
+				engine: "exiftool",
+				outputMode: "overwrite",
+				leakCheck: "passed",
+			},
 		});
 		expect(removeXattrCommand.execute).not.toHaveBeenCalled();
 	});
@@ -767,6 +914,11 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: {
+				engine: "exiftool",
+				outputMode: "overwrite",
+				leakCheck: "passed",
+			},
 		});
 		expect(removeXattrCommand.execute).toHaveBeenCalledWith({
 			filePath: "/dir/photo.jpg",
@@ -871,6 +1023,11 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: true,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: {
+				engine: "exiftool",
+				outputMode: "copy",
+				leakCheck: "not-run",
+			},
 		});
 	});
 
@@ -938,6 +1095,11 @@ describe("exif:remove handler", () => {
 				wasForcedCopy: true,
 				wroteFile: true,
 				outputSize: 4096,
+				evidence: {
+					engine: "exiftool",
+					outputMode: "copy",
+					leakCheck: "not-run",
+				},
 			});
 		},
 	);
@@ -1040,7 +1202,7 @@ describe("exif:remove handler", () => {
 			saveAsCopy: true,
 			transactionResult: {
 				ok: true,
-				value: { outputPath: "/dir/video_cleaned.mp4" },
+				value: { outputPath: "/dir/video_cleaned.mp4", writtenBy: "exiftool" },
 			},
 		});
 		setupExifHandlers({ container });
@@ -1062,13 +1224,21 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: {
+				engine: "exiftool",
+				outputMode: "copy",
+				leakCheck: "not-run",
+			},
 		});
 	});
 
 	it("stages overwrite-mode video beside the original before publishing it", async () => {
 		const { container, stripMetadata, outputTransaction } = makeContainer({
 			saveAsCopy: false,
-			transactionResult: { ok: true, value: { outputPath: "/dir/video.mp4" } },
+			transactionResult: {
+				ok: true,
+				value: { outputPath: "/dir/video.mp4", writtenBy: "exiftool" },
+			},
 		});
 		setupExifHandlers({ container });
 
@@ -1089,6 +1259,11 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: {
+				engine: "exiftool",
+				outputMode: "overwrite",
+				leakCheck: "not-run",
+			},
 		});
 	});
 

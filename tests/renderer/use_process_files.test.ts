@@ -173,6 +173,39 @@ describe("processFileEntries", () => {
 		});
 	});
 
+	it("ignores the additive evidence field: the dispatches equal the evidence-free case (69-14)", async () => {
+		const run = async (
+			result: Record<string, unknown>,
+		): Promise<AppAction[]> => {
+			dispatches.length = 0;
+			mockApi.exif.readMetadata
+				.mockResolvedValueOnce({ tag1: "v", tag2: "v" })
+				.mockResolvedValueOnce({});
+			mockApi.exif.removeMetadata.mockResolvedValue(result);
+			await processFileEntries([makeFileEntry()], mockDispatch);
+			return [...dispatches];
+		};
+		const base = {
+			success: true,
+			outputPath: "/path/to/test_cleaned.jpg",
+			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 512,
+		};
+
+		const without = await run(base);
+		const withEvidence = await run({
+			...base,
+			evidence: { engine: "native", outputMode: "copy", leakCheck: "passed" },
+		});
+
+		expect(withEvidence).toStrictEqual(without);
+		expect(withEvidence.some((d) => d.type === "UPDATE_FILE_METADATA")).toBe(
+			true,
+		);
+		expect(JSON.stringify(withEvidence)).not.toContain("evidence");
+	});
+
 	it("reads AFTER metadata from the returned output path and stores that path", async () => {
 		const entry = makeFileEntry({ path: "/path/to/test.jpg" });
 		mockApi.exif.readMetadata

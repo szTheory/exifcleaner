@@ -334,9 +334,10 @@ describe("69-12: overwrite of the seven native image extensions on the verified 
 
 					const ran = await overwrite({ source, route, settings });
 
+					// The transaction reports which engine wrote the stage (69-14, D-17).
 					expect(ran.outcome).toEqual({
 						ok: true,
-						value: { outputPath: source },
+						value: { outputPath: source, writtenBy: route },
 					});
 					// The engine that wrote the stage is the intended one, and only that one.
 					if (route === "native") {
@@ -384,9 +385,16 @@ describe("69-12: overwrite of the seven native image extensions on the verified 
 						settings: DEFAULT_PRESERVATION,
 					});
 
+					// Native is asked first and may decline before writing (the router then falls
+					// back to ExifTool), so the reported writer is derived from the observed calls.
+					const writer =
+						route === "native" &&
+						ran.stack.exiftoolWrite.mock.calls.length === 0
+							? "native"
+							: "exiftool";
 					expect(ran.outcome).toEqual({
 						ok: true,
-						value: { outputPath: source },
+						value: { outputPath: source, writtenBy: writer },
 					});
 					if (route === "native") {
 						// Native is asked first; an ICC-bearing file may be declined before any write
@@ -593,7 +601,7 @@ describe("69-12: overwrite of the seven native image extensions on the verified 
 
 			expect(ran.outcome).toEqual({
 				ok: true,
-				value: { outputPath: ran.source },
+				value: { outputPath: ran.source, writtenBy: "exiftool" },
 			});
 			expect(sha256(ran.source)).not.toBe(ran.sourceDigest);
 		});
@@ -643,7 +651,7 @@ describe("69-12: overwrite of the seven native image extensions on the verified 
 
 				expect(ran.outcome).toEqual({
 					ok: true,
-					value: { outputPath: source },
+					value: { outputPath: source, writtenBy: "exiftool" },
 				});
 				expect(ran.stack.exiftoolWrite).toHaveBeenCalledOnce();
 				expect(ran.stack.nativeWrite).not.toHaveBeenCalled();
@@ -669,7 +677,7 @@ describe("69-12: overwrite of the seven native image extensions on the verified 
 
 				expect(ran.outcome).toEqual({
 					ok: true,
-					value: { outputPath: source },
+					value: { outputPath: source, writtenBy: "exiftool" },
 				});
 				expect(fs.statSync(source).mode & 0o7777).toBe(0o444);
 				assertDirEffect(ran.before, ran.after, {

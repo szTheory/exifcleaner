@@ -316,7 +316,7 @@ describe("69-09: default-settings WebP copy through the real stack (WEBP-08)", (
 
 			expect(ran.outcome).toEqual({
 				ok: true,
-				value: { outputPath: ran.generatedPath },
+				value: { outputPath: ran.generatedPath, writtenBy: "native" },
 			});
 			expect(path.basename(ran.generatedPath)).toBe(
 				shape.fixture.replace(/\.webp$/u, "_cleaned.webp"),

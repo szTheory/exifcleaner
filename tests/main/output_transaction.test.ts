@@ -156,7 +156,10 @@ describe("OutputTransaction", () => {
 			preserveTimestamps: false,
 		});
 
-		expect(result).toEqual({ ok: true, value: { outputPath: generatedPath } });
+		expect(result).toEqual({
+			ok: true,
+			value: { outputPath: generatedPath, writtenBy: "exiftool" },
+		});
 		expect(events).toEqual(["write", `verify:${generatedPath}`]);
 	});
 
@@ -475,7 +478,10 @@ describe("OutputTransaction", () => {
 			preserveTimestamps: false,
 		});
 
-		expect(result).toEqual({ ok: true, value: { outputPath: originalPath } });
+		expect(result).toEqual({
+			ok: true,
+			value: { outputPath: originalPath, writtenBy: "exiftool" },
+		});
 		expect(events).toEqual([
 			`stat:${originalPath}`,
 			"write",
@@ -539,7 +545,10 @@ describe("OutputTransaction", () => {
 		it("captures identity of the source before the write, then syncs the stage, applies ownership then mode, rechecks, then renames (exact call log, A6)", async () => {
 			const { transaction, events } = createTransaction();
 			const result = await transaction.execute(base);
-			expect(result).toEqual({ ok: true, value: { outputPath: originalPath } });
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath: originalPath, writtenBy: "exiftool" },
+			});
 			expect(events).toEqual([
 				`stat:${originalPath}`,
 				"write",
@@ -577,7 +586,10 @@ describe("OutputTransaction", () => {
 				statSource: async () => identity({ ino: 42n, dev: 7n }),
 			});
 			const result = await transaction.execute(base);
-			expect(result).toEqual({ ok: true, value: { outputPath: originalPath } });
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath: originalPath, writtenBy: "exiftool" },
+			});
 			expect(events).toContain(`rename:${generatedPath}:${originalPath}`);
 		});
 
@@ -621,7 +633,7 @@ describe("OutputTransaction", () => {
 				if (commits) {
 					expect(result).toEqual({
 						ok: true,
-						value: { outputPath: originalPath },
+						value: { outputPath: originalPath, writtenBy: "exiftool" },
 					});
 					expect(events).toContain(`rename:${generatedPath}:${originalPath}`);
 				} else {
@@ -696,7 +708,7 @@ describe("OutputTransaction", () => {
 				const result = await transaction.execute(base);
 				expect(result).toEqual({
 					ok: true,
-					value: { outputPath: originalPath },
+					value: { outputPath: originalPath, writtenBy: "exiftool" },
 				});
 				expect(events).toEqual([
 					...throughSync,
@@ -715,7 +727,7 @@ describe("OutputTransaction", () => {
 					const result = await transaction.execute(base);
 					expect(result).toEqual({
 						ok: true,
-						value: { outputPath: originalPath },
+						value: { outputPath: originalPath, writtenBy: "exiftool" },
 					});
 				},
 			);
@@ -785,7 +797,7 @@ describe("OutputTransaction", () => {
 				const result = await transaction.execute(base);
 				expect(result).toEqual({
 					ok: true,
-					value: { outputPath: originalPath },
+					value: { outputPath: originalPath, writtenBy: "exiftool" },
 				});
 				expect(events).toContain(`chown:${generatedPath}:501:20`);
 				expect(events).toContain(`chmod:${generatedPath}:640`);
@@ -905,7 +917,7 @@ describe("OutputTransaction", () => {
 			});
 			expect(result).toEqual({
 				ok: true,
-				value: { outputPath: generatedPath },
+				value: { outputPath: generatedPath, writtenBy: "exiftool" },
 			});
 			expect(events).toEqual(["write", `verify:${generatedPath}`]);
 		});
@@ -1035,7 +1047,10 @@ describe("OutputTransaction", () => {
 				preserveTimestamps: false,
 			});
 
-			expect(result).toEqual({ ok: true, value: { outputPath } });
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath, writtenBy: "exiftool" },
+			});
 			assertDirEffect(beforeDir, snapshotDir(fixtureDir), {
 				added: ["sample-cleaned.webp"],
 				modified: [],
@@ -1082,6 +1097,39 @@ describe("OutputTransaction", () => {
 			expect(requests).toEqual([{ preserveResolution }]);
 		},
 	);
+
+	it("returns the writtenBy of the write on both success returns, native and exiftool (69-14)", async () => {
+		const base = {
+			filePath: originalPath,
+			generatedPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		};
+		for (const writtenBy of ["native", "exiftool"] as const) {
+			const copy = createTransaction({
+				writeResult: { ok: true, value: { tagsRemoved: 2, writtenBy } },
+			});
+			expect(await copy.transaction.execute(base)).toEqual({
+				ok: true,
+				value: { outputPath: generatedPath, writtenBy },
+			});
+
+			const overwrite = createTransaction({
+				writeResult: { ok: true, value: { tagsRemoved: 2, writtenBy } },
+			});
+			expect(
+				await overwrite.transaction.execute({
+					...base,
+					commitPath: originalPath,
+				}),
+			).toEqual({
+				ok: true,
+				value: { outputPath: originalPath, writtenBy },
+			});
+		}
+	});
 
 	it("forwards copyModeLeakCheck to verifyGeneratedOutput.execute with the strip result's writtenBy, nothing when omitted", async () => {
 		const leakCheck = {
