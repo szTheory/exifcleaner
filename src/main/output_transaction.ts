@@ -3,6 +3,7 @@ import type { ExifError } from "../domain";
 import type { CopyModeLeakCheckDemand } from "../domain/files/file_types";
 import type { WrittenBy } from "../application/metadata_engine_port";
 import type { OutputVerificationError } from "../application/queries/verify_generated_output_query";
+import type { SourceIdentity } from "./source_identity";
 
 export type OutputTransactionFailure =
 	| {
@@ -57,6 +58,14 @@ export type OutputTransactionDependencies = {
 	};
 	unlink(path: string): Promise<void>;
 	rename(from: string, to: string): Promise<void>;
+	/** Identity of the source, captured before the write and rechecked before the rename. */
+	statSource(path: string): Promise<SourceIdentity>;
+	/** fsync of the closed stage, called after verification and before the recheck. */
+	syncFile(path: string): Promise<void>;
+	// Declared and wired now, applied by plan 69-11 between the sync and the recheck
+	// (never before the sync: syncFile opens the stage r+, which a 0444 stage refuses).
+	chown(path: string, uid: number, gid: number): Promise<void>;
+	chmod(path: string, mode: number): Promise<void>;
 	delay(milliseconds: number): Promise<void>;
 };
 
@@ -88,6 +97,17 @@ export class OutputTransaction {
 		signal?: AbortSignal | undefined;
 		copyModeLeakCheck?: CopyModeLeakCheck | undefined;
 	}): Promise<Result<{ outputPath: string }, OutputTransactionFailure>> {
+		// Identity is captured only for a staged overwrite, and before the write so a change
+		// at any later moment is seen. Nothing exists on disk yet, so a failure needs no cleanup.
+		let capturedIdentity: SourceIdentity | undefined;
+		if (commitPath !== undefined) {
+			try {
+				capturedIdentity = await this.dependencies.statSource(filePath);
+			} catch {
+				return { ok: false, error: { code: "commit-failed" } };
+			}
+		}
+
 		// The staged write always targets a path distinct from the source
 		// (generatedPath), so from the engine's perspective this call is by
 		// construction a copy, regardless of whether the transaction ultimately
@@ -156,8 +176,15 @@ export class OutputTransaction {
 			};
 		}
 
-		if (commitPath !== undefined) {
+		if (commitPath !== undefined && capturedIdentity !== undefined) {
 			try {
+				await this.dependencies.syncFile(generatedPath);
+				const currentIdentity = await this.dependencies.statSource(filePath);
+				if (!sameSourceIdentity(capturedIdentity, currentIdentity)) {
+					// The source changed after the stage was written (a sync client, an editor, a
+					// replacement). Publishing would overwrite someone else's newer bytes.
+					throw new Error("source changed before commit");
+				}
 				await this.dependencies.rename(generatedPath, commitPath);
 			} catch {
 				const cleanupFailure = await this.cleanup({ generatedPath });
@@ -195,6 +222,35 @@ export class OutputTransaction {
 
 		return { code: "cleanup-failed", residualPath: generatedPath };
 	}
+}
+
+// size and mtime are always compared. dev and ino only when both captured values are
+// non-zero: SMB, FUSE and some ReFS volumes report 0 or ids that are not stable, and a
+// false refusal there would make every overwrite fail. ctime is deliberately not compared:
+// legitimate metadata operations (chmod, xattr, backup tools) bump it without changing the
+// content. Strict bigint equality, no tolerance.
+function sameSourceIdentity(
+	captured: SourceIdentity,
+	current: SourceIdentity,
+): boolean {
+	if (captured.size !== current.size || captured.mtimeNs !== current.mtimeNs) {
+		return false;
+	}
+	if (
+		captured.ino !== 0n &&
+		current.ino !== 0n &&
+		captured.ino !== current.ino
+	) {
+		return false;
+	}
+	if (
+		captured.dev !== 0n &&
+		current.dev !== 0n &&
+		captured.dev !== current.dev
+	) {
+		return false;
+	}
+	return true;
 }
 
 const MAX_DIAGNOSTIC_TAGS = 8;

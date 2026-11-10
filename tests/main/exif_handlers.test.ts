@@ -11,6 +11,7 @@ import {
 import { setupExifHandlers } from "../../src/main/exif_handlers";
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { FakeMetadataEngine } from "../fakes/fake_metadata_engine";
+import { fakeTransactionFileDependencies } from "../helpers/transaction_deps";
 
 const ipcHandleMock = vi.hoisted(() => vi.fn());
 const existsSyncMock = vi.hoisted(() => vi.fn());
@@ -154,6 +155,7 @@ function makePortCountContainer({ saveAsCopy }: { saveAsCopy: boolean }): {
 	const outputTransaction = new OutputTransaction({
 		stripMetadata,
 		verifyGeneratedOutput,
+		...fakeTransactionFileDependencies(),
 		unlink: vi.fn(async () => undefined),
 		rename: vi.fn(async () => undefined),
 		delay: vi.fn(async () => undefined),

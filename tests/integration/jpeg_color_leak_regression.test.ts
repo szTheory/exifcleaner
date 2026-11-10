@@ -26,6 +26,7 @@ import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_
 import type { NativeMetadataPort } from "../../src/infrastructure/metadata/native_metadata_port";
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.resolve(__dirname, "../e2e/fixtures");
@@ -131,11 +132,7 @@ describe("69-02: colour JPEG copy mode passes verification on both engines", () 
 		const transaction = new OutputTransaction({
 			stripMetadata: new StripMetadataCommand({ metadataEngine: hybrid }),
 			verifyGeneratedOutput: verify,
-			unlink: fs.promises.unlink,
-			rename: fs.promises.rename,
-			delay: async (milliseconds) => {
-				await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
-			},
+			...realTransactionFileDependencies(),
 		});
 		return { hybrid, verify, transaction, nativeWrite, exiftoolWrite };
 	}

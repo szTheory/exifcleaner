@@ -26,6 +26,7 @@ import {
 	createSparseLargeMp4,
 	sha256OfFileStreamed,
 } from "../helpers/large_file_fixture";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 // D-50 negative control (Task 3). This constant and class are the ONLY place in the test tree
 // that injects `-api LargeFileSupport=0` -- product code (src/) never gains this argument
@@ -90,11 +91,7 @@ function buildOutputTransaction(process: ExiftoolProcess): OutputTransaction {
 	return new OutputTransaction({
 		stripMetadata,
 		verifyGeneratedOutput,
-		unlink: fs.promises.unlink,
-		rename: fs.promises.rename,
-		delay: async (milliseconds) => {
-			await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
-		},
+		...realTransactionFileDependencies(),
 	});
 }
 

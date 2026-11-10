@@ -20,6 +20,7 @@ import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import { seedHeifCopy } from "../helpers/heif_seed";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.resolve(__dirname, "../e2e/fixtures");
@@ -128,11 +129,7 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 		const transaction = new OutputTransaction({
 			stripMetadata,
 			verifyGeneratedOutput,
-			unlink: fs.promises.unlink,
-			rename: fs.promises.rename,
-			delay: async (milliseconds) => {
-				await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
-			},
+			...realTransactionFileDependencies(),
 		});
 		return {
 			hybrid,

@@ -28,6 +28,7 @@ import { HybridMetadataEngine } from "../../src/infrastructure/metadata/hybrid_m
 import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_metadata_adapter";
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.resolve(__dirname, "../e2e/fixtures");
@@ -247,11 +248,7 @@ describe("69-09: default-settings WebP copy through the real stack (WEBP-08)", (
 		const transaction = new OutputTransaction({
 			stripMetadata: new StripMetadataCommand({ metadataEngine: hybrid }),
 			verifyGeneratedOutput: query,
-			unlink: fs.promises.unlink,
-			rename: fs.promises.rename,
-			delay: async (ms) => {
-				await new Promise<void>((resolve) => setTimeout(resolve, ms));
-			},
+			...realTransactionFileDependencies(),
 		});
 
 		const sourceDigest = sha256(source);

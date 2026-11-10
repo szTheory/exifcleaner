@@ -170,7 +170,10 @@ describe("OutputTransaction over real files: source identity recheck and fsync (
 		expect(result).toEqual(COMMIT_FAILED);
 		expect(fs.readFileSync(ctx.source, "utf8")).toBe(ORIGINAL);
 		assertNoStageResidue(ctx.dir);
-		expect(fs.readdirSync(ctx.dir).sort()).toEqual(["photo.bin", "sentinel.txt"]);
+		expect(fs.readdirSync(ctx.dir).sort()).toEqual([
+			"photo.bin",
+			"sentinel.txt",
+		]);
 		assertDirEffect(before, snapshotDir(ctx.dir), {
 			unchanged: ["photo.bin", "sentinel.txt"],
 		});

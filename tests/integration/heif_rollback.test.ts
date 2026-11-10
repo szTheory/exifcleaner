@@ -22,6 +22,7 @@ import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import { seedHeifCopy } from "../helpers/heif_seed";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.resolve(__dirname, "../e2e/fixtures");
@@ -194,11 +195,7 @@ describe("63-15: HEIC/AVIF rollback to ExifTool keeps the user-visible outcome",
 		const transaction = new OutputTransaction({
 			stripMetadata: new StripMetadataCommand({ metadataEngine: hybrid }),
 			verifyGeneratedOutput,
-			unlink: fs.promises.unlink,
-			rename: fs.promises.rename,
-			delay: async (milliseconds) => {
-				await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
-			},
+			...realTransactionFileDependencies(),
 		});
 		return { native, transaction, exiftoolWrite, nativeWrite, verifySpy };
 	}

@@ -1,7 +1,8 @@
 import { mkdtemp, rm, utimes, writeFile, appendFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import {
 	statSourceIdentity,
 	syncFileToDisk,
@@ -84,6 +85,15 @@ describe("statSourceIdentity (D-11, D-12)", () => {
 });
 
 describe("syncFileToDisk (D-11)", () => {
+	it("neither syncing nor reading the identity changes the directory (no stray temp file, bytes equal)", async () => {
+		const file = await tempFile("payload");
+		const dir = dirname(file);
+		const before = snapshotDir(dir);
+		await syncFileToDisk(file);
+		await statSourceIdentity(file);
+		assertDirEffect(before, snapshotDir(dir), { unchanged: ["photo.bin"] });
+	});
+
 	it("succeeds on a closed, writable temp file and leaves its bytes alone", async () => {
 		const file = await tempFile("payload");
 		await expect(syncFileToDisk(file)).resolves.toBeUndefined();

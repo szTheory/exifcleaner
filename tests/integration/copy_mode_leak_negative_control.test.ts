@@ -20,6 +20,7 @@ import { StripMetadataCommand } from "../../src/application/commands/strip_metad
 import { VerifyGeneratedOutputQuery } from "../../src/application/queries/verify_generated_output_query";
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.resolve(__dirname, "../e2e/fixtures");
@@ -286,13 +287,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 				const transaction = new OutputTransaction({
 					stripMetadata: injectingStripMetadata,
 					verifyGeneratedOutput,
-					unlink: fs.promises.unlink,
-					rename: fs.promises.rename,
-					delay: async (milliseconds) => {
-						await new Promise<void>((resolve) =>
-							setTimeout(resolve, milliseconds),
-						);
-					},
+					...realTransactionFileDependencies(),
 				});
 
 				await process.open();
@@ -365,13 +360,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 				const transaction = new OutputTransaction({
 					stripMetadata,
 					verifyGeneratedOutput,
-					unlink: fs.promises.unlink,
-					rename: fs.promises.rename,
-					delay: async (milliseconds) => {
-						await new Promise<void>((resolve) =>
-							setTimeout(resolve, milliseconds),
-						);
-					},
+					...realTransactionFileDependencies(),
 				});
 
 				await process.open();
