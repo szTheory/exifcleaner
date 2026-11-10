@@ -222,6 +222,8 @@ declare module "*native_orientation_mutation_gate.mjs" {
 }
 
 declare module "*orientation_mutation_gate.mjs" {
+	export const ORIENTATION_TEST_FILE: string;
+	export const ORIENTATION_TEST_TITLE: string;
 	export function applyOrientationMutation(source: string): string;
 	export function executeOrientationMutation(dependencies: {
 		readSource: () => string;

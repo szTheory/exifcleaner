@@ -1,5 +1,9 @@
 import { describe, expect, test, vi } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 import {
+	ORIENTATION_TEST_FILE,
+	ORIENTATION_TEST_TITLE,
 	applyOrientationMutation,
 	executeOrientationMutation,
 } from "../../scripts/orientation_mutation_gate.mjs";
@@ -28,6 +32,31 @@ describe("applyOrientationMutation", () => {
 	});
 });
 
+const RED_OUTPUT = `1) ${ORIENTATION_TEST_TITLE}\nExpected: "Rotate 90 CW" Received: undefined`;
+
+describe("the gated test", () => {
+	const spec = fs.readFileSync(
+		path.join(process.cwd(), ORIENTATION_TEST_FILE),
+		"utf8",
+	);
+	const body = (title: string) => {
+		const start = spec.indexOf(`test("${title}"`);
+		const next = spec.indexOf("\n\ttest(", start + 1);
+		return spec.slice(start, next === -1 ? undefined : next);
+	};
+
+	test("exists exactly once in the spec the gate runs", () => {
+		expect(spec.split(`test("${ORIENTATION_TEST_TITLE}"`).length - 1).toBe(1);
+	});
+
+	test("uses a JPEG the native cleaner declines, not the plain orientation.jpg", () => {
+		const gated = body(ORIENTATION_TEST_TITLE);
+		expect(gated).toContain('copyFixture("color_icc_p3.jpg")');
+		expect(gated).not.toContain('copyFixture("orientation.jpg")');
+		expect(gated).toContain("assertDirEffect(before, after");
+	});
+});
+
 describe("executeOrientationMutation", () => {
 	test("requires RED, restores byte-for-byte, then requires GREEN", async () => {
 		let current = SOURCE;
@@ -37,7 +66,7 @@ describe("executeOrientationMutation", () => {
 			.mockResolvedValueOnce({ status: 0, output: "mutated compile ok" })
 			.mockResolvedValueOnce({
 				status: 1,
-				output: 'Expected: "Rotate 90 CW" Received: undefined',
+				output: RED_OUTPUT,
 			})
 			.mockResolvedValueOnce({ status: 0, output: "restored compile ok" })
 			.mockResolvedValueOnce({ status: 0, output: "1 passed" });
@@ -72,6 +101,28 @@ describe("executeOrientationMutation", () => {
 				run,
 			}),
 		).rejects.toThrow("expected the controlled mutation to fail");
+		expect(current).toBe(SOURCE);
+	});
+
+	test("restores the starting bytes and rejects a red that is not the gated test", async () => {
+		let current = SOURCE;
+		const run = vi
+			.fn()
+			.mockResolvedValueOnce({ status: 0, output: "mutated compile ok" })
+			.mockResolvedValueOnce({
+				status: 1,
+				output: 'some other test: Expected: "Rotate 90 CW" Received: undefined',
+			});
+
+		await expect(
+			executeOrientationMutation({
+				readSource: () => current,
+				writeSource: (value) => {
+					current = value;
+				},
+				run,
+			}),
+		).rejects.toThrow("failed for the wrong reason");
 		expect(current).toBe(SOURCE);
 	});
 
