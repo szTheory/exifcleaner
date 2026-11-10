@@ -249,11 +249,14 @@ describe("OutputTransaction", () => {
 				residualPath: generatedPath,
 			},
 		});
+		// EPERM and EACCES lift a read-only bit before each retry (69-18, M-02 R8)
 		expect(events).toEqual([
 			"write",
 			`unlink:${generatedPath}`,
+			`chmod:${generatedPath}:600`,
 			"delay:20",
 			`unlink:${generatedPath}`,
+			`chmod:${generatedPath}:600`,
 			"delay:50",
 			`unlink:${generatedPath}`,
 		]);
@@ -462,8 +465,10 @@ describe("OutputTransaction", () => {
 			"write",
 			`verify:${generatedPath}`,
 			`unlink:${generatedPath}`,
+			`chmod:${generatedPath}:600`,
 			"delay:20",
 			`unlink:${generatedPath}`,
+			`chmod:${generatedPath}:600`,
 			"delay:50",
 			`unlink:${generatedPath}`,
 		]);

@@ -67,6 +67,8 @@ export type OutputTransactionDependencies = {
 	/** Applied to the stage after chown; a failure is commit-failed (see execute). */
 	chmod(path: string, mode: number): Promise<void>;
 	delay(milliseconds: number): Promise<void>;
+	/** The platform the commit decides for; the host's when omitted. Injected so tests cover every platform on any host. */
+	platform?: NodeJS.Platform;
 };
 
 export class OutputTransaction {
@@ -110,6 +112,19 @@ export class OutputTransaction {
 				capturedIdentity = await this.dependencies.statSource(filePath);
 			} catch {
 				return { ok: false, error: { code: "commit-failed" } };
+			}
+			// Measured on Windows (69-17, run 42777303465): a file with the read-only attribute
+			// cannot be replaced (the legacy overwrite and the staged one both fail), and the stage
+			// the native engine creates carries that attribute, which it cannot reopen or remove, so
+			// a started write leaves its private stage behind. Refuse before anything is written:
+			// the same outcome as the legacy route (failed, source intact) with nothing created.
+			// POSIX replaces a read-only file in a writable directory and keeps its mode (measured
+			// on macOS and Linux), so only win32 is refused.
+			if (
+				(this.dependencies.platform ?? process.platform) === "win32" &&
+				isReadOnlyMode(capturedIdentity.mode)
+			) {
+				return { ok: false, error: { code: "write-failed" } };
 			}
 		}
 
@@ -251,8 +266,11 @@ export class OutputTransaction {
 	}: {
 		generatedPath: string;
 	}): Promise<OutputTransactionFailure | undefined> {
-		const retryDelays = [20, 50];
-		for (let attempt = 0; attempt < retryDelays.length + 1; attempt += 1) {
+		for (
+			let attempt = 0;
+			attempt < TRANSIENT_LOCK_RETRY_DELAYS.length + 1;
+			attempt += 1
+		) {
 			try {
 				await this.dependencies.unlink(generatedPath);
 				return undefined;
@@ -260,15 +278,39 @@ export class OutputTransaction {
 				if (hasCode(error, "ENOENT")) {
 					return undefined;
 				}
-				if (!isTransientFileLock(error) || attempt === retryDelays.length) {
+				if (
+					!isTransientFileLock(error) ||
+					attempt === TRANSIENT_LOCK_RETRY_DELAYS.length
+				) {
 					return { code: "cleanup-failed", residualPath: generatedPath };
 				}
-				await this.dependencies.delay(retryDelays[attempt]!);
+				// A stage that carries the source's read-only attribute (the commit applied it
+				// before the rename) cannot be unlinked on Windows. Give it back the owner write
+				// bit before the retry; 0o600 clears the attribute there (only the write bit
+				// matters on win32) and never widens a POSIX stage beyond its owner. Best effort:
+				// a failed chmod must not hide the cleanup outcome, the retry decides.
+				if (hasCode(error, "EPERM") || hasCode(error, "EACCES")) {
+					try {
+						await this.dependencies.chmod(generatedPath, STAGE_REMOVABLE_MODE);
+					} catch {
+						// ignored on purpose, see above
+					}
+				}
+				await this.dependencies.delay(TRANSIENT_LOCK_RETRY_DELAYS[attempt]!);
 			}
 		}
 
 		return { code: "cleanup-failed", residualPath: generatedPath };
 	}
+}
+
+const TRANSIENT_LOCK_RETRY_DELAYS: readonly number[] = [20, 50];
+const STAGE_REMOVABLE_MODE = 0o600;
+
+// A stat mode without the owner write bit: the read-only attribute on Windows (libuv reports it
+// as 0o444) and a 0444 file on POSIX.
+function isReadOnlyMode(mode: number): boolean {
+	return (mode & 0o200) === 0;
 }
 
 // size and mtime are always compared. dev and ino only when both captured values are
