@@ -8,6 +8,7 @@ import {
 	OutputTransaction,
 	type OutputTransactionDependencies,
 } from "../../src/main/output_transaction";
+import type { SourceIdentity } from "../../src/main/source_identity";
 
 const originalPath = "/tmp/original.mp4";
 const generatedPath = "/tmp/.original.exifcleaner-stage.mp4";
@@ -23,18 +24,57 @@ type TransactionTestOptions = {
 	>;
 	unlink?: OutputTransactionDependencies["unlink"];
 	rename?: OutputTransactionDependencies["rename"];
+	/** Receives the 0-based call index so a test can answer capture and recheck differently. */
+	statSource?: (path: string, callIndex: number) => Promise<SourceIdentity>;
+	syncFile?: OutputTransactionDependencies["syncFile"];
 };
+
+function identity(overrides: Partial<SourceIdentity> = {}): SourceIdentity {
+	return {
+		dev: 16777230n,
+		ino: 8123456n,
+		size: 1024n,
+		mtimeNs: 1_700_000_000_123_456_789n,
+		mode: 0o644,
+		uid: 501,
+		gid: 20,
+		...overrides,
+	};
+}
+
+// For the cases whose paths never reach the commit branch: the new dependencies are
+// required members, but nothing may call them (the plain save-as-copy path).
+const neverCalledFileDependencies = {
+	statSource: async (): Promise<SourceIdentity> => {
+		throw new Error("statSource must not be called on this path");
+	},
+	syncFile: async (): Promise<void> => {
+		throw new Error("syncFile must not be called on this path");
+	},
+	chown: async (): Promise<void> => {
+		throw new Error("chown must not be called on this path");
+	},
+	chmod: async (): Promise<void> => {
+		throw new Error("chmod must not be called on this path");
+	},
+} satisfies Pick<
+	OutputTransactionDependencies,
+	"statSource" | "syncFile" | "chown" | "chmod"
+>;
 
 function createTransaction({
 	writeResult = { ok: true, value: { tagsRemoved: 0, writtenBy: "exiftool" } },
 	verifyResult = { ok: true, value: { exemptionsApplied: [] } },
 	unlink = async () => undefined,
 	rename = async () => undefined,
+	statSource = async () => identity(),
+	syncFile = async () => undefined,
 }: TransactionTestOptions = {}): {
 	transaction: OutputTransaction;
 	events: string[];
 } {
 	const events: string[] = [];
+	let statCalls = 0;
 	const transaction = new OutputTransaction({
 		stripMetadata: {
 			execute: async () => {
@@ -55,6 +95,23 @@ function createTransaction({
 		rename: async (from, to) => {
 			events.push(`rename:${from}:${to}`);
 			return rename(from, to);
+		},
+		statSource: async (path) => {
+			events.push(`stat:${path}`);
+			const index = statCalls;
+			statCalls += 1;
+			return statSource(path, index);
+		},
+		syncFile: async (path) => {
+			events.push(`sync:${path}`);
+			return syncFile(path);
+		},
+		// Declared but not applied until plan 69-11: any event here fails the exact lists.
+		chown: async (path) => {
+			events.push(`chown:${path}`);
+		},
+		chmod: async (path) => {
+			events.push(`chmod:${path}`);
 		},
 		delay: async (milliseconds) => {
 			events.push(`delay:${milliseconds}`);
@@ -281,6 +338,7 @@ describe("OutputTransaction", () => {
 				},
 				rename: async () => undefined,
 				delay: async () => undefined,
+				...neverCalledFileDependencies,
 			});
 
 			const result = await transaction.execute({
@@ -405,8 +463,11 @@ describe("OutputTransaction", () => {
 
 		expect(result).toEqual({ ok: true, value: { outputPath: originalPath } });
 		expect(events).toEqual([
+			`stat:${originalPath}`,
 			"write",
 			`verify:${generatedPath}`,
+			`sync:${generatedPath}`,
+			`stat:${originalPath}`,
 			`rename:${generatedPath}:${originalPath}`,
 		]);
 	});
@@ -429,11 +490,274 @@ describe("OutputTransaction", () => {
 		expect(result).toEqual({ ok: false, error: { code: "commit-failed" } });
 		expect(result).not.toHaveProperty("outputPath");
 		expect(events).toEqual([
+			`stat:${originalPath}`,
 			"write",
 			`verify:${generatedPath}`,
+			`sync:${generatedPath}`,
+			`stat:${originalPath}`,
 			`rename:${generatedPath}:${originalPath}`,
 			`unlink:${generatedPath}`,
 		]);
+	});
+
+	describe("staged commit: fsync and source identity recheck (69-10, OVR-02, D-11..D-13)", () => {
+		const base = {
+			filePath: originalPath,
+			generatedPath,
+			commitPath: originalPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		};
+		const failedCommit = { ok: false, error: { code: "commit-failed" } };
+		const throughSync = [
+			`stat:${originalPath}`,
+			"write",
+			`verify:${generatedPath}`,
+			`sync:${generatedPath}`,
+			`stat:${originalPath}`,
+		];
+
+		it("captures identity of the source before the write, then syncs the stage, rechecks, then renames (exact call log)", async () => {
+			const { transaction, events } = createTransaction();
+			const result = await transaction.execute(base);
+			expect(result).toEqual({ ok: true, value: { outputPath: originalPath } });
+			expect(events).toEqual([
+				`stat:${originalPath}`,
+				"write",
+				`verify:${generatedPath}`,
+				`sync:${generatedPath}`,
+				`stat:${originalPath}`,
+				`rename:${generatedPath}:${originalPath}`,
+			]);
+			expect(events.some((e) => /^(chown|chmod):/.test(e))).toBe(false);
+		});
+
+		it.each([
+			["ino", { ino: 8123457n }],
+			["size", { size: 1025n }],
+			["mtimeNs", { mtimeNs: 1_700_000_000_123_456_790n }],
+			["dev", { dev: 16777231n }],
+		] as const)(
+			"a different %s at the recheck refuses the commit: rename never called, stage removed",
+			async (_field, changed) => {
+				const { transaction, events } = createTransaction({
+					statSource: async (_path, index) =>
+						index === 0 ? identity() : identity(changed),
+				});
+				const result = await transaction.execute(base);
+				expect(result).toEqual(failedCommit);
+				expect(result).not.toHaveProperty("outputPath");
+				expect(events).toEqual([...throughSync, `unlink:${generatedPath}`]);
+				expect(events.some((e) => e.startsWith("rename:"))).toBe(false);
+			},
+		);
+
+		it("an unchanged identity commits (negative control for the matrix above)", async () => {
+			const { transaction, events } = createTransaction({
+				statSource: async () => identity({ ino: 42n, dev: 7n }),
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({ ok: true, value: { outputPath: originalPath } });
+			expect(events).toContain(`rename:${generatedPath}:${originalPath}`);
+		});
+
+		it.each([
+			["ino zero at capture", { ino: 0n }, {}, true],
+			["ino zero at recheck", {}, { ino: 0n }, true],
+			[
+				"ino zero at capture, different non-zero at recheck",
+				{ ino: 0n },
+				{ ino: 99n },
+				true,
+			],
+			[
+				"dev zero at capture, different non-zero at recheck",
+				{ dev: 0n },
+				{ dev: 99n },
+				true,
+			],
+			["dev zero at recheck", {}, { dev: 0n }, true],
+			["ino differs, both non-zero", { ino: 5n }, { ino: 6n }, false],
+			[
+				"ino zero but size differs",
+				{ ino: 0n },
+				{ ino: 6n, size: 2048n },
+				false,
+			],
+			[
+				"ino and dev zero but mtime differs",
+				{ ino: 0n, dev: 0n },
+				{ ino: 0n, dev: 0n, mtimeNs: 1n },
+				false,
+			],
+		] as const)(
+			"zero-id rule (D-12): %s",
+			async (_name, captured, rechecked, commits) => {
+				const { transaction, events } = createTransaction({
+					statSource: async (_path, index) =>
+						index === 0 ? identity(captured) : identity(rechecked),
+				});
+				const result = await transaction.execute(base);
+				if (commits) {
+					expect(result).toEqual({
+						ok: true,
+						value: { outputPath: originalPath },
+					});
+					expect(events).toContain(`rename:${generatedPath}:${originalPath}`);
+				} else {
+					expect(result).toEqual(failedCommit);
+					expect(events.some((e) => e.startsWith("rename:"))).toBe(false);
+				}
+			},
+		);
+
+		it("a failing identity capture returns commit-failed before anything is written, verified, synced or renamed", async () => {
+			const { transaction, events } = createTransaction({
+				statSource: async () => {
+					throw Object.assign(new Error("gone"), { code: "ENOENT" });
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual(failedCommit);
+			expect(events).toEqual([`stat:${originalPath}`]);
+		});
+
+		it("a sync failure returns commit-failed: no recheck, no rename, stage removed", async () => {
+			const { transaction, events } = createTransaction({
+				syncFile: async () => {
+					throw Object.assign(new Error("EIO"), { code: "EIO" });
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual(failedCommit);
+			expect(events).toEqual([
+				`stat:${originalPath}`,
+				"write",
+				`verify:${generatedPath}`,
+				`sync:${generatedPath}`,
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("a failing recheck stat returns commit-failed with rename never called", async () => {
+			const { transaction, events } = createTransaction({
+				statSource: async (_path, index) => {
+					if (index === 0) return identity();
+					throw Object.assign(new Error("gone"), { code: "ENOENT" });
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual(failedCommit);
+			expect(events).toEqual([...throughSync, `unlink:${generatedPath}`]);
+		});
+
+		it("a rename failure returns commit-failed and removes the stage after sync and recheck passed", async () => {
+			const { transaction, events } = createTransaction({
+				rename: async () => {
+					throw Object.assign(new Error("EXDEV"), { code: "EXDEV" });
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual(failedCommit);
+			expect(events).toEqual([
+				...throughSync,
+				`rename:${generatedPath}:${originalPath}`,
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("cleanup-failed still wins when the stage cannot be removed after a sync failure (existing precedence)", async () => {
+			const { transaction, events } = createTransaction({
+				syncFile: async () => {
+					throw new Error("sync failed");
+				},
+				unlink: async () => {
+					throw Object.assign(new Error("EIO"), { code: "EIO" });
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: false,
+				error: { code: "cleanup-failed", residualPath: generatedPath },
+			});
+			expect(events).toEqual([
+				`stat:${originalPath}`,
+				"write",
+				`verify:${generatedPath}`,
+				`sync:${generatedPath}`,
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("cleanup-failed still wins over an identity mismatch", async () => {
+			const { transaction } = createTransaction({
+				statSource: async (_path, index) =>
+					index === 0 ? identity() : identity({ size: 1n }),
+				unlink: async () => {
+					throw Object.assign(new Error("EIO"), { code: "EIO" });
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: false,
+				error: { code: "cleanup-failed", residualPath: generatedPath },
+			});
+		});
+
+		it("a write failure with a commit path only captured identity: no sync, no recheck", async () => {
+			const { transaction, events } = createTransaction({
+				writeResult: {
+					ok: false,
+					error: { code: "exiftool-error", detail: "write failed" },
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({ ok: false, error: { code: "write-failed" } });
+			expect(events).toEqual([`stat:${originalPath}`, "write"]);
+		});
+
+		it("a verification failure with a commit path never syncs or rechecks", async () => {
+			const { transaction, events } = createTransaction({
+				verifyResult: {
+					ok: false,
+					error: { code: "output-verification-failed", detail: "bad" },
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-verification-failed",
+					diagnostic: "bad",
+				},
+			});
+			expect(events).toEqual([
+				`stat:${originalPath}`,
+				"write",
+				`verify:${generatedPath}`,
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("without a commit path (plain save as copy) neither statSource nor syncFile is called", async () => {
+			const { transaction, events } = createTransaction();
+			const result = await transaction.execute({
+				filePath: originalPath,
+				generatedPath,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: false,
+				preserveTimestamps: false,
+			});
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath: generatedPath },
+			});
+			expect(events).toEqual(["write", `verify:${generatedPath}`]);
+		});
 	});
 
 	// D-27 NC-8: a webp save-as-copy whose generated output fails ExifTool
@@ -482,6 +806,7 @@ describe("OutputTransaction", () => {
 				},
 				rename: async () => undefined,
 				delay: async () => undefined,
+				...neverCalledFileDependencies,
 			});
 
 			const beforeDir = snapshotDir(fixtureDir);
@@ -546,6 +871,7 @@ describe("OutputTransaction", () => {
 				},
 				rename: async () => undefined,
 				delay: async () => undefined,
+				...neverCalledFileDependencies,
 			});
 
 			const beforeDir = snapshotDir(fixtureDir);
@@ -590,6 +916,7 @@ describe("OutputTransaction", () => {
 				unlink: async () => undefined,
 				rename: async () => undefined,
 				delay: async () => undefined,
+				...neverCalledFileDependencies,
 			});
 
 			await transaction.execute({
@@ -646,6 +973,7 @@ describe("OutputTransaction", () => {
 			unlink: async () => undefined,
 			rename: async () => undefined,
 			delay: async () => undefined,
+			...neverCalledFileDependencies,
 		});
 		const base = {
 			filePath: originalPath,
