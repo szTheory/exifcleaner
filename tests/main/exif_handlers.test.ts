@@ -1086,6 +1086,84 @@ describe("exif:remove handler", () => {
 		expect(result).not.toHaveProperty("outputPath");
 	});
 
+	it("appends the verification code and leaked tag names to the verification detail (69-04, D-20)", async () => {
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: true,
+			transactionResult: {
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic: "File:YCbCrSubSampling",
+				},
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+
+		expect(outputTransaction.execute).toHaveBeenCalledOnce();
+		expect(result).toEqual({
+			success: false,
+			failureKind: "verification",
+			detail:
+				"Generated output verification failed (output-metadata-leak): File:YCbCrSubSampling",
+		});
+		expect(result).not.toHaveProperty("outputPath");
+	});
+
+	it("appends the fixed reopen detail for a non-leak verification failure (69-04)", async () => {
+		const { container } = makeContainer({
+			saveAsCopy: false,
+			transactionResult: {
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-verification-failed",
+					diagnostic:
+						"ExifTool could not reopen the generated output (engine-error)",
+				},
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(result).toEqual({
+			success: false,
+			failureKind: "verification",
+			detail:
+				"Generated output verification failed (output-verification-failed): ExifTool could not reopen the generated output (engine-error)",
+		});
+	});
+
+	it("passes a markup-bearing tag name through as plain text without altering it (T-69-10)", async () => {
+		const { container } = makeContainer({
+			saveAsCopy: true,
+			transactionResult: {
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic: "PNG:<img src=x onerror=alert(1)>",
+				},
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.png");
+
+		expect(result).toEqual({
+			success: false,
+			failureKind: "verification",
+			detail:
+				"Generated output verification failed (output-metadata-leak): PNG:<img src=x onerror=alert(1)>",
+		});
+	});
+
 	it("rejects an empty string before executing the command", async () => {
 		const { container, stripMetadata } = makeContainer({ saveAsCopy: true });
 		setupExifHandlers({ container });

@@ -175,6 +175,34 @@ describe("FileRow copy reveal context menu", () => {
 		expect(() => findElementByClass(row, "file-table__after-done")).toThrow();
 	});
 
+	it("shows the verification code and leaked tag names in the detail line as a plain string (69-04, T-69-10)", () => {
+		const diagnosticDetail =
+			"Generated output verification failed (output-metadata-leak): File:YCbCrSubSampling, PNG:<b>x</b>";
+		const row = FileRow({
+			file: makeCompletedFile({
+				status: FileProcessingStatus.Error,
+				afterTags: null,
+				afterMetadata: null,
+				outputPath: undefined,
+				failureKind: "verification",
+				error: diagnosticDetail,
+				detail: diagnosticDetail,
+			}),
+			isExpanded: true,
+			onToggleExpand: vi.fn(),
+			staggerIndex: 0,
+			animatedCheckRef: { current: new Set<string>() },
+			onCopyToast: vi.fn(),
+		});
+
+		const summary = findElementByClass(row, "file-table__error-summary");
+		const detail = findElementByType(row, ErrorExpansion);
+		expect((summary.props as { children?: unknown }).children).toBe(
+			"Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged.",
+		);
+		expect((detail.props as { error?: string }).error).toBe(diagnosticDetail);
+	});
+
 	it("uses distinct cleanup copy and exposes only the main-returned residual path in detail", () => {
 		const row = FileRow({
 			file: makeCompletedFile({

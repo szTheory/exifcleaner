@@ -690,6 +690,7 @@ describe("OutputTransaction", () => {
 			error: {
 				code: "verification-failed",
 				verificationCode: "output-metadata-leak",
+				diagnostic: "XMP-dc:Creator",
 			},
 		});
 		expect(events).toEqual([
@@ -697,5 +698,187 @@ describe("OutputTransaction", () => {
 			`verify:${generatedPath}`,
 			`unlink:${generatedPath}`,
 		]);
+	});
+
+	describe("verification diagnostic (69-04, D-20, D-22d)", () => {
+		const baseRequest = {
+			filePath: originalPath,
+			generatedPath,
+			preserveOrientation: false,
+			preserveColorProfile: true,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		};
+
+		function leakResult(
+			leakedTags: readonly string[],
+			extra: Record<string, unknown> = {},
+		): TransactionTestOptions["verifyResult"] {
+			return {
+				ok: false,
+				error: {
+					code: "output-metadata-leak",
+					detail: `Generated output kept ${leakedTags.length} metadata tag(s) outside the permitted set: ${leakedTags.join(", ")}`,
+					leakedTags,
+					...extra,
+				},
+			};
+		}
+
+		it("carries the leaked tag name of a colour JPEG leak as the diagnostic", async () => {
+			const { transaction } = createTransaction({
+				verifyResult: leakResult(["File:YCbCrSubSampling"]),
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic: "File:YCbCrSubSampling",
+				},
+			});
+		});
+
+		it("carries the fixed verification detail for a non-leak verification failure", async () => {
+			const { transaction } = createTransaction({
+				verifyResult: {
+					ok: false,
+					error: {
+						code: "output-verification-failed",
+						detail: "ExifTool reported an error for the generated output",
+					},
+				},
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-verification-failed",
+					diagnostic: "ExifTool reported an error for the generated output",
+				},
+			});
+		});
+
+		it("lists the first 8 leaked tag names then a +N more suffix", async () => {
+			const names = Array.from({ length: 10 }, (_, i) => `ICC-test:Tag${i}`);
+			const { transaction } = createTransaction({
+				verifyResult: leakResult(names),
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic:
+						"ICC-test:Tag0, ICC-test:Tag1, ICC-test:Tag2, ICC-test:Tag3, ICC-test:Tag4, ICC-test:Tag5, ICC-test:Tag6, ICC-test:Tag7 +2 more",
+				},
+			});
+		});
+
+		it("lists exactly 8 names with no suffix", async () => {
+			const names = Array.from({ length: 8 }, (_, i) => `PNG:Key${i}`);
+			const { transaction } = createTransaction({
+				verifyResult: leakResult(names),
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toMatchObject({
+				ok: false,
+				error: { diagnostic: names.join(", ") },
+			});
+		});
+
+		it("falls back to the verifier detail (which names the reopened FileType) when no tag is listed", async () => {
+			const { transaction } = createTransaction({
+				verifyResult: {
+					ok: false,
+					error: {
+						code: "output-metadata-leak",
+						detail:
+							"Copy-mode leak check has no permitted-tag set for this file type (WEBP)",
+						leakedTags: [],
+					},
+				},
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic:
+						"Copy-mode leak check has no permitted-tag set for this file type (WEBP)",
+				},
+			});
+		});
+
+		it("never carries tag values, however the verifier error is shaped (T-69-09)", async () => {
+			const sentinel = "ZZ69-04-SENTINEL-VALUE";
+			const { transaction } = createTransaction({
+				verifyResult: leakResult(["XMP-dc:Creator", "EXIF:GPSLatitude"], {
+					metadata: {
+						"XMP-dc:Creator": sentinel,
+						"EXIF:GPSLatitude": sentinel,
+					},
+					record: { "XMP-dc:Creator": sentinel },
+				}),
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic: "XMP-dc:Creator, EXIF:GPSLatitude",
+				},
+			});
+			expect(JSON.stringify(result)).not.toContain(sentinel);
+			expect(JSON.stringify(result)).not.toContain(generatedPath);
+			expect(JSON.stringify(result)).not.toContain(originalPath);
+		});
+
+		it("truncates a pathologically long tag name so the line cannot be flooded", async () => {
+			const long = `XMP-x:${"A".repeat(500)}`;
+			const { transaction } = createTransaction({
+				verifyResult: leakResult([long]),
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toMatchObject({
+				ok: false,
+				error: { diagnostic: `${long.slice(0, 80)}…` },
+			});
+		});
+
+		it("keeps cleanup-failed ahead of the diagnostic when the stage cannot be removed", async () => {
+			const eacces = Object.assign(new Error("locked"), { code: "EACCES" });
+			const { transaction } = createTransaction({
+				verifyResult: leakResult(["File:YCbCrSubSampling"]),
+				unlink: async () => Promise.reject(eacces),
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toEqual({
+				ok: false,
+				error: { code: "cleanup-failed", residualPath: generatedPath },
+			});
+			expect(JSON.stringify(result)).not.toContain("YCbCrSubSampling");
+		});
 	});
 });

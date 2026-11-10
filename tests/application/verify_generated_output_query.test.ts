@@ -317,9 +317,35 @@ describe("VerifyGeneratedOutputQuery", () => {
 				});
 				expect(result.ok).toBe(false);
 				if (result.ok) return;
+				expect(result.error.code).toBe("output-metadata-leak");
 				expect(result.error.detail).toBe(
-					"Copy-mode leak check has no permitted-tag set for this file type",
+					"Copy-mode leak check has no permitted-tag set for this file type (WEBP)",
 				);
+				if (result.error.code !== "output-metadata-leak") return;
+				expect(result.error.leakedTags).toEqual([]);
+			});
+
+			it("keeps the engine-error reopen failure as a code-only detail (69-04)", async () => {
+				vi.mocked(metadataEngine.inspect).mockResolvedValue({
+					ok: false,
+					error: {
+						code: "engine-error",
+						detail: "/secret/path.png",
+						backend: "exiftool",
+					},
+				} as never);
+				const result = await query.execute({
+					generatedPath: "/tmp/a_cleaned.png",
+					copyModeLeakCheck: cleanPreservation,
+				});
+				expect(result).toEqual({
+					ok: false,
+					error: {
+						code: "output-verification-failed",
+						detail:
+							"ExifTool could not reopen the generated output (engine-error)",
+					},
+				});
 			});
 		});
 	});
