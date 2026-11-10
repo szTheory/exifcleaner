@@ -51,6 +51,17 @@ type ThemeChannel = `theme:${string}`;
 // Branded channel categories for documentation and future narrowing
 export type { ExifChannel, SettingsChannel, ThemeChannel };
 
+/**
+ * Three enums, never a path, tag value or hash (D-17): which engine wrote the output, the
+ * effective output mode (a RAW forced copy reports "copy") and whether the leak check was
+ * guaranteed to have run and passed ("not-run" for the optional when-allowlisted check).
+ */
+export type RemoveMetadataEvidence = {
+	engine: "native" | "exiftool";
+	outputMode: "copy" | "overwrite";
+	leakCheck: "passed" | "not-run";
+};
+
 export type RemoveMetadataResult =
 	| {
 			success: true;
@@ -58,6 +69,8 @@ export type RemoveMetadataResult =
 			wasForcedCopy: boolean;
 			wroteFile: boolean;
 			outputSize: number;
+			/** Present only for a verified write; absent on the legacy write branch and the zero-tag early exit. */
+			evidence?: RemoveMetadataEvidence;
 	  }
 	| { success: false; error: string }
 	| {

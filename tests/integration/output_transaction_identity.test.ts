@@ -117,7 +117,10 @@ describe("OutputTransaction over real files: source identity recheck and fsync (
 		const ctx = setup({});
 		const before = snapshotDir(ctx.dir);
 		const result = await ctx.run();
-		expect(result).toEqual({ ok: true, value: { outputPath: ctx.source } });
+		expect(result).toEqual({
+			ok: true,
+			value: { outputPath: ctx.source, writtenBy: "exiftool" },
+		});
 		expect(fs.readFileSync(ctx.source, "utf8")).toBe(ORIGINAL + MARKER);
 		assertNoStageResidue(ctx.dir);
 		assertDirEffect(before, snapshotDir(ctx.dir), {
@@ -311,7 +314,10 @@ describe.skipIf(posixOnly)(
 				fs.chmodSync(ctx.source, mode);
 				const before = snapshotDir(ctx.dir);
 				const result = await ctx.run();
-				expect(result).toEqual({ ok: true, value: { outputPath: ctx.source } });
+				expect(result).toEqual({
+					ok: true,
+					value: { outputPath: ctx.source, writtenBy: "exiftool" },
+				});
 				expect(syncs).toBe(1);
 				expect(modeOf(ctx.source)).toBe(mode.toString(8));
 				expect(fs.readFileSync(ctx.source, "utf8")).toBe(ORIGINAL + MARKER);
@@ -337,7 +343,10 @@ describe.skipIf(posixOnly)(
 			fs.chmodSync(ctx.source, 0o444);
 			const before = snapshotDir(ctx.dir);
 			const result = await ctx.run();
-			expect(result).toEqual({ ok: true, value: { outputPath: ctx.source } });
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath: ctx.source, writtenBy: "exiftool" },
+			});
 			expect(syncs).toBe(1);
 			expect(modeOf(ctx.source)).toBe("444");
 			expect(fs.readFileSync(ctx.source, "utf8")).toBe(ORIGINAL + MARKER);
@@ -370,7 +379,10 @@ describe.skipIf(posixOnly)(
 			});
 			fs.chmodSync(ctx.source, 0o444);
 			const result = await ctx.run();
-			expect(result).toEqual({ ok: true, value: { outputPath: ctx.source } });
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath: ctx.source, writtenBy: "exiftool" },
+			});
 			expect(syncedMode).toBe("644");
 			expect(modeOf(ctx.source)).toBe("444");
 			assertNoStageResidue(ctx.dir);

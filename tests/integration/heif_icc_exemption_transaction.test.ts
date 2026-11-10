@@ -219,7 +219,7 @@ describe("63-11: F-HEIC-ICC is applied only to ExifTool-written HEIF copies, thr
 
 				expect(outcome).toEqual({
 					ok: true,
-					value: { outputPath: generatedPath },
+					value: { outputPath: generatedPath, writtenBy: "exiftool" },
 				});
 				await nativeDeclined(stack);
 				expect(stack.exiftoolWrite).toHaveBeenCalledOnce();
@@ -263,7 +263,7 @@ describe("63-11: F-HEIC-ICC is applied only to ExifTool-written HEIF copies, thr
 
 				expect(outcome).toEqual({
 					ok: true,
-					value: { outputPath: generatedPath },
+					value: { outputPath: generatedPath, writtenBy: "exiftool" },
 				});
 				await nativeDeclined(stack);
 				expect(stack.exiftoolWrite).toHaveBeenCalledOnce();
@@ -350,7 +350,11 @@ describe("63-11: F-HEIC-ICC is applied only to ExifTool-written HEIF copies, thr
 			outcomes.forEach((outcome, index) => {
 				expect(outcome).toEqual({
 					ok: true,
-					value: { outputPath: runs[index]?.generatedPath },
+					value: {
+						outputPath: runs[index]?.generatedPath,
+						// The first source is declined by native and written by ExifTool, the second natively.
+						writtenBy: index === 0 ? "exiftool" : "native",
+					},
 				});
 			});
 			expect(stack.nativeWrite).toHaveBeenCalledTimes(2);

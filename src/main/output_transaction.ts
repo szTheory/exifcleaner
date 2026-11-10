@@ -96,7 +96,12 @@ export class OutputTransaction {
 		preserveTimestamps: boolean;
 		signal?: AbortSignal | undefined;
 		copyModeLeakCheck?: CopyModeLeakCheck | undefined;
-	}): Promise<Result<{ outputPath: string }, OutputTransactionFailure>> {
+	}): Promise<
+		Result<
+			{ outputPath: string; writtenBy: WrittenBy },
+			OutputTransactionFailure
+		>
+	> {
 		// Identity is captured only for a staged overwrite, and before the write so a change
 		// at any later moment is seen. Nothing exists on disk yet, so a failure needs no cleanup.
 		let capturedIdentity: SourceIdentity | undefined;
@@ -223,10 +228,22 @@ export class OutputTransaction {
 					error: cleanupFailure ?? { code: "commit-failed" },
 				};
 			}
-			return { ok: true, value: { outputPath: commitPath } };
+			return {
+				ok: true,
+				value: {
+					outputPath: commitPath,
+					writtenBy: writeResult.value.writtenBy,
+				},
+			};
 		}
 
-		return { ok: true, value: { outputPath: generatedPath } };
+		return {
+			ok: true,
+			value: {
+				outputPath: generatedPath,
+				writtenBy: writeResult.value.writtenBy,
+			},
+		};
 	}
 
 	private async cleanup({

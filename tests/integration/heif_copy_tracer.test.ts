@@ -126,7 +126,7 @@ describe("63-02 tracer: default-settings .heic copy goes native, reopens, leak-c
 
 			expect(result).toEqual({
 				ok: true,
-				value: { outputPath: generatedPath },
+				value: { outputPath: generatedPath, writtenBy: "native" },
 			});
 			expect(nativeWrite).toHaveBeenCalledOnce();
 			expect(exiftoolWrite).not.toHaveBeenCalled();

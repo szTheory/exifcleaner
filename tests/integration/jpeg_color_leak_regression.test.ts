@@ -173,7 +173,7 @@ describe("69-02: colour JPEG copy mode passes verification on both engines", () 
 
 				expect(result).toEqual({
 					ok: true,
-					value: { outputPath: generatedPath },
+					value: { outputPath: generatedPath, writtenBy: route },
 				});
 
 				// The route really was the one under test (observed, not assumed).

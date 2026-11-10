@@ -152,7 +152,7 @@ describe("Large-file (>4 GiB) support on ExifTool's default (LRG-01, LRG-02)", (
 			});
 			expect(normalResult).toEqual({
 				ok: true,
-				value: { outputPath: normalGeneratedPath },
+				value: { outputPath: normalGeneratedPath, writtenBy: "exiftool" },
 			});
 
 			largeInspect = await adapter.inspect({
@@ -171,7 +171,7 @@ describe("Large-file (>4 GiB) support on ExifTool's default (LRG-01, LRG-02)", (
 			});
 			expect(largeResult).toEqual({
 				ok: true,
-				value: { outputPath: largeGeneratedPath },
+				value: { outputPath: largeGeneratedPath, writtenBy: "exiftool" },
 			});
 		} finally {
 			await exiftoolProcess.close();
@@ -247,7 +247,7 @@ describe("Large-file (>4 GiB) support on ExifTool's default (LRG-01, LRG-02)", (
 			});
 			expect(normalResult).toEqual({
 				ok: true,
-				value: { outputPath: normalGeneratedPath },
+				value: { outputPath: normalGeneratedPath, writtenBy: "exiftool" },
 			});
 
 			// JSON-warning read channel (Task 2, Q2_READ_TEXT_CHANNEL): the exact

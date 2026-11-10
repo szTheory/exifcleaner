@@ -372,7 +372,10 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 		const ex = row.expect;
 		expect(ran.outcome).toEqual({
 			ok: true,
-			value: { outputPath: ran.generatedPath },
+			value: {
+				outputPath: ran.generatedPath,
+				writtenBy: row.expect.engine === "native" ? "native" : "exiftool",
+			},
 		});
 		// D-06: name and extension kept, content decides the cleaning.
 		expect(path.basename(ran.generatedPath)).toBe(
@@ -615,7 +618,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 		await assertEngine(ran, row);
 		expect(ran.outcome).toEqual({
 			ok: true,
-			value: { outputPath: ran.generatedPath },
+			value: { outputPath: ran.generatedPath, writtenBy: "exiftool" },
 		});
 		expect(exiftoolTag(ran.generatedPath, "-FileType")).toBe("HEIC");
 		expect(ran.verifySpy).toHaveBeenCalledOnce();

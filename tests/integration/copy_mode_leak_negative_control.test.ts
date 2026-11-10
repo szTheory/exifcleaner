@@ -384,7 +384,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 
 					expect(result).toEqual({
 						ok: true,
-						value: { outputPath: generatedPath },
+						value: { outputPath: generatedPath, writtenBy: "native" },
 					});
 					expect(fs.existsSync(generatedPath)).toBe(true);
 					expect(sha256(source)).toBe(sourceDigestBefore);

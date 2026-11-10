@@ -196,7 +196,7 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 
 				expect(await result).toEqual({
 					ok: true,
-					value: { outputPath: generatedPath },
+					value: { outputPath: generatedPath, writtenBy: "native" },
 				});
 				expect(stack.nativeWrite).toHaveBeenCalledOnce();
 				expect(stack.exiftoolWrite).not.toHaveBeenCalled();
@@ -264,7 +264,7 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 
 				expect(outcome).toEqual({
 					ok: true,
-					value: { outputPath: generatedPath },
+					value: { outputPath: generatedPath, writtenBy: "native" },
 				});
 				expect(stack.nativeWrite).toHaveBeenCalledOnce();
 				expect(stack.exiftoolWrite).not.toHaveBeenCalled();
@@ -304,11 +304,11 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 			);
 			expect(firstOutcome).toEqual({
 				ok: true,
-				value: { outputPath: first.generatedPath },
+				value: { outputPath: first.generatedPath, writtenBy: "native" },
 			});
 			expect(secondOutcome).toEqual({
 				ok: true,
-				value: { outputPath: second.generatedPath },
+				value: { outputPath: second.generatedPath, writtenBy: "native" },
 			});
 			expect(stack.nativeWrite).toHaveBeenCalledTimes(2);
 			expect(stack.exiftoolWrite).not.toHaveBeenCalled();
@@ -347,7 +347,10 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 			outcomes.forEach((outcome, index) => {
 				expect(outcome).toEqual({
 					ok: true,
-					value: { outputPath: runs[index]?.generatedPath },
+					value: {
+						outputPath: runs[index]?.generatedPath,
+						writtenBy: "native",
+					},
 				});
 			});
 			expect(stack.nativeWrite).toHaveBeenCalledTimes(2);
