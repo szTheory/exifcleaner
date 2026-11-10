@@ -1,4 +1,4 @@
-# Colour JPEG Fixture Provenance
+# Colour Fixture Provenance
 
 Two 16x16 colour JPEG fixtures (Phase 69-02, OVR-01, D-21, amendment A2). They exist because the
 three older JPEG fixtures (`sample.jpg`, `orientation.jpg`, `no_metadata.jpg`, plus the two issue
@@ -49,3 +49,40 @@ magick base.png ppm:- | cjpeg -sample 1x1 -quality 80 > color_444.jpg
 `exiftool -all= -o - color_420_progressive.jpg | exiftool -G1 -s -YCbCrSubSampling -` prints
 `[File] YCbCrSubSampling : YCbCr4:2:0 (2 2)`: the tag is derived from the SOF marker, is not
 metadata that `-all=` can remove, and is reported by ExifTool in the `File` group.
+
+## Phase 69-03 additions: colour PNG and colour WebP (OVR-01, D-22b)
+
+Two more 16x16 colour fixtures, generated once from the same gradient and committed as bytes
+(CI and the Windows runner have none of these tools). They feed the per-format colour sweep
+(`tests/domain/copy_mode_color_sweep.test.ts`, `tests/domain/fixtures/copy_mode_color_sweep.json`).
+The sweep rows record the sha256 of the measured input; the test re-hashes the committed file and
+fails if the bytes drift from what was measured.
+
+| Field | Pinned value |
+| --- | --- |
+| cwebp | 1.5.0 |
+| ImageMagick | 7.1.1-44 Q16-HDRI aarch64 |
+| Bundled ExifTool | 13.59 |
+| Generated | 2026-11-09 |
+
+```sh
+magick -size 16x16 gradient:red-blue base.png
+magick base.png PNG24:color_rgb.png                  # 8-bit RGB, not interlaced
+cwebp -q 80 base.png -o color_lossy.webp              # lossy VP8
+# seed synthetic identifying metadata with the BUNDLED ExifTool (both files):
+.resources/nix/bin/exiftool -overwrite_original -Make=ExifCleaner-Fixture \
+  -Model=ExifCleaner-Fixture-Model -Artist=ExifCleaner-Fixture-Artist \
+  -GPSLatitude=37.7749 -GPSLatitudeRef=N -GPSLongitude=122.4194 -GPSLongitudeRef=W \
+  -XMP-dc:Creator=ExifCleaner-Fixture-Creator <file>
+# the PNG additionally: -PNG:Comment=ExifCleaner-Fixture-Comment
+```
+
+| File | Bytes | SHA-256 | Colour facts (bundled ExifTool) |
+| --- | --- | --- | --- |
+| `color_rgb.png` | 1,266 | `a44bc4c9c8a5bca65f327498cbc119e8c1c8658ac984f536069282833b29ff50` | `PNG:ColorType` RGB, 8-bit, `Noninterlaced`; ImageMagick also wrote `cHRM` and `bKGD` chunks, which the PNG allowlist already permits |
+| `color_lossy.webp` | 3,246 | `97dab56eeff6216483842aaef3d5294e9422b578020ad86ad66b63ca320c18e5` | `File:FileType` Extended WEBP, `RIFF:WebP_Flags` XMP, EXIF, lossy VP8 |
+
+Seeded (identifying, synthetic) in both: `IFD0:Make`, `IFD0:Model`, `IFD0:Artist`,
+`GPS:GPSLatitude(+Ref)`, `GPS:GPSLongitude(+Ref)`, `XMP-dc:Creator`; the PNG also carries
+`PNG:Comment`. The WebP allowlist is not part of this plan (the WebP leak check is plan 69-09);
+the WebP rows of the sweep are measured and recorded only.

@@ -994,3 +994,66 @@ describe("colour JPEG File:YCbCrSubSampling (69-02)", () => {
 		},
 	);
 });
+
+// 69-03 (OVR-01; D-22b): colour PNG sweep, tests/domain/fixtures/copy_mode_color_sweep.json. The
+// ExifTool engine keeps the eXIf resolution tags (and the byte-order and positioning companions
+// ExifTool re-creates with them) of a PNG when preserveResolution is requested; the native engine
+// keeps only the pHYs chunk. They are resolution values, the thing the user asked to keep, the
+// same class JPEG/HEIC/AVIF already permit under preserveResolution.
+describe("colour PNG eXIf resolution keys (69-03)", () => {
+	const MEASURED_PNG_RESOLUTION_KEYS = [
+		"File:ExifByteOrder",
+		"IFD0:ResolutionUnit",
+		"IFD0:XResolution",
+		"IFD0:YCbCrPositioning",
+		"IFD0:YResolution",
+	] as const;
+
+	const base = {
+		format: "png",
+		writtenBy: "exiftool",
+		fileType: "PNG",
+	} as const;
+
+	it("permits them when preserveResolution is requested", () => {
+		const result = findLeakedTags({
+			...base,
+			record: recordFromKeys(MEASURED_PNG_RESOLUTION_KEYS),
+			preservation: {
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: true,
+			},
+		});
+		expect(result.leakedTags).toEqual([]);
+	});
+
+	it("still reports every one of them when preserveResolution is off", () => {
+		const result = findLeakedTags({
+			...base,
+			record: recordFromKeys(MEASURED_PNG_RESOLUTION_KEYS),
+			preservation: {
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: false,
+			},
+		});
+		expect(result.leakedTags).toEqual([...MEASURED_PNG_RESOLUTION_KEYS]);
+	});
+
+	it("does not widen the other formats (the key sets are scoped per format)", () => {
+		expect(alwaysSet("HEIC_ORIENTATION_ONLY").has("IFD0:XResolution")).toBe(
+			false,
+		);
+		const result = findLeakedTags({
+			...base,
+			record: recordFromKeys(["IFD0:Make"]),
+			preservation: {
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				preserveResolution: true,
+			},
+		});
+		expect(result.leakedTags).toEqual(["IFD0:Make"]);
+	});
+});
