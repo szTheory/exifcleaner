@@ -44,6 +44,12 @@ const EXEMPT_GROUPS: ReadonlySet<string> = new Set(["System", "ExifTool"]);
 // 58-SWEEP-MATRIX.md "## Allowlist derivation" — JPEG, always permitted (no preservation
 // required): APP14 Adobe segment fields (survive -all= unconditionally when present), basic
 // File-group format facts, Composite size/megapixel derivations.
+// File:YCbCrSubSampling (69-02, OVR-01) is the chroma subsampling ExifTool derives from the SOF
+// marker of any 3-component JPEG: structural, never source-identifying, and not removable by
+// -all=. Measured on the bundled ExifTool 13.59 with a 4:2:0 progressive and a 4:4:4 baseline
+// colour JPEG (69-EVIDENCE.md "## 69-02"). It is absent on 1-component grayscale, which is why
+// the Phase 58 sweep and the all-grayscale fixture set never saw it, and the colour copies of
+// the 69-02 regression failed verification on the base commit until this line was added.
 const JPEG_ALWAYS_PERMITTED: ReadonlySet<string> = new Set([
 	"Adobe:APP14Flags0",
 	"Adobe:APP14Flags1",
@@ -59,6 +65,7 @@ const JPEG_ALWAYS_PERMITTED: ReadonlySet<string> = new Set([
 	"File:ImageHeight",
 	"File:ImageWidth",
 	"File:MIMEType",
+	"File:YCbCrSubSampling",
 ]);
 
 // 58-SWEEP-MATRIX.md — JPEG, permitted only when preserveOrientation is requested.

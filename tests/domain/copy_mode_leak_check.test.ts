@@ -910,3 +910,87 @@ describe("findLeakedTags", () => {
 		});
 	});
 });
+
+// 69-02 (OVR-01; D-22a, D-22c): File:YCbCrSubSampling is the File-group chroma subsampling of any
+// 3-component JPEG. The key sets below are the measured output of the bundled ExifTool 13.59
+// after `-all=` on tests/e2e/fixtures/color_420_progressive.jpg and color_444.jpg (System and
+// ExifTool groups omitted: they are exempt wholesale).
+describe("colour JPEG File:YCbCrSubSampling (69-02)", () => {
+	const MEASURED_COLOR_KEYS = [
+		"File:FileType",
+		"File:FileTypeExtension",
+		"File:MIMEType",
+		"File:ImageWidth",
+		"File:ImageHeight",
+		"File:EncodingProcess",
+		"File:BitsPerSample",
+		"File:ColorComponents",
+		"File:YCbCrSubSampling",
+		"Composite:ImageSize",
+		"Composite:Megapixels",
+	] as const;
+
+	const COMBOS = [false, true].flatMap((preserveOrientation) =>
+		[false, true].flatMap((preserveColorProfile) =>
+			[false, true].map((preserveResolution) => ({
+				preserveOrientation,
+				preserveColorProfile,
+				preserveResolution,
+			})),
+		),
+	);
+
+	it.each(COMBOS)(
+		"a measured colour JPEG record has no leaked tags (%j)",
+		(preservation) => {
+			const result = findLeakedTags({
+				record: recordFromKeys(MEASURED_COLOR_KEYS),
+				format: "jpeg",
+				writtenBy: "native",
+				fileType: "JPEG",
+				preservation,
+			});
+			expect(result.leakedTags).toEqual([]);
+		},
+	);
+
+	it.each([["XMP-dc:Creator"], ["GPS:GPSLatitude"]])(
+		"the colour record plus %s still fails and names only that tag",
+		(leaky) => {
+			const result = findLeakedTags({
+				record: recordFromKeys([...MEASURED_COLOR_KEYS, leaky]),
+				format: "jpeg",
+				writtenBy: "exiftool",
+				fileType: "JPEG",
+				preservation: {
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+				},
+			});
+			expect(result.leakedTags).toEqual([leaky]);
+		},
+	);
+
+	it.each([
+		["png", "PNG"],
+		["heic", "HEIC"],
+		["avif", "AVIF"],
+	] as const)(
+		"%s still reports File:YCbCrSubSampling as a leak (the allowance is JPEG-scoped)",
+		(format, fileType) => {
+			const result = findLeakedTags({
+				record: recordFromKeys(["File:YCbCrSubSampling"]),
+				format,
+				writtenBy: "native",
+				fileType,
+				preservation: {
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+				},
+			});
+			expect(result.leakedTags).toEqual(["File:YCbCrSubSampling"]);
+		},
+	);
+});
