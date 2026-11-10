@@ -1149,20 +1149,82 @@ describe("JPEG and PNG ICC colorimetry and descriptor keys (69-03)", () => {
 		});
 	});
 
-	it.each([
-		["heic", "HEIC"],
-		["avif", "AVIF"],
-	] as const)(
-		"%s is not widened: bkpt stays a leak (only ChromaticAdaptation was measured there)",
-		(format, fileType) => {
+	it("heic is not widened: bkpt stays a leak (HEIC was not re-measured with these profiles)", () => {
+		const result = findLeakedTags({
+			record: recordFromKeys(["ICC_Profile:MediaBlackPoint"]),
+			format: "heic",
+			writtenBy: "native",
+			fileType: "HEIC",
+			preservation: colorProfileOn,
+		});
+		expect(result.leakedTags).toEqual(["ICC_Profile:MediaBlackPoint"]);
+	});
+
+	// Stretch measurement (69-03): an AVIF written by avifenc with the same three system profiles
+	// shows the same keys on both engines, so AVIF takes the same measured extension.
+	describe("avif (measured with avifenc-embedded system profiles)", () => {
+		it.each(MEASURED_EXTRA_ICC_KEYS)(
+			"permits %s when preserveColorProfile is requested, on both engines",
+			(key) => {
+				for (const writtenBy of ["native", "exiftool"] as const) {
+					const result = findLeakedTags({
+						record: recordFromKeys([key]),
+						format: "avif",
+						writtenBy,
+						fileType: "AVIF",
+						preservation: colorProfileOn,
+					});
+					expect(result.leakedTags).toEqual([]);
+				}
+			},
+		);
+
+		it("a native AVIF with the colour profile off and an ICC-meas key is still a leak (no exemption for native output)", () => {
 			const result = findLeakedTags({
-				record: recordFromKeys(["ICC_Profile:MediaBlackPoint"]),
-				format,
+				record: recordFromKeys(["ICC-meas:MeasurementObserver"]),
+				format: "avif",
 				writtenBy: "native",
-				fileType,
+				fileType: "AVIF",
+				preservation: colorProfileOff,
+			});
+			expect(result.leakedTags).toEqual(["ICC-meas:MeasurementObserver"]);
+		});
+
+		it("an ExifTool-written AVIF keeps the source ICC measurement and viewing groups with the colour profile off: exempted under F-HEIC-ICC", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys([
+					"ICC-meas:MeasurementObserver",
+					"ICC-view:ViewingCondSurround",
+				]),
+				format: "avif",
+				writtenBy: "exiftool",
+				fileType: "AVIF",
+				preservation: colorProfileOff,
+			});
+			expect(result.leakedTags).toEqual([]);
+			expect(result.exemptionsApplied).toEqual(["F-HEIC-ICC"]);
+		});
+
+		it("the same ExifTool-written record in a HEIC still leaks (the exemption extension is AVIF-scoped)", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys(["ICC-meas:MeasurementObserver"]),
+				format: "heic",
+				writtenBy: "exiftool",
+				fileType: "HEIC",
+				preservation: colorProfileOff,
+			});
+			expect(result.leakedTags).toEqual(["ICC-meas:MeasurementObserver"]);
+		});
+
+		it("an identifying key next to the ICC keys is still reported alone", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys([...MEASURED_EXTRA_ICC_KEYS, "XMP-dc:Creator"]),
+				format: "avif",
+				writtenBy: "exiftool",
+				fileType: "AVIF",
 				preservation: colorProfileOn,
 			});
-			expect(result.leakedTags).toEqual(["ICC_Profile:MediaBlackPoint"]);
-		},
-	);
+			expect(result.leakedTags).toEqual(["XMP-dc:Creator"]);
+		});
+	});
 });

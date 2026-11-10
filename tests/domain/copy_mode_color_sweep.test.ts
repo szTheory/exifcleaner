@@ -95,8 +95,8 @@ const IDENTIFYING_KEYS = [
 ] as const;
 
 describe("69-03 colour sweep data: non-vacuity", () => {
-	it("holds at least 150 written rows and no declined or errored row", () => {
-		expect(writtenRows.length).toBeGreaterThanOrEqual(150);
+	it("holds at least 480 written rows and no declined or errored row", () => {
+		expect(writtenRows.length).toBeGreaterThanOrEqual(480);
 		expect(rows.length).toBe(writtenRows.length);
 	});
 
@@ -352,6 +352,92 @@ describe("69-03 colour sweep data: ICC profiles", () => {
 			const seen = byKey.get(id);
 			if (seen === undefined) byKey.set(id, iccKeys);
 			else expect(iccKeys, id).toBe(seen);
+		}
+	});
+});
+
+// 69-03 Task 3 (A2 stretch, one bounded pass): variants beyond one-colour-fixture-per-format. Rows
+// are data only (no source bytes committed); the variants were generated in scratch with cjpeg,
+// magick, avifenc and a synthetic JUMBF box, then seeded with the HEIF seed.
+describe("69-03 colour sweep data: stretch variants", () => {
+	const variantRows = (name: string) =>
+		writtenRows.filter((row) => row.variant === name);
+
+	it.each([
+		"jpeg_422",
+		"jpeg_420_baseline",
+		"jpeg_gray_progressive",
+		"jpeg_cmyk_adobe",
+		"jpeg_c2pa_jumbf",
+		"png_16bit",
+		"png_palette",
+		"png_alpha",
+		"png_interlaced",
+		"png_text_after_idat",
+		"png_c2pa_cabx",
+		"avif_icc_srgb-iec",
+		"avif_icc_adobergb",
+		"avif_icc_displayp3",
+	])("%s has all 8 combinations on both routes", (name) => {
+		const rowsOf = variantRows(name);
+		expect(new Set(rowsOf.map((row) => row.combo)).size).toBe(8);
+		expect(new Set(rowsOf.map((row) => row.route))).toEqual(
+			new Set(["router", "exiftool-direct"]),
+		);
+	});
+
+	it("chroma subsampling is reported for 4:2:2 and 4:2:0 and absent for grayscale and CMYK (controls)", () => {
+		for (const name of ["jpeg_422", "jpeg_420_baseline"]) {
+			expect(
+				variantRows(name).every((row) =>
+					row.keys.includes("File:YCbCrSubSampling"),
+				),
+				name,
+			).toBe(true);
+		}
+		for (const name of ["jpeg_gray_progressive", "jpeg_cmyk_adobe"]) {
+			expect(
+				variantRows(name).some((row) =>
+					row.keys.includes("File:YCbCrSubSampling"),
+				),
+				name,
+			).toBe(false);
+		}
+	});
+
+	it("C2PA/JUMBF content credentials are removed by both engines (no JUMBF key in any written row)", () => {
+		const survivors = writtenRows.filter((row) =>
+			row.keys.some((key) => key.startsWith("JUMBF:")),
+		);
+		expect(survivors.map((row) => `${row.variant} ${row.route}`)).toEqual([]);
+		expect(variantRows("jpeg_c2pa_jumbf").length).toBeGreaterThan(0);
+		expect(variantRows("png_c2pa_cabx").length).toBeGreaterThan(0);
+	});
+
+	it("the CMYK/Adobe JPEG keeps only the already-permitted Adobe APP14 keys", () => {
+		const adobe = new Set(
+			variantRows("jpeg_cmyk_adobe").flatMap((row) =>
+				row.keys.filter((key) => key.startsWith("Adobe:")),
+			),
+		);
+		expect([...adobe].sort()).toEqual([
+			"Adobe:APP14Flags0",
+			"Adobe:APP14Flags1",
+			"Adobe:ColorTransform",
+			"Adobe:DCTEncodeVersion",
+		]);
+	});
+
+	it("AVIF with the system sRGB IEC61966-2.1 profile carries the measured ICC keys on both engines when the profile is kept", () => {
+		const on = variantRows("avif_icc_srgb-iec").filter(
+			(row) => row.preserveColorProfile,
+		);
+		expect(new Set(on.map((row) => row.engine))).toEqual(
+			new Set(["native", "exiftool"]),
+		);
+		for (const row of on) {
+			expect(row.keys).toContain("ICC_Profile:MediaBlackPoint");
+			expect(row.keys).toContain("ICC-meas:MeasurementObserver");
 		}
 	});
 });
