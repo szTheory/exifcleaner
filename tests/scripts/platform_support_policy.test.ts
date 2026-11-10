@@ -11,6 +11,28 @@ const ROOT = path.resolve(import.meta.dirname, "../..");
 
 type Inputs = ReturnType<typeof readRepositoryInputs>;
 
+// The 4.7.0 release-notes rule in the policy is keyed on package version 4.7.0 (see the
+// "notes rule is keyed on package version" test), so once the repository is at a later version
+// the real notes no longer exercise it. The notes negative controls therefore run against this
+// fixed 4.7.0 package state, carrying exactly the terms the rule requires.
+const NOTES_AT_4_7_0 = [
+	"# ExifCleaner 4.7.0",
+	"",
+	"It no longer runs on 32-bit Windows or macOS 12. The 4.6.x line is the last that does, and 4.6.0 is the version to reinstall.",
+	"",
+	"macOS 13 (Ventura) or later is now required.",
+	"",
+	"## Rollback",
+	"",
+	"Reinstall 4.6.0 from https://github.com/szTheory/exifcleaner/releases/tag/v4.6.0.",
+	"",
+].join("\n");
+
+function asPackageAt470(inputs: Inputs): void {
+	inputs.packageJson.version = "4.7.0";
+	inputs.releaseNotes = NOTES_AT_4_7_0;
+}
+
 describe("platform support policy", () => {
 	test("the repository satisfies the policy", () => {
 		expect(checkPlatformPolicy(readRepositoryInputs(ROOT))).toEqual([]);
@@ -188,6 +210,9 @@ describe("platform support policy", () => {
 		],
 	])("negative control: %s", (_name, mutate, expected) => {
 		const inputs = structuredClone(readRepositoryInputs(ROOT));
+		if (_name.startsWith("notes ")) {
+			asPackageAt470(inputs);
+		}
 		mutate(inputs);
 		const reasons = checkPlatformPolicy(inputs);
 		expect(reasons.length).toBeGreaterThan(0);
@@ -196,6 +221,7 @@ describe("platform support policy", () => {
 
 	test("a 4.7.0 package with a mistyped notes heading fails, not skips", () => {
 		const inputs = structuredClone(readRepositoryInputs(ROOT));
+		asPackageAt470(inputs);
 		inputs.releaseNotes = inputs.releaseNotes.replace(
 			"# ExifCleaner 4.7.0",
 			"# ExifCleaner v4.7.0",

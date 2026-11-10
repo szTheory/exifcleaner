@@ -1,5 +1,26 @@
 # Changelog
 
+## 4.8.0
+
+### Changed
+
+- Overwrite of JPG, JPEG, PNG, WebP, HEIC, HEIF and AVIF now writes a staged file next to the original, reopens it with ExifTool, runs the leftover-metadata check, syncs it to disk (a full fsync on macOS), rechecks that the original did not change, and only then replaces the original. If any step fails, the original is kept. TIFF and media files already worked this way
+- Overwrite of these formats uses the built-in cleaner whenever it can. ExifTool writes the file only when the built-in cleaner declines it before writing; turning on Preserve timestamps does not send a file to ExifTool
+- WebP files are now cleaned by the built-in cleaner by default (exifcleaner-node 0.5.0), including with Save as copy on and Preserve resolution on, which keeps the resolution. A WebP copy or overwrite that fails the leftover-metadata check is discarded and the original is kept. The check was swept over 23 WebP variants on both cleaners and none had to be refused
+- Overwrite replaces the file with the cleaned one rather than editing it in place. A file of your own keeps its owner and permissions (0640, 0600 and read-only 0444 are kept on macOS and Linux) and, when the system allows it, its group; a symbolic link at the path is replaced by the cleaned file and the old target is left alone. An existing hard link keeps the old bytes and metadata: only the path you cleaned gets the cleaned file. Extended attributes, ACLs and alternate data streams are not carried to the new file. The result for a file owned by a different user was not measured
+- On Windows the file's creation time changes when a file is overwritten, because the cleaned file is a new file (4.7.0 kept it). A read-only file on Windows is not overwritten and the original is kept, the same outcome as before 4.8.0
+- The extra checks cost time. Measured on one Apple Silicon Mac under background load: WebP Save as copy takes 8.0 to 8.3 ms more per file (about 4 s more per 500 files), and Overwrite of JPG, PNG, WebP, HEIC and AVIF files takes 8.4 to 12.1 ms more per file than 4.7.0 (about 4.2 to 6.0 s more per 500 files). Windows and Linux were not measured
+- A failed leftover-metadata check now shows the check code and the names of the unexpected tags in the file's detail line (at most eight names, never tag values or file paths). Tag names can come from the file itself, such as PNG text keywords or XMP property names. If another app changes or locks the original while an overwrite runs, the overwrite stops with a message that the original is unchanged
+- Updated exifcleaner-node from 0.4.0 to 0.5.0
+
+### Fixed
+
+- Save as copy of a colour JPEG no longer ends in "Couldn't verify cleaned output". The leftover-metadata check was flagging the JPEG's chroma subsampling (`File:YCbCrSubSampling`), a fact about how the picture is encoded, as unexpected metadata and discarding the copy. This affected 4.5.0 to 4.7.0. Measured on 4:2:0 progressive, 4:2:2 and 4:4:4 colour JPEGs; grayscale and CMYK JPEGs never carried this tag
+- With Preserve color profile on, Save as copy of a JPEG or PNG that carries an sRGB IEC61966-2.1, Adobe RGB (1998) or Display P3 colour profile no longer fails the same check on the profile's own descriptive entries. The same entries are now accepted for AVIF with the same setting. With Preserve color profile off none of these entries survive, and a profile entry that was not measured still fails the check
+- With Preserve resolution on, a PNG that carries EXIF resolution tags and is cleaned by ExifTool (the route used when the built-in cleaner declines a file) no longer fails the check on those resolution tags
+
+Thanks to zbruceli for reporting and proposing fixes in #403 and #404. Both were reimplemented with a regression fixture and measured sweeps rather than merged as written.
+
 ## 4.7.0
 
 ### Changed

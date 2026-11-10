@@ -46,6 +46,16 @@ orientation or color-profile fields must be copied back after stripping.
 `VerifyGeneratedOutputQuery` to reopen the file before returning a path or replacing an
 original.
 
+Since 4.8.0 an overwrite of JPG, JPEG, PNG, WebP, HEIC, HEIF or AVIF takes the same staged path
+as TIFF, RAW and media files: the candidate is written beside the source, reopened and
+leak-checked, synced to disk, given the source's owner (best effort) and permissions, and the
+source is stat-checked again before the rename replaces it. Any failure keeps the original.
+The built-in cleaner writes the stage when it can and ExifTool writes it when the built-in
+cleaner declines the file. GIF, BMP, SVG and PDF still overwrite in place with ExifTool. Because
+the rename swaps the file, a second hard link keeps the old bytes, and extended attributes,
+ACLs and alternate data streams are not carried; on Windows a read-only source is refused
+before anything is written.
+
 ## Outcome classification
 
 `cleanExifData()` removes ExifTool's structural `System`, `File`, `JFIF`, `ExifTool`, and `Composite`
