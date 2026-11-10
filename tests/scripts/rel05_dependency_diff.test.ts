@@ -134,6 +134,7 @@ describe("REL-05 package.json delta against the 4.7.0 policy", () => {
 			basePackage,
 			headPackage: basePackage,
 			policy,
+			release: "4.7.0",
 		});
 		expect(reasons).toContain(
 			"devDependencies change set [] does not equal the 4.7.0 policy [@playwright/test,@types/node,electron,playwright,prettier,tsx,vite]",
@@ -246,16 +247,22 @@ describe("REL-05 4.8.0 policy: exifcleaner-node 0.4.0 to 0.5.0 and nothing else"
 	});
 
 	test("a react or zod change under the 4.8.0 policy still fails, named by key", () => {
+		// No lock is passed: the manifest delta alone must already fail (a lock without an entry for
+		// the bumped range would throw instead).
+		const manifestOnly = (head: unknown): string =>
+			compareDependencySurfaces({
+				basePackage: v470Package,
+				headPackage: head,
+				policy: policy480,
+				release: "4.8.0",
+			}).join("\n");
 		const react = nodeFiveHead(headPackage);
 		react.dependencies.react = "^19.3.1";
-		expect(run({ headPackage: react }).join("\n")).toContain(
-			"dependencies.react changed",
-		);
+		expect(manifestOnly(react)).toContain("dependencies.react changed");
+		expect(manifestOnly(react)).not.toContain("exifcleaner-node");
 		const zod = nodeFiveHead(headPackage);
 		zod.dependencies.zod = "3.25.77";
-		expect(run({ headPackage: zod }).join("\n")).toContain(
-			"dependencies.zod changed",
-		);
+		expect(manifestOnly(zod)).toContain("dependencies.zod changed");
 	});
 
 	test("the declared dependency must actually change: the allowance is an exact set", () => {
