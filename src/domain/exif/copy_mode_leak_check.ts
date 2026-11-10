@@ -362,8 +362,13 @@ const AVIF_ORIENTATION_ONLY: ReadonlySet<string> = new Set([
 
 // 63-SWEEP-MATRIX.md "## Allowlist derivation" (AVIF) -- permitted only when preserveColorProfile
 // is requested; ICC_Profile:ChromaticAdaptation measured on a Display P3 libavif AVIF in 63-09.
+// 69-03 stretch (69-COLOR-SWEEP-MATRIX.md "## Stretch matrix"): an AVIF written by avifenc with the
+// same three system profiles shows the identical key sets on both engines, so AVIF also takes the
+// measured extension (ChromaticAdaptation is already listed above). HEIC was not re-measured and
+// does not get it.
 const AVIF_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
 	...ICC_GROUP_TAGS,
+	...ICC_MEASURED_EXTENSION_TAGS,
 	"ICC_Profile:ChromaticAdaptation",
 ]);
 
@@ -407,6 +412,14 @@ const F_HEIC_ICC_FILE_TYPES: ReadonlySet<string> = new Set([
 	"HEIC",
 	"HEIF",
 	"AVIF",
+]);
+// 69-03 stretch: the ICC measurement and viewing-condition groups of an sRGB IEC61966-2.1 profile
+// that the ExifTool engine keeps in an AVIF with the colour profile off (the same source-profile
+// residue as the two groups above, measured on avifenc-embedded profiles). Exact Group1 names,
+// AVIF only: HEIC and HEIF were not re-measured with such a profile.
+const F_HEIC_ICC_AVIF_ONLY_GROUPS: ReadonlySet<string> = new Set([
+	"ICC-meas",
+	"ICC-view",
 ]);
 
 interface Preservation {
@@ -558,7 +571,11 @@ export function findLeakedTags({
 		if (EXEMPT_GROUPS.has(group1)) continue;
 
 		if (!isPermitted({ format, group1, tag, preservation })) {
-			if (heicIccExemptionOpen && F_HEIC_ICC_GROUPS.has(group1)) {
+			if (
+				heicIccExemptionOpen &&
+				(F_HEIC_ICC_GROUPS.has(group1) ||
+					(fileType === "AVIF" && F_HEIC_ICC_AVIF_ONLY_GROUPS.has(group1)))
+			) {
 				heicIccExempted = true;
 				continue;
 			}
