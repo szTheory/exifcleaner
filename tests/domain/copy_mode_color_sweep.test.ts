@@ -242,3 +242,116 @@ describe("69-03 colour sweep data: classification", () => {
 		expect(replay(planted).leakedTags).toEqual(["XMP-dc:Creator"]);
 	});
 });
+
+// 69-03 Task 2 (A2, review B3): ICC tag sets measured on the profiles people actually have. The
+// three system profiles are embedded in scratch copies only (their bytes are never committed; the
+// rows hold key names); color_icc_p3.jpg/png are committed and embed the profile extracted from the
+// committed red-at-12-oclock AVIF (a ColorSpin sRGB v2.1 profile with no chad and no bkpt tag).
+describe("69-03 colour sweep data: ICC profiles", () => {
+	const iccRows = writtenRows.filter(
+		(row) =>
+			(row.format === "jpeg" || row.format === "png") &&
+			(row.variant.startsWith("icc-") || row.variant.startsWith("color_icc_")),
+	);
+	const isIcc = (key: string): boolean =>
+		key.startsWith("ICC-") || key.startsWith("ICC_Profile:");
+	const keysOf = (variantPrefix: string, format: string): Set<string> =>
+		new Set(
+			iccRows
+				.filter(
+					(row) =>
+						row.variant.startsWith(variantPrefix) &&
+						row.format === format &&
+						row.preserveColorProfile,
+				)
+				.flatMap((row) => [...row.keys]),
+		);
+
+	it("covers three system profiles on both routes and the committed fixture, JPEG and PNG", () => {
+		const rowsFor = (variant: string, format: string) =>
+			iccRows.filter(
+				(row) =>
+					row.variant.startsWith(variant) &&
+					row.format === format &&
+					row.preserveColorProfile,
+			);
+		for (const format of ["jpeg", "png"] as const) {
+			for (const variant of [
+				"icc-srgb-iec61966-2.1",
+				"icc-adobergb1998",
+				"icc-displayp3",
+			]) {
+				const routes = new Set(
+					rowsFor(variant, format).map((row) => row.route),
+				);
+				expect([...routes].sort(), `${variant} ${format}`).toEqual([
+					"exiftool-direct",
+					"router",
+				]);
+			}
+			// The router hands the committed fixture (profile with no chad/bkpt) to the ExifTool
+			// engine when the colour profile is kept (the native engine declines before writing);
+			// every written row must still verify.
+			expect(
+				rowsFor("color_icc_p3", format).length,
+				`color_icc_p3 ${format}`,
+			).toBeGreaterThanOrEqual(4);
+		}
+	});
+
+	it("with preserveColorProfile off no ICC key survives on either engine", () => {
+		const off = iccRows.filter((row) => !row.preserveColorProfile);
+		expect(off.length).toBeGreaterThan(0);
+		expect(
+			off.filter((row) => row.keys.some(isIcc)).map((row) => row.variant),
+		).toEqual([]);
+	});
+
+	it("with preserveColorProfile on every row keeps the profile (non-vacuous)", () => {
+		const on = iccRows.filter((row) => row.preserveColorProfile);
+		expect(on.length).toBeGreaterThan(0);
+		expect(
+			on.every((row) => row.keys.includes("ICC_Profile:ProfileDescription")),
+		).toBe(true);
+	});
+
+	it.each(["jpeg", "png"] as const)(
+		"%s: the measured colorimetry and descriptor keys are present for the profiles that carry them",
+		(format) => {
+			expect(keysOf("icc-displayp3", format)).toContain(
+				"ICC_Profile:ChromaticAdaptation",
+			);
+			expect(keysOf("icc-adobergb1998", format)).toContain(
+				"ICC_Profile:MediaBlackPoint",
+			);
+			const srgb = keysOf("icc-srgb-iec61966-2.1", format);
+			for (const key of [
+				"ICC_Profile:MediaBlackPoint",
+				"ICC_Profile:DeviceMfgDesc",
+				"ICC_Profile:DeviceModelDesc",
+				"ICC_Profile:ViewingCondDesc",
+				"ICC_Profile:Luminance",
+				"ICC_Profile:Technology",
+				"ICC-meas:MeasurementObserver",
+				"ICC-view:ViewingCondSurround",
+			]) {
+				expect(srgb, key).toContain(key);
+			}
+			// The committed fixture's profile carries neither tag the #404 hypothesis names.
+			const committed = keysOf("color_icc_p3", format);
+			expect(committed).not.toContain("ICC_Profile:ChromaticAdaptation");
+			expect(committed).not.toContain("ICC_Profile:MediaBlackPoint");
+		},
+	);
+
+	it("the keys are classified identically by both engines (same key set per variant and combo)", () => {
+		const byKey = new Map<string, string>();
+		for (const row of iccRows) {
+			const id = `${row.variant} ${row.combo}`;
+			const iccKeys = row.keys.filter(isIcc).join(",");
+			const seen = byKey.get(id);
+			if (seen === undefined) byKey.set(id, iccKeys);
+			else expect(iccKeys, id).toBe(seen);
+		}
+	});
+});

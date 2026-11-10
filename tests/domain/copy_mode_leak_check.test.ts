@@ -1057,3 +1057,98 @@ describe("colour PNG eXIf resolution keys (69-03)", () => {
 		expect(result.leakedTags).toEqual(["IFD0:Make"]);
 	});
 });
+
+// 69-03 (OVR-01; A2, review B3): ICC tags measured on the profiles people actually have, on JPEG
+// and PNG, on both engines (tests/domain/fixtures/copy_mode_color_sweep.json, rows icc-*). The
+// system sRGB IEC61966-2.1 v2 profile (cameras, Windows, Photoshop) adds the measurement, viewing
+// condition, device description, luminance and technology tags and the bkpt tag; Adobe RGB (1998)
+// adds MediaBlackPoint; Display P3 (v4) adds ChromaticAdaptation. All are colorimetry or profile
+// descriptors of the colour profile the user asked to keep, and none survives with
+// preserveColorProfile off.
+describe("JPEG and PNG ICC colorimetry and descriptor keys (69-03)", () => {
+	const MEASURED_EXTRA_ICC_KEYS = [
+		"ICC-meas:MeasurementBacking",
+		"ICC-meas:MeasurementFlare",
+		"ICC-meas:MeasurementGeometry",
+		"ICC-meas:MeasurementIlluminant",
+		"ICC-meas:MeasurementObserver",
+		"ICC-view:ViewingCondIlluminant",
+		"ICC-view:ViewingCondIlluminantType",
+		"ICC-view:ViewingCondSurround",
+		"ICC_Profile:ChromaticAdaptation",
+		"ICC_Profile:DeviceMfgDesc",
+		"ICC_Profile:DeviceModelDesc",
+		"ICC_Profile:Luminance",
+		"ICC_Profile:MediaBlackPoint",
+		"ICC_Profile:Technology",
+		"ICC_Profile:ViewingCondDesc",
+	] as const;
+
+	const colorProfileOn = {
+		preserveOrientation: false,
+		preserveColorProfile: true,
+		preserveResolution: false,
+	} as const;
+	const colorProfileOff = { ...colorProfileOn, preserveColorProfile: false };
+
+	describe.each([
+		["jpeg", "JPEG"],
+		["png", "PNG"],
+	] as const)("%s", (format, fileType) => {
+		it.each(MEASURED_EXTRA_ICC_KEYS)(
+			"permits %s when preserveColorProfile is requested",
+			(key) => {
+				const result = findLeakedTags({
+					record: recordFromKeys([key]),
+					format,
+					writtenBy: "native",
+					fileType,
+					preservation: colorProfileOn,
+				});
+				expect(result.leakedTags).toEqual([]);
+			},
+		);
+
+		it("reports every one of them when preserveColorProfile is off", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys(MEASURED_EXTRA_ICC_KEYS),
+				format,
+				writtenBy: "exiftool",
+				fileType,
+				preservation: colorProfileOff,
+			});
+			expect(result.leakedTags).toEqual([...MEASURED_EXTRA_ICC_KEYS].sort());
+		});
+
+		it("still fails closed on an ICC tag that was not measured", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys([
+					...MEASURED_EXTRA_ICC_KEYS,
+					"ICC_Profile:AToB0",
+				]),
+				format,
+				writtenBy: "native",
+				fileType,
+				preservation: colorProfileOn,
+			});
+			expect(result.leakedTags).toEqual(["ICC_Profile:AToB0"]);
+		});
+	});
+
+	it.each([
+		["heic", "HEIC"],
+		["avif", "AVIF"],
+	] as const)(
+		"%s is not widened: bkpt stays a leak (only ChromaticAdaptation was measured there)",
+		(format, fileType) => {
+			const result = findLeakedTags({
+				record: recordFromKeys(["ICC_Profile:MediaBlackPoint"]),
+				format,
+				writtenBy: "native",
+				fileType,
+				preservation: colorProfileOn,
+			});
+			expect(result.leakedTags).toEqual(["ICC_Profile:MediaBlackPoint"]);
+		},
+	);
+});

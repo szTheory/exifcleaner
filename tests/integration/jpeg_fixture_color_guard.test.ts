@@ -119,6 +119,8 @@ describe("69-02: committed JPEG fixtures cover colour", () => {
 		).toEqual([
 			["color_420_progressive.jpg", "2x2"],
 			["color_444.jpg", "1x1"],
+			// 69-03: the 4:2:0 file with an embedded ICC profile (COLOR-PROVENANCE.md).
+			["color_icc_p3.jpg", "2x2"],
 		]);
 	});
 

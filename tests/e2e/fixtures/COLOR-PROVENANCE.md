@@ -86,3 +86,29 @@ Seeded (identifying, synthetic) in both: `IFD0:Make`, `IFD0:Model`, `IFD0:Artist
 `GPS:GPSLatitude(+Ref)`, `GPS:GPSLongitude(+Ref)`, `XMP-dc:Creator`; the PNG also carries
 `PNG:Comment`. The WebP allowlist is not part of this plan (the WebP leak check is plan 69-09);
 the WebP rows of the sweep are measured and recorded only.
+
+## Phase 69-03 additions: colour JPEG and PNG with an embedded ICC profile
+
+`color_icc_p3.jpg` and `color_icc_p3.png` are copies of `color_420_progressive.jpg` and
+`color_rgb.png` with one ICC profile embedded. The `p3` in the name is the label the plan gave the
+files; the embedded profile is NOT Display P3. It is the profile extracted from the already
+committed `red-at-12-oclock-with-color-profile-lossy.avif` (`ProfileDescription` ColorSpin, ICC
+v2.1.0, sRGB-class matrix/TRC, no `chad` and no `bkpt` tag), so no third-party profile bytes enter
+the repository. They keep the seeded synthetic identifying metadata of their sources.
+
+```sh
+# profile extracted with the bundled ExifTool (written to a scratch directory, not the fixtures dir):
+.resources/nix/bin/exiftool -icc_profile -b red-at-12-oclock-with-color-profile-lossy.avif > colorspin.icc
+cp color_420_progressive.jpg color_icc_p3.jpg && cp color_rgb.png color_icc_p3.png
+.resources/nix/bin/exiftool -overwrite_original -icc_profile\<=colorspin.icc color_icc_p3.jpg color_icc_p3.png
+```
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| `color_icc_p3.jpg` | 4,245 | `7afbd1d2e1c44ed93f9c6a43e3da2bf2c154d7c7dc3909f3d32bc2009af41ef6` |
+| `color_icc_p3.png` | 1,538 | `df117b3355b4df2833ed51b12d4c0ce9ac929ddd0b2e67dfa55e5cba299719d9` |
+
+The profiles with `chad`, `bkpt`, `meas`, `view`, `lumi`, `tech`, `dmnd`, `dmdd` and `vued` tags
+(the macOS system sRGB IEC61966-2.1, Adobe RGB (1998) and Display P3 profiles) were embedded in
+scratch copies only and measured through both engines; their bytes are never committed. Only the
+resulting key names are in `tests/domain/fixtures/copy_mode_color_sweep.json` (rows `icc-*`).
