@@ -12,10 +12,11 @@ export class FakeNativeMetadata implements NativeMetadataPort {
 		value: undefined,
 	};
 
-	// Mirrors exifcleaner-node 0.4.0's real getCapabilities() routing fields (webp/png/jpeg
-	// measured at 58-01; heic/avif measured at 63-14 against the installed package, and
-	// guarded by a deep-equal projection in native_copy_candidate_routing.test.ts):
-	// five formats, real extension arrays.
+	// Mirrors exifcleaner-node 0.5.0's real getCapabilities() routing fields (webp/png/jpeg
+	// measured at 58-01; heic/avif at 63-14; webp resolution flipped to true by 0.5.0 and
+	// re-measured at 69-06; all five formats are guarded by a deep-equal projection against
+	// the installed package in native_copy_candidate_routing.test.ts): five formats, real
+	// extension arrays.
 	// Empty extensions arrays would make every routing case fall through to ExifTool and
 	// pass for the wrong reason (RESEARCH Pitfall 1), so these are the actual registered
 	// shapes, not placeholders.
@@ -30,7 +31,7 @@ export class FakeNativeMetadata implements NativeMetadataPort {
 					orientation: true,
 					colorProfile: true,
 					timestamps: true,
-					resolution: false,
+					resolution: true,
 				},
 			},
 			{
