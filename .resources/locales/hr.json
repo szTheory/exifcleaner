@@ -51,6 +51,7 @@
 	"cleanupFailedSummary": "Nije moguće provjeriti očišćeni izlaz, a nepotpuni izlaz nije moguće ukloniti. Izvorna datoteka nije promijenjena.",
 	"xattrFailedSummary": "Metapodaci su uklonjeni, ali proširene atribute sustava macOS nije bilo moguće izbrisati.",
 	"writeFailedSummary": "Nije moguće zapisati očišćeni izlaz. Izvorna datoteka nije promijenjena.",
+	"commitFailedSummary": "Nije moguće spremiti očišćenu datoteku preko izvorne. Druga aplikacija, primjerice klijent za sinkronizaciju u oblaku, možda ju je promijenila ili zaključala. Izvorna datoteka nije promijenjena.",
 	"complete": "Dovršeno",
 	"empty.dropActive": "Ispustite datoteke za čišćenje.",
 	"menu.help.new-releases": "Nova izdanja…",

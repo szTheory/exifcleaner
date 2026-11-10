@@ -55,7 +55,9 @@ export function FileRow({
 						? t("xattrFailedSummary")
 						: file.failureKind === "write"
 							? t("writeFailedSummary")
-							: undefined;
+							: file.failureKind === "commit"
+								? t("commitFailedSummary")
+								: undefined;
 	const outcomeSummary =
 		file.outcomeKind === "already-clean"
 			? t("outcome.alreadyClean")

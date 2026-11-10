@@ -51,6 +51,7 @@
 	"cleanupFailedSummary": "Nie można było zweryfikować oczyszczonego wyniku, a niekompletnego wyniku nie udało się usunąć. Oryginał pozostał bez zmian.",
 	"xattrFailedSummary": "Metadane zostały usunięte, ale nie udało się wyczyścić rozszerzonych atrybutów macOS.",
 	"writeFailedSummary": "Nie można było zapisać oczyszczonego wyniku. Oryginał pozostał bez zmian.",
+	"commitFailedSummary": "Nie można było zapisać oczyszczonego pliku na miejscu oryginału. Inna aplikacja, na przykład klient synchronizacji w chmurze, mogła go zmienić lub zablokować. Oryginał pozostał bez zmian.",
 	"complete": "Ukończono",
 	"empty.dropActive": "Upuść pliki, aby je wyczyścić.",
 	"menu.help.new-releases": "Nowe wydania…",

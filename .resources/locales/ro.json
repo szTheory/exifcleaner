@@ -76,6 +76,7 @@
 	"cleanupFailedSummary": "Rezultatul curățat nu a putut fi verificat, iar rezultatul incomplet nu a putut fi eliminat. Originalul este neschimbat.",
 	"xattrFailedSummary": "Metadatele au fost eliminate, dar atributele extinse macOS nu au putut fi șterse.",
 	"writeFailedSummary": "Rezultatul curățat nu a putut fi scris. Originalul este neschimbat.",
+	"commitFailedSummary": "Fișierul curățat nu a putut fi salvat peste original. O altă aplicație, de exemplu un client de sincronizare în cloud, l-ar fi putut modifica sau bloca. Originalul este neschimbat.",
 	"complete": "Finalizat",
 	"status.pending": "În așteptare",
 	"status.error": "Eroare",

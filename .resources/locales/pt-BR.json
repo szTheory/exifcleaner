@@ -51,6 +51,7 @@
 	"cleanupFailedSummary": "Não foi possível verificar a saída limpa, e a saída incompleta não pôde ser removida. Seu original não foi alterado.",
 	"xattrFailedSummary": "Os metadados foram removidos, mas não foi possível remover os atributos estendidos do macOS.",
 	"writeFailedSummary": "Não foi possível gravar a saída limpa. Seu original não foi alterado.",
+	"commitFailedSummary": "Não foi possível salvar o arquivo limpo sobre o original. Outro app, como um cliente de sincronização na nuvem, pode tê-lo alterado ou bloqueado. Seu original não foi alterado.",
 	"complete": "Concluído",
 	"empty.dropActive": "Solte os arquivos para limpá-los.",
 	"menu.help.new-releases": "Novas versões…",

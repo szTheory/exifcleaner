@@ -49,6 +49,7 @@
 	"cleanupFailedSummary": "No se pudo verificar la salida limpia ni eliminar la salida incompleta. El original no ha cambiado.",
 	"xattrFailedSummary": "Se eliminaron los metadatos, pero no se pudieron borrar los atributos extendidos de macOS.",
 	"writeFailedSummary": "No se pudo escribir la salida limpia. El original no ha cambiado.",
+	"commitFailedSummary": "No se pudo guardar el archivo limpio sobre el original. Otra aplicación, como un cliente de sincronización en la nube, puede haberlo cambiado o bloqueado. El original no ha cambiado.",
 	"complete": "Completado",
 	"empty.dropActive": "Suelta los archivos para limpiarlos.",
 	"menu.help.new-releases": "Nuevas versiones…",

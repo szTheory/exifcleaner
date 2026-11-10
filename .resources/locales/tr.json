@@ -51,6 +51,7 @@
 	"cleanupFailedSummary": "Temizlenmiş çıktı doğrulanamadı ve tamamlanmamış çıktı kaldırılamadı. Orijinaliniz değişmedi.",
 	"xattrFailedSummary": "Meta veriler kaldırıldı ancak macOS genişletilmiş öznitelikleri temizlenemedi.",
 	"writeFailedSummary": "Temizlenmiş çıktı yazılamadı. Orijinaliniz değişmedi.",
+	"commitFailedSummary": "Temizlenmiş dosya orijinalin üzerine kaydedilemedi. Bulut eşitleme istemcisi gibi başka bir uygulama dosyayı değiştirmiş veya kilitlemiş olabilir. Orijinaliniz değişmedi.",
 	"complete": "Tamamlandı",
 	"empty.dropActive": "Temizlemek için dosyaları bırakın.",
 	"menu.help.new-releases": "Yeni sürümler…",

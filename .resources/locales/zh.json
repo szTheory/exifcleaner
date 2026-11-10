@@ -51,6 +51,7 @@
 	"cleanupFailedSummary": "无法验证清理后的输出，也无法删除不完整的输出。原始文件未更改。",
 	"xattrFailedSummary": "元数据已移除，但无法清除 macOS 扩展属性。",
 	"writeFailedSummary": "无法写入清理后的输出。原始文件未更改。",
+	"commitFailedSummary": "无法将清理后的文件保存到原始文件上。云同步客户端等其他应用可能已更改或锁定该文件。原始文件未更改。",
 	"complete": "完成",
 	"empty.dropActive": "拖放文件以清理。",
 	"menu.help.new-releases": "新版本…",
