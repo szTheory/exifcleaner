@@ -35,7 +35,7 @@ for (const fixture of [
 ] as const) {
 	test(
 		fixture === "sample.webp"
-			? "sample.webp preserves its source and verifies output with bundled ExifTool in the installed artifact"
+			? "sample.webp saves a copy, leaves its source unchanged and the output is reopened and leak-checked with the bundled ExifTool in the installed artifact"
 			: `${fixture} processes through the installed artifact`,
 		async () => {
 			const context = await launchForFullStrip();
