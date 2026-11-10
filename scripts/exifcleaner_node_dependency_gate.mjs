@@ -5,16 +5,22 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-// Published version is 0.4.0 (63-01, ADP-06): native HEIC/HEIF/AVIF (ISOBMFF) sanitize. Source
-// commit b93507f357be4a564802373f92f76d595cbd9223 = the target of tag v0.4.0 (tag object
-// 0391bf954a7c658c85deee69cf0a88105ce0c195), release run 37163279172 attempt 1 -- the commit
-// and run confirmed against the published SLSA provenance attestation (predicateType
-// https://slsa.dev/provenance/v1, workflow release.yml, environment npm, build ref
-// refs/tags/v0.4.0), and the attestation subject sha512 equals dist.integrity. 0.4.0 adds the
-// dist/isobmff/* and dist/admission/{isobmff,heic,avif}-handler.js modules; measured by this
-// seal's own runtime scan: the same EXPECTED_RUNTIME_EXPORTS, the same six
-// EXPECTED_PREBUILD_PATHS, the same ALLOWED_IMPORTS set, and no new URL literal -- no
-// allowlist entry changed from 0.3.1.
+// Published version is 0.5.0 (69-06/69-07, WEBP-08): native WebP default, verified overwrite
+// support. Source commit 3994118e028f11b79eba0430c41400287ed87d42 = the commit the SLSA
+// provenance attestation resolves refs/tags/v0.5.0 to (tag v0.5.0), release run 42739084475
+// attempt 1 -- confirmed against the decoded published attestation (predicateType
+// https://slsa.dev/provenance/v1, workflow .github/workflows/release.yml in
+// szTheory/exifcleaner-node, build ref refs/tags/v0.5.0, resolved gitCommit as above), and the
+// attestation subject sha512 equals dist.integrity. Measured against 0.4.0 by this seal's own
+// runtime scan and the packed file list: the tarball file list is identical (189 files, the same
+// 45 runtime files, no module added or removed; dist/isobmff/verify.js already shipped in 0.4.0)
+// while 28 of the 45 runtime file digests changed, so the same EXPECTED_RUNTIME_EXPORTS, the
+// same six EXPECTED_PREBUILD_PATHS, the same ALLOWED_IMPORTS set, and no new URL literal -- no
+// allowlist entry changed from 0.4.0.
+//
+// History: 0.4.0 (63-01, ADP-06) added native HEIC/HEIF/AVIF (ISOBMFF) sanitize. Source commit
+// b93507f357be4a564802373f92f76d595cbd9223, tag v0.4.0, release run 37163279172 attempt 1.
+// 0.4.0 added the dist/isobmff/* and dist/admission/{isobmff,heic,avif}-handler.js modules.
 //
 // History: 0.3.1 (58-12..58-15, ADP-04) added post-commit removal of the
 // `.exifcleaner-stage-<uuid>` staging directory. Source commit
@@ -25,7 +31,7 @@ import ts from "typescript";
 // defect (0.2.1's publication.node statically imported the literal name "node.exe", faulting
 // inside the packaged ExifCleaner.exe host on a V8 pointer-compression cage mismatch). Source
 // commit 8474396, tag v0.2.2, release run 35370603372.
-export const SEALED_VERSION = "0.4.0";
+export const SEALED_VERSION = "0.5.0";
 const PACKAGE_NAME = "exifcleaner-node";
 const EVIDENCE_PATH = "docs/evidence/native-webp-registry-package.json";
 const REPOSITORY_URL = "https://github.com/szTheory/exifcleaner-node";

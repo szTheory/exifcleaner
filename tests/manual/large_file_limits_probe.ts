@@ -21,6 +21,7 @@ import {
 	createSparseLargeMp4,
 	sha256OfFileStreamed,
 } from "../helpers/large_file_fixture";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 if (process.platform !== "darwin") {
 	console.log("PROBE_UNSUPPORTED_PLATFORM");
@@ -44,11 +45,7 @@ function buildOutputTransaction(
 	return new OutputTransaction({
 		stripMetadata,
 		verifyGeneratedOutput,
-		unlink: fs.promises.unlink,
-		rename: fs.promises.rename,
-		delay: async (milliseconds: number) => {
-			await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
-		},
+		...realTransactionFileDependencies(),
 	});
 }
 

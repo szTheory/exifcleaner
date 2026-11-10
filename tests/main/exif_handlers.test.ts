@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import path from "node:path";
 import type { IpcMainInvokeEvent } from "electron";
 import type { Container } from "../../src/main/container";
 import { StripMetadataCommand } from "../../src/application/commands/strip_metadata_command";
@@ -11,6 +12,7 @@ import {
 import { setupExifHandlers } from "../../src/main/exif_handlers";
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { FakeMetadataEngine } from "../fakes/fake_metadata_engine";
+import { fakeTransactionFileDependencies } from "../helpers/transaction_deps";
 
 const ipcHandleMock = vi.hoisted(() => vi.fn());
 const existsSyncMock = vi.hoisted(() => vi.fn());
@@ -85,10 +87,12 @@ function makeContainer({
 		value: { tagsRemoved: 0, writtenBy: "exiftool" },
 	},
 	transactionResult,
+	writtenBy = "exiftool",
 	readMetadataResult = { ok: true, value: { Make: "camera" } },
 }: {
 	saveAsCopy: boolean;
 	removeXattrs?: boolean;
+	writtenBy?: "native" | "exiftool";
 	executeResult?: Awaited<ReturnType<Container["stripMetadata"]["execute"]>>;
 	transactionResult?: Awaited<
 		ReturnType<Container["outputTransaction"]["execute"]>
@@ -110,7 +114,10 @@ function makeContainer({
 			return (
 				transactionResult ?? {
 					ok: true,
-					value: { outputPath: request.commitPath ?? request.generatedPath },
+					value: {
+						outputPath: request.commitPath ?? request.generatedPath,
+						writtenBy,
+					},
 				}
 			);
 		}),
@@ -154,6 +161,7 @@ function makePortCountContainer({ saveAsCopy }: { saveAsCopy: boolean }): {
 	const outputTransaction = new OutputTransaction({
 		stripMetadata,
 		verifyGeneratedOutput,
+		...fakeTransactionFileDependencies(),
 		unlink: vi.fn(async () => undefined),
 		rename: vi.fn(async () => undefined),
 		delay: vi.fn(async () => undefined),
@@ -227,25 +235,25 @@ describe("exif:remove handler", () => {
 			name: "JPEG",
 			filePath: "/tmp/sample.jpg",
 			saveAsCopy: false,
-			verifierPath: undefined,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.jpg",
 		},
 		{
 			name: "JPEG alias",
 			filePath: "/tmp/sample.jpeg",
 			saveAsCopy: false,
-			verifierPath: undefined,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.jpeg",
 		},
 		{
 			name: "mixed-case JPEG",
 			filePath: "/tmp/sample.JpG",
 			saveAsCopy: false,
-			verifierPath: undefined,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.JpG",
 		},
 		{
 			name: "PNG",
 			filePath: "/tmp/sample.png",
 			saveAsCopy: false,
-			verifierPath: undefined,
+			verifierPath: "/tmp/.sample.exifcleaner-stage-test-uuid.png",
 		},
 		{
 			name: "copy-mode JPEG (D-11, ADP-03)",
@@ -414,6 +422,7 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: { engine: "exiftool", outputMode: "copy", leakCheck: "passed" },
 		});
 	});
 
@@ -446,11 +455,11 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: { engine: "exiftool", outputMode: "copy", leakCheck: "passed" },
 		});
 	});
 
 	it.each([
-		["webp save-as-copy", "/dir/photo.webp", "/dir/photo_cleaned.webp"],
 		["tif save-as-copy", "/dir/scan.tif", "/dir/scan_cleaned.tif"],
 		["RAW save-as-copy", "/dir/sample.dng", "/dir/sample_cleaned.dng"],
 		["mp4 save-as-copy", "/dir/clip.mp4", "/dir/clip_cleaned.mp4"],
@@ -477,6 +486,35 @@ describe("exif:remove handler", () => {
 		},
 	);
 
+	it.each([
+		["/dir/photo.webp", "/dir/photo_cleaned.webp"],
+		["/dir/PHOTO.WEBP", "/dir/PHOTO_cleaned.WEBP"],
+	])(
+		"passes copyModeLeakCheck with demand required for a webp save-as-copy %s (69-09, WEBP-08)",
+		async (filePath, generatedPath) => {
+			const { container, outputTransaction } = makeContainer({
+				saveAsCopy: true,
+			});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			await handler(makeAuthorizedEvent(), filePath);
+
+			expect(outputTransaction.execute).toHaveBeenCalledWith(
+				expect.objectContaining({
+					filePath,
+					generatedPath,
+					copyModeLeakCheck: {
+						demand: "required",
+						preserveOrientation: true,
+						preserveColorProfile: true,
+						preserveResolution: true,
+					},
+				}),
+			);
+		},
+	);
+
 	it("passes copyModeLeakCheck with demand required for a heic save-as-copy (D-08)", async () => {
 		const { container, outputTransaction } = makeContainer({
 			saveAsCopy: true,
@@ -493,6 +531,126 @@ describe("exif:remove handler", () => {
 		);
 	});
 
+	it.each([
+		"/dir/photo.jpg",
+		"/dir/photo.jpeg",
+		"/dir/PHOTO.JPG",
+		"/dir/photo.png",
+		"/dir/photo.webp",
+		"/dir/PHOTO.WEBP",
+		"/dir/photo.heic",
+		"/dir/photo.heif",
+		"/dir/photo.avif",
+	])(
+		"routes an overwrite of %s through the verified staged transaction with the leak demand required (OVR-01, D-08)",
+		async (filePath) => {
+			const { container, stripMetadata, outputTransaction } = makeContainer({
+				saveAsCopy: false,
+			});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			const result = await handler(makeAuthorizedEvent(), filePath);
+
+			// The legacy in-place branch is not taken; the transaction owns the write.
+			expect(stripMetadata.execute).not.toHaveBeenCalled();
+			expect(outputTransaction.execute).toHaveBeenCalledTimes(1);
+			const parsed = path.parse(filePath);
+			const stage = `${parsed.dir}/.${parsed.name}.exifcleaner-stage-test-uuid${parsed.ext}`;
+			expect(outputTransaction.execute).toHaveBeenCalledWith({
+				filePath,
+				generatedPath: stage,
+				commitPath: filePath,
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				preserveResolution: true,
+				preserveTimestamps: false,
+				copyModeLeakCheck: {
+					demand: "required",
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+				},
+			});
+			expect(result).toEqual({
+				success: true,
+				outputPath: filePath,
+				wasForcedCopy: false,
+				wroteFile: true,
+				outputSize: 4096,
+				evidence: {
+					engine: "exiftool",
+					outputMode: "overwrite",
+					leakCheck: "passed",
+				},
+			});
+		},
+	);
+
+	it("carries the current preserve settings into the overwrite demand (OVR-01)", async () => {
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: false,
+		});
+		const base = container.settings.get();
+		(container as unknown as { settings: { get: () => unknown } }).settings = {
+			get: () => ({
+				...base,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: true,
+			}),
+		};
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		await handler(makeAuthorizedEvent(), "/dir/photo.webp");
+
+		expect(outputTransaction.execute).toHaveBeenCalledWith(
+			expect.objectContaining({
+				commitPath: "/dir/photo.webp",
+				copyModeLeakCheck: {
+					demand: "required",
+					preserveOrientation: false,
+					preserveColorProfile: false,
+					preserveResolution: true,
+				},
+			}),
+		);
+	});
+
+	it.each([
+		{
+			error: {
+				code: "verification-failed" as const,
+				verificationCode: "output-metadata-leak" as const,
+				diagnostic: "GPS:GPSLatitude",
+			},
+			failureKind: "verification",
+			detail:
+				"Generated output verification failed (output-metadata-leak): GPS:GPSLatitude",
+		},
+		{
+			error: { code: "commit-failed" as const },
+			failureKind: "commit",
+			detail: "Generated output commit failed",
+		},
+	])(
+		"a failed staged overwrite of a webp is reported as failureKind $failureKind and does not claim a written file (OVR-01, D-09)",
+		async ({ error, failureKind, detail }) => {
+			const { container, stripMetadata } = makeContainer({
+				saveAsCopy: false,
+				transactionResult: { ok: false, error },
+			});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			const result = await handler(makeAuthorizedEvent(), "/dir/photo.webp");
+
+			expect(stripMetadata.execute).not.toHaveBeenCalled();
+			expect(result).toEqual({ success: false, failureKind, detail });
+		},
+	);
+
 	it("passes no copyModeLeakCheck for a tif overwrite (D-08; a RAW overwrite is a forced copy)", async () => {
 		const { container, outputTransaction } = makeContainer({
 			saveAsCopy: false,
@@ -505,6 +663,136 @@ describe("exif:remove handler", () => {
 		const call = outputTransaction.execute.mock.calls[0]?.[0];
 		expect(call).toBeDefined();
 		expect(call).not.toHaveProperty("copyModeLeakCheck");
+	});
+
+	it.each([
+		{
+			name: "a natively written webp copy (the 4.8.0 default)",
+			filePath: "/dir/photo.webp",
+			saveAsCopy: true,
+			writtenBy: "native" as const,
+			expected: { engine: "native", outputMode: "copy", leakCheck: "passed" },
+		},
+		{
+			name: "a natively written jpg overwrite",
+			filePath: "/dir/photo.jpg",
+			saveAsCopy: false,
+			writtenBy: "native" as const,
+			expected: {
+				engine: "native",
+				outputMode: "overwrite",
+				leakCheck: "passed",
+			},
+		},
+		{
+			name: "an ExifTool-written png overwrite",
+			filePath: "/dir/photo.png",
+			saveAsCopy: false,
+			writtenBy: "exiftool" as const,
+			expected: {
+				engine: "exiftool",
+				outputMode: "overwrite",
+				leakCheck: "passed",
+			},
+		},
+		{
+			name: "a RAW file with save-as-copy off (forced copy, the optional check is not claimed)",
+			filePath: "/dir/sample.dng",
+			saveAsCopy: false,
+			writtenBy: "exiftool" as const,
+			expected: {
+				engine: "exiftool",
+				outputMode: "copy",
+				leakCheck: "not-run",
+			},
+		},
+		{
+			name: "a tif copy written natively (demand when-allowlisted is not claimed as passed)",
+			filePath: "/dir/scan.tif",
+			saveAsCopy: true,
+			writtenBy: "native" as const,
+			expected: { engine: "native", outputMode: "copy", leakCheck: "not-run" },
+		},
+	])(
+		"reports exact evidence for $name (69-14, D-17)",
+		async ({ filePath, saveAsCopy, writtenBy, expected }) => {
+			const { container } = makeContainer({ saveAsCopy, writtenBy });
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			const result = (await handler(makeAuthorizedEvent(), filePath)) as {
+				success: true;
+				evidence?: Record<string, unknown>;
+			};
+
+			expect(result.success).toBe(true);
+			expect(result.evidence).toStrictEqual(expected);
+			// Privacy: three enums, no path, tag value or hash.
+			const evidence = result.evidence ?? {};
+			expect(Object.keys(evidence).sort()).toEqual([
+				"engine",
+				"leakCheck",
+				"outputMode",
+			]);
+			expect(["native", "exiftool"]).toContain(evidence["engine"]);
+			expect(["copy", "overwrite"]).toContain(evidence["outputMode"]);
+			expect(["passed", "not-run"]).toContain(evidence["leakCheck"]);
+			for (const value of Object.values(evidence)) {
+				expect(String(value)).not.toMatch(/[\\/.]/);
+			}
+		},
+	);
+
+	it("carries the evidence through the xattr postcondition when remove-xattrs is on (69-14)", async () => {
+		const { container, removeXattrCommand } = makeContainer({
+			saveAsCopy: true,
+			removeXattrs: true,
+			writtenBy: "native",
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.webp");
+
+		expect(removeXattrCommand.execute).toHaveBeenCalledTimes(1);
+		expect(result).toStrictEqual({
+			success: true,
+			outputPath: "/dir/photo_cleaned.webp",
+			wasForcedCopy: false,
+			wroteFile: true,
+			outputSize: 4096,
+			evidence: { engine: "native", outputMode: "copy", leakCheck: "passed" },
+		});
+	});
+
+	it("omits the evidence key on the legacy branch and on the zero-tag xattr early exit (69-14)", async () => {
+		const legacyCopy = makeContainer({ saveAsCopy: true });
+		setupExifHandlers({ container: legacyCopy.container });
+		let { handler } = captureInvokeHandler("exif:remove");
+		const gifCopy = await handler(makeAuthorizedEvent(), "/dir/photo.gif");
+		expect(gifCopy).toMatchObject({ success: true });
+		expect(Object.keys(gifCopy as object)).not.toContain("evidence");
+
+		const legacyOverwrite = makeContainer({ saveAsCopy: false });
+		ipcHandleMock.mockClear();
+		setupExifHandlers({ container: legacyOverwrite.container });
+		({ handler } = captureInvokeHandler("exif:remove"));
+		const gifOverwrite = await handler(makeAuthorizedEvent(), "/dir/photo.gif");
+		expect(gifOverwrite).toMatchObject({ success: true });
+		expect(Object.keys(gifOverwrite as object)).not.toContain("evidence");
+
+		const zeroTag = makeContainer({
+			saveAsCopy: false,
+			removeXattrs: true,
+			readMetadataResult: { ok: true, value: {} },
+		});
+		ipcHandleMock.mockClear();
+		setupExifHandlers({ container: zeroTag.container });
+		({ handler } = captureInvokeHandler("exif:remove"));
+		const early = await handler(makeAuthorizedEvent(), "/dir/clean.jpg");
+		expect(early).toMatchObject({ success: true, wroteFile: false });
+		expect(Object.keys(early as object)).not.toContain("evidence");
+		expect(zeroTag.outputTransaction.execute).not.toHaveBeenCalled();
 	});
 
 	it("clears only xattrs without rewriting an already-clean file", async () => {
@@ -579,6 +867,11 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: {
+				engine: "exiftool",
+				outputMode: "overwrite",
+				leakCheck: "passed",
+			},
 		});
 		expect(removeXattrCommand.execute).not.toHaveBeenCalled();
 	});
@@ -621,6 +914,11 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: {
+				engine: "exiftool",
+				outputMode: "overwrite",
+				leakCheck: "passed",
+			},
 		});
 		expect(removeXattrCommand.execute).toHaveBeenCalledWith({
 			filePath: "/dir/photo.jpg",
@@ -725,6 +1023,11 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: true,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: {
+				engine: "exiftool",
+				outputMode: "copy",
+				leakCheck: "not-run",
+			},
 		});
 	});
 
@@ -792,6 +1095,11 @@ describe("exif:remove handler", () => {
 				wasForcedCopy: true,
 				wroteFile: true,
 				outputSize: 4096,
+				evidence: {
+					engine: "exiftool",
+					outputMode: "copy",
+					leakCheck: "not-run",
+				},
 			});
 		},
 	);
@@ -844,23 +1152,24 @@ describe("exif:remove handler", () => {
 		});
 	});
 
-	it("returns and writes the source path when overwrite mode is active", async () => {
+	it("returns and writes the source path when overwrite mode is active (a format outside the verified set; the seven image extensions overwrite through the transaction since 4.8.0)", async () => {
 		const { container, stripMetadata } = makeContainer({ saveAsCopy: false });
 		setupExifHandlers({ container });
 
 		const { handler } = captureInvokeHandler("exif:remove");
-		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.gif");
 
 		expect(stripMetadata.execute).toHaveBeenCalledWith(
 			expect.objectContaining({
-				filePath: "/dir/photo.jpg",
+				filePath: "/dir/photo.gif",
+				outputMode: "overwrite",
 				saveAsCopy: false,
 				outputPath: undefined,
 			}),
 		);
 		expect(result).toEqual({
 			success: true,
-			outputPath: "/dir/photo.jpg",
+			outputPath: "/dir/photo.gif",
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
@@ -893,7 +1202,7 @@ describe("exif:remove handler", () => {
 			saveAsCopy: true,
 			transactionResult: {
 				ok: true,
-				value: { outputPath: "/dir/video_cleaned.mp4" },
+				value: { outputPath: "/dir/video_cleaned.mp4", writtenBy: "exiftool" },
 			},
 		});
 		setupExifHandlers({ container });
@@ -915,13 +1224,21 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: {
+				engine: "exiftool",
+				outputMode: "copy",
+				leakCheck: "not-run",
+			},
 		});
 	});
 
 	it("stages overwrite-mode video beside the original before publishing it", async () => {
 		const { container, stripMetadata, outputTransaction } = makeContainer({
 			saveAsCopy: false,
-			transactionResult: { ok: true, value: { outputPath: "/dir/video.mp4" } },
+			transactionResult: {
+				ok: true,
+				value: { outputPath: "/dir/video.mp4", writtenBy: "exiftool" },
+			},
 		});
 		setupExifHandlers({ container });
 
@@ -942,6 +1259,11 @@ describe("exif:remove handler", () => {
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
+			evidence: {
+				engine: "exiftool",
+				outputMode: "overwrite",
+				leakCheck: "not-run",
+			},
 		});
 	});
 
@@ -1036,7 +1358,7 @@ describe("exif:remove handler", () => {
 		expect("residualPath" in (result as object)).toBe(false);
 	});
 
-	it("returns a verification terminal failure without publishing an output path", async () => {
+	it("returns a verification terminal failure without publishing an output path, old text when no diagnostic is carried", async () => {
 		const { container, outputTransaction } = makeContainer({
 			saveAsCopy: false,
 			transactionResult: {
@@ -1061,7 +1383,7 @@ describe("exif:remove handler", () => {
 		expect(result).not.toHaveProperty("outputPath");
 	});
 
-	it("maps a copy-mode leak verdict to the exact same unchanged IPC text (D-10, D-11)", async () => {
+	it("a leak verdict carrying no diagnostic keeps the old fixed IPC text (D-10, D-11)", async () => {
 		const { container, outputTransaction } = makeContainer({
 			saveAsCopy: true,
 			transactionResult: {
@@ -1084,6 +1406,84 @@ describe("exif:remove handler", () => {
 			detail: "Generated output verification failed",
 		});
 		expect(result).not.toHaveProperty("outputPath");
+	});
+
+	it("appends the verification code and leaked tag names to the verification detail (69-04, D-20)", async () => {
+		const { container, outputTransaction } = makeContainer({
+			saveAsCopy: true,
+			transactionResult: {
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic: "File:YCbCrSubSampling",
+				},
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+
+		expect(outputTransaction.execute).toHaveBeenCalledOnce();
+		expect(result).toEqual({
+			success: false,
+			failureKind: "verification",
+			detail:
+				"Generated output verification failed (output-metadata-leak): File:YCbCrSubSampling",
+		});
+		expect(result).not.toHaveProperty("outputPath");
+	});
+
+	it("appends the fixed reopen detail for a non-leak verification failure (69-04)", async () => {
+		const { container } = makeContainer({
+			saveAsCopy: false,
+			transactionResult: {
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-verification-failed",
+					diagnostic:
+						"ExifTool could not reopen the generated output (engine-error)",
+				},
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/video.mp4");
+
+		expect(result).toEqual({
+			success: false,
+			failureKind: "verification",
+			detail:
+				"Generated output verification failed (output-verification-failed): ExifTool could not reopen the generated output (engine-error)",
+		});
+	});
+
+	it("passes a markup-bearing tag name through as plain text without altering it (T-69-10)", async () => {
+		const { container } = makeContainer({
+			saveAsCopy: true,
+			transactionResult: {
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic: "PNG:<img src=x onerror=alert(1)>",
+				},
+			},
+		});
+		setupExifHandlers({ container });
+
+		const { handler } = captureInvokeHandler("exif:remove");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.png");
+
+		expect(result).toEqual({
+			success: false,
+			failureKind: "verification",
+			detail:
+				"Generated output verification failed (output-metadata-leak): PNG:<img src=x onerror=alert(1)>",
+		});
 	});
 
 	it("rejects an empty string before executing the command", async () => {
@@ -1151,7 +1551,7 @@ function makeContainerWithPreserveResolution({
 
 describe("exif:remove forwards the actual preserveResolution setting (FID-01, D-40)", () => {
 	it.each([true, false])(
-		"a .jpg request reaches stripMetadata.execute with preserveResolution %s (FID-01, D-40)",
+		"a .gif request reaches stripMetadata.execute with preserveResolution %s (FID-01, D-40)",
 		async (preserveResolution) => {
 			const { container, stripMetadata } = makeContainerWithPreserveResolution({
 				saveAsCopy: false,
@@ -1160,10 +1560,33 @@ describe("exif:remove forwards the actual preserveResolution setting (FID-01, D-
 			setupExifHandlers({ container });
 
 			const { handler } = captureInvokeHandler("exif:remove");
-			await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+			await handler(makeAuthorizedEvent(), "/dir/photo.gif");
 
 			expect(stripMetadata.execute).toHaveBeenCalledWith(
 				expect.objectContaining({ preserveResolution }),
+			);
+		},
+	);
+
+	it.each([true, false])(
+		"a .jpg overwrite request reaches outputTransaction.execute with preserveResolution %s in the request and in the leak check (FID-01, D-40, OVR-01)",
+		async (preserveResolution) => {
+			const { container, stripMetadata, outputTransaction } =
+				makeContainerWithPreserveResolution({
+					saveAsCopy: false,
+					preserveResolution,
+				});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+
+			expect(stripMetadata.execute).not.toHaveBeenCalled();
+			expect(outputTransaction.execute).toHaveBeenCalledWith(
+				expect.objectContaining({
+					preserveResolution,
+					copyModeLeakCheck: expect.objectContaining({ preserveResolution }),
+				}),
 			);
 		},
 	);

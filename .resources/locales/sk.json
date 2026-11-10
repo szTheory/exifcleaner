@@ -51,6 +51,7 @@
 	"cleanupFailedSummary": "Vyčistený výstup sa nepodarilo overiť a neúplný výstup nebolo možné odstrániť. Originál zostal nezmenený.",
 	"xattrFailedSummary": "Metadáta boli odstránené, ale rozšírené atribúty systému macOS sa nepodarilo odstrániť.",
 	"writeFailedSummary": "Vyčistený výstup sa nepodarilo zapísať. Originál zostal nezmenený.",
+	"commitFailedSummary": "Vyčistený súbor sa nepodarilo uložiť na miesto originálu. Iná aplikácia, napríklad klient cloudovej synchronizácie, ho mohla zmeniť alebo zamknúť. Originál zostal nezmenený.",
 	"complete": "Dokončené",
 	"empty.dropActive": "Presunutím sem súbory vyčistíte.",
 	"menu.help.new-releases": "Nové vydania…",

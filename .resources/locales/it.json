@@ -51,6 +51,7 @@
 	"cleanupFailedSummary": "Impossibile verificare l'output pulito e rimuovere l'output incompleto. L'originale non è stato modificato.",
 	"xattrFailedSummary": "I metadati sono stati rimossi, ma non è stato possibile cancellare gli attributi estesi di macOS.",
 	"writeFailedSummary": "Impossibile scrivere l'output pulito. L'originale non è stato modificato.",
+	"commitFailedSummary": "Impossibile salvare il file pulito sopra l'originale. Un'altra app, come un client di sincronizzazione cloud, potrebbe averlo modificato o bloccato. L'originale non è stato modificato.",
 	"complete": "Completato",
 	"empty.dropActive": "Rilascia i file per pulirli.",
 	"menu.help.new-releases": "Nuove versioni…",

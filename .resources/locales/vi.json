@@ -51,6 +51,7 @@
 	"cleanupFailedSummary": "Không thể xác minh đầu ra đã làm sạch và không thể xóa đầu ra chưa hoàn chỉnh. Tệp gốc của bạn không thay đổi.",
 	"xattrFailedSummary": "Siêu dữ liệu đã được xóa nhưng không thể xóa các thuộc tính mở rộng của macOS.",
 	"writeFailedSummary": "Không thể ghi đầu ra đã làm sạch. Tệp gốc của bạn không thay đổi.",
+	"commitFailedSummary": "Không thể lưu tệp đã làm sạch đè lên tệp gốc. Một ứng dụng khác, chẳng hạn ứng dụng đồng bộ đám mây, có thể đã thay đổi hoặc khóa tệp. Tệp gốc của bạn không thay đổi.",
 	"complete": "Hoàn tất",
 	"empty.dropActive": "Thả tệp để làm sạch.",
 	"menu.help.new-releases": "Bản phát hành mới…",

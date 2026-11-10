@@ -16,6 +16,7 @@ import {
 } from "../domain/files/file_types";
 import { refuseUnsafeRafWrite } from "../domain/files/file_processing_outcome";
 import type { OutputTransactionFailure } from "./output_transaction";
+import type { RemoveMetadataEvidence } from "../common/ipc_channels";
 
 const DEV_XATTR_FAILURE_EVENT = "exifcleaner:dev-xattr-failure-path";
 
@@ -111,6 +112,14 @@ export function setupExifHandlers({
 						actualOutputPath: transactionResult.value.outputPath,
 						wasForcedCopy,
 						removeXattrs: settings.removeXattrs,
+						evidence: {
+							engine: transactionResult.value.writtenBy,
+							outputMode,
+							// "passed" only when the check was required: the transaction returned ok,
+							// so a required check ran and accepted the output. The optional
+							// when-allowlisted check is not claimed.
+							leakCheck: leakCheckDemand === "required" ? "passed" : "not-run",
+						},
 					});
 				}
 				return transactionFailureResult(transactionResult.error);
@@ -145,12 +154,14 @@ async function applyXattrPostcondition({
 	wasForcedCopy,
 	removeXattrs,
 	wroteFile = true,
+	evidence,
 }: {
 	container: Container;
 	actualOutputPath: string;
 	wasForcedCopy: boolean;
 	removeXattrs: boolean;
 	wroteFile?: boolean;
+	evidence?: RemoveMetadataEvidence;
 }) {
 	if (!removeXattrs) {
 		const outputSize = (await stat(actualOutputPath)).size;
@@ -160,6 +171,7 @@ async function applyXattrPostcondition({
 			wasForcedCopy,
 			wroteFile,
 			outputSize,
+			...(evidence === undefined ? {} : { evidence }),
 		};
 	}
 
@@ -184,6 +196,7 @@ async function applyXattrPostcondition({
 		wasForcedCopy,
 		wroteFile,
 		outputSize,
+		...(evidence === undefined ? {} : { evidence }),
 	};
 }
 
@@ -257,7 +270,10 @@ function transactionFailureResult(error: OutputTransactionFailure): {
 			return {
 				success: false,
 				failureKind: "verification",
-				detail: "Generated output verification failed",
+				detail:
+					error.diagnostic === undefined
+						? "Generated output verification failed"
+						: `Generated output verification failed (${error.verificationCode}): ${error.diagnostic}`,
 			};
 		case "cleanup-failed":
 			return {

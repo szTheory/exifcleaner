@@ -372,7 +372,7 @@ describe("HybridMetadataEngine", () => {
 	// a native `unsupported-format` admission decline (nativeWrite not-started, via the fake's
 	// sanitizeResult) and proves the router then falls back to ExifTool exactly once. It does
 	// not claim the library declines WebP bytes behind another registered extension: measured
-	// (F-63-8), exifcleaner-node 0.3.1 and 0.4.0 select a handler by content and sanitize WebP
+	// (F-63-8), exifcleaner-node 0.3.1, 0.4.0 and 0.5.0 select a handler by content and sanitize WebP
 	// bytes behind `.png` as WebP; only unregistered content (for example GIF) declines, which
 	// tests/integration/native_copy_routing.test.ts proves with real bytes. An unmatched or
 	// absent extension is not a candidate at all and never reaches the native port (the D-01 row

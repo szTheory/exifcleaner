@@ -25,6 +25,7 @@ import { HybridMetadataEngine } from "../../src/infrastructure/metadata/hybrid_m
 import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_metadata_adapter";
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.resolve(__dirname, "../e2e/fixtures");
@@ -89,7 +90,7 @@ interface Row {
 		readonly outcome: "published" | "write-failed" | "verification-failed";
 		// Reopened FileType of the published (or removed) output; undefined when nothing was written.
 		readonly fileType?: string;
-		readonly format?: "png" | "jpeg" | "heic" | "avif";
+		readonly format?: "png" | "jpeg" | "heic" | "avif" | "webp";
 		readonly exemptionsApplied?: readonly string[];
 		readonly demand?: "required" | "when-allowlisted";
 		readonly verificationCode?: string;
@@ -187,6 +188,42 @@ const ROWS_PUBLISHED: readonly Row[] = [
 			demand: "required",
 		},
 	},
+	// Rows 6 and 10 (69-09, WEBP-08): WebP bytes behind a .heic / .png name. They ended
+	// verification-failed until 4.8.0 because no WebP allowlist existed (F-63-9). The reopened
+	// FileType (Extended WEBP) now maps to the measured WebP allowlist whatever the name says, so
+	// the clean native output is published, name and extension kept (D-06).
+	{
+		title:
+			"WebP bytes named .heic with preserveResolution: native writes, the reopened WebP passes the WebP allowlist",
+		row: "6",
+		fixture: "sample.webp",
+		sourceName: "photo.heic",
+		settings: RESOLUTION_ON,
+		expect: {
+			engine: "native",
+			outcome: "published",
+			fileType: "Extended WEBP",
+			format: "webp",
+			exemptionsApplied: [],
+			demand: "required",
+		},
+	},
+	{
+		title:
+			"WebP bytes named .png: native writes, the reopened WebP passes the WebP allowlist",
+		row: "10",
+		fixture: "sample.webp",
+		sourceName: "photo.png",
+		settings: DEFAULTS,
+		expect: {
+			engine: "native",
+			outcome: "published",
+			fileType: "Extended WEBP",
+			format: "webp",
+			exemptionsApplied: [],
+			demand: "required",
+		},
+	},
 ];
 
 const ROWS_FALLBACK: readonly Row[] = [
@@ -259,11 +296,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 		const transaction = new OutputTransaction({
 			stripMetadata: new StripMetadataCommand({ metadataEngine: hybrid }),
 			verifyGeneratedOutput: query,
-			unlink: fs.promises.unlink,
-			rename: fs.promises.rename,
-			delay: async (ms) => {
-				await new Promise<void>((resolve) => setTimeout(resolve, ms));
-			},
+			...realTransactionFileDependencies(),
 		});
 
 		const sourceDigest = sha256(source);
@@ -339,7 +372,10 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 		const ex = row.expect;
 		expect(ran.outcome).toEqual({
 			ok: true,
-			value: { outputPath: ran.generatedPath },
+			value: {
+				outputPath: ran.generatedPath,
+				writtenBy: row.expect.engine === "native" ? "native" : "exiftool",
+			},
 		});
 		// D-06: name and extension kept, content decides the cleaning.
 		expect(path.basename(ran.generatedPath)).toBe(
@@ -446,19 +482,10 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 		readonly demand: "required" | "when-allowlisted";
 	}
 
-	// Rows 6, 9, 13: ExifTool refuses (it chooses its writer by the file NAME, Writer.pl:2550-2558),
+	// Rows 9, 13 (row 6 became a published row when exifcleaner-node 0.5.0 made the WebP handler
+	// preserve resolution and 69-09 added the WebP allowlist): ExifTool refuses (it chooses its writer by the file NAME, Writer.pl:2550-2558),
 	// the transaction ends write-failed, nothing is written, the source and directory are unchanged.
 	const REFUSALS: readonly RefusalRow[] = [
-		{
-			row: "6",
-			title:
-				"WebP bytes named .heic with preserveResolution: native declines unsupported-feature, ExifTool refuses",
-			fixture: "sample.webp",
-			sourceName: "photo.heic",
-			settings: RESOLUTION_ON,
-			nativeDecline: "unsupported-feature",
-			demand: "required",
-		},
 		{
 			row: "9",
 			title:
@@ -508,18 +535,11 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 		assertSourceAndDir(ran, { sourceName: refusal.sourceName } as Row, []);
 	});
 
-	// Rows 10 and 15: a write succeeds but the reopened FileType (WEBP / MP4) has no allowlist
-	// while the .png / .heic name demands the leak check: fail closed, output removed (F-63-9
-	// pinned, not changed).
+	// Row 15: a write succeeds but the reopened FileType (MP4) has no allowlist while the .heic name
+	// demands the leak check: fail closed, output removed (F-63-9 pinned, not changed). Rows 6 and
+	// 10 (WebP bytes behind a .heic / .png name) lived here until 69-09 gave WebP its allowlist;
+	// they are published rows above now.
 	const FAIL_CLOSED = [
-		{
-			row: "10",
-			title: "WebP bytes named .png: native writes, verify fails closed",
-			fixture: "sample.webp",
-			sourceName: "photo.png",
-			sourceFileType: "Extended WEBP",
-			engine: "native",
-		},
 		{
 			row: "15",
 			title:
@@ -528,6 +548,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 			sourceName: "photo.heic",
 			sourceFileType: "MP4",
 			engine: "exiftool-after-native-decline",
+			settings: DEFAULTS,
 		},
 	] as const;
 
@@ -537,7 +558,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 			row: failClosed.row,
 			fixture: failClosed.fixture,
 			sourceName: failClosed.sourceName,
-			settings: DEFAULTS,
+			settings: failClosed.settings,
 			expect: {
 				engine: failClosed.engine,
 				nativeDecline: "unsupported-format",
@@ -559,6 +580,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 			error: {
 				code: "verification-failed",
 				verificationCode: "output-metadata-leak",
+				diagnostic: `Copy-mode leak check has no permitted-tag set for this file type (${failClosed.sourceFileType})`,
 			},
 		});
 		expect(ran.verifySpy).toHaveBeenCalledOnce();
@@ -569,8 +591,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 			ok: false,
 			error: {
 				code: "output-metadata-leak",
-				detail:
-					"Copy-mode leak check has no permitted-tag set for this file type",
+				detail: `Copy-mode leak check has no permitted-tag set for this file type (${failClosed.sourceFileType})`,
 				leakedTags: [],
 			},
 		});
@@ -597,7 +618,7 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 		await assertEngine(ran, row);
 		expect(ran.outcome).toEqual({
 			ok: true,
-			value: { outputPath: ran.generatedPath },
+			value: { outputPath: ran.generatedPath, writtenBy: "exiftool" },
 		});
 		expect(exiftoolTag(ran.generatedPath, "-FileType")).toBe("HEIC");
 		expect(ran.verifySpy).toHaveBeenCalledOnce();

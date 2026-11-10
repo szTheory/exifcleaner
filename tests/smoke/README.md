@@ -63,6 +63,44 @@ EXIFCLEANER_PACKAGED_APP="$PWD/dist/mac-arm64/ExifCleaner.app/Contents/MacOS/Exi
   yarn test:smoke tests/smoke/exiftool_orphan.smoke.ts
 ```
 
+## engine_rows, overwrite_platform and color_copy (Phase 69)
+
+These three files print stable lines that the hosted job log carries; the numbers are read from
+the CI logs, not asserted by a human.
+
+- `engine_rows.smoke.ts` (SMK-01): one launch, one serial test, eight rows in one fixture directory
+  (default WebP copy, then overwrite of `.jpg .jpeg .png .webp .heic .heif .avif`) plus a declined
+  HEIC control. Each row calls `window.api.exif.removeMetadata`, asserts the `evidence` field and
+  prints `SMOKE-ROW <row> engine=<native|exiftool> mode=<copy|overwrite> leak=<passed|not-run>`.
+  The row is a fixed label (`overwrite-heic`), never a path. The control must report `exiftool` and
+  its native expectation is asserted to throw, so the harness is shown able to fail.
+- `overwrite_platform.smoke.ts` (OVR-03, A4): measures what vitest cannot reach on Windows. Each case
+  prints `MEASURE: <platform> <id> legacy=<tuple> staged=<tuple>`. `staged` is the app's own overwrite;
+  `legacy` is a twin of the same fixture cleaned by the bundled ExifTool with `-overwrite_original`.
+  Ids and tuples: `mode` (octal mode after), `readonly` (`<ok|failed>:<failureKind|->:<mode>:<original|cleaned|other>`),
+  `hardlink` (`nlink=<n>:other-link=<unchanged|changed>`), `ads` (Windows: `carried|dropped|changed`),
+  `symlink` (POSIX: `replaced-by-regular-file=<bool>:target-bytes=<unchanged|changed>`), `identity`
+  (`ino` and `dev` as `zero|nonzero`, before and after), `owner` (POSIX `uid:gid`), `birthtime`
+  (Windows `changed|same`). Only safety invariants and the POSIX 0640 mode are asserted; a measured
+  value that differs from a note changes the note (D-16), never the other way round.
+- `color_copy.smoke.ts` (OVR-01, M-08): colour JPEG and PNG saved as a copy; prints
+  `MEASURE: <platform> color-copy fixture=<name> flags=<off|default> status=<complete|error>`.
+
+Read them with `gh run view <id> --log`, strip the `<job>\t<step>\t<timestamp> ` prefix
+(`cut -f3- | sed -E 's/^[0-9TZ:.-]+ //'`) and then grep `^SMOKE-ROW` or `^MEASURE:`. Each
+measurement also travels as a JSON attachment in the `smoke-report-<os>` artifact. None of these
+titles matches the Intel job's `--grep`; `tests/smoke/helpers/intel_grep_isolation.test.ts`
+asks Playwright itself and fails if one ever does.
+
+Local run against an unpacked macOS build (the full smoke project also contains install-layout
+tests that an unpacked `--dir` build cannot satisfy, so scope it):
+
+```bash
+yarn packmactest
+EXIFCLEANER_PACKAGED_APP="$PWD/dist/mac-arm64/ExifCleaner.app/Contents/MacOS/ExifCleaner" \
+  yarn test:smoke --grep 'every native image row|platform behaviour is measured|colour JPEG|colour PNG'
+```
+
 ## The Gatekeeper gate, and why it looks backwards
 
 `scripts/gatekeeper_check.mjs` runs two layers and **ignores `spctl`'s exit code**. That

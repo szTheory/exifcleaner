@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import type { ElectronApplication, Page } from "playwright";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -505,6 +506,53 @@ test.describe("Settings", () => {
 			await waitForProcessing(page, { timeout: 15000 });
 			const after = snapshotDir(dir);
 			assertDirEffect(before, after, { modified: ["orientation.jpg"] });
+
+			const tagsAfter = await readMetadataTags(tempFile);
+			expect(tagsAfter.Orientation).toBe(expectedOrientation);
+		} finally {
+			cleanup();
+		}
+	});
+
+	// ExifTool-writer orientation seam. The JPEG test above runs on the native engine since
+	// OVR-01 (native_orientation_mutation_gate.mjs holds that seam). A JPEG that carries a
+	// colour profile the native cleaner declines while the profile is preserved falls back to
+	// the ExifTool writer (staged transaction, `-TagsFromFile @ -Orientation` copy-back; see
+	// the exiftool-after-decline MEASURE line of overwrite_verified_transaction.test.ts).
+	// scripts/orientation_mutation_gate.mjs removes the copy-back line and requires THIS test
+	// to go red with Orientation undefined, so the gate proves the seam is on this path.
+	test("preserves orientation metadata through the ExifTool writer when toggle is enabled", async () => {
+		await page.evaluate(() => window.api.settings.set({ saveAsCopy: false }));
+		const { dir, copyFixture, cleanup } = createFixtureDir();
+		try {
+			const expectedOrientation = "Rotate 90 CW";
+			const tempFile = copyFixture("color_icc_p3.jpg");
+			execFileSync(EXIFTOOL_PATH, [
+				"-overwrite_original",
+				"-Orientation#=6",
+				tempFile,
+			]);
+			const tagsBefore = await readMetadataTags(tempFile);
+			expect(tagsBefore.Orientation).toBe(expectedOrientation);
+
+			const settings = await page.evaluate(() => window.api.settings.get());
+			expect(settings.preserveOrientation).toBe(true);
+			expect(settings.preserveColorProfile).toBe(true);
+			const before = snapshotDir(dir);
+
+			await app.evaluate(
+				({ BrowserWindow }, filePaths) => {
+					const win = BrowserWindow.getAllWindows()[0];
+					if (win) {
+						win.webContents.send("file-open-add-files", filePaths);
+					}
+				},
+				[tempFile],
+			);
+
+			await waitForProcessing(page, { timeout: 15000 });
+			const after = snapshotDir(dir);
+			assertDirEffect(before, after, { modified: ["color_icc_p3.jpg"] });
 
 			const tagsAfter = await readMetadataTags(tempFile);
 			expect(tagsAfter.Orientation).toBe(expectedOrientation);

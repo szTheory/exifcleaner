@@ -69,7 +69,29 @@ describe("copyModeLeakCheckFormatOf", () => {
 		expect(copyModeLeakCheckFormatOf({ fileType: "AVIF" })).toBe("avif");
 	});
 
-	it.each([["WEBP"], ["MOV"], ["MP4"], [""], [undefined], [42]])(
+	// 69-09 (D-03): ExifTool reports four FileType strings for a reopened WebP output (measured on
+	// 352 written rows, 69-WEBP-SWEEP-MATRIX.md). Mapping only WEBP and Extended WEBP would leave a
+	// lossless WebP unchecked (fail open by omission), so each string is pinned.
+	it.each([
+		["WEBP"],
+		["WEBP (lossless)"],
+		["Extended WEBP"],
+		["Extended WEBP (lossless)"],
+	])("maps the reopened WebP FileType %s to webp", (fileType) => {
+		expect(copyModeLeakCheckFormatOf({ fileType })).toBe("webp");
+	});
+
+	it.each([
+		["webp"],
+		["Extended WEBP (animated)"],
+		["WEBP "],
+		["VP8"],
+		["RIFF"],
+	])("does not map the near-miss FileType %j to webp", (fileType) => {
+		expect(copyModeLeakCheckFormatOf({ fileType })).toBeUndefined();
+	});
+
+	it.each([["MOV"], ["MP4"], [""], [undefined], [42]])(
 		"returns undefined for %s",
 		(fileType) => {
 			expect(copyModeLeakCheckFormatOf({ fileType })).toBeUndefined();
@@ -463,7 +485,7 @@ describe("findLeakedTags", () => {
 	describe("HEIC and AVIF allowlist shape (63-09)", () => {
 		const everySet = Object.entries(PERMITTED_SETS_FOR_TESTS);
 
-		it("has the eight per-format sets", () => {
+		it("has the twelve per-format sets (eight ISOBMFF sets plus the four WebP sets of 69-09)", () => {
 			expect(everySet.map(([name]) => name).sort()).toEqual([
 				"AVIF_ALWAYS_PERMITTED",
 				"AVIF_COLOR_PROFILE_ONLY",
@@ -473,6 +495,10 @@ describe("findLeakedTags", () => {
 				"HEIC_COLOR_PROFILE_ONLY",
 				"HEIC_ORIENTATION_ONLY",
 				"HEIC_RESOLUTION_ONLY",
+				"WEBP_ALWAYS_PERMITTED",
+				"WEBP_COLOR_PROFILE_ONLY",
+				"WEBP_ORIENTATION_ONLY",
+				"WEBP_RESOLUTION_ONLY",
 			]);
 		});
 
@@ -634,15 +660,29 @@ describe("findLeakedTags", () => {
 			},
 		);
 
-		it("keeps ICC_Profile:ChromaticAdaptation out of the shared PNG/JPEG colour-profile set", () => {
+		// 63-09 kept ICC_Profile:ChromaticAdaptation out of the shared set because JPEG and PNG were
+		// not re-measured. 69-03 measured them (Display P3 profile, both engines, 8 combinations):
+		// JPEG and PNG now permit it, only under preserveColorProfile, through their own
+		// measured extension (the shared ICC_GROUP_TAGS set is unchanged).
+		it("permits ICC_Profile:ChromaticAdaptation for PNG/JPEG only under preserveColorProfile", () => {
 			for (const format of ["png", "jpeg"] as const) {
+				const fileType = format === "png" ? "PNG" : "JPEG";
 				expect(
 					findLeakedTags({
 						record: { "ICC_Profile:ChromaticAdaptation": "x" },
 						format,
 						writtenBy: "native",
-						fileType: format === "png" ? "PNG" : "JPEG",
+						fileType,
 						preservation: colourOn,
+					}).leakedTags,
+				).toEqual([]);
+				expect(
+					findLeakedTags({
+						record: { "ICC_Profile:ChromaticAdaptation": "x" },
+						format,
+						writtenBy: "native",
+						fileType,
+						preservation: off,
 					}).leakedTags,
 				).toEqual(["ICC_Profile:ChromaticAdaptation"]);
 			}
@@ -908,5 +948,668 @@ describe("findLeakedTags", () => {
 			});
 			expect(result.leakedTags).toEqual([]);
 		});
+	});
+});
+
+// 69-02 (OVR-01; D-22a, D-22c): File:YCbCrSubSampling is the File-group chroma subsampling of any
+// 3-component JPEG. The key sets below are the measured output of the bundled ExifTool 13.59
+// after `-all=` on tests/e2e/fixtures/color_420_progressive.jpg and color_444.jpg (System and
+// ExifTool groups omitted: they are exempt wholesale).
+describe("colour JPEG File:YCbCrSubSampling (69-02)", () => {
+	const MEASURED_COLOR_KEYS = [
+		"File:FileType",
+		"File:FileTypeExtension",
+		"File:MIMEType",
+		"File:ImageWidth",
+		"File:ImageHeight",
+		"File:EncodingProcess",
+		"File:BitsPerSample",
+		"File:ColorComponents",
+		"File:YCbCrSubSampling",
+		"Composite:ImageSize",
+		"Composite:Megapixels",
+	] as const;
+
+	const COMBOS = [false, true].flatMap((preserveOrientation) =>
+		[false, true].flatMap((preserveColorProfile) =>
+			[false, true].map((preserveResolution) => ({
+				preserveOrientation,
+				preserveColorProfile,
+				preserveResolution,
+			})),
+		),
+	);
+
+	it.each(COMBOS)(
+		"a measured colour JPEG record has no leaked tags (%j)",
+		(preservation) => {
+			const result = findLeakedTags({
+				record: recordFromKeys(MEASURED_COLOR_KEYS),
+				format: "jpeg",
+				writtenBy: "native",
+				fileType: "JPEG",
+				preservation,
+			});
+			expect(result.leakedTags).toEqual([]);
+		},
+	);
+
+	it.each([["XMP-dc:Creator"], ["GPS:GPSLatitude"]])(
+		"the colour record plus %s still fails and names only that tag",
+		(leaky) => {
+			const result = findLeakedTags({
+				record: recordFromKeys([...MEASURED_COLOR_KEYS, leaky]),
+				format: "jpeg",
+				writtenBy: "exiftool",
+				fileType: "JPEG",
+				preservation: {
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+				},
+			});
+			expect(result.leakedTags).toEqual([leaky]);
+		},
+	);
+
+	it.each([
+		["png", "PNG"],
+		["heic", "HEIC"],
+		["avif", "AVIF"],
+	] as const)(
+		"%s still reports File:YCbCrSubSampling as a leak (the allowance is JPEG-scoped)",
+		(format, fileType) => {
+			const result = findLeakedTags({
+				record: recordFromKeys(["File:YCbCrSubSampling"]),
+				format,
+				writtenBy: "native",
+				fileType,
+				preservation: {
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+				},
+			});
+			expect(result.leakedTags).toEqual(["File:YCbCrSubSampling"]);
+		},
+	);
+});
+
+// 69-03 (OVR-01; D-22b): colour PNG sweep, tests/domain/fixtures/copy_mode_color_sweep.json. The
+// ExifTool engine keeps the eXIf resolution tags (and the byte-order and positioning companions
+// ExifTool re-creates with them) of a PNG when preserveResolution is requested; the native engine
+// keeps only the pHYs chunk. They are resolution values, the thing the user asked to keep, the
+// same class JPEG/HEIC/AVIF already permit under preserveResolution.
+describe("colour PNG eXIf resolution keys (69-03)", () => {
+	const MEASURED_PNG_RESOLUTION_KEYS = [
+		"File:ExifByteOrder",
+		"IFD0:ResolutionUnit",
+		"IFD0:XResolution",
+		"IFD0:YCbCrPositioning",
+		"IFD0:YResolution",
+	] as const;
+
+	const base = {
+		format: "png",
+		writtenBy: "exiftool",
+		fileType: "PNG",
+	} as const;
+
+	it("permits them when preserveResolution is requested", () => {
+		const result = findLeakedTags({
+			...base,
+			record: recordFromKeys(MEASURED_PNG_RESOLUTION_KEYS),
+			preservation: {
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: true,
+			},
+		});
+		expect(result.leakedTags).toEqual([]);
+	});
+
+	it("still reports every one of them when preserveResolution is off", () => {
+		const result = findLeakedTags({
+			...base,
+			record: recordFromKeys(MEASURED_PNG_RESOLUTION_KEYS),
+			preservation: {
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: false,
+			},
+		});
+		expect(result.leakedTags).toEqual([...MEASURED_PNG_RESOLUTION_KEYS]);
+	});
+
+	it("does not widen the other formats (the key sets are scoped per format)", () => {
+		expect(alwaysSet("HEIC_ORIENTATION_ONLY").has("IFD0:XResolution")).toBe(
+			false,
+		);
+		const result = findLeakedTags({
+			...base,
+			record: recordFromKeys(["IFD0:Make"]),
+			preservation: {
+				preserveOrientation: true,
+				preserveColorProfile: true,
+				preserveResolution: true,
+			},
+		});
+		expect(result.leakedTags).toEqual(["IFD0:Make"]);
+	});
+});
+
+// 69-03 (OVR-01; A2, review B3): ICC tags measured on the profiles people actually have, on JPEG
+// and PNG, on both engines (tests/domain/fixtures/copy_mode_color_sweep.json, rows icc-*). The
+// system sRGB IEC61966-2.1 v2 profile (cameras, Windows, Photoshop) adds the measurement, viewing
+// condition, device description, luminance and technology tags and the bkpt tag; Adobe RGB (1998)
+// adds MediaBlackPoint; Display P3 (v4) adds ChromaticAdaptation. All are colorimetry or profile
+// descriptors of the colour profile the user asked to keep, and none survives with
+// preserveColorProfile off.
+describe("JPEG and PNG ICC colorimetry and descriptor keys (69-03)", () => {
+	const MEASURED_EXTRA_ICC_KEYS = [
+		"ICC-meas:MeasurementBacking",
+		"ICC-meas:MeasurementFlare",
+		"ICC-meas:MeasurementGeometry",
+		"ICC-meas:MeasurementIlluminant",
+		"ICC-meas:MeasurementObserver",
+		"ICC-view:ViewingCondIlluminant",
+		"ICC-view:ViewingCondIlluminantType",
+		"ICC-view:ViewingCondSurround",
+		"ICC_Profile:ChromaticAdaptation",
+		"ICC_Profile:DeviceMfgDesc",
+		"ICC_Profile:DeviceModelDesc",
+		"ICC_Profile:Luminance",
+		"ICC_Profile:MediaBlackPoint",
+		"ICC_Profile:Technology",
+		"ICC_Profile:ViewingCondDesc",
+	] as const;
+
+	const colorProfileOn = {
+		preserveOrientation: false,
+		preserveColorProfile: true,
+		preserveResolution: false,
+	} as const;
+	const colorProfileOff = { ...colorProfileOn, preserveColorProfile: false };
+
+	describe.each([
+		["jpeg", "JPEG"],
+		["png", "PNG"],
+	] as const)("%s", (format, fileType) => {
+		it.each(MEASURED_EXTRA_ICC_KEYS)(
+			"permits %s when preserveColorProfile is requested",
+			(key) => {
+				const result = findLeakedTags({
+					record: recordFromKeys([key]),
+					format,
+					writtenBy: "native",
+					fileType,
+					preservation: colorProfileOn,
+				});
+				expect(result.leakedTags).toEqual([]);
+			},
+		);
+
+		it("reports every one of them when preserveColorProfile is off", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys(MEASURED_EXTRA_ICC_KEYS),
+				format,
+				writtenBy: "exiftool",
+				fileType,
+				preservation: colorProfileOff,
+			});
+			expect(result.leakedTags).toEqual([...MEASURED_EXTRA_ICC_KEYS].sort());
+		});
+
+		it("still fails closed on an ICC tag that was not measured", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys([
+					...MEASURED_EXTRA_ICC_KEYS,
+					"ICC_Profile:AToB0",
+				]),
+				format,
+				writtenBy: "native",
+				fileType,
+				preservation: colorProfileOn,
+			});
+			expect(result.leakedTags).toEqual(["ICC_Profile:AToB0"]);
+		});
+	});
+
+	it("heic is not widened: bkpt stays a leak (HEIC was not re-measured with these profiles)", () => {
+		const result = findLeakedTags({
+			record: recordFromKeys(["ICC_Profile:MediaBlackPoint"]),
+			format: "heic",
+			writtenBy: "native",
+			fileType: "HEIC",
+			preservation: colorProfileOn,
+		});
+		expect(result.leakedTags).toEqual(["ICC_Profile:MediaBlackPoint"]);
+	});
+
+	// Stretch measurement (69-03): an AVIF written by avifenc with the same three system profiles
+	// shows the same keys on both engines, so AVIF takes the same measured extension.
+	describe("avif (measured with avifenc-embedded system profiles)", () => {
+		it.each(MEASURED_EXTRA_ICC_KEYS)(
+			"permits %s when preserveColorProfile is requested, on both engines",
+			(key) => {
+				for (const writtenBy of ["native", "exiftool"] as const) {
+					const result = findLeakedTags({
+						record: recordFromKeys([key]),
+						format: "avif",
+						writtenBy,
+						fileType: "AVIF",
+						preservation: colorProfileOn,
+					});
+					expect(result.leakedTags).toEqual([]);
+				}
+			},
+		);
+
+		it("a native AVIF with the colour profile off and an ICC-meas key is still a leak (no exemption for native output)", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys(["ICC-meas:MeasurementObserver"]),
+				format: "avif",
+				writtenBy: "native",
+				fileType: "AVIF",
+				preservation: colorProfileOff,
+			});
+			expect(result.leakedTags).toEqual(["ICC-meas:MeasurementObserver"]);
+		});
+
+		it("an ExifTool-written AVIF keeps the source ICC measurement and viewing groups with the colour profile off: exempted under F-HEIC-ICC", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys([
+					"ICC-meas:MeasurementObserver",
+					"ICC-view:ViewingCondSurround",
+				]),
+				format: "avif",
+				writtenBy: "exiftool",
+				fileType: "AVIF",
+				preservation: colorProfileOff,
+			});
+			expect(result.leakedTags).toEqual([]);
+			expect(result.exemptionsApplied).toEqual(["F-HEIC-ICC"]);
+		});
+
+		it("the same ExifTool-written record in a HEIC still leaks (the exemption extension is AVIF-scoped)", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys(["ICC-meas:MeasurementObserver"]),
+				format: "heic",
+				writtenBy: "exiftool",
+				fileType: "HEIC",
+				preservation: colorProfileOff,
+			});
+			expect(result.leakedTags).toEqual(["ICC-meas:MeasurementObserver"]);
+		});
+
+		it("an identifying key next to the ICC keys is still reported alone", () => {
+			const result = findLeakedTags({
+				record: recordFromKeys([...MEASURED_EXTRA_ICC_KEYS, "XMP-dc:Creator"]),
+				format: "avif",
+				writtenBy: "exiftool",
+				fileType: "AVIF",
+				preservation: colorProfileOn,
+			});
+			expect(result.leakedTags).toEqual(["XMP-dc:Creator"]);
+		});
+	});
+});
+
+// 69-09 (WEBP-08; D-03, review N3): the WebP allowlist, transcribed from the 368-row sweep of
+// 69-WEBP-SWEEP-MATRIX.md "## Derived allowlist". The literals below are an independent oracle (typed
+// from the matrix, not imported from the source), so a transcription error in the source fails here.
+describe("WebP leak check (69-09)", () => {
+	const WEBP_ALWAYS = [
+		"Composite:ImageSize",
+		"Composite:Megapixels",
+		"File:FileType",
+		"File:FileTypeExtension",
+		"File:MIMEType",
+		"RIFF:AlphaCompression",
+		"RIFF:AlphaFiltering",
+		"RIFF:AlphaIsUsed",
+		"RIFF:AlphaPreprocessing",
+		"RIFF:AnimationLoopCount",
+		"RIFF:BackgroundColor",
+		"RIFF:Duration",
+		"RIFF:HorizontalScale",
+		"RIFF:ImageHeight",
+		"RIFF:ImageWidth",
+		"RIFF:VP8Version",
+		"RIFF:VerticalScale",
+	] as const;
+	const WEBP_ORIENTATION = [
+		"File:ExifByteOrder",
+		"IFD0:Orientation",
+		"IFD0:YCbCrPositioning",
+	] as const;
+	const WEBP_RESOLUTION = [
+		"File:ExifByteOrder",
+		"IFD0:ResolutionUnit",
+		"IFD0:XResolution",
+		"IFD0:YCbCrPositioning",
+		"IFD0:YResolution",
+	] as const;
+	const ICC_25 = [
+		"ICC-header:CMMFlags",
+		"ICC-header:ColorSpaceData",
+		"ICC-header:ConnectionSpaceIlluminant",
+		"ICC-header:DeviceAttributes",
+		"ICC-header:DeviceManufacturer",
+		"ICC-header:DeviceModel",
+		"ICC-header:PrimaryPlatform",
+		"ICC-header:ProfileCMMType",
+		"ICC-header:ProfileClass",
+		"ICC-header:ProfileConnectionSpace",
+		"ICC-header:ProfileCreator",
+		"ICC-header:ProfileDateTime",
+		"ICC-header:ProfileFileSignature",
+		"ICC-header:ProfileID",
+		"ICC-header:ProfileVersion",
+		"ICC-header:RenderingIntent",
+		"ICC_Profile:BlueMatrixColumn",
+		"ICC_Profile:BlueTRC",
+		"ICC_Profile:GreenMatrixColumn",
+		"ICC_Profile:GreenTRC",
+		"ICC_Profile:MediaWhitePoint",
+		"ICC_Profile:ProfileCopyright",
+		"ICC_Profile:ProfileDescription",
+		"ICC_Profile:RedMatrixColumn",
+		"ICC_Profile:RedTRC",
+	] as const;
+	const ICC_15 = [
+		"ICC-meas:MeasurementBacking",
+		"ICC-meas:MeasurementFlare",
+		"ICC-meas:MeasurementGeometry",
+		"ICC-meas:MeasurementIlluminant",
+		"ICC-meas:MeasurementObserver",
+		"ICC-view:ViewingCondIlluminant",
+		"ICC-view:ViewingCondIlluminantType",
+		"ICC-view:ViewingCondSurround",
+		"ICC_Profile:ChromaticAdaptation",
+		"ICC_Profile:DeviceMfgDesc",
+		"ICC_Profile:DeviceModelDesc",
+		"ICC_Profile:Luminance",
+		"ICC_Profile:MediaBlackPoint",
+		"ICC_Profile:Technology",
+		"ICC_Profile:ViewingCondDesc",
+	] as const;
+	const WEBP_COLOR = [...ICC_25, ...ICC_15];
+
+	type Flags = {
+		preserveOrientation: boolean;
+		preserveColorProfile: boolean;
+		preserveResolution: boolean;
+	};
+	const COMBOS: readonly Flags[] = [false, true].flatMap((o) =>
+		[false, true].flatMap((c) =>
+			[false, true].map((r) => ({
+				preserveOrientation: o,
+				preserveColorProfile: c,
+				preserveResolution: r,
+			})),
+		),
+	);
+	const comboName = (f: Flags) =>
+		`o=${f.preserveOrientation} c=${f.preserveColorProfile} r=${f.preserveResolution}`;
+	const ALL_OFF: Flags = {
+		preserveOrientation: false,
+		preserveColorProfile: false,
+		preserveResolution: false,
+	};
+	const ALL_ON: Flags = {
+		preserveOrientation: true,
+		preserveColorProfile: true,
+		preserveResolution: true,
+	};
+
+	function check(
+		record: Record<string, unknown>,
+		preservation: Flags,
+		writtenBy: "native" | "exiftool" = "native",
+		fileType = "Extended WEBP",
+	) {
+		return findLeakedTags({
+			record,
+			format: "webp",
+			writtenBy,
+			fileType,
+			preservation,
+		}).leakedTags;
+	}
+
+	it("exports the four WebP sets with exactly the measured members", () => {
+		expect([...alwaysSet("WEBP_ALWAYS_PERMITTED")].sort()).toEqual([
+			...WEBP_ALWAYS,
+		]);
+		expect([...alwaysSet("WEBP_ORIENTATION_ONLY")].sort()).toEqual([
+			...WEBP_ORIENTATION,
+		]);
+		expect([...alwaysSet("WEBP_RESOLUTION_ONLY")].sort()).toEqual([
+			...WEBP_RESOLUTION,
+		]);
+		expect([...alwaysSet("WEBP_COLOR_PROFILE_ONLY")].sort()).toEqual(
+			[...WEBP_COLOR].sort(),
+		);
+		expect(WEBP_ALWAYS).toHaveLength(17);
+		expect(WEBP_COLOR).toHaveLength(40);
+	});
+
+	it.each(COMBOS.map((f) => [comboName(f), f] as const))(
+		"%s: accepts exactly its permitted set and reports every other measured key",
+		(_name, flags) => {
+			const permitted = new Set<string>([
+				...WEBP_ALWAYS,
+				...(flags.preserveOrientation ? WEBP_ORIENTATION : []),
+				...(flags.preserveResolution ? WEBP_RESOLUTION : []),
+				...(flags.preserveColorProfile ? WEBP_COLOR : []),
+			]);
+			expect(check(recordFromKeys([...permitted]), flags)).toEqual([]);
+
+			const everyKey = [
+				...new Set([
+					...WEBP_ALWAYS,
+					...WEBP_ORIENTATION,
+					...WEBP_RESOLUTION,
+					...WEBP_COLOR,
+				]),
+			];
+			const expectedLeaks = everyKey
+				.filter((key) => !permitted.has(key))
+				.sort();
+			expect(check(recordFromKeys(everyKey), flags)).toEqual(expectedLeaks);
+		},
+	);
+
+	it.each([
+		"XMP-dc:Creator",
+		"XMP-x:XMPToolkit",
+		"ExifIFD:DateTimeOriginal",
+		"GPS:GPSLatitude",
+		"GPS:GPSVersionID",
+		"Composite:GPSLatitude",
+		"IFD0:Make",
+		"IFD0:Model",
+		"IFD0:Artist",
+		"IFD0:Software",
+		"IFD0:Copyright",
+		"IFD1:ThumbnailImage",
+		"RIFF:Comment",
+		"RIFF:Software",
+		"ICC_Profile:AToB0",
+	])("%s is a leak under every preserve combination", (key) => {
+		for (const flags of COMBOS) {
+			expect(check({ [key]: "ZZLEAK-69" }, flags), comboName(flags)).toEqual([
+				key,
+			]);
+		}
+	});
+
+	it("reads the Group1 and tag from a -G1:2:4 key of three parts", () => {
+		expect(
+			check(
+				{ "RIFF:Image:ImageWidth": 16, "XMP-dc:Author:Creator": "x" },
+				ALL_ON,
+			),
+		).toEqual(["XMP-dc:Creator"]);
+	});
+
+	it("never echoes a value into the result (names only)", () => {
+		const result = findLeakedTags({
+			record: { "XMP-dc:Creator": "ZZLEAK-69-VALUE", "GPS:GPSLatitude": 1 },
+			format: "webp",
+			writtenBy: "native",
+			fileType: "WEBP",
+			preservation: ALL_OFF,
+		});
+		expect(JSON.stringify(result)).not.toContain("ZZLEAK-69-VALUE");
+	});
+
+	it("keeps the WebP keys out of the other formats (the key sets are scoped per format)", () => {
+		for (const format of ["jpeg", "png", "heic", "avif"] as const) {
+			const leaks = findLeakedTags({
+				record: recordFromKeys(["RIFF:VP8Version", "RIFF:ImageWidth"]),
+				format,
+				writtenBy: "native",
+				fileType: "WEBP",
+				preservation: ALL_ON,
+			}).leakedTags;
+			expect(leaks, format).toEqual(["RIFF:ImageWidth", "RIFF:VP8Version"]);
+		}
+		expect(alwaysSet("HEIC_ORIENTATION_ONLY").has("RIFF:VP8Version")).toBe(
+			false,
+		);
+	});
+
+	describe("IFD0:YCbCrPositioning, the ExifTool-written EXIF companion", () => {
+		const record = { "IFD0:YCbCrPositioning": "Centered" };
+		it("is accepted under orientation and under resolution only", () => {
+			expect(check(record, { ...ALL_OFF, preserveOrientation: true })).toEqual(
+				[],
+			);
+			expect(check(record, { ...ALL_OFF, preserveResolution: true })).toEqual(
+				[],
+			);
+			expect(check(record, ALL_OFF)).toEqual(["IFD0:YCbCrPositioning"]);
+			expect(check(record, { ...ALL_OFF, preserveColorProfile: true })).toEqual(
+				["IFD0:YCbCrPositioning"],
+			);
+		});
+	});
+
+	describe("RIFF:WebP_Flags is judged by its value (review N3)", () => {
+		const KEY = "RIFF:WebP_Flags";
+		const off = ALL_OFF;
+		const orientation = { ...ALL_OFF, preserveOrientation: true };
+		const resolution = { ...ALL_OFF, preserveResolution: true };
+		const color = { ...ALL_OFF, preserveColorProfile: true };
+
+		it.each([
+			["Alpha", off],
+			["Animation", off],
+			["Alpha, Animation", off],
+			["Animation, Alpha", off],
+			["EXIF, Alpha", orientation],
+			["EXIF, Alpha", resolution],
+			["Animation, EXIF", orientation],
+			["Animation, EXIF", resolution],
+			["EXIF", orientation],
+			["EXIF", resolution],
+			["ICC Profile", color],
+			["EXIF, ICC Profile", { ...orientation, preserveColorProfile: true }],
+			["ICC Profile, EXIF", { ...resolution, preserveColorProfile: true }],
+			["Alpha, ICC Profile", color],
+			["EXIF, ICC Profile", ALL_ON],
+		] as const)("permits %j under %j", (value, flags) => {
+			expect(check({ [KEY]: value }, flags)).toEqual([]);
+		});
+
+		it.each([
+			["EXIF", off],
+			["EXIF, Alpha", off],
+			["Animation, EXIF", off],
+			["EXIF", color],
+			["EXIF, Alpha", color],
+			["ICC Profile", off],
+			["ICC Profile", orientation],
+			["ICC Profile", resolution],
+			["EXIF, ICC Profile", orientation],
+			["EXIF, ICC Profile", color],
+			["Alpha, ICC Profile", off],
+			["XMP", ALL_ON],
+			["XMP", off],
+			["XMP, EXIF", ALL_ON],
+			["Animation, XMP, EXIF", ALL_ON],
+			["Alpha, XMP", ALL_ON],
+		] as const)("reports %j under %j", (value, flags) => {
+			expect(check({ [KEY]: value }, flags)).toEqual([KEY]);
+		});
+
+		// Fail closed: any token outside the pinned print vocabulary, however plausible.
+		it.each([
+			["Sparkle"],
+			["Alpha, Sparkle"],
+			["alpha"],
+			["ALPHA"],
+			["Alpha,"],
+			[","],
+			[""],
+			[" "],
+			["Icc Profile"],
+			["ICC"],
+			["Exif"],
+			["Animated"],
+			["Alpha;EXIF"],
+		])(
+			"reports the unrecognised value %j even with every option on",
+			(value) => {
+				expect(check({ [KEY]: value }, ALL_ON)).toEqual([KEY]);
+			},
+		);
+
+		it.each([
+			[5],
+			[0],
+			[true],
+			[null],
+			[undefined],
+			[["Alpha"]],
+			[{ Alpha: 1 }],
+		])("reports the non-string value %j (fail closed)", (value) => {
+			expect(check({ [KEY]: value }, ALL_ON)).toEqual([KEY]);
+		});
+
+		it("tolerates a comma without a space and surrounding blanks around a known token", () => {
+			expect(check({ [KEY]: "Alpha,Animation" }, off)).toEqual([]);
+			expect(check({ [KEY]: " Alpha , Animation " }, off)).toEqual([]);
+		});
+
+		it("is decided from the value, not from the key alone: the same key flips with the value", () => {
+			expect(check({ [KEY]: "Alpha" }, off)).toEqual([]);
+			expect(check({ [KEY]: "EXIF" }, off)).toEqual([KEY]);
+		});
+
+		it("works with the three-part key a -G1:2:4 record carries", () => {
+			expect(check({ "RIFF:Other:WebP_Flags": "XMP" }, ALL_ON)).toEqual([
+				"RIFF:WebP_Flags",
+			]);
+			expect(check({ "RIFF:Other:WebP_Flags": "Alpha" }, off)).toEqual([]);
+		});
+	});
+
+	describe("F-HEIC-ICC is not a WebP exemption", () => {
+		it.each(["WEBP", "Extended WEBP"])(
+			"an ExifTool-written %s keeps ICC keys a leak when the colour profile is off",
+			(fileType) => {
+				expect(
+					check(
+						{ "ICC-header:ProfileClass": "Display", "ICC_Profile:RedTRC": "x" },
+						ALL_OFF,
+						"exiftool",
+						fileType,
+					),
+				).toEqual(["ICC-header:ProfileClass", "ICC_Profile:RedTRC"]);
+			},
+		);
 	});
 });

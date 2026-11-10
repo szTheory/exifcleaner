@@ -8,9 +8,17 @@ import {
 	OutputTransaction,
 	type OutputTransactionDependencies,
 } from "../../src/main/output_transaction";
+import type { SourceIdentity } from "../../src/main/source_identity";
 
 const originalPath = "/tmp/original.mp4";
 const generatedPath = "/tmp/.original.exifcleaner-stage.mp4";
+// The attribute application of 69-11 (A6): after the sync, before the identity recheck. The
+// identity() default is uid 501, gid 20, mode 0o100644 (file-type bits included), so chmod must
+// receive the masked permission bits 644, never 100644.
+const appliedAttributes = [
+	`chown:${generatedPath}:501:20`,
+	`chmod:${generatedPath}:644`,
+];
 
 type TransactionTestOptions = {
 	writeResult?: Awaited<
@@ -23,18 +31,66 @@ type TransactionTestOptions = {
 	>;
 	unlink?: OutputTransactionDependencies["unlink"];
 	rename?: OutputTransactionDependencies["rename"];
+	/** Receives the 0-based call index so a test can answer capture and recheck differently. */
+	statSource?: (path: string, callIndex: number) => Promise<SourceIdentity>;
+	syncFile?: OutputTransactionDependencies["syncFile"];
+	chown?: OutputTransactionDependencies["chown"];
+	chmod?: OutputTransactionDependencies["chmod"];
+	/** The platform the transaction decides for; omitted means the host (production wiring). */
+	platform?: NodeJS.Platform;
 };
+
+function identity(overrides: Partial<SourceIdentity> = {}): SourceIdentity {
+	return {
+		dev: 16777230n,
+		ino: 8123456n,
+		size: 1024n,
+		mtimeNs: 1_700_000_000_123_456_789n,
+		// A real stat mode carries the file-type bits (0o100000 = regular file); the commit must
+		// apply only the permission bits.
+		mode: 0o100644,
+		uid: 501,
+		gid: 20,
+		...overrides,
+	};
+}
+
+// For the cases whose paths never reach the commit branch: the new dependencies are
+// required members, but nothing may call them (the plain save-as-copy path).
+const neverCalledFileDependencies = {
+	statSource: async (): Promise<SourceIdentity> => {
+		throw new Error("statSource must not be called on this path");
+	},
+	syncFile: async (): Promise<void> => {
+		throw new Error("syncFile must not be called on this path");
+	},
+	chown: async (): Promise<void> => {
+		throw new Error("chown must not be called on this path");
+	},
+	chmod: async (): Promise<void> => {
+		throw new Error("chmod must not be called on this path");
+	},
+} satisfies Pick<
+	OutputTransactionDependencies,
+	"statSource" | "syncFile" | "chown" | "chmod"
+>;
 
 function createTransaction({
 	writeResult = { ok: true, value: { tagsRemoved: 0, writtenBy: "exiftool" } },
 	verifyResult = { ok: true, value: { exemptionsApplied: [] } },
 	unlink = async () => undefined,
 	rename = async () => undefined,
+	statSource = async () => identity(),
+	syncFile = async () => undefined,
+	chown = async () => undefined,
+	chmod = async () => undefined,
+	platform,
 }: TransactionTestOptions = {}): {
 	transaction: OutputTransaction;
 	events: string[];
 } {
 	const events: string[] = [];
+	let statCalls = 0;
 	const transaction = new OutputTransaction({
 		stripMetadata: {
 			execute: async () => {
@@ -56,9 +112,28 @@ function createTransaction({
 			events.push(`rename:${from}:${to}`);
 			return rename(from, to);
 		},
+		statSource: async (path) => {
+			events.push(`stat:${path}`);
+			const index = statCalls;
+			statCalls += 1;
+			return statSource(path, index);
+		},
+		syncFile: async (path) => {
+			events.push(`sync:${path}`);
+			return syncFile(path);
+		},
+		chown: async (path, uid, gid) => {
+			events.push(`chown:${path}:${uid}:${gid}`);
+			return chown(path, uid, gid);
+		},
+		chmod: async (path, mode) => {
+			events.push(`chmod:${path}:${mode.toString(8)}`);
+			return chmod(path, mode);
+		},
 		delay: async (milliseconds) => {
 			events.push(`delay:${milliseconds}`);
 		},
+		...(platform === undefined ? {} : { platform }),
 	});
 
 	return { transaction, events };
@@ -85,7 +160,10 @@ describe("OutputTransaction", () => {
 			preserveTimestamps: false,
 		});
 
-		expect(result).toEqual({ ok: true, value: { outputPath: generatedPath } });
+		expect(result).toEqual({
+			ok: true,
+			value: { outputPath: generatedPath, writtenBy: "exiftool" },
+		});
 		expect(events).toEqual(["write", `verify:${generatedPath}`]);
 	});
 
@@ -171,11 +249,14 @@ describe("OutputTransaction", () => {
 				residualPath: generatedPath,
 			},
 		});
+		// EPERM and EACCES lift a read-only bit before each retry (69-18, M-02 R8)
 		expect(events).toEqual([
 			"write",
 			`unlink:${generatedPath}`,
+			`chmod:${generatedPath}:600`,
 			"delay:20",
 			`unlink:${generatedPath}`,
+			`chmod:${generatedPath}:600`,
 			"delay:50",
 			`unlink:${generatedPath}`,
 		]);
@@ -228,6 +309,7 @@ describe("OutputTransaction", () => {
 			error: {
 				code: "verification-failed",
 				verificationCode: "output-verification-failed",
+				diagnostic: "not reopenable",
 			},
 		});
 		expect(result).not.toHaveProperty("outputPath");
@@ -280,6 +362,7 @@ describe("OutputTransaction", () => {
 				},
 				rename: async () => undefined,
 				delay: async () => undefined,
+				...neverCalledFileDependencies,
 			});
 
 			const result = await transaction.execute({
@@ -297,6 +380,7 @@ describe("OutputTransaction", () => {
 				error: {
 					code: "verification-failed",
 					verificationCode: "output-verification-failed",
+					diagnostic: "re-open failed",
 				},
 			});
 			expect(events).toEqual([
@@ -344,6 +428,7 @@ describe("OutputTransaction", () => {
 			error: {
 				code: "verification-failed",
 				verificationCode: "output-verification-failed",
+				diagnostic: "not reopenable",
 			},
 		});
 		expect(events).toEqual([
@@ -380,8 +465,10 @@ describe("OutputTransaction", () => {
 			"write",
 			`verify:${generatedPath}`,
 			`unlink:${generatedPath}`,
+			`chmod:${generatedPath}:600`,
 			"delay:20",
 			`unlink:${generatedPath}`,
+			`chmod:${generatedPath}:600`,
 			"delay:50",
 			`unlink:${generatedPath}`,
 		]);
@@ -400,10 +487,17 @@ describe("OutputTransaction", () => {
 			preserveTimestamps: false,
 		});
 
-		expect(result).toEqual({ ok: true, value: { outputPath: originalPath } });
+		expect(result).toEqual({
+			ok: true,
+			value: { outputPath: originalPath, writtenBy: "exiftool" },
+		});
 		expect(events).toEqual([
+			`stat:${originalPath}`,
 			"write",
 			`verify:${generatedPath}`,
+			`sync:${generatedPath}`,
+			...appliedAttributes,
+			`stat:${originalPath}`,
 			`rename:${generatedPath}:${originalPath}`,
 		]);
 	});
@@ -426,11 +520,416 @@ describe("OutputTransaction", () => {
 		expect(result).toEqual({ ok: false, error: { code: "commit-failed" } });
 		expect(result).not.toHaveProperty("outputPath");
 		expect(events).toEqual([
+			`stat:${originalPath}`,
 			"write",
 			`verify:${generatedPath}`,
+			`sync:${generatedPath}`,
+			...appliedAttributes,
+			`stat:${originalPath}`,
 			`rename:${generatedPath}:${originalPath}`,
 			`unlink:${generatedPath}`,
 		]);
+	});
+
+	describe("staged commit: fsync and source identity recheck (69-10, OVR-02, D-11..D-13)", () => {
+		const base = {
+			filePath: originalPath,
+			generatedPath,
+			commitPath: originalPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		};
+		const failedCommit = { ok: false, error: { code: "commit-failed" } };
+		const throughSync = [
+			`stat:${originalPath}`,
+			"write",
+			`verify:${generatedPath}`,
+			`sync:${generatedPath}`,
+			...appliedAttributes,
+			`stat:${originalPath}`,
+		];
+
+		it("captures identity of the source before the write, then syncs the stage, applies ownership then mode, rechecks, then renames (exact call log, A6)", async () => {
+			const { transaction, events } = createTransaction();
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath: originalPath, writtenBy: "exiftool" },
+			});
+			expect(events).toEqual([
+				`stat:${originalPath}`,
+				"write",
+				`verify:${generatedPath}`,
+				`sync:${generatedPath}`,
+				`chown:${generatedPath}:501:20`,
+				`chmod:${generatedPath}:644`,
+				`stat:${originalPath}`,
+				`rename:${generatedPath}:${originalPath}`,
+			]);
+		});
+
+		it.each([
+			["ino", { ino: 8123457n }],
+			["size", { size: 1025n }],
+			["mtimeNs", { mtimeNs: 1_700_000_000_123_456_790n }],
+			["dev", { dev: 16777231n }],
+		] as const)(
+			"a different %s at the recheck refuses the commit: rename never called, stage removed",
+			async (_field, changed) => {
+				const { transaction, events } = createTransaction({
+					statSource: async (_path, index) =>
+						index === 0 ? identity() : identity(changed),
+				});
+				const result = await transaction.execute(base);
+				expect(result).toEqual(failedCommit);
+				expect(result).not.toHaveProperty("outputPath");
+				expect(events).toEqual([...throughSync, `unlink:${generatedPath}`]);
+				expect(events.some((e) => e.startsWith("rename:"))).toBe(false);
+			},
+		);
+
+		it("an unchanged identity commits (negative control for the matrix above)", async () => {
+			const { transaction, events } = createTransaction({
+				statSource: async () => identity({ ino: 42n, dev: 7n }),
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath: originalPath, writtenBy: "exiftool" },
+			});
+			expect(events).toContain(`rename:${generatedPath}:${originalPath}`);
+		});
+
+		it.each([
+			["ino zero at capture", { ino: 0n }, {}, true],
+			["ino zero at recheck", {}, { ino: 0n }, true],
+			[
+				"ino zero at capture, different non-zero at recheck",
+				{ ino: 0n },
+				{ ino: 99n },
+				true,
+			],
+			[
+				"dev zero at capture, different non-zero at recheck",
+				{ dev: 0n },
+				{ dev: 99n },
+				true,
+			],
+			["dev zero at recheck", {}, { dev: 0n }, true],
+			["ino differs, both non-zero", { ino: 5n }, { ino: 6n }, false],
+			[
+				"ino zero but size differs",
+				{ ino: 0n },
+				{ ino: 6n, size: 2048n },
+				false,
+			],
+			[
+				"ino and dev zero but mtime differs",
+				{ ino: 0n, dev: 0n },
+				{ ino: 0n, dev: 0n, mtimeNs: 1n },
+				false,
+			],
+		] as const)(
+			"zero-id rule (D-12): %s",
+			async (_name, captured, rechecked, commits) => {
+				const { transaction, events } = createTransaction({
+					statSource: async (_path, index) =>
+						index === 0 ? identity(captured) : identity(rechecked),
+				});
+				const result = await transaction.execute(base);
+				if (commits) {
+					expect(result).toEqual({
+						ok: true,
+						value: { outputPath: originalPath, writtenBy: "exiftool" },
+					});
+					expect(events).toContain(`rename:${generatedPath}:${originalPath}`);
+				} else {
+					expect(result).toEqual(failedCommit);
+					expect(events.some((e) => e.startsWith("rename:"))).toBe(false);
+				}
+			},
+		);
+
+		it("a failing identity capture returns commit-failed before anything is written, verified, synced or renamed", async () => {
+			const { transaction, events } = createTransaction({
+				statSource: async () => {
+					throw Object.assign(new Error("gone"), { code: "ENOENT" });
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual(failedCommit);
+			expect(events).toEqual([`stat:${originalPath}`]);
+		});
+
+		it("a sync failure returns commit-failed: no recheck, no rename, stage removed", async () => {
+			const { transaction, events } = createTransaction({
+				syncFile: async () => {
+					throw Object.assign(new Error("EIO"), { code: "EIO" });
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual(failedCommit);
+			expect(events).toEqual([
+				`stat:${originalPath}`,
+				"write",
+				`verify:${generatedPath}`,
+				`sync:${generatedPath}`,
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("a failing recheck stat returns commit-failed with rename never called", async () => {
+			const { transaction, events } = createTransaction({
+				statSource: async (_path, index) => {
+					if (index === 0) return identity();
+					throw Object.assign(new Error("gone"), { code: "ENOENT" });
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual(failedCommit);
+			expect(events).toEqual([...throughSync, `unlink:${generatedPath}`]);
+		});
+
+		it("a rename failure returns commit-failed and removes the stage after sync and recheck passed", async () => {
+			const { transaction, events } = createTransaction({
+				rename: async () => {
+					throw Object.assign(new Error("EXDEV"), { code: "EXDEV" });
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual(failedCommit);
+			expect(events).toEqual([
+				...throughSync,
+				`rename:${generatedPath}:${originalPath}`,
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		describe("attribute application (69-11, OVR-03, D-15, A6)", () => {
+			it("chown failing never fails the commit (best effort): chmod, recheck and rename still run", async () => {
+				const { transaction, events } = createTransaction({
+					chown: async () => {
+						throw Object.assign(new Error("EPERM: chown"), { code: "EPERM" });
+					},
+				});
+				const result = await transaction.execute(base);
+				expect(result).toEqual({
+					ok: true,
+					value: { outputPath: originalPath, writtenBy: "exiftool" },
+				});
+				expect(events).toEqual([
+					...throughSync,
+					`rename:${generatedPath}:${originalPath}`,
+				]);
+			});
+
+			it.each(["EPERM", "EINVAL", "ENOSYS", "EIO"])(
+				"chown failing with %s is ignored",
+				async (code) => {
+					const { transaction } = createTransaction({
+						chown: async () => {
+							throw Object.assign(new Error(code), { code });
+						},
+					});
+					const result = await transaction.execute(base);
+					expect(result).toEqual({
+						ok: true,
+						value: { outputPath: originalPath, writtenBy: "exiftool" },
+					});
+				},
+			);
+
+			it("chmod failing returns commit-failed: no recheck, rename never called, stage removed", async () => {
+				const { transaction, events } = createTransaction({
+					chmod: async () => {
+						throw Object.assign(new Error("EPERM: chmod"), { code: "EPERM" });
+					},
+				});
+				const result = await transaction.execute(base);
+				expect(result).toEqual(failedCommit);
+				expect(events).toEqual([
+					`stat:${originalPath}`,
+					"write",
+					`verify:${generatedPath}`,
+					`sync:${generatedPath}`,
+					...appliedAttributes,
+					`unlink:${generatedPath}`,
+				]);
+				expect(events.some((e) => e.startsWith("rename:"))).toBe(false);
+			});
+
+			it("cleanup-failed still wins when chmod fails and the stage cannot be removed", async () => {
+				const { transaction } = createTransaction({
+					chmod: async () => {
+						throw new Error("chmod failed");
+					},
+					unlink: async () => {
+						throw Object.assign(new Error("EIO"), { code: "EIO" });
+					},
+				});
+				const result = await transaction.execute(base);
+				expect(result).toEqual({
+					ok: false,
+					error: { code: "cleanup-failed", residualPath: generatedPath },
+				});
+			});
+
+			it.each([
+				["0640 regular file", 0o100640, "640"],
+				["0444 read-only regular file", 0o100444, "444"],
+				[
+					"setuid and sticky bits are permission bits and are kept",
+					0o106755,
+					"6755",
+				],
+				["0600 private file", 0o100600, "600"],
+			] as const)(
+				"chmod receives the source mode masked with 0o7777: %s",
+				async (_name, sourceMode, expectedOctal) => {
+					const { transaction, events } = createTransaction({
+						statSource: async () => identity({ mode: sourceMode }),
+					});
+					await transaction.execute(base);
+					expect(events).toContain(`chmod:${generatedPath}:${expectedOctal}`);
+				},
+			);
+
+			it("ownership and mode come from the identity captured before the write, not the recheck", async () => {
+				const { transaction, events } = createTransaction({
+					statSource: async (_path, index) =>
+						index === 0
+							? identity({ uid: 501, gid: 20, mode: 0o100640 })
+							: identity({ uid: 0, gid: 0, mode: 0o100777 }),
+				});
+				const result = await transaction.execute(base);
+				expect(result).toEqual({
+					ok: true,
+					value: { outputPath: originalPath, writtenBy: "exiftool" },
+				});
+				expect(events).toContain(`chown:${generatedPath}:501:20`);
+				expect(events).toContain(`chmod:${generatedPath}:640`);
+				expect(events.some((e) => e.includes(":0:0"))).toBe(false);
+			});
+
+			it("the order is sync, chown, chmod, recheck, rename and never mode before sync (a 0444 stage cannot be opened r+ for the sync)", async () => {
+				const { transaction, events } = createTransaction();
+				await transaction.execute(base);
+				const order = ["sync:", "chown:", "chmod:", "rename:"].map((prefix) =>
+					events.findIndex((e) => e.startsWith(prefix)),
+				);
+				expect(order.every((index) => index >= 0)).toBe(true);
+				expect([...order].sort((a, b) => a - b)).toEqual(order);
+				const recheck = events.lastIndexOf(`stat:${originalPath}`);
+				expect(recheck).toBeGreaterThan(order[2]!);
+				expect(recheck).toBeLessThan(order[3]!);
+			});
+
+			it("a verification failure never applies attributes", async () => {
+				const failedVerify = createTransaction({
+					verifyResult: {
+						ok: false,
+						error: { code: "output-verification-failed", detail: "bad" },
+					},
+				});
+				await failedVerify.transaction.execute(base);
+				expect(failedVerify.events.some((e) => /^(chown|chmod):/.test(e))).toBe(
+					false,
+				);
+			});
+		});
+
+		it("cleanup-failed still wins when the stage cannot be removed after a sync failure (existing precedence)", async () => {
+			const { transaction, events } = createTransaction({
+				syncFile: async () => {
+					throw new Error("sync failed");
+				},
+				unlink: async () => {
+					throw Object.assign(new Error("EIO"), { code: "EIO" });
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: false,
+				error: { code: "cleanup-failed", residualPath: generatedPath },
+			});
+			expect(events).toEqual([
+				`stat:${originalPath}`,
+				"write",
+				`verify:${generatedPath}`,
+				`sync:${generatedPath}`,
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("cleanup-failed still wins over an identity mismatch", async () => {
+			const { transaction } = createTransaction({
+				statSource: async (_path, index) =>
+					index === 0 ? identity() : identity({ size: 1n }),
+				unlink: async () => {
+					throw Object.assign(new Error("EIO"), { code: "EIO" });
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: false,
+				error: { code: "cleanup-failed", residualPath: generatedPath },
+			});
+		});
+
+		it("a write failure with a commit path only captured identity: no sync, no recheck", async () => {
+			const { transaction, events } = createTransaction({
+				writeResult: {
+					ok: false,
+					error: { code: "exiftool-error", detail: "write failed" },
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({ ok: false, error: { code: "write-failed" } });
+			expect(events).toEqual([`stat:${originalPath}`, "write"]);
+		});
+
+		it("a verification failure with a commit path never syncs or rechecks", async () => {
+			const { transaction, events } = createTransaction({
+				verifyResult: {
+					ok: false,
+					error: { code: "output-verification-failed", detail: "bad" },
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-verification-failed",
+					diagnostic: "bad",
+				},
+			});
+			expect(events).toEqual([
+				`stat:${originalPath}`,
+				"write",
+				`verify:${generatedPath}`,
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("without a commit path (plain save as copy) neither statSource nor syncFile is called", async () => {
+			const { transaction, events } = createTransaction();
+			const result = await transaction.execute({
+				filePath: originalPath,
+				generatedPath,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: false,
+				preserveTimestamps: false,
+			});
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath: generatedPath, writtenBy: "exiftool" },
+			});
+			expect(events).toEqual(["write", `verify:${generatedPath}`]);
+		});
 	});
 
 	// D-27 NC-8: a webp save-as-copy whose generated output fails ExifTool
@@ -479,6 +978,7 @@ describe("OutputTransaction", () => {
 				},
 				rename: async () => undefined,
 				delay: async () => undefined,
+				...neverCalledFileDependencies,
 			});
 
 			const beforeDir = snapshotDir(fixtureDir);
@@ -496,6 +996,7 @@ describe("OutputTransaction", () => {
 				error: {
 					code: "verification-failed",
 					verificationCode: "output-verification-failed",
+					diagnostic: "reopen failed",
 				},
 			});
 			assertDirEffect(beforeDir, snapshotDir(fixtureDir), {
@@ -542,6 +1043,7 @@ describe("OutputTransaction", () => {
 				},
 				rename: async () => undefined,
 				delay: async () => undefined,
+				...neverCalledFileDependencies,
 			});
 
 			const beforeDir = snapshotDir(fixtureDir);
@@ -554,7 +1056,10 @@ describe("OutputTransaction", () => {
 				preserveTimestamps: false,
 			});
 
-			expect(result).toEqual({ ok: true, value: { outputPath } });
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath, writtenBy: "exiftool" },
+			});
 			assertDirEffect(beforeDir, snapshotDir(fixtureDir), {
 				added: ["sample-cleaned.webp"],
 				modified: [],
@@ -586,6 +1091,7 @@ describe("OutputTransaction", () => {
 				unlink: async () => undefined,
 				rename: async () => undefined,
 				delay: async () => undefined,
+				...neverCalledFileDependencies,
 			});
 
 			await transaction.execute({
@@ -600,6 +1106,39 @@ describe("OutputTransaction", () => {
 			expect(requests).toEqual([{ preserveResolution }]);
 		},
 	);
+
+	it("returns the writtenBy of the write on both success returns, native and exiftool (69-14)", async () => {
+		const base = {
+			filePath: originalPath,
+			generatedPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		};
+		for (const writtenBy of ["native", "exiftool"] as const) {
+			const copy = createTransaction({
+				writeResult: { ok: true, value: { tagsRemoved: 2, writtenBy } },
+			});
+			expect(await copy.transaction.execute(base)).toEqual({
+				ok: true,
+				value: { outputPath: generatedPath, writtenBy },
+			});
+
+			const overwrite = createTransaction({
+				writeResult: { ok: true, value: { tagsRemoved: 2, writtenBy } },
+			});
+			expect(
+				await overwrite.transaction.execute({
+					...base,
+					commitPath: originalPath,
+				}),
+			).toEqual({
+				ok: true,
+				value: { outputPath: originalPath, writtenBy },
+			});
+		}
+	});
 
 	it("forwards copyModeLeakCheck to verifyGeneratedOutput.execute with the strip result's writtenBy, nothing when omitted", async () => {
 		const leakCheck = {
@@ -642,6 +1181,7 @@ describe("OutputTransaction", () => {
 			unlink: async () => undefined,
 			rename: async () => undefined,
 			delay: async () => undefined,
+			...neverCalledFileDependencies,
 		});
 		const base = {
 			filePath: originalPath,
@@ -690,6 +1230,7 @@ describe("OutputTransaction", () => {
 			error: {
 				code: "verification-failed",
 				verificationCode: "output-metadata-leak",
+				diagnostic: "XMP-dc:Creator",
 			},
 		});
 		expect(events).toEqual([
@@ -697,5 +1238,496 @@ describe("OutputTransaction", () => {
 			`verify:${generatedPath}`,
 			`unlink:${generatedPath}`,
 		]);
+	});
+
+	describe("verification diagnostic (69-04, D-20, D-22d)", () => {
+		const baseRequest = {
+			filePath: originalPath,
+			generatedPath,
+			preserveOrientation: false,
+			preserveColorProfile: true,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		};
+
+		function leakResult(
+			leakedTags: readonly string[],
+			extra: Record<string, unknown> = {},
+		): NonNullable<TransactionTestOptions["verifyResult"]> {
+			return {
+				ok: false,
+				error: {
+					code: "output-metadata-leak",
+					detail: `Generated output kept ${leakedTags.length} metadata tag(s) outside the permitted set: ${leakedTags.join(", ")}`,
+					leakedTags,
+					...extra,
+				},
+			};
+		}
+
+		it("carries the leaked tag name of a colour JPEG leak as the diagnostic", async () => {
+			const { transaction } = createTransaction({
+				verifyResult: leakResult(["File:YCbCrSubSampling"]),
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic: "File:YCbCrSubSampling",
+				},
+			});
+		});
+
+		it("carries the fixed verification detail for a non-leak verification failure", async () => {
+			const { transaction } = createTransaction({
+				verifyResult: {
+					ok: false,
+					error: {
+						code: "output-verification-failed",
+						detail: "ExifTool reported an error for the generated output",
+					},
+				},
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-verification-failed",
+					diagnostic: "ExifTool reported an error for the generated output",
+				},
+			});
+		});
+
+		it("lists the first 8 leaked tag names then a +N more suffix", async () => {
+			const names = Array.from({ length: 10 }, (_, i) => `ICC-test:Tag${i}`);
+			const { transaction } = createTransaction({
+				verifyResult: leakResult(names),
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic:
+						"ICC-test:Tag0, ICC-test:Tag1, ICC-test:Tag2, ICC-test:Tag3, ICC-test:Tag4, ICC-test:Tag5, ICC-test:Tag6, ICC-test:Tag7 +2 more",
+				},
+			});
+		});
+
+		it("lists exactly 8 names with no suffix", async () => {
+			const names = Array.from({ length: 8 }, (_, i) => `PNG:Key${i}`);
+			const { transaction } = createTransaction({
+				verifyResult: leakResult(names),
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toMatchObject({
+				ok: false,
+				error: { diagnostic: names.join(", ") },
+			});
+		});
+
+		it("falls back to the verifier detail (which names the reopened FileType) when no tag is listed", async () => {
+			const { transaction } = createTransaction({
+				verifyResult: {
+					ok: false,
+					error: {
+						code: "output-metadata-leak",
+						detail:
+							"Copy-mode leak check has no permitted-tag set for this file type (WEBP)",
+						leakedTags: [],
+					},
+				},
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic:
+						"Copy-mode leak check has no permitted-tag set for this file type (WEBP)",
+				},
+			});
+		});
+
+		it("never carries tag values, however the verifier error is shaped (T-69-09)", async () => {
+			const sentinel = "ZZ69-04-SENTINEL-VALUE";
+			const { transaction } = createTransaction({
+				verifyResult: leakResult(["XMP-dc:Creator", "EXIF:GPSLatitude"], {
+					metadata: {
+						"XMP-dc:Creator": sentinel,
+						"EXIF:GPSLatitude": sentinel,
+					},
+					record: { "XMP-dc:Creator": sentinel },
+				}),
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic: "XMP-dc:Creator, EXIF:GPSLatitude",
+				},
+			});
+			expect(JSON.stringify(result)).not.toContain(sentinel);
+			expect(JSON.stringify(result)).not.toContain(generatedPath);
+			expect(JSON.stringify(result)).not.toContain(originalPath);
+		});
+
+		it("truncates a pathologically long tag name so the line cannot be flooded", async () => {
+			const long = `XMP-x:${"A".repeat(500)}`;
+			const { transaction } = createTransaction({
+				verifyResult: leakResult([long]),
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toMatchObject({
+				ok: false,
+				error: { diagnostic: `${long.slice(0, 80)}…` },
+			});
+		});
+
+		it("keeps cleanup-failed ahead of the diagnostic when the stage cannot be removed", async () => {
+			const eacces = Object.assign(new Error("locked"), { code: "EACCES" });
+			const { transaction } = createTransaction({
+				verifyResult: leakResult(["File:YCbCrSubSampling"]),
+				unlink: async () => Promise.reject(eacces),
+			});
+
+			const result = await transaction.execute(baseRequest);
+
+			expect(result).toEqual({
+				ok: false,
+				error: { code: "cleanup-failed", residualPath: generatedPath },
+			});
+			expect(JSON.stringify(result)).not.toContain("YCbCrSubSampling");
+		});
+	});
+	// 69-18 (OVR-03, M-02 review R8, D-16): the first hosted Windows run measured that a read-only
+	// source ends in a refused rename (a read-only target cannot be replaced) and that a stage
+	// carrying the source's read-only attribute cannot be unlinked. The stage is modelled here as
+	// injected file-system state, so the cases hold on every host and depend on no Windows
+	// semantics: unlink fails with EPERM while the stage has no write bit and succeeds once a
+	// chmod has given it one.
+	describe("read-only stage cleanup (69-18, M-02 R8)", () => {
+		const readOnlySource = identity({ mode: 0o100444 });
+		const base = {
+			filePath: originalPath,
+			generatedPath,
+			commitPath: originalPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		};
+		const failedCommit = { ok: false, error: { code: "commit-failed" } };
+		const renameRefused = async () => {
+			throw Object.assign(new Error("EPERM: rename over a read-only file"), {
+				code: "EPERM",
+			});
+		};
+
+		// A stage whose unlink needs the write bit, as a Windows read-only file does.
+		function stageModel(initialMode: number, { chmodWorks = true } = {}) {
+			const stage = { present: true, mode: initialMode };
+			return {
+				stage,
+				unlink: async () => {
+					if (!stage.present) {
+						throw Object.assign(new Error("ENOENT"), { code: "ENOENT" });
+					}
+					if ((stage.mode & 0o200) === 0) {
+						throw Object.assign(new Error("EPERM: read-only"), {
+							code: "EPERM",
+						});
+					}
+					stage.present = false;
+				},
+				chmod: async (_path: string, mode: number) => {
+					if (!chmodWorks) {
+						throw Object.assign(new Error("EPERM: chmod"), { code: "EPERM" });
+					}
+					stage.mode = mode;
+				},
+			};
+		}
+
+		it("a failed commit of a read-only source clears the stage's read-only bit, then removes the stage (no residue)", async () => {
+			const model = stageModel(0o444);
+			const { transaction, events } = createTransaction({
+				statSource: async () => readOnlySource,
+				rename: renameRefused,
+				unlink: model.unlink,
+				chmod: model.chmod,
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual(failedCommit);
+			expect(model.stage.present).toBe(false);
+			expect(events).toEqual([
+				`stat:${originalPath}`,
+				"write",
+				`verify:${generatedPath}`,
+				`sync:${generatedPath}`,
+				`chown:${generatedPath}:501:20`,
+				// the commit applies the source's read-only mode to the stage ...
+				`chmod:${generatedPath}:444`,
+				`stat:${originalPath}`,
+				`rename:${generatedPath}:${originalPath}`,
+				// ... and the cleanup must lift it before the unlink can succeed
+				`unlink:${generatedPath}`,
+				`chmod:${generatedPath}:600`,
+				"delay:20",
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("control: with no write bit given back the same stage cannot be removed and the residual path is reported", async () => {
+			const model = stageModel(0o444, { chmodWorks: false });
+			const { transaction } = createTransaction({
+				statSource: async () => readOnlySource,
+				rename: renameRefused,
+				unlink: model.unlink,
+				chmod: async (path, mode) => {
+					// the commit's own chmod works, the cleanup's does not
+					if (mode === 0o444) model.stage.mode = mode;
+					else await model.chmod(path, mode);
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: false,
+				error: { code: "cleanup-failed", residualPath: generatedPath },
+			});
+			expect(model.stage.present).toBe(true);
+		});
+
+		it("the stage is made owner-writable only (0o600), never group or world writable", async () => {
+			const model = stageModel(0o444);
+			const { transaction, events } = createTransaction({
+				statSource: async () => readOnlySource,
+				rename: renameRefused,
+				unlink: model.unlink,
+				chmod: model.chmod,
+			});
+			await transaction.execute(base);
+			const lifted = events.filter((entry) =>
+				entry.startsWith(`chmod:${generatedPath}:`),
+			);
+			expect(lifted).toEqual([
+				`chmod:${generatedPath}:444`,
+				`chmod:${generatedPath}:600`,
+			]);
+			expect(model.stage.mode & 0o066).toBe(0);
+		});
+
+		it("a chmod that fails during cleanup is ignored: the retry still runs and the stage goes once the lock is gone", async () => {
+			let unlinkCalls = 0;
+			const { transaction, events } = createTransaction({
+				statSource: async () => readOnlySource,
+				rename: renameRefused,
+				unlink: async () => {
+					unlinkCalls += 1;
+					if (unlinkCalls === 1) {
+						throw Object.assign(new Error("EPERM"), { code: "EPERM" });
+					}
+				},
+				chmod: async (_path, mode) => {
+					if (mode === 0o600) {
+						throw Object.assign(new Error("EPERM: chmod"), { code: "EPERM" });
+					}
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual(failedCommit);
+			expect(events.slice(-4)).toEqual([
+				`unlink:${generatedPath}`,
+				`chmod:${generatedPath}:600`,
+				"delay:20",
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("EBUSY is a lock, not a read-only bit: no chmod, the existing delays only", async () => {
+			const ebusy = Object.assign(new Error("busy"), { code: "EBUSY" });
+			const { transaction, events } = createTransaction({
+				statSource: async () => readOnlySource,
+				rename: renameRefused,
+				unlink: async () => Promise.reject(ebusy),
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: false,
+				error: { code: "cleanup-failed", residualPath: generatedPath },
+			});
+			expect(
+				events.filter((entry) => entry.endsWith(":600")),
+				"no cleanup chmod for EBUSY",
+			).toEqual([]);
+			expect(events.slice(-5)).toEqual([
+				`unlink:${generatedPath}`,
+				"delay:20",
+				`unlink:${generatedPath}`,
+				"delay:50",
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("a non-transient unlink error (EIO) and ENOENT never trigger the chmod", async () => {
+			for (const code of ["EIO", "ENOENT"]) {
+				const { transaction, events } = createTransaction({
+					statSource: async () => readOnlySource,
+					rename: renameRefused,
+					unlink: async () =>
+						Promise.reject(Object.assign(new Error(code), { code })),
+				});
+				await transaction.execute(base);
+				expect(
+					events.filter((entry) => entry.endsWith(":600")),
+					code,
+				).toEqual([]);
+			}
+		});
+
+		it("a rejected verification of a plain copy (no commit path) also lifts a read-only output before removing it", async () => {
+			const model = stageModel(0o444);
+			const { transaction } = createTransaction({
+				verifyResult: {
+					ok: false,
+					error: { code: "output-verification-failed", detail: "reopen" },
+				},
+				unlink: model.unlink,
+				chmod: model.chmod,
+			});
+			const result = await transaction.execute({
+				filePath: originalPath,
+				generatedPath,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: false,
+				preserveTimestamps: false,
+			});
+			expect(result).toMatchObject({
+				ok: false,
+				error: { code: "verification-failed" },
+			});
+			expect(model.stage.present).toBe(false);
+		});
+	});
+
+	// 69-18 (OVR-03, M-02, D-16): on Windows a read-only source cannot be replaced (measured:
+	// legacy and staged both fail, run 42777303465), and the native engine's own private stage
+	// carries the read-only attribute it copies from the source, which it cannot reopen for
+	// writing or remove, so a started write leaves `.exifcleaner-stage-*` behind. The staged
+	// overwrite therefore refuses that source before anything is written: the same outcome as
+	// legacy (failed, source intact), with nothing created next to the file. POSIX replaces a
+	// read-only file and keeps its mode (measured), so no other platform is refused.
+	describe("read-only source on Windows is refused before any write (69-18, M-02)", () => {
+		const base = {
+			filePath: originalPath,
+			generatedPath,
+			commitPath: originalPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		};
+
+		it("win32 with a read-only source returns write-failed and touches nothing: one stat, no write, no stage, no unlink", async () => {
+			const { transaction, events } = createTransaction({
+				platform: "win32",
+				statSource: async () => identity({ mode: 0o100444 }),
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({ ok: false, error: { code: "write-failed" } });
+			expect(events).toEqual([`stat:${originalPath}`]);
+		});
+
+		it("win32 with a writable source commits as before (negative control: the refusal is not blanket)", async () => {
+			const { transaction, events } = createTransaction({
+				platform: "win32",
+				statSource: async () => identity({ mode: 0o100666 }),
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath: originalPath, writtenBy: "exiftool" },
+			});
+			expect(events).toContain(`rename:${generatedPath}:${originalPath}`);
+		});
+
+		it("win32 only checks the write bit of the owner: a source with only the owner write bit missing is read-only", async () => {
+			const { transaction, events } = createTransaction({
+				platform: "win32",
+				statSource: async () => identity({ mode: 0o100464 }),
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({ ok: false, error: { code: "write-failed" } });
+			expect(events).toEqual([`stat:${originalPath}`]);
+		});
+
+		it.each(["linux", "darwin", "freebsd"] as const)(
+			"%s with a read-only (0444) source is NOT refused: the stage is written, given mode 444 and renamed over the source (POSIX behaviour unchanged)",
+			async (platform) => {
+				const { transaction, events } = createTransaction({
+					platform,
+					statSource: async () => identity({ mode: 0o100444 }),
+				});
+				const result = await transaction.execute(base);
+				expect(result).toEqual({
+					ok: true,
+					value: { outputPath: originalPath, writtenBy: "exiftool" },
+				});
+				expect(events).toEqual([
+					`stat:${originalPath}`,
+					"write",
+					`verify:${generatedPath}`,
+					`sync:${generatedPath}`,
+					`chown:${generatedPath}:501:20`,
+					`chmod:${generatedPath}:444`,
+					`stat:${originalPath}`,
+					`rename:${generatedPath}:${originalPath}`,
+				]);
+			},
+		);
+
+		it("win32 plain save as copy (no commit path) is not refused and never stats the source", async () => {
+			const { transaction, events } = createTransaction({
+				platform: "win32",
+				statSource: async () => {
+					throw new Error("statSource must not be called on this path");
+				},
+			});
+			const result = await transaction.execute({
+				filePath: originalPath,
+				generatedPath,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: false,
+				preserveTimestamps: false,
+			});
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath: generatedPath, writtenBy: "exiftool" },
+			});
+			expect(events).toEqual(["write", `verify:${generatedPath}`]);
+		});
 	});
 });

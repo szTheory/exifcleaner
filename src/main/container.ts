@@ -1,6 +1,6 @@
 import { app } from "electron";
 import path from "node:path";
-import { rename, unlink } from "node:fs/promises";
+import { chmod, chown, rename, unlink } from "node:fs/promises";
 import {
 	ExiftoolProcess,
 	ExifToolAdapter,
@@ -20,6 +20,7 @@ import {
 	VerifyGeneratedOutputQuery,
 } from "../application";
 import { OutputTransaction } from "./output_transaction";
+import { statSourceIdentity, syncFileToDisk } from "./source_identity";
 
 export function createContainer(): {
 	exiftoolProcess: ExiftoolProcess;
@@ -53,6 +54,10 @@ export function createContainer(): {
 		verifyGeneratedOutput,
 		unlink,
 		rename,
+		statSource: statSourceIdentity,
+		syncFile: syncFileToDisk,
+		chown,
+		chmod,
 		delay: async (milliseconds) => {
 			await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 		},

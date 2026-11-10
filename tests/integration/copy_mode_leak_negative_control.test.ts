@@ -20,6 +20,7 @@ import { StripMetadataCommand } from "../../src/application/commands/strip_metad
 import { VerifyGeneratedOutputQuery } from "../../src/application/queries/verify_generated_output_query";
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.resolve(__dirname, "../e2e/fixtures");
@@ -29,6 +30,9 @@ const EXIFTOOL_PATH =
 		: path.resolve(__dirname, "../../.resources/nix/bin/exiftool");
 
 const SENTINEL = "ZZLEAK-58";
+// 69-09 (WEBP-08, D-05): the WebP row of CASES uses its own sentinel so a stale 58 value can never
+// satisfy the "value never echoed" assertions of the new row.
+const WEBP_SENTINEL = "ZZLEAK-69";
 
 const DEFAULT_PRESERVATION = {
 	preserveOrientation: true,
@@ -59,11 +63,25 @@ function injectPngSentinel(filePath: string): void {
 	]);
 }
 
+function injectWebpSentinel(filePath: string): void {
+	execFileSync(EXIFTOOL_PATH, [
+		"-overwrite_original",
+		"-GPSLatitude=37.7749",
+		"-GPSLatitudeRef=N",
+		`-XMP-dc:Creator=${WEBP_SENTINEL}`,
+		filePath,
+	]);
+}
+
 type Case = {
-	readonly name: "jpeg" | "png";
+	readonly name: "jpeg" | "png" | "webp";
 	readonly fixture: string;
 	readonly inject: (filePath: string) => void;
+	// The sentinel value the injector writes; it must never appear in a verdict or diagnostic.
+	readonly sentinel: string;
 	readonly leakedTagPrefix: string;
+	// Exact diagnostic the real transaction carries (tag names only, never the sentinel value).
+	readonly diagnostic: string;
 };
 
 const CASES: readonly Case[] = [
@@ -71,13 +89,29 @@ const CASES: readonly Case[] = [
 		name: "jpeg",
 		fixture: "sample.jpg",
 		inject: injectJpegSentinel,
+		sentinel: SENTINEL,
 		leakedTagPrefix: "XMP-dc:Creator",
+		diagnostic:
+			"Composite:GPSLatitude, GPS:GPSLatitude, GPS:GPSLatitudeRef, GPS:GPSVersionID, XMP-dc:Creator, XMP-x:XMPToolkit",
 	},
 	{
 		name: "png",
 		fixture: "sample.png",
 		inject: injectPngSentinel,
+		sentinel: SENTINEL,
 		leakedTagPrefix: "PNG:Comment",
+		diagnostic: "PNG:Comment",
+	},
+	{
+		name: "webp",
+		fixture: "sample.webp",
+		inject: injectWebpSentinel,
+		sentinel: WEBP_SENTINEL,
+		leakedTagPrefix: "XMP-dc:Creator",
+		// The injected XMP chunk makes ExifTool print the XMP token in RIFF:WebP_Flags, which the
+		// value-aware flags rule reports by key name alongside the planted tags.
+		diagnostic:
+			"Composite:GPSLatitude, GPS:GPSLatitude, GPS:GPSLatitudeRef, GPS:GPSVersionID, RIFF:WebP_Flags, XMP-dc:Creator, XMP-x:XMPToolkit",
 	},
 ];
 
@@ -207,8 +241,8 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 					if (leaked.ok) return;
 					if (leaked.error.code !== "output-metadata-leak") return;
 					expect(leaked.error.leakedTags).toContain(testCase.leakedTagPrefix);
-					expect(leaked.error.detail).not.toContain(SENTINEL);
-					expect(JSON.stringify(leaked)).not.toContain(SENTINEL);
+					expect(leaked.error.detail).not.toContain(testCase.sentinel);
+					expect(JSON.stringify(leaked)).not.toContain(testCase.sentinel);
 				} finally {
 					await process.close();
 				}
@@ -218,6 +252,9 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 				const dir = makeTempDir(`copy-leak-l3-${testCase.name}-`);
 				const source = path.join(dir, testCase.fixture);
 				fs.copyFileSync(path.join(FIXTURES, testCase.fixture), source);
+				// A sibling the transaction must never touch (69-09: whole-directory blast radius).
+				const siblingName = "unrelated-sibling.txt";
+				fs.writeFileSync(path.join(dir, siblingName), "keep me");
 				const sourceDigestBefore = sha256(source);
 				const generatedPath = path.join(
 					dir,
@@ -250,13 +287,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 				const transaction = new OutputTransaction({
 					stripMetadata: injectingStripMetadata,
 					verifyGeneratedOutput,
-					unlink: fs.promises.unlink,
-					rename: fs.promises.rename,
-					delay: async (milliseconds) => {
-						await new Promise<void>((resolve) =>
-							setTimeout(resolve, milliseconds),
-						);
-					},
+					...realTransactionFileDependencies(),
 				});
 
 				await process.open();
@@ -283,12 +314,16 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 						error: {
 							code: "verification-failed",
 							verificationCode: "output-metadata-leak",
+							diagnostic: testCase.diagnostic,
 						},
 					});
 					expect(fs.existsSync(generatedPath)).toBe(false);
 					expect(sha256(source)).toBe(sourceDigestBefore);
+					expect(fs.readFileSync(path.join(dir, siblingName), "utf8")).toBe(
+						"keep me",
+					);
 					assertDirEffect(before, after, {
-						unchanged: [testCase.fixture],
+						unchanged: [testCase.fixture, siblingName],
 						added: [],
 						modified: [],
 						removed: [],
@@ -302,6 +337,9 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 				const dir = makeTempDir(`copy-leak-l3-clean-${testCase.name}-`);
 				const source = path.join(dir, testCase.fixture);
 				fs.copyFileSync(path.join(FIXTURES, testCase.fixture), source);
+				// A sibling the transaction must never touch (69-09: whole-directory blast radius).
+				const siblingName = "unrelated-sibling.txt";
+				fs.writeFileSync(path.join(dir, siblingName), "keep me");
 				const sourceDigestBefore = sha256(source);
 				const generatedPath = path.join(
 					dir,
@@ -322,13 +360,7 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 				const transaction = new OutputTransaction({
 					stripMetadata,
 					verifyGeneratedOutput,
-					unlink: fs.promises.unlink,
-					rename: fs.promises.rename,
-					delay: async (milliseconds) => {
-						await new Promise<void>((resolve) =>
-							setTimeout(resolve, milliseconds),
-						);
-					},
+					...realTransactionFileDependencies(),
 				});
 
 				await process.open();
@@ -352,12 +384,12 @@ describe("58-05: copy-mode leak check is red on an injected leak (D-12)", () => 
 
 					expect(result).toEqual({
 						ok: true,
-						value: { outputPath: generatedPath },
+						value: { outputPath: generatedPath, writtenBy: "native" },
 					});
 					expect(fs.existsSync(generatedPath)).toBe(true);
 					expect(sha256(source)).toBe(sourceDigestBefore);
 					assertDirEffect(before, after, {
-						unchanged: [testCase.fixture],
+						unchanged: [testCase.fixture, siblingName],
 						added: [path.basename(generatedPath)],
 						modified: [],
 						removed: [],

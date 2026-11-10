@@ -6,7 +6,13 @@ import { fileURLToPath } from "node:url";
 const ORIENTATION_SEAM =
 	'if (preserveOrientation) preserveTags.push("-Orientation");';
 const TARGET_SOURCE = "src/infrastructure/exiftool/exiftool_adapter.ts";
-const TEST_TITLE = "preserves orientation metadata when toggle is enabled";
+// Since OVR-01 (app 4.8.0) a .jpg overwrite is written by the native engine, so the ExifTool
+// seam above is only on the path of a file the native cleaner declines (a JPEG carrying a
+// colour profile while the profile is preserved). This test uses such a file and must go red
+// when the seam is removed; the native seam has its own gate (native_orientation_mutation_gate).
+export const ORIENTATION_TEST_FILE = "tests/e2e/settings.spec.ts";
+export const ORIENTATION_TEST_TITLE =
+	"preserves orientation metadata through the ExifTool writer when toggle is enabled";
 
 export function applyOrientationMutation(source) {
 	const occurrences = source.split(ORIENTATION_SEAM).length - 1;
@@ -54,6 +60,7 @@ export async function executeOrientationMutation({
 			);
 		}
 		if (
+			!red.output.includes(ORIENTATION_TEST_TITLE) ||
 			!red.output.includes("Rotate 90 CW") ||
 			!red.output.includes("undefined")
 		) {
@@ -86,9 +93,9 @@ function runCommand(step) {
 			? ["compile"]
 			: [
 					"test:e2e",
-					"tests/e2e/settings.spec.ts",
+					ORIENTATION_TEST_FILE,
 					"--grep",
-					TEST_TITLE,
+					ORIENTATION_TEST_TITLE,
 					"--reporter=list",
 				];
 	const result = spawnSync("yarn", args, {

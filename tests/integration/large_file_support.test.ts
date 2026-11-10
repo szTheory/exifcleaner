@@ -26,6 +26,7 @@ import {
 	createSparseLargeMp4,
 	sha256OfFileStreamed,
 } from "../helpers/large_file_fixture";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 // D-50 negative control (Task 3). This constant and class are the ONLY place in the test tree
 // that injects `-api LargeFileSupport=0` -- product code (src/) never gains this argument
@@ -90,11 +91,7 @@ function buildOutputTransaction(process: ExiftoolProcess): OutputTransaction {
 	return new OutputTransaction({
 		stripMetadata,
 		verifyGeneratedOutput,
-		unlink: fs.promises.unlink,
-		rename: fs.promises.rename,
-		delay: async (milliseconds) => {
-			await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
-		},
+		...realTransactionFileDependencies(),
 	});
 }
 
@@ -155,7 +152,7 @@ describe("Large-file (>4 GiB) support on ExifTool's default (LRG-01, LRG-02)", (
 			});
 			expect(normalResult).toEqual({
 				ok: true,
-				value: { outputPath: normalGeneratedPath },
+				value: { outputPath: normalGeneratedPath, writtenBy: "exiftool" },
 			});
 
 			largeInspect = await adapter.inspect({
@@ -174,7 +171,7 @@ describe("Large-file (>4 GiB) support on ExifTool's default (LRG-01, LRG-02)", (
 			});
 			expect(largeResult).toEqual({
 				ok: true,
-				value: { outputPath: largeGeneratedPath },
+				value: { outputPath: largeGeneratedPath, writtenBy: "exiftool" },
 			});
 		} finally {
 			await exiftoolProcess.close();
@@ -250,7 +247,7 @@ describe("Large-file (>4 GiB) support on ExifTool's default (LRG-01, LRG-02)", (
 			});
 			expect(normalResult).toEqual({
 				ok: true,
-				value: { outputPath: normalGeneratedPath },
+				value: { outputPath: normalGeneratedPath, writtenBy: "exiftool" },
 			});
 
 			// JSON-warning read channel (Task 2, Q2_READ_TEXT_CHANNEL): the exact

@@ -3,6 +3,7 @@ import type { ExifError } from "../domain";
 import type { CopyModeLeakCheckDemand } from "../domain/files/file_types";
 import type { WrittenBy } from "../application/metadata_engine_port";
 import type { OutputVerificationError } from "../application/queries/verify_generated_output_query";
+import type { SourceIdentity } from "./source_identity";
 
 export type OutputTransactionFailure =
 	| {
@@ -13,6 +14,8 @@ export type OutputTransactionFailure =
 	| {
 			readonly code: "verification-failed";
 			readonly verificationCode: OutputVerificationError["code"];
+			/** Tag names (never values or paths) or the fixed verification detail; see verificationDiagnostic. */
+			readonly diagnostic?: string;
 	  }
 	| { readonly code: "cleanup-failed"; readonly residualPath: string }
 	| { readonly code: "commit-failed" };
@@ -55,7 +58,17 @@ export type OutputTransactionDependencies = {
 	};
 	unlink(path: string): Promise<void>;
 	rename(from: string, to: string): Promise<void>;
+	/** Identity of the source, captured before the write and rechecked before the rename. */
+	statSource(path: string): Promise<SourceIdentity>;
+	/** fsync of the closed stage, called after verification and before the attributes and the recheck. */
+	syncFile(path: string): Promise<void>;
+	/** Best effort: applied to the stage after the sync, errors ignored (see execute). */
+	chown(path: string, uid: number, gid: number): Promise<void>;
+	/** Applied to the stage after chown; a failure is commit-failed (see execute). */
+	chmod(path: string, mode: number): Promise<void>;
 	delay(milliseconds: number): Promise<void>;
+	/** The platform the commit decides for; the host's when omitted. Injected so tests cover every platform on any host. */
+	platform?: NodeJS.Platform;
 };
 
 export class OutputTransaction {
@@ -85,7 +98,36 @@ export class OutputTransaction {
 		preserveTimestamps: boolean;
 		signal?: AbortSignal | undefined;
 		copyModeLeakCheck?: CopyModeLeakCheck | undefined;
-	}): Promise<Result<{ outputPath: string }, OutputTransactionFailure>> {
+	}): Promise<
+		Result<
+			{ outputPath: string; writtenBy: WrittenBy },
+			OutputTransactionFailure
+		>
+	> {
+		// Identity is captured only for a staged overwrite, and before the write so a change
+		// at any later moment is seen. Nothing exists on disk yet, so a failure needs no cleanup.
+		let capturedIdentity: SourceIdentity | undefined;
+		if (commitPath !== undefined) {
+			try {
+				capturedIdentity = await this.dependencies.statSource(filePath);
+			} catch {
+				return { ok: false, error: { code: "commit-failed" } };
+			}
+			// Measured on Windows (69-17, run 42777303465): a file with the read-only attribute
+			// cannot be replaced (the legacy overwrite and the staged one both fail), and the stage
+			// the native engine creates carries that attribute, which it cannot reopen or remove, so
+			// a started write leaves its private stage behind. Refuse before anything is written:
+			// the same outcome as the legacy route (failed, source intact) with nothing created.
+			// POSIX replaces a read-only file in a writable directory and keeps its mode (measured
+			// on macOS and Linux), so only win32 is refused.
+			if (
+				(this.dependencies.platform ?? process.platform) === "win32" &&
+				isReadOnlyMode(capturedIdentity.mode)
+			) {
+				return { ok: false, error: { code: "write-failed" } };
+			}
+		}
+
 		// The staged write always targets a path distinct from the source
 		// (generatedPath), so from the engine's perspective this call is by
 		// construction a copy, regardless of whether the transaction ultimately
@@ -149,12 +191,50 @@ export class OutputTransaction {
 				error: cleanupFailure ?? {
 					code: "verification-failed",
 					verificationCode: verificationResult.error.code,
+					diagnostic: verificationDiagnostic(verificationResult.error),
 				},
 			};
 		}
 
-		if (commitPath !== undefined) {
+		if (commitPath !== undefined && capturedIdentity !== undefined) {
 			try {
+				await this.dependencies.syncFile(generatedPath);
+				// Give the replacement the attributes -overwrite_original keeps, using the
+				// identity captured before the write (the recheck below proves the source is
+				// still that file). Order: sync, chown, chmod, recheck, rename.
+				//  - After the sync (amendment A6): the sync opens the stage for writing, which a
+				//    stage that is already read-only cannot do on every platform, so the mode
+				//    is applied once the stage is durable.
+				//  - chown is best effort: it fails with EPERM when the user is not in the
+				//    group, has no effect on Windows, and a failed chown must never block a
+				//    cleaned file from replacing the original.
+				//  - chmod follows chown because chown can clear setuid and setgid. The mask is
+				//    0o7777: a stat mode also carries the file-type bits, which chmod must not
+				//    receive. A chmod failure is commit-failed (cleanup below), never a file
+				//    that silently ends up with the stage's default mode.
+				//  - Path-based calls: fchmod and lchown are not portable to Windows.
+				// Not carried over (documented limitation): extended attributes, ACLs,
+				// alternate data streams, file flags, hard-link identity (a second link keeps the
+				// old bytes) and a symlink at the path (it is replaced by the regular file).
+				try {
+					await this.dependencies.chown(
+						generatedPath,
+						capturedIdentity.uid,
+						capturedIdentity.gid,
+					);
+				} catch {
+					// ignored on purpose, see above
+				}
+				await this.dependencies.chmod(
+					generatedPath,
+					capturedIdentity.mode & 0o7777,
+				);
+				const currentIdentity = await this.dependencies.statSource(filePath);
+				if (!sameSourceIdentity(capturedIdentity, currentIdentity)) {
+					// The source changed after the stage was written (a sync client, an editor, a
+					// replacement). Publishing would overwrite someone else's newer bytes.
+					throw new Error("source changed before commit");
+				}
 				await this.dependencies.rename(generatedPath, commitPath);
 			} catch {
 				const cleanupFailure = await this.cleanup({ generatedPath });
@@ -163,10 +243,22 @@ export class OutputTransaction {
 					error: cleanupFailure ?? { code: "commit-failed" },
 				};
 			}
-			return { ok: true, value: { outputPath: commitPath } };
+			return {
+				ok: true,
+				value: {
+					outputPath: commitPath,
+					writtenBy: writeResult.value.writtenBy,
+				},
+			};
 		}
 
-		return { ok: true, value: { outputPath: generatedPath } };
+		return {
+			ok: true,
+			value: {
+				outputPath: generatedPath,
+				writtenBy: writeResult.value.writtenBy,
+			},
+		};
 	}
 
 	private async cleanup({
@@ -174,8 +266,11 @@ export class OutputTransaction {
 	}: {
 		generatedPath: string;
 	}): Promise<OutputTransactionFailure | undefined> {
-		const retryDelays = [20, 50];
-		for (let attempt = 0; attempt < retryDelays.length + 1; attempt += 1) {
+		for (
+			let attempt = 0;
+			attempt < TRANSIENT_LOCK_RETRY_DELAYS.length + 1;
+			attempt += 1
+		) {
 			try {
 				await this.dependencies.unlink(generatedPath);
 				return undefined;
@@ -183,15 +278,93 @@ export class OutputTransaction {
 				if (hasCode(error, "ENOENT")) {
 					return undefined;
 				}
-				if (!isTransientFileLock(error) || attempt === retryDelays.length) {
+				if (
+					!isTransientFileLock(error) ||
+					attempt === TRANSIENT_LOCK_RETRY_DELAYS.length
+				) {
 					return { code: "cleanup-failed", residualPath: generatedPath };
 				}
-				await this.dependencies.delay(retryDelays[attempt]!);
+				// A stage that carries the source's read-only attribute (the commit applied it
+				// before the rename) cannot be unlinked on Windows. Give it back the owner write
+				// bit before the retry; 0o600 clears the attribute there (only the write bit
+				// matters on win32) and never widens a POSIX stage beyond its owner. Best effort:
+				// a failed chmod must not hide the cleanup outcome, the retry decides.
+				if (hasCode(error, "EPERM") || hasCode(error, "EACCES")) {
+					try {
+						await this.dependencies.chmod(generatedPath, STAGE_REMOVABLE_MODE);
+					} catch {
+						// ignored on purpose, see above
+					}
+				}
+				await this.dependencies.delay(TRANSIENT_LOCK_RETRY_DELAYS[attempt]!);
 			}
 		}
 
 		return { code: "cleanup-failed", residualPath: generatedPath };
 	}
+}
+
+const TRANSIENT_LOCK_RETRY_DELAYS: readonly number[] = [20, 50];
+const STAGE_REMOVABLE_MODE = 0o600;
+
+// A stat mode without the owner write bit: the read-only attribute on Windows (libuv reports it
+// as 0o444) and a 0444 file on POSIX.
+function isReadOnlyMode(mode: number): boolean {
+	return (mode & 0o200) === 0;
+}
+
+// size and mtime are always compared. dev and ino only when both captured values are
+// non-zero: SMB, FUSE and some ReFS volumes report 0 or ids that are not stable, and a
+// false refusal there would make every overwrite fail. ctime is deliberately not compared:
+// legitimate metadata operations (chmod, xattr, backup tools) bump it without changing the
+// content. Strict bigint equality, no tolerance.
+function sameSourceIdentity(
+	captured: SourceIdentity,
+	current: SourceIdentity,
+): boolean {
+	if (captured.size !== current.size || captured.mtimeNs !== current.mtimeNs) {
+		return false;
+	}
+	if (
+		captured.ino !== 0n &&
+		current.ino !== 0n &&
+		captured.ino !== current.ino
+	) {
+		return false;
+	}
+	if (
+		captured.dev !== 0n &&
+		current.dev !== 0n &&
+		captured.dev !== current.dev
+	) {
+		return false;
+	}
+	return true;
+}
+
+const MAX_DIAGNOSTIC_TAGS = 8;
+const MAX_DIAGNOSTIC_TAG_LENGTH = 80;
+
+// Names only: a leak verdict also reaches this point with the record's values
+// nearby, so the text is built from `leakedTags` and `detail` alone. Tag names can
+// originate in file content (PNG text keywords, XMP property names), so each name
+// and the list are capped; the copied line cannot be flooded by a hostile file.
+function verificationDiagnostic(error: OutputVerificationError): string {
+	if (error.code === "output-verification-failed") {
+		return error.detail;
+	}
+	if (error.leakedTags.length === 0) {
+		return error.detail;
+	}
+	const shown = error.leakedTags
+		.slice(0, MAX_DIAGNOSTIC_TAGS)
+		.map((name) =>
+			name.length > MAX_DIAGNOSTIC_TAG_LENGTH
+				? `${name.slice(0, MAX_DIAGNOSTIC_TAG_LENGTH)}…`
+				: name,
+		);
+	const hidden = error.leakedTags.length - shown.length;
+	return hidden > 0 ? `${shown.join(", ")} +${hidden} more` : shown.join(", ");
 }
 
 function isTransientFileLock(error: unknown): boolean {

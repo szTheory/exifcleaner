@@ -222,6 +222,8 @@ declare module "*native_orientation_mutation_gate.mjs" {
 }
 
 declare module "*orientation_mutation_gate.mjs" {
+	export const ORIENTATION_TEST_FILE: string;
+	export const ORIENTATION_TEST_TITLE: string;
 	export function applyOrientationMutation(source: string): string;
 	export function executeOrientationMutation(dependencies: {
 		readSource: () => string;
@@ -365,7 +367,12 @@ declare module "*release_public_audit.mjs" {
 declare module "*rel05_dependency_diff.mjs" {
 	export const RELEASE_DEPENDENCY_POLICY: Record<
 		string,
-		{ base: string; devDependencies: string[]; resolutions: string[] }
+		{
+			base: string;
+			devDependencies: string[];
+			resolutions: string[];
+			dependencies?: string[];
+		}
 	>;
 	export function changedKeys(
 		baseRecord: Record<string, string> | undefined,
@@ -374,7 +381,12 @@ declare module "*rel05_dependency_diff.mjs" {
 	export function compareDependencySurfaces(input: {
 		basePackage: any;
 		headPackage: any;
-		policy: { devDependencies: string[]; resolutions: string[] };
+		policy: {
+			devDependencies: string[];
+			resolutions: string[];
+			dependencies?: string[];
+		};
+		release?: string;
 		baseLock?: string;
 		headLock?: string;
 	}): string[];

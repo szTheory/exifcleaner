@@ -21,6 +21,7 @@ import { HybridMetadataEngine } from "../../src/infrastructure/metadata/hybrid_m
 import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_metadata_adapter";
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURE = path.resolve(__dirname, "../e2e/fixtures/sample-sips.heic");
@@ -90,11 +91,7 @@ describe("63-02 tracer: default-settings .heic copy goes native, reopens, leak-c
 		const transaction = new OutputTransaction({
 			stripMetadata,
 			verifyGeneratedOutput,
-			unlink: fs.promises.unlink,
-			rename: fs.promises.rename,
-			delay: async (milliseconds) => {
-				await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
-			},
+			...realTransactionFileDependencies(),
 		});
 
 		// Built exactly as exif_handlers does: only when the gating predicate says so.
@@ -129,7 +126,7 @@ describe("63-02 tracer: default-settings .heic copy goes native, reopens, leak-c
 
 			expect(result).toEqual({
 				ok: true,
-				value: { outputPath: generatedPath },
+				value: { outputPath: generatedPath, writtenBy: "native" },
 			});
 			expect(nativeWrite).toHaveBeenCalledOnce();
 			expect(exiftoolWrite).not.toHaveBeenCalled();

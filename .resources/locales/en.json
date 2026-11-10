@@ -76,6 +76,7 @@
 	"cleanupFailedSummary": "Couldn’t verify cleaned output, and the incomplete output could not be removed. Your original is unchanged.",
 	"xattrFailedSummary": "Metadata was removed, but macOS extended attributes could not be cleared.",
 	"writeFailedSummary": "Couldn’t write the cleaned output. Your original is unchanged.",
+	"commitFailedSummary": "Couldn’t save the cleaned file over the original. Another app, such as a cloud sync client, may have changed or locked it. Your original is unchanged.",
 	"complete": "Complete",
 	"status.pending": "Pending",
 	"status.error": "Error",

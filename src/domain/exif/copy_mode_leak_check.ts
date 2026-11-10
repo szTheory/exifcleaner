@@ -1,5 +1,11 @@
 // Pure domain logic — zero dependencies, zero I/O.
 //
+// Phase 69-09 (WEBP-08; D-03, review N3): WebP is the fifth allowlist-checked format. The WebP sets
+// and the RIFF:WebP_Flags rule are transcribed from .planning/phases/69-app-4-8-0-adoption/
+// 69-WEBP-SWEEP-MATRIX.md "## Derived allowlist", measured on 368 rows of the real bundled ExifTool
+// 13.59 over both engines and all eight preserve combinations
+// (tests/domain/fixtures/copy_mode_webp_sweep.json).
+//
 // Phase 63-09 (D-15): HEIC/HEIF/AVIF allowlists are measured in
 // .planning/phases/63-app-adoption/63-SWEEP-MATRIX.md ("## Allowlist derivation" and
 // "## 63-09 decisions"), per key, never group-wide.
@@ -16,11 +22,22 @@
 // ImageWidth).
 import { groupAndTagOf } from "./exif";
 
-export type CopyModeLeakCheckFormat = "png" | "jpeg" | "heic" | "avif";
+export type CopyModeLeakCheckFormat = "png" | "jpeg" | "heic" | "avif" | "webp";
 
 interface CopyModeLeakCheckFormatOfParams {
 	readonly fileType: unknown;
 }
+
+// ExifTool 13.59 reports four FileType strings for a reopened WebP output (measured on every one of
+// the 352 written sweep rows, 69-WEBP-SWEEP-MATRIX.md): plain lossy, lossless (VP8L), and the
+// extended (VP8X) forms of both. All four map to the WebP allowlist; mapping only two would leave a
+// lossless or plain WebP unchecked, which is fail open by omission.
+const WEBP_FILE_TYPES: ReadonlySet<string> = new Set([
+	"WEBP",
+	"WEBP (lossless)",
+	"Extended WEBP",
+	"Extended WEBP (lossless)",
+]);
 
 export function copyModeLeakCheckFormatOf({
 	fileType,
@@ -28,8 +45,11 @@ export function copyModeLeakCheckFormatOf({
 	if (fileType === "PNG") return "png";
 	if (fileType === "JPEG") return "jpeg";
 	// ExifTool reports a reopened HEIC or HEIF container as either FileType; both share the
-	// HEVC ISOBMFF allowlist. AVIF has its own (AV1) allowlist. WebP, MOV and anything else stay
-	// undefined (fail closed).
+	// HEVC ISOBMFF allowlist. AVIF has its own (AV1) allowlist, WebP has its own (RIFF) allowlist.
+	// MOV and anything else stay undefined (fail closed).
+	if (typeof fileType === "string" && WEBP_FILE_TYPES.has(fileType)) {
+		return "webp";
+	}
 	if (fileType === "HEIC" || fileType === "HEIF") return "heic";
 	if (fileType === "AVIF") return "avif";
 	return undefined;
@@ -44,6 +64,12 @@ const EXEMPT_GROUPS: ReadonlySet<string> = new Set(["System", "ExifTool"]);
 // 58-SWEEP-MATRIX.md "## Allowlist derivation" — JPEG, always permitted (no preservation
 // required): APP14 Adobe segment fields (survive -all= unconditionally when present), basic
 // File-group format facts, Composite size/megapixel derivations.
+// File:YCbCrSubSampling (69-02, OVR-01) is the chroma subsampling ExifTool derives from the SOF
+// marker of any 3-component JPEG: structural, never source-identifying, and not removable by
+// -all=. Measured on the bundled ExifTool 13.59 with a 4:2:0 progressive and a 4:4:4 baseline
+// colour JPEG (69-EVIDENCE.md "## 69-02"). It is absent on 1-component grayscale, which is why
+// the Phase 58 sweep and the all-grayscale fixture set never saw it, and the colour copies of
+// the 69-02 regression failed verification on the base commit until this line was added.
 const JPEG_ALWAYS_PERMITTED: ReadonlySet<string> = new Set([
 	"Adobe:APP14Flags0",
 	"Adobe:APP14Flags1",
@@ -59,6 +85,7 @@ const JPEG_ALWAYS_PERMITTED: ReadonlySet<string> = new Set([
 	"File:ImageHeight",
 	"File:ImageWidth",
 	"File:MIMEType",
+	"File:YCbCrSubSampling",
 ]);
 
 // 58-SWEEP-MATRIX.md — JPEG, permitted only when preserveOrientation is requested.
@@ -100,6 +127,44 @@ const ICC_GROUP_TAGS: ReadonlySet<string> = new Set([
 	"ICC_Profile:ProfileDescription",
 	"ICC_Profile:RedMatrixColumn",
 	"ICC_Profile:RedTRC",
+]);
+
+// 69-03 (OVR-01; amendment A2, review B3): ICC tags measured on the profiles people actually have
+// (69-COLOR-SWEEP-MATRIX.md "## ICC decisions"), JPEG and PNG only, both engines. The Phase 58 set
+// above came from one simple profile. The macOS system sRGB IEC61966-2.1 v2 profile (the layout
+// cameras, Windows and Photoshop embed) adds the measurement (ICC-meas), viewing condition
+// (ICC-view), device description, luminance and technology tags and the bkpt tag; Adobe RGB (1998)
+// adds ICC_Profile:MediaBlackPoint; Display P3 (v4) adds ICC_Profile:ChromaticAdaptation. They are
+// colorimetry and descriptor text of the colour profile itself, the same class as the permitted
+// ProfileDescription and ProfileCopyright, and they exist in the output only because the caller
+// asked to keep the profile: with preserveColorProfile off every ICC key is absent on both engines
+// (measured). They are therefore permitted ONLY under preserveColorProfile and never in an
+// always-permitted set. Any ICC tag that was not measured (for example a LUT tag of a printer
+// profile) stays a leak. HEIC and AVIF were not re-measured with these profiles and do not get
+// them.
+const ICC_MEASURED_EXTENSION_TAGS: ReadonlySet<string> = new Set([
+	"ICC-meas:MeasurementBacking",
+	"ICC-meas:MeasurementFlare",
+	"ICC-meas:MeasurementGeometry",
+	"ICC-meas:MeasurementIlluminant",
+	"ICC-meas:MeasurementObserver",
+	"ICC-view:ViewingCondIlluminant",
+	"ICC-view:ViewingCondIlluminantType",
+	"ICC-view:ViewingCondSurround",
+	"ICC_Profile:ChromaticAdaptation",
+	"ICC_Profile:DeviceMfgDesc",
+	"ICC_Profile:DeviceModelDesc",
+	"ICC_Profile:Luminance",
+	"ICC_Profile:MediaBlackPoint",
+	"ICC_Profile:Technology",
+	"ICC_Profile:ViewingCondDesc",
+]);
+
+// JPEG, permitted only when preserveColorProfile is requested: the Phase 58 ICC set plus the 69-03
+// measured extension.
+const JPEG_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
+	...ICC_GROUP_TAGS,
+	...ICC_MEASURED_EXTENSION_TAGS,
 ]);
 
 // 58-SWEEP-MATRIX.md — JPEG, permitted only when preserveResolution is requested.
@@ -158,14 +223,26 @@ const PNG_ORIENTATION_ONLY: ReadonlySet<string> = new Set([
 
 // 58-SWEEP-MATRIX.md — PNG, permitted only when preserveColorProfile is requested.
 // PNG:ProfileName is the iCCP chunk's profile-name field (ExifTool's own naming, not
-// content), additional to the shared ICC_GROUP_TAGS set.
+// content), additional to the shared ICC_GROUP_TAGS set and the 69-03 measured extension.
 const PNG_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
 	...ICC_GROUP_TAGS,
+	...ICC_MEASURED_EXTENSION_TAGS,
 	"PNG:ProfileName",
 ]);
 
 // 58-SWEEP-MATRIX.md — PNG, permitted only when preserveResolution is requested.
+// The five IFD0/File keys are the 69-03 decision (69-COLOR-SWEEP-MATRIX.md "## Classification of
+// new keys"): a colour PNG that carries eXIf resolution tags, written by the ExifTool engine
+// (fallback or rollback route) with preserveResolution, keeps IFD0:XResolution/YResolution/
+// ResolutionUnit plus the File:ExifByteOrder and IFD0:YCbCrPositioning companions ExifTool
+// re-creates with them. The native engine does not carry them. Resolution values are what the
+// user asked to keep, the same class JPEG, HEIC and AVIF already permit under preserveResolution.
 const PNG_RESOLUTION_ONLY: ReadonlySet<string> = new Set([
+	"File:ExifByteOrder",
+	"IFD0:ResolutionUnit",
+	"IFD0:XResolution",
+	"IFD0:YCbCrPositioning",
+	"IFD0:YResolution",
 	"PNG-pHYs:PixelUnits",
 	"PNG-pHYs:PixelsPerUnitX",
 	"PNG-pHYs:PixelsPerUnitY",
@@ -305,8 +382,13 @@ const AVIF_ORIENTATION_ONLY: ReadonlySet<string> = new Set([
 
 // 63-SWEEP-MATRIX.md "## Allowlist derivation" (AVIF) -- permitted only when preserveColorProfile
 // is requested; ICC_Profile:ChromaticAdaptation measured on a Display P3 libavif AVIF in 63-09.
+// 69-03 stretch (69-COLOR-SWEEP-MATRIX.md "## Stretch matrix"): an AVIF written by avifenc with the
+// same three system profiles shows the identical key sets on both engines, so AVIF also takes the
+// measured extension (ChromaticAdaptation is already listed above). HEIC was not re-measured and
+// does not get it.
 const AVIF_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
 	...ICC_GROUP_TAGS,
+	...ICC_MEASURED_EXTENSION_TAGS,
 	"ICC_Profile:ChromaticAdaptation",
 ]);
 
@@ -319,6 +401,99 @@ const AVIF_RESOLUTION_ONLY: ReadonlySet<string> = new Set([
 	"IFD0:YCbCrPositioning",
 	"IFD0:YResolution",
 ]);
+
+// 69-WEBP-SWEEP-MATRIX.md "## Derived allowlist" (WebP) -- always permitted (no preservation
+// required): the structural container and codec descriptors measured in every written row of every
+// shape, on both engines, all eight preserve combinations. Composite and File keys are format facts;
+// the RIFF keys are numeric or enumerated descriptors that cannot carry free text and cannot be
+// removed without re-encoding: image geometry and scale (VP8), the VP8L alpha-used bit (lossless),
+// the ALPH chunk header (alpha shapes) and the ANIM/ANMF fields (animated shapes). No XMP, GPS,
+// ExifIFD, free-text IFD0 or RIFF text key is ever permitted.
+const WEBP_ALWAYS_PERMITTED: ReadonlySet<string> = new Set([
+	"Composite:ImageSize",
+	"Composite:Megapixels",
+	"File:FileType",
+	"File:FileTypeExtension",
+	"File:MIMEType",
+	"RIFF:AlphaCompression",
+	"RIFF:AlphaFiltering",
+	"RIFF:AlphaIsUsed",
+	"RIFF:AlphaPreprocessing",
+	"RIFF:AnimationLoopCount",
+	"RIFF:BackgroundColor",
+	"RIFF:Duration",
+	"RIFF:HorizontalScale",
+	"RIFF:ImageHeight",
+	"RIFF:ImageWidth",
+	"RIFF:VP8Version",
+	"RIFF:VerticalScale",
+]);
+
+// 69-WEBP-SWEEP-MATRIX.md (WebP) -- permitted only when preserveOrientation is requested.
+// IFD0:YCbCrPositioning is the ExifTool-written companion (native output never carries it); like the
+// JPEG companion rule it is permitted under orientation and under resolution because ExifTool
+// re-creates the EXIF block for either.
+const WEBP_ORIENTATION_ONLY: ReadonlySet<string> = new Set([
+	"File:ExifByteOrder",
+	"IFD0:Orientation",
+	"IFD0:YCbCrPositioning",
+]);
+
+// 69-WEBP-SWEEP-MATRIX.md (WebP) -- permitted only when preserveColorProfile is requested: the 25
+// ICC keys of the Phase 58 set plus the 15 measured extension keys, observed identically in WebP on
+// both engines with the Nikon profile and the three system profiles. With the colour profile off no
+// ICC key survived in any of the 88 rows written from ICC-bearing sources. An unmeasured ICC tag
+// (for example a LUT tag such as AToB0) stays a leak.
+const WEBP_COLOR_PROFILE_ONLY: ReadonlySet<string> = new Set([
+	...ICC_GROUP_TAGS,
+	...ICC_MEASURED_EXTENSION_TAGS,
+]);
+
+// 69-WEBP-SWEEP-MATRIX.md (WebP) -- permitted only when preserveResolution is requested.
+const WEBP_RESOLUTION_ONLY: ReadonlySet<string> = new Set([
+	"File:ExifByteOrder",
+	"IFD0:ResolutionUnit",
+	"IFD0:XResolution",
+	"IFD0:YCbCrPositioning",
+	"IFD0:YResolution",
+]);
+
+// RIFF:WebP_Flags is the one WebP key that is judged by its VALUE (review N3, 69-WEBP-SWEEP-MATRIX.md
+// "WEBP_FLAGS_RULE"), never by name alone: a blanket "only with a preserve option" rule would refuse
+// every alpha and animated WebP with all options off (measured: VP8X is mandatory for those shapes),
+// and an unconditional permit would let an EXIF, ICC or XMP flag through with nothing preserved. The
+// value is the print-converted token list the app's verification reopen prints (`-j -G1:2:4`, no
+// `-n`), for example "EXIF, Alpha". Each token is judged by its own row; one refused token refuses
+// the key. The vocabulary is pinned to what the bundled ExifTool 13.59 prints, so anything else
+// (an unknown or differently cased token, an empty token, a non-string value) fails closed.
+function webpFlagsPermitted({
+	value,
+	preservation,
+}: {
+	value: unknown;
+	preservation: Preservation;
+}): boolean {
+	if (typeof value !== "string") return false;
+	return value.split(",").every((rawToken) => {
+		switch (rawToken.trim()) {
+			// Structural: the mandatory VP8X alpha / animation bit.
+			case "Alpha":
+			case "Animation":
+				return true;
+			// The minimal EXIF block carries either option's tags.
+			case "EXIF":
+				return (
+					preservation.preserveOrientation || preservation.preserveResolution
+				);
+			case "ICC Profile":
+				return preservation.preserveColorProfile;
+			// XMP: no preserve option keeps it (absent from every measured output). Everything else,
+			// including the empty token of a trailing comma: unknown, so a leak.
+			default:
+				return false;
+		}
+	});
+}
 
 // Test-only view of the per-format sets so the shape guards can iterate every set without a
 // production consumer.
@@ -333,6 +508,10 @@ export const PERMITTED_SETS_FOR_TESTS: Readonly<
 	AVIF_ORIENTATION_ONLY,
 	AVIF_COLOR_PROFILE_ONLY,
 	AVIF_RESOLUTION_ONLY,
+	WEBP_ALWAYS_PERMITTED,
+	WEBP_ORIENTATION_ONLY,
+	WEBP_COLOR_PROFILE_ONLY,
+	WEBP_RESOLUTION_ONLY,
 };
 
 // F-HEIC-ICC (D-03, D22): with preserveColorProfile=false the ExifTool engine still keeps the
@@ -351,6 +530,14 @@ const F_HEIC_ICC_FILE_TYPES: ReadonlySet<string> = new Set([
 	"HEIF",
 	"AVIF",
 ]);
+// 69-03 stretch: the ICC measurement and viewing-condition groups of an sRGB IEC61966-2.1 profile
+// that the ExifTool engine keeps in an AVIF with the colour profile off (the same source-profile
+// residue as the two groups above, measured on avifenc-embedded profiles). Exact Group1 names,
+// AVIF only: HEIC and HEIF were not re-measured with such a profile.
+const F_HEIC_ICC_AVIF_ONLY_GROUPS: ReadonlySet<string> = new Set([
+	"ICC-meas",
+	"ICC-view",
+]);
 
 interface Preservation {
 	readonly preserveOrientation: boolean;
@@ -362,11 +549,14 @@ function isPermitted({
 	format,
 	group1,
 	tag,
+	value,
 	preservation,
 }: {
 	format: CopyModeLeakCheckFormat;
 	group1: string;
 	tag: string;
+	// Read only by the value-aware RIFF:WebP_Flags rule; every other key is judged by name.
+	value: unknown;
 	preservation: Preservation;
 }): boolean {
 	const groupTag = `${group1}:${tag}`;
@@ -382,7 +572,10 @@ function isPermitted({
 			) {
 				return true;
 			}
-			if (preservation.preserveColorProfile && ICC_GROUP_TAGS.has(groupTag)) {
+			if (
+				preservation.preserveColorProfile &&
+				JPEG_COLOR_PROFILE_ONLY.has(groupTag)
+			) {
 				return true;
 			}
 			return (
@@ -443,6 +636,27 @@ function isPermitted({
 				preservation.preserveResolution && AVIF_RESOLUTION_ONLY.has(groupTag)
 			);
 		}
+		case "webp": {
+			if (groupTag === "RIFF:WebP_Flags") {
+				return webpFlagsPermitted({ value, preservation });
+			}
+			if (WEBP_ALWAYS_PERMITTED.has(groupTag)) return true;
+			if (
+				preservation.preserveOrientation &&
+				WEBP_ORIENTATION_ONLY.has(groupTag)
+			) {
+				return true;
+			}
+			if (
+				preservation.preserveColorProfile &&
+				WEBP_COLOR_PROFILE_ONLY.has(groupTag)
+			) {
+				return true;
+			}
+			return (
+				preservation.preserveResolution && WEBP_RESOLUTION_ONLY.has(groupTag)
+			);
+		}
 		default: {
 			const unreachable: never = format;
 			throw new Error(`Unhandled leak-check format: ${String(unreachable)}`);
@@ -497,8 +711,14 @@ export function findLeakedTags({
 		const { group1, tag } = parsed;
 		if (EXEMPT_GROUPS.has(group1)) continue;
 
-		if (!isPermitted({ format, group1, tag, preservation })) {
-			if (heicIccExemptionOpen && F_HEIC_ICC_GROUPS.has(group1)) {
+		if (
+			!isPermitted({ format, group1, tag, value: record[key], preservation })
+		) {
+			if (
+				heicIccExemptionOpen &&
+				(F_HEIC_ICC_GROUPS.has(group1) ||
+					(fileType === "AVIF" && F_HEIC_ICC_AVIF_ONLY_GROUPS.has(group1)))
+			) {
 				heicIccExempted = true;
 				continue;
 			}

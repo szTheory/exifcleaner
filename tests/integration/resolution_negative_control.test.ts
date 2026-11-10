@@ -178,9 +178,8 @@ describe("Resolution copy-back matrix, product adapter (FID-03, D-37, D-38)", ()
 // vi.spyOn tracking call counts only -- never mocking the engines themselves) so the NC gate
 // proves the native PNG/JPEG copy path and the WebP ExifTool/native split, not just ExifTool's
 // own writer. jpg/jpeg/png preserve resolution natively (HybridMetadataEngine routes both ON
-// and OFF to native); webp does not preserve resolution natively, so ON (preserveResolution
-// true) is native-ineligible and routes to ExifTool, while OFF (preserveResolution false)
-// bypasses the resolution gate and routes to native (D-01, D-03, 58-01).
+// and OFF to native); webp did not on exifcleaner-node 0.4.0 (ON routed to ExifTool, OFF to
+// native; D-01, D-03, 58-01) and does from 0.5.0 on, so ON and OFF both route to native (69-06).
 // 63-16 (ADP-07, D-11): the four native HEIC/AVIF rows (matching and mismatched names) ride the
 // hybrid block too: heic/avif preserve resolution natively, so ON and OFF both route to native,
 // like jpg/png. The QuickTime.heic .heic/.heif rows stay ExifTool-only (FileType HEIF).
@@ -255,13 +254,10 @@ describe("Resolution copy-back matrix, hybrid engine (ADP-02, ADP-04)", () => {
 			expect(onResult).toMatchObject({ ok: true });
 			expect(offResult).toMatchObject({ ok: true });
 
-			if (row.ext === ".webp") {
-				expect(exiftoolWrite).toHaveBeenCalledOnce();
-				expect(nativeWrite).toHaveBeenCalledOnce();
-			} else {
-				expect(nativeWrite).toHaveBeenCalledTimes(2);
-				expect(exiftoolWrite).not.toHaveBeenCalled();
-			}
+			// Every hybrid row, WebP included since exifcleaner-node 0.5.0 declares WebP
+			// resolution true (69-06), is written natively for both ON and OFF.
+			expect(nativeWrite).toHaveBeenCalledTimes(2);
+			expect(exiftoolWrite).not.toHaveBeenCalled();
 
 			const after = snapshotDir(dir);
 			assertDirEffect(before, after, {

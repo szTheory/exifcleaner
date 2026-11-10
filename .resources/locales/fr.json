@@ -74,6 +74,7 @@
 	"cleanupFailedSummary": "Impossible de vérifier le résultat nettoyé et la sortie incomplète n'a pas pu être supprimée. Votre original est inchangé.",
 	"xattrFailedSummary": "Les métadonnées ont été supprimées, mais les attributs étendus de macOS n'ont pas pu être effacés.",
 	"writeFailedSummary": "Impossible d'écrire le résultat nettoyé. Votre original est inchangé.",
+	"commitFailedSummary": "Impossible d'enregistrer le fichier nettoyé à la place de l'original. Une autre application, comme un client de synchronisation cloud, l'a peut-être modifié ou verrouillé. Votre original est inchangé.",
 	"complete": "Terminé",
 	"empty.dropActive": "Déposez les fichiers à nettoyer.",
 	"menu.help.new-releases": "Nouvelles versions…",

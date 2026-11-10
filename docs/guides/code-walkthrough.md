@@ -161,7 +161,9 @@ export interface IpcInvokeMap {
 
 `setupExifHandlers()` reads current settings, selects overwrite/copy/staged behavior, and
 routes the work through application commands. RAF is refused until the project has a safe
-write oracle. Media and other guarded formats use `OutputTransaction`.
+write oracle. JPG, JPEG, PNG, WebP, HEIC, HEIF, AVIF, TIFF, RAW and media files use
+`OutputTransaction` in both output modes (since 4.8.0 that includes overwrite for the seven
+native image extensions). GIF, BMP, SVG and PDF overwrite in place through ExifTool.
 
 ```ts
 // src/main/exif_handlers.ts
@@ -208,7 +210,10 @@ ipcMain.handle("exif:remove", createValidatedHandler(exifRemoveSchema, async (fi
 ## 5. The transaction publishes only verified output
 
 The transaction writes a generated path, asks ExifTool to reopen it, removes an invalid
-candidate, and atomically renames a verified stage when overwrite mode requires it. A
+candidate, and, when overwrite mode requires it, syncs the verified stage, applies the source's
+owner and permissions, rechecks that the source did not change and renames the stage over it.
+The built-in cleaner writes the stage when it can; ExifTool writes it when the built-in cleaner
+declines the file. A
 cleanup failure reports its residual path so the UI never implies that nothing was left. A
 write stopped at its deadline is cleaned up only after ExifTool's exit is confirmed; any
 other write failure returns without touching the candidate.

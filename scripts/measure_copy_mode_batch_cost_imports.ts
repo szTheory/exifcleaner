@@ -10,5 +10,9 @@ export { HybridMetadataEngine } from "../src/infrastructure/metadata/hybrid_meta
 export { StripMetadataCommand } from "../src/application/commands/strip_metadata_command.ts";
 export { VerifyGeneratedOutputQuery } from "../src/application/queries/verify_generated_output_query.ts";
 export { OutputTransaction } from "../src/main/output_transaction.ts";
+export {
+	statSourceIdentity,
+	syncFileToDisk,
+} from "../src/main/source_identity.ts";
 export { seedHeifCopy } from "../tests/helpers/heif_seed.ts";
 export * as registry from "../node_modules/exifcleaner-node/dist/admission/registry.js";

@@ -19,6 +19,7 @@ import { HybridMetadataEngine } from "../../src/infrastructure/metadata/hybrid_m
 import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_metadata_adapter";
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.resolve(__dirname, "../e2e/fixtures");
@@ -136,11 +137,7 @@ describe("63-11: F-HEIC-ICC is applied only to ExifTool-written HEIF copies, thr
 		const transaction = new OutputTransaction({
 			stripMetadata,
 			verifyGeneratedOutput,
-			unlink: fs.promises.unlink,
-			rename: fs.promises.rename,
-			delay: async (milliseconds) => {
-				await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
-			},
+			...realTransactionFileDependencies(),
 		});
 		return {
 			transaction,
@@ -222,7 +219,7 @@ describe("63-11: F-HEIC-ICC is applied only to ExifTool-written HEIF copies, thr
 
 				expect(outcome).toEqual({
 					ok: true,
-					value: { outputPath: generatedPath },
+					value: { outputPath: generatedPath, writtenBy: "exiftool" },
 				});
 				await nativeDeclined(stack);
 				expect(stack.exiftoolWrite).toHaveBeenCalledOnce();
@@ -266,7 +263,7 @@ describe("63-11: F-HEIC-ICC is applied only to ExifTool-written HEIF copies, thr
 
 				expect(outcome).toEqual({
 					ok: true,
-					value: { outputPath: generatedPath },
+					value: { outputPath: generatedPath, writtenBy: "exiftool" },
 				});
 				await nativeDeclined(stack);
 				expect(stack.exiftoolWrite).toHaveBeenCalledOnce();
@@ -307,6 +304,8 @@ describe("63-11: F-HEIC-ICC is applied only to ExifTool-written HEIF copies, thr
 					error: {
 						code: "verification-failed",
 						verificationCode: "output-metadata-leak",
+						diagnostic:
+							"ICC-header:CMMFlags, ICC-header:ColorSpaceData, ICC-header:ConnectionSpaceIlluminant, ICC-header:DeviceAttributes, ICC-header:DeviceManufacturer, ICC-header:DeviceModel, ICC-header:PrimaryPlatform, ICC-header:ProfileCMMType +17 more",
 					},
 				});
 				await nativeDeclined(stack);
@@ -351,7 +350,11 @@ describe("63-11: F-HEIC-ICC is applied only to ExifTool-written HEIF copies, thr
 			outcomes.forEach((outcome, index) => {
 				expect(outcome).toEqual({
 					ok: true,
-					value: { outputPath: runs[index]?.generatedPath },
+					value: {
+						outputPath: runs[index]?.generatedPath,
+						// The first source is declined by native and written by ExifTool, the second natively.
+						writtenBy: index === 0 ? "exiftool" : "native",
+					},
 				});
 			});
 			expect(stack.nativeWrite).toHaveBeenCalledTimes(2);
@@ -419,6 +422,7 @@ describe("63-11: F-HEIC-ICC is applied only to ExifTool-written HEIF copies, thr
 					error: {
 						code: "verification-failed",
 						verificationCode: "output-metadata-leak",
+						diagnostic: "QuickTime:HandlerDescription",
 					},
 				});
 				expect(stack.nativeWrite).toHaveBeenCalledOnce();

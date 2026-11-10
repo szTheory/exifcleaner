@@ -8,6 +8,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // The 4.7.0 devDependencies policy is the six #387 names plus electron (D-13, D-15). resolutions.vite
 // is in the policy because #387 bumps the vite resolution with the dev dependency; this departs from
 // D-03 ("vite resolution unchanged") and is reconciliation R2, acknowledged at the 65-09 checkpoint.
+/**
+ * `dependencies` is optional: an absent field means no production dependency may change (4.7.0).
+ *
+ * @type {Record<string, {base: string, devDependencies: string[], resolutions: string[], dependencies?: string[]}>}
+ */
 export const RELEASE_DEPENDENCY_POLICY = {
 	"4.7.0": {
 		base: "v4.6.0",
@@ -21,6 +26,15 @@ export const RELEASE_DEPENDENCY_POLICY = {
 			"vite",
 		],
 		resolutions: ["vite"],
+	},
+	// 4.8.0 adopts exifcleaner-node 0.5.0 (0.4.0 before), the only runtime dependency change of the
+	// release, sealed by exifcleaner_node_dependency_gate.mjs (integrity, zero dependencies). The
+	// dev-dependency and resolution sets are empty so Dependabot drift in the bump PR fails here.
+	"4.8.0": {
+		base: "v4.7.0",
+		devDependencies: [],
+		resolutions: [],
+		dependencies: ["exifcleaner-node"],
 	},
 };
 
@@ -40,23 +54,45 @@ export function changedKeys(baseRecord, headRecord) {
 }
 
 /**
- * @param {{basePackage: any, headPackage: any, policy: {devDependencies: string[], resolutions: string[]}, baseLock?: string, headLock?: string}} input
+ * Package name of a closure id (`name@version`): everything before the last `@`.
+ *
+ * @param {string} id
+ * @returns {string}
+ */
+function closureName(id) {
+	return id.slice(0, id.lastIndexOf("@"));
+}
+
+/**
+ * @param {{basePackage: any, headPackage: any, policy: {devDependencies: string[], resolutions: string[], dependencies?: string[]}, release?: string, baseLock?: string, headLock?: string}} input
  * @returns {string[]} reasons; empty when the delta satisfies the policy
  */
 export function compareDependencySurfaces({
 	basePackage,
 	headPackage,
 	policy,
+	release,
 	baseLock,
 	headLock,
 }) {
 	const reasons = [];
-	for (const key of changedKeys(
+	const label = release === undefined ? "declared" : release;
+	const declared = [...(policy.dependencies ?? [])].sort();
+	const changedDependencies = changedKeys(
 		basePackage.dependencies,
 		headPackage.dependencies,
-	)) {
+	);
+	// The change set must equal the declared names exactly: an undeclared change is named by key, a
+	// declared name that did not change is reported as a set mismatch.
+	for (const key of changedDependencies) {
+		if (declared.includes(key)) continue;
 		reasons.push(
 			`dependencies.${key} changed: ${basePackage.dependencies?.[key]} -> ${headPackage.dependencies?.[key]}`,
+		);
+	}
+	if (declared.some((key) => !changedDependencies.includes(key))) {
+		reasons.push(
+			`dependencies change set [${changedDependencies}] does not equal the ${label} policy [${declared}]`,
 		);
 	}
 	for (const [field, expected] of [
@@ -67,13 +103,20 @@ export function compareDependencySurfaces({
 		const wanted = [...expected].sort();
 		if (JSON.stringify(actual) !== JSON.stringify(wanted)) {
 			reasons.push(
-				`${field} change set [${actual}] does not equal the 4.7.0 policy [${wanted}]`,
+				`${field} change set [${actual}] does not equal the ${label} policy [${wanted}]`,
 			);
 		}
 	}
 	if (baseLock !== undefined && headLock !== undefined) {
-		const baseClosure = productionClosure(basePackage, baseLock);
-		const headClosure = productionClosure(headPackage, headLock);
+		// Only closure ids whose package name is a declared dependency are excluded; any other id,
+		// including a new transitive dependency of a declared package, still differs.
+		const outsideDeclared = (id) => !declared.includes(closureName(id));
+		const baseClosure = productionClosure(basePackage, baseLock).filter(
+			outsideDeclared,
+		);
+		const headClosure = productionClosure(headPackage, headLock).filter(
+			outsideDeclared,
+		);
 		const onlyBase = baseClosure.filter((id) => !headClosure.includes(id));
 		const onlyHead = headClosure.filter((id) => !baseClosure.includes(id));
 		if (onlyBase.length > 0 || onlyHead.length > 0) {
@@ -238,6 +281,7 @@ export function main(argv = process.argv.slice(2)) {
 			basePackage,
 			headPackage,
 			policy,
+			release,
 			baseLock: gitText(["show", `${base}:yarn.lock`]),
 			headLock: fs.readFileSync(path.join(ROOT, "yarn.lock"), "utf8"),
 		});

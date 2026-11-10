@@ -251,6 +251,8 @@ async function main() {
 		StripMetadataCommand,
 		VerifyGeneratedOutputQuery,
 		OutputTransaction,
+		statSourceIdentity,
+		syncFileToDisk,
 		seedHeifCopy,
 		registry,
 	} = await tsImport(
@@ -335,6 +337,10 @@ async function main() {
 			verifyGeneratedOutput,
 			unlink: fs.promises.unlink,
 			rename: fs.promises.rename,
+			statSource: statSourceIdentity,
+			syncFile: syncFileToDisk,
+			chown: fs.promises.chown,
+			chmod: fs.promises.chmod,
 			delay: async (milliseconds) => {
 				await new Promise((resolve) => setTimeout(resolve, milliseconds));
 			},

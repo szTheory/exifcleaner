@@ -20,6 +20,7 @@ import { NativeMetadataAdapter } from "../../src/infrastructure/metadata/native_
 import { OutputTransaction } from "../../src/main/output_transaction";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import { seedHeifCopy } from "../helpers/heif_seed";
+import { realTransactionFileDependencies } from "../helpers/transaction_deps";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.resolve(__dirname, "../e2e/fixtures");
@@ -128,11 +129,7 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 		const transaction = new OutputTransaction({
 			stripMetadata,
 			verifyGeneratedOutput,
-			unlink: fs.promises.unlink,
-			rename: fs.promises.rename,
-			delay: async (milliseconds) => {
-				await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
-			},
+			...realTransactionFileDependencies(),
 		});
 		return {
 			hybrid,
@@ -199,7 +196,7 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 
 				expect(await result).toEqual({
 					ok: true,
-					value: { outputPath: generatedPath },
+					value: { outputPath: generatedPath, writtenBy: "native" },
 				});
 				expect(stack.nativeWrite).toHaveBeenCalledOnce();
 				expect(stack.exiftoolWrite).not.toHaveBeenCalled();
@@ -234,6 +231,8 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 					error: {
 						code: "verification-failed",
 						verificationCode: "output-metadata-leak",
+						diagnostic:
+							"ICC-header:CMMFlags, ICC-header:ColorSpaceData, ICC-header:ConnectionSpaceIlluminant, ICC-header:DeviceAttributes, ICC-header:DeviceManufacturer, ICC-header:DeviceModel, ICC-header:PrimaryPlatform, ICC-header:ProfileCMMType +17 more",
 					},
 				});
 				expect(stack.nativeWrite).toHaveBeenCalledOnce();
@@ -265,7 +264,7 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 
 				expect(outcome).toEqual({
 					ok: true,
-					value: { outputPath: generatedPath },
+					value: { outputPath: generatedPath, writtenBy: "native" },
 				});
 				expect(stack.nativeWrite).toHaveBeenCalledOnce();
 				expect(stack.exiftoolWrite).not.toHaveBeenCalled();
@@ -305,11 +304,11 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 			);
 			expect(firstOutcome).toEqual({
 				ok: true,
-				value: { outputPath: first.generatedPath },
+				value: { outputPath: first.generatedPath, writtenBy: "native" },
 			});
 			expect(secondOutcome).toEqual({
 				ok: true,
-				value: { outputPath: second.generatedPath },
+				value: { outputPath: second.generatedPath, writtenBy: "native" },
 			});
 			expect(stack.nativeWrite).toHaveBeenCalledTimes(2);
 			expect(stack.exiftoolWrite).not.toHaveBeenCalled();
@@ -348,7 +347,10 @@ describe("63-10: native HEIC/AVIF output never uses F-HEIC-ICC", () => {
 			outcomes.forEach((outcome, index) => {
 				expect(outcome).toEqual({
 					ok: true,
-					value: { outputPath: runs[index]?.generatedPath },
+					value: {
+						outputPath: runs[index]?.generatedPath,
+						writtenBy: "native",
+					},
 				});
 			});
 			expect(stack.nativeWrite).toHaveBeenCalledTimes(2);

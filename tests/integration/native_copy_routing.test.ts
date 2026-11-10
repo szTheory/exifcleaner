@@ -1,6 +1,6 @@
 // 58-01 tracer (ADP-01, ADP-02): real-bytes proof that extension-identified routing sends
-// PNG/JPEG copy requests to the real native engine and WebP-with-resolution to the real
-// bundled ExifTool, through the real HybridMetadataEngine — no fakes, no mocks of the engines
+// PNG/JPEG copy requests to the real native engine (WebP too since 0.5.0 declares WebP
+// resolution true; 69-06) while rollback/declined formats reach the real bundled ExifTool, through the real HybridMetadataEngine — no fakes, no mocks of the engines
 // themselves (only vi.spyOn call-count tracking, mirroring native_metadata_oracle.test.ts).
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -153,7 +153,7 @@ describe("58-01: extension-identified native copy routing with real bytes", () =
 		}
 	});
 
-	it("routes a WebP copy request with preserveResolution true to ExifTool, never native, keeping IFD0 XResolution", async () => {
+	it("routes a WebP copy request with preserveResolution true to native, never ExifTool, keeping IFD0 XResolution", async () => {
 		const dir = makeTempDir("native-copy-routing-webp-on-");
 		const source = path.join(dir, "sample.webp");
 		const destination = path.join(dir, "sample-cleaned.webp");
@@ -187,9 +187,9 @@ describe("58-01: extension-identified native copy routing with real bytes", () =
 				preserveTimestamps: false,
 			});
 
-			expect(result).toMatchObject({ ok: true });
-			expect(nativeWrite).not.toHaveBeenCalled();
-			expect(exiftoolWrite).toHaveBeenCalledOnce();
+			expect(result).toEqual({ ok: true, value: { writtenBy: "native" } });
+			expect(nativeWrite).toHaveBeenCalledOnce();
+			expect(exiftoolWrite).not.toHaveBeenCalled();
 			expect(fs.existsSync(destination)).toBe(true);
 			expect(sha256(source)).toBe(sourceDigest);
 
