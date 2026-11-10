@@ -36,6 +36,8 @@ type TransactionTestOptions = {
 	syncFile?: OutputTransactionDependencies["syncFile"];
 	chown?: OutputTransactionDependencies["chown"];
 	chmod?: OutputTransactionDependencies["chmod"];
+	/** The platform the transaction decides for; omitted means the host (production wiring). */
+	platform?: NodeJS.Platform;
 };
 
 function identity(overrides: Partial<SourceIdentity> = {}): SourceIdentity {
@@ -82,6 +84,7 @@ function createTransaction({
 	syncFile = async () => undefined,
 	chown = async () => undefined,
 	chmod = async () => undefined,
+	platform,
 }: TransactionTestOptions = {}): {
 	transaction: OutputTransaction;
 	events: string[];
@@ -130,6 +133,7 @@ function createTransaction({
 		delay: async (milliseconds) => {
 			events.push(`delay:${milliseconds}`);
 		},
+		...(platform === undefined ? {} : { platform }),
 	});
 
 	return { transaction, events };
@@ -1410,6 +1414,315 @@ describe("OutputTransaction", () => {
 				error: { code: "cleanup-failed", residualPath: generatedPath },
 			});
 			expect(JSON.stringify(result)).not.toContain("YCbCrSubSampling");
+		});
+	});
+	// 69-18 (OVR-03, M-02 review R8, D-16): the first hosted Windows run measured that a read-only
+	// source ends in a refused rename (a read-only target cannot be replaced) and that a stage
+	// carrying the source's read-only attribute cannot be unlinked. The stage is modelled here as
+	// injected file-system state, so the cases hold on every host and depend on no Windows
+	// semantics: unlink fails with EPERM while the stage has no write bit and succeeds once a
+	// chmod has given it one.
+	describe("read-only stage cleanup (69-18, M-02 R8)", () => {
+		const readOnlySource = identity({ mode: 0o100444 });
+		const base = {
+			filePath: originalPath,
+			generatedPath,
+			commitPath: originalPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		};
+		const failedCommit = { ok: false, error: { code: "commit-failed" } };
+		const renameRefused = async () => {
+			throw Object.assign(new Error("EPERM: rename over a read-only file"), {
+				code: "EPERM",
+			});
+		};
+
+		// A stage whose unlink needs the write bit, as a Windows read-only file does.
+		function stageModel(initialMode: number, { chmodWorks = true } = {}) {
+			const stage = { present: true, mode: initialMode };
+			return {
+				stage,
+				unlink: async () => {
+					if (!stage.present) {
+						throw Object.assign(new Error("ENOENT"), { code: "ENOENT" });
+					}
+					if ((stage.mode & 0o200) === 0) {
+						throw Object.assign(new Error("EPERM: read-only"), {
+							code: "EPERM",
+						});
+					}
+					stage.present = false;
+				},
+				chmod: async (_path: string, mode: number) => {
+					if (!chmodWorks) {
+						throw Object.assign(new Error("EPERM: chmod"), { code: "EPERM" });
+					}
+					stage.mode = mode;
+				},
+			};
+		}
+
+		it("a failed commit of a read-only source clears the stage's read-only bit, then removes the stage (no residue)", async () => {
+			const model = stageModel(0o444);
+			const { transaction, events } = createTransaction({
+				statSource: async () => readOnlySource,
+				rename: renameRefused,
+				unlink: model.unlink,
+				chmod: model.chmod,
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual(failedCommit);
+			expect(model.stage.present).toBe(false);
+			expect(events).toEqual([
+				`stat:${originalPath}`,
+				"write",
+				`verify:${generatedPath}`,
+				`sync:${generatedPath}`,
+				`chown:${generatedPath}:501:20`,
+				// the commit applies the source's read-only mode to the stage ...
+				`chmod:${generatedPath}:444`,
+				`stat:${originalPath}`,
+				`rename:${generatedPath}:${originalPath}`,
+				// ... and the cleanup must lift it before the unlink can succeed
+				`unlink:${generatedPath}`,
+				`chmod:${generatedPath}:600`,
+				"delay:20",
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("control: with no write bit given back the same stage cannot be removed and the residual path is reported", async () => {
+			const model = stageModel(0o444, { chmodWorks: false });
+			const { transaction } = createTransaction({
+				statSource: async () => readOnlySource,
+				rename: renameRefused,
+				unlink: model.unlink,
+				chmod: async (path, mode) => {
+					// the commit's own chmod works, the cleanup's does not
+					if (mode === 0o444) model.stage.mode = mode;
+					else await model.chmod(path, mode);
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: false,
+				error: { code: "cleanup-failed", residualPath: generatedPath },
+			});
+			expect(model.stage.present).toBe(true);
+		});
+
+		it("the stage is made owner-writable only (0o600), never group or world writable", async () => {
+			const model = stageModel(0o444);
+			const { transaction, events } = createTransaction({
+				statSource: async () => readOnlySource,
+				rename: renameRefused,
+				unlink: model.unlink,
+				chmod: model.chmod,
+			});
+			await transaction.execute(base);
+			const lifted = events.filter((entry) =>
+				entry.startsWith(`chmod:${generatedPath}:`),
+			);
+			expect(lifted).toEqual([
+				`chmod:${generatedPath}:444`,
+				`chmod:${generatedPath}:600`,
+			]);
+			expect(model.stage.mode & 0o066).toBe(0);
+		});
+
+		it("a chmod that fails during cleanup is ignored: the retry still runs and the stage goes once the lock is gone", async () => {
+			let unlinkCalls = 0;
+			const { transaction, events } = createTransaction({
+				statSource: async () => readOnlySource,
+				rename: renameRefused,
+				unlink: async () => {
+					unlinkCalls += 1;
+					if (unlinkCalls === 1) {
+						throw Object.assign(new Error("EPERM"), { code: "EPERM" });
+					}
+				},
+				chmod: async (_path, mode) => {
+					if (mode === 0o600) {
+						throw Object.assign(new Error("EPERM: chmod"), { code: "EPERM" });
+					}
+				},
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual(failedCommit);
+			expect(events.slice(-4)).toEqual([
+				`unlink:${generatedPath}`,
+				`chmod:${generatedPath}:600`,
+				"delay:20",
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("EBUSY is a lock, not a read-only bit: no chmod, the existing delays only", async () => {
+			const ebusy = Object.assign(new Error("busy"), { code: "EBUSY" });
+			const { transaction, events } = createTransaction({
+				statSource: async () => readOnlySource,
+				rename: renameRefused,
+				unlink: async () => Promise.reject(ebusy),
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: false,
+				error: { code: "cleanup-failed", residualPath: generatedPath },
+			});
+			expect(
+				events.filter((entry) => entry.endsWith(":600")),
+				"no cleanup chmod for EBUSY",
+			).toEqual([]);
+			expect(events.slice(-5)).toEqual([
+				`unlink:${generatedPath}`,
+				"delay:20",
+				`unlink:${generatedPath}`,
+				"delay:50",
+				`unlink:${generatedPath}`,
+			]);
+		});
+
+		it("a non-transient unlink error (EIO) and ENOENT never trigger the chmod", async () => {
+			for (const code of ["EIO", "ENOENT"]) {
+				const { transaction, events } = createTransaction({
+					statSource: async () => readOnlySource,
+					rename: renameRefused,
+					unlink: async () =>
+						Promise.reject(Object.assign(new Error(code), { code })),
+				});
+				await transaction.execute(base);
+				expect(
+					events.filter((entry) => entry.endsWith(":600")),
+					code,
+				).toEqual([]);
+			}
+		});
+
+		it("a rejected verification of a plain copy (no commit path) also lifts a read-only output before removing it", async () => {
+			const model = stageModel(0o444);
+			const { transaction } = createTransaction({
+				verifyResult: {
+					ok: false,
+					error: { code: "output-verification-failed", detail: "reopen" },
+				},
+				unlink: model.unlink,
+				chmod: model.chmod,
+			});
+			const result = await transaction.execute({
+				filePath: originalPath,
+				generatedPath,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: false,
+				preserveTimestamps: false,
+			});
+			expect(result).toMatchObject({
+				ok: false,
+				error: { code: "verification-failed" },
+			});
+			expect(model.stage.present).toBe(false);
+		});
+	});
+
+	// 69-18 (OVR-03, M-02, D-16): on Windows a read-only source cannot be replaced (measured:
+	// legacy and staged both fail, run 42777303465), and the native engine's own private stage
+	// carries the read-only attribute it copies from the source, which it cannot reopen for
+	// writing or remove, so a started write leaves `.exifcleaner-stage-*` behind. The staged
+	// overwrite therefore refuses that source before anything is written: the same outcome as
+	// legacy (failed, source intact), with nothing created next to the file. POSIX replaces a
+	// read-only file and keeps its mode (measured), so no other platform is refused.
+	describe("read-only source on Windows is refused before any write (69-18, M-02)", () => {
+		const base = {
+			filePath: originalPath,
+			generatedPath,
+			commitPath: originalPath,
+			preserveOrientation: false,
+			preserveColorProfile: false,
+			preserveResolution: false,
+			preserveTimestamps: false,
+		};
+
+		it("win32 with a read-only source returns write-failed and touches nothing: one stat, no write, no stage, no unlink", async () => {
+			const { transaction, events } = createTransaction({
+				platform: "win32",
+				statSource: async () => identity({ mode: 0o100444 }),
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({ ok: false, error: { code: "write-failed" } });
+			expect(events).toEqual([`stat:${originalPath}`]);
+		});
+
+		it("win32 with a writable source commits as before (negative control: the refusal is not blanket)", async () => {
+			const { transaction, events } = createTransaction({
+				platform: "win32",
+				statSource: async () => identity({ mode: 0o100666 }),
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath: originalPath, writtenBy: "exiftool" },
+			});
+			expect(events).toContain(`rename:${generatedPath}:${originalPath}`);
+		});
+
+		it("win32 only checks the write bit of the owner: a source with only the owner write bit missing is read-only", async () => {
+			const { transaction, events } = createTransaction({
+				platform: "win32",
+				statSource: async () => identity({ mode: 0o100464 }),
+			});
+			const result = await transaction.execute(base);
+			expect(result).toEqual({ ok: false, error: { code: "write-failed" } });
+			expect(events).toEqual([`stat:${originalPath}`]);
+		});
+
+		it.each(["linux", "darwin", "freebsd"] as const)(
+			"%s with a read-only (0444) source is NOT refused: the stage is written, given mode 444 and renamed over the source (POSIX behaviour unchanged)",
+			async (platform) => {
+				const { transaction, events } = createTransaction({
+					platform,
+					statSource: async () => identity({ mode: 0o100444 }),
+				});
+				const result = await transaction.execute(base);
+				expect(result).toEqual({
+					ok: true,
+					value: { outputPath: originalPath, writtenBy: "exiftool" },
+				});
+				expect(events).toEqual([
+					`stat:${originalPath}`,
+					"write",
+					`verify:${generatedPath}`,
+					`sync:${generatedPath}`,
+					`chown:${generatedPath}:501:20`,
+					`chmod:${generatedPath}:444`,
+					`stat:${originalPath}`,
+					`rename:${generatedPath}:${originalPath}`,
+				]);
+			},
+		);
+
+		it("win32 plain save as copy (no commit path) is not refused and never stats the source", async () => {
+			const { transaction, events } = createTransaction({
+				platform: "win32",
+				statSource: async () => {
+					throw new Error("statSource must not be called on this path");
+				},
+			});
+			const result = await transaction.execute({
+				filePath: originalPath,
+				generatedPath,
+				preserveOrientation: false,
+				preserveColorProfile: false,
+				preserveResolution: false,
+				preserveTimestamps: false,
+			});
+			expect(result).toEqual({
+				ok: true,
+				value: { outputPath: generatedPath, writtenBy: "exiftool" },
+			});
+			expect(events).toEqual(["write", `verify:${generatedPath}`]);
 		});
 	});
 });
