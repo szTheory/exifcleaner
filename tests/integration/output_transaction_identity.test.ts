@@ -33,15 +33,18 @@ function sha256(file: string): string {
 }
 
 type Overrides = Partial<
-	Pick<OutputTransactionDependencies, "syncFile" | "rename">
+	Pick<OutputTransactionDependencies, "syncFile" | "rename" | "chmod">
 >;
 
 function setup({
 	onVerified,
 	overrides = {},
+	nativeLikeStage = false,
 }: {
 	onVerified?: (paths: { source: string; dir: string }) => void;
 	overrides?: Overrides;
+	/** The native engine writes a stage that already carries the source's mode (measured, 69-11). */
+	nativeLikeStage?: boolean;
 }) {
 	const dir = fs.mkdtempSync(path.join(os.tmpdir(), "output-tx-identity-"));
 	temporaryDirs.push(dir);
@@ -55,8 +58,15 @@ function setup({
 		stripMetadata: {
 			execute: async ({ filePath, outputPath }) => {
 				stripCalls += 1;
-				fs.copyFileSync(filePath, outputPath);
-				fs.appendFileSync(outputPath, MARKER);
+				// A fresh file with default permissions, like a real engine's `-o`/native write
+				// (copyFileSync would copy the source mode onto the stage).
+				fs.writeFileSync(
+					outputPath,
+					Buffer.concat([fs.readFileSync(filePath), Buffer.from(MARKER)]),
+				);
+				if (nativeLikeStage) {
+					fs.chmodSync(outputPath, fs.statSync(filePath).mode & 0o7777);
+				}
 				return { ok: true, value: { tagsRemoved: 1, writtenBy: "exiftool" } };
 			},
 		},
@@ -71,7 +81,7 @@ function setup({
 		statSource: statSourceIdentity,
 		syncFile: overrides.syncFile ?? syncFileToDisk,
 		chown: fs.promises.chown,
-		chmod: fs.promises.chmod,
+		chmod: overrides.chmod ?? fs.promises.chmod,
 		delay: async () => undefined,
 	});
 	const run = () =>
@@ -268,3 +278,104 @@ describe("OutputTransaction over real files: source identity recheck and fsync (
 		});
 	});
 });
+
+// 69-11 (OVR-03, D-15, A6): the stage is a fresh 0644 file; the commit must give the replaced
+// file the source's permission bits AFTER the sync, because syncFile opens the stage r+ and a
+// stage already at 0444 refuses that open (every read-only source would end commit-failed while
+// -overwrite_original keeps 0444 and succeeds).
+const posixOnly = process.platform === "win32" || process.getuid?.() === 0;
+
+function modeOf(file: string): string {
+	return (fs.statSync(file).mode & 0o7777).toString(8);
+}
+
+describe.skipIf(posixOnly)(
+	"OutputTransaction over real files: the source mode survives a staged overwrite (69-11)",
+	() => {
+		it.each([
+			["0640", 0o640],
+			["0600", 0o600],
+			["0444 (read-only)", 0o444],
+		] as const)(
+			"a %s source commits with the same mode, the cleaned bytes, a successful real sync and no residue",
+			async (_label, mode) => {
+				let syncs = 0;
+				const ctx = setup({
+					overrides: {
+						syncFile: async (stage) => {
+							await syncFileToDisk(stage);
+							syncs += 1;
+						},
+					},
+				});
+				fs.chmodSync(ctx.source, mode);
+				const before = snapshotDir(ctx.dir);
+				const result = await ctx.run();
+				expect(result).toEqual({ ok: true, value: { outputPath: ctx.source } });
+				expect(syncs).toBe(1);
+				expect(modeOf(ctx.source)).toBe(mode.toString(8));
+				expect(fs.readFileSync(ctx.source, "utf8")).toBe(ORIGINAL + MARKER);
+				assertNoStageResidue(ctx.dir);
+				assertDirEffect(before, snapshotDir(ctx.dir), {
+					modified: ["photo.bin"],
+					unchanged: ["sentinel.txt"],
+				});
+			},
+		);
+
+		it("a native-like stage that already carries 0444 (the native engine copies the source mode) still syncs and commits with 0444", async () => {
+			let syncs = 0;
+			const ctx = setup({
+				nativeLikeStage: true,
+				overrides: {
+					syncFile: async (stage) => {
+						await syncFileToDisk(stage);
+						syncs += 1;
+					},
+				},
+			});
+			fs.chmodSync(ctx.source, 0o444);
+			const before = snapshotDir(ctx.dir);
+			const result = await ctx.run();
+			expect(result).toEqual({ ok: true, value: { outputPath: ctx.source } });
+			expect(syncs).toBe(1);
+			expect(modeOf(ctx.source)).toBe("444");
+			expect(fs.readFileSync(ctx.source, "utf8")).toBe(ORIGINAL + MARKER);
+			assertNoStageResidue(ctx.dir);
+			assertDirEffect(before, snapshotDir(ctx.dir), {
+				modified: ["photo.bin"],
+				unchanged: ["sentinel.txt"],
+			});
+		});
+
+		it("uid and gid of the replaced file equal the source's", async () => {
+			const ctx = setup({});
+			const sourceStat = fs.statSync(ctx.source);
+			const result = await ctx.run();
+			expect(result.ok).toBe(true);
+			const after = fs.statSync(ctx.source);
+			expect([after.uid, after.gid]).toEqual([sourceStat.uid, sourceStat.gid]);
+		});
+
+		it("chmod failing on a real stage: commit-failed, the 0444 source is byte-identical and still 0444, no stage", async () => {
+			const ctx = setup({
+				overrides: {
+					chmod: async () => {
+						throw Object.assign(new Error("EPERM: chmod"), { code: "EPERM" });
+					},
+				},
+			});
+			fs.chmodSync(ctx.source, 0o444);
+			const shaBefore = sha256(ctx.source);
+			const before = snapshotDir(ctx.dir);
+			const result = await ctx.run();
+			expect(result).toEqual(COMMIT_FAILED);
+			expect(sha256(ctx.source)).toBe(shaBefore);
+			expect(modeOf(ctx.source)).toBe("444");
+			assertNoStageResidue(ctx.dir);
+			assertDirEffect(before, snapshotDir(ctx.dir), {
+				unchanged: ["photo.bin", "sentinel.txt"],
+			});
+		});
+	},
+);

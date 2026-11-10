@@ -1,4 +1,12 @@
-import { mkdtemp, rm, utimes, writeFile, appendFile } from "node:fs/promises";
+import {
+	appendFile,
+	chmod,
+	mkdtemp,
+	rm,
+	stat,
+	utimes,
+	writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -131,6 +139,111 @@ describe("syncFileToDisk (D-11)", () => {
 		const fresh = await import("../../src/main/source_identity");
 		await fresh.syncFileToDisk("/virtual/stage.bin");
 		expect(calls).toEqual(["open:/virtual/stage.bin:r+", "sync", "close"]);
+	});
+
+	// 69-11: a stage written by the native engine already carries the source's mode, so a
+	// read-only source gives a 0444 stage that cannot be opened r+. fsync works on a read-only
+	// descriptor on POSIX, so the sync falls back to a read-only open instead of failing every
+	// read-only file (which -overwrite_original handles).
+	it.skipIf(process.platform === "win32" || process.getuid?.() === 0)(
+		"syncs a read-only (0444) stage through a read-only open and changes nothing",
+		async () => {
+			const file = await tempFile("payload");
+			await chmod(file, 0o444);
+			const dir = dirname(file);
+			const before = snapshotDir(dir);
+			await expect(syncFileToDisk(file)).resolves.toBeUndefined();
+			expect(((await stat(file)).mode & 0o7777).toString(8)).toBe("444");
+			assertDirEffect(before, snapshotDir(dir), { unchanged: ["photo.bin"] });
+		},
+	);
+
+	it.each(["EACCES", "EPERM"])(
+		"falls back from r+ to a read-only open when r+ is refused with %s, then syncs and closes",
+		async (code) => {
+			const calls: string[] = [];
+			vi.resetModules();
+			vi.doMock("node:fs/promises", () => ({
+				open: async (path: string, flags: string) => {
+					calls.push(`open:${path}:${flags}`);
+					if (flags === "r+") {
+						throw Object.assign(new Error(code), { code });
+					}
+					return {
+						sync: async () => {
+							calls.push("sync");
+						},
+						close: async () => {
+							calls.push("close");
+						},
+					};
+				},
+				stat: async () => {
+					throw new Error("not used");
+				},
+			}));
+			const fresh = await import("../../src/main/source_identity");
+			await fresh.syncFileToDisk("/virtual/stage.bin");
+			expect(calls).toEqual([
+				"open:/virtual/stage.bin:r+",
+				"open:/virtual/stage.bin:r",
+				"sync",
+				"close",
+			]);
+		},
+	);
+
+	it.each(["ENOENT", "EIO", "EMFILE"])(
+		"does not retry a refused open that is not a permission problem (%s)",
+		async (code) => {
+			const calls: string[] = [];
+			const failure = Object.assign(new Error(code), { code });
+			vi.resetModules();
+			vi.doMock("node:fs/promises", () => ({
+				open: async (path: string, flags: string) => {
+					calls.push(`open:${path}:${flags}`);
+					throw failure;
+				},
+				stat: async () => {
+					throw new Error("not used");
+				},
+			}));
+			const fresh = await import("../../src/main/source_identity");
+			await expect(fresh.syncFileToDisk("/virtual/stage.bin")).rejects.toBe(
+				failure,
+			);
+			expect(calls).toEqual(["open:/virtual/stage.bin:r+"]);
+		},
+	);
+
+	it("a sync error on the read-only fallback is still rethrown and the handle closed", async () => {
+		const calls: string[] = [];
+		const failure = Object.assign(new Error("EIO: sync"), { code: "EIO" });
+		vi.resetModules();
+		vi.doMock("node:fs/promises", () => ({
+			open: async (_path: string, flags: string) => {
+				if (flags === "r+") {
+					throw Object.assign(new Error("EACCES"), { code: "EACCES" });
+				}
+				return {
+					sync: async () => {
+						calls.push("sync");
+						throw failure;
+					},
+					close: async () => {
+						calls.push("close");
+					},
+				};
+			},
+			stat: async () => {
+				throw new Error("not used");
+			},
+		}));
+		const fresh = await import("../../src/main/source_identity");
+		await expect(fresh.syncFileToDisk("/virtual/stage.bin")).rejects.toBe(
+			failure,
+		);
+		expect(calls).toEqual(["sync", "close"]);
 	});
 
 	it("closes the handle when sync fails and rethrows the sync error", async () => {

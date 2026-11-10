@@ -12,6 +12,13 @@ import type { SourceIdentity } from "../../src/main/source_identity";
 
 const originalPath = "/tmp/original.mp4";
 const generatedPath = "/tmp/.original.exifcleaner-stage.mp4";
+// The attribute application of 69-11 (A6): after the sync, before the identity recheck. The
+// identity() default is uid 501, gid 20, mode 0o100644 (file-type bits included), so chmod must
+// receive the masked permission bits 644, never 100644.
+const appliedAttributes = [
+	`chown:${generatedPath}:501:20`,
+	`chmod:${generatedPath}:644`,
+];
 
 type TransactionTestOptions = {
 	writeResult?: Awaited<
@@ -27,6 +34,8 @@ type TransactionTestOptions = {
 	/** Receives the 0-based call index so a test can answer capture and recheck differently. */
 	statSource?: (path: string, callIndex: number) => Promise<SourceIdentity>;
 	syncFile?: OutputTransactionDependencies["syncFile"];
+	chown?: OutputTransactionDependencies["chown"];
+	chmod?: OutputTransactionDependencies["chmod"];
 };
 
 function identity(overrides: Partial<SourceIdentity> = {}): SourceIdentity {
@@ -35,7 +44,9 @@ function identity(overrides: Partial<SourceIdentity> = {}): SourceIdentity {
 		ino: 8123456n,
 		size: 1024n,
 		mtimeNs: 1_700_000_000_123_456_789n,
-		mode: 0o644,
+		// A real stat mode carries the file-type bits (0o100000 = regular file); the commit must
+		// apply only the permission bits.
+		mode: 0o100644,
 		uid: 501,
 		gid: 20,
 		...overrides,
@@ -69,6 +80,8 @@ function createTransaction({
 	rename = async () => undefined,
 	statSource = async () => identity(),
 	syncFile = async () => undefined,
+	chown = async () => undefined,
+	chmod = async () => undefined,
 }: TransactionTestOptions = {}): {
 	transaction: OutputTransaction;
 	events: string[];
@@ -106,12 +119,13 @@ function createTransaction({
 			events.push(`sync:${path}`);
 			return syncFile(path);
 		},
-		// Declared but not applied until plan 69-11: any event here fails the exact lists.
-		chown: async (path) => {
-			events.push(`chown:${path}`);
+		chown: async (path, uid, gid) => {
+			events.push(`chown:${path}:${uid}:${gid}`);
+			return chown(path, uid, gid);
 		},
-		chmod: async (path) => {
-			events.push(`chmod:${path}`);
+		chmod: async (path, mode) => {
+			events.push(`chmod:${path}:${mode.toString(8)}`);
+			return chmod(path, mode);
 		},
 		delay: async (milliseconds) => {
 			events.push(`delay:${milliseconds}`);
@@ -467,6 +481,7 @@ describe("OutputTransaction", () => {
 			"write",
 			`verify:${generatedPath}`,
 			`sync:${generatedPath}`,
+			...appliedAttributes,
 			`stat:${originalPath}`,
 			`rename:${generatedPath}:${originalPath}`,
 		]);
@@ -516,10 +531,11 @@ describe("OutputTransaction", () => {
 			"write",
 			`verify:${generatedPath}`,
 			`sync:${generatedPath}`,
+			...appliedAttributes,
 			`stat:${originalPath}`,
 		];
 
-		it("captures identity of the source before the write, then syncs the stage, rechecks, then renames (exact call log)", async () => {
+		it("captures identity of the source before the write, then syncs the stage, applies ownership then mode, rechecks, then renames (exact call log, A6)", async () => {
 			const { transaction, events } = createTransaction();
 			const result = await transaction.execute(base);
 			expect(result).toEqual({ ok: true, value: { outputPath: originalPath } });
@@ -528,10 +544,11 @@ describe("OutputTransaction", () => {
 				"write",
 				`verify:${generatedPath}`,
 				`sync:${generatedPath}`,
+				`chown:${generatedPath}:501:20`,
+				`chmod:${generatedPath}:644`,
 				`stat:${originalPath}`,
 				`rename:${generatedPath}:${originalPath}`,
 			]);
-			expect(events.some((e) => /^(chown|chmod):/.test(e))).toBe(false);
 		});
 
 		it.each([
@@ -666,6 +683,139 @@ describe("OutputTransaction", () => {
 				`rename:${generatedPath}:${originalPath}`,
 				`unlink:${generatedPath}`,
 			]);
+		});
+
+		describe("attribute application (69-11, OVR-03, D-15, A6)", () => {
+			it("chown failing never fails the commit (best effort): chmod, recheck and rename still run", async () => {
+				const { transaction, events } = createTransaction({
+					chown: async () => {
+						throw Object.assign(new Error("EPERM: chown"), { code: "EPERM" });
+					},
+				});
+				const result = await transaction.execute(base);
+				expect(result).toEqual({
+					ok: true,
+					value: { outputPath: originalPath },
+				});
+				expect(events).toEqual([
+					...throughSync,
+					`rename:${generatedPath}:${originalPath}`,
+				]);
+			});
+
+			it.each(["EPERM", "EINVAL", "ENOSYS", "EIO"])(
+				"chown failing with %s is ignored",
+				async (code) => {
+					const { transaction } = createTransaction({
+						chown: async () => {
+							throw Object.assign(new Error(code), { code });
+						},
+					});
+					const result = await transaction.execute(base);
+					expect(result).toEqual({
+						ok: true,
+						value: { outputPath: originalPath },
+					});
+				},
+			);
+
+			it("chmod failing returns commit-failed: no recheck, rename never called, stage removed", async () => {
+				const { transaction, events } = createTransaction({
+					chmod: async () => {
+						throw Object.assign(new Error("EPERM: chmod"), { code: "EPERM" });
+					},
+				});
+				const result = await transaction.execute(base);
+				expect(result).toEqual(failedCommit);
+				expect(events).toEqual([
+					`stat:${originalPath}`,
+					"write",
+					`verify:${generatedPath}`,
+					`sync:${generatedPath}`,
+					...appliedAttributes,
+					`unlink:${generatedPath}`,
+				]);
+				expect(events.some((e) => e.startsWith("rename:"))).toBe(false);
+			});
+
+			it("cleanup-failed still wins when chmod fails and the stage cannot be removed", async () => {
+				const { transaction } = createTransaction({
+					chmod: async () => {
+						throw new Error("chmod failed");
+					},
+					unlink: async () => {
+						throw Object.assign(new Error("EIO"), { code: "EIO" });
+					},
+				});
+				const result = await transaction.execute(base);
+				expect(result).toEqual({
+					ok: false,
+					error: { code: "cleanup-failed", residualPath: generatedPath },
+				});
+			});
+
+			it.each([
+				["0640 regular file", 0o100640, "640"],
+				["0444 read-only regular file", 0o100444, "444"],
+				[
+					"setuid and sticky bits are permission bits and are kept",
+					0o106755,
+					"6755",
+				],
+				["0600 private file", 0o100600, "600"],
+			] as const)(
+				"chmod receives the source mode masked with 0o7777: %s",
+				async (_name, sourceMode, expectedOctal) => {
+					const { transaction, events } = createTransaction({
+						statSource: async () => identity({ mode: sourceMode }),
+					});
+					await transaction.execute(base);
+					expect(events).toContain(`chmod:${generatedPath}:${expectedOctal}`);
+				},
+			);
+
+			it("ownership and mode come from the identity captured before the write, not the recheck", async () => {
+				const { transaction, events } = createTransaction({
+					statSource: async (_path, index) =>
+						index === 0
+							? identity({ uid: 501, gid: 20, mode: 0o100640 })
+							: identity({ uid: 0, gid: 0, mode: 0o100777 }),
+				});
+				const result = await transaction.execute(base);
+				expect(result).toEqual({
+					ok: true,
+					value: { outputPath: originalPath },
+				});
+				expect(events).toContain(`chown:${generatedPath}:501:20`);
+				expect(events).toContain(`chmod:${generatedPath}:640`);
+				expect(events.some((e) => e.includes(":0:0"))).toBe(false);
+			});
+
+			it("the order is sync, chown, chmod, recheck, rename and never mode before sync (a 0444 stage cannot be opened r+ for the sync)", async () => {
+				const { transaction, events } = createTransaction();
+				await transaction.execute(base);
+				const order = ["sync:", "chown:", "chmod:", "rename:"].map((prefix) =>
+					events.findIndex((e) => e.startsWith(prefix)),
+				);
+				expect(order.every((index) => index >= 0)).toBe(true);
+				expect([...order].sort((a, b) => a - b)).toEqual(order);
+				const recheck = events.lastIndexOf(`stat:${originalPath}`);
+				expect(recheck).toBeGreaterThan(order[2]!);
+				expect(recheck).toBeLessThan(order[3]!);
+			});
+
+			it("a verification failure never applies attributes", async () => {
+				const failedVerify = createTransaction({
+					verifyResult: {
+						ok: false,
+						error: { code: "output-verification-failed", detail: "bad" },
+					},
+				});
+				await failedVerify.transaction.execute(base);
+				expect(failedVerify.events.some((e) => /^(chown|chmod):/.test(e))).toBe(
+					false,
+				);
+			});
 		});
 
 		it("cleanup-failed still wins when the stage cannot be removed after a sync failure (existing precedence)", async () => {
