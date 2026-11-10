@@ -130,18 +130,20 @@ export function isTiffFile({ filename }: IsSupportedFileParams): boolean {
 	return hasExtension({ filename, extensions: TIFF_EXTENSIONS });
 }
 
-// A webp/png/jpeg save-as-copy has no independent output verification unless it is
-// routed through the staged-write transaction (D-22). In-place webp/png/jpeg
-// overwrites stay on the unverified ExifTool path — a deferred gap, not this
-// phase's work (D-23, D-24, 47-CONTEXT.md). TIFF routes through the verified
-// transaction in BOTH output modes (D-24): this phase changes how TIFF is
-// written, and risky/uncertain processing must preserve the source.
-// D-11/ADP-03: png and jpeg saves-as-copy are verified alongside webp because
-// exifcleaner-node 0.3.0 can write them natively -- every PNG/JPEG copy-mode output,
-// regardless of which engine wrote it, must be reopened and checked before publication.
+// Which writes go through the staged-write transaction (reopen verification before anything is
+// published). RAW, media and TIFF are verified in BOTH output modes (D-24): their write behavior
+// changed in earlier phases and risky/uncertain processing must preserve the source. From 4.8.0
+// (Phase 69 D-08, OVR-01) the seven native image extensions (jpg, jpeg, png, webp, heic, heif,
+// avif) are verified in BOTH modes too: an overwrite is written to a hidden stage beside the
+// source, reopened and leak-checked, synced, identity-rechecked and only then renamed over the
+// source, so a failed check keeps the original. Before 4.8.0 an in-place overwrite of these
+// extensions ran ExifTool -overwrite_original with no reopen and no leak check.
+// D-11/ADP-03: png and jpeg are verified alongside webp because exifcleaner-node can write them
+// natively -- every output, regardless of which engine wrote it, is reopened and checked before
+// publication.
 export function requiresVerifiedWrite({
 	filename,
-	outputMode,
+	outputMode: _outputMode,
 }: {
 	filename: string;
 	outputMode: "copy" | "overwrite";
@@ -153,39 +155,36 @@ export function requiresVerifiedWrite({
 	) {
 		return true;
 	}
-	return (
-		outputMode === "copy" &&
-		hasExtension({ filename, extensions: VERIFIED_COPY_EXTENSIONS })
-	);
+	// The output mode no longer changes the answer for the seven image extensions (OVR-01); the
+	// parameter stays so callers keep stating the mode they are asking about.
+	return hasExtension({ filename, extensions: VERIFIED_COPY_EXTENSIONS });
 }
 
-// D-07/D-08/D-11: whether a save-as-copy's verified reopen should additionally run the
-// measured fail-closed leak allowlist (58-SWEEP-MATRIX.md). From 4.8.0 every verified copy
-// extension (png/jpg/jpeg/webp/heic/heif/avif) has a measured allowlist and is listed, so the two
-// copy sets have the same members; they stay separate on purpose (see LEAK_CHECKED_COPY_EXTENSIONS).
+// D-07/D-08/D-11: whether a verified output's reopen should additionally run the measured
+// fail-closed leak allowlist (58-SWEEP-MATRIX.md). Every verified image extension
+// (png/jpg/jpeg/webp/heic/heif/avif) has a measured allowlist and is listed, so the two sets have
+// the same members; they stay separate on purpose (see LEAK_CHECKED_COPY_EXTENSIONS). From 4.8.0
+// the check applies to an overwrite as well as to a save-as-copy (Phase 69 D-08, OVR-01).
 export function requiresCopyModeLeakCheck({
 	filename,
-	outputMode,
+	outputMode: _outputMode,
 }: {
 	filename: string;
 	outputMode: "copy" | "overwrite";
 }): boolean {
-	return (
-		outputMode === "copy" &&
-		hasExtension({ filename, extensions: LEAK_CHECKED_COPY_EXTENSIONS })
-	);
+	return hasExtension({ filename, extensions: LEAK_CHECKED_COPY_EXTENSIONS });
 }
 
 export type CopyModeLeakCheckDemand = "required" | "when-allowlisted";
 
-// D-08/F-63-3: the leak check runs on every verified copy whose reopened FileType has an
+// D-08/F-63-3: the leak check runs on every verified output whose reopened FileType has an
 // allowlist, whatever the extension. "required" = the extension itself demands a check, so a
-// FileType without an allowlist fails closed (.png, .jpg, .jpeg, .webp, .heic, .heif, .avif).
+// FileType without an allowlist fails closed (.png, .jpg, .jpeg, .webp, .heic, .heif, .avif), in
+// both output modes from 4.8.0 (Phase 69 D-08, OVR-01).
 // "when-allowlisted" = every other verified copy name (RAW, TIFF, media): the check runs when the
 // content reopens as an allowlisted FileType (HEIC/JPEG/WebP bytes behind .tif), while genuine
 // RAW/TIFF/media output stays verify-only. Computed from the name only; the reopened FileType is
-// the content signal.
-// Overwrite mode stays outside the copy-mode leak check.
+// the content signal. A RAW, TIFF or media overwrite carries no leak demand (unchanged).
 export function copyModeLeakCheckDemandOf({
 	filename,
 	outputMode,

@@ -990,23 +990,24 @@ describe("exif:remove handler", () => {
 		});
 	});
 
-	it("returns and writes the source path when overwrite mode is active", async () => {
+	it("returns and writes the source path when overwrite mode is active (a format outside the verified set; the seven image extensions overwrite through the transaction since 4.8.0)", async () => {
 		const { container, stripMetadata } = makeContainer({ saveAsCopy: false });
 		setupExifHandlers({ container });
 
 		const { handler } = captureInvokeHandler("exif:remove");
-		const result = await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+		const result = await handler(makeAuthorizedEvent(), "/dir/photo.gif");
 
 		expect(stripMetadata.execute).toHaveBeenCalledWith(
 			expect.objectContaining({
-				filePath: "/dir/photo.jpg",
+				filePath: "/dir/photo.gif",
+				outputMode: "overwrite",
 				saveAsCopy: false,
 				outputPath: undefined,
 			}),
 		);
 		expect(result).toEqual({
 			success: true,
-			outputPath: "/dir/photo.jpg",
+			outputPath: "/dir/photo.gif",
 			wasForcedCopy: false,
 			wroteFile: true,
 			outputSize: 4096,
@@ -1375,7 +1376,7 @@ function makeContainerWithPreserveResolution({
 
 describe("exif:remove forwards the actual preserveResolution setting (FID-01, D-40)", () => {
 	it.each([true, false])(
-		"a .jpg request reaches stripMetadata.execute with preserveResolution %s (FID-01, D-40)",
+		"a .gif request reaches stripMetadata.execute with preserveResolution %s (FID-01, D-40)",
 		async (preserveResolution) => {
 			const { container, stripMetadata } = makeContainerWithPreserveResolution({
 				saveAsCopy: false,
@@ -1384,10 +1385,33 @@ describe("exif:remove forwards the actual preserveResolution setting (FID-01, D-
 			setupExifHandlers({ container });
 
 			const { handler } = captureInvokeHandler("exif:remove");
-			await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+			await handler(makeAuthorizedEvent(), "/dir/photo.gif");
 
 			expect(stripMetadata.execute).toHaveBeenCalledWith(
 				expect.objectContaining({ preserveResolution }),
+			);
+		},
+	);
+
+	it.each([true, false])(
+		"a .jpg overwrite request reaches outputTransaction.execute with preserveResolution %s in the request and in the leak check (FID-01, D-40, OVR-01)",
+		async (preserveResolution) => {
+			const { container, stripMetadata, outputTransaction } =
+				makeContainerWithPreserveResolution({
+					saveAsCopy: false,
+					preserveResolution,
+				});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			await handler(makeAuthorizedEvent(), "/dir/photo.jpg");
+
+			expect(stripMetadata.execute).not.toHaveBeenCalled();
+			expect(outputTransaction.execute).toHaveBeenCalledWith(
+				expect.objectContaining({
+					preserveResolution,
+					copyModeLeakCheck: expect.objectContaining({ preserveResolution }),
+				}),
 			);
 		},
 	);

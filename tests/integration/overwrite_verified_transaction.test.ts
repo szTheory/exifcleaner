@@ -389,8 +389,20 @@ describe("69-12: overwrite of the seven native image extensions on the verified 
 						value: { outputPath: source },
 					});
 					if (route === "native") {
+						// Native is asked first; an ICC-bearing file may be declined before any write
+						// and the router then falls back to ExifTool. Either route is a pass; which one
+						// happened is measured and printed, never assumed.
 						expect(ran.stack.nativeWrite).toHaveBeenCalledOnce();
-						expect(ran.stack.exiftoolWrite).not.toHaveBeenCalled();
+						const fallbackWrites = ran.stack.exiftoolWrite.mock.calls.length;
+						expect([0, 1]).toContain(fallbackWrites);
+						expect(ran.stack.verifySpy.mock.calls[0]?.[0]).toMatchObject({
+							copyModeLeakCheck: {
+								writtenBy: fallbackWrites === 0 ? "native" : "exiftool",
+							},
+						});
+						console.log(
+							`MEASURE: ${process.platform} overwrite-colour id=${testCase.name} route=native writer=${fallbackWrites === 0 ? "native" : "exiftool-after-decline"}`,
+						);
 					} else {
 						expect(ran.stack.exiftoolWrite).toHaveBeenCalledOnce();
 					}
@@ -448,7 +460,7 @@ describe("69-12: overwrite of the seven native image extensions on the verified 
 				},
 			);
 
-			it("GIF bytes named .webp: the reopened FileType has no allowlist, so the required demand fails closed and the source is kept", async () => {
+			it("GIF bytes named .webp: the writer refuses the content, the overwrite fails closed (write-failed) and the source is kept", async () => {
 				const dir = freshDir();
 				const source = path.join(dir, "not-really.webp");
 				fs.copyFileSync(path.join(FIXTURES, "GIF.gif"), source);
@@ -460,16 +472,14 @@ describe("69-12: overwrite of the seven native image extensions on the verified 
 					settings: DEFAULT_PRESERVATION,
 				});
 
+				// ExifTool itself reports "Not a valid WEBP (looks more like a GIF)"; native declines
+				// at admission and the fallback meets the same refusal.
 				expect(ran.outcome).toEqual({
 					ok: false,
-					error: {
-						code: "verification-failed",
-						verificationCode: "output-metadata-leak",
-						diagnostic: expect.stringContaining("FileType"),
-					},
+					error: { code: "write-failed" },
 				});
+				expect(ran.stack.verifySpy).not.toHaveBeenCalled();
 				expect(sha256(source)).toBe(sourceDigest);
-				expect(fs.existsSync(ran.generatedPath)).toBe(false);
 				assertDirEffect(ran.before, ran.after, {
 					unchanged: ["not-really.webp", SIBLING],
 					added: [],
@@ -481,6 +491,113 @@ describe("69-12: overwrite of the seven native image extensions on the verified 
 			});
 		},
 	);
+
+	describe("content with no leak allowlist behind an image extension (D-09)", () => {
+		// No real writer accepts GIF content under a .webp name, so a writer double produces the
+		// output a misbehaving or fallback engine could: GIF bytes at the stage. The reopen still
+		// runs through the real ExifTool and the real verifier, with the demand the handler computes.
+		async function runWithGifWriter({
+			demand,
+		}: {
+			demand: "required" | "when-allowlisted";
+		}) {
+			const dir = freshDir();
+			const source = path.join(dir, "not-really.webp");
+			fs.copyFileSync(path.join(FIXTURES, "sample.webp"), source);
+			const sourceDigest = sha256(source);
+			const hybrid = new HybridMetadataEngine({
+				exiftool: new ExifToolAdapter({ process: exiftoolProcess }),
+				native: new NativeMetadataAdapter(),
+			});
+			const gifWriter = {
+				execute: async (
+					request: Parameters<StripMetadataCommand["execute"]>[0],
+				) => {
+					fs.copyFileSync(
+						path.join(FIXTURES, "GIF.gif"),
+						request.outputPath as string,
+					);
+					return {
+						ok: true as const,
+						value: { tagsRemoved: 0, writtenBy: "exiftool" as const },
+					};
+				},
+			};
+			const transaction = new OutputTransaction({
+				stripMetadata: gifWriter,
+				verifyGeneratedOutput: new VerifyGeneratedOutputQuery({
+					metadataEngine: hybrid,
+				}),
+				...realTransactionFileDependencies(),
+			});
+			const generatedPath = path.join(
+				dir,
+				".not-really.exifcleaner-stage-gif.webp",
+			);
+			const before = snapshotDir(dir);
+			const outcome = await transaction.execute({
+				filePath: source,
+				generatedPath,
+				commitPath: source,
+				...DEFAULT_PRESERVATION,
+				copyModeLeakCheck: {
+					demand,
+					preserveOrientation: true,
+					preserveColorProfile: true,
+					preserveResolution: true,
+				},
+			});
+			return {
+				dir,
+				source,
+				sourceDigest,
+				outcome,
+				before,
+				after: snapshotDir(dir),
+				generatedPath,
+			};
+		}
+
+		it("the demand the handler computes for an overwrite (required) refuses GIF output, keeps the source and leaves nothing behind", async () => {
+			expect(
+				copyModeLeakCheckDemandOf({
+					filename: "not-really.webp",
+					outputMode: "overwrite",
+				}),
+			).toBe("required");
+			const ran = await runWithGifWriter({ demand: "required" });
+
+			expect(ran.outcome).toEqual({
+				ok: false,
+				error: {
+					code: "verification-failed",
+					verificationCode: "output-metadata-leak",
+					diagnostic:
+						"Copy-mode leak check has no permitted-tag set for this file type (GIF)",
+				},
+			});
+			expect(sha256(ran.source)).toBe(ran.sourceDigest);
+			expect(fs.existsSync(ran.generatedPath)).toBe(false);
+			assertDirEffect(ran.before, ran.after, {
+				unchanged: ["not-really.webp", SIBLING],
+				added: [],
+				modified: [],
+				removed: [],
+			});
+			expectNoResidue(ran.dir, ["not-really.webp", SIBLING]);
+			tally.refusedContent += 1;
+		});
+
+		it("control: the weaker when-allowlisted demand would publish the same GIF bytes over the source, which is why overwrite of these extensions demands required", async () => {
+			const ran = await runWithGifWriter({ demand: "when-allowlisted" });
+
+			expect(ran.outcome).toEqual({
+				ok: true,
+				value: { outputPath: ran.source },
+			});
+			expect(sha256(ran.source)).not.toBe(ran.sourceDigest);
+		});
+	});
 
 	describe("TIFF and media overwrite inherit the transaction (review N6)", () => {
 		// Same composition as the handler: TIFF and media are verified in overwrite mode with no
