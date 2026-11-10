@@ -170,7 +170,7 @@ it("requiresVerifiedWrite routes raw, media, TIFF (both modes), and copy-mode we
 	).toBe(true);
 });
 
-it("requiresCopyModeLeakCheck is true only for png/jpg/jpeg copies, false for webp/tiff/raw/media copies and any overwrite (D-11)", () => {
+it("requiresCopyModeLeakCheck is true for png/jpg/jpeg/webp copies (webp from 4.8.0, 69-09), false for tiff/raw/media copies and any overwrite (D-11)", () => {
 	expect(
 		requiresCopyModeLeakCheck({ filename: "sample.png", outputMode: "copy" }),
 	).toBe(true);
@@ -197,6 +197,15 @@ it("requiresCopyModeLeakCheck is true only for png/jpg/jpeg copies, false for we
 	).toBe(false);
 	expect(
 		requiresCopyModeLeakCheck({ filename: "sample.webp", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresCopyModeLeakCheck({ filename: "PHOTO.WEBP", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresCopyModeLeakCheck({
+			filename: "sample.webp",
+			outputMode: "overwrite",
+		}),
 	).toBe(false);
 	expect(
 		requiresCopyModeLeakCheck({ filename: "sample.tif", outputMode: "copy" }),
@@ -232,13 +241,23 @@ it.each([["sample.heic"], ["SAMPLE.HEIC"], ["sample.heif"], ["sample.avif"]])(
 	},
 );
 
-it("webp copies stay verified but are not leak-checked (D-08)", () => {
+it("webp copies are verified and leak-checked from 4.8.0 against a measured allowlist, overwrites stay outside (D-03, D-06)", () => {
 	expect(
 		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "copy" }),
 	).toBe(true);
 	expect(
 		requiresCopyModeLeakCheck({ filename: "sample.webp", outputMode: "copy" }),
+	).toBe(true);
+	expect(
+		requiresVerifiedWrite({ filename: "sample.webp", outputMode: "overwrite" }),
 	).toBe(false);
+	expect(
+		requiresCopyModeLeakCheck({
+			filename: "sample.webp",
+			outputMode: "overwrite",
+		}),
+	).toBe(false);
+	expect(isMediaFile({ filename: "sample.webp" })).toBe(false);
 });
 
 it("copyModeLeakCheckDemandOf is required for leak-checked copies, when-allowlisted for other verified copies, undefined otherwise (D-08)", () => {
@@ -250,12 +269,14 @@ it("copyModeLeakCheckDemandOf is required for leak-checked copies, when-allowlis
 		"a.HEIC",
 		"a.heif",
 		"a.avif",
+		"a.webp",
+		"a.WEBP",
 	]) {
 		expect(copyModeLeakCheckDemandOf({ filename, outputMode: "copy" })).toBe(
 			"required",
 		);
 	}
-	for (const filename of ["a.webp", "a.dng", "a.tif", "a.mp4", "a.mov"]) {
+	for (const filename of ["a.dng", "a.tif", "a.mp4", "a.mov"]) {
 		expect(copyModeLeakCheckDemandOf({ filename, outputMode: "copy" })).toBe(
 			"when-allowlisted",
 		);

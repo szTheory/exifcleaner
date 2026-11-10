@@ -69,7 +69,29 @@ describe("copyModeLeakCheckFormatOf", () => {
 		expect(copyModeLeakCheckFormatOf({ fileType: "AVIF" })).toBe("avif");
 	});
 
-	it.each([["WEBP"], ["MOV"], ["MP4"], [""], [undefined], [42]])(
+	// 69-09 (D-03): ExifTool reports four FileType strings for a reopened WebP output (measured on
+	// 352 written rows, 69-WEBP-SWEEP-MATRIX.md). Mapping only WEBP and Extended WEBP would leave a
+	// lossless WebP unchecked (fail open by omission), so each string is pinned.
+	it.each([
+		["WEBP"],
+		["WEBP (lossless)"],
+		["Extended WEBP"],
+		["Extended WEBP (lossless)"],
+	])("maps the reopened WebP FileType %s to webp", (fileType) => {
+		expect(copyModeLeakCheckFormatOf({ fileType })).toBe("webp");
+	});
+
+	it.each([
+		["webp"],
+		["Extended WEBP (animated)"],
+		["WEBP "],
+		["VP8"],
+		["RIFF"],
+	])("does not map the near-miss FileType %j to webp", (fileType) => {
+		expect(copyModeLeakCheckFormatOf({ fileType })).toBeUndefined();
+	});
+
+	it.each([["MOV"], ["MP4"], [""], [undefined], [42]])(
 		"returns undefined for %s",
 		(fileType) => {
 			expect(copyModeLeakCheckFormatOf({ fileType })).toBeUndefined();
@@ -463,7 +485,7 @@ describe("findLeakedTags", () => {
 	describe("HEIC and AVIF allowlist shape (63-09)", () => {
 		const everySet = Object.entries(PERMITTED_SETS_FOR_TESTS);
 
-		it("has the eight per-format sets", () => {
+		it("has the twelve per-format sets (eight ISOBMFF sets plus the four WebP sets of 69-09)", () => {
 			expect(everySet.map(([name]) => name).sort()).toEqual([
 				"AVIF_ALWAYS_PERMITTED",
 				"AVIF_COLOR_PROFILE_ONLY",
@@ -473,6 +495,10 @@ describe("findLeakedTags", () => {
 				"HEIC_COLOR_PROFILE_ONLY",
 				"HEIC_ORIENTATION_ONLY",
 				"HEIC_RESOLUTION_ONLY",
+				"WEBP_ALWAYS_PERMITTED",
+				"WEBP_COLOR_PROFILE_ONLY",
+				"WEBP_ORIENTATION_ONLY",
+				"WEBP_RESOLUTION_ONLY",
 			]);
 		});
 
@@ -1226,5 +1252,364 @@ describe("JPEG and PNG ICC colorimetry and descriptor keys (69-03)", () => {
 			});
 			expect(result.leakedTags).toEqual(["XMP-dc:Creator"]);
 		});
+	});
+});
+
+// 69-09 (WEBP-08; D-03, review N3): the WebP allowlist, transcribed from the 368-row sweep of
+// 69-WEBP-SWEEP-MATRIX.md "## Derived allowlist". The literals below are an independent oracle (typed
+// from the matrix, not imported from the source), so a transcription error in the source fails here.
+describe("WebP leak check (69-09)", () => {
+	const WEBP_ALWAYS = [
+		"Composite:ImageSize",
+		"Composite:Megapixels",
+		"File:FileType",
+		"File:FileTypeExtension",
+		"File:MIMEType",
+		"RIFF:AlphaCompression",
+		"RIFF:AlphaFiltering",
+		"RIFF:AlphaIsUsed",
+		"RIFF:AlphaPreprocessing",
+		"RIFF:AnimationLoopCount",
+		"RIFF:BackgroundColor",
+		"RIFF:Duration",
+		"RIFF:HorizontalScale",
+		"RIFF:ImageHeight",
+		"RIFF:ImageWidth",
+		"RIFF:VP8Version",
+		"RIFF:VerticalScale",
+	] as const;
+	const WEBP_ORIENTATION = [
+		"File:ExifByteOrder",
+		"IFD0:Orientation",
+		"IFD0:YCbCrPositioning",
+	] as const;
+	const WEBP_RESOLUTION = [
+		"File:ExifByteOrder",
+		"IFD0:ResolutionUnit",
+		"IFD0:XResolution",
+		"IFD0:YCbCrPositioning",
+		"IFD0:YResolution",
+	] as const;
+	const ICC_25 = [
+		"ICC-header:CMMFlags",
+		"ICC-header:ColorSpaceData",
+		"ICC-header:ConnectionSpaceIlluminant",
+		"ICC-header:DeviceAttributes",
+		"ICC-header:DeviceManufacturer",
+		"ICC-header:DeviceModel",
+		"ICC-header:PrimaryPlatform",
+		"ICC-header:ProfileCMMType",
+		"ICC-header:ProfileClass",
+		"ICC-header:ProfileConnectionSpace",
+		"ICC-header:ProfileCreator",
+		"ICC-header:ProfileDateTime",
+		"ICC-header:ProfileFileSignature",
+		"ICC-header:ProfileID",
+		"ICC-header:ProfileVersion",
+		"ICC-header:RenderingIntent",
+		"ICC_Profile:BlueMatrixColumn",
+		"ICC_Profile:BlueTRC",
+		"ICC_Profile:GreenMatrixColumn",
+		"ICC_Profile:GreenTRC",
+		"ICC_Profile:MediaWhitePoint",
+		"ICC_Profile:ProfileCopyright",
+		"ICC_Profile:ProfileDescription",
+		"ICC_Profile:RedMatrixColumn",
+		"ICC_Profile:RedTRC",
+	] as const;
+	const ICC_15 = [
+		"ICC-meas:MeasurementBacking",
+		"ICC-meas:MeasurementFlare",
+		"ICC-meas:MeasurementGeometry",
+		"ICC-meas:MeasurementIlluminant",
+		"ICC-meas:MeasurementObserver",
+		"ICC-view:ViewingCondIlluminant",
+		"ICC-view:ViewingCondIlluminantType",
+		"ICC-view:ViewingCondSurround",
+		"ICC_Profile:ChromaticAdaptation",
+		"ICC_Profile:DeviceMfgDesc",
+		"ICC_Profile:DeviceModelDesc",
+		"ICC_Profile:Luminance",
+		"ICC_Profile:MediaBlackPoint",
+		"ICC_Profile:Technology",
+		"ICC_Profile:ViewingCondDesc",
+	] as const;
+	const WEBP_COLOR = [...ICC_25, ...ICC_15];
+
+	type Flags = {
+		preserveOrientation: boolean;
+		preserveColorProfile: boolean;
+		preserveResolution: boolean;
+	};
+	const COMBOS: readonly Flags[] = [false, true].flatMap((o) =>
+		[false, true].flatMap((c) =>
+			[false, true].map((r) => ({
+				preserveOrientation: o,
+				preserveColorProfile: c,
+				preserveResolution: r,
+			})),
+		),
+	);
+	const comboName = (f: Flags) =>
+		`o=${f.preserveOrientation} c=${f.preserveColorProfile} r=${f.preserveResolution}`;
+	const ALL_OFF: Flags = {
+		preserveOrientation: false,
+		preserveColorProfile: false,
+		preserveResolution: false,
+	};
+	const ALL_ON: Flags = {
+		preserveOrientation: true,
+		preserveColorProfile: true,
+		preserveResolution: true,
+	};
+
+	function check(
+		record: Record<string, unknown>,
+		preservation: Flags,
+		writtenBy: "native" | "exiftool" = "native",
+		fileType = "Extended WEBP",
+	) {
+		return findLeakedTags({
+			record,
+			format: "webp",
+			writtenBy,
+			fileType,
+			preservation,
+		}).leakedTags;
+	}
+
+	it("exports the four WebP sets with exactly the measured members", () => {
+		expect([...alwaysSet("WEBP_ALWAYS_PERMITTED")].sort()).toEqual([
+			...WEBP_ALWAYS,
+		]);
+		expect([...alwaysSet("WEBP_ORIENTATION_ONLY")].sort()).toEqual([
+			...WEBP_ORIENTATION,
+		]);
+		expect([...alwaysSet("WEBP_RESOLUTION_ONLY")].sort()).toEqual([
+			...WEBP_RESOLUTION,
+		]);
+		expect([...alwaysSet("WEBP_COLOR_PROFILE_ONLY")].sort()).toEqual(
+			[...WEBP_COLOR].sort(),
+		);
+		expect(WEBP_ALWAYS).toHaveLength(17);
+		expect(WEBP_COLOR).toHaveLength(40);
+	});
+
+	it.each(COMBOS.map((f) => [comboName(f), f] as const))(
+		"%s: accepts exactly its permitted set and reports every other measured key",
+		(_name, flags) => {
+			const permitted = new Set<string>([
+				...WEBP_ALWAYS,
+				...(flags.preserveOrientation ? WEBP_ORIENTATION : []),
+				...(flags.preserveResolution ? WEBP_RESOLUTION : []),
+				...(flags.preserveColorProfile ? WEBP_COLOR : []),
+			]);
+			expect(check(recordFromKeys([...permitted]), flags)).toEqual([]);
+
+			const everyKey = [
+				...new Set([
+					...WEBP_ALWAYS,
+					...WEBP_ORIENTATION,
+					...WEBP_RESOLUTION,
+					...WEBP_COLOR,
+				]),
+			];
+			const expectedLeaks = everyKey
+				.filter((key) => !permitted.has(key))
+				.sort();
+			expect(check(recordFromKeys(everyKey), flags)).toEqual(expectedLeaks);
+		},
+	);
+
+	it.each([
+		"XMP-dc:Creator",
+		"XMP-x:XMPToolkit",
+		"ExifIFD:DateTimeOriginal",
+		"GPS:GPSLatitude",
+		"GPS:GPSVersionID",
+		"Composite:GPSLatitude",
+		"IFD0:Make",
+		"IFD0:Model",
+		"IFD0:Artist",
+		"IFD0:Software",
+		"IFD0:Copyright",
+		"IFD1:ThumbnailImage",
+		"RIFF:Comment",
+		"RIFF:Software",
+		"ICC_Profile:AToB0",
+	])("%s is a leak under every preserve combination", (key) => {
+		for (const flags of COMBOS) {
+			expect(check({ [key]: "ZZLEAK-69" }, flags), comboName(flags)).toEqual([
+				key,
+			]);
+		}
+	});
+
+	it("reads the Group1 and tag from a -G1:2:4 key of three parts", () => {
+		expect(
+			check(
+				{ "RIFF:Image:ImageWidth": 16, "XMP-dc:Author:Creator": "x" },
+				ALL_ON,
+			),
+		).toEqual(["XMP-dc:Creator"]);
+	});
+
+	it("never echoes a value into the result (names only)", () => {
+		const result = findLeakedTags({
+			record: { "XMP-dc:Creator": "ZZLEAK-69-VALUE", "GPS:GPSLatitude": 1 },
+			format: "webp",
+			writtenBy: "native",
+			fileType: "WEBP",
+			preservation: ALL_OFF,
+		});
+		expect(JSON.stringify(result)).not.toContain("ZZLEAK-69-VALUE");
+	});
+
+	it("keeps the WebP keys out of the other formats (the key sets are scoped per format)", () => {
+		for (const format of ["jpeg", "png", "heic", "avif"] as const) {
+			const leaks = findLeakedTags({
+				record: recordFromKeys(["RIFF:VP8Version", "RIFF:ImageWidth"]),
+				format,
+				writtenBy: "native",
+				fileType: "WEBP",
+				preservation: ALL_ON,
+			}).leakedTags;
+			expect(leaks, format).toEqual(["RIFF:ImageWidth", "RIFF:VP8Version"]);
+		}
+		expect(alwaysSet("HEIC_ORIENTATION_ONLY").has("RIFF:VP8Version")).toBe(
+			false,
+		);
+	});
+
+	describe("IFD0:YCbCrPositioning, the ExifTool-written EXIF companion", () => {
+		const record = { "IFD0:YCbCrPositioning": "Centered" };
+		it("is accepted under orientation and under resolution only", () => {
+			expect(check(record, { ...ALL_OFF, preserveOrientation: true })).toEqual(
+				[],
+			);
+			expect(check(record, { ...ALL_OFF, preserveResolution: true })).toEqual(
+				[],
+			);
+			expect(check(record, ALL_OFF)).toEqual(["IFD0:YCbCrPositioning"]);
+			expect(check(record, { ...ALL_OFF, preserveColorProfile: true })).toEqual(
+				["IFD0:YCbCrPositioning"],
+			);
+		});
+	});
+
+	describe("RIFF:WebP_Flags is judged by its value (review N3)", () => {
+		const KEY = "RIFF:WebP_Flags";
+		const off = ALL_OFF;
+		const orientation = { ...ALL_OFF, preserveOrientation: true };
+		const resolution = { ...ALL_OFF, preserveResolution: true };
+		const color = { ...ALL_OFF, preserveColorProfile: true };
+
+		it.each([
+			["Alpha", off],
+			["Animation", off],
+			["Alpha, Animation", off],
+			["Animation, Alpha", off],
+			["EXIF, Alpha", orientation],
+			["EXIF, Alpha", resolution],
+			["Animation, EXIF", orientation],
+			["Animation, EXIF", resolution],
+			["EXIF", orientation],
+			["EXIF", resolution],
+			["ICC Profile", color],
+			["EXIF, ICC Profile", { ...orientation, preserveColorProfile: true }],
+			["ICC Profile, EXIF", { ...resolution, preserveColorProfile: true }],
+			["Alpha, ICC Profile", color],
+			["EXIF, ICC Profile", ALL_ON],
+		] as const)("permits %j under %j", (value, flags) => {
+			expect(check({ [KEY]: value }, flags)).toEqual([]);
+		});
+
+		it.each([
+			["EXIF", off],
+			["EXIF, Alpha", off],
+			["Animation, EXIF", off],
+			["EXIF", color],
+			["EXIF, Alpha", color],
+			["ICC Profile", off],
+			["ICC Profile", orientation],
+			["ICC Profile", resolution],
+			["EXIF, ICC Profile", orientation],
+			["EXIF, ICC Profile", color],
+			["Alpha, ICC Profile", off],
+			["XMP", ALL_ON],
+			["XMP", off],
+			["XMP, EXIF", ALL_ON],
+			["Animation, XMP, EXIF", ALL_ON],
+			["Alpha, XMP", ALL_ON],
+		] as const)("reports %j under %j", (value, flags) => {
+			expect(check({ [KEY]: value }, flags)).toEqual([KEY]);
+		});
+
+		// Fail closed: any token outside the pinned print vocabulary, however plausible.
+		it.each([
+			["Sparkle"],
+			["Alpha, Sparkle"],
+			["alpha"],
+			["ALPHA"],
+			["Alpha,"],
+			[","],
+			[""],
+			[" "],
+			["Icc Profile"],
+			["ICC"],
+			["Exif"],
+			["Animated"],
+			["Alpha;EXIF"],
+		])(
+			"reports the unrecognised value %j even with every option on",
+			(value) => {
+				expect(check({ [KEY]: value }, ALL_ON)).toEqual([KEY]);
+			},
+		);
+
+		it.each([
+			[5],
+			[0],
+			[true],
+			[null],
+			[undefined],
+			[["Alpha"]],
+			[{ Alpha: 1 }],
+		])("reports the non-string value %j (fail closed)", (value) => {
+			expect(check({ [KEY]: value }, ALL_ON)).toEqual([KEY]);
+		});
+
+		it("tolerates a comma without a space and surrounding blanks around a known token", () => {
+			expect(check({ [KEY]: "Alpha,Animation" }, off)).toEqual([]);
+			expect(check({ [KEY]: " Alpha , Animation " }, off)).toEqual([]);
+		});
+
+		it("is decided from the value, not from the key alone: the same key flips with the value", () => {
+			expect(check({ [KEY]: "Alpha" }, off)).toEqual([]);
+			expect(check({ [KEY]: "EXIF" }, off)).toEqual([KEY]);
+		});
+
+		it("works with the three-part key a -G1:2:4 record carries", () => {
+			expect(check({ "RIFF:Other:WebP_Flags": "XMP" }, ALL_ON)).toEqual([
+				"RIFF:WebP_Flags",
+			]);
+			expect(check({ "RIFF:Other:WebP_Flags": "Alpha" }, off)).toEqual([]);
+		});
+	});
+
+	describe("F-HEIC-ICC is not a WebP exemption", () => {
+		it.each(["WEBP", "Extended WEBP"])(
+			"an ExifTool-written %s keeps ICC keys a leak when the colour profile is off",
+			(fileType) => {
+				expect(
+					check(
+						{ "ICC-header:ProfileClass": "Display", "ICC_Profile:RedTRC": "x" },
+						ALL_OFF,
+						"exiftool",
+						fileType,
+					),
+				).toEqual(["ICC-header:ProfileClass", "ICC_Profile:RedTRC"]);
+			},
+		);
 	});
 });

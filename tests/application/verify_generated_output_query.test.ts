@@ -221,13 +221,13 @@ describe("VerifyGeneratedOutputQuery", () => {
 			expect(JSON.stringify(result.error)).not.toContain(leakedValue);
 		});
 
-		it("fails closed with output-metadata-leak when the reopened FileType is neither PNG nor JPEG", async () => {
+		it("fails closed with output-metadata-leak when the reopened FileType has no allowlist (a .webp name over MOV content, 69-09)", async () => {
 			vi.mocked(metadataEngine.inspect).mockResolvedValue({
 				ok: true,
 				value: {
-					metadata: { "File:FileType": "WEBP" },
+					metadata: { "File:FileType": "MOV" },
 					recordCount: 1,
-					verification: { fileType: "WEBP", error: undefined },
+					verification: { fileType: "MOV", error: undefined },
 				},
 			});
 
@@ -239,6 +239,96 @@ describe("VerifyGeneratedOutputQuery", () => {
 			expect(result.ok).toBe(false);
 			if (result.ok) return;
 			expect(result.error.code).toBe("output-metadata-leak");
+			expect(result.error.detail).toBe(
+				"Copy-mode leak check has no permitted-tag set for this file type (MOV)",
+			);
+		});
+
+		describe("WebP (69-09, WEBP-08)", () => {
+			const webp = (metadata: Record<string, unknown>, fileType = "WEBP") =>
+				vi.mocked(metadataEngine.inspect).mockResolvedValue({
+					ok: true,
+					value: {
+						metadata: { "File:FileType": fileType, ...metadata },
+						recordCount: 1,
+						verification: { fileType, error: undefined },
+					},
+				});
+
+			it.each([
+				"WEBP",
+				"WEBP (lossless)",
+				"Extended WEBP",
+				"Extended WEBP (lossless)",
+			])("passes a clean %s record under demand required", async (fileType) => {
+				webp({ "RIFF:ImageWidth": 16 }, fileType);
+				const result = await query.execute({
+					generatedPath: "/tmp/a_cleaned.webp",
+					copyModeLeakCheck: cleanPreservation,
+				});
+				expect(result).toEqual({ ok: true, value: { exemptionsApplied: [] } });
+			});
+
+			it("flags a surviving XMP creator and GPS tag in a WebP, names only", async () => {
+				const leakedValue = "ZZLEAK-69-SENTINEL-VALUE";
+				webp(
+					{
+						"XMP-dc:Creator": leakedValue,
+						"GPS:GPSLatitude": 12.5,
+					},
+					"Extended WEBP",
+				);
+				const result = await query.execute({
+					generatedPath: "/tmp/a_cleaned.webp",
+					copyModeLeakCheck: cleanPreservation,
+				});
+				expect(result.ok).toBe(false);
+				if (result.ok) return;
+				expect(result.error.code).toBe("output-metadata-leak");
+				if (result.error.code !== "output-metadata-leak") return;
+				expect(result.error.leakedTags).toEqual([
+					"GPS:GPSLatitude",
+					"XMP-dc:Creator",
+				]);
+				expect(JSON.stringify(result.error)).not.toContain(leakedValue);
+			});
+
+			it("flags a WebP_Flags value naming XMP and judges the flags by their value", async () => {
+				webp({ "RIFF:WebP_Flags": "XMP, EXIF" }, "Extended WEBP");
+				const xmp = await query.execute({
+					generatedPath: "/tmp/a_cleaned.webp",
+					copyModeLeakCheck: {
+						...cleanPreservation,
+						preserveOrientation: true,
+					},
+				});
+				expect(xmp.ok).toBe(false);
+				if (xmp.ok) return;
+				if (xmp.error.code !== "output-metadata-leak") return;
+				expect(xmp.error.leakedTags).toEqual(["RIFF:WebP_Flags"]);
+
+				webp({ "RIFF:WebP_Flags": "Alpha" }, "Extended WEBP");
+				const alpha = await query.execute({
+					generatedPath: "/tmp/a_cleaned.webp",
+					copyModeLeakCheck: cleanPreservation,
+				});
+				expect(alpha).toEqual({ ok: true, value: { exemptionsApplied: [] } });
+			});
+
+			it("is leak-checked under demand when-allowlisted too: a genuine WebP with GPS leaks", async () => {
+				webp({ "GPS:GPSLatitude": 12.5 });
+				const result = await query.execute({
+					generatedPath: "/tmp/a_cleaned.webp",
+					copyModeLeakCheck: {
+						...cleanPreservation,
+						demand: "when-allowlisted",
+					},
+				});
+				expect(result.ok).toBe(false);
+				if (result.ok) return;
+				if (result.error.code !== "output-metadata-leak") return;
+				expect(result.error.leakedTags).toEqual(["GPS:GPSLatitude"]);
+			});
 		});
 
 		describe("demand when-allowlisted (D-08, F-63-3)", () => {
@@ -281,7 +371,6 @@ describe("VerifyGeneratedOutputQuery", () => {
 			});
 
 			it.each([
-				["WEBP", "/tmp/a_cleaned.webp"],
 				["TIFF", "/tmp/a_cleaned.tif"],
 				["DNG", "/tmp/a_cleaned.dng"],
 				["MP4", "/tmp/a_cleaned.mp4"],
@@ -309,17 +398,17 @@ describe("VerifyGeneratedOutputQuery", () => {
 				expect(result.ok).toBe(true);
 			});
 
-			it("demand required keeps the no permitted-tag set failure text for WEBP", async () => {
-				reopened("WEBP", {});
+			it("demand required keeps the no permitted-tag set failure text for a FileType without an allowlist (MOV behind a .webp name)", async () => {
+				reopened("MOV", {});
 				const result = await query.execute({
-					generatedPath: "/tmp/a_cleaned.png",
+					generatedPath: "/tmp/a_cleaned.webp",
 					copyModeLeakCheck: cleanPreservation,
 				});
 				expect(result.ok).toBe(false);
 				if (result.ok) return;
 				expect(result.error.code).toBe("output-metadata-leak");
 				expect(result.error.detail).toBe(
-					"Copy-mode leak check has no permitted-tag set for this file type (WEBP)",
+					"Copy-mode leak check has no permitted-tag set for this file type (MOV)",
 				);
 				if (result.error.code !== "output-metadata-leak") return;
 				expect(result.error.leakedTags).toEqual([]);

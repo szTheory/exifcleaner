@@ -89,7 +89,7 @@ interface Row {
 		readonly outcome: "published" | "write-failed" | "verification-failed";
 		// Reopened FileType of the published (or removed) output; undefined when nothing was written.
 		readonly fileType?: string;
-		readonly format?: "png" | "jpeg" | "heic" | "avif";
+		readonly format?: "png" | "jpeg" | "heic" | "avif" | "webp";
 		readonly exemptionsApplied?: readonly string[];
 		readonly demand?: "required" | "when-allowlisted";
 		readonly verificationCode?: string;
@@ -183,6 +183,42 @@ const ROWS_PUBLISHED: readonly Row[] = [
 			outcome: "published",
 			fileType: "AVIF",
 			format: "avif",
+			exemptionsApplied: [],
+			demand: "required",
+		},
+	},
+	// Rows 6 and 10 (69-09, WEBP-08): WebP bytes behind a .heic / .png name. They ended
+	// verification-failed until 4.8.0 because no WebP allowlist existed (F-63-9). The reopened
+	// FileType (Extended WEBP) now maps to the measured WebP allowlist whatever the name says, so
+	// the clean native output is published, name and extension kept (D-06).
+	{
+		title:
+			"WebP bytes named .heic with preserveResolution: native writes, the reopened WebP passes the WebP allowlist",
+		row: "6",
+		fixture: "sample.webp",
+		sourceName: "photo.heic",
+		settings: RESOLUTION_ON,
+		expect: {
+			engine: "native",
+			outcome: "published",
+			fileType: "Extended WEBP",
+			format: "webp",
+			exemptionsApplied: [],
+			demand: "required",
+		},
+	},
+	{
+		title:
+			"WebP bytes named .png: native writes, the reopened WebP passes the WebP allowlist",
+		row: "10",
+		fixture: "sample.webp",
+		sourceName: "photo.png",
+		settings: DEFAULTS,
+		expect: {
+			engine: "native",
+			outcome: "published",
+			fileType: "Extended WEBP",
+			format: "webp",
 			exemptionsApplied: [],
 			demand: "required",
 		},
@@ -446,8 +482,8 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 		readonly demand: "required" | "when-allowlisted";
 	}
 
-	// Rows 9, 13 (row 6 moved to the fail-closed table below when exifcleaner-node 0.5.0 made the
-	// WebP handler preserve resolution, so native no longer declines it): ExifTool refuses (it chooses its writer by the file NAME, Writer.pl:2550-2558),
+	// Rows 9, 13 (row 6 became a published row when exifcleaner-node 0.5.0 made the WebP handler
+	// preserve resolution and 69-09 added the WebP allowlist): ExifTool refuses (it chooses its writer by the file NAME, Writer.pl:2550-2558),
 	// the transaction ends write-failed, nothing is written, the source and directory are unchanged.
 	const REFUSALS: readonly RefusalRow[] = [
 		{
@@ -499,31 +535,11 @@ describe("63-13: extension/content mismatch matrix (ADP-08) through the real tra
 		assertSourceAndDir(ran, { sourceName: refusal.sourceName } as Row, []);
 	});
 
-	// Rows 6, 10 and 15: a write succeeds but the reopened FileType (WEBP / MP4) has no allowlist
-	// while the .png / .heic name demands the leak check: fail closed, output removed (F-63-9
-	// pinned, not changed). Row 6 was a native decline (unsupported-feature) on 0.4.0 because the
-	// content-selected WebP handler did not preserve resolution; 0.5.0 declares it and writes, so
-	// the same bytes now end exactly like row 10 (69-06, measured on the installed package).
+	// Row 15: a write succeeds but the reopened FileType (MP4) has no allowlist while the .heic name
+	// demands the leak check: fail closed, output removed (F-63-9 pinned, not changed). Rows 6 and
+	// 10 (WebP bytes behind a .heic / .png name) lived here until 69-09 gave WebP its allowlist;
+	// they are published rows above now.
 	const FAIL_CLOSED = [
-		{
-			row: "6",
-			title:
-				"WebP bytes named .heic with preserveResolution: native writes (0.5.0), verify fails closed",
-			fixture: "sample.webp",
-			sourceName: "photo.heic",
-			sourceFileType: "Extended WEBP",
-			engine: "native",
-			settings: RESOLUTION_ON,
-		},
-		{
-			row: "10",
-			title: "WebP bytes named .png: native writes, verify fails closed",
-			fixture: "sample.webp",
-			sourceName: "photo.png",
-			sourceFileType: "Extended WEBP",
-			engine: "native",
-			settings: DEFAULTS,
-		},
 		{
 			row: "15",
 			title:
