@@ -26,6 +26,7 @@ import { promisify } from "node:util";
 import type { RemoveMetadataResult } from "../../src/common/ipc_channels";
 import { DEFAULT_SETTINGS } from "../../src/domain/settings_schema";
 import { readMetadataTags } from "../e2e/helpers/metadata_assertions";
+import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import { createFixtureDir } from "../helpers/fixture_copier";
 import {
 	closePackagedApp,
@@ -217,6 +218,31 @@ test("installed artifact overwrite platform behaviour is measured and fails clos
 			);
 		}
 	}
+	// The app's own overwrite plus the whole-directory effect of the call: only the target changed
+	// (or nothing, when the removal failed closed); every sibling, link and the sentinel is untouched.
+	async function stagedChecked(
+		id: string,
+		file: string,
+	): Promise<RemoveMetadataResult> {
+		const dir = path.dirname(file);
+		const before = snapshotDir(dir);
+		const result = await staged(context, file);
+		try {
+			assertDirEffect(before, snapshotDir(dir), {
+				added: [],
+				removed: [],
+				modified: result.success ? [path.basename(file)] : [],
+				unchanged: [...before.keys()].filter(
+					(name) => name !== path.basename(file),
+				),
+			});
+		} catch (error) {
+			problems.push(
+				`${id}: ${error instanceof Error ? error.message : String(error)}`,
+			);
+		}
+		return result;
+	}
 	function assertNoResidue(id: string, dir: string): void {
 		const left = residue(dir);
 		if (left.length > 0) problems.push(`${id}: residue ${left.join(",")}`);
@@ -234,7 +260,7 @@ test("installed artifact overwrite platform behaviour is measured and fails clos
 				const twin = place(probe, "mode-legacy", "row.jpg");
 				fs.chmodSync(file, 0o640);
 				fs.chmodSync(twin, 0o640);
-				const result = await staged(context, file);
+				const result = await stagedChecked("mode", file);
 				await legacy(context, twin);
 				const stagedMode = octal(fs.statSync(file).mode);
 				record({
@@ -256,7 +282,7 @@ test("installed artifact overwrite platform behaviour is measured and fails clos
 			const twin = place(probe, "readonly-legacy", "row.jpg");
 			fs.chmodSync(file, 0o444);
 			fs.chmodSync(twin, 0o444);
-			const result = await staged(context, file);
+			const result = await stagedChecked("readonly", file);
 			const legacyOk = await legacy(context, twin);
 			const stagedBytes = await bytesState(context, probe, file);
 			const legacyBytes = await bytesState(context, probe, twin);
@@ -284,7 +310,7 @@ test("installed artifact overwrite platform behaviour is measured and fails clos
 			const twinLink = path.join(path.dirname(twin), "link.jpg");
 			fs.linkSync(file, link);
 			fs.linkSync(twin, twinLink);
-			const result = await staged(context, file);
+			const result = await stagedChecked("hardlink", file);
 			await legacy(context, twin);
 			const stagedOther = fs.readFileSync(link).equals(probe.original)
 				? "unchanged"
@@ -313,7 +339,7 @@ test("installed artifact overwrite platform behaviour is measured and fails clos
 				const twin = place(probe, "ads-legacy", "row.jpg");
 				fs.writeFileSync(`${file}:exifcleaner-probe`, "probe");
 				fs.writeFileSync(`${twin}:exifcleaner-probe`, "probe");
-				const result = await staged(context, file);
+				const result = await stagedChecked("ads", file);
 				await legacy(context, twin);
 				const carried = (target: string): string => {
 					try {
@@ -357,7 +383,7 @@ test("installed artifact overwrite platform behaviour is measured and fails clos
 				};
 				let stagedResult: RemoveMetadataResult | undefined;
 				const stagedObservation = await run("symlink-staged", async (link) => {
-					stagedResult = await staged(context, link);
+					stagedResult = await stagedChecked("symlink", link);
 				});
 				const legacyObservation = await run("symlink-legacy", (link) =>
 					legacy(context, link),
@@ -378,7 +404,7 @@ test("installed artifact overwrite platform behaviour is measured and fails clos
 		await guarded("identity", async () => {
 			const file = place(probe, "identity", "row.jpg");
 			const before = fs.statSync(file, { bigint: true });
-			const result = await staged(context, file);
+			const result = await stagedChecked("identity", file);
 			const after = fs.statSync(file, { bigint: true });
 			const word = (value: bigint): string =>
 				value === 0n ? "zero" : "nonzero";
@@ -399,7 +425,7 @@ test("installed artifact overwrite platform behaviour is measured and fails clos
 				const twin = place(probe, "birth-legacy", "row.jpg");
 				const before = fs.statSync(file).birthtimeMs;
 				const twinBefore = fs.statSync(twin).birthtimeMs;
-				const result = await staged(context, file);
+				const result = await stagedChecked("birthtime", file);
 				await legacy(context, twin);
 				const verdict = (a: number, b: number): string =>
 					Math.abs(a - b) > 1 ? "changed" : "same";
@@ -415,7 +441,7 @@ test("installed artifact overwrite platform behaviour is measured and fails clos
 				const file = place(probe, "owner-staged", "row.jpg");
 				const twin = place(probe, "owner-legacy", "row.jpg");
 				const source = fs.statSync(file);
-				const result = await staged(context, file);
+				const result = await stagedChecked("owner", file);
 				await legacy(context, twin);
 				const owner = (stat: fs.Stats): string => `${stat.uid}:${stat.gid}`;
 				const stagedOwner = owner(fs.statSync(file));
