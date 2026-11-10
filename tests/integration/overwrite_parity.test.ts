@@ -452,6 +452,23 @@ describeOnPosix(
 			},
 		);
 
+		// D-16: the Windows creation time is a measured difference, asserted explicitly here
+		// because vitest does not run on Windows in CI; the installed-artifact smoke prints the
+		// MEASURE line this entry quotes. Never a silent skip, never promised as kept.
+		it("the Windows creation-time difference is a named known difference quoting its measurement", () => {
+			const entry = KNOWN_DIFFERENCES.find(
+				(candidate) => candidate.id === "creation-time-windows",
+			);
+			expect(entry).toBeDefined();
+			expect(entry?.observation).toContain(
+				"MEASURE: win32 birthtime legacy=same staged=changed",
+			);
+			expect(entry?.observation).toContain("42777303465");
+			expect(entry?.notesPhrase).toBe(
+				"on windows the file's creation time changes",
+			);
+		});
+
 		it("every KNOWN_DIFFERENCES entry and every required notes fact is well-formed (ids unique, phrases non-empty)", () => {
 			const ids = [...KNOWN_DIFFERENCES, ...NOTES_REQUIRED_FACTS].map(
 				(entry) => entry.id,

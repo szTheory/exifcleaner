@@ -228,15 +228,23 @@ export function buildParityStack(process_: ExiftoolProcess): ParityStack {
 
 // Measured differences between today's -overwrite_original and a staged overwrite that are NOT
 // asserted equal. Each entry is stated in the release notes (notesPhrase, case-insensitive) and
-// the parity test asserts the difference explicitly. Empty means every observation was measured
-// equal on the platforms measured so far (macOS arm64 APFS; Linux and Windows follow at the
-// first CI run).
+// the parity test asserts the difference explicitly. Every other observation was measured equal
+// on macOS arm64 (APFS), Linux (hosted ubuntu-24.04) and Windows (hosted windows-2025); the
+// entries below come from the first hosted run (69-17, run 42777303465, head f3d5843).
 export type KnownDifference = {
 	readonly id: string;
 	readonly observation: string;
 	readonly notesPhrase: string;
 };
-export const KNOWN_DIFFERENCES: readonly KnownDifference[] = [];
+export const KNOWN_DIFFERENCES: readonly KnownDifference[] = [
+	{
+		id: "creation-time-windows",
+		// The legacy overwrite keeps the file; the staged overwrite replaces it with a new file.
+		observation:
+			"MEASURE: win32 birthtime legacy=same staged=changed (run 42777303465): the legacy overwrite keeps the creation time of the file, the staged overwrite creates a new file whose creation time is new",
+		notesPhrase: "on windows the file's creation time changes",
+	},
+];
 
 // Limitations the 4.8.0 release notes must state (D-15). The wording is a contract: the
 // cross-check test fails when a phrase is missing from RELEASE_NOTES.md at 4.8.0.
