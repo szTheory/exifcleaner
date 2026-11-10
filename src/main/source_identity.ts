@@ -5,8 +5,9 @@ export type SourceIdentity = {
 	readonly ino: bigint;
 	readonly size: bigint;
 	readonly mtimeNs: bigint;
-	// Not compared by the identity recheck. Plan 69-11 applies mode, uid and gid to the stage
-	// so an overwrite keeps the original's attributes.
+	// Not compared by the identity recheck. The commit applies uid, gid and the mode (masked
+	// with 0o7777: this value carries the file-type bits) to the stage so an overwrite keeps
+	// the original's attributes.
 	readonly mode: number;
 	readonly uid: number;
 	readonly gid: number;
@@ -32,13 +33,34 @@ export async function statSourceIdentity(
 
 // Flush the closed stage to disk before it is renamed over the only copy of the user's
 // file. Opened r+ because Windows FlushFileBuffers needs write access (a read-only open
-// fails there). No directory fsync: the promise is atomic visibility of the rename, not
-// instant durability of the directory entry.
+// fails there). A stage written from a read-only source can itself be read-only (the native
+// engine gives the stage the source's mode), and r+ then fails with EACCES or EPERM:
+// -overwrite_original handles a read-only source, so the sync must not make every such file
+// commit-failed. On POSIX fsync works on a read-only descriptor, so only that open is
+// retried read-only; any other open error and every sync error still propagate (a Windows
+// read-only stage fails closed at the retry's sync, as its rename-over would). No directory
+// fsync: the promise is atomic visibility of the rename, not instant durability of the
+// directory entry.
 export async function syncFileToDisk(path: string): Promise<void> {
-	const handle = await open(path, "r+");
+	let handle;
+	try {
+		handle = await open(path, "r+");
+	} catch (error: unknown) {
+		if (!isPermissionRefusal(error)) {
+			throw error;
+		}
+		handle = await open(path, "r");
+	}
 	try {
 		await handle.sync();
 	} finally {
 		await handle.close();
 	}
+}
+
+function isPermissionRefusal(error: unknown): boolean {
+	if (typeof error !== "object" || error === null || !("code" in error)) {
+		return false;
+	}
+	return error.code === "EACCES" || error.code === "EPERM";
 }

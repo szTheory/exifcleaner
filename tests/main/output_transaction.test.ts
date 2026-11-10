@@ -509,6 +509,7 @@ describe("OutputTransaction", () => {
 			"write",
 			`verify:${generatedPath}`,
 			`sync:${generatedPath}`,
+			...appliedAttributes,
 			`stat:${originalPath}`,
 			`rename:${generatedPath}:${originalPath}`,
 			`unlink:${generatedPath}`,

@@ -348,6 +348,34 @@ describe.skipIf(posixOnly)(
 			});
 		});
 
+		// A6 order proof that does not lean on the read-only fallback of syncFileToDisk: a strict
+		// r+ sync (what Windows FlushFileBuffers needs, and what the 69-10 sync did) refuses a
+		// stage that is already 0444. Because the mode is applied AFTER the sync the stage is
+		// still 0644 at that moment and the commit succeeds; moving chmod before the sync turns
+		// this case into commit-failed (mutation control NC-ATTR).
+		it("with a strict r+ sync a 0444 source still commits: the mode is applied after the sync, never before", async () => {
+			let syncedMode = "";
+			const ctx = setup({
+				overrides: {
+					syncFile: async (stage) => {
+						syncedMode = modeOf(stage);
+						const handle = await fs.promises.open(stage, "r+");
+						try {
+							await handle.sync();
+						} finally {
+							await handle.close();
+						}
+					},
+				},
+			});
+			fs.chmodSync(ctx.source, 0o444);
+			const result = await ctx.run();
+			expect(result).toEqual({ ok: true, value: { outputPath: ctx.source } });
+			expect(syncedMode).toBe("644");
+			expect(modeOf(ctx.source)).toBe("444");
+			assertNoStageResidue(ctx.dir);
+		});
+
 		it("uid and gid of the replaced file equal the source's", async () => {
 			const ctx = setup({});
 			const sourceStat = fs.statSync(ctx.source);

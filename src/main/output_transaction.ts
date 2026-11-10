@@ -60,11 +60,11 @@ export type OutputTransactionDependencies = {
 	rename(from: string, to: string): Promise<void>;
 	/** Identity of the source, captured before the write and rechecked before the rename. */
 	statSource(path: string): Promise<SourceIdentity>;
-	/** fsync of the closed stage, called after verification and before the recheck. */
+	/** fsync of the closed stage, called after verification and before the attributes and the recheck. */
 	syncFile(path: string): Promise<void>;
-	// Declared and wired now, applied by plan 69-11 between the sync and the recheck
-	// (never before the sync: syncFile opens the stage r+, which a 0444 stage refuses).
+	/** Best effort: applied to the stage after the sync, errors ignored (see execute). */
 	chown(path: string, uid: number, gid: number): Promise<void>;
+	/** Applied to the stage after chown; a failure is commit-failed (see execute). */
 	chmod(path: string, mode: number): Promise<void>;
 	delay(milliseconds: number): Promise<void>;
 };
@@ -179,6 +179,36 @@ export class OutputTransaction {
 		if (commitPath !== undefined && capturedIdentity !== undefined) {
 			try {
 				await this.dependencies.syncFile(generatedPath);
+				// Give the replacement the attributes -overwrite_original keeps, using the
+				// identity captured before the write (the recheck below proves the source is
+				// still that file). Order: sync, chown, chmod, recheck, rename.
+				//  - After the sync (amendment A6): the sync opens the stage for writing, which a
+				//    stage that is already read-only cannot do on every platform, so the mode
+				//    is applied once the stage is durable.
+				//  - chown is best effort: it fails with EPERM when the user is not in the
+				//    group, has no effect on Windows, and a failed chown must never block a
+				//    cleaned file from replacing the original.
+				//  - chmod follows chown because chown can clear setuid and setgid. The mask is
+				//    0o7777: a stat mode also carries the file-type bits, which chmod must not
+				//    receive. A chmod failure is commit-failed (cleanup below), never a file
+				//    that silently ends up with the stage's default mode.
+				//  - Path-based calls: fchmod and lchown are not portable to Windows.
+				// Not carried over (documented limitation): extended attributes, ACLs,
+				// alternate data streams, file flags, hard-link identity (a second link keeps the
+				// old bytes) and a symlink at the path (it is replaced by the regular file).
+				try {
+					await this.dependencies.chown(
+						generatedPath,
+						capturedIdentity.uid,
+						capturedIdentity.gid,
+					);
+				} catch {
+					// ignored on purpose, see above
+				}
+				await this.dependencies.chmod(
+					generatedPath,
+					capturedIdentity.mode & 0o7777,
+				);
 				const currentIdentity = await this.dependencies.statSource(filePath);
 				if (!sameSourceIdentity(capturedIdentity, currentIdentity)) {
 					// The source changed after the stage was written (a sync client, an editor, a
