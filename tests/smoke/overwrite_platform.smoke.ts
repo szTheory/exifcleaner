@@ -295,6 +295,13 @@ test("installed artifact overwrite platform behaviour is measured and fails clos
 			if (!result.success && stagedBytes !== "original") {
 				problems.push("readonly: failed removal changed the source");
 			}
+			// Measured on Windows (69-17, run 42777303465): a read-only source is not replaced
+			// by either route. The app refuses it before anything is written (69-18), so the
+			// outcome is a failure with the original bytes and, asserted below for every OS, no
+			// stage and no residue next to the file.
+			if (IS_WINDOWS && result.success) {
+				problems.push("readonly: a read-only Windows source was replaced");
+			}
 			if (result.success && stagedBytes !== "cleaned") {
 				problems.push("readonly: successful removal did not clean the source");
 			}
