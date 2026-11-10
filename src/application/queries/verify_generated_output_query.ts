@@ -37,11 +37,13 @@ export class VerifyGeneratedOutputQuery {
 	}: {
 		generatedPath: string;
 		/**
-		 * Opt-in (D-08/D-10/D-11): populated by every verified copy-mode call site. When present,
-		 * after every existing check passes, a reopened FileType with an allowlist is checked
-		 * against the measured fail-closed allowlist (58-SWEEP-MATRIX.md). `demand` decides the
+		 * Opt-in (D-08/D-10/D-11): populated by the call sites whose write demands a leak check:
+		 * every save-as-copy of a verified name and, from 4.8.0, every overwrite of the seven
+		 * native image extensions. When present, after every existing check passes, a reopened
+		 * FileType with an allowlist is checked against the measured fail-closed allowlist
+		 * (58-SWEEP-MATRIX.md, 63-SWEEP-MATRIX.md, 69-WEBP-SWEEP-MATRIX.md). `demand` decides the
 		 * outcome for a FileType without an allowlist: "required" fails closed, "when-allowlisted"
-		 * stays verify-only (genuine WebP/RAW/TIFF/media). Absent for overwrite-mode call sites.
+		 * stays verify-only (genuine RAW/TIFF/media). Absent for a RAW, TIFF or media overwrite.
 		 */
 		copyModeLeakCheck?:
 			| {
