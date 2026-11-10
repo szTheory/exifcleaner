@@ -1,5 +1,5 @@
 // Phase 69-02 (OVR-01; D-21, measurement M-08): a 3-component colour JPEG saved as a copy by the
-// INSTALLED app must complete and verify on every OS. The committed colour fixtures
+// INSTALLED app (JPEG and, from 69-03, PNG) must complete and verify on every OS. The committed colour fixtures
 // (tests/e2e/fixtures/COLOR-PROVENANCE.md) carry synthetic identifying metadata, so the strip is
 // non-vacuous. Each test prints one stable line per observation to stdout so the hosted job log
 // (and the smoke-report artifact attachment) carries the measurement:
@@ -24,11 +24,19 @@ import {
 
 test.describe.configure({ mode: "serial" });
 
-const COLOR_FIXTURES = ["color_420_progressive.jpg", "color_444.jpg"] as const;
+// 69-03 adds the colour PNG and the ICC-bearing colour JPEG (the profile is embedded in the
+// committed bytes, so the colour-profile flag has something to keep).
+const COLOR_FIXTURES = [
+	{ fixture: "color_420_progressive.jpg", kind: "JPEG" },
+	{ fixture: "color_444.jpg", kind: "JPEG" },
+	{ fixture: "color_icc_p3.jpg", kind: "JPEG" },
+	{ fixture: "color_rgb.png", kind: "PNG" },
+] as const;
 const FLAG_SETS = ["off", "default"] as const;
 type FlagSet = (typeof FLAG_SETS)[number];
 
-// Ungrouped ExifTool names of the seeded identifying tags (COLOR-PROVENANCE.md).
+// Ungrouped ExifTool names of the seeded identifying tags (COLOR-PROVENANCE.md); Comment is the
+// PNG text chunk of color_rgb.png and is absent from the JPEG sources.
 const SEEDED_TAG_NAMES = [
 	"Make",
 	"Model",
@@ -36,11 +44,12 @@ const SEEDED_TAG_NAMES = [
 	"GPSLatitude",
 	"GPSLongitude",
 	"Creator",
+	"Comment",
 ] as const;
 
-for (const fixture of COLOR_FIXTURES) {
+for (const { fixture, kind } of COLOR_FIXTURES) {
 	for (const flags of FLAG_SETS) {
-		test(`colour JPEG ${fixture} saves as a copy and verifies in the installed artifact (flags ${flags})`, async () => {
+		test(`colour ${kind} ${fixture} saves as a copy and verifies in the installed artifact (flags ${flags})`, async () => {
 			const context = await launchPackagedApp();
 			const driver = createProcessingDriver(context);
 			const { dir, copyFixture, cleanup } = createFixtureDir();
