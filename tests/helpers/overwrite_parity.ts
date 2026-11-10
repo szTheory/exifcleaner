@@ -260,3 +260,33 @@ export const NOTES_REQUIRED_FACTS: readonly RequiredFact[] = [
 		phrase: "owned by a different user",
 	},
 ];
+
+function normalizeNotes(text: string): string {
+	return text.toLowerCase().replace(/\s+/g, " ");
+}
+
+// The phrases (ids) of the required facts and known differences that a notes text does not
+// contain. Case-insensitive and tolerant of line wrapping (whitespace runs collapse), nothing
+// else: a paraphrase is a miss, because the wording is the contract.
+export function missingNotesPhrases(
+	notesText: string,
+	{
+		facts = NOTES_REQUIRED_FACTS,
+		differences = KNOWN_DIFFERENCES,
+	}: {
+		facts?: readonly RequiredFact[];
+		differences?: readonly KnownDifference[];
+	} = {},
+): string[] {
+	const haystack = normalizeNotes(notesText);
+	const wanted = [
+		...facts.map((fact) => ({ id: fact.id, phrase: fact.phrase })),
+		...differences.map((entry) => ({
+			id: entry.id,
+			phrase: entry.notesPhrase,
+		})),
+	];
+	return wanted
+		.filter(({ phrase }) => !haystack.includes(normalizeNotes(phrase)))
+		.map(({ id }) => id);
+}

@@ -301,6 +301,14 @@ describe.skipIf(process.platform === "win32")(
 			// file and the old target is left alone (see NOTES_REQUIRED_FACTS "overwrite replaces
 			// the file").
 			expect(runs.legacy.after?.isSymlink).toBe(false);
+			// The file the link pointed to is left alone: still there, bytes equal to the
+			// link's pre-overwrite content.
+			for (const route of ROUTE_NAMES) {
+				const target = path.join(runs[route].dir, "real-target.jpg");
+				expect(sha256(target), `${route} target untouched`).toBe(
+					runs[route].before.bytesSha256,
+				);
+			}
 		});
 
 		it.skipIf(!posixUser)(
