@@ -20,6 +20,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { itOnPosixUser } from "../helpers/posix_host";
 import { StripMetadataCommand } from "../../src/application/commands/strip_metadata_command";
 import { VerifyGeneratedOutputQuery } from "../../src/application/queries/verify_generated_output_query";
 import {
@@ -665,7 +666,7 @@ describe("69-12: overwrite of the seven native image extensions on the verified 
 			},
 		);
 
-		it.skipIf(process.platform === "win32" || process.getuid?.() === 0)(
+		itOnPosixUser(
 			"a POSIX 0444 TIFF keeps its mode after the staged overwrite",
 			async () => {
 				const dir = freshDir();

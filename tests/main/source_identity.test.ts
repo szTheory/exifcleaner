@@ -10,6 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { itOnPosixUser } from "../helpers/posix_host";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import {
 	statSourceIdentity,
@@ -145,7 +146,7 @@ describe("syncFileToDisk (D-11)", () => {
 	// read-only source gives a 0444 stage that cannot be opened r+. fsync works on a read-only
 	// descriptor on POSIX, so the sync falls back to a read-only open instead of failing every
 	// read-only file (which -overwrite_original handles).
-	it.skipIf(process.platform === "win32" || process.getuid?.() === 0)(
+	itOnPosixUser(
 		"syncs a read-only (0444) stage through a read-only open and changes nothing",
 		async () => {
 			const file = await tempFile("payload");

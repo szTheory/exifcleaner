@@ -20,6 +20,12 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { ExiftoolProcess } from "../../src/infrastructure/exiftool/ExiftoolProcess";
 import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import {
+	describeOnPosix,
+	describeOnPosixUser,
+	itOnPosix,
+	itOnPosixUser,
+} from "../helpers/posix_host";
+import {
 	KNOWN_DIFFERENCES,
 	NOTES_REQUIRED_FACTS,
 	PARITY_SETTINGS,
@@ -43,8 +49,6 @@ const EXIFTOOL_PATH =
 		? path.resolve(__dirname, "../../.resources/win/bin/exiftool.exe")
 		: path.resolve(__dirname, "../../.resources/nix/bin/exiftool");
 
-const posixUser = process.platform !== "win32" && process.getuid?.() !== 0;
-
 type RouteRun = {
 	readonly dir: string;
 	readonly source: string;
@@ -53,7 +57,7 @@ type RouteRun = {
 	readonly outcome: RouteOutcome;
 };
 
-describe.skipIf(process.platform === "win32")(
+describeOnPosix(
 	"overwrite attribute parity: legacy -overwrite_original versus the staged overwrite (69-11)",
 	() => {
 		const exiftoolProcess = new ExiftoolProcess({ binPath: EXIFTOOL_PATH });
@@ -159,7 +163,7 @@ describe.skipIf(process.platform === "win32")(
 			}
 		});
 
-		it.skipIf(!posixUser)(
+		itOnPosixUser(
 			"overwrite preserves 0640 mode vs -overwrite_original",
 			async () => {
 				const runs = await runRoutes({
@@ -177,7 +181,7 @@ describe.skipIf(process.platform === "win32")(
 			},
 		);
 
-		it.skipIf(!posixUser)(
+		itOnPosixUser(
 			"overwrite preserves a private 0600 mode on every route",
 			async () => {
 				const runs = await runRoutes({
@@ -189,7 +193,7 @@ describe.skipIf(process.platform === "win32")(
 			},
 		);
 
-		it.skipIf(!posixUser)(
+		itOnPosixUser(
 			"overwrite preserves read-only 0444 in a writable directory: same outcome and mode on every route (the stage still commits)",
 			async () => {
 				const runs = await runRoutes({
@@ -222,7 +226,7 @@ describe.skipIf(process.platform === "win32")(
 			}
 		});
 
-		it.skipIf(process.platform === "win32")(
+		itOnPosix(
 			"overwrite breaks a hard link: the other link keeps the old bytes and metadata, on every route",
 			async () => {
 				const sibling = (dir: string) => path.join(dir, "other-link.jpg");
@@ -311,7 +315,7 @@ describe.skipIf(process.platform === "win32")(
 			}
 		});
 
-		it.skipIf(!posixUser)(
+		itOnPosixUser(
 			"overwrite ends with the same uid and gid as the source (non-root; a secondary group makes it non-trivial)",
 			async (testContext) => {
 				const secondary = (process.getgroups?.() ?? []).find(
@@ -342,7 +346,7 @@ describe.skipIf(process.platform === "win32")(
 			},
 		);
 
-		it.skipIf(!posixUser)(
+		itOnPosixUser(
 			"a directory where the stage cannot be created: every route fails, the source is untouched, the directory equals its pre-state",
 			async () => {
 				const failures: Record<string, RouteOutcome> = {};
@@ -410,7 +414,7 @@ describe.skipIf(process.platform === "win32")(
 			});
 		});
 
-		describe.skipIf(!posixUser)(
+		describeOnPosixUser(
 			"TIFF and media overwrite already pass commitPath: they inherit the attribute application",
 			() => {
 				it.each([

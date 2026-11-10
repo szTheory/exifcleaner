@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { describeOnPosixUser } from "../helpers/posix_host";
 import {
 	OutputTransaction,
 	type OutputTransactionDependencies,
@@ -286,13 +287,11 @@ describe("OutputTransaction over real files: source identity recheck and fsync (
 // file the source's permission bits AFTER the sync, because syncFile opens the stage r+ and a
 // stage already at 0444 refuses that open (every read-only source would end commit-failed while
 // -overwrite_original keeps 0444 and succeeds).
-const posixOnly = process.platform === "win32" || process.getuid?.() === 0;
-
 function modeOf(file: string): string {
 	return (fs.statSync(file).mode & 0o7777).toString(8);
 }
 
-describe.skipIf(posixOnly)(
+describeOnPosixUser(
 	"OutputTransaction over real files: the source mode survives a staged overwrite (69-11)",
 	() => {
 		it.each([
