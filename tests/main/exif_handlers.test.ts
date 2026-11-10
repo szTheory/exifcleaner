@@ -450,7 +450,6 @@ describe("exif:remove handler", () => {
 	});
 
 	it.each([
-		["webp save-as-copy", "/dir/photo.webp", "/dir/photo_cleaned.webp"],
 		["tif save-as-copy", "/dir/scan.tif", "/dir/scan_cleaned.tif"],
 		["RAW save-as-copy", "/dir/sample.dng", "/dir/sample_cleaned.dng"],
 		["mp4 save-as-copy", "/dir/clip.mp4", "/dir/clip_cleaned.mp4"],
@@ -472,6 +471,35 @@ describe("exif:remove handler", () => {
 					copyModeLeakCheck: expect.objectContaining({
 						demand: "when-allowlisted",
 					}),
+				}),
+			);
+		},
+	);
+
+	it.each([
+		["/dir/photo.webp", "/dir/photo_cleaned.webp"],
+		["/dir/PHOTO.WEBP", "/dir/PHOTO_cleaned.WEBP"],
+	])(
+		"passes copyModeLeakCheck with demand required for a webp save-as-copy %s (69-09, WEBP-08)",
+		async (filePath, generatedPath) => {
+			const { container, outputTransaction } = makeContainer({
+				saveAsCopy: true,
+			});
+			setupExifHandlers({ container });
+
+			const { handler } = captureInvokeHandler("exif:remove");
+			await handler(makeAuthorizedEvent(), filePath);
+
+			expect(outputTransaction.execute).toHaveBeenCalledWith(
+				expect.objectContaining({
+					filePath,
+					generatedPath,
+					copyModeLeakCheck: {
+						demand: "required",
+						preserveOrientation: true,
+						preserveColorProfile: true,
+						preserveResolution: true,
+					},
 				}),
 			);
 		},

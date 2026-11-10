@@ -69,15 +69,17 @@ const VERIFIED_COPY_EXTENSIONS: ReadonlySet<string> = new Set([
 	".avif",
 ]);
 
-// Deliberately narrower than VERIFIED_COPY_EXTENSIONS (D-11): the leak check (D-07/D-08) has a
-// measured allowlist for png and jpeg (58-SWEEP-MATRIX.md) and, from 63-02, heic/heif
-// (63-SWEEP-MATRIX.md); webp copies are verified (reopened, checked for a recognized
-// FileType/no Error) but not leak-checked -- no allowlist was measured for webp. An .avif copy
-// is leak-checked but has no allowlist until 63-09, so it fails closed (source kept).
+// The leak check (D-07/D-08) has a measured allowlist for png and jpeg (58-SWEEP-MATRIX.md), for
+// heic/heif/avif (63-SWEEP-MATRIX.md) and, from 4.8.0 (69-09, WEBP-08), for webp
+// (69-WEBP-SWEEP-MATRIX.md), so today this set has the same members as VERIFIED_COPY_EXTENSIONS. It
+// stays a separate set (D-11): a format may be verified before its allowlist is measured, and an
+// extension listed here demands the check, so a reopened FileType without an allowlist fails closed
+// (source kept).
 const LEAK_CHECKED_COPY_EXTENSIONS: ReadonlySet<string> = new Set([
 	".png",
 	".jpg",
 	".jpeg",
+	".webp",
 	".heic",
 	".heif",
 	".avif",
@@ -158,8 +160,9 @@ export function requiresVerifiedWrite({
 }
 
 // D-07/D-08/D-11: whether a save-as-copy's verified reopen should additionally run the
-// measured fail-closed leak allowlist (58-SWEEP-MATRIX.md). Narrower than
-// requiresVerifiedWrite's copy clause -- only png/jpg/jpeg/heic/heif (and avif, failing closed until 63-09) are listed.
+// measured fail-closed leak allowlist (58-SWEEP-MATRIX.md). From 4.8.0 every verified copy
+// extension (png/jpg/jpeg/webp/heic/heif/avif) has a measured allowlist and is listed, so the two
+// copy sets have the same members; they stay separate on purpose (see LEAK_CHECKED_COPY_EXTENSIONS).
 export function requiresCopyModeLeakCheck({
 	filename,
 	outputMode,
@@ -177,10 +180,11 @@ export type CopyModeLeakCheckDemand = "required" | "when-allowlisted";
 
 // D-08/F-63-3: the leak check runs on every verified copy whose reopened FileType has an
 // allowlist, whatever the extension. "required" = the extension itself demands a check, so a
-// FileType without an allowlist fails closed. "when-allowlisted" = every other verified copy
-// name (.webp, RAW, TIFF, media): the check runs when the content reopens as an allowlisted
-// FileType (HEIC/JPEG bytes behind .webp or .tif), while genuine WebP/RAW/TIFF/media output
-// stays verify-only. Computed from the name only; the reopened FileType is the content signal.
+// FileType without an allowlist fails closed (.png, .jpg, .jpeg, .webp, .heic, .heif, .avif).
+// "when-allowlisted" = every other verified copy name (RAW, TIFF, media): the check runs when the
+// content reopens as an allowlisted FileType (HEIC/JPEG/WebP bytes behind .tif), while genuine
+// RAW/TIFF/media output stays verify-only. Computed from the name only; the reopened FileType is
+// the content signal.
 // Overwrite mode stays outside the copy-mode leak check.
 export function copyModeLeakCheckDemandOf({
 	filename,

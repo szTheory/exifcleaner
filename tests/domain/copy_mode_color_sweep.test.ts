@@ -8,7 +8,8 @@
 // The test replays findLeakedTags over the committed data, so a new colour source that surfaces a
 // structural key fails here as data, not as a user's rejected Save as copy.
 //
-// WebP rows are measured and shape-checked only: the WebP allowlist is plan 69-09's.
+// WebP rows are replayed here without the flags key; the WebP allowlist itself is 69-09's, replayed
+// with recorded flag values in copy_mode_webp_sweep.test.ts.
 import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -211,7 +212,10 @@ describe("69-03 colour sweep data: classification", () => {
 		).toEqual([]);
 	});
 
-	it("WebP rows are shape-checked only (the WebP allowlist belongs to plan 69-09)", () => {
+	// 69-09: WebP has its allowlist. These rows hold key names only (no RIFF:WebP_Flags value was
+	// recorded in the colour sweep), so the replay judges every key but the flags key, which the
+	// 69-08 WebP sweep replays with its recorded values (copy_mode_webp_sweep.test.ts).
+	it("WebP rows map to the webp format and pass the allowlist under their own flags (69-09)", () => {
 		const webp = writtenRows.filter((row) => row.format === "webp");
 		expect(webp.length).toBeGreaterThanOrEqual(16);
 		for (const row of webp) {
@@ -220,8 +224,16 @@ describe("69-03 colour sweep data: classification", () => {
 			);
 			expect(row.keys).toContain("File:FileType");
 			expect(copyModeLeakCheckFormatOf({ fileType: row.fileType })).toBe(
-				undefined,
+				"webp",
 			);
+			const withoutFlags: ColorSweepRow = {
+				...row,
+				keys: row.keys.filter((key) => key !== "RIFF:WebP_Flags"),
+			};
+			expect(
+				replay(withoutFlags).leakedTags,
+				`${row.variant} ${row.combo} ${row.route}`,
+			).toEqual([]);
 		}
 	});
 
