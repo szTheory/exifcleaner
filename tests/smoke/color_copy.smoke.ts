@@ -47,6 +47,72 @@ const SEEDED_TAG_NAMES = [
 	"Comment",
 ] as const;
 
+// Ungrouped names that legitimately remain when a preservation setting is left on (the default
+// run keeps orientation, colour profile and resolution; "off" turns all three off). Measured on
+// the installed artifact (hosted Linux run of push P1: the JPEG default run left exactly the four
+// resolution names; local macOS arm64 packaged build: all eight cases) and in the per-format sweep
+// (tests/domain/fixtures/copy_mode_color_sweep.json, router rows). Anything else the strip
+// assertion finds fails the test.
+const RESOLUTION_RESIDUE = [
+	"ExifByteOrder",
+	"XResolution",
+	"YResolution",
+	"ResolutionUnit",
+] as const;
+// color_icc_p3.jpg with the colour profile kept is cleaned by ExifTool (native declines a kept
+// profile with unsupported-feature), which keeps the profile's own header and colorimetry entries.
+const ICC_PROFILE_RESIDUE = [
+	"YCbCrPositioning",
+	"CMMFlags",
+	"ColorSpaceData",
+	"ConnectionSpaceIlluminant",
+	"DeviceAttributes",
+	"DeviceManufacturer",
+	"DeviceModel",
+	"PrimaryPlatform",
+	"ProfileCMMType",
+	"ProfileClass",
+	"ProfileConnectionSpace",
+	"ProfileCreator",
+	"ProfileDateTime",
+	"ProfileFileSignature",
+	"ProfileID",
+	"ProfileVersion",
+	"RenderingIntent",
+	"BlueMatrixColumn",
+	"BlueTRC",
+	"GreenMatrixColumn",
+	"GreenTRC",
+	"MediaWhitePoint",
+	"ProfileCopyright",
+	"ProfileDescription",
+	"RedMatrixColumn",
+	"RedTRC",
+] as const;
+// The native PNG cleaner keeps the cHRM and bKGD chunks whatever the flags (measured: the same
+// nine keys with all flags off and on, in the sweep and on the installed artifact).
+const PNG_CHUNK_RESIDUE = [
+	"BackgroundColor",
+	"BlueX",
+	"BlueY",
+	"GreenX",
+	"GreenY",
+	"RedX",
+	"RedY",
+	"WhitePointX",
+	"WhitePointY",
+] as const;
+
+function allowedResidue(fixture: string, flags: FlagSet): ReadonlySet<string> {
+	const allowed: string[] = [];
+	if (fixture.endsWith(".png")) allowed.push(...PNG_CHUNK_RESIDUE);
+	if (flags === "default" && fixture.endsWith(".jpg")) {
+		allowed.push(...RESOLUTION_RESIDUE);
+		if (fixture === "color_icc_p3.jpg") allowed.push(...ICC_PROFILE_RESIDUE);
+	}
+	return new Set(allowed);
+}
+
 for (const { fixture, kind } of COLOR_FIXTURES) {
 	for (const flags of FLAG_SETS) {
 		test(`colour ${kind} ${fixture} saves as a copy and verifies in the installed artifact (flags ${flags})`, async () => {
@@ -115,7 +181,11 @@ for (const { fixture, kind } of COLOR_FIXTURES) {
 					unchanged: [fixture],
 				});
 				expect(fs.readFileSync(source).equals(sourceBytes)).toBe(true);
-				await assertMetadataStripped(outputPath, context.exiftoolPath);
+				await assertMetadataStripped(
+					outputPath,
+					context.exiftoolPath,
+					allowedResidue(fixture, flags),
+				);
 				const outputTags = Object.keys(
 					await readMetadataTags(outputPath, context.exiftoolPath),
 				);

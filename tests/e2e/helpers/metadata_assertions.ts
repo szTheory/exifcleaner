@@ -117,13 +117,18 @@ export async function readMetadataTags(
 	return first;
 }
 
+// allowedKeys: exact ungrouped names a caller has measured as the residue of a preservation
+// setting that was deliberately left on (for example the resolution tags under Preserve
+// resolution). Default: none, so every existing caller keeps the strict meaning.
 export async function assertMetadataStripped(
 	filePath: string,
 	exiftoolPath?: string,
+	allowedKeys: ReadonlySet<string> = new Set(),
 ): Promise<void> {
 	const tags = await readMetadataTags(filePath, exiftoolPath);
 	const userExifKeys = Object.keys(tags).filter((key) => {
 		if (COMPUTED_TAG_NAMES.has(key)) return false;
+		if (allowedKeys.has(key)) return false;
 		if (STRUCTURAL_TAG_NAMES.has(key)) return false;
 		if (
 			MANDATORY_QUICKTIME_ZERO_DATE_TAG_NAMES.has(key) &&
