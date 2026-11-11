@@ -121,6 +121,15 @@ export function workflowPolicyProblems(text: string): string[] {
 	if (!/^ {8}run: yarn test:storybook$/m.test(text)) {
 		problems.push("the yarn test:storybook step is missing");
 	}
+	const testAt = text.indexOf("run: yarn test:storybook\n");
+	const ratchetAt = text.indexOf(
+		"run: node scripts/findings_ratchet.mjs --check --index storybook-static/index.json",
+	);
+	if (ratchetAt === -1 || testAt === -1 || ratchetAt < testAt) {
+		problems.push(
+			"the findings_ratchet.mjs --check step must follow yarn test:storybook",
+		);
+	}
 	return problems;
 }
 
@@ -218,6 +227,15 @@ describe("storybook.yml policy (D-17, SBK-04)", () => {
 			"test step removed",
 			(t) => t.replace("        run: yarn test:storybook\n", ""),
 			"yarn test:storybook",
+		],
+		[
+			"ratchet step removed",
+			(t) =>
+				t.replace(
+					/\n {6}# Shrink-only baseline[\s\S]*storybook-static\/index\.json\n/,
+					"\n",
+				),
+			"findings_ratchet.mjs --check",
 		],
 	];
 

@@ -104,3 +104,8 @@ jobs:
       # request, and runs every Storybook project (light, dark, a11y gate, node).
       - name: Storybook tests
         run: yarn test:storybook
+
+      # Shrink-only baseline (SBK-05): compares docs/evidence/known-findings.json
+      # with its merge-base copy and the catalog test:storybook just rebuilt.
+      - name: Findings ratchet
+        run: node scripts/findings_ratchet.mjs --check --index storybook-static/index.json
