@@ -563,6 +563,21 @@ describe("storybook_budget_check CLI", () => {
 		expect(over.result.stderr).toContain("over-budget");
 	});
 
+	test("the checked-in budget file is accepted by the CLI", () => {
+		const result = spawnSync(process.execPath, [BUDGET], {
+			cwd: repoRoot,
+			encoding: "utf8",
+			env: {
+				PATH: process.env["PATH"] ?? "",
+				STORYBOOK_JOB_START: String(Math.floor(Date.now() / 1000)),
+			},
+			timeout: 60_000,
+		});
+		expect(result.stderr).not.toContain("STORYBOOK BUDGET FAILED");
+		expect(result.status).toBe(0);
+		expect(result.stdout).toContain("✓ STORYBOOK BUDGET PASSED");
+	});
+
 	const INVALID: ReadonlyArray<[string, unknown, string]> = [
 		[
 			"a missing field",
