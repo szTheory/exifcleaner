@@ -26,6 +26,22 @@ Before opening a PR, run `yarn lint`, `yarn check:deps`, and the tests closest t
 change. Packaging/release changes also need the relevant packaged-smoke path described in
 [Build, tests, and releases](docs/subsystems/build-test-release.md).
 
+### Storybook (renderer catalog)
+
+Storybook is a development tool only: it is never part of the app bundle and sends nothing
+over the network (telemetry is off in config and in every script, and a preloaded network
+guard blocks any non-local connection).
+
+```bash
+yarn storybook:dev    # local dev server on port 6006, no browser opened, telemetry off
+yarn storybook:build  # static build into storybook-static/
+yarn test:storybook   # Storybook's own vitest projects (separate from yarn test)
+```
+
+The repository `.npmrc` skips Playwright browser downloads, so run
+`npx playwright install chromium` once before the browser-based Storybook tests
+(Playwright 1.64.1 needs Chromium revision 1248).
+
 ## Translation corrections
 
 Translations live in `.resources/locales/<locale>.json`. English is the canonical key set.
