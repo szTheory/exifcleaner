@@ -201,7 +201,7 @@ Brand files are never committed here. `brand.pin.json` pins one commit of `szThe
 
 ## Code Patterns
 
-- **Exports**: Named exports only — no default exports anywhere in codebase
+- **Exports**: Named exports only in `src/` production code. Framework-mandated default exports are the only exceptions, each with a one-line comment saying so: `.storybook/main.ts`, `.storybook/vite.config.ts`, `.storybook/preview.tsx`, `vitest.storybook.config.ts`, and the CSF `meta` default export of `*.stories.tsx` files. `.storybook/config.test.ts` (`defaultExportViolations`) fails on a default export in any other `src/` file.
 - **Async**: `async`/`await` in renderer, `.finally()` for cleanup
 - **File processing**: `addFiles()` maps file paths to `Promise.all()`, each file processed sequentially (read → remove → read after) via IPC to main process exiftool
 - **DOM**: Pure native API — `createElement()`, `querySelector()`, `querySelectorAll('[i18n]')`, `classList.add/remove`, `appendChild`
