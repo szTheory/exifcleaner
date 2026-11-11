@@ -128,19 +128,14 @@ describe("script entry points run when started through a symlink (WR-02)", () =>
 			expect(outcome(result)).toEqual(expected);
 		});
 
-		// File symlinks need a privilege on Windows; the directory junction above already
-		// covers the realpath-versus-argv[1] mismatch there.
-		test.skipIf(process.platform === "win32")(
-			"through a symlink to the script file it behaves exactly like the direct path",
-			() => {
-				const link = path.join(tmp, "script-link.mjs");
-				fs.symlinkSync(direct(), link);
-				const expected = outcome(run(direct(), testCase));
-				const result = runAssertingNoWrites(link, testCase);
-				expect(result.status, result.stderr).toBe(testCase.status);
-				expect(result.stderr).toMatch(testCase.output);
-				expect(outcome(result)).toEqual(expected);
-			},
-		);
+		test("through a symlink to the script file it behaves exactly like the direct path", () => {
+			const link = path.join(tmp, "script-link.mjs");
+			fs.symlinkSync(direct(), link);
+			const expected = outcome(run(direct(), testCase));
+			const result = runAssertingNoWrites(link, testCase);
+			expect(result.status, result.stderr).toBe(testCase.status);
+			expect(result.stderr).toMatch(testCase.output);
+			expect(outcome(result)).toEqual(expected);
+		});
 	});
 });
