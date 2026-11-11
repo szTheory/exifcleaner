@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, waitFor, within } from "storybook/test";
+import fa from "../../../../.resources/locales/fa.json";
 import { LanguageDropdown } from "./LanguageDropdown";
 
 const meta = {
@@ -13,13 +14,36 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+// The real ThemeProvider and I18nProvider write data-theme, lang and dir from
+// the mock; these stories only read them.
 export const Default: Story = {
 	play: async ({ canvasElement, globals }) => {
 		const canvas = within(canvasElement);
-		// The real ThemeProvider writes data-theme from the mock; the story only reads it.
 		await waitFor(() =>
 			expect(document.documentElement.dataset["theme"]).toBe(globals["theme"]),
 		);
-		await canvas.findByRole("button");
+		const trigger = await canvas.findByRole("button");
+		await expect(trigger).toHaveTextContent("System");
+		// Vacuity guard for the right-to-left stories below.
+		await expect(document.documentElement.dir).toBe("ltr");
+	},
+};
+
+export const Arabic: Story = {
+	globals: { locale: "ar" },
+	play: async ({ canvasElement }) => {
+		await waitFor(() => expect(document.documentElement.dir).toBe("rtl"));
+		await expect(document.documentElement.lang).toBe("ar");
+		await within(canvasElement).findByRole("button");
+	},
+};
+
+export const Persian: Story = {
+	globals: { locale: "fa" },
+	play: async ({ canvasElement }) => {
+		await waitFor(() => expect(document.documentElement.dir).toBe("rtl"));
+		await expect(document.documentElement.lang).toBe("fa");
+		const trigger = await within(canvasElement).findByRole("button");
+		await expect(trigger).toHaveTextContent(fa.languageSystem);
 	},
 };

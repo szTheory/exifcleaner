@@ -305,3 +305,71 @@ describe("preview stylesheet drift", () => {
 		expect(fromPreview.slice(1)).not.toEqual(fromApp);
 	});
 });
+
+// D-20: one story, not one per theme. The theme is the `theme` global of the
+// Storybook project (light and dark run every story), so a story must not pin
+// it and must not be named for it. Returns one message per violation.
+export function storyShapeViolations(fileText: string): string[] {
+	const violations: string[] = [];
+	if (/globals:\s*\{[^}]*\btheme\s*:/.test(fileText)) {
+		violations.push("sets globals.theme");
+	}
+	for (const match of fileText.matchAll(
+		/^export const (\w*(?:Light|Dark))\b/gm,
+	)) {
+		violations.push(`exports ${match[1] ?? ""}`);
+	}
+	return violations;
+}
+
+function listStoryFiles(root: string, relative: string): string[] {
+	return readdirSync(path.join(root, relative), {
+		withFileTypes: true,
+	}).flatMap((entry) => {
+		const child = `${relative}/${entry.name}`;
+		if (entry.isDirectory()) return listStoryFiles(root, child);
+		return entry.name.endsWith(".stories.tsx") ? [child] : [];
+	});
+}
+
+describe("story shape", () => {
+	test("no story under src/renderer sets the theme or is named for it", () => {
+		const root = path.resolve(import.meta.dirname, "..");
+		const stories = listStoryFiles(root, "src/renderer");
+		// Anti-vacuity: the walk saw the first composed story.
+		expect(stories).toContain(
+			"src/renderer/components/settings/LanguageDropdown.stories.tsx",
+		);
+		for (const file of stories) {
+			expect(
+				storyShapeViolations(readFileSync(path.join(root, file), "utf8")),
+				file,
+			).toEqual([]);
+		}
+	});
+
+	test("reports a planted globals.theme", () => {
+		expect(
+			storyShapeViolations(
+				'export const Default = { globals: { theme: "dark" } };',
+			),
+		).toEqual(["sets globals.theme"]);
+	});
+
+	test("reports a planted per-theme clone name", () => {
+		expect(
+			storyShapeViolations("export const ButtonDark = { args: {} };"),
+		).toEqual(["exports ButtonDark"]);
+		expect(
+			storyShapeViolations("export const CardLight = { args: {} };"),
+		).toEqual(["exports CardLight"]);
+	});
+
+	test("allows a locale global and ordinary names", () => {
+		expect(
+			storyShapeViolations(
+				'export const Arabic = { globals: { locale: "ar" } };\nexport const Lighthouse = {};',
+			),
+		).toEqual([]);
+	});
+});

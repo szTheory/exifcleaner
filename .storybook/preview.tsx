@@ -4,6 +4,7 @@ import type { Preview } from "@storybook/react-vite";
 import { fn } from "storybook/test";
 import { createMockApi } from "../tests/fakes/mock_window_api";
 import type { MockApiOverrides } from "../tests/fakes/mock_window_api";
+import { Locale } from "../src/domain/i18n/i18n_lookup";
 import type { Settings } from "../src/domain/settings_schema";
 import {
 	I18nContext,
@@ -27,6 +28,7 @@ import "../src/renderer/styles/status_icon.css";
 import "../src/renderer/styles/toast.css";
 import "../src/renderer/styles/type_pill.css";
 import "./harness.css";
+import { LOCALE_DICTIONARY } from "./locale_dictionary";
 
 // `parameters.mockApi` of a story: what the mock starts with. `gate: false`
 // renders the story before the providers finish loading (loading-state stories).
@@ -76,6 +78,11 @@ function themeOf(globals: Record<string, unknown>): "light" | "dark" {
 	return globals["theme"] === "dark" ? "dark" : "light";
 }
 
+function localeOf(globals: Record<string, unknown>): string {
+	const value = globals["locale"];
+	return typeof value === "string" ? value : "en";
+}
+
 const preview: Preview = {
 	globalTypes: {
 		theme: {
@@ -89,8 +96,16 @@ const preview: Preview = {
 				],
 			},
 		},
+		locale: {
+			description: "Locale the real I18nProvider resolves from the mock",
+			toolbar: {
+				title: "Locale",
+				icon: "globe",
+				items: Object.values(Locale).map((value) => ({ value, title: value })),
+			},
+		},
 	},
-	initialGlobals: { theme: "light" },
+	initialGlobals: { theme: "light", locale: "en" },
 	beforeEach: async (ctx) => {
 		const theme = themeOf(ctx.globals);
 		const raw = ctx.parameters["mockApi"];
@@ -100,8 +115,8 @@ const preview: Preview = {
 			...(parameter.settings === undefined
 				? {}
 				: { settings: parameter.settings }),
-			locale: "en",
-			strings: {},
+			locale: localeOf(ctx.globals),
+			strings: LOCALE_DICTIONARY,
 			spy: (f) => fn(f),
 		});
 		window.api = mock.api;
@@ -120,13 +135,14 @@ const preview: Preview = {
 	decorators: [
 		(Story, ctx) => {
 			const theme = themeOf(ctx.globals);
+			const locale = localeOf(ctx.globals);
 			const raw = ctx.parameters["mockApi"];
 			const gate = isMockApiParameter(raw) ? raw.gate !== false : true;
 			// The key remounts the providers when a toolbar global changes: the
 			// mock is rebuilt then, and a mounted provider keeps subscriptions on
-			// the old one. The real ThemeProvider is the only writer of data-theme.
+			// the old one. The real providers are the only writers of data-theme, lang and dir.
 			return (
-				<ThemeProvider key={`${theme}:en`}>
+				<ThemeProvider key={`${theme}:${locale}`}>
 					<I18nProvider>
 						<ReadyGate enabled={gate}>
 							<Story />
