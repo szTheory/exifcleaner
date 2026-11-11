@@ -680,3 +680,14 @@ describe("brand_fetch CLI", () => {
 		).rejects.toThrow(/BRAND_FETCH must be/);
 	});
 });
+
+describe("brand_fetch wiring", () => {
+	test("precompile, predev and predev:debug each run the brand fetch", () => {
+		const manifest = JSON.parse(
+			fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
+		) as { scripts: Record<string, string> };
+		for (const hook of ["precompile", "predev", "predev:debug"]) {
+			expect(manifest.scripts[hook], hook).toBe("node scripts/brand_fetch.mjs");
+		}
+	});
+});
