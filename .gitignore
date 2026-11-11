@@ -320,3 +320,8 @@ vitest-report.json
 
 # Pinned brand assets (fetched by scripts/brand_fetch.mjs; never committed)
 /.brand-cache/
+
+# Storybook build output and failure screenshots (generated, never committed)
+/storybook-static
+/storybook-static-nc
+**/__screenshots__/
