@@ -8,9 +8,33 @@ export interface BrandPin {
 }
 export type FetchBytes = (
 	url: string,
-	options?: { headers?: Record<string, string> },
+	options?: { headers?: Record<string, string>; maxBytes?: number },
 ) => Promise<Buffer>;
+export type FetchLike = (
+	url: string,
+	init?: {
+		redirect?: string;
+		signal?: AbortSignal;
+		headers?: Record<string, string>;
+	},
+) => Promise<{
+	ok: boolean;
+	status: number;
+	body: AsyncIterable<Uint8Array> | null;
+}>;
 export class BrandError extends Error {}
+export const UNPINNED_MAX_BYTES: number;
+export function defaultFetchBytes(
+	url: string,
+	options?: {
+		timeoutMs?: number;
+		headers?: Record<string, string>;
+		maxBytes?: number;
+		attempts?: number;
+		fetchImpl?: FetchLike;
+		delayMs?: number;
+	},
+): Promise<Buffer>;
 export const PIN_FILE_NAME: string;
 export const ALLOWLIST_FILE_NAME: string;
 export const CACHE_DIR_NAME: string;

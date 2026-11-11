@@ -9,6 +9,7 @@ import {
 	BrandError,
 	ZIP_FILE_NAME,
 	computePin,
+	defaultFetchBytes,
 	ensureBrand,
 	extractZip,
 	parseAllowlist,
@@ -301,6 +302,90 @@ describe("ensureBrand", () => {
 				fs.readFileSync(path.join(cacheDir, ZIP_FILE_NAME)).equals(goodZip),
 			).toBe(true);
 		});
+	});
+});
+
+describe("defaultFetchBytes", () => {
+	function okResponse(chunks: Uint8Array[]) {
+		return {
+			ok: true,
+			status: 200,
+			body: (async function* () {
+				yield* chunks;
+			})(),
+		};
+	}
+
+	test("two transport failures then success resolves after exactly 3 calls", async () => {
+		let calls = 0;
+		const bytes = await defaultFetchBytes("https://example.invalid/a.zip", {
+			delayMs: 0,
+			fetchImpl: async () => {
+				calls += 1;
+				if (calls < 3) throw new Error("ECONNRESET");
+				return okResponse([Buffer.from("ab"), Buffer.from("cd")]);
+			},
+		});
+		expect(calls).toBe(3);
+		expect(bytes.toString("utf8")).toBe("abcd");
+	});
+
+	test("HTTP 500 on every attempt is a BrandError after exactly 3 calls", async () => {
+		let calls = 0;
+		await expect(
+			defaultFetchBytes("https://example.invalid/a.zip", {
+				delayMs: 0,
+				fetchImpl: async () => {
+					calls += 1;
+					return { ok: false, status: 500, body: null };
+				},
+			}),
+		).rejects.toThrow(/HTTP 500/);
+		expect(calls).toBe(3);
+		await expect(
+			defaultFetchBytes("https://example.invalid/a.zip", {
+				delayMs: 0,
+				fetchImpl: async () => ({ ok: false, status: 500, body: null }),
+			}),
+		).rejects.toBeInstanceOf(BrandError);
+	});
+
+	test("a body one byte over maxBytes aborts after exactly 1 call", async () => {
+		let calls = 0;
+		await expect(
+			defaultFetchBytes("https://example.invalid/a.zip", {
+				delayMs: 0,
+				maxBytes: 4,
+				fetchImpl: async () => {
+					calls += 1;
+					return okResponse([Buffer.from("abc"), Buffer.from("de")]);
+				},
+			}),
+		).rejects.toThrow(/size cap/);
+		expect(calls).toBe(1);
+	});
+
+	test("a body of exactly maxBytes resolves", async () => {
+		const bytes = await defaultFetchBytes("https://example.invalid/a.zip", {
+			delayMs: 0,
+			maxBytes: 4,
+			fetchImpl: async () => okResponse([Buffer.from("abc"), Buffer.from("d")]),
+		});
+		expect(bytes.toString("utf8")).toBe("abcd");
+	});
+
+	test("ensureBrand passes the pinned size as maxBytes", async () => {
+		const seen: Array<number | undefined> = [];
+		const pin = pinFor(goodZip);
+		await ensureBrand({
+			pin,
+			cacheDir: path.join(tmp, "cache"),
+			fetchBytes: async (_url, options) => {
+				seen.push(options?.maxBytes);
+				return goodZip;
+			},
+		});
+		expect(seen).toEqual([pin.size]);
 	});
 });
 

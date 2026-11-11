@@ -281,19 +281,60 @@ export function extractZip(buffer, destination) {
 // ---------------------------------------------------------------------------------------
 // Fetch: cache-first, verify-always, fail closed.
 // ---------------------------------------------------------------------------------------
+// Cap for downloads whose size is not pinned (the latest-commit SHA text, a freshly
+// computed pin). The pinned zip is capped at its pinned size instead.
+export const UNPINNED_MAX_BYTES = 64 * 1024 * 1024;
+
+// Download with a few retries on transport and HTTP failures, and a hard size cap that
+// aborts while streaming. A size-cap breach is never retried, and checksum verification
+// happens outside this function, so a wrong archive is never retried either.
 export async function defaultFetchBytes(
 	url,
-	{ timeoutMs = 60_000, headers } = {},
+	{
+		timeoutMs = 60_000,
+		headers,
+		maxBytes = UNPINNED_MAX_BYTES,
+		attempts = 3,
+		fetchImpl = fetch,
+		delayMs = 500,
+	} = {},
 ) {
-	const response = await fetch(url, {
-		redirect: "follow",
-		signal: AbortSignal.timeout(timeoutMs),
-		...(headers === undefined ? {} : { headers }),
-	});
-	if (!response.ok) {
-		throw new BrandError(`GET ${url} failed: HTTP ${response.status}`);
+	let lastError;
+	for (let attempt = 1; attempt <= attempts; attempt++) {
+		let overCap = false;
+		try {
+			const response = await fetchImpl(url, {
+				redirect: "follow",
+				signal: AbortSignal.timeout(timeoutMs),
+				...(headers === undefined ? {} : { headers }),
+			});
+			if (!response.ok) {
+				throw new BrandError(`GET ${url} failed: HTTP ${response.status}`);
+			}
+			const chunks = [];
+			let total = 0;
+			for await (const chunk of response.body) {
+				total += chunk.length;
+				if (total > maxBytes) {
+					overCap = true;
+					throw new BrandError(
+						`GET ${url} exceeds the size cap (${maxBytes} bytes)`,
+					);
+				}
+				chunks.push(chunk);
+			}
+			return Buffer.concat(chunks);
+		} catch (error) {
+			lastError = error;
+			if (overCap) break;
+			if (attempt < attempts) {
+				await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
+			}
+		}
 	}
-	return Buffer.from(await response.arrayBuffer());
+	throw lastError instanceof BrandError
+		? lastError
+		: new BrandError(`GET ${url} failed: ${lastError?.message ?? lastError}`);
 }
 
 function atomicWrite(file, bytes) {
@@ -346,7 +387,7 @@ export async function ensureBrand({
 	if (!cacheHit) {
 		log(`downloading ${pin.url}`);
 		try {
-			bytes = await fetchBytes(pin.url);
+			bytes = await fetchBytes(pin.url, { maxBytes: pin.size });
 		} catch (error) {
 			if (error instanceof BrandError) throw error;
 			throw new BrandError(`cannot download ${pin.url}: ${error.message}`);
@@ -478,6 +519,7 @@ export async function resolveLatestCommit({
 		`https://api.github.com/repos/${repo}/commits/main`,
 		{
 			headers,
+			maxBytes: UNPINNED_MAX_BYTES,
 		},
 	);
 	const sha = bytes.toString("utf8").trim();
@@ -498,7 +540,7 @@ export async function computePin({
 		throw new BrandError("commit must be a full 40-character lowercase SHA");
 	}
 	const url = pinUrl(repo, commit);
-	const bytes = await fetchBytes(url);
+	const bytes = await fetchBytes(url, { maxBytes: UNPINNED_MAX_BYTES });
 	const pin = {
 		repo,
 		commit,
