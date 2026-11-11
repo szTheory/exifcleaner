@@ -29,6 +29,11 @@
 		"release": "echo 'Use GitHub Actions release workflow (workflow_dispatch) instead' && exit 1",
 		"dev": "ELECTRON_RUN_AS_NODE= electron-vite dev",
 		"dev:debug": "ELECTRON_RUN_AS_NODE= electron-vite dev --remote-debugging-port=9222",
+		"brand:fetch": "node scripts/brand_fetch.mjs",
+		"brand:update": "node scripts/brand_update.mjs",
+		"precompile": "node scripts/brand_fetch.mjs",
+		"predev": "node scripts/brand_fetch.mjs",
+		"predev:debug": "node scripts/brand_fetch.mjs",
 		"compile": "electron-vite build",
 		"typecheck": "tsc --noEmit",
 		"preview": "ELECTRON_RUN_AS_NODE= electron-vite preview",
@@ -98,6 +103,11 @@
 	"build": {
 		"afterSign": "./scripts/afterPack.cjs",
 		"appId": "com.exifcleaner",
+		"files": [
+			"!.brand-cache{,/**/*}",
+			"!.storybook{,/**/*}",
+			"!storybook-static*{,/**/*}"
+		],
 		"electronFuses": {
 			"runAsNode": false,
 			"enableNodeOptionsEnvironmentVariable": false,
@@ -202,6 +212,13 @@
 				"filter": [
 					"strings.json",
 					"*.png"
+				]
+			},
+			{
+				"from": ".brand-cache/ship",
+				"to": "brand",
+				"filter": [
+					"**/*"
 				]
 			}
 		]

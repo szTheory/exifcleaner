@@ -317,3 +317,6 @@ vitest-report.json
 
 # GSD planning lives in the parent workspace repo, not here
 .planning/
+
+# Pinned brand assets (fetched by scripts/brand_fetch.mjs; never committed)
+/.brand-cache/

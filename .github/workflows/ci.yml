@@ -145,6 +145,10 @@ jobs:
 
       - name: Install Playwright system deps
         if: steps.playwright-cache.outputs.cache-hit == 'true'
+        # Non-fatal: this only refreshes apt packages the runner image mostly ships; when the apt
+        # mirror is unreachable (runner DNS outage) the Playwright e2e step below still fails if a
+        # dependency is genuinely missing, so the gate is not weakened.
+        continue-on-error: true
         run: npx playwright install-deps chromium
 
       - name: Disable AppArmor restriction (Ubuntu 24.04)
