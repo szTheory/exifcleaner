@@ -103,6 +103,11 @@
 	"build": {
 		"afterSign": "./scripts/afterPack.cjs",
 		"appId": "com.exifcleaner",
+		"files": [
+			"!.brand-cache{,/**/*}",
+			"!.storybook{,/**/*}",
+			"!storybook-static*{,/**/*}"
+		],
 		"electronFuses": {
 			"runAsNode": false,
 			"enableNodeOptionsEnvironmentVariable": false,
