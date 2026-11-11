@@ -34,6 +34,18 @@ export default defineConfig({
 				test: { name: `storybook-${theme}`, browser: browser() },
 			})),
 			{
+				// addon-a11y only throws on a violation when VITEST_STORYBOOK is
+				// "false" (the plugin projects above set it themselves); this plain
+				// browser project sets it so the gate test can see a rejection.
+				plugins: [react()],
+				test: {
+					name: "storybook-a11y-gate",
+					include: [".storybook/**/*.test.tsx"],
+					env: { VITEST_STORYBOOK: "false" },
+					browser: browser(),
+				},
+			},
+			{
 				test: {
 					name: "storybook-node",
 					environment: "node",

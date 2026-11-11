@@ -325,3 +325,4 @@ vitest-report.json
 /storybook-static
 /storybook-static-nc
 **/__screenshots__/
+/.vitest-attachments/

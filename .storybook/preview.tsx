@@ -106,6 +106,8 @@ const preview: Preview = {
 		},
 	},
 	initialGlobals: { theme: "light", locale: "en" },
+	// Accessibility violations fail the story (D-27). color-contrast stays on.
+	parameters: { a11y: { test: "error" } },
 	beforeEach: async (ctx) => {
 		const theme = themeOf(ctx.globals);
 		const raw = ctx.parameters["mockApi"];
