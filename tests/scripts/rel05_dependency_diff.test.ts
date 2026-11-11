@@ -324,8 +324,20 @@ left-pad@^1.3.0:
 		expect(reasons.join("\n")).toContain("left-pad@1.3.0");
 	});
 
-	test("main passes on this branch for --release 4.8.0 against v4.7.0", () => {
-		expect(main(["--release", "4.8.0"])).toBe(0);
+	// Like the 4.7.0 cases above, the real 4.8.0 delta is measured on the released tag, not the working
+	// tree: once 4.8.0 shipped, any later branch may change dev dependencies (Storybook, Dependabot),
+	// and the working tree then correctly stops being the 4.8.0 release head.
+	test("the real v4.7.0 to v4.8.0 delta satisfies the 4.8.0 policy", () => {
+		expect(
+			compareDependencySurfaces({
+				basePackage: v470Package,
+				headPackage: JSON.parse(git(["show", "v4.8.0:package.json"])),
+				policy: policy480,
+				release: "4.8.0",
+				baseLock: v470Lock,
+				headLock: git(["show", "v4.8.0:yarn.lock"]),
+			}),
+		).toEqual([]);
 	});
 
 	test("an unknown release such as 4.9.0 still fails closed", () => {
