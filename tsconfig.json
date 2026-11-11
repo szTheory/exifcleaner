@@ -22,5 +22,12 @@
 		"jsxImportSource": "react",
 		"lib": ["ES2021", "DOM", "DOM.Iterable"]
 	},
-	"include": ["./src/**/*.ts", "./src/**/*.tsx", "./tests/**/*.ts"]
+	"include": [
+		"./src/**/*.ts",
+		"./src/**/*.tsx",
+		"./tests/**/*.ts",
+		"./.storybook/**/*.ts",
+		"./.storybook/**/*.tsx",
+		"./vitest.storybook.config.ts"
+	]
 }
