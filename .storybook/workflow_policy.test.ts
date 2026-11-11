@@ -121,6 +121,30 @@ export function workflowPolicyProblems(text: string): string[] {
 	if (!/^ {8}run: yarn test:storybook$/m.test(text)) {
 		problems.push("the yarn test:storybook step is missing");
 	}
+	const steps =
+		text
+			.split("    steps:\n")[1]
+			?.split(/^ {6}- /m)
+			.slice(1) ?? [];
+	const first = steps[0] ?? "";
+	if (
+		!first.startsWith("name: Record job start") ||
+		!first.includes('echo "STORYBOOK_JOB_START=$(date +%s)" >> "$GITHUB_ENV"')
+	) {
+		problems.push(
+			"the first step must record STORYBOOK_JOB_START (Record job start)",
+		);
+	}
+	const last = steps[steps.length - 1] ?? "";
+	if (
+		!last.startsWith("name: Runtime budget") ||
+		!/^ {8}if: always\(\)$/m.test(last) ||
+		!last.includes("run: node scripts/storybook_budget_check.mjs")
+	) {
+		problems.push(
+			"the last step must be Runtime budget with if: always() running storybook_budget_check.mjs",
+		);
+	}
 	const testAt = text.indexOf("run: yarn test:storybook\n");
 	const ratchetAt = text.indexOf(
 		"run: node scripts/findings_ratchet.mjs --check --index storybook-static/index.json",
@@ -236,6 +260,22 @@ describe("storybook.yml policy (D-17, SBK-04)", () => {
 					"\n",
 				),
 			"findings_ratchet.mjs --check",
+		],
+		[
+			"budget step removed",
+			(t) =>
+				t.replace(/\n {6}# SBK-04 \/ D-18[\s\S]*budget_check\.mjs\n/, "\n"),
+			"the last step must be Runtime budget",
+		],
+		[
+			"budget step loses always()",
+			(t) => t.replace("        if: always()\n", ""),
+			"if: always()",
+		],
+		[
+			"job start step removed",
+			(t) => t.replace(/\n {6}# First step[\s\S]*GITHUB_ENV"\n/, ""),
+			"STORYBOOK_JOB_START",
 		],
 	];
 

@@ -66,6 +66,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
+      # First step: the final always() step measures elapsed time from here.
+      - name: Record job start
+        run: echo "STORYBOOK_JOB_START=$(date +%s)" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -109,3 +113,10 @@ jobs:
       # with its merge-base copy and the catalog test:storybook just rebuilt.
       - name: Findings ratchet
         run: node scripts/findings_ratchet.mjs --check --index storybook-static/index.json
+
+      # SBK-04 / D-18: fails when this job ran longer than the budget measured
+      # from a real run (docs/evidence/storybook-ci-budget.json). Runs even
+      # when an earlier step failed so the elapsed time is always reported.
+      - name: Runtime budget
+        if: always()
+        run: node scripts/storybook_budget_check.mjs

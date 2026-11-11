@@ -458,3 +458,145 @@ describe("findings_ratchet CLI against a temp git repo", () => {
 		}
 	});
 });
+
+// --- storybook_budget_check CLI -------------------------------------------
+
+const BUDGET = path.join(repoRoot, "scripts", "storybook_budget_check.mjs");
+
+const GOOD_BUDGET = {
+	phase: "70",
+	stories: 3,
+	measuredSeconds: 69,
+	budgetSeconds: 300,
+	runId: "43080512177",
+};
+
+// Runs the CLI in a fresh temporary cwd (a planted budget file when `budget`
+// is given) and asserts the whole directory delta: only the step-summary file
+// may appear, and only when `summary` is set.
+function runBudgetCase(args: {
+	budget?: unknown;
+	env: Record<string, string>;
+	summary?: boolean;
+}) {
+	const cwd = mkdtempSync(path.join(os.tmpdir(), "budget-cli-"));
+	try {
+		if (args.budget !== undefined) {
+			mkdirSync(path.join(cwd, "docs", "evidence"), { recursive: true });
+			writeFileSync(
+				path.join(cwd, "docs", "evidence", "storybook-ci-budget.json"),
+				JSON.stringify(args.budget),
+			);
+		}
+		const before = snapshotDir(cwd);
+		const result = spawnSync(process.execPath, [BUDGET], {
+			cwd,
+			encoding: "utf8",
+			env: {
+				PATH: process.env["PATH"] ?? "",
+				...(args.summary
+					? { GITHUB_STEP_SUMMARY: path.join(cwd, "summary.md") }
+					: {}),
+				...args.env,
+			},
+			timeout: 60_000,
+		});
+		assertDirEffect(before, snapshotDir(cwd), {
+			added: args.summary ? ["summary.md"] : [],
+		});
+		const summary = args.summary
+			? readFileSync(path.join(cwd, "summary.md"), "utf8")
+			: "";
+		return { result, summary };
+	} finally {
+		rmSync(cwd, { recursive: true, force: true });
+	}
+}
+
+describe("storybook_budget_check CLI", () => {
+	test("no budget file prints BOOTSTRAP and exits 0", () => {
+		const { result } = runBudgetCase({
+			env: { STORYBOOK_JOB_START: "1000", STORYBOOK_JOB_NOW: "1042" },
+		});
+		expect(result.status).toBe(0);
+		expect(result.stdout).toContain(
+			"BOOTSTRAP: no budget file yet; elapsed 42s",
+		);
+	});
+
+	test("elapsed over budget exits 1 and writes the table to the step summary", () => {
+		const { result, summary } = runBudgetCase({
+			budget: { ...GOOD_BUDGET, measuredSeconds: 1, budgetSeconds: 1 },
+			env: { STORYBOOK_JOB_START: "1000", STORYBOOK_JOB_NOW: "1100" },
+			summary: true,
+		});
+		expect(result.status).toBe(1);
+		expect(result.stderr).toContain("over-budget");
+		expect(summary).toContain("| elapsed (s) | budget (s) |");
+		expect(summary).toContain("| 100 | 1 | 1 | 43080512177 |");
+	});
+
+	test("the real clock is used when it is not pinned: start 100 s ago, budget 1 s", () => {
+		const start = Math.floor(Date.now() / 1000) - 100;
+		const { result } = runBudgetCase({
+			budget: { ...GOOD_BUDGET, measuredSeconds: 1, budgetSeconds: 1 },
+			env: { STORYBOOK_JOB_START: String(start) },
+		});
+		expect(result.status).toBe(1);
+		expect(result.stderr).toContain("over-budget");
+	});
+
+	test("elapsed equal to the budget passes, one second more fails", () => {
+		const at = runBudgetCase({
+			budget: GOOD_BUDGET,
+			env: { STORYBOOK_JOB_START: "1000", STORYBOOK_JOB_NOW: "1300" },
+			summary: true,
+		});
+		expect(at.result.status).toBe(0);
+		expect(at.result.stdout).toContain("✓ STORYBOOK BUDGET PASSED");
+		expect(at.summary).toContain("| 300 | 300 | 69 | 43080512177 |");
+		const over = runBudgetCase({
+			budget: GOOD_BUDGET,
+			env: { STORYBOOK_JOB_START: "1000", STORYBOOK_JOB_NOW: "1301" },
+		});
+		expect(over.result.status).toBe(1);
+		expect(over.result.stderr).toContain("over-budget");
+	});
+
+	const INVALID: ReadonlyArray<[string, unknown, string]> = [
+		[
+			"a missing field",
+			{ phase: "70", stories: 3, measuredSeconds: 69, runId: "1" },
+			"missing-field",
+		],
+		["runId TBD", { ...GOOD_BUDGET, runId: "TBD" }, "bad-run-id"],
+		[
+			"measured above budget",
+			{ ...GOOD_BUDGET, measuredSeconds: 301 },
+			"measured-over-budget",
+		],
+		["an unknown field", { ...GOOD_BUDGET, extra: 1 }, "unknown-field"],
+		["zero stories", { ...GOOD_BUDGET, stories: 0 }, "bad-stories"],
+	];
+
+	test.each(INVALID)(
+		"%s exits 1 with its own problem code",
+		(_name, budget, code) => {
+			const { result } = runBudgetCase({
+				budget,
+				env: { STORYBOOK_JOB_START: "1000", STORYBOOK_JOB_NOW: "1010" },
+			});
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain(`${code}:`);
+		},
+	);
+
+	test.each([
+		["with a budget file", GOOD_BUDGET],
+		["without a budget file", undefined],
+	])("a missing STORYBOOK_JOB_START exits 1 %s", (_name, budget) => {
+		const { result } = runBudgetCase({ budget, env: {} });
+		expect(result.status).toBe(1);
+		expect(result.stderr).toContain("start-missing");
+	});
+});
