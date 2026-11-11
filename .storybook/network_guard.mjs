@@ -4,15 +4,30 @@
 import fs from "node:fs";
 import net from "node:net";
 
-const ALLOWED = [
-	/^localhost$/i,
-	/^127\./,
-	/^::1$/,
-	/^0\.0\.0\.0$/,
-	/^10\./,
-	/^192\.168\./,
-	/^172\.(1[6-9]|2\d|3[01])\./,
-];
+// Only `localhost` and literal IP addresses are ever allowed. A hostname that merely starts
+// with digits (`10.evil.example.com`, `127.0.0.1.attacker.net`) is a DNS name that resolves
+// wherever its owner points it, so it is treated as public and blocked (Phase 70 review WR-01).
+// The allowlist is deliberately closed: anything it does not recognise is blocked.
+function isLoopbackOrPrivate(host) {
+	if (/^localhost$/i.test(host)) {
+		return true;
+	}
+	const family = net.isIP(host);
+	if (family === 6) {
+		return host === "::1";
+	}
+	if (family !== 4) {
+		return false;
+	}
+	const [first, second] = host.split(".").map(Number);
+	return (
+		host === "0.0.0.0" ||
+		first === 127 ||
+		first === 10 ||
+		(first === 192 && second === 168) ||
+		(first === 172 && second >= 16 && second <= 31)
+	);
+}
 
 const original = net.Socket.prototype.connect;
 
@@ -26,10 +41,7 @@ net.Socket.prototype.connect = function (...args) {
 			? args[1]
 			: "localhost";
 	const socketPath = isObject ? options.path : undefined;
-	if (
-		socketPath === undefined &&
-		!ALLOWED.some((re) => re.test(String(host)))
-	) {
+	if (socketPath === undefined && !isLoopbackOrPrivate(String(host))) {
 		if (process.env.TRACE_LOG) {
 			fs.appendFileSync(process.env.TRACE_LOG, `BLOCKED ${host}\n`);
 		}
