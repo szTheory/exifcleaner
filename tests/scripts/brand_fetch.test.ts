@@ -26,6 +26,7 @@ import {
 } from "../../scripts/brand_lib.mjs";
 import { runBrandFetch } from "../../scripts/brand_fetch.mjs";
 import { runBrandUpdate } from "../../scripts/brand_update.mjs";
+import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 import {
 	BRAND_FIXTURE_ENTRIES,
 	buildZip,
@@ -137,6 +138,8 @@ describe("checksum verification", () => {
 describe("ensureBrand", () => {
 	test("downloads once, verifies, writes the cache and unpacks", async () => {
 		const cacheDir = path.join(tmp, "cache");
+		fs.mkdirSync(cacheDir);
+		const before = snapshotDir(cacheDir);
 		const pin = pinFor(goodZip);
 		const urls: string[] = [];
 		const result = await ensureBrand({
@@ -150,6 +153,25 @@ describe("ensureBrand", () => {
 		expect(urls).toEqual([pin.url]);
 		expect(result.downloaded).toBe(true);
 		expect(result.extracted).toBe(true);
+		// Whole-directory effect: exactly the verified zip and the unpacked tree
+		// (a stale staging directory or temporary file would fail this).
+		assertDirEffect(before, snapshotDir(cacheDir), {
+			added: [
+				ZIP_FILE_NAME,
+				"unpacked",
+				"unpacked/.pin-sha256",
+				"unpacked/exifcleaner-brand",
+				"unpacked/exifcleaner-brand/BRAND.md",
+				"unpacked/exifcleaner-brand/assets",
+				"unpacked/exifcleaner-brand/assets/fonts",
+				"unpacked/exifcleaner-brand/assets/fonts/OFL-Alpha.txt",
+				"unpacked/exifcleaner-brand/assets/fonts/OFL-Beta.txt",
+				"unpacked/exifcleaner-brand/assets/fonts/static",
+				"unpacked/exifcleaner-brand/assets/fonts/static/Alpha-Regular.ttf",
+				"unpacked/exifcleaner-brand/assets/logo",
+				"unpacked/exifcleaner-brand/assets/logo/mark.svg",
+			],
+		});
 		expect(
 			fs.readFileSync(path.join(cacheDir, ZIP_FILE_NAME)).equals(goodZip),
 		).toBe(true);
@@ -647,10 +669,17 @@ describe("brand_fetch CLI", () => {
 	test("NEGATIVE CONTROL: a corrupted cache makes the build step exit non-zero and stage nothing", () => {
 		const flipped = Buffer.from(goodZip);
 		flipped[60] = (flipped[60] ?? 0) ^ 0xff;
-		const result = runCli(fixtureEnv(flipped, "offline"));
+		const env = fixtureEnv(flipped, "offline");
+		const before = snapshotDir(path.join(tmp, "cache"));
+		const result = runCli(env);
 		expect(result.status).toBe(1);
 		expect(result.stderr).toMatch(/sha256 mismatch/);
 		expect(fs.existsSync(path.join(tmp, "cache/ship"))).toBe(false);
+		// Whole-directory effect: the failed run added, changed and removed nothing,
+		// and left the tampered zip itself exactly as it was.
+		assertDirEffect(before, snapshotDir(path.join(tmp, "cache")), {
+			unchanged: [ZIP_FILE_NAME],
+		});
 	});
 
 	test("offline with no cache exits non-zero", () => {
