@@ -1,0 +1,16 @@
+/* Storybook harness only; never imported by the app. Existing tokens only. */
+
+/* The app paints its background on `.app`, which stories do not render, so the
+   default white body would fail contrast in the dark theme. */
+body {
+	background-color: var(--color-bg);
+	color: var(--color-text);
+}
+
+/* Motion off: a scan or screenshot taken mid-transition reads a blended colour. */
+*,
+*::before,
+*::after {
+	animation: none !important;
+	transition: none !important;
+}

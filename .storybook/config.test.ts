@@ -261,3 +261,47 @@ describe("named exports in src", () => {
 		).toEqual([]);
 	});
 });
+
+// D-11: the preview must load the same app-level stylesheets as the real
+// entry point, in the same order (cascade order matters: reset, then tokens).
+// Component-level stylesheets are imported by their components and are not listed.
+export function stylesheetImports(text: string, prefix: string): string[] {
+	const pattern = new RegExp(
+		`^import "${prefix.replace(/[./]/g, "\\$&")}([a-z_]+)\\.css";$`,
+		"gm",
+	);
+	return [...text.matchAll(pattern)].map((match) => match[1] ?? "");
+}
+
+describe("preview stylesheet drift", () => {
+	const root = path.resolve(import.meta.dirname, "..");
+	const appEntry = readFileSync(
+		path.join(root, "src/renderer/index.tsx"),
+		"utf8",
+	);
+	const preview = readFileSync(
+		path.join(root, ".storybook/preview.tsx"),
+		"utf8",
+	);
+	const fromApp = stylesheetImports(appEntry, "./styles/");
+	const fromPreview = stylesheetImports(preview, "../src/renderer/styles/");
+
+	test("the preview imports the app entry's 13 stylesheets in the same order", () => {
+		// Anti-vacuity: both extractions found the full list.
+		expect(fromApp).toHaveLength(13);
+		expect(fromApp.slice(0, 2)).toEqual(["reset", "tokens"]);
+		expect(fromPreview).toEqual(fromApp);
+	});
+
+	test("a planted reordered list (reset after tokens) is a mismatch", () => {
+		const reordered = [...fromPreview];
+		const reset = reordered.splice(0, 1);
+		reordered.splice(1, 0, ...reset);
+		expect(reordered.slice(0, 2)).toEqual(["tokens", "reset"]);
+		expect(reordered).not.toEqual(fromApp);
+	});
+
+	test("a planted dropped stylesheet is a mismatch", () => {
+		expect(fromPreview.slice(1)).not.toEqual(fromApp);
+	});
+});
