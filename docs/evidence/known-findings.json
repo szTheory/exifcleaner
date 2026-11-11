@@ -1,0 +1,9 @@
+{
+	"schemaVersion": 1,
+	"kinds": {
+		"a11y": {
+			"sealed": true
+		}
+	},
+	"entries": []
+}
