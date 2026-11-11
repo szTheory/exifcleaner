@@ -18,6 +18,7 @@ import {
 	resolveLatestCommit,
 	writePin,
 } from "./brand_lib.mjs";
+import { isMainModule } from "./is_main_module.mjs";
 
 export async function runBrandUpdate({
 	argv,
@@ -53,7 +54,7 @@ export async function runBrandUpdate({
 	return pin;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (isMainModule(import.meta.url)) {
 	const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 	runBrandUpdate({ argv: process.argv.slice(2), root }).catch((error) => {
 		console.error(`brand: update FAILED: ${error.message}`);

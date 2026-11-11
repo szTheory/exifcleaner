@@ -25,7 +25,7 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { isMainModule } from "./is_main_module.mjs";
 
 export const BASELINE_PATH = "docs/evidence/known-findings.json";
 
@@ -395,6 +395,6 @@ export function main(argv = process.argv.slice(2)) {
 	}
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (isMainModule(import.meta.url)) {
 	process.exitCode = main();
 }
