@@ -1,0 +1,106 @@
+name: Storybook
+
+# One path-filtered job: builds the catalog twice (real and planted) for the
+# offline proof, runs every Storybook vitest project, then the shrink-only
+# findings ratchet. Deliberately not a required check: a PR that touches none
+# of these paths never starts it. Runs on the pull_request trigger only
+# (untrusted PR code never gets a write token); no secrets.
+on:
+  push:
+    branches: [master]
+    paths:
+      - "src/renderer/**"
+      - "src/domain/**"
+      - "src/common/**"
+      - "src/preload/api_types.ts"
+      - ".storybook/**"
+      - "vitest.storybook.config.ts"
+      - "package.json"
+      - "yarn.lock"
+      - "tsconfig*.json"
+      - ".resources/locales/**"
+      - ".resources/strings.json"
+      - "tests/fakes/mock_window_api.ts"
+      - "tests/types/**"
+      - "scripts/findings_ratchet.mjs"
+      - "scripts/storybook_budget_check.mjs"
+      - "docs/evidence/known-findings.json"
+      - "docs/evidence/storybook-ci-budget.json"
+      - ".github/workflows/storybook.yml"
+  pull_request:
+    paths:
+      - "src/renderer/**"
+      - "src/domain/**"
+      - "src/common/**"
+      - "src/preload/api_types.ts"
+      - ".storybook/**"
+      - "vitest.storybook.config.ts"
+      - "package.json"
+      - "yarn.lock"
+      - "tsconfig*.json"
+      - ".resources/locales/**"
+      - ".resources/strings.json"
+      - "tests/fakes/mock_window_api.ts"
+      - "tests/types/**"
+      - "scripts/findings_ratchet.mjs"
+      - "scripts/storybook_budget_check.mjs"
+      - "docs/evidence/known-findings.json"
+      - "docs/evidence/storybook-ci-budget.json"
+      - ".github/workflows/storybook.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Cancel in-progress runs for same branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  STORYBOOK_DISABLE_TELEMETRY: "true"
+
+jobs:
+  storybook:
+    name: Storybook (build, offline, a11y)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+      - name: Install Playwright
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        # Non-fatal, as in ci.yml: only refreshes apt packages the runner image mostly ships.
+        continue-on-error: true
+        run: npx playwright install-deps chromium
+
+      - name: Disable AppArmor restriction (Ubuntu 24.04)
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      # Builds the real and the planted catalog fresh, proves no outbound
+      # request, and runs every Storybook project (light, dark, a11y gate, node).
+      - name: Storybook tests
+        run: yarn test:storybook

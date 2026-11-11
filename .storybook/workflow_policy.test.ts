@@ -1,0 +1,231 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { describe, expect, test } from "vitest";
+
+// D-17 / SBK-04: policy for .github/workflows/storybook.yml, in the style of
+// tests/scripts/homebrew_workflow_policy.test.ts. The policy is a pure function
+// over the workflow text; the checked-in file must yield no problem and each
+// planted mutation must yield a problem naming the property it broke.
+
+const REQUIRED_PATHS = [
+	"src/renderer/**",
+	"src/domain/**",
+	"src/common/**",
+	"src/preload/api_types.ts",
+	".storybook/**",
+	"vitest.storybook.config.ts",
+	"package.json",
+	"yarn.lock",
+	"tsconfig*.json",
+	".resources/locales/**",
+	".resources/strings.json",
+	"tests/fakes/mock_window_api.ts",
+	"tests/types/**",
+	"scripts/findings_ratchet.mjs",
+	"scripts/storybook_budget_check.mjs",
+	"docs/evidence/known-findings.json",
+	"docs/evidence/storybook-ci-budget.json",
+	".github/workflows/storybook.yml",
+];
+
+// The `paths:` list of one `on:` event (push or pull_request).
+function eventPaths(text: string, event: string): string[] {
+	const lines = text.split("\n");
+	const start = lines.indexOf(`  ${event}:`);
+	if (start === -1) return [];
+	const paths: string[] = [];
+	let inPaths = false;
+	for (const line of lines.slice(start + 1)) {
+		if (/^ {0,2}\S/.test(line)) break;
+		if (line === "    paths:") {
+			inPaths = true;
+			continue;
+		}
+		if (inPaths) {
+			const match = /^ {6}- "(.+)"$/.exec(line);
+			if (match === null || match[1] === undefined) {
+				inPaths = false;
+				continue;
+			}
+			paths.push(match[1]);
+		}
+	}
+	return paths;
+}
+
+function eventBlock(text: string, event: string): string {
+	const lines = text.split("\n");
+	const start = lines.indexOf(`  ${event}:`);
+	if (start === -1) return "";
+	const block: string[] = [];
+	for (const line of lines.slice(start + 1)) {
+		if (/^ {0,2}\S/.test(line)) break;
+		block.push(line);
+	}
+	return block.join("\n");
+}
+
+function stepNames(text: string): string[] {
+	return [...text.matchAll(/^ {6}- name: (.+)$/gm)].map((m) => m[1] ?? "");
+}
+
+export function workflowPolicyProblems(text: string): string[] {
+	const problems: string[] = [];
+	for (const event of ["push", "pull_request"]) {
+		const listed = eventPaths(text, event);
+		for (const required of REQUIRED_PATHS) {
+			if (!listed.includes(required)) {
+				problems.push(`${event} paths must include ${required}`);
+			}
+		}
+	}
+	if (
+		JSON.stringify(eventPaths(text, "push")) !==
+		JSON.stringify(eventPaths(text, "pull_request"))
+	) {
+		problems.push("push and pull_request path lists must be identical");
+	}
+	if (!/^ {4}branches: \[master\]$/m.test(eventBlock(text, "push"))) {
+		problems.push("push must be filtered to branches: [master]");
+	}
+	if (!/^ {2}workflow_dispatch:/m.test(text)) {
+		problems.push("workflow_dispatch trigger is missing");
+	}
+	if (/^ {2}pull_request_target:/m.test(text)) {
+		problems.push("pull_request_target is forbidden");
+	}
+	if (!/^permissions:\n {2}contents: read$/m.test(text)) {
+		problems.push("workflow permissions must be contents: read");
+	}
+	if (!/^ {4}runs-on: ubuntu-24\.04$/m.test(text)) {
+		problems.push("runner must be ubuntu-24.04");
+	}
+	if (!/^ {4}timeout-minutes: 10$/m.test(text)) {
+		problems.push("job timeout-minutes must be 10");
+	}
+	if (!/^env:\n {2}STORYBOOK_DISABLE_TELEMETRY: "true"$/m.test(text)) {
+		problems.push("workflow env STORYBOOK_DISABLE_TELEMETRY must be true");
+	}
+	for (const line of text.split("\n")) {
+		const match = /\buses:\s*(\S+)/.exec(line);
+		if (match !== null && !/@[0-9a-f]{40}$/.test(match[1] ?? "")) {
+			problems.push(`action must be pinned to a 40-hex SHA: ${match[1]}`);
+		}
+	}
+	if (!/^ {10}fetch-depth: 0$/m.test(text)) {
+		problems.push("checkout must use fetch-depth: 0");
+	}
+	if (!text.includes("run: yarn install --frozen-lockfile --ignore-scripts")) {
+		problems.push("install must use --frozen-lockfile --ignore-scripts");
+	}
+	if (!/^ {8}run: yarn test:storybook$/m.test(text)) {
+		problems.push("the yarn test:storybook step is missing");
+	}
+	return problems;
+}
+
+const WORKFLOW_FILE = path.resolve(
+	import.meta.dirname,
+	"../.github/workflows/storybook.yml",
+);
+
+describe("storybook.yml policy (D-17, SBK-04)", () => {
+	const checkedIn = readFileSync(WORKFLOW_FILE, "utf8");
+
+	test("the checked-in workflow satisfies the policy", () => {
+		expect(workflowPolicyProblems(checkedIn)).toEqual([]);
+	});
+
+	test("the policy reads real step names (anti-vacuity)", () => {
+		expect(stepNames(checkedIn).length).toBeGreaterThanOrEqual(5);
+		expect(eventPaths(checkedIn, "push").length).toBe(REQUIRED_PATHS.length);
+		expect(eventPaths(checkedIn, "pull_request").length).toBe(
+			REQUIRED_PATHS.length,
+		);
+	});
+
+	const MUTATIONS: ReadonlyArray<[string, (text: string) => string, string]> = [
+		[
+			"push list drops .storybook/**",
+			(t) => t.replace('      - ".storybook/**"\n', ""),
+			"push paths must include .storybook/**",
+		],
+		[
+			"pull_request list drops .storybook/**",
+			(t) => {
+				const at = t.lastIndexOf('      - ".storybook/**"\n');
+				return (
+					t.slice(0, at) + t.slice(at + '      - ".storybook/**"\n'.length)
+				);
+			},
+			"pull_request paths must include .storybook/**",
+		],
+		[
+			"write permission",
+			(t) => t.replace("contents: read", "contents: write"),
+			"contents: read",
+		],
+		[
+			"floating runner",
+			(t) => t.replace("ubuntu-24.04", "ubuntu-latest"),
+			"ubuntu-24.04",
+		],
+		[
+			"timeout removed",
+			(t) => t.replace("    timeout-minutes: 10\n", ""),
+			"timeout-minutes",
+		],
+		[
+			"telemetry env removed",
+			(t) => t.replace('env:\n  STORYBOOK_DISABLE_TELEMETRY: "true"\n', ""),
+			"STORYBOOK_DISABLE_TELEMETRY",
+		],
+		[
+			"action pinned to a tag",
+			(t) =>
+				t.replace(
+					/actions\/checkout@[0-9a-f]{40} # v7\.0\.1/,
+					"actions/checkout@v4",
+				),
+			"40-hex SHA",
+		],
+		[
+			"pull_request_target trigger",
+			(t) => t.replace("  pull_request:\n", "  pull_request_target:\n"),
+			"pull_request_target is forbidden",
+		],
+		[
+			"push branch filter removed",
+			(t) => t.replace("    branches: [master]\n", ""),
+			"branches: [master]",
+		],
+		[
+			"workflow_dispatch removed",
+			(t) => t.replace("  workflow_dispatch:\n", ""),
+			"workflow_dispatch",
+		],
+		[
+			"shallow checkout",
+			(t) => t.replace("          fetch-depth: 0\n", ""),
+			"fetch-depth: 0",
+		],
+		[
+			"install without --ignore-scripts",
+			(t) => t.replace(" --ignore-scripts", ""),
+			"--ignore-scripts",
+		],
+		[
+			"test step removed",
+			(t) => t.replace("        run: yarn test:storybook\n", ""),
+			"yarn test:storybook",
+		],
+	];
+
+	test.each(MUTATIONS)("rejects %s", (_name, mutate, property) => {
+		const mutated = mutate(checkedIn);
+		expect(mutated).not.toBe(checkedIn);
+		const problems = workflowPolicyProblems(mutated);
+		expect(problems.length).toBeGreaterThan(0);
+		expect(problems.join("\n")).toContain(property);
+	});
+});

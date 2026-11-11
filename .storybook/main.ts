@@ -1,7 +1,15 @@
 import type { StorybookConfig } from "@storybook/react-vite";
 
+// D-13: STORYBOOK_OFFLINE_NC=1 swaps the catalog for the planted-request
+// fixture only, so .storybook/offline.test.ts can prove its collector sees an
+// outbound request. The real build never sets it.
+const stories =
+	process.env["STORYBOOK_OFFLINE_NC"] === "1"
+		? ["./fixtures/offline_planted.stories.tsx"]
+		: ["../src/renderer/**/*.stories.@(ts|tsx)"];
+
 const config: StorybookConfig = {
-	stories: ["../src/renderer/**/*.stories.@(ts|tsx)"],
+	stories,
 	addons: ["@storybook/addon-a11y", "@storybook/addon-vitest"],
 	framework: {
 		name: "@storybook/react-vite",
