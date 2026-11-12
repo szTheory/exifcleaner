@@ -45,7 +45,7 @@ describe("withRealHover (D-11)", () => {
 		// took longer than the 15 s default for the first real pointer move (Phase 72).
 	}, 60_000);
 
-	test("rejects with the degraded-to-synthetic message on a pointer-events:none target", async () => {
+	test("rejects with the could-not-reach message on a pointer-events:none target", async () => {
 		const target = mount(
 			"div",
 			"position:absolute;left:40px;top:120px;width:120px;height:40px;pointer-events:none",
@@ -62,8 +62,39 @@ describe("withRealHover (D-11)", () => {
 				// Short on purpose: a target that cannot be hovered fails after this long.
 				{ timeoutMs: 1_500 },
 			),
-		).rejects.toThrow("real pointer did not produce :hover");
+		).rejects.toThrow("the hover could not reach the element");
 		// The assertion body never ran against a pointer that did not hover.
+		expect(asserted).toBe(false);
+	});
+
+	test("rejects with the degraded-to-synthetic message when the hover resolves but :hover is absent", async () => {
+		// The seam stands in for a pointer that moved but did not hover (a helper that
+		// had silently fallen back to a synthetic hover). The real hover is not used, so
+		// only the post-hover :hover check can produce this message.
+		const target = mount(
+			"button",
+			"position:absolute;left:40px;top:120px;width:120px;height:40px",
+			"Hover resolves, no :hover",
+		);
+		let asserted = false;
+		let hoverCalls = 0;
+		await expect(
+			withRealHover(
+				target,
+				throwingSynthetic,
+				() => {
+					asserted = true;
+				},
+				{
+					hover: () => {
+						hoverCalls += 1;
+						return Promise.resolve();
+					},
+					matches: () => false,
+				},
+			),
+		).rejects.toThrow("helper degraded to synthetic");
+		expect(hoverCalls).toBe(1);
 		expect(asserted).toBe(false);
 	});
 

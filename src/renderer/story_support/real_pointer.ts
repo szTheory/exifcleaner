@@ -31,11 +31,24 @@ function underVitest(): boolean {
 	);
 }
 
+// Test seam, for the permanent negative control only: a stub whose hover resolves while
+// matches reports no :hover proves the post-hover check is a branch of its own (a
+// pointer-events: none target fails in the catch below and never reaches it). Stories
+// pass neither, so the real vitest/browser hover and element.matches(":hover") run.
+type RealPointerSeam = {
+	hover?: ((element: Element, timeoutMs: number) => Promise<void>) | undefined;
+	matches?: ((element: Element) => boolean) | undefined;
+};
+
 export async function withRealHover(
 	element: Element,
 	synthetic: SyntheticPointer,
 	assert: () => Promise<void> | void,
-	{ timeoutMs = HOVER_TIMEOUT_MS }: { timeoutMs?: number } = {},
+	{
+		timeoutMs = HOVER_TIMEOUT_MS,
+		hover,
+		matches,
+	}: { timeoutMs?: number } & RealPointerSeam = {},
 ): Promise<void> {
 	if (!underVitest()) {
 		await synthetic.hover(element);
@@ -47,8 +60,10 @@ export async function withRealHover(
 		return;
 	}
 	const { userEvent } = await import("vitest/browser");
+	const realHover = hover ?? ((el, ms) => userEvent.hover(el, { timeout: ms }));
+	const isHovered = matches ?? ((el) => el.matches(":hover"));
 	try {
-		await userEvent.hover(element, { timeout: timeoutMs });
+		await realHover(element, timeoutMs);
 	} catch (error) {
 		// Playwright refuses to hover an element that cannot receive pointer events
 		// (for example pointer-events: none); that is the same failure as no :hover.
@@ -58,7 +73,7 @@ export async function withRealHover(
 		);
 	}
 	try {
-		if (!element.matches(":hover")) {
+		if (!isHovered(element)) {
 			throw new Error(
 				"real pointer did not produce :hover (helper degraded to synthetic)",
 			);
