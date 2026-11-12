@@ -41,7 +41,9 @@ describe("withRealHover (D-11)", () => {
 			hoveredDuringAssert = button.matches(":hover");
 		});
 		expect(hoveredDuringAssert).toBe(true);
-	});
+		// This project has no testTimeout of its own, and a full parallel run on a busy host
+		// took longer than the 15 s default for the first real pointer move (Phase 72).
+	}, 60_000);
 
 	test("rejects with the degraded-to-synthetic message on a pointer-events:none target", async () => {
 		const target = mount(
