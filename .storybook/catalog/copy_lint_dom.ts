@@ -31,6 +31,11 @@ const TEXT_ATTRIBUTES = [
 
 const SKIPPED_TAGS = new Set(["SCRIPT", "STYLE"]);
 
+// Storybook's own preview chrome (the loader, "No Preview" and error screens
+// from its iframe template) sits in document.body with hidden English text
+// that no story rendered; it is the tool's copy, not the product's.
+const STORYBOOK_CHROME_CLASS = "sb-wrapper";
+
 // One unit per element: its own direct text nodes joined, plus each text
 // attribute as a unit of its own. Portals are included because the caller
 // starts at document.body; visually hidden text counts (it is still read).
@@ -38,6 +43,7 @@ export function collectCopyUnits(root: Element): CopyUnit[] {
 	const units: CopyUnit[] = [];
 	const visit = (element: Element): void => {
 		if (SKIPPED_TAGS.has(element.tagName.toUpperCase())) return;
+		if (element.classList.contains(STORYBOOK_CHROME_CLASS)) return;
 		let own = "";
 		for (const child of Array.from(element.childNodes)) {
 			if (child.nodeType === Node.TEXT_NODE) {

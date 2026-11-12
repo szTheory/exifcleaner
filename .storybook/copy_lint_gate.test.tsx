@@ -1,6 +1,7 @@
 import { composeStories, setProjectAnnotations } from "@storybook/react-vite";
 import * as a11yAnnotations from "@storybook/addon-a11y/preview";
 import { expect, test } from "vitest";
+import { collectCopyUnits } from "./catalog/copy_lint_dom";
 import preview from "./preview";
 import * as fixtureStories from "./fixtures/copy_lint_violation.stories";
 
@@ -50,4 +51,18 @@ test("resolves: FixtureText (excused by a visible fixtureText substring)", async
 
 test("resolves: NonEnglish (only en is linted)", async () => {
 	await expect(NonEnglish.run()).resolves.not.toThrow();
+});
+
+test("collectCopyUnits skips Storybook's own preview wrappers and nothing else", () => {
+	const root = document.createElement("div");
+	root.innerHTML =
+		'<div class="sb-wrapper"><p>Please check the Storybook config.</p></div>' +
+		'<div class="sb-wrapper-lookalike"><p>Story text</p></div>' +
+		'<button aria-label="Open" title="Tip">Go</button>';
+	expect(collectCopyUnits(root).map((unit) => unit.text)).toEqual([
+		"Story text",
+		"Go",
+		"Open",
+		"Tip",
+	]);
 });

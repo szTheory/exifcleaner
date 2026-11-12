@@ -15,6 +15,272 @@
 			},
 			"bad": "Just drop a file.",
 			"ok": "Drop a file."
+		},
+		{
+			"id": "banned.simply",
+			"category": "banned",
+			"pattern": "\\bsimply\\b",
+			"flags": "i",
+			"message": "leave out \"simply\"; the brand bans it (and \"just\" and \"easy\")",
+			"source": {
+				"section": "Inclusive language, and writing for translation",
+				"quote": "Leave out “just”, “simply” and “easy”.",
+				"basis": "rule"
+			},
+			"bad": "Simply drop a file.",
+			"ok": "Drop a file."
+		},
+		{
+			"id": "banned.easy",
+			"category": "banned",
+			"pattern": "\\b(easy|easily)\\b",
+			"flags": "i",
+			"message": "leave out \"easy\"; the brand bans it (and \"just\" and \"simply\")",
+			"source": {
+				"section": "Inclusive language, and writing for translation",
+				"quote": "Leave out “just”, “simply” and “easy”.",
+				"basis": "rule"
+			},
+			"bad": "Easy to use.",
+			"ok": "Drop a file."
+		},
+		{
+			"id": "banned.scrub",
+			"category": "banned",
+			"pattern": "\\bscrub(s|bed|bing)?\\b",
+			"flags": "i",
+			"message": "use \"remove\" or \"clean\" instead of \"scrub\"",
+			"source": {
+				"section": "How to write our name",
+				"quote": "scrub, wipe, nuke, destroy",
+				"basis": "rule"
+			},
+			"bad": "Scrub the file.",
+			"ok": "Clean the file."
+		},
+		{
+			"id": "banned.wipe",
+			"category": "banned",
+			"pattern": "\\bwip(e|es|ed|ing)\\b",
+			"flags": "i",
+			"message": "use \"remove\" or \"clean\" instead of \"wipe\"",
+			"source": {
+				"section": "How to write our name",
+				"quote": "scrub, wipe, nuke, destroy",
+				"basis": "rule"
+			},
+			"bad": "Wipe metadata.",
+			"ok": "Remove metadata."
+		},
+		{
+			"id": "banned.nuke",
+			"category": "banned",
+			"pattern": "\\bnuk(e|es|ed|ing)\\b",
+			"flags": "i",
+			"message": "use \"remove\" or \"clean\" instead of \"nuke\"",
+			"source": {
+				"section": "How to write our name",
+				"quote": "scrub, wipe, nuke, destroy",
+				"basis": "rule"
+			},
+			"bad": "Nuke metadata.",
+			"ok": "Remove metadata."
+		},
+		{
+			"id": "banned.destroy",
+			"category": "banned",
+			"pattern": "\\bdestr(oy|oys|oyed|oying)\\b",
+			"flags": "i",
+			"message": "use \"remove\" or \"clean\" instead of \"destroy\"",
+			"source": {
+				"section": "How to write our name",
+				"quote": "scrub, wipe, nuke, destroy",
+				"basis": "rule"
+			},
+			"bad": "Destroy metadata.",
+			"ok": "Remove metadata."
+		},
+		{
+			"id": "banned.secure",
+			"category": "banned",
+			"pattern": "\\bsecur(e|ely)\\b",
+			"flags": "i",
+			"message": "say what is true and checkable, such as \"stays on your computer\", instead of \"secure\"",
+			"source": {
+				"section": "How to write our name",
+				"quote": "secure, anonymous, untraceable",
+				"basis": "rule"
+			},
+			"bad": "Your files stay secure.",
+			"ok": "Your files stay on your computer."
+		},
+		{
+			"id": "banned.anonymous",
+			"category": "banned",
+			"pattern": "\\b(anonymous|anonymously|untraceable)\\b",
+			"flags": "i",
+			"message": "say what is true and checkable, such as \"stays on your computer\", instead of \"anonymous\" or \"untraceable\"",
+			"source": {
+				"section": "How to write our name",
+				"quote": "secure, anonymous, untraceable",
+				"basis": "rule"
+			},
+			"bad": "Be anonymous.",
+			"ok": "Stays on your computer."
+		},
+		{
+			"id": "banned.100pct",
+			"category": "banned",
+			"pattern": "\\b100\\s?%\\s*(secure|safe|private|anonymous|guarantee\\w*|protected|sure)",
+			"flags": "i",
+			"message": "a bare 100% is fine; 100% before a claim word is the brand's example of what not to say",
+			"source": {
+				"section": "Voice: this, not that",
+				"quote": "“100% secure, guaranteed.”",
+				"basis": "example"
+			},
+			"bad": "100% secure.",
+			"ok": "100% of 12 cleaned"
+		},
+		{
+			"id": "banned.guaranteed",
+			"category": "banned",
+			"pattern": "\\bguarantee[ds]?\\b",
+			"flags": "i",
+			"message": "leave out \"guarantee\"; state what was verified instead",
+			"source": {
+				"section": "Voice: this, not that",
+				"quote": "“100% secure, guaranteed.”",
+				"basis": "example"
+			},
+			"bad": "Guaranteed clean.",
+			"ok": "Verified clean."
+		},
+		{
+			"id": "banned.error-code",
+			"category": "banned",
+			"pattern": "\\bError\\s+(0x|#?\\d)",
+			"flags": "i",
+			"message": "no error codes; say what happened and what stays unchanged",
+			"source": {
+				"section": "Voice: this, not that",
+				"quote": "“Error 0x03: operation failed.”",
+				"basis": "example"
+			},
+			"bad": "Error 0x03: operation failed",
+			"ok": "Error"
+		},
+		{
+			"id": "banned.exclamation",
+			"category": "banned",
+			"pattern": "!",
+			"flags": "",
+			"message": "derived from the brand example, a project extension and not a brand ban: leave out the exclamation mark",
+			"source": {
+				"section": "Voice: this, not that",
+				"quote": "“Please star us on GitHub!”",
+				"basis": "example"
+			},
+			"bad": "Done!",
+			"ok": "Done."
+		},
+		{
+			"id": "banned.please",
+			"category": "banned",
+			"pattern": "\\bplease\\b",
+			"flags": "i",
+			"message": "derived from the brand example, a project extension and not a brand ban: leave out \"please\"",
+			"source": {
+				"section": "Voice: this, not that",
+				"quote": "“Please star us on GitHub!”",
+				"basis": "example"
+			},
+			"bad": "Please wait.",
+			"ok": "Wait."
+		},
+		{
+			"id": "banned.free-caps",
+			"category": "banned",
+			"pattern": "\\bFREE\\b",
+			"flags": "",
+			"message": "write \"free\", never \"FREE\"",
+			"source": {
+				"section": "How to write our name",
+				"quote": "Write “FREE” never; “free” is fine.",
+				"basis": "rule"
+			},
+			"bad": "FREE download",
+			"ok": "Free download"
+		},
+		{
+			"id": "banned.fear",
+			"category": "banned",
+			"pattern": "\\b(hackers?|stalkers?|something to hide)\\b",
+			"flags": "i",
+			"message": "never use fear to sell: state what is removed, not what could happen to you",
+			"source": {
+				"section": "Inclusive language, and writing for translation",
+				"quote": "Never use fear to sell.",
+				"basis": "rule"
+			},
+			"bad": "Protect yourself from hackers.",
+			"ok": "Metadata, removed."
+		},
+		{
+			"id": "name.spaced",
+			"category": "name",
+			"pattern": "\\bexif[ -]cleaner\\b",
+			"flags": "i",
+			"message": "the name is one word: ExifCleaner",
+			"source": {
+				"section": "How to write our name",
+				"quote": "~~Exif Cleaner~~",
+				"basis": "rule"
+			},
+			"bad": "Exif Cleaner cleaned 12 files.",
+			"ok": "ExifCleaner cleaned 12 files."
+		},
+		{
+			"id": "name.miscased",
+			"category": "name",
+			"pattern": "\\b(EXIFCleaner|Exifcleaner|EXIFCLEANER)\\b",
+			"flags": "",
+			"message": "the name is ExifCleaner: capital E, capital C",
+			"source": {
+				"section": "How to write our name",
+				"quote": "~~EXIFCleaner~~",
+				"basis": "rule"
+			},
+			"bad": "EXIFCleaner is open source.",
+			"ok": "ExifCleaner is open source."
+		},
+		{
+			"id": "name.abbrev",
+			"category": "name",
+			"pattern": "\\bEC\\b",
+			"flags": "",
+			"message": "never abbreviate the name",
+			"source": {
+				"section": "How to write our name",
+				"quote": "~~EC~~: never abbreviated",
+				"basis": "rule"
+			},
+			"bad": "EC removed it.",
+			"ok": "ExifCleaner removed it."
+		},
+		{
+			"id": "name.verb",
+			"category": "name",
+			"pattern": "\\bexifclean\\b",
+			"flags": "i",
+			"message": "ExifCleaner is never a verb; the verb is \"clean\"",
+			"source": {
+				"section": "How to write our name",
+				"quote": "~~exifclean~~: never a verb",
+				"basis": "rule"
+			},
+			"bad": "exifclean the file",
+			"ok": "clean the file"
 		}
 	]
 }

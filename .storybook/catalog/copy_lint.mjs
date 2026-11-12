@@ -307,8 +307,30 @@ function compileRule(rule, derived, maskers) {
 	});
 }
 
+// An avoid word may span several words ("free software"): a run of spaces
+// matches a run of whitespace.
+function wordPattern(word) {
+	return `\\b${escapeRegExp(word).replace(/ +/g, "\\s+")}\\b`;
+}
+
+function terms(glossaryDoc) {
+	if (!isPlainObject(glossaryDoc) || !Array.isArray(glossaryDoc["terms"])) {
+		throw new Error("the glossary document is malformed");
+	}
+	return glossaryDoc["terms"];
+}
+
 /**
- * Compile every rule once into a frozen ruleset.
+ * Compile every rule once into a frozen ruleset: the file rules in file
+ * order, then one derived rule per glossary avoid word, sorted by id.
+ *
+ * Derived rule `vocab|<termId>|<word>`: bad is the avoid word, ok the term's
+ * label. Masking contract (RESEARCH Pitfall 3): before a derived rule runs,
+ * every OTHER term's multi-word label ("Finder tags", "macOS attributes") is
+ * masked, so the OS-owned names are not findings while "macOS extended
+ * attributes" still is; single-word labels are never masked. An avoid word
+ * that a banned or name rule already catches gets no derived rule, so one
+ * string has one detector.
  *
  * @param {unknown} rulesDoc
  * @param {unknown} glossaryDoc
@@ -320,8 +342,48 @@ export function buildRuleset(rulesDoc, glossaryDoc) {
 	const fileRules = rulesDoc["rules"].map((rule) =>
 		compileRule(rule, false, []),
 	);
-	void glossaryDoc;
-	return Object.freeze({ rules: Object.freeze([...fileRules]) });
+	const covering = fileRules.filter(
+		(rule) => rule.category === "banned" || rule.category === "name",
+	);
+	const glossaryTerms = terms(glossaryDoc);
+	const derived = [];
+	for (const term of glossaryTerms) {
+		const maskers = glossaryTerms
+			.filter(
+				(other) =>
+					other !== term &&
+					typeof other["ui_label"] === "string" &&
+					other["ui_label"].includes(" "),
+			)
+			.map((other) => new RegExp(wordPattern(other["ui_label"]), "gi"));
+		for (const word of term["avoid"] ?? []) {
+			const caught = covering.some((rule) =>
+				rule.regex.test(normalizeForLint(word)),
+			);
+			if (caught) {
+				continue;
+			}
+			derived.push(
+				compileRule(
+					{
+						id: `vocab|${term["id"]}|${word}`,
+						category: "vocab",
+						pattern: wordPattern(word),
+						flags: "i",
+						message: `use "${term["ui_label"]}" instead of "${word}"`,
+						bad: word,
+						ok: term["ui_label"],
+					},
+					true,
+					maskers,
+				),
+			);
+		}
+	}
+	derived.sort((a, b) => compareCodeUnits(a.id, b.id));
+	return Object.freeze({
+		rules: Object.freeze([...fileRules, ...derived]),
+	});
 }
 
 /**
