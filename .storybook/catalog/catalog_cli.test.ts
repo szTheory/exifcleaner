@@ -14,6 +14,7 @@ import {
 
 const CATALOG = ".storybook/catalog/catalog.mjs";
 const GLOSSARY_MD = ".storybook/catalog/GLOSSARY.md";
+const PERSONAS_MD = ".storybook/catalog/PERSONAS.md";
 const GLOSSARY_JSON = ".storybook/catalog/glossary.json";
 const REGISTER = ".storybook/catalog/copy-findings.json";
 
@@ -52,6 +53,21 @@ describe("catalog.mjs against a temp git repo", () => {
 			expect(result.stderr).toContain("CATALOG CHECK FAILED");
 			expect(result.stderr).toContain(
 				"GLOSSARY.md is stale; run yarn catalog:write",
+			);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: one changed byte in PERSONAS.md fails --check and changes nothing", () => {
+		withRepo((repo) => {
+			const file = path.join(repo, PERSONAS_MD);
+			fs.writeFileSync(file, `${fs.readFileSync(file, "utf8")}x`);
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("CATALOG CHECK FAILED");
+			expect(result.stderr).toContain(
+				"PERSONAS.md is stale; run yarn catalog:write",
 			);
 			assertDirEffect(before, snapshotDir(repo), {});
 		});

@@ -23,6 +23,13 @@ import {
 	validateGlossary,
 } from "./glossary.mjs";
 import { readMergeBase, resolveBaseRef } from "./merge_base.mjs";
+import {
+	CATALOG_PATH,
+	PERSONAS_MD_PATH,
+	loadCatalogContext,
+	renderPersonas,
+	validateCatalog,
+} from "./personas.mjs";
 
 // Repo-relative inputs `--check` reads. Tests copy exactly these into a temp
 // repository, so a passing run there also proves no other data is read.
@@ -70,6 +77,16 @@ function glossaryProblems(root) {
 	return { doc, problems: validateGlossary(doc, loadGlossaryContext(root)) };
 }
 
+function catalogProblems(root) {
+	const doc = readJson(root, CATALOG_PATH);
+	return { doc, problems: validateCatalog(doc, loadCatalogContext(root)) };
+}
+
+function firstProblem(problems) {
+	const first = problems[0];
+	return `${first?.code}: ${first?.message}`;
+}
+
 /**
  * Every generated file as `[relPath, expectedText]`.
  *
@@ -82,7 +99,14 @@ export function generatedFiles(root) {
 		const first = problems[0];
 		throw new Error(`${first?.code}: ${first?.message}`);
 	}
-	return [[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))]];
+	const catalog = catalogProblems(root);
+	if (catalog.problems.length > 0) {
+		throw new Error(firstProblem(catalog.problems));
+	}
+	return [
+		[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))],
+		[PERSONAS_MD_PATH, renderPersonas(/** @type {any} */ (catalog.doc))],
+	];
 }
 
 /**
@@ -96,8 +120,15 @@ export function checkCatalog({ root, base }) {
 	if (problems.length > 0) {
 		return { ok: false, problems, files: 0, notes: [] };
 	}
+	const catalog = catalogProblems(root);
+	if (catalog.problems.length > 0) {
+		return { ok: false, problems: catalog.problems, files: 0, notes: [] };
+	}
 	const stale = [];
-	const files = [[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))]];
+	const files = [
+		[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))],
+		[PERSONAS_MD_PATH, renderPersonas(/** @type {any} */ (catalog.doc))],
+	];
 	for (const [relPath, expected] of files) {
 		let actual = "";
 		try {
