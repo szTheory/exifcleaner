@@ -263,13 +263,27 @@ describe("gapRatchet and zeroGapProblems", () => {
 		const removed = clone(base);
 		removed.rows = removed.rows.filter((row) => row.subject !== "Toast");
 		expect(gapRatchet({ base, head: removed }).problems).toEqual([]);
+		expect(gapRatchet({ base, head: base }).problems).toEqual([]);
+	});
+
+	test("a gap closed at head is fine: the cell is a gap at base and covered at head", async () => {
+		// The gap is planted at base, so the control follows the catalog as it fills
+		// (Toast|happy is already covered in the committed grid) and always changes a cell
+		// from gap to closed instead of comparing a covered cell with itself.
+		const base = asDocument(await realModel());
+		rowOf(base, "Toast").cells["happy"] = { status: "gap" };
 		const closed = clone(base);
 		rowOf(closed, "Toast").cells["happy"] = {
 			status: "covered",
 			scenarios: ["toast.happy"],
 		};
+		expect(rowOf(base, "Toast").cells["happy"]?.status).toBe("gap");
+		expect(rowOf(closed, "Toast").cells["happy"]?.status).toBe("covered");
 		expect(gapRatchet({ base, head: closed }).problems).toEqual([]);
-		expect(gapRatchet({ base, head: base }).problems).toEqual([]);
+		// The same transition the other way round is the regression the ratchet reports.
+		expect(codes(gapRatchet({ base: closed, head: base }).problems)).toEqual([
+			"gap-added",
+		]);
 	});
 
 	test("an absent base grid is admitted once as bootstrap, even for a head with gaps", async () => {
