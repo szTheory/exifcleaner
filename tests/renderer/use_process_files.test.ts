@@ -1,7 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { FileProcessingStatus } from "../../src/domain/files/file_status";
-import type { FileEntry } from "../../src/renderer/contexts/AppContext";
 import type { AppAction } from "../../src/renderer/contexts/AppContext";
+// D-06 / STY-05: the entries and the typed-failure and already-clean cases come from the
+// shared fixtures the stories render (src/renderer/story_support/process_outcomes).
+// Known gap: a fixture edit that changes a case's removeResult and its UPDATE_FILE_ERROR
+// action consistently still passes here; the story-side hard-coded literals and the
+// composed-story tests catch that (D-07). readMetadata inputs stay literal inline, so
+// the frozen `beforeTags === 0` early exit (use_process_files.ts:30-52) stays visible.
+import {
+	FAILURE_CASES,
+	OUTCOME_CASES,
+	fileEntry,
+} from "../../src/renderer/story_support/process_outcomes";
 
 // Mock window.api
 function createMockApi(): {
@@ -25,24 +35,6 @@ function createMockApi(): {
 			notifyFileProcessed: vi.fn(),
 			notifyAllFilesProcessed: vi.fn(),
 		},
-	};
-}
-
-function makeFileEntry(overrides: Partial<FileEntry> = {}): FileEntry {
-	return {
-		id: overrides.id ?? "test-id-1",
-		path: overrides.path ?? "/path/to/test.jpg",
-		name: overrides.name ?? "test.jpg",
-		extension: overrides.extension ?? "JPG",
-		size: overrides.size ?? 1024,
-		folder: overrides.folder ?? null,
-		status: overrides.status ?? FileProcessingStatus.Pending,
-		beforeTags: overrides.beforeTags ?? null,
-		afterTags: overrides.afterTags ?? null,
-		beforeMetadata: overrides.beforeMetadata ?? null,
-		afterMetadata: overrides.afterMetadata ?? null,
-		outputPath: overrides.outputPath ?? undefined,
-		error: overrides.error ?? null,
 	};
 }
 
@@ -87,7 +79,7 @@ describe("processFileEntries", () => {
 	});
 
 	it("dispatches UPDATE_FILE_STATUS 'reading' for each file", async () => {
-		const entry = makeFileEntry();
+		const entry = fileEntry();
 		mockApi.exif.readMetadata.mockResolvedValue({ tag1: "val1" });
 		mockApi.exif.removeMetadata.mockResolvedValue({
 			success: true,
@@ -110,7 +102,7 @@ describe("processFileEntries", () => {
 	});
 
 	it("dispatches UPDATE_FILE_STATUS 'processing' after reading metadata", async () => {
-		const entry = makeFileEntry();
+		const entry = fileEntry();
 		mockApi.exif.readMetadata.mockResolvedValue({ tag1: "val1" });
 		mockApi.exif.removeMetadata.mockResolvedValue({
 			success: true,
@@ -141,7 +133,7 @@ describe("processFileEntries", () => {
 	});
 
 	it("dispatches UPDATE_FILE_METADATA with before and after tag counts", async () => {
-		const entry = makeFileEntry();
+		const entry = fileEntry();
 		// Before: 3 tags, After: 1 tag
 		mockApi.exif.readMetadata
 			.mockResolvedValueOnce({ tag1: "v", tag2: "v", tag3: "v" })
@@ -182,7 +174,7 @@ describe("processFileEntries", () => {
 				.mockResolvedValueOnce({ tag1: "v", tag2: "v" })
 				.mockResolvedValueOnce({});
 			mockApi.exif.removeMetadata.mockResolvedValue(result);
-			await processFileEntries([makeFileEntry()], mockDispatch);
+			await processFileEntries([fileEntry()], mockDispatch);
 			return [...dispatches];
 		};
 		const base = {
@@ -207,7 +199,7 @@ describe("processFileEntries", () => {
 	});
 
 	it("reads AFTER metadata from the returned output path and stores that path", async () => {
-		const entry = makeFileEntry({ path: "/path/to/test.jpg" });
+		const entry = fileEntry({ path: "/path/to/test.jpg" });
 		mockApi.exif.readMetadata
 			.mockResolvedValueOnce({ before: "metadata" })
 			.mockResolvedValueOnce({ after: "metadata" });
@@ -243,7 +235,7 @@ describe("processFileEntries", () => {
 	});
 
 	it("copies the main-returned forced-copy fact only after the successful AFTER read", async () => {
-		const entry = makeFileEntry({ path: "/path/to/sample.cr2" });
+		const entry = fileEntry({ path: "/path/to/sample.cr2" });
 		mockApi.exif.readMetadata
 			.mockResolvedValueOnce({ DateTimeOriginal: "2024:01:01 00:00:00" })
 			.mockResolvedValueOnce({});
@@ -277,12 +269,12 @@ describe("processFileEntries", () => {
 	});
 
 	it("continues the batch after refusing an unsafe RAF write", async () => {
-		const raf = makeFileEntry({
+		const raf = fileEntry({
 			id: "raf",
 			path: "/path/to/sample.raf",
 			name: "sample.raf",
 		});
-		const jpeg = makeFileEntry({
+		const jpeg = fileEntry({
 			id: "jpeg",
 			path: "/path/to/sample.jpg",
 			name: "sample.jpg",
@@ -327,7 +319,7 @@ describe("processFileEntries", () => {
 	});
 
 	it("dispatches UPDATE_FILE_STATUS 'complete' on success", async () => {
-		const entry = makeFileEntry();
+		const entry = fileEntry();
 		mockApi.exif.readMetadata
 			.mockResolvedValueOnce({ tag1: "v", tag2: "v" })
 			.mockResolvedValueOnce({ tag1: "v" });
@@ -347,7 +339,7 @@ describe("processFileEntries", () => {
 	});
 
 	it("reports unchanged metadata as complete, not metadata-free", async () => {
-		const entry = makeFileEntry();
+		const entry = fileEntry();
 		mockApi.exif.readMetadata.mockResolvedValue({ Artist: "Ada" });
 		mockApi.exif.removeMetadata.mockResolvedValue({
 			success: true,
@@ -373,7 +365,7 @@ describe("processFileEntries", () => {
 	});
 
 	it("dispatches 'no-metadata-found' when beforeTags is 0", async () => {
-		const entry = makeFileEntry();
+		const entry = fileEntry();
 		mockApi.exif.readMetadata.mockResolvedValue({});
 		mockApi.exif.removeMetadata.mockResolvedValue({
 			success: true,
@@ -404,10 +396,14 @@ describe("processFileEntries", () => {
 				d.status === FileProcessingStatus.NoMetadataFound,
 		);
 		expect(noMetadataDispatches).toHaveLength(1);
+		// The shared fixture's already-clean dispatches are the ones the hook makes.
+		for (const action of OUTCOME_CASES["already-clean"].actions) {
+			expect(dispatches).toContainEqual(action);
+		}
 	});
 
 	it("skips AFTER read and output state when remove returns an explicit error", async () => {
-		const entry = makeFileEntry();
+		const entry = fileEntry();
 		mockApi.exif.readMetadata.mockResolvedValueOnce({ before: "metadata" });
 		mockApi.exif.removeMetadata.mockResolvedValue({
 			success: false,
@@ -432,33 +428,22 @@ describe("processFileEntries", () => {
 		).toBe(false);
 	});
 
-	it.each([
-		["verification", undefined],
-		["cleanup", "/path/to/incomplete-output.jpg"],
-		["xattr", "/path/to/cleaned.jpg"],
-	] as const)(
+	it.each(["verification", "cleanup", "xattr"] as const)(
 		"stores %s terminal failure details without reading AFTER metadata",
-		async (failureKind, residualPath) => {
-			const entry = makeFileEntry();
+		async (failureKind) => {
+			const fixtureCase = FAILURE_CASES[failureKind];
+			const errorAction = fixtureCase.actions.find(
+				(action) => action.type === "UPDATE_FILE_ERROR",
+			);
+			expect(errorAction).toBeDefined();
+			const entry = fileEntry();
 			mockApi.exif.readMetadata.mockResolvedValueOnce({ before: "metadata" });
-			mockApi.exif.removeMetadata.mockResolvedValue({
-				success: false,
-				failureKind,
-				detail: "Verification could not prove output safety",
-				...(residualPath === undefined ? {} : { residualPath }),
-			});
+			mockApi.exif.removeMetadata.mockResolvedValue(fixtureCase.removeResult);
 
 			await processFileEntries([entry], mockDispatch);
 
 			expect(mockApi.exif.readMetadata).toHaveBeenCalledTimes(1);
-			expect(dispatches).toContainEqual({
-				type: "UPDATE_FILE_ERROR",
-				id: "test-id-1",
-				error: "Verification could not prove output safety",
-				failureKind,
-				detail: "Verification could not prove output safety",
-				...(residualPath === undefined ? {} : { residualPath }),
-			});
+			expect(dispatches).toContainEqual(errorAction);
 			expect(
 				dispatches.some((action) => action.type === "UPDATE_FILE_METADATA"),
 			).toBe(false);
@@ -467,7 +452,7 @@ describe("processFileEntries", () => {
 	);
 
 	it("keeps a verification failure as an error row without AFTER or revealable output state", async () => {
-		const entry = makeFileEntry();
+		const entry = fileEntry();
 		mockApi.exif.readMetadata.mockResolvedValueOnce({ before: "metadata" });
 		mockApi.exif.removeMetadata.mockResolvedValue({
 			success: false,
@@ -498,7 +483,7 @@ describe("processFileEntries", () => {
 	});
 
 	it("dispatches UPDATE_FILE_ERROR on IPC failure", async () => {
-		const entry = makeFileEntry();
+		const entry = fileEntry();
 		mockApi.exif.readMetadata.mockRejectedValue(new Error("ExifTool crashed"));
 
 		await processFileEntries([entry], mockDispatch);
@@ -515,8 +500,8 @@ describe("processFileEntries", () => {
 	});
 
 	it("processes files sequentially (second file starts after first completes)", async () => {
-		const entry1 = makeFileEntry({ id: "id-1", path: "/a.jpg" });
-		const entry2 = makeFileEntry({ id: "id-2", path: "/b.jpg" });
+		const entry1 = fileEntry({ id: "id-1", path: "/a.jpg" });
+		const entry2 = fileEntry({ id: "id-2", path: "/b.jpg" });
 
 		let callOrder: string[] = [];
 		mockApi.exif.readMetadata.mockImplementation(async (path: string) => {
@@ -547,7 +532,7 @@ describe("processFileEntries", () => {
 	it("keeps 200 JPEGs at exactly two renderer reads and one write each", async () => {
 		const entries = Array.from({ length: 200 }, (_, index) => {
 			const number = index + 1;
-			return makeFileEntry({
+			return fileEntry({
 				id: `jpeg-${number}`,
 				path: `/batch/jpeg-${number}.jpg`,
 				name: `jpeg-${number}.jpg`,
@@ -589,8 +574,8 @@ describe("processFileEntries", () => {
 	});
 
 	it("stores each returned output path while processing two files sequentially", async () => {
-		const entry1 = makeFileEntry({ id: "id-1", path: "/a.jpg" });
-		const entry2 = makeFileEntry({ id: "id-2", path: "/b.jpg" });
+		const entry1 = fileEntry({ id: "id-1", path: "/a.jpg" });
+		const entry2 = fileEntry({ id: "id-2", path: "/b.jpg" });
 
 		mockApi.exif.readMetadata
 			.mockResolvedValueOnce({ aBefore: "v" })
@@ -628,10 +613,7 @@ describe("processFileEntries", () => {
 	});
 
 	it("calls window.api.files.notifyFilesAdded with count at start", async () => {
-		const entries = [
-			makeFileEntry({ id: "id-1" }),
-			makeFileEntry({ id: "id-2" }),
-		];
+		const entries = [fileEntry({ id: "id-1" }), fileEntry({ id: "id-2" })];
 		mockApi.exif.readMetadata.mockResolvedValue({ tag: "v" });
 		mockApi.exif.removeMetadata.mockImplementation(async (path: string) => ({
 			success: true,
@@ -644,7 +626,7 @@ describe("processFileEntries", () => {
 	});
 
 	it("calls window.api.files.notifyAllFilesProcessed at end", async () => {
-		const entry = makeFileEntry();
+		const entry = fileEntry();
 		mockApi.exif.readMetadata.mockResolvedValue({ tag: "v" });
 		mockApi.exif.removeMetadata.mockResolvedValue({
 			success: true,
@@ -657,10 +639,7 @@ describe("processFileEntries", () => {
 	});
 
 	it("calls window.api.files.notifyFileProcessed for each file", async () => {
-		const entries = [
-			makeFileEntry({ id: "id-1" }),
-			makeFileEntry({ id: "id-2" }),
-		];
+		const entries = [fileEntry({ id: "id-1" }), fileEntry({ id: "id-2" })];
 		mockApi.exif.readMetadata.mockResolvedValue({ tag: "v" });
 		mockApi.exif.removeMetadata.mockImplementation(async (path: string) => ({
 			success: true,

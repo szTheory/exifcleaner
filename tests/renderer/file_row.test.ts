@@ -1,9 +1,21 @@
+import { composeStories } from "@storybook/react-vite";
 import * as React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FileProcessingStatus } from "../../src/domain";
 import { FileRow } from "../../src/renderer/components/file-list/FileRow";
 import { ErrorExpansion } from "../../src/renderer/components/file-list/ErrorExpansion";
+import * as errorExpansionStories from "../../src/renderer/components/file-list/ErrorExpansion.stories";
 import type { FileEntry } from "../../src/renderer/contexts/AppContext";
+import type { FailureCase } from "../../src/renderer/story_support/process_outcomes";
+import {
+	FAILURE_CASES,
+	FAILURE_WITHOUT_RESIDUAL,
+	GENERIC_FAILURE,
+	OUTCOME_CASES,
+	entryFor,
+	errorTextFor,
+} from "../../src/renderer/story_support/process_outcomes";
 
 vi.mock("react", async (importOriginal) => {
 	const actual = await importOriginal<typeof import("react")>();
@@ -37,22 +49,27 @@ vi.mock("../../src/renderer/hooks/use_i18n", () => ({
 
 const showContextMenu = vi.fn();
 
-function makeCompletedFile(overrides: Partial<FileEntry> = {}): FileEntry {
-	return {
-		id: "file-304",
-		path: "/photos/sample.jpg",
-		name: "sample.jpg",
-		extension: "jpg",
-		size: 1234,
-		folder: null,
-		status: FileProcessingStatus.Complete,
-		beforeTags: 4,
-		afterTags: 0,
-		beforeMetadata: {},
-		afterMetadata: {},
-		error: null,
-		...overrides,
-	};
+// D-07: rows are built through the shared fixtures (the real reducer folds each case's
+// dispatches), with the same `sample.jpg` identity the assertions below name. A `patch`
+// replaces a field AFTER the fold when one test pins a specific detail or path; the
+// summaries, aria-labels and per-kind detail literals never change to fit a fixture.
+const SAMPLE_ROW = {
+	id: "file-304",
+	path: "/photos/sample.jpg",
+	name: "sample.jpg",
+	extension: "jpg",
+	size: 1234,
+} satisfies Partial<FileEntry>;
+
+function failedRow(
+	fixtureCase: FailureCase,
+	patch: Partial<FileEntry> = {},
+): FileEntry {
+	return { ...entryFor(fixtureCase, SAMPLE_ROW), ...patch };
+}
+
+function completedRow(patch: Partial<FileEntry> = {}): FileEntry {
+	return { ...entryFor(OUTCOME_CASES.cleaned, SAMPLE_ROW), ...patch };
 }
 
 function findRevealControl(node: unknown): React.ReactElement {
@@ -149,15 +166,7 @@ beforeEach(() => {
 describe("FileRow copy reveal context menu", () => {
 	it("renders the exact localized verification failure summary with no successful-output affordance", () => {
 		const row = FileRow({
-			file: makeCompletedFile({
-				status: FileProcessingStatus.Error,
-				afterTags: null,
-				afterMetadata: null,
-				outputPath: undefined,
-				failureKind: "verification",
-				error: "ExifTool verification failed",
-				detail: "ExifTool verification failed",
-			}),
+			file: failedRow(FAILURE_CASES.verification),
 			isExpanded: true,
 			onToggleExpand: vi.fn(),
 			staggerIndex: 0,
@@ -181,12 +190,7 @@ describe("FileRow copy reveal context menu", () => {
 		const diagnosticDetail =
 			"Generated output verification failed (output-metadata-leak): File:YCbCrSubSampling, PNG:<b>x</b>";
 		const row = FileRow({
-			file: makeCompletedFile({
-				status: FileProcessingStatus.Error,
-				afterTags: null,
-				afterMetadata: null,
-				outputPath: undefined,
-				failureKind: "verification",
+			file: failedRow(FAILURE_CASES.verification, {
 				error: diagnosticDetail,
 				detail: diagnosticDetail,
 			}),
@@ -207,12 +211,7 @@ describe("FileRow copy reveal context menu", () => {
 
 	it("uses distinct cleanup copy and exposes only the main-returned residual path in detail", () => {
 		const row = FileRow({
-			file: makeCompletedFile({
-				status: FileProcessingStatus.Error,
-				afterTags: null,
-				afterMetadata: null,
-				outputPath: undefined,
-				failureKind: "cleanup",
+			file: failedRow(FAILURE_CASES.cleanup, {
 				error: "Removal failed",
 				detail: "Could not remove incomplete output",
 				residualPath: "/photos/.sample-incomplete.jpg",
@@ -236,15 +235,7 @@ describe("FileRow copy reveal context menu", () => {
 
 	it("renders the exact localized write failure summary with no reveal control", () => {
 		const row = FileRow({
-			file: makeCompletedFile({
-				status: FileProcessingStatus.Error,
-				afterTags: null,
-				afterMetadata: null,
-				outputPath: undefined,
-				failureKind: "write",
-				error: "Generated output write failed: exceeded the write time limit",
-				detail: "Generated output write failed: exceeded the write time limit",
-			}),
+			file: failedRow(FAILURE_CASES.write),
 			isExpanded: true,
 			onToggleExpand: vi.fn(),
 			staggerIndex: 0,
@@ -261,15 +252,7 @@ describe("FileRow copy reveal context menu", () => {
 
 	it("renders the exact localized commit failure summary with no reveal control (69-13, D-10)", () => {
 		const row = FileRow({
-			file: makeCompletedFile({
-				status: FileProcessingStatus.Error,
-				afterTags: null,
-				afterMetadata: null,
-				outputPath: undefined,
-				failureKind: "commit",
-				error: "Generated output commit failed",
-				detail: "Generated output commit failed",
-			}),
+			file: failedRow(FAILURE_CASES.commit),
 			isExpanded: true,
 			onToggleExpand: vi.fn(),
 			staggerIndex: 0,
@@ -294,12 +277,7 @@ describe("FileRow copy reveal context menu", () => {
 
 	it("shows the write failure detail with its residual path when one is carried", () => {
 		const row = FileRow({
-			file: makeCompletedFile({
-				status: FileProcessingStatus.Error,
-				afterTags: null,
-				afterMetadata: null,
-				outputPath: undefined,
-				failureKind: "write",
+			file: failedRow(FAILURE_CASES.write, {
 				error: "Generated output write failed: exceeded the write time limit",
 				detail: "Generated output write failed: exceeded the write time limit",
 				residualPath: "/photos/.sample.exifcleaner-stage-x.mp4",
@@ -319,12 +297,7 @@ describe("FileRow copy reveal context menu", () => {
 
 	it("shows the write failure detail alone when no residual path is carried", () => {
 		const row = FileRow({
-			file: makeCompletedFile({
-				status: FileProcessingStatus.Error,
-				afterTags: null,
-				afterMetadata: null,
-				outputPath: undefined,
-				failureKind: "write",
+			file: failedRow(FAILURE_WITHOUT_RESIDUAL.write, {
 				error: "Generated output write failed: exceeded the write time limit",
 				detail: "Generated output write failed: exceeded the write time limit",
 			}),
@@ -343,10 +316,13 @@ describe("FileRow copy reveal context menu", () => {
 
 	it("discloses one localized forced-copy result with the 60px row contract", () => {
 		const row = FileRow({
-			file: makeCompletedFile({
+			file: completedRow({
 				extension: "cr2",
 				outputPath: "/photos/sample_cleaned.cr2",
 				wasForcedCopy: true,
+				// This row pins the aria-label of a completed row with no outcome kind
+				// (the plain "Complete" status text), so the fixture's kind is cleared.
+				outcomeKind: undefined,
 			}),
 			isExpanded: false,
 			onToggleExpand: vi.fn(),
@@ -367,7 +343,7 @@ describe("FileRow copy reveal context menu", () => {
 
 	it("discloses copy mode for ordinary completed rows", () => {
 		const row = FileRow({
-			file: makeCompletedFile({ outputPath: "/photos/sample_cleaned.jpg" }),
+			file: completedRow({ outputPath: "/photos/sample_cleaned.jpg" }),
 			isExpanded: false,
 			onToggleExpand: vi.fn(),
 			staggerIndex: 0,
@@ -382,9 +358,7 @@ describe("FileRow copy reveal context menu", () => {
 
 	it("sends the completed row's exact stored copy and submitted original paths on context-menu gesture", () => {
 		const row = FileRow({
-			file: makeCompletedFile({
-				outputPath: "/photos/sample_cleaned_2.jpg",
-			}),
+			file: completedRow({ outputPath: "/photos/sample_cleaned_2.jpg" }),
 			isExpanded: false,
 			onToggleExpand: vi.fn(),
 			staggerIndex: 0,
@@ -415,7 +389,7 @@ describe("FileRow copy reveal context menu", () => {
 
 	it("does not offer the dual-artifact context menu for an overwrite result", () => {
 		const row = FileRow({
-			file: makeCompletedFile({ outputPath: "/photos/sample.jpg" }),
+			file: completedRow({ outputPath: "/photos/sample.jpg" }),
 			isExpanded: false,
 			onToggleExpand: vi.fn(),
 			staggerIndex: 0,
@@ -436,4 +410,126 @@ describe("FileRow copy reveal context menu", () => {
 
 		expect(showContextMenu).not.toHaveBeenCalled();
 	});
+});
+
+// D-07: the detail text FileRow hands to ErrorExpansion for every fixture failure, checked
+// against errorTextFor (the fixture helper) AND a literal typed out here, so a fixture
+// edit that moves both together is still caught by the literal.
+const FAILURE_DETAIL_ROWS: ReadonlyArray<
+	readonly [string, FailureCase, string]
+> = [
+	[
+		"write",
+		FAILURE_CASES.write,
+		"Generated output write failed: /path/to/incomplete-output.jpg",
+	],
+	[
+		"write without a residual path",
+		FAILURE_WITHOUT_RESIDUAL.write,
+		"Generated output write failed",
+	],
+	[
+		"verification",
+		FAILURE_CASES.verification,
+		"Generated output verification failed",
+	],
+	[
+		"cleanup",
+		FAILURE_CASES.cleanup,
+		"Generated output cleanup failed: /path/to/incomplete-output.jpg",
+	],
+	[
+		"cleanup without a residual path",
+		FAILURE_WITHOUT_RESIDUAL.cleanup,
+		"Generated output cleanup failed",
+	],
+	["commit", FAILURE_CASES.commit, "Generated output commit failed"],
+	[
+		"xattr",
+		FAILURE_CASES.xattr,
+		"Embedded metadata was removed, but macOS extended attributes could not be cleared: Operation not permitted: /path/to/cleaned.jpg",
+	],
+	[
+		"xattr without a residual path",
+		FAILURE_WITHOUT_RESIDUAL.xattr,
+		"Embedded metadata was removed, but macOS extended attributes could not be cleared: Operation not permitted",
+	],
+	[
+		"refused",
+		FAILURE_CASES.refused,
+		"RAF metadata removal is disabled because writing this format can damage the original. The file was left unchanged.",
+	],
+	[
+		"generic",
+		GENERIC_FAILURE,
+		"ExifTool crashed unexpectedly. Restart the app to retry.",
+	],
+];
+
+describe("FileRow failure detail from the shared fixtures", () => {
+	it.each(FAILURE_DETAIL_ROWS)(
+		"hands ErrorExpansion the %s detail",
+		(_name, fixtureCase, literal) => {
+			const entry = entryFor(fixtureCase, SAMPLE_ROW);
+			const row = FileRow({
+				file: entry,
+				isExpanded: true,
+				onToggleExpand: vi.fn(),
+				staggerIndex: 0,
+				animatedCheckRef: { current: new Set<string>() },
+				onCopyToast: vi.fn(),
+			});
+
+			const error = (
+				findElementByType(row, ErrorExpansion).props as {
+					error?: string;
+				}
+			).error;
+			expect(error).toBe(errorTextFor(entry));
+			expect(error).toBe(literal);
+		},
+	);
+});
+
+// SC3 / D-07 (secondary vehicle): the ErrorExpansion stories are composed WITHOUT the
+// project annotations and rendered with renderToStaticMarkup; ErrorExpansion reads no
+// i18n or app context, so no provider is needed. No play function or decorator runs in
+// this node environment. Every literal is typed out again, never read from the story.
+describe("composed ErrorExpansion stories (SC3)", () => {
+	const composed = composeStories(errorExpansionStories);
+
+	it.each([
+		["Write", "Generated output write failed: /path/to/incomplete-output.jpg"],
+		["Verification", "Generated output verification failed"],
+		[
+			"Cleanup",
+			"Generated output cleanup failed: /path/to/incomplete-output.jpg",
+		],
+		["Commit", "Generated output commit failed"],
+		[
+			"Xattr",
+			"Embedded metadata was removed, but macOS extended attributes could not be cleared: Operation not permitted: /path/to/cleaned.jpg",
+		],
+		[
+			"Refused",
+			"RAF metadata removal is disabled because writing this format can damage the original. The file was left unchanged.",
+		],
+		[
+			"GenericFailure",
+			"ExifTool crashed unexpectedly. Restart the app to retry.",
+		],
+		[
+			"LongDetail",
+			"Generated output cleanup failed: /Users/example/Pictures/2024/Summer holiday in the mountains/RAW exports/very-long-camera-file-name-IMG_2041_final_edit_v3.HEIC.exifcleaner-stage-3f9c1a2e-7b64-4d0a-9c2e-1f5a8d7b6e90.HEIC",
+		],
+	] as const)(
+		"renders the %s story with its literal text and the copy hint",
+		(name, literal) => {
+			const Story = composed[name];
+			const markup = renderToStaticMarkup(React.createElement(Story));
+
+			expect(markup).toContain(literal);
+			expect(markup).toContain("Click to copy");
+		},
+	);
 });
