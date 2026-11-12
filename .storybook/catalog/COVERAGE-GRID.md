@@ -2,7 +2,7 @@
 
 # Coverage grid
 
-21 subjects x 12 state classes = 252 cells: 40 covered, 94 waived, 118 gaps.
+21 subjects x 12 state classes = 252 cells: 46 covered, 100 waived, 106 gaps.
 
 A cell is covered by a scenario in scenarios.json, waived with a reason in waivers.json, or a gap. A gap is computed, never typed. Cells show the scenario count, `waived` or `gap`. A gap is owed by the phase in the Due column: primitive and pattern rows by Phase 72, area and screen rows by Phase 73.
 
@@ -16,7 +16,7 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 | TypePill | primitive | Phase 72 | 7 | waived | waived | waived | waived | waived | waived | waived | waived | waived | waived | waived |
 | ErrorBoundary | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | ErrorExpansion | pattern | Phase 72 | waived | waived | waived | waived | waived | waived | 5 | 1 | 1 | 1 | waived | waived |
-| FolderRow | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
+| FolderRow | pattern | Phase 72 | 4 | 2 | 1 | waived | waived | 1 | waived | waived | waived | 1 | 1 | waived |
 | LanguageDropdown | pattern | Phase 72 | 1 | gap | gap | gap | gap | gap | gap | gap | gap | gap | 1 | gap |
 | MetadataExpansion | pattern | Phase 72 | 5 | 1 | 1 | 1 | 1 | waived | waived | waived | waived | waived | 1 | waived |
 | MetadataField | pattern | Phase 72 | 2 | waived | waived | waived | 2 | waived | waived | waived | waived | waived | 1 | waived |
@@ -98,6 +98,12 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 - ErrorExpansion|loading: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#handleCopy): A row in flight is Pending, Reading or Processing and cannot expand; the pattern appears only after a verdict, and its copy write settles at once.
 - ErrorExpansion|intl: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#Click to copy): The pattern renders engine English text and the hardcoded English hint Click to copy, so no locale string reaches it and a locale adds no state of its own.
 - ErrorExpansion|huge: duplicate (error-expansion.long-detail): One error string is the largest input the pattern takes; thousands of files stress the file table and the status bar, and long-detail already covers the string size.
+- FolderRow|many: duplicate (folder-row.complete-expanded): A row shows one count string whatever its size, and the expanded row with twelve files already draws that wording, so a larger number adds no second look.
+- FolderRow|boundary: duplicate (folder-row.long-path): The only threshold in the row is the forty character cut of middleTruncatePath, and the long path story already draws both sides of that cut.
+- FolderRow|error: unreachable (src/renderer/components/file-list/FolderRow.tsx#renderCount): The discovery status has scanning, discovering, complete and empty and no error member, so a folder that cannot be read arrives as empty and is the recorded zero supported files finding.
+- FolderRow|denied: unreachable (src/renderer/components/file-list/FolderRow.tsx#onToggle): The fold button is always enabled and takes no disabled prop, and a folder the app may not read is dispatched as empty, so no refused row exists to draw.
+- FolderRow|stale: unreachable (src/renderer/components/file-list/FolderRow.tsx#fileCount): The row only mirrors the folder, count and status it is handed by the reducer and never rereads the folder, so it holds no state that can outlive its source.
+- FolderRow|huge: unreachable (src/renderer/components/file-list/FolderRow.tsx#renderCount): Thousands of files only lengthen one number in one string; the stress of many folder rows and file rows belongs to the table that repeats this row.
 - MetadataExpansion|loading: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#beforeMetadata): FileRow mounts the panel only for a Complete row that holds both maps, and a Pending, Reading or Processing row has no maps yet, so the panel is never drawn while a file is in flight.
 - MetadataExpansion|error: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#MetadataExpansion): A failed row shows ErrorExpansion in place of the panel, and the panel takes two maps with no failure input, so a failure never reaches it.
 - MetadataExpansion|denied: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#handleCopyAll): A refused file ends in the error state and shows its refusal text in ErrorExpansion, and the panel has no input that could carry a refusal.

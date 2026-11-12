@@ -128,6 +128,48 @@
 			"reason": "One error string is the largest input the pattern takes; thousands of files stress the file table and the status bar, and long-detail already covers the string size."
 		},
 		{
+			"subject": "FolderRow",
+			"stateClass": "many",
+			"basis": "duplicate",
+			"ref": "folder-row.complete-expanded",
+			"reason": "A row shows one count string whatever its size, and the expanded row with twelve files already draws that wording, so a larger number adds no second look."
+		},
+		{
+			"subject": "FolderRow",
+			"stateClass": "boundary",
+			"basis": "duplicate",
+			"ref": "folder-row.long-path",
+			"reason": "The only threshold in the row is the forty character cut of middleTruncatePath, and the long path story already draws both sides of that cut."
+		},
+		{
+			"subject": "FolderRow",
+			"stateClass": "error",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/file-list/FolderRow.tsx#renderCount",
+			"reason": "The discovery status has scanning, discovering, complete and empty and no error member, so a folder that cannot be read arrives as empty and is the recorded zero supported files finding."
+		},
+		{
+			"subject": "FolderRow",
+			"stateClass": "denied",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/file-list/FolderRow.tsx#onToggle",
+			"reason": "The fold button is always enabled and takes no disabled prop, and a folder the app may not read is dispatched as empty, so no refused row exists to draw."
+		},
+		{
+			"subject": "FolderRow",
+			"stateClass": "stale",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/file-list/FolderRow.tsx#fileCount",
+			"reason": "The row only mirrors the folder, count and status it is handed by the reducer and never rereads the folder, so it holds no state that can outlive its source."
+		},
+		{
+			"subject": "FolderRow",
+			"stateClass": "huge",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/file-list/FolderRow.tsx#renderCount",
+			"reason": "Thousands of files only lengthen one number in one string; the stress of many folder rows and file rows belongs to the table that repeats this row."
+		},
+		{
 			"subject": "GearIcon",
 			"stateClass": "empty",
 			"basis": "unreachable",

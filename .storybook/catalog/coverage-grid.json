@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 40,
-		"waived": 94,
-		"gaps": 118
+		"covered": 46,
+		"waived": 100,
+		"gaps": 106
 	},
 	"rows": [
 		{
@@ -756,40 +756,92 @@
 			"tier": "pattern",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"folder-row.complete-collapsed",
+						"folder-row.complete-expanded",
+						"folder-row.keyboard-focus",
+						"folder-row.toggle-hover"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"folder-row.empty-collapsed",
+						"folder-row.empty-expanded"
+					]
 				},
 				"one": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"folder-row.single-file"
+					]
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "folder-row.complete-expanded",
+						"reason": "A row shows one count string whatever its size, and the expanded row with twelve files already draws that wording, so a larger number adds no second look."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "folder-row.long-path",
+						"reason": "The only threshold in the row is the forty character cut of middleTruncatePath, and the long path story already draws both sides of that cut."
+					}
 				},
 				"loading": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"folder-row.scanning"
+					]
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/FolderRow.tsx#renderCount",
+						"reason": "The discovery status has scanning, discovering, complete and empty and no error member, so a folder that cannot be read arrives as empty and is the recorded zero supported files finding."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/FolderRow.tsx#onToggle",
+						"reason": "The fold button is always enabled and takes no disabled prop, and a folder the app may not read is dispatched as empty, so no refused row exists to draw."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/FolderRow.tsx#fileCount",
+						"reason": "The row only mirrors the folder, count and status it is handed by the reducer and never rereads the folder, so it holds no state that can outlive its source."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"folder-row.long-path"
+					]
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"folder-row.bidi-name"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/FolderRow.tsx#renderCount",
+						"reason": "Thousands of files only lengthen one number in one string; the stress of many folder rows and file rows belongs to the table that repeats this row."
+					}
 				}
 			}
 		},

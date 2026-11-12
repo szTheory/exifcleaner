@@ -74,6 +74,86 @@
 			"disposition": "fix-v5.1"
 		},
 		{
+			"fingerprint": "a11y-p72|file-list-folderrow--bidi-name|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--bidi-name",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--complete-collapsed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--complete-collapsed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--complete-expanded|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--complete-expanded",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--empty-collapsed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--empty-collapsed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--empty-expanded|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--empty-expanded",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--keyboard-focus|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--long-path|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--long-path",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--scanning|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--scanning",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count--scanning (the Scanning text, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--single-file|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--single-file",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--toggle-hover|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--toggle-hover",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
 			"fingerprint": "a11y-p72|file-list-metadataexpansion--all-removed|color-contrast",
 			"kind": "a11y-p72",
 			"story": "file-list-metadataexpansion--all-removed",

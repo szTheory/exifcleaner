@@ -134,6 +134,126 @@
 			]
 		},
 		{
+			"id": "folder-row.bidi-name",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "intl",
+			"tier": "pattern",
+			"situation": "Someone using Arabic drops a folder with an Arabic name and the row shows it in the right direction.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--bidi-name"
+			]
+		},
+		{
+			"id": "folder-row.complete-collapsed",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "After a large run someone folds a folder away and its row shows a chevron pointing right with the same count.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--complete-collapsed"
+			]
+		},
+		{
+			"id": "folder-row.complete-expanded",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone drops a folder and its row shows the folder, a chevron pointing down and how many files it holds.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--complete-expanded"
+			]
+		},
+		{
+			"id": "folder-row.empty-collapsed",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "empty",
+			"tier": "pattern",
+			"situation": "The row of a folder with nothing supported is folded away at once and still reads zero supported files.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--empty-collapsed"
+			]
+		},
+		{
+			"id": "folder-row.empty-expanded",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "empty",
+			"tier": "pattern",
+			"situation": "Someone drops a folder with nothing supported in it and its row reads zero supported files for a moment.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--empty-expanded"
+			]
+		},
+		{
+			"id": "folder-row.keyboard-focus",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone tabs to the fold button of a folder row and sees a visible focus ring around it.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--keyboard-focus"
+			]
+		},
+		{
+			"id": "folder-row.long-path",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "long",
+			"tier": "pattern",
+			"situation": "A folder deep in the tree shows a shortened path in the row and keeps the full path in its tooltip and name.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--long-path"
+			]
+		},
+		{
+			"id": "folder-row.scanning",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "loading",
+			"tier": "pattern",
+			"situation": "Someone drops a big folder and the row shows that it is still being scanned before any file count is known.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--scanning"
+			]
+		},
+		{
+			"id": "folder-row.single-file",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "one",
+			"tier": "pattern",
+			"situation": "Someone drops a folder that holds exactly one supported file and its row shows a count of one.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--single-file"
+			]
+		},
+		{
+			"id": "folder-row.toggle-hover",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone moves the pointer over the fold button of a folder row and the chevron changes to the accent colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--toggle-hover"
+			]
+		},
+		{
 			"id": "gear-icon.closed",
 			"persona": "P-sharer",
 			"job": "J-09",
