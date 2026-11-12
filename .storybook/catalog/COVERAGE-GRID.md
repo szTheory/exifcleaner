@@ -2,7 +2,7 @@
 
 # Coverage grid
 
-21 subjects x 12 state classes = 252 cells: 6 covered, 8 waived, 238 gaps.
+21 subjects x 12 state classes = 252 cells: 9 covered, 17 waived, 226 gaps.
 
 A cell is covered by a scenario in scenarios.json, waived with a reason in waivers.json, or a gap. A gap is computed, never typed. Cells show the scenario count, `waived` or `gap`. A gap is owed by the phase in the Due column: primitive and pattern rows by Phase 72, area and screen rows by Phase 73.
 
@@ -12,7 +12,7 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 | GearIcon | primitive | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | SegmentedControl | primitive | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | StatusIcon | primitive | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
-| ToggleSwitch | primitive | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
+| ToggleSwitch | primitive | Phase 72 | 3 | waived | waived | waived | waived | waived | waived | waived | waived | 1 | 1 | waived |
 | TypePill | primitive | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | ErrorBoundary | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | ErrorExpansion | pattern | Phase 72 | waived | waived | waived | waived | waived | waived | 5 | 1 | 1 | 1 | waived | waived |
@@ -32,6 +32,15 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 
 ## Waivers
 
+- ToggleSwitch|empty: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#label): The switch always renders a label and a description handed in by its parent, so a blank or zero-item toggle is not a state it has.
+- ToggleSwitch|one: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#checked): A switch shows one boolean for one setting and carries no count, so there is no singular wording or one-item layout to test.
+- ToggleSwitch|many: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#id): Each switch is independent with its own id and renders alone; the six switches stacked in a drawer belong to the settings drawer area story.
+- ToggleSwitch|boundary: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#onChange): A switch has only on and off, and ToggleSwitch.tsx has no limit, cap or threshold at which its behaviour changes.
+- ToggleSwitch|loading: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#ToggleSwitch): ToggleSwitch takes a plain checked boolean and renders no spinner or pending style, so any wait for settings belongs to the drawer around it.
+- ToggleSwitch|error: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#description): The primitive has no error prop and no error class, so there is no failed appearance of a switch to show; a message would be the description text.
+- ToggleSwitch|denied: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#input): The input takes no disabled or read-only prop and no call site in src/renderer passes one, so a refused toggle is not a state it can render.
+- ToggleSwitch|stale: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#checked): The switch holds no file or source of its own and only mirrors its checked prop, so nothing in it can outlive what it refers to.
+- ToggleSwitch|huge: duplicate (toggle-switch.long-labels): The text is two short strings from the locale files, and the longest translation of them is already the long-labels scenario, so no larger input exists.
 - ErrorExpansion|happy: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#ErrorExpansion): FileRow mounts ErrorExpansion only for an expanded row in the Error status, so no cleaned or unchanged row ever renders it.
 - ErrorExpansion|empty: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#error): FileRow renders the pattern only when the error text is not null, and every failure path supplies one, so an empty pattern never appears.
 - ErrorExpansion|one: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#error): The pattern shows one error string for one row and has no count, so there is no singular or plural wording to test.

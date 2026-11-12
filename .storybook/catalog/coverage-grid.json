@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 6,
-		"waived": 8,
-		"gaps": 238
+		"covered": 9,
+		"waived": 17,
+		"gaps": 226
 	},
 	"rows": [
 		{
@@ -182,40 +182,96 @@
 			"tier": "primitive",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"toggle-switch.keyboard-focus",
+						"toggle-switch.off",
+						"toggle-switch.on"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/ToggleSwitch.tsx#label",
+						"reason": "The switch always renders a label and a description handed in by its parent, so a blank or zero-item toggle is not a state it has."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/ToggleSwitch.tsx#checked",
+						"reason": "A switch shows one boolean for one setting and carries no count, so there is no singular wording or one-item layout to test."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/ToggleSwitch.tsx#id",
+						"reason": "Each switch is independent with its own id and renders alone; the six switches stacked in a drawer belong to the settings drawer area story."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/ToggleSwitch.tsx#onChange",
+						"reason": "A switch has only on and off, and ToggleSwitch.tsx has no limit, cap or threshold at which its behaviour changes."
+					}
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/ToggleSwitch.tsx#ToggleSwitch",
+						"reason": "ToggleSwitch takes a plain checked boolean and renders no spinner or pending style, so any wait for settings belongs to the drawer around it."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/ToggleSwitch.tsx#description",
+						"reason": "The primitive has no error prop and no error class, so there is no failed appearance of a switch to show; a message would be the description text."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/ToggleSwitch.tsx#input",
+						"reason": "The input takes no disabled or read-only prop and no call site in src/renderer passes one, so a refused toggle is not a state it can render."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/ToggleSwitch.tsx#checked",
+						"reason": "The switch holds no file or source of its own and only mirrors its checked prop, so nothing in it can outlive what it refers to."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"toggle-switch.long-labels"
+					]
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"toggle-switch.arabic"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "toggle-switch.long-labels",
+						"reason": "The text is two short strings from the locale files, and the longest translation of them is already the long-labels scenario, so no larger input exists."
+					}
 				}
 			}
 		},

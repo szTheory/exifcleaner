@@ -56,6 +56,69 @@
 			"basis": "duplicate",
 			"ref": "error-expansion.long-detail",
 			"reason": "One error string is the largest input the pattern takes; thousands of files stress the file table and the status bar, and long-detail already covers the string size."
+		},
+		{
+			"subject": "ToggleSwitch",
+			"stateClass": "empty",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/settings/ToggleSwitch.tsx#label",
+			"reason": "The switch always renders a label and a description handed in by its parent, so a blank or zero-item toggle is not a state it has."
+		},
+		{
+			"subject": "ToggleSwitch",
+			"stateClass": "one",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/settings/ToggleSwitch.tsx#checked",
+			"reason": "A switch shows one boolean for one setting and carries no count, so there is no singular wording or one-item layout to test."
+		},
+		{
+			"subject": "ToggleSwitch",
+			"stateClass": "many",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/settings/ToggleSwitch.tsx#id",
+			"reason": "Each switch is independent with its own id and renders alone; the six switches stacked in a drawer belong to the settings drawer area story."
+		},
+		{
+			"subject": "ToggleSwitch",
+			"stateClass": "boundary",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/settings/ToggleSwitch.tsx#onChange",
+			"reason": "A switch has only on and off, and ToggleSwitch.tsx has no limit, cap or threshold at which its behaviour changes."
+		},
+		{
+			"subject": "ToggleSwitch",
+			"stateClass": "loading",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/settings/ToggleSwitch.tsx#ToggleSwitch",
+			"reason": "ToggleSwitch takes a plain checked boolean and renders no spinner or pending style, so any wait for settings belongs to the drawer around it."
+		},
+		{
+			"subject": "ToggleSwitch",
+			"stateClass": "error",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/settings/ToggleSwitch.tsx#description",
+			"reason": "The primitive has no error prop and no error class, so there is no failed appearance of a switch to show; a message would be the description text."
+		},
+		{
+			"subject": "ToggleSwitch",
+			"stateClass": "denied",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/settings/ToggleSwitch.tsx#input",
+			"reason": "The input takes no disabled or read-only prop and no call site in src/renderer passes one, so a refused toggle is not a state it can render."
+		},
+		{
+			"subject": "ToggleSwitch",
+			"stateClass": "stale",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/settings/ToggleSwitch.tsx#checked",
+			"reason": "The switch holds no file or source of its own and only mirrors its checked prop, so nothing in it can outlive what it refers to."
+		},
+		{
+			"subject": "ToggleSwitch",
+			"stateClass": "huge",
+			"basis": "duplicate",
+			"ref": "toggle-switch.long-labels",
+			"reason": "The text is two short strings from the locale files, and the longest translation of them is already the long-labels scenario, so no larger input exists."
 		}
 	]
 }

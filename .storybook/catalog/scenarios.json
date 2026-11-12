@@ -121,6 +121,66 @@
 			"stories": [
 				"settings-languagedropdown--default"
 			]
+		},
+		{
+			"id": "toggle-switch.arabic",
+			"persona": "P-sharer",
+			"job": "J-01",
+			"stateClass": "intl",
+			"tier": "primitive",
+			"situation": "An Arabic speaker reads a setting in a right-to-left layout with its label and description in Arabic.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-toggleswitch--arabic"
+			]
+		},
+		{
+			"id": "toggle-switch.keyboard-focus",
+			"persona": "P-photographer",
+			"job": "J-02",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone tabs to a setting with the keyboard and sees a focus ring on the switch before changing it.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-toggleswitch--keyboard-focus"
+			]
+		},
+		{
+			"id": "toggle-switch.long-labels",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "long",
+			"tier": "primitive",
+			"situation": "A Spanish speaker opens the settings and the longest translated label and description still fit beside the switch.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-toggleswitch--long-labels"
+			]
+		},
+		{
+			"id": "toggle-switch.off",
+			"persona": "P-sharer",
+			"job": "J-01",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone leaves a setting off before sharing a file and can see from the switch and its label that it is not applied.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-toggleswitch--off"
+			]
+		},
+		{
+			"id": "toggle-switch.on",
+			"persona": "P-photographer",
+			"job": "J-05",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone turns on Save as copy so the original is kept exactly as it was, and reads the setting description.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-toggleswitch--on"
+			]
 		}
 	]
 }
