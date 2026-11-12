@@ -66,6 +66,11 @@ export function makeCatalogRepo(root: string = repoRoot): string {
 	git(repo, ["config", "user.name", "Catalog Test"]);
 	git(repo, ["config", "user.email", "catalog@example.invalid"]);
 	git(repo, ["config", "commit.gpgsign", "false"]);
+	// `git commit` otherwise starts a detached `git maintenance run --auto`
+	// that creates and removes .git/objects/maintenance.lock while a test is
+	// walking the directory (an ENOENT in snapshotDir on a loaded runner).
+	git(repo, ["config", "maintenance.auto", "false"]);
+	git(repo, ["config", "gc.auto", "0"]);
 	git(repo, ["add", "-A"]);
 	git(repo, ["commit", "-q", "-m", "base"]);
 	return repo;

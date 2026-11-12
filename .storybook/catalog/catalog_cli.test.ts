@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -5,6 +6,7 @@ import { describe, expect, test } from "vitest";
 import { assertDirEffect, snapshotDir } from "../../tests/helpers/dir_effect";
 import { enumerateStories } from "./story_index.mjs";
 import {
+	GIT_ENV,
 	childEnv,
 	git,
 	makeCatalogRepo,
@@ -425,6 +427,21 @@ describe("temp_repo helper contract", () => {
 	test("temp_repo: repoRoot is the working tree", () => {
 		expect(fs.existsSync(path.join(repoRoot, "package.json"))).toBe(true);
 		expect(fs.existsSync(realScript(CATALOG))).toBe(true);
+	});
+
+	test("temp_repo: a catalog repo never starts background git maintenance", () => {
+		withRepo((repo) => {
+			for (const key of ["maintenance.auto", "gc.auto"]) {
+				const result = spawnSync("git", ["config", "--get", key], {
+					cwd: repo,
+					encoding: "utf8",
+					env: GIT_ENV,
+				});
+				expect(result.stdout.trim(), key).toBe(
+					key === "gc.auto" ? "0" : "false",
+				);
+			}
+		});
 	});
 
 	test("temp_repo: child env has no NODE_OPTIONS", () => {
