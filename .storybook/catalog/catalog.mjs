@@ -6,6 +6,7 @@
 // JSON is the authored source and is never rewritten; only generated Markdown
 // is. Every data path resolves from the current working directory, so a test
 // can point the real script at a temporary copy of CHECK_INPUTS.
+import "./cache_dir.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import { isMainModule } from "../../scripts/is_main_module.mjs";
@@ -22,6 +23,14 @@ import {
 	renderGlossary,
 	validateGlossary,
 } from "./glossary.mjs";
+import {
+	GRID_JSON_PATH,
+	GRID_MD_PATH,
+	gapRatchet,
+	loadGrid,
+	renderGridJson,
+	renderGridMarkdown,
+} from "./grid.mjs";
 import { readMergeBase, resolveBaseRef } from "./merge_base.mjs";
 import {
 	CATALOG_PATH,
@@ -91,9 +100,9 @@ function firstProblem(problems) {
  * Every generated file as `[relPath, expectedText]`.
  *
  * @param {string} root
- * @returns {Array<[string, string]>}
+ * @returns {Promise<Array<[string, string]>>}
  */
-export function generatedFiles(root) {
+export async function generatedFiles(root) {
 	const { doc, problems } = glossaryProblems(root);
 	if (problems.length > 0) {
 		const first = problems[0];
@@ -103,19 +112,26 @@ export function generatedFiles(root) {
 	if (catalog.problems.length > 0) {
 		throw new Error(firstProblem(catalog.problems));
 	}
+	const grid = await loadGrid(root);
+	if (grid.model === null) {
+		throw new Error(firstProblem(grid.problems));
+	}
 	return [
 		[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))],
 		[PERSONAS_MD_PATH, renderPersonas(/** @type {any} */ (catalog.doc))],
+		[GRID_JSON_PATH, renderGridJson(grid.model)],
+		[GRID_MD_PATH, renderGridMarkdown(grid.model)],
 	];
 }
 
 /**
- * The drift layer (generated files) and the copy findings register layer.
+ * The drift layer (generated files), the copy findings register layer and
+ * the coverage grid gap ratchet.
  *
  * @param {{ root: string, base?: string | undefined }} options
- * @returns {{ ok: boolean, problems: Array<{ code: string, message: string }>, files: number, notes: string[] }}
+ * @returns {Promise<{ ok: boolean, problems: Array<{ code: string, message: string }>, files: number, notes: string[] }>}
  */
-export function checkCatalog({ root, base }) {
+export async function checkCatalog({ root, base }) {
 	const { doc, problems } = glossaryProblems(root);
 	if (problems.length > 0) {
 		return { ok: false, problems, files: 0, notes: [] };
@@ -124,10 +140,16 @@ export function checkCatalog({ root, base }) {
 	if (catalog.problems.length > 0) {
 		return { ok: false, problems: catalog.problems, files: 0, notes: [] };
 	}
+	const grid = await loadGrid(root);
+	if (grid.model === null) {
+		return { ok: false, problems: grid.problems, files: 0, notes: [] };
+	}
 	const stale = [];
 	const files = [
 		[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))],
 		[PERSONAS_MD_PATH, renderPersonas(/** @type {any} */ (catalog.doc))],
+		[GRID_JSON_PATH, renderGridJson(grid.model)],
+		[GRID_MD_PATH, renderGridMarkdown(grid.model)],
 	];
 	for (const [relPath, expected] of files) {
 		let actual = "";
@@ -156,23 +178,33 @@ export function checkCatalog({ root, base }) {
 	const entries = Array.isArray(/** @type {any} */ (head)?.entries)
 		? /** @type {any} */ (head).entries.length
 		: 0;
-	const all = [...stale, ...register.problems];
+	const gridBase = readMergeBase(GRID_JSON_PATH, {
+		ref: resolveBaseRef(base, process.env),
+		cwd: root,
+	});
+	const ratchet = gapRatchet({
+		base: gridBase.base,
+		head: JSON.parse(renderGridJson(grid.model)),
+	});
+	const all = [...stale, ...register.problems, ...ratchet.problems];
+	const { counts } = grid.model;
 	return {
 		ok: all.length === 0,
 		problems: all,
 		files: files.length,
 		notes: [
 			`copy findings: ${entries} entries (${baseDoc === null ? "bootstrap" : `merge-base ${mergeBase.slice(0, 7)}`})`,
+			`grid: ${counts.subjects} subjects, ${counts.cells} cells, ${counts.covered} covered, ${counts.waived} waived, ${counts.gaps} gaps (${gridBase.base === null ? "bootstrap" : `merge-base ${gridBase.mergeBase.slice(0, 7)}`})`,
 		],
 	};
 }
 
 /**
  * @param {string} root
- * @returns {number} files written
+ * @returns {Promise<number>} files written
  */
-export function writeCatalog(root) {
-	const files = generatedFiles(root);
+export async function writeCatalog(root) {
+	const files = await generatedFiles(root);
 	for (const [relPath, expected] of files) {
 		const absolute = path.join(root, relPath);
 		let actual = null;
@@ -194,9 +226,9 @@ function describe(problems) {
 
 /**
  * @param {string[]} argv
- * @returns {number} exit code
+ * @returns {Promise<number>} exit code
  */
-export function main(argv = process.argv.slice(2)) {
+export async function main(argv = process.argv.slice(2)) {
 	try {
 		const { flags, base } = parseArguments(argv);
 		const writing = flags.has("--write");
@@ -205,11 +237,11 @@ export function main(argv = process.argv.slice(2)) {
 		}
 		const root = process.cwd();
 		if (writing) {
-			const count = writeCatalog(root);
+			const count = await writeCatalog(root);
 			console.log(`✓ CATALOG WRITE — ${count} files`);
 			return 0;
 		}
-		const result = checkCatalog({ root, base });
+		const result = await checkCatalog({ root, base });
 		if (!result.ok) {
 			console.error(`✗ CATALOG CHECK FAILED: ${describe(result.problems)}`);
 			return 1;
@@ -228,5 +260,5 @@ export function main(argv = process.argv.slice(2)) {
 }
 
 if (isMainModule(import.meta.url)) {
-	process.exitCode = main();
+	process.exitCode = await main();
 }
