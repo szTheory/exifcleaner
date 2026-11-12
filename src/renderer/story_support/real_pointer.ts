@@ -18,9 +18,11 @@ type SyntheticPointer = {
 // VITEST_STORYBOOK, VITEST_BROWSER_DEBUG), so the Storybook plugin's VITEST_STORYBOOK
 // ("true" in the story projects, "false" in the gate project) is the marker, with
 // VITEST kept for a node run. The Storybook UI and a static build set neither.
-// Long enough for a loaded machine to move the pointer onto a visible element, short
-// enough that the permanent negative control (a pointer-events: none target) stays quick.
-const HOVER_TIMEOUT_MS = 5_000;
+// Long enough for a loaded machine to move the pointer onto a visible element: a full
+// parallel `yarn test:storybook` on a busy host starved a 5 s limit (Phase 72, 72-02).
+// The permanent negative control (a pointer-events: none target) passes a short
+// `timeoutMs` of its own so it stays quick.
+const HOVER_TIMEOUT_MS = 20_000;
 
 function underVitest(): boolean {
 	return (
@@ -33,6 +35,7 @@ export async function withRealHover(
 	element: Element,
 	synthetic: SyntheticPointer,
 	assert: () => Promise<void> | void,
+	{ timeoutMs = HOVER_TIMEOUT_MS }: { timeoutMs?: number } = {},
 ): Promise<void> {
 	if (!underVitest()) {
 		await synthetic.hover(element);
@@ -45,7 +48,7 @@ export async function withRealHover(
 	}
 	const { userEvent } = await import("vitest/browser");
 	try {
-		await userEvent.hover(element, { timeout: HOVER_TIMEOUT_MS });
+		await userEvent.hover(element, { timeout: timeoutMs });
 	} catch (error) {
 		// Playwright refuses to hover an element that cannot receive pointer events
 		// (for example pointer-events: none); that is the same failure as no :hover.

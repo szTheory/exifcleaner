@@ -51,9 +51,15 @@ describe("withRealHover (D-11)", () => {
 		);
 		let asserted = false;
 		await expect(
-			withRealHover(target, throwingSynthetic, () => {
-				asserted = true;
-			}),
+			withRealHover(
+				target,
+				throwingSynthetic,
+				() => {
+					asserted = true;
+				},
+				// Short on purpose: a target that cannot be hovered fails after this long.
+				{ timeoutMs: 1_500 },
+			),
 		).rejects.toThrow("real pointer did not produce :hover");
 		// The assertion body never ran against a pointer that did not hover.
 		expect(asserted).toBe(false);
