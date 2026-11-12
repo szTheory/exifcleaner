@@ -1,4 +1,4 @@
-export interface Problem {
+interface Problem {
 	code: string;
 	message: string;
 	id?: string | undefined;
