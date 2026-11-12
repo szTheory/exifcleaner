@@ -18,8 +18,12 @@ import * as fixtureStories from "./fixtures/a11y_recheck.stories";
 //       story run reject naming that rule in at least one theme (theme-union: some
 //       entries fail in light only), else the entry is stale and the test says
 //       `fixed, remove the entry <fingerprint>` (the ratchet lets entries go);
-//   (c) no `src/` story silences the gate any other way: every story's effective
-//       parameters.a11y.test is "error" and parameters.a11y.disable is not true.
+//   (c) no `src/` story silences the gate any other way. @storybook/addon-a11y's
+//       afterEach skips or empties the scan on: parameters.a11y.test other than
+//       "error", parameters.a11y.disable, globals.a11y.manual, globals.ghostStories,
+//       parameters.a11y.context (include/exclude), and options.runOnly. Every route is
+//       checked on every story of the catalog's own glob (`*.stories.@(ts|tsx)`,
+//       asserted equal to STORIES_GLOB in catalog/story_index.test.ts).
 //       This closes the interim audit's per-story bypass for src stories (RESEARCH C8).
 //
 // Accepted residual: a baselined story and rule hides a NEW instance of the same rule
@@ -44,6 +48,9 @@ type Indexed = {
 	name: string;
 	module: CsfModule;
 	parameters: Record<string, unknown>;
+	// The CSF globals (module default, then the story's own): addon-a11y reads
+	// globals.a11y.manual and globals.ghostStories, which parameters cannot show.
+	globals: Record<string, unknown>;
 };
 export type Runner = (
 	storyId: string,
@@ -82,11 +89,16 @@ function indexStories(modules: Record<string, CsfModule>): Indexed[] {
 			) {
 				throw new Error(`story ${name} has no id`);
 			}
+			const exports = record(module);
 			out.push({
 				id: composed.id,
 				name,
 				module,
 				parameters: record("parameters" in composed ? composed.parameters : {}),
+				globals: {
+					...record(record(exports["default"])["globals"]),
+					...record(record(exports[name])["globals"]),
+				},
 			});
 		}
 	}
@@ -136,11 +148,16 @@ export function pairProblems(
 }
 
 export function bypassProblems(
-	stories: ReadonlyArray<{ id: string; parameters: Record<string, unknown> }>,
+	stories: ReadonlyArray<{
+		id: string;
+		parameters: Record<string, unknown>;
+		globals?: Record<string, unknown>;
+	}>,
 ): string[] {
 	const problems: string[] = [];
 	for (const story of stories) {
 		const a11y = record(story.parameters["a11y"]);
+		const globals = story.globals ?? {};
 		if (a11y["test"] !== "error") {
 			problems.push(
 				`${story.id}: parameters.a11y.test is ${JSON.stringify(a11y["test"])}, not "error"`,
@@ -148,6 +165,18 @@ export function bypassProblems(
 		}
 		if (a11y["disable"] === true) {
 			problems.push(`${story.id}: parameters.a11y.disable is true`);
+		}
+		if (record(globals["a11y"])["manual"] === true) {
+			problems.push(`${story.id}: globals.a11y.manual is true`);
+		}
+		if (globals["ghostStories"]) {
+			problems.push(`${story.id}: globals.ghostStories is set`);
+		}
+		if (a11y["context"] !== undefined) {
+			problems.push(`${story.id}: parameters.a11y.context is set`);
+		}
+		if (record(a11y["options"])["runOnly"] !== undefined) {
+			problems.push(`${story.id}: parameters.a11y.options.runOnly is set`);
 		}
 	}
 	return problems.sort(compare);
@@ -216,8 +245,10 @@ export async function recheckProblems(
 	return problems;
 }
 
+// Must equal STORIES_GLOB (catalog/story_index.mjs); story_index.test.ts reads this
+// literal back and asserts it, because import.meta.glob needs a string literal.
 const realModules = import.meta.glob<CsfModule>(
-	"../src/renderer/**/*.stories.tsx",
+	"../src/renderer/**/*.stories.@(ts|tsx)",
 	{ eager: true },
 );
 const REAL_STORIES = indexStories(realModules);
@@ -261,6 +292,7 @@ describe("a11y-p72 baseline (SC2, D-21)", () => {
 				id: "planted--story",
 				name: "Story",
 				module: {} as CsfModule,
+				globals: {},
 				parameters: {
 					a11y: { options: { rules: { "fake-rule": { enabled: false } } } },
 				},
@@ -299,6 +331,59 @@ describe("a11y-p72 baseline (SC2, D-21)", () => {
 			'b: parameters.a11y.test is "off", not "error"',
 			'c: parameters.a11y.test is undefined, not "error"',
 			"d: parameters.a11y.disable is true",
+		]);
+	});
+
+	test("the bypass scan reports each remaining route that addon-a11y honours", () => {
+		const ok = { a11y: { test: "error" } };
+		// One planted story per route, each otherwise clean, so a problem names its route.
+		expect(
+			bypassProblems([
+				{ id: "manual", parameters: ok, globals: { a11y: { manual: true } } },
+				{ id: "ghost", parameters: ok, globals: { ghostStories: true } },
+				{
+					id: "context",
+					parameters: {
+						a11y: { test: "error", context: { exclude: ["body"] } },
+					},
+				},
+				{
+					id: "runonly",
+					parameters: {
+						a11y: { test: "error", options: { runOnly: ["button-name"] } },
+					},
+				},
+				{ id: "clean", parameters: ok, globals: { a11y: { manual: false } } },
+			]),
+		).toEqual([
+			"context: parameters.a11y.context is set",
+			"ghost: globals.ghostStories is set",
+			"manual: globals.a11y.manual is true",
+			"runonly: parameters.a11y.options.runOnly is set",
+		]);
+	});
+
+	test("globals set in a story module's CSF, on the story or on the meta, reach the scan", () => {
+		// The scan only sees what indexStories hands it, so plant real CSF modules.
+		const planted = indexStories({
+			story: {
+				default: { title: "Planted/StoryGlobals" },
+				Manual: { render: () => null, globals: { a11y: { manual: true } } },
+				Fine: { render: () => null },
+			} as CsfModule,
+			meta: {
+				default: {
+					title: "Planted/MetaGlobals",
+					globals: { ghostStories: true },
+					parameters: { a11y: { context: { exclude: ["body"] } } },
+				},
+				Any: { render: () => null },
+			} as CsfModule,
+		});
+		expect(bypassProblems(planted)).toEqual([
+			"planted-metaglobals--any: globals.ghostStories is set",
+			"planted-metaglobals--any: parameters.a11y.context is set",
+			"planted-storyglobals--manual: globals.a11y.manual is true",
 		]);
 	});
 

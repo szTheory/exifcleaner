@@ -78,6 +78,20 @@ describe("the real stories", () => {
 		expect(main).toContain(STORIES_GLOB);
 	});
 
+	test("the a11y-p72 bypass scan globs the same stories as the catalog", () => {
+		// import.meta.glob needs a string literal, so the recheck test cannot import
+		// STORIES_GLOB; read its literal back instead. A narrower glob (for example
+		// `*.stories.tsx`) hides every `.stories.ts` file from the bypass scan.
+		const source = fs.readFileSync(
+			path.join(repoRoot, ".storybook/a11y_p72_recheck.test.tsx"),
+			"utf8",
+		);
+		const globs = [
+			...source.matchAll(/import\.meta\.glob<[^>]*>\(\s*"([^"]+)"/g),
+		].map((match) => match[1]);
+		expect(globs).toEqual([STORIES_GLOB]);
+	});
+
 	test("fixture stories are never listed", () => {
 		const fixtures = walkStories(path.join(repoRoot, ".storybook/fixtures"));
 		expect(fixtures.length).toBeGreaterThanOrEqual(2);
