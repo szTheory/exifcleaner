@@ -83,6 +83,8 @@ const MAX_DEFINITION_SENTENCES = 2;
 
 const WORD = /^\p{Ll}+$/u;
 const PHRASE = /^\p{Ll}+( \p{Ll}+)*$/u;
+// A function word is one token as the tokenizer sees it, so couldn't is one word.
+const FUNCTION_WORD = /^\p{Ll}+('\p{Ll}+)*$/u;
 
 // Label containment and word matching compare UTF-16 code units after mapping
 // the curly apostrophes to U+0027, U+00A0 to a space and
@@ -516,7 +518,11 @@ function checkWordLists(doc, problems) {
 	const functionWords = doc["functionWords"];
 	const seenWords = new Set();
 	for (const word of functionWords) {
-		if (typeof word !== "string" || !WORD.test(word) || seenWords.has(word)) {
+		if (
+			typeof word !== "string" ||
+			!FUNCTION_WORD.test(word) ||
+			seenWords.has(word)
+		) {
 			problems.push(
 				problem(
 					"bad-function-word",

@@ -1,6 +1,44 @@
 {
 	"schemaVersion": 1,
-	"functionWords": [],
+	"functionWords": [
+		"a",
+		"after",
+		"an",
+		"and",
+		"another",
+		"as",
+		"at",
+		"be",
+		"before",
+		"but",
+		"could",
+		"couldn't",
+		"for",
+		"from",
+		"have",
+		"here",
+		"in",
+		"is",
+		"it",
+		"left",
+		"may",
+		"no",
+		"not",
+		"of",
+		"or",
+		"over",
+		"right",
+		"s",
+		"so",
+		"still",
+		"such",
+		"the",
+		"to",
+		"was",
+		"when",
+		"will",
+		"your"
+	],
 	"terms": [
 		{
 			"id": "appearance",
@@ -83,6 +121,7 @@
 			"ui_label": "cloud sync client",
 			"definition": "An app such as a cloud drive that keeps a folder in sync and can change a file while it is cleaned.",
 			"forms": [
+				"app",
 				"client",
 				"cloud",
 				"sync"
@@ -190,7 +229,8 @@
 			"definition": "Anything dropped or chosen to clean: an image, a video or a PDF.",
 			"forms": [
 				"file",
-				"files"
+				"files",
+				"photos"
 			],
 			"internal": [],
 			"avoid": [],
@@ -483,6 +523,7 @@
 			"definition": "The DPI an image is printed at. Preserving it keeps prints the right size.",
 			"forms": [
 				"dpi",
+				"prints",
 				"resolution"
 			],
 			"internal": [],
@@ -666,5 +707,171 @@
 			"reviewed": "2026-11-12"
 		}
 	],
-	"wordWaivers": []
+	"wordWaivers": [
+		{
+			"word": "accurate",
+			"class": "generic-adjective",
+			"reason": "Describes color accuracy in the ICC profile setting description."
+		},
+		{
+			"word": "add",
+			"class": "generic-verb",
+			"reason": "Action verb in the empty-screen title."
+		},
+		{
+			"word": "all",
+			"class": "generic-adjective",
+			"reason": "Quantifier in the Select All and Copy all labels."
+		},
+		{
+			"word": "changed",
+			"class": "generic-adjective",
+			"reason": "Describes a file another app altered, in the commit failure message."
+		},
+		{
+			"word": "choose",
+			"class": "generic-verb",
+			"reason": "Action verb for the file and folder pickers."
+		},
+		{
+			"word": "clear",
+			"class": "generic-verb",
+			"reason": "Label of the button that empties the file list."
+		},
+		{
+			"word": "cleared",
+			"class": "generic-verb",
+			"reason": "macOS attributes could not be cleared, in the xattr failure message."
+		},
+		{
+			"word": "close",
+			"class": "generic-verb",
+			"reason": "Closes the settings drawer."
+		},
+		{
+			"word": "collapse",
+			"class": "generic-verb",
+			"reason": "Toggle verb on a folder row."
+		},
+		{
+			"word": "complete",
+			"class": "generic-adjective",
+			"reason": "Row status label."
+		},
+		{
+			"word": "copyright",
+			"class": "os-term",
+			"reason": "Label of the About window copyright line, owned by the OS About panel."
+		},
+		{
+			"word": "create",
+			"class": "generic-verb",
+			"reason": "Describes making a cleaned copy in the copy-mode description."
+		},
+		{
+			"word": "created",
+			"class": "generic-verb",
+			"reason": "Describes the cleaned copies made in copy mode."
+		},
+		{
+			"word": "currently",
+			"class": "generic-adjective",
+			"reason": "Adverb in the RAF refusal message."
+		},
+		{
+			"word": "error",
+			"class": "generic-adjective",
+			"reason": "Row status label."
+		},
+		{
+			"word": "expand",
+			"class": "generic-verb",
+			"reason": "Toggle verb on a folder row."
+		},
+		{
+			"word": "extended",
+			"class": "os-term",
+			"reason": "macOS extended attributes: the operating system's own name."
+		},
+		{
+			"word": "incomplete",
+			"class": "generic-adjective",
+			"reason": "Describes a partial output file in the verification failure messages."
+		},
+		{
+			"word": "keep",
+			"class": "generic-verb",
+			"reason": "Verb in the preserve setting descriptions."
+		},
+		{
+			"word": "leave",
+			"class": "generic-verb",
+			"reason": "Verb in the copy-mode setting description."
+		},
+		{
+			"word": "locked",
+			"class": "generic-adjective",
+			"reason": "A file another app holds, in the commit failure message."
+		},
+		{
+			"word": "measured",
+			"class": "generic-adjective",
+			"reason": "Describes what verification measured, in the unchanged outcome."
+		},
+		{
+			"word": "open",
+			"class": "generic-verb",
+			"reason": "Verb in the Open files user task."
+		},
+		{
+			"word": "option",
+			"class": "generic-adjective",
+			"reason": "Noun for a choice offered on the empty screen."
+		},
+		{
+			"word": "pdfs",
+			"class": "proper-noun",
+			"reason": "File format name, plural."
+		},
+		{
+			"word": "pending",
+			"class": "generic-adjective",
+			"reason": "Row status label."
+		},
+		{
+			"word": "present",
+			"class": "generic-adjective",
+			"reason": "A field that is still present after cleaning."
+		},
+		{
+			"word": "raf",
+			"class": "proper-noun",
+			"reason": "Camera RAW format name."
+		},
+		{
+			"word": "read",
+			"class": "generic-verb",
+			"reason": "Folders that could not be read."
+		},
+		{
+			"word": "safe",
+			"class": "generic-adjective",
+			"reason": "Describes cleaning that is not safe, in the RAF refusal message."
+		},
+		{
+			"word": "select",
+			"class": "generic-verb",
+			"reason": "Verb in the Select All context-menu item."
+		},
+		{
+			"word": "selected",
+			"class": "generic-adjective",
+			"reason": "Describes files chosen by the person, in the table header and user task."
+		},
+		{
+			"word": "stay",
+			"class": "generic-verb",
+			"reason": "Originals stay unchanged, in the copy-mode messages."
+		}
+	]
 }
