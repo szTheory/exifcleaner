@@ -72,6 +72,69 @@
 			"reason": "With no list, count or text, a large quantity cannot be fed into a single glyph, so the quantity stress belongs to the table that repeats it."
 		},
 		{
+			"subject": "ErrorBoundary",
+			"stateClass": "empty",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/ErrorBoundary.tsx#children",
+			"reason": "With no child the guard renders nothing and has nothing to fail, so there is no empty form of it, and a child that draws nothing is the healthy story."
+		},
+		{
+			"subject": "ErrorBoundary",
+			"stateClass": "one",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/ErrorBoundary.tsx#ErrorBoundaryState",
+			"reason": "The guard holds one error and shows one message with no count, so there is no singular or plural wording to look at."
+		},
+		{
+			"subject": "ErrorBoundary",
+			"stateClass": "many",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/ErrorBoundary.tsx#hasError",
+			"reason": "A second failure while the fallback is up cannot happen because the failed child is no longer rendered, so only one error is ever shown at a time."
+		},
+		{
+			"subject": "ErrorBoundary",
+			"stateClass": "boundary",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/ErrorBoundary.tsx#getDerivedStateFromError",
+			"reason": "The guard has two states, healthy and failed, and no limit or threshold at which its behaviour changes, so there is no edge to sit on."
+		},
+		{
+			"subject": "ErrorBoundary",
+			"stateClass": "loading",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/ErrorBoundary.tsx#handleReset",
+			"reason": "Try again re-renders the child in the same turn and the guard has no pending style or spinner, so there is no in-between frame to show."
+		},
+		{
+			"subject": "ErrorBoundary",
+			"stateClass": "denied",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/ErrorBoundary.tsx#render",
+			"reason": "The guard has no permission or refused form and its button is never disabled, so a blocked version of the message does not exist."
+		},
+		{
+			"subject": "ErrorBoundary",
+			"stateClass": "stale",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/ErrorBoundary.tsx#ErrorBoundaryProps",
+			"reason": "The fallback keeps the caught error until Try again is pressed and rereads nothing, so no revalidation or out-of-date form exists apart from the recovery story."
+		},
+		{
+			"subject": "ErrorBoundary",
+			"stateClass": "intl",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/ErrorBoundary.tsx#Try again",
+			"reason": "The message, the cause and the button are hardcoded English in the component and no locale string reaches them, so a locale story would draw the same English text."
+		},
+		{
+			"subject": "ErrorBoundary",
+			"stateClass": "huge",
+			"basis": "duplicate",
+			"ref": "error-boundary.fallback-long-message",
+			"reason": "The guard shows one error, so the largest input is its longest message, which the long message story already draws wrapping inside the box."
+		},
+		{
 			"subject": "ErrorExpansion",
 			"stateClass": "happy",
 			"basis": "unreachable",
@@ -469,6 +532,48 @@
 			"basis": "duplicate",
 			"ref": "segmented-control.long-labels",
 			"reason": "The control has a fixed three segments and its widest input is the longest translated labels, which the long-labels scenario already shows."
+		},
+		{
+			"subject": "StatusBar",
+			"stateClass": "many",
+			"basis": "duplicate",
+			"ref": "status-bar.all-cleaned",
+			"reason": "More files only change the digits in the same three segments, and the all-cleaned story already draws the finished form of a run."
+		},
+		{
+			"subject": "StatusBar",
+			"stateClass": "error",
+			"basis": "duplicate",
+			"ref": "status-bar.nothing-removed",
+			"reason": "The bar has no failed count, so a batch where every file failed reads zero of N cleaned with zero tags, the same markup the nothing-removed story already draws."
+		},
+		{
+			"subject": "StatusBar",
+			"stateClass": "denied",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/StatusBar.tsx#onCleanMore",
+			"reason": "The Clear button is always enabled whenever it is shown and takes no disabled prop, so no refused form of the bar exists to draw."
+		},
+		{
+			"subject": "StatusBar",
+			"stateClass": "stale",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/StatusBar.tsx#elapsedSeconds",
+			"reason": "The bar prints the numbers App hands it and never rereads a file, so it holds no figure that can outlive its source."
+		},
+		{
+			"subject": "StatusBar",
+			"stateClass": "long",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/StatusBar.tsx#interpolate",
+			"reason": "The three segments are short sentences filled with numbers; how the longest translations wrap across the whole bar is an area question that belongs to Phase 73."
+		},
+		{
+			"subject": "StatusBar",
+			"stateClass": "huge",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/StatusBar.tsx#totalTagsRemoved",
+			"reason": "A huge batch only makes the numbers longer inside the same segments; the stress of thousands of rows belongs to the file table, not to this bar."
 		},
 		{
 			"subject": "StatusIcon",

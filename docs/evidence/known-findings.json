@@ -394,6 +394,94 @@
 			"disposition": "fix-v5.1"
 		},
 		{
+			"fingerprint": "a11y-p72|ui-errorboundary--button-hover|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-errorboundary--button-hover",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): .error-boundary__button (Try again), 14px measures 3.62:1 (#007aff --ec-color-accent on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.85:1 (#007aff --ec-color-accent on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__detail, 14px measures 4.22:1 (#66758c --ec-color-text-secondary on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.99:1 (#818188 --ec-color-text-secondary on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__message, 20px measures 4.46:1 (#c44536 --ec-color-error on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.13:1 (#c44536 --ec-color-error on #3d1a16 --ec-color-error-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-errorboundary--fallback|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-errorboundary--fallback",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): .error-boundary__button (Try again), 14px measures 3.62:1 (#007aff --ec-color-accent on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.85:1 (#007aff --ec-color-accent on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__detail, 14px measures 4.22:1 (#66758c --ec-color-text-secondary on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.99:1 (#818188 --ec-color-text-secondary on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__message, 20px measures 4.46:1 (#c44536 --ec-color-error on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.13:1 (#c44536 --ec-color-error on #3d1a16 --ec-color-error-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-errorboundary--fallback-long-message|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-errorboundary--fallback-long-message",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): .error-boundary__button (Try again), 14px measures 3.62:1 (#007aff --ec-color-accent on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.85:1 (#007aff --ec-color-accent on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__detail, 14px measures 4.22:1 (#66758c --ec-color-text-secondary on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.99:1 (#818188 --ec-color-text-secondary on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__message, 20px measures 4.46:1 (#c44536 --ec-color-error on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.13:1 (#c44536 --ec-color-error on #3d1a16 --ec-color-error-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-errorboundary--keyboard-focus|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-errorboundary--keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): .error-boundary__button (Try again), 14px measures 3.62:1 (#007aff --ec-color-accent on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.85:1 (#007aff --ec-color-accent on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__detail, 14px measures 4.22:1 (#66758c --ec-color-text-secondary on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.99:1 (#818188 --ec-color-text-secondary on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__message, 20px measures 4.46:1 (#c44536 --ec-color-error on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.13:1 (#c44536 --ec-color-error on #3d1a16 --ec-color-error-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--all-cleaned|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--all-cleaned",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--arabic|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--arabic",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--keyboard-focus|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--mid-batch|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--mid-batch",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--nothing-removed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--nothing-removed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--running|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--running",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--single-file|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--single-file",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
 			"fingerprint": "a11y-p72|ui-typepill--heic|color-contrast",
 			"kind": "a11y-p72",
 			"story": "ui-typepill--heic",

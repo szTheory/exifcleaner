@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 46,
-		"waived": 100,
-		"gaps": 106
+		"covered": 55,
+		"waived": 115,
+		"gaps": 82
 	},
 	"rows": [
 		{
@@ -616,40 +616,97 @@
 			"tier": "pattern",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"error-boundary.healthy"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/ErrorBoundary.tsx#children",
+						"reason": "With no child the guard renders nothing and has nothing to fail, so there is no empty form of it, and a child that draws nothing is the healthy story."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/ErrorBoundary.tsx#ErrorBoundaryState",
+						"reason": "The guard holds one error and shows one message with no count, so there is no singular or plural wording to look at."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/ErrorBoundary.tsx#hasError",
+						"reason": "A second failure while the fallback is up cannot happen because the failed child is no longer rendered, so only one error is ever shown at a time."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/ErrorBoundary.tsx#getDerivedStateFromError",
+						"reason": "The guard has two states, healthy and failed, and no limit or threshold at which its behaviour changes, so there is no edge to sit on."
+					}
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/ErrorBoundary.tsx#handleReset",
+						"reason": "Try again re-renders the child in the same turn and the guard has no pending style or spinner, so there is no in-between frame to show."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"error-boundary.button-hover",
+						"error-boundary.fallback",
+						"error-boundary.keyboard-focus",
+						"error-boundary.try-again-recovers"
+					]
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/ErrorBoundary.tsx#render",
+						"reason": "The guard has no permission or refused form and its button is never disabled, so a blocked version of the message does not exist."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/ErrorBoundary.tsx#ErrorBoundaryProps",
+						"reason": "The fallback keeps the caught error until Try again is pressed and rereads nothing, so no revalidation or out-of-date form exists apart from the recovery story."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"error-boundary.fallback-long-message"
+					]
 				},
 				"intl": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/ErrorBoundary.tsx#Try again",
+						"reason": "The message, the cause and the button are hardcoded English in the component and no locale string reaches them, so a locale story would draw the same English text."
+					}
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "error-boundary.fallback-long-message",
+						"reason": "The guard shows one error, so the largest input is its longest message, which the long message story already draws wrapping inside the box."
+					}
 				}
 			}
 		},
@@ -1186,40 +1243,90 @@
 			"tier": "pattern",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"status-bar.all-cleaned",
+						"status-bar.keyboard-focus",
+						"status-bar.mid-batch"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"status-bar.idle"
+					]
 				},
 				"one": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"status-bar.single-file"
+					]
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "status-bar.all-cleaned",
+						"reason": "More files only change the digits in the same three segments, and the all-cleaned story already draws the finished form of a run."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"status-bar.nothing-removed"
+					]
 				},
 				"loading": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"status-bar.running"
+					]
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "status-bar.nothing-removed",
+						"reason": "The bar has no failed count, so a batch where every file failed reads zero of N cleaned with zero tags, the same markup the nothing-removed story already draws."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/StatusBar.tsx#onCleanMore",
+						"reason": "The Clear button is always enabled whenever it is shown and takes no disabled prop, so no refused form of the bar exists to draw."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/StatusBar.tsx#elapsedSeconds",
+						"reason": "The bar prints the numbers App hands it and never rereads a file, so it holds no figure that can outlive its source."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/StatusBar.tsx#interpolate",
+						"reason": "The three segments are short sentences filled with numbers; how the longest translations wrap across the whole bar is an area question that belongs to Phase 73."
+					}
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"status-bar.arabic"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/StatusBar.tsx#totalTagsRemoved",
+						"reason": "A huge batch only makes the numbers longer inside the same segments; the stress of thousands of rows belongs to the file table, not to this bar."
+					}
 				}
 			}
 		},

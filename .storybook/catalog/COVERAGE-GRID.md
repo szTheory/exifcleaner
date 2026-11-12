@@ -2,7 +2,7 @@
 
 # Coverage grid
 
-21 subjects x 12 state classes = 252 cells: 46 covered, 100 waived, 106 gaps.
+21 subjects x 12 state classes = 252 cells: 55 covered, 115 waived, 82 gaps.
 
 A cell is covered by a scenario in scenarios.json, waived with a reason in waivers.json, or a gap. A gap is computed, never typed. Cells show the scenario count, `waived` or `gap`. A gap is owed by the phase in the Due column: primitive and pattern rows by Phase 72, area and screen rows by Phase 73.
 
@@ -14,14 +14,14 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 | StatusIcon | primitive | Phase 72 | 2 | waived | waived | waived | waived | 2 | 2 | waived | waived | waived | waived | waived |
 | ToggleSwitch | primitive | Phase 72 | 3 | waived | waived | waived | waived | waived | waived | waived | waived | 1 | 1 | waived |
 | TypePill | primitive | Phase 72 | 7 | waived | waived | waived | waived | waived | waived | waived | waived | waived | waived | waived |
-| ErrorBoundary | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
+| ErrorBoundary | pattern | Phase 72 | 1 | waived | waived | waived | waived | waived | 4 | waived | waived | 1 | waived | waived |
 | ErrorExpansion | pattern | Phase 72 | waived | waived | waived | waived | waived | waived | 5 | 1 | 1 | 1 | waived | waived |
 | FolderRow | pattern | Phase 72 | 4 | 2 | 1 | waived | waived | 1 | waived | waived | waived | 1 | 1 | waived |
 | LanguageDropdown | pattern | Phase 72 | 1 | gap | gap | gap | gap | gap | gap | gap | gap | gap | 1 | gap |
 | MetadataExpansion | pattern | Phase 72 | 5 | 1 | 1 | 1 | 1 | waived | waived | waived | waived | waived | 1 | waived |
 | MetadataField | pattern | Phase 72 | 2 | waived | waived | waived | 2 | waived | waived | waived | waived | waived | 1 | waived |
 | MetadataGroup | pattern | Phase 72 | waived | waived | 1 | 1 | 1 | waived | waived | waived | waived | waived | waived | waived |
-| StatusBar | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
+| StatusBar | pattern | Phase 72 | 3 | 1 | 1 | waived | 1 | 1 | waived | waived | waived | waived | 1 | waived |
 | Toast | pattern | Phase 72 | 1 | 1 | 1 | 1 | 1 | waived | waived | waived | 1 | 1 | 1 | waived |
 | DropZone | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | EmptyState | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
@@ -90,6 +90,15 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 - TypePill|long: unreachable (src/renderer/components/ui/TypePill.tsx#extension): Only the supported extensions are rendered and the longest is four letters, so no long text can reach the pill; a long file name sits in another column.
 - TypePill|intl: unreachable (src/renderer/components/ui/TypePill.tsx#extension): Extensions are ASCII letters and digits in every language and the pill text carries no translated string, so the locale changes nothing it renders.
 - TypePill|huge: unreachable (src/renderer/components/ui/TypePill.tsx#pillClass): The pill takes one short extension, so a large quantity has nothing to feed on; the quantity stress belongs to the table that repeats it.
+- ErrorBoundary|empty: unreachable (src/renderer/components/ui/ErrorBoundary.tsx#children): With no child the guard renders nothing and has nothing to fail, so there is no empty form of it, and a child that draws nothing is the healthy story.
+- ErrorBoundary|one: unreachable (src/renderer/components/ui/ErrorBoundary.tsx#ErrorBoundaryState): The guard holds one error and shows one message with no count, so there is no singular or plural wording to look at.
+- ErrorBoundary|many: unreachable (src/renderer/components/ui/ErrorBoundary.tsx#hasError): A second failure while the fallback is up cannot happen because the failed child is no longer rendered, so only one error is ever shown at a time.
+- ErrorBoundary|boundary: unreachable (src/renderer/components/ui/ErrorBoundary.tsx#getDerivedStateFromError): The guard has two states, healthy and failed, and no limit or threshold at which its behaviour changes, so there is no edge to sit on.
+- ErrorBoundary|loading: unreachable (src/renderer/components/ui/ErrorBoundary.tsx#handleReset): Try again re-renders the child in the same turn and the guard has no pending style or spinner, so there is no in-between frame to show.
+- ErrorBoundary|denied: unreachable (src/renderer/components/ui/ErrorBoundary.tsx#render): The guard has no permission or refused form and its button is never disabled, so a blocked version of the message does not exist.
+- ErrorBoundary|stale: unreachable (src/renderer/components/ui/ErrorBoundary.tsx#ErrorBoundaryProps): The fallback keeps the caught error until Try again is pressed and rereads nothing, so no revalidation or out-of-date form exists apart from the recovery story.
+- ErrorBoundary|intl: unreachable (src/renderer/components/ui/ErrorBoundary.tsx#Try again): The message, the cause and the button are hardcoded English in the component and no locale string reaches them, so a locale story would draw the same English text.
+- ErrorBoundary|huge: duplicate (error-boundary.fallback-long-message): The guard shows one error, so the largest input is its longest message, which the long message story already draws wrapping inside the box.
 - ErrorExpansion|happy: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#ErrorExpansion): FileRow mounts ErrorExpansion only for an expanded row in the Error status, so no cleaned or unchanged row ever renders it.
 - ErrorExpansion|empty: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#error): FileRow renders the pattern only when the error text is not null, and every failure path supplies one, so an empty pattern never appears.
 - ErrorExpansion|one: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#error): The pattern shows one error string for one row and has no count, so there is no singular or plural wording to test.
@@ -128,6 +137,12 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 - MetadataGroup|long: unreachable (src/renderer/components/file-list/MetadataGroup.tsx#rawGroupName): The header is a translated group label or one of ExifTool's short group names, so it never outgrows its line; long text belongs to the values, which the field row cuts.
 - MetadataGroup|intl: duplicate (metadata-expansion.arabic-plural): The Arabic panel story draws the translated group headers and the field rows in a right-to-left layout, which is every locale difference a group has.
 - MetadataGroup|huge: duplicate (metadata-expansion.scrolls-at-max-height): A group never limits its own height; any number of fields scrolls inside the panel, which the scroll story already draws at thirty fields.
+- StatusBar|many: duplicate (status-bar.all-cleaned): More files only change the digits in the same three segments, and the all-cleaned story already draws the finished form of a run.
+- StatusBar|error: duplicate (status-bar.nothing-removed): The bar has no failed count, so a batch where every file failed reads zero of N cleaned with zero tags, the same markup the nothing-removed story already draws.
+- StatusBar|denied: unreachable (src/renderer/components/ui/StatusBar.tsx#onCleanMore): The Clear button is always enabled whenever it is shown and takes no disabled prop, so no refused form of the bar exists to draw.
+- StatusBar|stale: unreachable (src/renderer/components/ui/StatusBar.tsx#elapsedSeconds): The bar prints the numbers App hands it and never rereads a file, so it holds no figure that can outlive its source.
+- StatusBar|long: unreachable (src/renderer/components/ui/StatusBar.tsx#interpolate): The three segments are short sentences filled with numbers; how the longest translations wrap across the whole bar is an area question that belongs to Phase 73.
+- StatusBar|huge: unreachable (src/renderer/components/ui/StatusBar.tsx#totalTagsRemoved): A huge batch only makes the numbers longer inside the same segments; the stress of thousands of rows belongs to the file table, not to this bar.
 - Toast|loading: unreachable (src/renderer/components/ui/Toast.tsx#message): The notice appears only after the copy or the skip has happened and never announces work in progress, so it has no pending form.
 - Toast|error: unreachable (src/renderer/components/ui/Toast.tsx#visible): Toast has no error variant or style; a failed reveal is shown as ordinary notice text, which is the reveal-failed scenario, so a separate error cell adds nothing.
 - Toast|denied: unreachable (src/renderer/components/ui/Toast.tsx#Toast): The notice takes no disabled or refused form and the file:reveal handler's only failure is a missing file (the reveal-failed scenario), so no deterministic refusal is left to display.

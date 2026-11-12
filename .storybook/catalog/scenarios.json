@@ -38,6 +38,78 @@
 			]
 		},
 		{
+			"id": "error-boundary.button-hover",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "Someone moves the pointer over Try again and the button fills with the highlight colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-errorboundary--button-hover"
+			]
+		},
+		{
+			"id": "error-boundary.fallback",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "A screen fails while drawing and the guard shows a plain message with the cause and a Try again button.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-errorboundary--fallback"
+			]
+		},
+		{
+			"id": "error-boundary.fallback-long-message",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "long",
+			"tier": "pattern",
+			"situation": "A drawing failure carries a very long file path and the message wraps inside the box and does not run off the edge.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-errorboundary--fallback-long-message"
+			]
+		},
+		{
+			"id": "error-boundary.healthy",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "The app draws its screens as normal and the error guard stays out of the way, with no message and no logged error.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-errorboundary--healthy"
+			]
+		},
+		{
+			"id": "error-boundary.keyboard-focus",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "Someone tabs to the Try again button of the error message and sees a visible focus ring around it.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-errorboundary--keyboard-focus"
+			]
+		},
+		{
+			"id": "error-boundary.try-again-recovers",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "After a drawing failure the cause goes away, Try again is pressed and the screen comes back with the alert gone.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-errorboundary--try-again-recovers"
+			]
+		},
+		{
 			"id": "error-expansion.cleanup",
 			"persona": "P-batch",
 			"job": "J-04",
@@ -625,6 +697,102 @@
 			"proofBoundary": "story",
 			"stories": [
 				"settings-segmentedcontrol--system-active"
+			]
+		},
+		{
+			"id": "status-bar.all-cleaned",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "A folder run ends and the bar reads three of three cleaned with the fields removed and a Clear button to start again.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--all-cleaned"
+			]
+		},
+		{
+			"id": "status-bar.arabic",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "intl",
+			"tier": "pattern",
+			"situation": "Someone using Arabic sees the counts, the time and the Clear button of the bar laid out right to left.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--arabic"
+			]
+		},
+		{
+			"id": "status-bar.idle",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "empty",
+			"tier": "pattern",
+			"situation": "Someone opens the app with no file yet and the bottom bar shows only the settings gear, with no counts.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--idle"
+			]
+		},
+		{
+			"id": "status-bar.keyboard-focus",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone tabs from the settings gear to the Clear button of the bar and sees a visible focus ring on each stop.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--keyboard-focus"
+			]
+		},
+		{
+			"id": "status-bar.mid-batch",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Partway through a run the bar shows one of three cleaned, the fields removed so far and the seconds passed.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--mid-batch"
+			]
+		},
+		{
+			"id": "status-bar.nothing-removed",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "Files that were already clean give zero of twelve cleaned and zero fields removed, so the zero reads as a result and not a gap.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--nothing-removed"
+			]
+		},
+		{
+			"id": "status-bar.running",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "loading",
+			"tier": "pattern",
+			"situation": "A large run has begun and the bar reads zero of three cleaned with no time passed.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--running"
+			]
+		},
+		{
+			"id": "status-bar.single-file",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "one",
+			"tier": "pattern",
+			"situation": "Someone cleans a single file and the bar reads one of one cleaned with a count of one field removed.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--single-file"
 			]
 		},
 		{
