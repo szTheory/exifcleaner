@@ -2,7 +2,7 @@
 
 # Coverage grid
 
-21 subjects x 12 state classes = 252 cells: 19 covered, 55 waived, 178 gaps.
+21 subjects x 12 state classes = 252 cells: 28 covered, 70 waived, 154 gaps.
 
 A cell is covered by a scenario in scenarios.json, waived with a reason in waivers.json, or a gap. A gap is computed, never typed. Cells show the scenario count, `waived` or `gap`. A gap is owed by the phase in the Due column: primitive and pattern rows by Phase 72, area and screen rows by Phase 73.
 
@@ -13,7 +13,7 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 | SegmentedControl | primitive | Phase 72 | 4 | waived | waived | waived | 1 | waived | waived | waived | waived | 1 | 1 | waived |
 | StatusIcon | primitive | Phase 72 | 2 | waived | waived | waived | waived | 2 | 2 | waived | waived | waived | waived | waived |
 | ToggleSwitch | primitive | Phase 72 | 3 | waived | waived | waived | waived | waived | waived | waived | waived | 1 | 1 | waived |
-| TypePill | primitive | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
+| TypePill | primitive | Phase 72 | 7 | waived | waived | waived | waived | waived | waived | waived | waived | waived | waived | waived |
 | ErrorBoundary | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | ErrorExpansion | pattern | Phase 72 | waived | waived | waived | waived | waived | waived | 5 | 1 | 1 | 1 | waived | waived |
 | FolderRow | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
@@ -22,7 +22,7 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 | MetadataField | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | MetadataGroup | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | StatusBar | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
-| Toast | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
+| Toast | pattern | Phase 72 | 1 | 1 | 1 | 1 | 1 | waived | waived | waived | 1 | 1 | 1 | waived |
 | DropZone | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | EmptyState | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | FileRow | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
@@ -79,6 +79,17 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 - ToggleSwitch|denied: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#input): The input takes no disabled or read-only prop and no call site in src/renderer passes one, so a refused toggle is not a state it can render.
 - ToggleSwitch|stale: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#checked): The switch holds no file or source of its own and only mirrors its checked prop, so nothing in it can outlive what it refers to.
 - ToggleSwitch|huge: duplicate (toggle-switch.long-labels): The text is two short strings from the locale files, and the longest translation of them is already the long-labels scenario, so no larger input exists.
+- TypePill|empty: unreachable (src/renderer/components/ui/TypePill.tsx#extension): A pill is drawn only for a supported file, which always has an extension from its name, so a blank badge is not a state it can show.
+- TypePill|one: unreachable (src/renderer/components/ui/TypePill.tsx#TypePill): A pill shows one extension for one row and has no count, so there is no singular or plural wording to test; the single-member families already show one pill.
+- TypePill|many: unreachable (src/renderer/components/ui/TypePill.tsx#modifier): Each file row draws its own pill, so a column of different pills is the file table area story; each family story already shows its members together.
+- TypePill|boundary: unreachable (src/renderer/components/ui/TypePill.tsx#pillClass): pillClass is a plain lookup with no limit or threshold, so the only edge is an extension that is in no family, which the neutral story shows.
+- TypePill|loading: unreachable (src/renderer/components/ui/TypePill.tsx#extension): The extension is known from the file name before any reading starts, so the pill never waits on a result and has no pending look.
+- TypePill|error: unreachable (src/renderer/components/ui/TypePill.tsx#TypePill): The pill is drawn from the file name alone and has no error prop or error colour, so a failed file keeps the same badge as any other.
+- TypePill|denied: unreachable (src/renderer/components/ui/TypePill.tsx#TypePill): The pill takes no disabled or read-only form, and a refused RAF file still shows its normal RAW badge, so there is no refused look to draw.
+- TypePill|stale: unreachable (src/renderer/components/ui/TypePill.tsx#extension): The pill holds only the text of an extension and no file reference, so nothing in it can outlive a source that changed.
+- TypePill|long: unreachable (src/renderer/components/ui/TypePill.tsx#extension): Only the supported extensions are rendered and the longest is four letters, so no long text can reach the pill; a long file name sits in another column.
+- TypePill|intl: unreachable (src/renderer/components/ui/TypePill.tsx#extension): Extensions are ASCII letters and digits in every language and the pill text carries no translated string, so the locale changes nothing it renders.
+- TypePill|huge: unreachable (src/renderer/components/ui/TypePill.tsx#pillClass): The pill takes one short extension, so a large quantity has nothing to feed on; the quantity stress belongs to the table that repeats it.
 - ErrorExpansion|happy: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#ErrorExpansion): FileRow mounts ErrorExpansion only for an expanded row in the Error status, so no cleaned or unchanged row ever renders it.
 - ErrorExpansion|empty: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#error): FileRow renders the pattern only when the error text is not null, and every failure path supplies one, so an empty pattern never appears.
 - ErrorExpansion|one: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#error): The pattern shows one error string for one row and has no count, so there is no singular or plural wording to test.
@@ -87,6 +98,10 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 - ErrorExpansion|loading: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#handleCopy): A row in flight is Pending, Reading or Processing and cannot expand; the pattern appears only after a verdict, and its copy write settles at once.
 - ErrorExpansion|intl: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#Click to copy): The pattern renders engine English text and the hardcoded English hint Click to copy, so no locale string reaches it and a locale adds no state of its own.
 - ErrorExpansion|huge: duplicate (error-expansion.long-detail): One error string is the largest input the pattern takes; thousands of files stress the file table and the status bar, and long-detail already covers the string size.
+- Toast|loading: unreachable (src/renderer/components/ui/Toast.tsx#message): The notice appears only after the copy or the skip has happened and never announces work in progress, so it has no pending form.
+- Toast|error: unreachable (src/renderer/components/ui/Toast.tsx#visible): Toast has no error variant or style; a failed reveal is shown as ordinary notice text, which is the reveal-failed scenario, so a separate error cell adds nothing.
+- Toast|denied: unreachable (src/renderer/components/ui/Toast.tsx#Toast): The notice takes no disabled or refused form and the file:reveal handler's only failure is a missing file (the reveal-failed scenario), so no deterministic refusal is left to display.
+- Toast|huge: duplicate (toast.long-message): The notice holds one short sentence with a count, so the largest input is its longest translation, which the long-message scenario already shows.
 
 ## State classes
 

@@ -160,6 +160,62 @@
 			"rule": "color-contrast",
 			"reason": "Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 14px normal weight; the dark theme passes; the token fix belongs to v5.1.",
 			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--heic|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--heic",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill--heic (the HEIC and HEIF pills) measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 (--ec-pill-heic-text) on background #ebeaef (--ec-pill-heic-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--jpeg|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--jpeg",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill--jpg (the JPG and JPEG pills) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 (--ec-pill-jpg-text) on background #e9eef2 (--ec-pill-jpg-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--media|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--media",
+			"rule": "color-contrast",
+			"reason": "Selectors .type-pill--mov and .type-pill--mp4 (the media family pills) measure 2.71:1 in the light theme only, below 4.5:1: foreground #a09060 (--ec-pill-mov-text) on background #eeeeeb (--ec-pill-mov-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--neutral|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--neutral",
+			"rule": "color-contrast",
+			"reason": "Selectors .type-pill--gif, --tiff, --tif and --webp (the neutral pills, base .type-pill rule) measure 2.09:1 in the light theme (foreground #9da7b6 --ec-color-muted on background #eceef1) and 2.63:1 in the dark theme (#636369 on #222326), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--pdf|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--pdf",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill--pdf measures 3.72:1 in the light theme (foreground #a06a60 on background #eeeaeb) and 4.48:1 in the dark theme (#b07a70 on #281f20), both below 4.5:1 (--ec-pill-pdf-text on --ec-pill-pdf-bg composited on the page), 14px normal weight; the family token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--png|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--png",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 (--ec-pill-png-text) on background #e8edec (--ec-pill-png-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--raw|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--raw",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill--dng (the RAW family pills) measures 2.93:1 in the light theme only, below 4.5:1: foreground #b08060 (--ec-pill-dng-text) on background #f0eceb (--ec-pill-dng-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
 		}
 	]
 }

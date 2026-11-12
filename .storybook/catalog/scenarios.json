@@ -363,6 +363,102 @@
 			]
 		},
 		{
+			"id": "toast.arabic",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "intl",
+			"tier": "pattern",
+			"situation": "An Arabic speaker copies the list and the confirmation notice appears in Arabic in a right-to-left layout.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--arabic"
+			]
+		},
+		{
+			"id": "toast.copied",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone copies the removed-metadata list and a short notice confirms the text is on the clipboard.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--copied"
+			]
+		},
+		{
+			"id": "toast.faded-out",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "The notice timer runs out, so the message is still set but the notice has faded away.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--faded-out"
+			]
+		},
+		{
+			"id": "toast.hidden",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "empty",
+			"tier": "pattern",
+			"situation": "Nothing has been copied or skipped, so the notice holds no text and stays out of sight.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--hidden"
+			]
+		},
+		{
+			"id": "toast.long-message",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "long",
+			"tier": "pattern",
+			"situation": "In the narrow default window the longest translated skipped notice wraps inside the window width.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--long-message"
+			]
+		},
+		{
+			"id": "toast.reveal-failed",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "stale",
+			"tier": "pattern",
+			"situation": "Someone reveals a result that was moved or deleted after its row appeared and is told it no longer exists.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--reveal-failed"
+			]
+		},
+		{
+			"id": "toast.skipped-many",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "many",
+			"tier": "pattern",
+			"situation": "A drop contains several unsupported files and the notice says how many were skipped.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--skipped-many"
+			]
+		},
+		{
+			"id": "toast.skipped-one",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "one",
+			"tier": "pattern",
+			"situation": "A drop contains a single unsupported file and the notice reports the one that was skipped.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--skipped-one"
+			]
+		},
+		{
 			"id": "toggle-switch.arabic",
 			"persona": "P-sharer",
 			"job": "J-01",
@@ -420,6 +516,90 @@
 			"proofBoundary": "story",
 			"stories": [
 				"settings-toggleswitch--on"
+			]
+		},
+		{
+			"id": "type-pill.heic",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone checks a cleaned phone photo and sees its type as a HEIC or HEIF badge in one colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--heic"
+			]
+		},
+		{
+			"id": "type-pill.jpeg",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone checks a cleaned photo and sees its type as a JPG or JPEG badge in one colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--jpeg"
+			]
+		},
+		{
+			"id": "type-pill.media",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "A folder of recordings is cleaned and every audio and video type shows the same media colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--media"
+			]
+		},
+		{
+			"id": "type-pill.neutral",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "A mixed folder is cleaned and the supported types with no colour of their own show a plain badge.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--neutral"
+			]
+		},
+		{
+			"id": "type-pill.pdf",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone checks a cleaned document and sees its type as a PDF badge in its own colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--pdf"
+			]
+		},
+		{
+			"id": "type-pill.png",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone checks a cleaned screenshot and sees its type as a PNG badge in its own colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--png"
+			]
+		},
+		{
+			"id": "type-pill.raw",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone checks cleaned camera files and every RAW type, from DNG to SRW, shows the same colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--raw"
 			]
 		}
 	]

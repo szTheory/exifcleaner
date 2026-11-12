@@ -324,6 +324,34 @@
 			"reason": "With no list, count or text input, a large quantity cannot be fed into one icon, so the quantity stress belongs to the table that repeats it."
 		},
 		{
+			"subject": "Toast",
+			"stateClass": "loading",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/Toast.tsx#message",
+			"reason": "The notice appears only after the copy or the skip has happened and never announces work in progress, so it has no pending form."
+		},
+		{
+			"subject": "Toast",
+			"stateClass": "error",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/Toast.tsx#visible",
+			"reason": "Toast has no error variant or style; a failed reveal is shown as ordinary notice text, which is the reveal-failed scenario, so a separate error cell adds nothing."
+		},
+		{
+			"subject": "Toast",
+			"stateClass": "denied",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/Toast.tsx#Toast",
+			"reason": "The notice takes no disabled or refused form and the file:reveal handler's only failure is a missing file (the reveal-failed scenario), so no deterministic refusal is left to display."
+		},
+		{
+			"subject": "Toast",
+			"stateClass": "huge",
+			"basis": "duplicate",
+			"ref": "toast.long-message",
+			"reason": "The notice holds one short sentence with a count, so the largest input is its longest translation, which the long-message scenario already shows."
+		},
+		{
 			"subject": "ToggleSwitch",
 			"stateClass": "empty",
 			"basis": "unreachable",
@@ -385,6 +413,83 @@
 			"basis": "duplicate",
 			"ref": "toggle-switch.long-labels",
 			"reason": "The text is two short strings from the locale files, and the longest translation of them is already the long-labels scenario, so no larger input exists."
+		},
+		{
+			"subject": "TypePill",
+			"stateClass": "empty",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/TypePill.tsx#extension",
+			"reason": "A pill is drawn only for a supported file, which always has an extension from its name, so a blank badge is not a state it can show."
+		},
+		{
+			"subject": "TypePill",
+			"stateClass": "one",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/TypePill.tsx#TypePill",
+			"reason": "A pill shows one extension for one row and has no count, so there is no singular or plural wording to test; the single-member families already show one pill."
+		},
+		{
+			"subject": "TypePill",
+			"stateClass": "many",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/TypePill.tsx#modifier",
+			"reason": "Each file row draws its own pill, so a column of different pills is the file table area story; each family story already shows its members together."
+		},
+		{
+			"subject": "TypePill",
+			"stateClass": "boundary",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/TypePill.tsx#pillClass",
+			"reason": "pillClass is a plain lookup with no limit or threshold, so the only edge is an extension that is in no family, which the neutral story shows."
+		},
+		{
+			"subject": "TypePill",
+			"stateClass": "loading",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/TypePill.tsx#extension",
+			"reason": "The extension is known from the file name before any reading starts, so the pill never waits on a result and has no pending look."
+		},
+		{
+			"subject": "TypePill",
+			"stateClass": "error",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/TypePill.tsx#TypePill",
+			"reason": "The pill is drawn from the file name alone and has no error prop or error colour, so a failed file keeps the same badge as any other."
+		},
+		{
+			"subject": "TypePill",
+			"stateClass": "denied",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/TypePill.tsx#TypePill",
+			"reason": "The pill takes no disabled or read-only form, and a refused RAF file still shows its normal RAW badge, so there is no refused look to draw."
+		},
+		{
+			"subject": "TypePill",
+			"stateClass": "stale",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/TypePill.tsx#extension",
+			"reason": "The pill holds only the text of an extension and no file reference, so nothing in it can outlive a source that changed."
+		},
+		{
+			"subject": "TypePill",
+			"stateClass": "long",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/TypePill.tsx#extension",
+			"reason": "Only the supported extensions are rendered and the longest is four letters, so no long text can reach the pill; a long file name sits in another column."
+		},
+		{
+			"subject": "TypePill",
+			"stateClass": "intl",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/TypePill.tsx#extension",
+			"reason": "Extensions are ASCII letters and digits in every language and the pill text carries no translated string, so the locale changes nothing it renders."
+		},
+		{
+			"subject": "TypePill",
+			"stateClass": "huge",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/TypePill.tsx#pillClass",
+			"reason": "The pill takes one short extension, so a large quantity has nothing to feed on; the quantity stress belongs to the table that repeats it."
 		}
 	]
 }
