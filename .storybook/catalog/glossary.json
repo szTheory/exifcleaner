@@ -1,0 +1,24 @@
+{
+	"schemaVersion": 1,
+	"functionWords": [],
+	"terms": [
+		{
+			"id": "metadata",
+			"ui_label": "metadata",
+			"definition": "Information stored inside a file, such as camera, location, author and time details.",
+			"forms": [
+				"metadata"
+			],
+			"internal": [],
+			"avoid": [
+				"exif data"
+			],
+			"surfaces": [
+				"en:noMetadataFound"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		}
+	],
+	"wordWaivers": []
+}

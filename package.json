@@ -48,6 +48,8 @@
 		"test:all": "vitest run && playwright test --project=dev",
 		"i18n:write": "node scripts/i18n_resources.mjs --write",
 		"i18n:check": "node scripts/i18n_resources.mjs --check",
+		"catalog:write": "node .storybook/catalog/catalog.mjs --write",
+		"catalog:check": "node .storybook/catalog/catalog.mjs --check",
 		"docs:verify": "node scripts/verify_docs.mjs",
 		"verify:gatekeeper": "node scripts/gatekeeper_check.mjs",
 		"verify:direffect": "node scripts/dir_effect_gate.mjs",
