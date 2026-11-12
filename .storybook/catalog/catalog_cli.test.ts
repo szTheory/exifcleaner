@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { assertDirEffect, snapshotDir } from "../../tests/helpers/dir_effect";
+import { enumerateStories } from "./story_index.mjs";
 import {
 	childEnv,
 	git,
@@ -17,6 +18,11 @@ const GLOSSARY_MD = ".storybook/catalog/GLOSSARY.md";
 const PERSONAS_MD = ".storybook/catalog/PERSONAS.md";
 const GLOSSARY_JSON = ".storybook/catalog/glossary.json";
 const REGISTER = ".storybook/catalog/copy-findings.json";
+const GRID_JSON = ".storybook/catalog/coverage-grid.json";
+const GRID_MD = ".storybook/catalog/COVERAGE-GRID.md";
+const SCENARIOS = ".storybook/catalog/scenarios.json";
+const WAIVERS = ".storybook/catalog/waivers.json";
+const FIXTURES = ".storybook/catalog/fixtures";
 
 function withRepo(body: (repo: string) => void): void {
 	const repo = makeCatalogRepo();
@@ -147,6 +153,229 @@ describe("catalog.mjs against a temp git repo", () => {
 			const unknown = run(repo, ["--check", "--base", "main", "--frobnicate"]);
 			expect(unknown.status).toBe(1);
 			expect(unknown.stderr).toContain("unknown argument --frobnicate");
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+});
+
+// The coverage grid layer (JTBD-03, D-25, D-26): each rejected run exits 1 and
+// leaves the whole directory unchanged.
+describe("catalog.mjs coverage grid against a temp git repo", () => {
+	function storyIds(): Promise<string[]> {
+		return enumerateStories(repoRoot).then((stories) =>
+			stories.map((story) => story.id),
+		);
+	}
+
+	function plantIndex(
+		repo: string,
+		ids: string[],
+		extra: string[] = [],
+	): string {
+		const entries: Record<string, unknown> = {};
+		for (const id of [...ids, ...extra]) {
+			entries[id] = { type: "story", id, name: "x" };
+		}
+		entries["docs-entry"] = { type: "docs", id: "docs-entry" };
+		const file = path.join(repo, "index.json");
+		fs.writeFileSync(file, JSON.stringify({ v: 5, entries }));
+		return "index.json";
+	}
+
+	test("shown red: COVERAGE-GRID.md drift (one changed byte)", () => {
+		withRepo((repo) => {
+			const file = path.join(repo, GRID_MD);
+			fs.writeFileSync(file, `${fs.readFileSync(file, "utf8")}x`);
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain(
+				"COVERAGE-GRID.md is stale; run yarn catalog:write",
+			);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: coverage-grid.json drift (one changed byte)", () => {
+		withRepo((repo) => {
+			const file = path.join(repo, GRID_JSON);
+			fs.writeFileSync(
+				file,
+				fs.readFileSync(file, "utf8").replace('"gaps": 250', '"gaps": 251'),
+			);
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("coverage-grid.json is stale");
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: gap-added via CLI (a scenario dropped at head, grid regenerated)", () => {
+		withRepo((repo) => {
+			const file = path.join(repo, SCENARIOS);
+			const doc = JSON.parse(fs.readFileSync(file, "utf8")) as {
+				scenarios: Array<{ id: string }>;
+			};
+			fs.writeFileSync(
+				file,
+				`${JSON.stringify(
+					{
+						...doc,
+						scenarios: doc.scenarios.filter(
+							(scenario) => scenario.id !== "language-dropdown.system-default",
+						),
+					},
+					null,
+					"\t",
+				)}\n`,
+			);
+			const written = run(repo, ["--write"]);
+			expect(written.status, written.stderr).toBe(0);
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("gap-added");
+			expect(result.stderr).toContain("LanguageDropdown|happy");
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("grid bootstrap: a merge-base without coverage-grid.json is admitted once", () => {
+		withRepo((repo) => {
+			const json = fs.readFileSync(path.join(repo, GRID_JSON), "utf8");
+			const markdown = fs.readFileSync(path.join(repo, GRID_MD), "utf8");
+			git(repo, ["rm", "-q", GRID_JSON, GRID_MD]);
+			git(repo, ["commit", "-q", "-m", "base without the grid"]);
+			fs.writeFileSync(path.join(repo, GRID_JSON), json);
+			fs.writeFileSync(path.join(repo, GRID_MD), markdown);
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status, result.stderr).toBe(0);
+			expect(result.stdout).toMatch(
+				/grid: 21 subjects, 252 cells, 2 covered, 0 waived, 250 gaps \(bootstrap\)/,
+			);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("grid at the merge-base: a normal run reports the merge-base sha", () => {
+		withRepo((repo) => {
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status, result.stderr).toBe(0);
+			expect(result.stdout).toMatch(
+				/grid: 21 subjects, 252 cells, 2 covered, 0 waived, 250 gaps \(merge-base [0-9a-f]{7}\)/,
+			);
+		});
+	});
+
+	test("shown red: build the catalog first (--index at a missing file)", () => {
+		withRepo((repo) => {
+			const before = snapshotDir(repo);
+			const result = run(repo, [
+				"--check",
+				"--base",
+				"main",
+				"--index",
+				"storybook-static/index.json",
+			]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("build the catalog first");
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: index lacks a story (--index at a planted index.json)", async () => {
+		const ids = await storyIds();
+		withRepo((repo) => {
+			const missing = ids[0];
+			const index = plantIndex(repo, ids.slice(1));
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main", "--index", index]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain(
+				`story ${missing} is enumerated from source`,
+			);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: index has a story the source does not enumerate", async () => {
+		const ids = await storyIds();
+		withRepo((repo) => {
+			const index = plantIndex(repo, ids, ["planted--extra"]);
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main", "--index", index]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("story planted--extra is in index.json");
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("an index with exactly the enumerated stories passes (docs entries are ignored)", async () => {
+		const ids = await storyIds();
+		withRepo((repo) => {
+			const index = plantIndex(repo, ids);
+			const result = run(repo, ["--check", "--base", "main", "--index", index]);
+			expect(result.status, result.stderr).toBe(0);
+		});
+	});
+
+	test("shown red: zero-gaps screen names the App gaps", () => {
+		withRepo((repo) => {
+			const before = snapshotDir(repo);
+			const result = run(repo, [
+				"--check",
+				"--base",
+				"main",
+				"--zero-gaps",
+				"--tier",
+				"screen",
+			]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("gap|App|happy");
+			expect(result.stderr).toContain("gap|App|huge");
+			expect(result.stderr).not.toContain("gap|ChevronIcon");
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: zero-gaps without --tier looks at every tier, and --tier needs --zero-gaps", () => {
+		withRepo((repo) => {
+			const before = snapshotDir(repo);
+			const all = run(repo, ["--check", "--base", "main", "--zero-gaps"]);
+			expect(all.status).toBe(1);
+			expect(all.stderr).toContain("gap|ChevronIcon|happy");
+			const bare = run(repo, ["--check", "--base", "main", "--tier", "screen"]);
+			expect(bare.status).toBe(1);
+			expect(bare.stderr).toContain("--tier only applies with --zero-gaps");
+			const unknown = run(repo, [
+				"--check",
+				"--base",
+				"main",
+				"--zero-gaps",
+				"--tier",
+				"atom",
+			]);
+			expect(unknown.status).toBe(1);
+			expect(unknown.stderr).toContain("unknown tier atom");
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: a planted full-row waivers.json fails --check and refuses --write", () => {
+		withRepo((repo) => {
+			fs.copyFileSync(
+				path.join(repoRoot, FIXTURES, "waiver_full_row.json"),
+				path.join(repo, WAIVERS),
+			);
+			const before = snapshotDir(repo);
+			const check = run(repo, ["--check", "--base", "main"]);
+			expect(check.status).toBe(1);
+			expect(check.stderr).toContain("full-row");
+			const write = run(repo, ["--write"]);
+			expect(write.status).toBe(1);
+			expect(write.stderr).toContain("full-row");
 			assertDirEffect(before, snapshotDir(repo), {});
 		});
 	});

@@ -10,7 +10,7 @@ import "./cache_dir.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import { isMainModule } from "../../scripts/is_main_module.mjs";
-import { readJson } from "./closed.mjs";
+import { compareCodeUnits, readJson } from "./closed.mjs";
 import {
 	COPY_FINDINGS_PATH,
 	check as checkRegister,
@@ -30,6 +30,7 @@ import {
 	loadGrid,
 	renderGridJson,
 	renderGridMarkdown,
+	zeroGapProblems,
 } from "./grid.mjs";
 import { readMergeBase, resolveBaseRef } from "./merge_base.mjs";
 import {
@@ -39,6 +40,7 @@ import {
 	renderPersonas,
 	validateCatalog,
 } from "./personas.mjs";
+import { TIERS } from "./vocab.mjs";
 
 // Repo-relative inputs `--check` reads. Tests copy exactly these into a temp
 // repository, so a passing run there also proves no other data is read.
@@ -52,25 +54,30 @@ export const CHECK_INPUTS = Object.freeze([
 	"tests/e2e",
 ]);
 
-const FLAGS = new Set(["--check", "--write"]);
+const FLAGS = new Set(["--check", "--write", "--zero-gaps"]);
 
 /**
- * `--check` and `--write`, plus `--base <ref>` for the merge-base the copy
- * findings register is compared with (default origin/master).
+ * `--check`, `--write` and `--zero-gaps`, plus the valued flags `--base <ref>`
+ * (the merge-base the copy findings register and the coverage grid are
+ * compared with, default origin/master), `--index <path>` (a built Storybook
+ * index.json whose story ids must equal the enumerated ones) and
+ * `--tier <comma list>` (the tiers `--zero-gaps` looks at).
  *
  * @param {string[]} argv
- * @returns {{ flags: Set<string>, base: string | undefined }}
+ * @returns {{ flags: Set<string>, base: string | undefined, index: string | undefined, tiers: string[] | undefined }}
  */
 export function parseArguments(argv) {
 	const flags = new Set();
-	let base;
+	/** @type {Record<string, string | undefined>} */
+	const values = {};
 	for (let index = 0; index < argv.length; index += 1) {
 		const arg = argv[index];
-		if (arg === "--base") {
-			base = argv[index + 1];
-			if (base === undefined || base.startsWith("--")) {
-				throw new Error("--base needs a ref");
+		if (arg === "--base" || arg === "--index" || arg === "--tier") {
+			const value = argv[index + 1];
+			if (value === undefined || value.startsWith("--")) {
+				throw new Error(`${arg} needs a value`);
 			}
+			values[arg] = value;
 			index += 1;
 		} else if (FLAGS.has(arg)) {
 			flags.add(arg);
@@ -78,7 +85,25 @@ export function parseArguments(argv) {
 			throw new Error(`unknown argument ${arg}`);
 		}
 	}
-	return { flags, base };
+	let tiers;
+	if (values["--tier"] !== undefined) {
+		if (!flags.has("--zero-gaps")) {
+			throw new Error("--tier only applies with --zero-gaps");
+		}
+		tiers = values["--tier"].split(",");
+		const unknown = tiers.filter((tier) => !TIERS.includes(tier));
+		if (unknown.length > 0) {
+			throw new Error(
+				`unknown tier ${unknown.join(", ")}; the tiers are ${TIERS.join(", ")}`,
+			);
+		}
+	}
+	return {
+		flags,
+		base: values["--base"],
+		index: values["--index"],
+		tiers,
+	};
 }
 
 function glossaryProblems(root) {
@@ -94,6 +119,65 @@ function catalogProblems(root) {
 function firstProblem(problems) {
 	const first = problems[0];
 	return `${first?.code}: ${first?.message}`;
+}
+
+/**
+ * Story-index parity: the ids this tree's stories enumerate to must equal the
+ * `story` entries of a built Storybook index. A missing index fails closed.
+ *
+ * @param {string} root
+ * @param {string} indexPath
+ * @param {ReadonlyArray<{ id: string }>} stories
+ * @returns {Array<{ code: string, message: string }>}
+ */
+function indexProblems(root, indexPath, stories) {
+	const absolute = path.resolve(root, indexPath);
+	if (!fs.existsSync(absolute)) {
+		return [
+			{
+				code: "index-missing",
+				message: `index ${indexPath} not found; build the catalog first (yarn test:storybook builds storybook-static)`,
+			},
+		];
+	}
+	let entries;
+	try {
+		entries = JSON.parse(fs.readFileSync(absolute, "utf8")).entries;
+	} catch {
+		entries = undefined;
+	}
+	if (typeof entries !== "object" || entries === null) {
+		return [
+			{
+				code: "index-unreadable",
+				message: `index ${indexPath} has no entries object; build the catalog first`,
+			},
+		];
+	}
+	const built = new Set(
+		Object.values(entries)
+			.filter((entry) => /** @type {any} */ (entry)?.type === "story")
+			.map((entry) => /** @type {any} */ (entry).id),
+	);
+	const enumerated = new Set(stories.map((story) => story.id));
+	const found = [];
+	for (const id of [...enumerated].sort(compareCodeUnits)) {
+		if (!built.has(id)) {
+			found.push({
+				code: "index-story-missing",
+				message: `story ${id} is enumerated from source but is not in ${indexPath}`,
+			});
+		}
+	}
+	for (const id of [...built].sort(compareCodeUnits)) {
+		if (!enumerated.has(id)) {
+			found.push({
+				code: "index-story-extra",
+				message: `story ${id} is in ${indexPath} but is not enumerated from source`,
+			});
+		}
+	}
+	return found;
 }
 
 /**
@@ -128,10 +212,10 @@ export async function generatedFiles(root) {
  * The drift layer (generated files), the copy findings register layer and
  * the coverage grid gap ratchet.
  *
- * @param {{ root: string, base?: string | undefined }} options
+ * @param {{ root: string, base?: string | undefined, index?: string | undefined, zeroGaps?: boolean | undefined, tiers?: readonly string[] | undefined }} options
  * @returns {Promise<{ ok: boolean, problems: Array<{ code: string, message: string }>, files: number, notes: string[] }>}
  */
-export async function checkCatalog({ root, base }) {
+export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 	const { doc, problems } = glossaryProblems(root);
 	if (problems.length > 0) {
 		return { ok: false, problems, files: 0, notes: [] };
@@ -186,7 +270,13 @@ export async function checkCatalog({ root, base }) {
 		base: gridBase.base,
 		head: JSON.parse(renderGridJson(grid.model)),
 	});
-	const all = [...stale, ...register.problems, ...ratchet.problems];
+	const all = [
+		...stale,
+		...register.problems,
+		...ratchet.problems,
+		...(index === undefined ? [] : indexProblems(root, index, grid.stories)),
+		...(zeroGaps === true ? zeroGapProblems(grid.model, tiers ?? []) : []),
+	];
 	const { counts } = grid.model;
 	return {
 		ok: all.length === 0,
@@ -230,10 +320,14 @@ function describe(problems) {
  */
 export async function main(argv = process.argv.slice(2)) {
 	try {
-		const { flags, base } = parseArguments(argv);
+		const { flags, base, index, tiers } = parseArguments(argv);
 		const writing = flags.has("--write");
-		if (writing === flags.has("--check")) {
+		const checking = flags.has("--check") || flags.has("--zero-gaps");
+		if (writing === checking) {
 			throw new Error("pass exactly one of --check or --write");
+		}
+		if (writing && index !== undefined) {
+			throw new Error("--index only applies with --check");
 		}
 		const root = process.cwd();
 		if (writing) {
@@ -241,7 +335,13 @@ export async function main(argv = process.argv.slice(2)) {
 			console.log(`✓ CATALOG WRITE — ${count} files`);
 			return 0;
 		}
-		const result = await checkCatalog({ root, base });
+		const result = await checkCatalog({
+			root,
+			base,
+			index,
+			zeroGaps: flags.has("--zero-gaps"),
+			tiers,
+		});
 		if (!result.ok) {
 			console.error(`✗ CATALOG CHECK FAILED: ${describe(result.problems)}`);
 			return 1;

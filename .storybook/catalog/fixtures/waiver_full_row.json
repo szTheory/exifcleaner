@@ -1,0 +1,89 @@
+{
+	"schemaVersion": 1,
+	"waivers": [
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "happy",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "empty",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "one",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "many",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "boundary",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "loading",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "error",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "denied",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "long",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "intl",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "huge",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		}
+	]
+}
