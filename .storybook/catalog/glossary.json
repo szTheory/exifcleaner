@@ -3,6 +3,362 @@
 	"functionWords": [],
 	"terms": [
 		{
+			"id": "appearance",
+			"ui_label": "appearance",
+			"definition": "Whether the app looks light or dark, or follows the system.",
+			"forms": [
+				"appearance",
+				"auto",
+				"dark",
+				"light"
+			],
+			"internal": [
+				"themeMode"
+			],
+			"avoid": [],
+			"surfaces": [
+				"en:appearance"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "clean",
+			"ui_label": "clean",
+			"definition": "The result of removing metadata: a cleaned file or a cleaned copy.",
+			"forms": [
+				"clean",
+				"cleaned",
+				"cleaning"
+			],
+			"internal": [],
+			"avoid": [
+				"destroy",
+				"nuke"
+			],
+			"surfaces": [
+				"en:statusBar.xOfYCleaned"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "cleaned-copy",
+			"ui_label": "cleaned copy",
+			"definition": "A new file with the metadata removed, saved next to the original, which stays unchanged.",
+			"forms": [
+				"copies",
+				"copy"
+			],
+			"internal": [
+				"outputPath"
+			],
+			"avoid": [
+				"output"
+			],
+			"surfaces": [
+				"en:reveal.cleanedCopy"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "clipboard",
+			"ui_label": "clipboard",
+			"definition": "Where copied text goes. The app confirms with Copied to clipboard.",
+			"forms": [
+				"clipboard",
+				"copied"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:toast.copied"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "cloud-sync-client",
+			"ui_label": "cloud sync client",
+			"definition": "An app such as a cloud drive that keeps a folder in sync and can change a file while it is cleaned.",
+			"forms": [
+				"client",
+				"cloud",
+				"sync"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:commitFailedSummary"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "download-origin",
+			"ui_label": "download origin",
+			"definition": "The record macOS keeps of where a downloaded file came from.",
+			"forms": [
+				"download",
+				"origin",
+				"quarantine"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:settings.removeXattrs.description"
+			],
+			"status": "os-owned",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "drop-zone",
+			"ui_label": "drop zone",
+			"definition": "The area where files are dropped to start cleaning.",
+			"forms": [
+				"drop",
+				"zone"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:intake.dropZone"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "exif",
+			"ui_label": "Exif",
+			"definition": "A common metadata format in photos. Say metadata unless you mean Exif itself.",
+			"forms": [
+				"exif"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:table.header.exif-before"
+			],
+			"status": "technical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "exifcleaner",
+			"ui_label": "ExifCleaner",
+			"definition": "The app's name, written as one word with the capitals shown.",
+			"forms": [
+				"exifcleaner"
+			],
+			"internal": [],
+			"avoid": [
+				"exif cleaner"
+			],
+			"surfaces": [
+				"src:src/renderer/index.html"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "fields",
+			"ui_label": "fields",
+			"definition": "The individual items of metadata, such as a camera model or a place. Say fields to people; tags only in technical detail.",
+			"forms": [
+				"field",
+				"fields"
+			],
+			"internal": [
+				"removedFields"
+			],
+			"avoid": [
+				"attribute",
+				"attributes",
+				"info",
+				"tag",
+				"tags"
+			],
+			"surfaces": [
+				"en:metadata.removed.other"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "file",
+			"ui_label": "file",
+			"definition": "Anything dropped or chosen to clean: an image, a video or a PDF.",
+			"forms": [
+				"file",
+				"files"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:table.label"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "file-manager",
+			"ui_label": "file manager",
+			"definition": "Finder or File Explorer, named for what it does. The OS owns the real name.",
+			"forms": [
+				"manager"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:reveal.original"
+			],
+			"status": "os-owned",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "file-results",
+			"ui_label": "file results",
+			"definition": "The table of files with their name, type, size and metadata before and after cleaning.",
+			"forms": [
+				"name",
+				"results",
+				"size",
+				"type"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:table.label"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "finder-tags",
+			"ui_label": "Finder tags",
+			"definition": "Labels a person adds to a file in the Finder. macOS owns the name.",
+			"forms": [
+				"finder"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:settings.removeXattrs.description"
+			],
+			"status": "os-owned",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "folder",
+			"ui_label": "folder",
+			"definition": "A folder whose supported files are cleaned together. Scanning counts them first.",
+			"forms": [
+				"folder",
+				"folders",
+				"found",
+				"scanning"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:intake.chooseFolder"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "group",
+			"ui_label": "group",
+			"definition": "A set of related fields shown together, such as Camera, Location or Time.",
+			"forms": [
+				"author",
+				"camera",
+				"document",
+				"image",
+				"images",
+				"internals",
+				"location",
+				"other",
+				"publishing",
+				"time",
+				"video",
+				"videos"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"src:src/renderer/components/file-list/MetadataGroup.tsx"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "icc-profile",
+			"ui_label": "ICC profile",
+			"definition": "Color-management data embedded in an image. Preserving it keeps colors accurate.",
+			"forms": [
+				"color",
+				"icc",
+				"profile"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:settings.preserveColorProfile.description"
+			],
+			"status": "technical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "in-place",
+			"ui_label": "in place",
+			"definition": "Cleaning the file itself instead of making a copy. The original is replaced.",
+			"forms": [
+				"place"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:intake.outputOverwrite"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "language",
+			"ui_label": "language",
+			"definition": "The language the app is shown in. System follows the language of the computer.",
+			"forms": [
+				"language",
+				"system"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:language"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "macos-attributes",
+			"ui_label": "macOS attributes",
+			"definition": "Extra data macOS keeps on a file outside its contents, such as where it was downloaded from.",
+			"forms": [
+				"macos"
+			],
+			"internal": [
+				"removeXattrs",
+				"xattr"
+			],
+			"avoid": [],
+			"surfaces": [
+				"en:settings.removeXattrs.label"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
 			"id": "metadata",
 			"ui_label": "metadata",
 			"definition": "Information stored inside a file, such as camera, location, author and time details.",
@@ -15,6 +371,296 @@
 			],
 			"surfaces": [
 				"en:noMetadataFound"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "no-network-access",
+			"ui_label": "no network access",
+			"definition": "Brand claim: the app makes no network requests while it cleans. Not used in any string yet.",
+			"forms": [
+				"network"
+			],
+			"internal": [],
+			"avoid": [
+				"offline mode",
+				"online mode"
+			],
+			"surfaces": [],
+			"status": "reserved",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "open-source",
+			"ui_label": "open source",
+			"definition": "Brand claim: the code is public and open to inspection. Not used in any string yet.",
+			"forms": [],
+			"internal": [],
+			"avoid": [
+				"free software",
+				"free software project"
+			],
+			"surfaces": [],
+			"status": "reserved",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "orientation",
+			"ui_label": "orientation",
+			"definition": "Which way up a photo is shown. Preserving it keeps photos upright after metadata removal.",
+			"forms": [
+				"orientation",
+				"upright"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:settings.preserveOrientation.label"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "original",
+			"ui_label": "original",
+			"definition": "The file you added, before cleaning. It stays unchanged when a cleaned copy is made.",
+			"forms": [
+				"original",
+				"originals"
+			],
+			"internal": [],
+			"avoid": [
+				"input",
+				"source file"
+			],
+			"surfaces": [
+				"en:reveal.original"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "preserve",
+			"ui_label": "preserve",
+			"definition": "Keep a kind of data when metadata is removed, such as orientation or the color profile.",
+			"forms": [
+				"preserve",
+				"preserved"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:settings.preserveOrientation.label"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "remove",
+			"ui_label": "remove",
+			"definition": "Take metadata out of a file. Exact, never dramatic.",
+			"forms": [
+				"removable",
+				"removal",
+				"remove",
+				"removed"
+			],
+			"internal": [],
+			"avoid": [
+				"scrub",
+				"wipe"
+			],
+			"surfaces": [
+				"en:settings.removeXattrs.label"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "resolution",
+			"ui_label": "resolution",
+			"definition": "The DPI an image is printed at. Preserving it keeps prints the right size.",
+			"forms": [
+				"dpi",
+				"resolution"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:settings.preserveResolution.label"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "reveal",
+			"ui_label": "reveal",
+			"definition": "Show a file in the file manager.",
+			"forms": [
+				"reveal"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:reveal.original"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "save-as-copy",
+			"ui_label": "Save as copy",
+			"definition": "The setting that writes a cleaned copy and leaves the original unchanged.",
+			"forms": [
+				"save"
+			],
+			"internal": [
+				"saveAsCopy",
+				"wasForcedCopy"
+			],
+			"avoid": [
+				"back up",
+				"backup",
+				"duplicate"
+			],
+			"surfaces": [
+				"en:settings.saveAsCopy.label"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "settings",
+			"ui_label": "settings",
+			"definition": "The preferences that control how files are cleaned.",
+			"forms": [
+				"setting",
+				"settings"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:settings.close"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "sorted",
+			"ui_label": "sorted",
+			"definition": "The order of the table, shown as Sorted ascending or Sorted descending.",
+			"forms": [
+				"ascending",
+				"descending",
+				"sort",
+				"sorted"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:table.sort.ascending"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "stays-on-your-computer",
+			"ui_label": "stays on your computer",
+			"definition": "Brand claim: files are cleaned on this computer and are not sent anywhere. Not used in any string yet.",
+			"forms": [
+				"computer"
+			],
+			"internal": [],
+			"avoid": [
+				"anonymous",
+				"secure",
+				"untraceable"
+			],
+			"surfaces": [],
+			"status": "reserved",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "supported-files",
+			"ui_label": "supported files",
+			"definition": "Files in a format ExifCleaner can clean. Other files are skipped and counted.",
+			"forms": [
+				"skipped",
+				"supported",
+				"unsupported"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:folder.supportedFiles"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "timestamps",
+			"ui_label": "modification date",
+			"definition": "When a file was last changed, as the file system records it. Not the date a photo was taken.",
+			"forms": [
+				"date",
+				"modification"
+			],
+			"internal": [
+				"preserveTimestamps"
+			],
+			"avoid": [],
+			"surfaces": [
+				"en:settings.preserveTimestamps.label"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "unchanged",
+			"ui_label": "unchanged",
+			"definition": "The original was not altered. Say it whenever a run fails or finds nothing to remove.",
+			"forms": [
+				"unchanged"
+			],
+			"internal": [],
+			"avoid": [
+				"untouched"
+			],
+			"surfaces": [
+				"en:verificationFailedSummary"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "verify",
+			"ui_label": "verify",
+			"definition": "Check that a cleaned file no longer holds the metadata that was removed.",
+			"forms": [
+				"verify"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:verificationFailedSummary"
+			],
+			"status": "canonical",
+			"reviewed": "2026-11-12"
+		},
+		{
+			"id": "write",
+			"ui_label": "write",
+			"definition": "Save the cleaned file to disk.",
+			"forms": [
+				"rewritten",
+				"write",
+				"written"
+			],
+			"internal": [],
+			"avoid": [],
+			"surfaces": [
+				"en:writeFailedSummary"
 			],
 			"status": "canonical",
 			"reviewed": "2026-11-12"

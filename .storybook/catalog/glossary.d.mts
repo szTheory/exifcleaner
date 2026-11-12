@@ -34,6 +34,7 @@ export interface GlossaryContext {
 
 export const GLOSSARY_PATH: string;
 export const GLOSSARY_MD_PATH: string;
+export const GLOSSARY_CODES: readonly string[];
 
 export function normalizeText(text: string): string;
 
