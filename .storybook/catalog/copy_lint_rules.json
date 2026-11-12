@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"brandPin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+	"rules": [
+		{
+			"id": "banned.just",
+			"category": "banned",
+			"pattern": "\\bjust\\b",
+			"flags": "i",
+			"message": "leave out \"just\"; the brand bans it (and \"simply\" and \"easy\")",
+			"source": {
+				"section": "Inclusive language, and writing for translation",
+				"quote": "Leave out “just”, “simply” and “easy”.",
+				"basis": "rule"
+			},
+			"bad": "Just drop a file.",
+			"ok": "Drop a file."
+		}
+	]
+}

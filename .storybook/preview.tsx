@@ -28,6 +28,10 @@ import "../src/renderer/styles/status_icon.css";
 import "../src/renderer/styles/toast.css";
 import "../src/renderer/styles/type_pill.css";
 import "./harness.css";
+import copyLintRules from "./catalog/copy_lint_rules.json";
+import glossary from "./catalog/glossary.json";
+import { buildRuleset } from "./catalog/copy_lint.mjs";
+import { collectCopyUnits, copyLintHits } from "./catalog/copy_lint_dom";
 import { LOCALE_DICTIONARY } from "./locale_dictionary";
 
 // `parameters.mockApi` of a story: what the mock starts with. `gate: false`
@@ -73,6 +77,26 @@ function ReadyGate({
 	if (enabled && (theme.isLoading || i18n.isLoading)) return null;
 	return <>{children}</>;
 }
+
+// `parameters.copyLint` of a story: substrings of the rendered text that are
+// data, not copy (a user's file name), stripped before the lint. Nothing else
+// is read from it, so there is no way to turn the lint off for a story.
+export type CopyLintParameter = { fixtureText?: string[] | undefined };
+
+export function isCopyLintParameter(
+	value: unknown,
+): value is CopyLintParameter {
+	if (typeof value !== "object" || value === null) return false;
+	const fixtureText = new Map(Object.entries(value)).get("fixtureText");
+	return (
+		fixtureText === undefined ||
+		(Array.isArray(fixtureText) &&
+			fixtureText.every((text) => typeof text === "string"))
+	);
+}
+
+// Built once per module load: the rules plus the glossary-derived vocabulary.
+const COPY_RULESET = buildRuleset(copyLintRules, glossary);
 
 function themeOf(globals: Record<string, unknown>): "light" | "dark" {
 	return globals["theme"] === "dark" ? "dark" : "light";
@@ -133,6 +157,29 @@ const preview: Preview = {
 			html.classList.remove("theme-transitioning");
 			mock.clear();
 		};
+	},
+	// D-12: every English story is linted for brand copy after it renders. A
+	// thrown error is what fails a story (a report entry does not).
+	afterEach: async (ctx) => {
+		if (ctx.viewMode !== "story" || localeOf(ctx.globals) !== "en") return;
+		const raw = ctx.parameters["copyLint"];
+		const fixtureText =
+			isCopyLintParameter(raw) && raw.fixtureText !== undefined
+				? raw.fixtureText
+				: [];
+		const hits = copyLintHits(collectCopyUnits(document.body), COPY_RULESET, {
+			fixtureText,
+			templates: [],
+		});
+		if (hits.length > 0) {
+			throw new Error(
+				hits
+					.map(
+						(hit) => `${ctx.id}: ${hit.ruleId} "${hit.match}" in ${hit.text}`,
+					)
+					.join("\n"),
+			);
+		}
 	},
 	decorators: [
 		(Story, ctx) => {
