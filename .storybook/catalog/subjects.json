@@ -1,0 +1,86 @@
+[
+	{
+		"id": "App",
+		"tier": "screen"
+	},
+	{
+		"id": "ChevronIcon",
+		"tier": "primitive"
+	},
+	{
+		"id": "DropZone",
+		"tier": "area"
+	},
+	{
+		"id": "EmptyState",
+		"tier": "area"
+	},
+	{
+		"id": "ErrorBoundary",
+		"tier": "pattern"
+	},
+	{
+		"id": "ErrorExpansion",
+		"tier": "pattern"
+	},
+	{
+		"id": "FileRow",
+		"tier": "area"
+	},
+	{
+		"id": "FileTable",
+		"tier": "area"
+	},
+	{
+		"id": "FolderRow",
+		"tier": "pattern"
+	},
+	{
+		"id": "GearIcon",
+		"tier": "primitive"
+	},
+	{
+		"id": "LanguageDropdown",
+		"tier": "pattern"
+	},
+	{
+		"id": "MetadataExpansion",
+		"tier": "pattern"
+	},
+	{
+		"id": "MetadataField",
+		"tier": "pattern"
+	},
+	{
+		"id": "MetadataGroup",
+		"tier": "pattern"
+	},
+	{
+		"id": "SegmentedControl",
+		"tier": "primitive"
+	},
+	{
+		"id": "SettingsDrawer",
+		"tier": "area"
+	},
+	{
+		"id": "StatusBar",
+		"tier": "pattern"
+	},
+	{
+		"id": "StatusIcon",
+		"tier": "primitive"
+	},
+	{
+		"id": "Toast",
+		"tier": "pattern"
+	},
+	{
+		"id": "ToggleSwitch",
+		"tier": "primitive"
+	},
+	{
+		"id": "TypePill",
+		"tier": "primitive"
+	}
+]

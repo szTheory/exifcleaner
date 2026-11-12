@@ -1,0 +1,446 @@
+{
+	"schemaVersion": 1,
+	"entries": [
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/file-list/ErrorExpansion.tsx|Click to copy",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/file-list/ErrorExpansion.tsx",
+			"text": "Click to copy",
+			"disposition": "fix-v5.1",
+			"reason": "Untranslated visible text on the error detail; needs an en key."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/icons/GearIcon.tsx|Close settings",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/icons/GearIcon.tsx",
+			"text": "Close settings",
+			"disposition": "fix-v5.1",
+			"reason": "Untranslated screen-reader name for the settings button."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/icons/GearIcon.tsx|Open settings",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/icons/GearIcon.tsx",
+			"text": "Open settings",
+			"disposition": "fix-v5.1",
+			"reason": "Untranslated screen-reader name; there is no settings.open key."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/settings/LanguageDropdown.tsx|Language",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/settings/LanguageDropdown.tsx",
+			"text": "Language",
+			"disposition": "accept",
+			"reason": "An inert fallback after t(...) ||: the translated key is shown whenever it exists, so this text is never rendered."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/settings/LanguageDropdown.tsx|System",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/settings/LanguageDropdown.tsx",
+			"text": "System",
+			"disposition": "accept",
+			"reason": "An inert fallback after t(...) ||: the translated key is shown whenever it exists, so this text is never rendered."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/settings/SettingsDrawer.tsx|Appearance",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/settings/SettingsDrawer.tsx",
+			"text": "Appearance",
+			"disposition": "accept",
+			"reason": "An inert fallback after t(...) ||: the translated key is shown whenever it exists, so this text is never rendered."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/settings/SettingsDrawer.tsx|Auto",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/settings/SettingsDrawer.tsx",
+			"text": "Auto",
+			"disposition": "accept",
+			"reason": "An inert fallback after t(...) ||: the translated key is shown whenever it exists, so this text is never rendered."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/settings/SettingsDrawer.tsx|Close settings",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/settings/SettingsDrawer.tsx",
+			"text": "Close settings",
+			"disposition": "accept",
+			"reason": "An inert fallback after t(...) ||: the translated key is shown whenever it exists, so this text is never rendered."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/settings/SettingsDrawer.tsx|Dark",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/settings/SettingsDrawer.tsx",
+			"text": "Dark",
+			"disposition": "accept",
+			"reason": "An inert fallback after t(...) ||: the translated key is shown whenever it exists, so this text is never rendered."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/settings/SettingsDrawer.tsx|Language",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/settings/SettingsDrawer.tsx",
+			"text": "Language",
+			"disposition": "accept",
+			"reason": "An inert fallback after t(...) ||: the translated key is shown whenever it exists, so this text is never rendered."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/settings/SettingsDrawer.tsx|Light",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/settings/SettingsDrawer.tsx",
+			"text": "Light",
+			"disposition": "accept",
+			"reason": "An inert fallback after t(...) ||: the translated key is shown whenever it exists, so this text is never rendered."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/settings/SettingsDrawer.tsx|Settings",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/settings/SettingsDrawer.tsx",
+			"text": "Settings",
+			"disposition": "accept",
+			"reason": "An inert fallback after t(...) ||: the translated key is shown whenever it exists, so this text is never rendered."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/ui/ErrorBoundary.tsx|Something went wrong.",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/ui/ErrorBoundary.tsx",
+			"text": "Something went wrong.",
+			"disposition": "fix-v5.1",
+			"reason": "Untranslated fallback message shown when the app fails to render."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/ui/ErrorBoundary.tsx|Try again",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/ui/ErrorBoundary.tsx",
+			"text": "Try again",
+			"disposition": "fix-v5.1",
+			"reason": "Untranslated button label on the fallback screen."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/ui/StatusIcon.tsx|Complete",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/ui/StatusIcon.tsx",
+			"text": "Complete",
+			"disposition": "fix-v5.1",
+			"reason": "Untranslated screen-reader name of the complete status icon."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/ui/StatusIcon.tsx|Error",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/ui/StatusIcon.tsx",
+			"text": "Error",
+			"disposition": "fix-v5.1",
+			"reason": "Untranslated screen-reader name of the error status icon."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/ui/StatusIcon.tsx|Pending",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/ui/StatusIcon.tsx",
+			"text": "Pending",
+			"disposition": "fix-v5.1",
+			"reason": "Untranslated screen-reader name of the pending status icon."
+		},
+		{
+			"fingerprint": "hardcoded|src:src/renderer/components/ui/StatusIcon.tsx|Processing",
+			"kind": "hardcoded",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/ui/StatusIcon.tsx",
+			"text": "Processing",
+			"disposition": "fix-v5.1",
+			"reason": "Untranslated screen-reader name; Processing has no en key."
+		},
+		{
+			"fingerprint": "main|src:src/application/queries/verify_generated_output_query.ts|metadata tag(s) outside the permitted set",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/application/queries/verify_generated_output_query.ts",
+			"text": "metadata tag(s) outside the permitted set",
+			"disposition": "accept",
+			"reason": "Technical diagnostic shown only in the error expansion; 'tag' is allowed in technical detail (D-14)."
+		},
+		{
+			"fingerprint": "main|src:src/application/queries/verify_generated_output_query.ts|no permitted-tag set",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/application/queries/verify_generated_output_query.ts",
+			"text": "no permitted-tag set",
+			"disposition": "accept",
+			"reason": "Technical diagnostic shown only in the error expansion; 'tag' is allowed in technical detail (D-14)."
+		},
+		{
+			"fingerprint": "main|src:src/domain/exif/exif_errors.ts|Could not start ExifTool at",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/domain/exif/exif_errors.ts",
+			"text": "Could not start ExifTool at",
+			"disposition": "fix-v5.2",
+			"reason": "D-31(1): raw engine message reaches the row aria-label (FileRow.tsx:143) and title (FileRow.tsx:130) when no failureKind is set, names ExifTool and does not say the original is unchanged; measured user-facing defect flagged for maintainer promotion"
+		},
+		{
+			"fingerprint": "main|src:src/domain/exif/exif_errors.ts|ExifTool crashed unexpectedly. Restart the app to retry.",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/domain/exif/exif_errors.ts",
+			"text": "ExifTool crashed unexpectedly. Restart the app to retry.",
+			"disposition": "fix-v5.2",
+			"reason": "D-31(1): raw engine message reaches the row aria-label (FileRow.tsx:143) and title (FileRow.tsx:130) when no failureKind is set, names ExifTool and does not say the original is unchanged; measured user-facing defect flagged for maintainer promotion"
+		},
+		{
+			"fingerprint": "main|src:src/domain/exif/exif_errors.ts|ExifTool error:",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/domain/exif/exif_errors.ts",
+			"text": "ExifTool error:",
+			"disposition": "fix-v5.2",
+			"reason": "D-31(1): raw engine message reaches the row aria-label (FileRow.tsx:143) and title (FileRow.tsx:130) when no failureKind is set, names ExifTool and does not say the original is unchanged; measured user-facing defect flagged for maintainer promotion"
+		},
+		{
+			"fingerprint": "main|src:src/domain/exif/exif_errors.ts|ExifTool is not running. Restart the app to retry.",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/domain/exif/exif_errors.ts",
+			"text": "ExifTool is not running. Restart the app to retry.",
+			"disposition": "fix-v5.2",
+			"reason": "D-31(1): raw engine message reaches the row aria-label (FileRow.tsx:143) and title (FileRow.tsx:130) when no failureKind is set, names ExifTool and does not say the original is unchanged; measured user-facing defect flagged for maintainer promotion"
+		},
+		{
+			"fingerprint": "main|src:src/domain/exif/exif_errors.ts|ExifTool returned unreadable output. Try processing the file again.",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/domain/exif/exif_errors.ts",
+			"text": "ExifTool returned unreadable output. Try processing the file again.",
+			"disposition": "fix-v5.2",
+			"reason": "D-31(1): raw engine message reaches the row aria-label (FileRow.tsx:143) and title (FileRow.tsx:130) when no failureKind is set, names ExifTool and does not say the original is unchanged; measured user-facing defect flagged for maintainer promotion"
+		},
+		{
+			"fingerprint": "main|src:src/domain/exif/exif_errors.ts|ExifTool took too long to respond. Try processing the file again.",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/domain/exif/exif_errors.ts",
+			"text": "ExifTool took too long to respond. Try processing the file again.",
+			"disposition": "fix-v5.2",
+			"reason": "D-31(1): raw engine message reaches the row aria-label (FileRow.tsx:143) and title (FileRow.tsx:130) when no failureKind is set, names ExifTool and does not say the original is unchanged; measured user-facing defect flagged for maintainer promotion"
+		},
+		{
+			"fingerprint": "main|src:src/domain/exif/exif_errors.ts|Metadata engine error:",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/domain/exif/exif_errors.ts",
+			"text": "Metadata engine error:",
+			"disposition": "fix-v5.2",
+			"reason": "D-31(1): raw engine message reaches the row aria-label (FileRow.tsx:143) and title (FileRow.tsx:130) when no failureKind is set, names ExifTool and does not say the original is unchanged; measured user-facing defect flagged for maintainer promotion"
+		},
+		{
+			"fingerprint": "main|src:src/domain/exif/exif_errors.ts|Metadata engine error: native processing failed.",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/domain/exif/exif_errors.ts",
+			"text": "Metadata engine error: native processing failed.",
+			"disposition": "fix-v5.2",
+			"reason": "D-31(1): raw engine message reaches the row aria-label (FileRow.tsx:143) and title (FileRow.tsx:130) when no failureKind is set, names ExifTool and does not say the original is unchanged; measured user-facing defect flagged for maintainer promotion"
+		},
+		{
+			"fingerprint": "main|src:src/domain/exif/exif_errors.ts|Metadata engine is not running. Restart the app to retry.",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/domain/exif/exif_errors.ts",
+			"text": "Metadata engine is not running. Restart the app to retry.",
+			"disposition": "fix-v5.2",
+			"reason": "D-31(1): raw engine message reaches the row aria-label (FileRow.tsx:143) and title (FileRow.tsx:130) when no failureKind is set, names ExifTool and does not say the original is unchanged; measured user-facing defect flagged for maintainer promotion"
+		},
+		{
+			"fingerprint": "main|src:src/main/exif_handlers.ts|Embedded metadata was removed, but macOS extended attributes could not be cleared",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/main/exif_handlers.ts",
+			"text": "Embedded metadata was removed, but macOS extended attributes could not be cleared",
+			"disposition": "accept",
+			"reason": "Technical detail shown only in the error expansion (file.detail), a closed technical-detail surface (D-14)."
+		},
+		{
+			"fingerprint": "main|src:src/main/exif_handlers.ts|Generated output cleanup failed",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/main/exif_handlers.ts",
+			"text": "Generated output cleanup failed",
+			"disposition": "accept",
+			"reason": "Technical detail shown only in the error expansion (file.detail), a closed technical-detail surface (D-14)."
+		},
+		{
+			"fingerprint": "main|src:src/main/exif_handlers.ts|Generated output commit failed",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/main/exif_handlers.ts",
+			"text": "Generated output commit failed",
+			"disposition": "accept",
+			"reason": "Technical detail shown only in the error expansion (file.detail), a closed technical-detail surface (D-14)."
+		},
+		{
+			"fingerprint": "main|src:src/main/exif_handlers.ts|Generated output verification failed",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/main/exif_handlers.ts",
+			"text": "Generated output verification failed",
+			"disposition": "accept",
+			"reason": "Technical detail shown only in the error expansion (file.detail), a closed technical-detail surface (D-14)."
+		},
+		{
+			"fingerprint": "main|src:src/main/exif_handlers.ts|Generated output write failed",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/main/exif_handlers.ts",
+			"text": "Generated output write failed",
+			"disposition": "accept",
+			"reason": "Technical detail shown only in the error expansion (file.detail), a closed technical-detail surface (D-14)."
+		},
+		{
+			"fingerprint": "main|src:src/main/reveal_handlers.ts|File no longer exists",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/main/reveal_handlers.ts",
+			"text": "File no longer exists",
+			"disposition": "fix-v5.2",
+			"reason": "Hardcoded error returned to a toast when the file vanished; needs an en key and the stale-row wording."
+		},
+		{
+			"fingerprint": "main|src:src/main/reveal_handlers.ts|Reveal Cleaned Copy",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/main/reveal_handlers.ts",
+			"text": "Reveal Cleaned Copy",
+			"disposition": "fix-v5.1",
+			"reason": "Title-case, hardcoded context-menu label; the app's labels are sentence case and translated (reveal.cleanedCopy)."
+		},
+		{
+			"fingerprint": "main|src:src/main/reveal_handlers.ts|Reveal Original",
+			"kind": "main",
+			"surface": "main",
+			"ref": "src:src/main/reveal_handlers.ts",
+			"text": "Reveal Original",
+			"disposition": "fix-v5.1",
+			"reason": "Title-case, hardcoded context-menu label; the app's labels are sentence case and translated."
+		},
+		{
+			"fingerprint": "manual|apostrophe-mix",
+			"kind": "manual",
+			"surface": "en",
+			"ref": "en:intake.foldersUnreadable",
+			"text": "couldn't",
+			"disposition": "fix-v5.2",
+			"reason": "The only en string with a straight apostrophe; the others are curly. Typography is not linted."
+		},
+		{
+			"fingerprint": "manual|bare-error-label",
+			"kind": "manual",
+			"surface": "en",
+			"ref": "en:status.error",
+			"text": "Error",
+			"disposition": "fix-v5.2",
+			"reason": "A bare \"Error\" label says nothing about what happened or the original; the failed-file strings do."
+		},
+		{
+			"fingerprint": "manual|copy-all-markers",
+			"kind": "manual",
+			"surface": "renderer",
+			"ref": "src:src/renderer/components/file-list/MetadataExpansion.tsx",
+			"text": "\"[-]\"",
+			"disposition": "accept",
+			"reason": "The Copy-all clipboard text marks removed and kept fields with [-] and [+]; clipboard text is a closed technical-detail surface (D-14)."
+		},
+		{
+			"fingerprint": "manual|exif-before-after-headers",
+			"kind": "manual",
+			"surface": "en",
+			"ref": "en:table.header.exif-before",
+			"text": "# Exif Before",
+			"disposition": "fix-v5.2",
+			"reason": "The \"# Exif Before\" and \"# Exif After\" headers use the technical word where the brand says metadata; the keys are unused today."
+		},
+		{
+			"fingerprint": "manual|metadata-field-preserved",
+			"kind": "manual",
+			"surface": "en",
+			"ref": "en:metadata.field.preserved",
+			"text": "preserved",
+			"disposition": "fix-v5.1",
+			"reason": "Implies intent: computeMetadataDiff (metadata_groups.ts:88) marks any still-present key \"preserved\" even when it was merely not removable; a trust-core wording problem."
+		},
+		{
+			"fingerprint": "vocab|cleaned-copy|output|en:cleanupFailedSummary",
+			"kind": "vocab",
+			"surface": "en",
+			"ref": "en:cleanupFailedSummary",
+			"text": "Couldn’t verify cleaned output, and the incomplete output could not be removed. Your original is unchanged.",
+			"disposition": "fix-v5.1",
+			"reason": "The brand word is \"original\" (and \"cleaned copy\"), not \"output\"; the failed-file string says \"output\"."
+		},
+		{
+			"fingerprint": "vocab|cleaned-copy|output|en:verificationFailedSummary",
+			"kind": "vocab",
+			"surface": "en",
+			"ref": "en:verificationFailedSummary",
+			"text": "Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged.",
+			"disposition": "fix-v5.1",
+			"reason": "The brand word is \"original\" (and \"cleaned copy\"), not \"output\"; the failed-file string says \"output\"."
+		},
+		{
+			"fingerprint": "vocab|cleaned-copy|output|en:writeFailedSummary",
+			"kind": "vocab",
+			"surface": "en",
+			"ref": "en:writeFailedSummary",
+			"text": "Couldn’t write the cleaned output. Your original is unchanged.",
+			"disposition": "fix-v5.1",
+			"reason": "The brand word is \"original\" (and \"cleaned copy\"), not \"output\"; the failed-file string says \"output\"."
+		},
+		{
+			"fingerprint": "vocab|fields|attributes|en:xattrFailedSummary",
+			"kind": "vocab",
+			"surface": "en",
+			"ref": "en:xattrFailedSummary",
+			"text": "Metadata was removed, but macOS extended attributes could not be cleared.",
+			"disposition": "fix-v5.1",
+			"reason": "Says \"macOS extended attributes\"; the glossary label is \"macOS attributes\" and the brand word for a counted item is \"fields\"."
+		},
+		{
+			"fingerprint": "vocab|fields|tags|en:statusBar.tagsRemoved",
+			"kind": "vocab",
+			"surface": "en",
+			"ref": "en:statusBar.tagsRemoved",
+			"text": "{count} tags removed",
+			"disposition": "fix-v5.1",
+			"reason": "App.tsx:42-44 sums removedFields, so the unit is fields (the brand in-app example is \"162 fields removed\"); the string has no .one form, so one field reads \"1 tags removed\"."
+		},
+		{
+			"fingerprint": "vocab|unchanged|untouched|en:intake.outputCopy",
+			"kind": "vocab",
+			"surface": "en",
+			"ref": "en:intake.outputCopy",
+			"text": "Cleaned copies will be created — originals stay untouched.",
+			"disposition": "fix-v5.2",
+			"reason": "The brand word is \"unchanged\", not \"untouched\"; intake.outputCopy is a protected key, so the fix waits for v5.2."
+		},
+		{
+			"fingerprint": "vocab|unchanged|untouched|en:settings.saveAsCopy.description",
+			"kind": "vocab",
+			"surface": "en",
+			"ref": "en:settings.saveAsCopy.description",
+			"text": "Create a cleaned copy and leave the original untouched",
+			"disposition": "fix-v5.2",
+			"reason": "The brand word is \"unchanged\", not \"untouched\"; the setting description is a translated string, so the fix waits for v5.2."
+		}
+	]
+}

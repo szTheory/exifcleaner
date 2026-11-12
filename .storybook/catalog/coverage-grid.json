@@ -1,0 +1,901 @@
+{
+	"schemaVersion": 1,
+	"counts": {
+		"subjects": 21,
+		"states": 12,
+		"cells": 252,
+		"covered": 2,
+		"waived": 0,
+		"gaps": 250
+	},
+	"rows": [
+		{
+			"subject": "ChevronIcon",
+			"tier": "primitive",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "GearIcon",
+			"tier": "primitive",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "SegmentedControl",
+			"tier": "primitive",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "StatusIcon",
+			"tier": "primitive",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "ToggleSwitch",
+			"tier": "primitive",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "TypePill",
+			"tier": "primitive",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "ErrorBoundary",
+			"tier": "pattern",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "ErrorExpansion",
+			"tier": "pattern",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "FolderRow",
+			"tier": "pattern",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "LanguageDropdown",
+			"tier": "pattern",
+			"cells": {
+				"happy": {
+					"status": "covered",
+					"scenarios": [
+						"language-dropdown.system-default"
+					]
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "covered",
+					"scenarios": [
+						"language-dropdown.rtl-locales"
+					]
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "MetadataExpansion",
+			"tier": "pattern",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "MetadataField",
+			"tier": "pattern",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "MetadataGroup",
+			"tier": "pattern",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "StatusBar",
+			"tier": "pattern",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "Toast",
+			"tier": "pattern",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "DropZone",
+			"tier": "area",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "EmptyState",
+			"tier": "area",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "FileRow",
+			"tier": "area",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "FileTable",
+			"tier": "area",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "SettingsDrawer",
+			"tier": "area",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		},
+		{
+			"subject": "App",
+			"tier": "screen",
+			"cells": {
+				"happy": {
+					"status": "gap"
+				},
+				"empty": {
+					"status": "gap"
+				},
+				"one": {
+					"status": "gap"
+				},
+				"many": {
+					"status": "gap"
+				},
+				"boundary": {
+					"status": "gap"
+				},
+				"loading": {
+					"status": "gap"
+				},
+				"error": {
+					"status": "gap"
+				},
+				"denied": {
+					"status": "gap"
+				},
+				"stale": {
+					"status": "gap"
+				},
+				"long": {
+					"status": "gap"
+				},
+				"intl": {
+					"status": "gap"
+				},
+				"huge": {
+					"status": "gap"
+				}
+			}
+		}
+	]
+}

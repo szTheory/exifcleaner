@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"scenarios": [
+		{
+			"id": "language-dropdown.rtl-locales",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "intl",
+			"tier": "pattern",
+			"situation": "Someone using Arabic or Persian sees the language list laid out right to left.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--arabic",
+				"settings-languagedropdown--persian"
+			]
+		},
+		{
+			"id": "language-dropdown.system-default",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone opens the language list with the app following the system language.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--default"
+			]
+		}
+	]
+}

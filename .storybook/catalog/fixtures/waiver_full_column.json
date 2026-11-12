@@ -1,0 +1,152 @@
+{
+	"schemaVersion": 1,
+	"waivers": [
+		{
+			"subject": "App",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "DropZone",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "EmptyState",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ErrorBoundary",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ErrorExpansion",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "FileRow",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "FileTable",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "FolderRow",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "GearIcon",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "LanguageDropdown",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "MetadataExpansion",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "MetadataField",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "MetadataGroup",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "SegmentedControl",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "SettingsDrawer",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "StatusBar",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "StatusIcon",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "Toast",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "ToggleSwitch",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		},
+		{
+			"subject": "TypePill",
+			"stateClass": "stale",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		}
+	]
+}

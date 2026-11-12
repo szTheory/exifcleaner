@@ -22,6 +22,10 @@ on:
       - ".resources/strings.json"
       - "tests/fakes/mock_window_api.ts"
       - "tests/types/**"
+      - "brand.pin.json"
+      - "src/main/reveal_handlers.ts"
+      - "src/main/exif_handlers.ts"
+      - "src/application/queries/verify_generated_output_query.ts"
       - "scripts/findings_ratchet.mjs"
       - "scripts/storybook_budget_check.mjs"
       - "docs/evidence/known-findings.json"
@@ -42,6 +46,10 @@ on:
       - ".resources/strings.json"
       - "tests/fakes/mock_window_api.ts"
       - "tests/types/**"
+      - "brand.pin.json"
+      - "src/main/reveal_handlers.ts"
+      - "src/main/exif_handlers.ts"
+      - "src/application/queries/verify_generated_output_query.ts"
       - "scripts/findings_ratchet.mjs"
       - "scripts/storybook_budget_check.mjs"
       - "docs/evidence/known-findings.json"
@@ -113,6 +121,10 @@ jobs:
       # with its merge-base copy and the catalog test:storybook just rebuilt.
       - name: Findings ratchet
         run: node scripts/findings_ratchet.mjs --check --index storybook-static/index.json
+
+      # Phase 71 (D-05): glossary, personas and grid drift, the copy-findings and gap ratchets, and story-index parity.
+      - name: Catalog ratchets
+        run: node .storybook/catalog/catalog.mjs --check --index storybook-static/index.json
 
       # SBK-04 / D-18: fails when this job ran longer than the budget measured
       # from a real run (docs/evidence/storybook-ci-budget.json). Runs even

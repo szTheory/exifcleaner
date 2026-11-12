@@ -1,0 +1,12 @@
+{
+	"schemaVersion": 1,
+	"waivers": [
+		{
+			"subject": "ChevronIcon",
+			"stateClass": "huge",
+			"basis": "duplicate",
+			"ref": "no-such.scenario",
+			"reason": "The app-launch spec drives this state through the real window."
+		}
+	]
+}

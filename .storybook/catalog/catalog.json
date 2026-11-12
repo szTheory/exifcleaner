@@ -1,0 +1,897 @@
+{
+	"schemaVersion": 1,
+	"coreJob": {
+		"statement": "Remove what my files say about me, without surprises, and let me see what changed.",
+		"clauses": [
+			{
+				"field": "remove",
+				"about": "user",
+				"tag": "confirmed",
+				"text": "Users reported or asked about identifying data: geolocation fields, the PC name and user name, face tags, and the user name and project name from a design tool.",
+				"source": {
+					"kind": "issue",
+					"by": "user",
+					"refs": [
+						"#366",
+						"#108",
+						"#132",
+						"#347"
+					]
+				}
+			},
+			{
+				"field": "no-surprises",
+				"about": "user",
+				"tag": "confirmed",
+				"text": "Users reported surprises after cleaning: photos rotated, print resolution reset, a modified original with Save as copy on, a changed modification date.",
+				"source": {
+					"kind": "issue",
+					"by": "user",
+					"refs": [
+						"#168",
+						"#209",
+						"#234",
+						"#255",
+						"#304",
+						"#250"
+					]
+				}
+			},
+			{
+				"field": "see-changes",
+				"about": "user",
+				"tag": "confirmed",
+				"text": "Users asked to see what was removed and were unsure when the count read 0.",
+				"source": {
+					"kind": "issue",
+					"by": "user",
+					"refs": [
+						"#207",
+						"#361"
+					]
+				}
+			},
+			{
+				"field": "wording",
+				"about": "product",
+				"tag": "confirmed",
+				"text": "The sentence is the brand book's job statement, pinned at the recorded commit.",
+				"source": {
+					"kind": "brand",
+					"pin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+					"section": "Positioning and values"
+				}
+			}
+		]
+	},
+	"personas": [
+		{
+			"id": "P-batch",
+			"label": "Batch cleaners",
+			"claims": [
+				{
+					"field": "trigger",
+					"about": "user",
+					"tag": "assumed",
+					"text": "Has a folder or a large set to clean in one sitting.",
+					"source": {
+						"kind": "brand",
+						"pin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+						"section": "Batch cleaners"
+					},
+					"validateBy": "feedback-thread"
+				},
+				{
+					"field": "need",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users asked for whole folders and sub-folders, and for multiple files at once.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#18",
+							"#171",
+							"#139"
+						]
+					}
+				},
+				{
+					"field": "need",
+					"about": "user",
+					"tag": "proposal",
+					"text": "After a large batch, finding the results and telling cleaned from failed files is a need the maintainer's own issues describe.",
+					"source": {
+						"kind": "issue",
+						"by": "maintainer",
+						"refs": [
+							"#316",
+							"#317"
+						]
+					}
+				},
+				{
+					"field": "stakes",
+					"about": "user",
+					"tag": "proposal",
+					"text": "One failure hides among hundreds of successes.",
+					"source": {
+						"kind": "maintainer",
+						"date": "2026-11-10",
+						"doc": "MILESTONE-GUIDE.md, Who we serve, item 4"
+					}
+				}
+			],
+			"redFlags": [
+				{
+					"id": "RF-batch-1",
+					"kind": "never-happen",
+					"tag": "proposal",
+					"text": "One failed file stops, or is hidden among, the rest of the batch.",
+					"source": {
+						"kind": "brand",
+						"pin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+						"section": "Batch cleaners"
+					},
+					"states": [
+						"error",
+						"huge",
+						"many"
+					],
+					"jobs": [
+						"J-06",
+						"J-07"
+					]
+				},
+				{
+					"id": "RF-batch-2",
+					"kind": "never-happen",
+					"tag": "proposal",
+					"text": "A batch summary that counts already-clean and failed files the same way, so the two cannot be told apart.",
+					"source": {
+						"kind": "maintainer",
+						"date": "2026-11-10",
+						"doc": "research/v5.0-catalog-foundation.md (unverified inventory item)"
+					},
+					"states": [
+						"boundary",
+						"many"
+					],
+					"jobs": [
+						"J-07"
+					]
+				},
+				{
+					"id": "RF-batch-3",
+					"kind": "never-happen",
+					"tag": "proposal",
+					"text": "Rows that cannot be told apart: long or duplicate names, no folder context.",
+					"source": {
+						"kind": "issue",
+						"by": "maintainer",
+						"refs": [
+							"#316",
+							"#317"
+						]
+					},
+					"states": [
+						"huge",
+						"long"
+					],
+					"jobs": [
+						"J-07"
+					]
+				}
+			]
+		},
+		{
+			"id": "P-photographer",
+			"label": "Photographers",
+			"claims": [
+				{
+					"field": "trigger",
+					"about": "user",
+					"tag": "assumed",
+					"text": "Has RAW, TIFF or print files whose masters must come out as they went in, minus the private fields.",
+					"source": {
+						"kind": "brand",
+						"pin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+						"section": "Photographers"
+					},
+					"validateBy": "feedback-thread"
+				},
+				{
+					"field": "need",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users reported print resolution reset to 96, RAF files that would not open after cleaning, and asked to keep only the colour profile or the modification date.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#255",
+							"#241",
+							"#266",
+							"#250"
+						]
+					}
+				},
+				{
+					"field": "need",
+					"about": "product",
+					"tag": "confirmed",
+					"text": "Preserve resolution is a shipped setting.",
+					"source": {
+						"kind": "string",
+						"key": "settings.preserveResolution.label"
+					}
+				},
+				{
+					"field": "need",
+					"about": "product",
+					"tag": "confirmed",
+					"text": "Preserve color profile is a shipped setting.",
+					"source": {
+						"kind": "string",
+						"key": "settings.preserveColorProfile.label"
+					}
+				},
+				{
+					"field": "need",
+					"about": "product",
+					"tag": "confirmed",
+					"text": "Preserve orientation is a shipped setting.",
+					"source": {
+						"kind": "string",
+						"key": "settings.preserveOrientation.label"
+					}
+				},
+				{
+					"field": "need",
+					"about": "product",
+					"tag": "confirmed",
+					"text": "Preserve modification date is a shipped setting.",
+					"source": {
+						"kind": "string",
+						"key": "settings.preserveTimestamps.label"
+					}
+				},
+				{
+					"field": "stakes",
+					"about": "user",
+					"tag": "proposal",
+					"text": "A master that is damaged, or silently altered, is lost work.",
+					"source": {
+						"kind": "maintainer",
+						"date": "2026-11-10",
+						"doc": "MILESTONE-GUIDE.md, Who we serve, item 3"
+					}
+				}
+			],
+			"redFlags": [
+				{
+					"id": "RF-photographer-1",
+					"kind": "never-happen",
+					"tag": "confirmed",
+					"text": "A cleaned RAW file that no longer opens, or an original modified while Save as copy is on.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#241",
+							"#304"
+						]
+					},
+					"states": [
+						"boundary",
+						"error"
+					],
+					"jobs": [
+						"J-05"
+					]
+				},
+				{
+					"id": "RF-photographer-2",
+					"kind": "never-happen",
+					"tag": "proposal",
+					"text": "A preserve setting reported as kept when the field was not kept (resolution, colour, HDR gain map).",
+					"source": {
+						"kind": "issue",
+						"by": "maintainer",
+						"refs": [
+							"#396"
+						]
+					},
+					"states": [
+						"boundary"
+					],
+					"jobs": [
+						"J-02"
+					]
+				}
+			]
+		},
+		{
+			"id": "P-sharer",
+			"label": "Sharers",
+			"claims": [
+				{
+					"field": "trigger",
+					"about": "user",
+					"tag": "assumed",
+					"text": "Has a photo or file about to be posted, sent or sold.",
+					"source": {
+						"kind": "brand",
+						"pin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+						"section": "Sharers"
+					},
+					"validateBy": "feedback-thread"
+				},
+				{
+					"field": "need",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users reported photos rotated or flipped after cleaning, and two asked for the rotation to be kept.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#168",
+							"#209",
+							"#234"
+						]
+					}
+				},
+				{
+					"field": "need",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "A user dropped an image and saw nothing happen, in two reports.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#256",
+							"#257"
+						]
+					}
+				},
+				{
+					"field": "context",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "One user described themselves as not very tech-oriented.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#217"
+						]
+					}
+				},
+				{
+					"field": "stakes",
+					"about": "user",
+					"tag": "proposal",
+					"text": "If the tool misleads, the file leaves with its metadata still inside.",
+					"source": {
+						"kind": "maintainer",
+						"date": "2026-11-10",
+						"doc": "PROJECT.md core value"
+					}
+				}
+			],
+			"redFlags": [
+				{
+					"id": "RF-sharer-1",
+					"kind": "never-happen",
+					"tag": "confirmed",
+					"text": "A cleaned photo comes back rotated or flipped by default.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#168",
+							"#209",
+							"#234"
+						]
+					},
+					"states": [
+						"boundary",
+						"happy"
+					],
+					"jobs": [
+						"J-02"
+					]
+				},
+				{
+					"id": "RF-sharer-2",
+					"kind": "never-happen",
+					"tag": "confirmed",
+					"text": "A dropped image that shows nothing on screen.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#256",
+							"#257"
+						]
+					},
+					"states": [
+						"empty",
+						"error",
+						"loading"
+					],
+					"jobs": [
+						"J-09"
+					]
+				},
+				{
+					"id": "RF-sharer-3",
+					"kind": "never-say",
+					"tag": "confirmed",
+					"text": "Copy that uses fear to sell, naming what could happen to a person instead of what is removed.",
+					"source": {
+						"kind": "brand",
+						"pin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+						"section": "Inclusive language, and writing for translation"
+					},
+					"states": [
+						"happy"
+					],
+					"jobs": [
+						"J-01"
+					],
+					"forbidden": [
+						"hackers",
+						"stalkers",
+						"something to hide"
+					],
+					"gate": "banned.fear"
+				}
+			]
+		},
+		{
+			"id": "P-source",
+			"label": "Sources and journalists",
+			"claims": [
+				{
+					"field": "trigger",
+					"about": "user",
+					"tag": "assumed",
+					"text": "Has a file whose origin or location would identify someone, and must hand it over or publish it.",
+					"source": {
+						"kind": "brand",
+						"pin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+						"section": "Sources and journalists"
+					},
+					"validateBy": "volunteer-session"
+				},
+				{
+					"field": "need",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users reported identifying fields they expected gone: location, PC and user name, face tags, design-tool author and project.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#366",
+							"#108",
+							"#132",
+							"#347"
+						]
+					}
+				},
+				{
+					"field": "need",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users reported what a cleaning left behind (PDF, AVIF) and files the app could not verify.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#216",
+							"#215",
+							"#405",
+							"#406"
+						]
+					}
+				},
+				{
+					"field": "context",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users questioned the app's network and permission behaviour: a firewall prompt, a location-access question.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#116",
+							"#298"
+						]
+					}
+				},
+				{
+					"field": "context",
+					"about": "product",
+					"tag": "confirmed",
+					"text": "The app promises no network access, no telemetry and no automatic updates, and its code is open to check.",
+					"source": {
+						"kind": "brand",
+						"pin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+						"section": "Key messages"
+					}
+				},
+				{
+					"field": "stakes",
+					"about": "user",
+					"tag": "assumed",
+					"text": "A false clean result is worse than a visible failure, because the file is shared believing the data is gone.",
+					"source": {
+						"kind": "maintainer",
+						"date": "2026-11-10",
+						"doc": "MILESTONE-GUIDE.md, Who we serve, item 2"
+					},
+					"validateBy": "volunteer-session"
+				},
+				{
+					"field": "context",
+					"about": "user",
+					"tag": "assumed",
+					"text": "No issue in the tracker (213 read on 2026-11-11) is filed by someone who says they are a journalist or a source; this persona's existence rests on the brand book.",
+					"source": {
+						"kind": "none"
+					},
+					"validateBy": "feedback-thread"
+				}
+			],
+			"redFlags": [
+				{
+					"id": "RF-source-1",
+					"kind": "never-happen",
+					"tag": "confirmed",
+					"text": "A cleaned file that still carries an identifying field, such as a user name or a PC name.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#108",
+							"#347"
+						]
+					},
+					"states": [
+						"boundary"
+					],
+					"jobs": [
+						"J-01",
+						"J-03"
+					]
+				},
+				{
+					"id": "RF-source-2",
+					"kind": "never-say",
+					"tag": "confirmed",
+					"text": "Claims the app cannot prove, such as secure, anonymous or untraceable.",
+					"source": {
+						"kind": "brand",
+						"pin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+						"section": "How to write our name"
+					},
+					"states": [
+						"error",
+						"happy"
+					],
+					"jobs": [
+						"J-08"
+					],
+					"forbidden": [
+						"secure",
+						"anonymous",
+						"untraceable"
+					]
+				},
+				{
+					"id": "RF-source-3",
+					"kind": "never-happen",
+					"tag": "confirmed",
+					"text": "A PDF that still holds metadata after cleaning.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#216"
+						]
+					},
+					"states": [
+						"boundary"
+					],
+					"jobs": [
+						"J-03"
+					]
+				},
+				{
+					"id": "RF-source-4",
+					"kind": "never-happen",
+					"tag": "proposal",
+					"text": "A failed-file message that does not say the original is unchanged.",
+					"source": {
+						"kind": "string",
+						"key": "writeFailedSummary"
+					},
+					"states": [
+						"denied",
+						"error"
+					],
+					"jobs": [
+						"J-04",
+						"J-05"
+					]
+				},
+				{
+					"id": "RF-source-5",
+					"kind": "never-say",
+					"tag": "confirmed",
+					"text": "Absolute promises the app cannot prove, such as one hundred percent secure or guaranteed.",
+					"source": {
+						"kind": "brand",
+						"pin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+						"section": "Voice: this, not that"
+					},
+					"states": [
+						"error",
+						"happy"
+					],
+					"jobs": [
+						"J-08"
+					],
+					"forbidden": [
+						"100% secure",
+						"guaranteed"
+					]
+				}
+			]
+		}
+	],
+	"jobs": [
+		{
+			"id": "J-01",
+			"personas": [
+				"P-sharer",
+				"P-source"
+			],
+			"when": "I am about to post, send or sell a file",
+			"want": "what it says about me gone before it leaves my hands",
+			"so": "I can share it without giving away more than I meant",
+			"claims": [
+				{
+					"field": "evidence",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users asked about removing location, PC name and user name, and face data.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#366",
+							"#108",
+							"#132"
+						]
+					}
+				}
+			]
+		},
+		{
+			"id": "J-02",
+			"personas": [
+				"P-photographer",
+				"P-sharer"
+			],
+			"when": "I clean a file I care about",
+			"want": "the things I rely on, such as which way it faces, how its colour reads and how large it prints, to stay as they were",
+			"so": "it works in my other tools afterwards and I do not repair it by hand",
+			"claims": [
+				{
+					"field": "evidence",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users reported rotation and resolution lost after cleaning and asked for options to keep rotation, resolution and the colour profile.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#209",
+							"#234",
+							"#255",
+							"#266"
+						]
+					}
+				}
+			]
+		},
+		{
+			"id": "J-03",
+			"personas": [
+				"P-photographer",
+				"P-sharer",
+				"P-source"
+			],
+			"when": "a file has been cleaned",
+			"want": "to see exactly what was removed and what remains",
+			"so": "I can trust the result without checking it another way",
+			"claims": [
+				{
+					"field": "evidence",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users asked for the full list of removed metadata and were unsure about a count of 0.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#207",
+							"#361"
+						]
+					}
+				}
+			]
+		},
+		{
+			"id": "J-04",
+			"personas": [
+				"P-batch",
+				"P-source"
+			],
+			"when": "a file could not be cleaned, or the result could not be checked",
+			"want": "to be told plainly which file and what state it is in",
+			"so": "I never believe a file is clean when it is not",
+			"claims": [
+				{
+					"field": "evidence",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users reported files the app could not verify, and cleaning that failed outright.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#405",
+							"#406",
+							"#344"
+						]
+					}
+				}
+			]
+		},
+		{
+			"id": "J-05",
+			"personas": [
+				"P-batch",
+				"P-photographer"
+			],
+			"when": "I am not sure a cleaning will go right",
+			"want": "my original kept exactly as it was",
+			"so": "I can try again or go back",
+			"claims": [
+				{
+					"field": "evidence",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users asked for a copy instead of an overwrite and reported an original modified with Save as copy on.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#124",
+							"#218",
+							"#304"
+						]
+					}
+				}
+			]
+		},
+		{
+			"id": "J-06",
+			"personas": [
+				"P-batch"
+			],
+			"when": "I have a whole folder or a large set to clean",
+			"want": "to hand it over once and get through all of it",
+			"so": "I am not cleaning file by file",
+			"claims": [
+				{
+					"field": "evidence",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users asked for folders, sub-folders and multi-file drops.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#18",
+							"#171",
+							"#139"
+						]
+					}
+				}
+			]
+		},
+		{
+			"id": "J-07",
+			"personas": [
+				"P-batch"
+			],
+			"when": "a large run finishes or is under way",
+			"want": "to see which files are cleaned, which failed and which need a look, and to find the results",
+			"so": "I know what to do next without opening each file",
+			"claims": [
+				{
+					"field": "evidence",
+					"about": "user",
+					"tag": "proposal",
+					"text": "The maintainer's own jobs list for results and output folders; no user report yet.",
+					"source": {
+						"kind": "issue",
+						"by": "maintainer",
+						"refs": [
+							"#316",
+							"#317"
+						]
+					}
+				}
+			]
+		},
+		{
+			"id": "J-08",
+			"personas": [
+				"P-source"
+			],
+			"when": "I hand the app personal or sensitive files",
+			"want": "to know it stays on my computer and sends nothing out",
+			"so": "I can use it for files I could not upload anywhere",
+			"claims": [
+				{
+					"field": "evidence",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users questioned the app's outbound connection and location access.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#116",
+							"#298"
+						]
+					}
+				}
+			]
+		},
+		{
+			"id": "J-09",
+			"personas": [
+				"P-sharer"
+			],
+			"when": "I open the app for the first time with a file in hand",
+			"want": "one obvious thing to do and a result I can see",
+			"so": "I get the file cleaned without help",
+			"claims": [
+				{
+					"field": "evidence",
+					"about": "user",
+					"tag": "confirmed",
+					"text": "Users reported seeing nothing after a drop, and one reported that the app did not work and asked for help.",
+					"source": {
+						"kind": "issue",
+						"by": "user",
+						"refs": [
+							"#256",
+							"#257",
+							"#252"
+						]
+					}
+				}
+			]
+		}
+	]
+}

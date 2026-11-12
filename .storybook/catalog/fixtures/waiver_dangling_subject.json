@@ -1,0 +1,12 @@
+{
+	"schemaVersion": 1,
+	"waivers": [
+		{
+			"subject": "Ghost",
+			"stateClass": "huge",
+			"basis": "e2e",
+			"ref": "tests/e2e/app-launch.spec.ts",
+			"reason": "The app-launch spec drives this state through the real window."
+		}
+	]
+}
