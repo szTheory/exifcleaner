@@ -26,6 +26,7 @@ constraints and seams; it does not reteach Electron, React, or TypeScript.
 | Add a preference | `settings_schema.ts`, then settings/localization |
 | Debug a packaged-only failure | build/test/release, then `tests/smoke/` |
 | Understand why a file was not changed | the outcome model in file processing |
+| Check user-facing words, personas, scenarios and story coverage | `.storybook/catalog/` (GLOSSARY.md, PERSONAS.md, COVERAGE-GRID.md; `yarn catalog:check`) |
 
 Historical release proofs live in `docs/evidence/`. They are evidence, not onboarding
 material, and are intentionally outside this reading path.
