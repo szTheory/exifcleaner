@@ -23,6 +23,7 @@ import {
 	readPin,
 	shipBrand,
 } from "./brand_lib.mjs";
+import { isMainModule } from "./is_main_module.mjs";
 
 export async function runBrandFetch({
 	env = process.env,
@@ -59,7 +60,7 @@ export async function runBrandFetch({
 	return { skipped: false, shipped, ...result };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (isMainModule(import.meta.url)) {
 	const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 	runBrandFetch({ root }).catch((error) => {
 		console.error(`brand: FAILED: ${error.message}`);

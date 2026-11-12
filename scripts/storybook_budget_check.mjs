@@ -13,7 +13,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { isMainModule } from "./is_main_module.mjs";
 
 export const BUDGET_PATH = "docs/evidence/storybook-ci-budget.json";
 
@@ -168,6 +168,6 @@ export function main(_argv = process.argv.slice(2)) {
 	}
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (isMainModule(import.meta.url)) {
 	process.exitCode = main();
 }
