@@ -327,6 +327,103 @@
 			]
 		},
 		{
+			"id": "metadata-field.bidi-value",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "intl",
+			"tier": "pattern",
+			"situation": "Someone reads an office name that mixes Arabic and Latin letters and finds each part in its own reading direction.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatafield--bidi-value"
+			]
+		},
+		{
+			"id": "metadata-field.cut-at-limit",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "Someone reads a description of 81 characters that is cut after 80 with an ellipsis, and finds the full text by pointing at it.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatafield--cut-at-limit"
+			]
+		},
+		{
+			"id": "metadata-field.exactly-at-limit",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "Someone reads a description of exactly 80 characters, which shows in full with no ellipsis.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatafield--exactly-at-limit"
+			]
+		},
+		{
+			"id": "metadata-field.removed-and-preserved",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone reads a removed field marked with a minus and a kept field marked with a check, each with its value.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatafield--removed",
+				"file-list-metadatafield--preserved"
+			]
+		},
+		{
+			"id": "metadata-field.structured-value",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone reads a removed location field whose value is a list of two numbers, shown as its plain text.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatafield--structured-value"
+			]
+		},
+		{
+			"id": "metadata-group.many-fields",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "many",
+			"tier": "pattern",
+			"situation": "Someone sees a Camera group that holds six removed fields and its count of 6.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatagroup--many-fields"
+			]
+		},
+		{
+			"id": "metadata-group.one-field",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "one",
+			"tier": "pattern",
+			"situation": "Someone sees a Camera group that holds one removed field and its count of 1.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatagroup--one-field"
+			]
+		},
+		{
+			"id": "metadata-group.unmapped-group",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "Someone sees a group the app has no name for under the heading Other, and can point at it to read the real group name.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatagroup--unmapped-group"
+			]
+		},
+		{
 			"id": "segmented-control.arabic",
 			"persona": "P-sharer",
 			"job": "J-01",

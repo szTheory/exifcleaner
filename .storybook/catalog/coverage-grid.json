@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 34,
-		"waived": 76,
-		"gaps": 142
+		"covered": 40,
+		"waived": 94,
+		"gaps": 118
 	},
 	"rows": [
 		{
@@ -940,40 +940,96 @@
 			"tier": "pattern",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"metadata-field.removed-and-preserved",
+						"metadata-field.structured-value"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataField.tsx#formatFieldValue",
+						"reason": "A field row is one name and one value, so it holds no collection that could be empty; a null value only leaves its value cell blank."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataField.tsx#MetadataField",
+						"reason": "A field row carries no count, so it has no singular or plural wording to test; the counts belong to the group and the panel."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataField.tsx#field",
+						"reason": "A field row never repeats itself, so a mix of rows exists only inside a group; metadata-group.many-fields shows it."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"metadata-field.cut-at-limit",
+						"metadata-field.exactly-at-limit"
+					]
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataField.tsx#displayValue",
+						"reason": "A field row is drawn from a finished read and has no in-flight form, so no value is ever shown as still arriving."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataField.tsx#i18nLookup",
+						"reason": "A row shows one value from a finished read and has no failure input; a file that failed shows ErrorExpansion instead of any field."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataField.tsx#removed",
+						"reason": "No rule blocks a field from showing, and a refused file never reaches a field row because it ends in the error state."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataField.tsx#valueStr",
+						"reason": "A row shows the value it was handed and never rereads the file, so it holds no revalidation state of its own."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "metadata-field.cut-at-limit",
+						"reason": "The row cuts every value at 80 characters, so a longer value renders exactly like the cut-at-limit row and adds no layout of its own."
+					}
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"metadata-field.bidi-value"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "metadata-field.cut-at-limit",
+						"reason": "One value is the largest input a row takes and the 80 character cut bounds it, so the cut-at-limit row is the largest row a field can draw."
+					}
 				}
 			}
 		},
@@ -982,40 +1038,94 @@
 			"tier": "pattern",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "metadata-group.many-fields",
+						"reason": "A group with its header and its field rows is the success path, and the many-fields row draws exactly that."
+					}
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataGroup.tsx#MetadataGroup",
+						"reason": "MetadataExpansion filters out every group that has no fields before it renders one, so an empty group is never mounted."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"metadata-group.one-field"
+					]
 				},
 				"many": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"metadata-group.many-fields"
+					]
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"metadata-group.unmapped-group"
+					]
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataGroup.tsx#group",
+						"reason": "A group is built from a finished read through computeMetadataDiff, so there is no in-flight form of it."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataGroup.tsx#fields",
+						"reason": "A group lists fields from a finished read and has no failure input; a failed file shows ErrorExpansion in place of any group."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataGroup.tsx#friendlyName",
+						"reason": "No rule blocks a group from showing, and a refused file ends in the error state before any group is built."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataGroup.tsx#i18nLookup",
+						"reason": "A group shows the fields it was handed and never rereads the file, so it holds no revalidation state of its own."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataGroup.tsx#rawGroupName",
+						"reason": "The header is a translated group label or one of ExifTool's short group names, so it never outgrows its line; long text belongs to the values, which the field row cuts."
+					}
 				},
 				"intl": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "metadata-expansion.arabic-plural",
+						"reason": "The Arabic panel story draws the translated group headers and the field rows in a right-to-left layout, which is every locale difference a group has."
+					}
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "metadata-expansion.scrolls-at-max-height",
+						"reason": "A group never limits its own height; any number of fields scrolls inside the panel, which the scroll story already draws at thirty fields."
+					}
 				}
 			}
 		},

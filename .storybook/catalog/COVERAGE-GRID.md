@@ -2,7 +2,7 @@
 
 # Coverage grid
 
-21 subjects x 12 state classes = 252 cells: 34 covered, 76 waived, 142 gaps.
+21 subjects x 12 state classes = 252 cells: 40 covered, 94 waived, 118 gaps.
 
 A cell is covered by a scenario in scenarios.json, waived with a reason in waivers.json, or a gap. A gap is computed, never typed. Cells show the scenario count, `waived` or `gap`. A gap is owed by the phase in the Due column: primitive and pattern rows by Phase 72, area and screen rows by Phase 73.
 
@@ -19,8 +19,8 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 | FolderRow | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | LanguageDropdown | pattern | Phase 72 | 1 | gap | gap | gap | gap | gap | gap | gap | gap | gap | 1 | gap |
 | MetadataExpansion | pattern | Phase 72 | 5 | 1 | 1 | 1 | 1 | waived | waived | waived | waived | waived | 1 | waived |
-| MetadataField | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
-| MetadataGroup | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
+| MetadataField | pattern | Phase 72 | 2 | waived | waived | waived | 2 | waived | waived | waived | waived | waived | 1 | waived |
+| MetadataGroup | pattern | Phase 72 | waived | waived | 1 | 1 | 1 | waived | waived | waived | waived | waived | waived | waived |
 | StatusBar | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | Toast | pattern | Phase 72 | 1 | 1 | 1 | 1 | 1 | waived | waived | waived | 1 | 1 | 1 | waived |
 | DropZone | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
@@ -104,6 +104,24 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 - MetadataExpansion|stale: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#afterMetadata): The panel draws the two maps it was handed and never rereads the file, so it holds no stale state of its own; a source changed by another app ends the row in a commit failure that ErrorExpansion shows.
 - MetadataExpansion|long: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#removedGroups): Each value is cut to 80 characters with the full text in a title before it reaches the panel layout, so no value longer than the cut can stress the panel; the cut itself is the field boundary story.
 - MetadataExpansion|huge: duplicate (metadata-expansion.scrolls-at-max-height): Any number of fields lands in the same 300 pixel scrolling surface, so thousands of fields look like the scroll story; the large batch stress belongs to the file table.
+- MetadataField|empty: unreachable (src/renderer/components/file-list/MetadataField.tsx#formatFieldValue): A field row is one name and one value, so it holds no collection that could be empty; a null value only leaves its value cell blank.
+- MetadataField|one: unreachable (src/renderer/components/file-list/MetadataField.tsx#MetadataField): A field row carries no count, so it has no singular or plural wording to test; the counts belong to the group and the panel.
+- MetadataField|many: unreachable (src/renderer/components/file-list/MetadataField.tsx#field): A field row never repeats itself, so a mix of rows exists only inside a group; metadata-group.many-fields shows it.
+- MetadataField|loading: unreachable (src/renderer/components/file-list/MetadataField.tsx#displayValue): A field row is drawn from a finished read and has no in-flight form, so no value is ever shown as still arriving.
+- MetadataField|error: unreachable (src/renderer/components/file-list/MetadataField.tsx#i18nLookup): A row shows one value from a finished read and has no failure input; a file that failed shows ErrorExpansion instead of any field.
+- MetadataField|denied: unreachable (src/renderer/components/file-list/MetadataField.tsx#removed): No rule blocks a field from showing, and a refused file never reaches a field row because it ends in the error state.
+- MetadataField|stale: unreachable (src/renderer/components/file-list/MetadataField.tsx#valueStr): A row shows the value it was handed and never rereads the file, so it holds no revalidation state of its own.
+- MetadataField|long: duplicate (metadata-field.cut-at-limit): The row cuts every value at 80 characters, so a longer value renders exactly like the cut-at-limit row and adds no layout of its own.
+- MetadataField|huge: duplicate (metadata-field.cut-at-limit): One value is the largest input a row takes and the 80 character cut bounds it, so the cut-at-limit row is the largest row a field can draw.
+- MetadataGroup|happy: duplicate (metadata-group.many-fields): A group with its header and its field rows is the success path, and the many-fields row draws exactly that.
+- MetadataGroup|empty: unreachable (src/renderer/components/file-list/MetadataGroup.tsx#MetadataGroup): MetadataExpansion filters out every group that has no fields before it renders one, so an empty group is never mounted.
+- MetadataGroup|loading: unreachable (src/renderer/components/file-list/MetadataGroup.tsx#group): A group is built from a finished read through computeMetadataDiff, so there is no in-flight form of it.
+- MetadataGroup|error: unreachable (src/renderer/components/file-list/MetadataGroup.tsx#fields): A group lists fields from a finished read and has no failure input; a failed file shows ErrorExpansion in place of any group.
+- MetadataGroup|denied: unreachable (src/renderer/components/file-list/MetadataGroup.tsx#friendlyName): No rule blocks a group from showing, and a refused file ends in the error state before any group is built.
+- MetadataGroup|stale: unreachable (src/renderer/components/file-list/MetadataGroup.tsx#i18nLookup): A group shows the fields it was handed and never rereads the file, so it holds no revalidation state of its own.
+- MetadataGroup|long: unreachable (src/renderer/components/file-list/MetadataGroup.tsx#rawGroupName): The header is a translated group label or one of ExifTool's short group names, so it never outgrows its line; long text belongs to the values, which the field row cuts.
+- MetadataGroup|intl: duplicate (metadata-expansion.arabic-plural): The Arabic panel story draws the translated group headers and the field rows in a right-to-left layout, which is every locale difference a group has.
+- MetadataGroup|huge: duplicate (metadata-expansion.scrolls-at-max-height): A group never limits its own height; any number of fields scrolls inside the panel, which the scroll story already draws at thirty fields.
 - Toast|loading: unreachable (src/renderer/components/ui/Toast.tsx#message): The notice appears only after the copy or the skip has happened and never announces work in progress, so it has no pending form.
 - Toast|error: unreachable (src/renderer/components/ui/Toast.tsx#visible): Toast has no error variant or style; a failed reveal is shown as ordinary notice text, which is the reveal-failed scenario, so a separate error cell adds nothing.
 - Toast|denied: unreachable (src/renderer/components/ui/Toast.tsx#Toast): The notice takes no disabled or refused form and the file:reveal handler's only failure is a missing file (the reveal-failed scenario), so no deterministic refusal is left to display.
