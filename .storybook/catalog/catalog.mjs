@@ -11,12 +11,18 @@ import path from "node:path";
 import { isMainModule } from "../../scripts/is_main_module.mjs";
 import { readJson } from "./closed.mjs";
 import {
+	COPY_FINDINGS_PATH,
+	check as checkRegister,
+	loadObservation,
+} from "./copy_findings_ratchet.mjs";
+import {
 	GLOSSARY_MD_PATH,
 	GLOSSARY_PATH,
 	loadGlossaryContext,
 	renderGlossary,
 	validateGlossary,
 } from "./glossary.mjs";
+import { readMergeBase, resolveBaseRef } from "./merge_base.mjs";
 
 // Repo-relative inputs `--check` reads. Tests copy exactly these into a temp
 // repository, so a passing run there also proves no other data is read.
@@ -33,18 +39,30 @@ export const CHECK_INPUTS = Object.freeze([
 const FLAGS = new Set(["--check", "--write"]);
 
 /**
+ * `--check` and `--write`, plus `--base <ref>` for the merge-base the copy
+ * findings register is compared with (default origin/master).
+ *
  * @param {string[]} argv
- * @returns {{ flags: Set<string> }}
+ * @returns {{ flags: Set<string>, base: string | undefined }}
  */
 export function parseArguments(argv) {
 	const flags = new Set();
-	for (const arg of argv) {
-		if (!FLAGS.has(arg)) {
+	let base;
+	for (let index = 0; index < argv.length; index += 1) {
+		const arg = argv[index];
+		if (arg === "--base") {
+			base = argv[index + 1];
+			if (base === undefined || base.startsWith("--")) {
+				throw new Error("--base needs a ref");
+			}
+			index += 1;
+		} else if (FLAGS.has(arg)) {
+			flags.add(arg);
+		} else {
 			throw new Error(`unknown argument ${arg}`);
 		}
-		flags.add(arg);
 	}
-	return { flags };
+	return { flags, base };
 }
 
 function glossaryProblems(root) {
@@ -68,13 +86,15 @@ export function generatedFiles(root) {
 }
 
 /**
- * @param {{ root: string }} options
- * @returns {{ ok: boolean, problems: Array<{ code: string, message: string }>, files: number }}
+ * The drift layer (generated files) and the copy findings register layer.
+ *
+ * @param {{ root: string, base?: string | undefined }} options
+ * @returns {{ ok: boolean, problems: Array<{ code: string, message: string }>, files: number, notes: string[] }}
  */
-export function checkCatalog({ root }) {
+export function checkCatalog({ root, base }) {
 	const { doc, problems } = glossaryProblems(root);
 	if (problems.length > 0) {
-		return { ok: false, problems, files: 0 };
+		return { ok: false, problems, files: 0, notes: [] };
 	}
 	const stale = [];
 	const files = [[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))]];
@@ -92,7 +112,28 @@ export function checkCatalog({ root }) {
 			});
 		}
 	}
-	return { ok: stale.length === 0, problems: stale, files: files.length };
+	const { mergeBase, base: baseDoc } = readMergeBase(COPY_FINDINGS_PATH, {
+		ref: resolveBaseRef(base, process.env),
+		cwd: root,
+	});
+	const head = readJson(root, COPY_FINDINGS_PATH);
+	const register = checkRegister({
+		head,
+		base: baseDoc,
+		observation: loadObservation(root),
+	});
+	const entries = Array.isArray(/** @type {any} */ (head)?.entries)
+		? /** @type {any} */ (head).entries.length
+		: 0;
+	const all = [...stale, ...register.problems];
+	return {
+		ok: all.length === 0,
+		problems: all,
+		files: files.length,
+		notes: [
+			`copy findings: ${entries} entries (${baseDoc === null ? "bootstrap" : `merge-base ${mergeBase.slice(0, 7)}`})`,
+		],
+	};
 }
 
 /**
@@ -126,7 +167,7 @@ function describe(problems) {
  */
 export function main(argv = process.argv.slice(2)) {
 	try {
-		const { flags } = parseArguments(argv);
+		const { flags, base } = parseArguments(argv);
 		const writing = flags.has("--write");
 		if (writing === flags.has("--check")) {
 			throw new Error("pass exactly one of --check or --write");
@@ -137,7 +178,7 @@ export function main(argv = process.argv.slice(2)) {
 			console.log(`✓ CATALOG WRITE — ${count} files`);
 			return 0;
 		}
-		const result = checkCatalog({ root });
+		const result = checkCatalog({ root, base });
 		if (!result.ok) {
 			console.error(`✗ CATALOG CHECK FAILED: ${describe(result.problems)}`);
 			return 1;
@@ -145,6 +186,7 @@ export function main(argv = process.argv.slice(2)) {
 		console.log(
 			`✓ CATALOG CHECK PASSED — ${result.files} generated files current`,
 		);
+		for (const note of result.notes) console.log(note);
 		return 0;
 	} catch (error) {
 		console.error(
