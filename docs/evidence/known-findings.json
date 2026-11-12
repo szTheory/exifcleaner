@@ -306,6 +306,86 @@
 			"disposition": "fix-v5.1"
 		},
 		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--item-hover|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--item-hover",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: the label of the selected or highlighted item (--ec-color-accent text) measures 3.38:1 (#007aff --ec-color-accent on #e8ecf0 --ec-color-surface) in the light theme, measures 4.23:1 (#007aff --ec-color-accent on #1c1c1f --ec-color-surface) in the dark theme; the English name in brackets (.language-dropdown__english) measures 3.62:1 (#66758c --ec-color-text-secondary on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) and 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) and 4.44:1 (#818188 --ec-color-text-secondary on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--item-hover|scrollable-region-focusable",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--item-hover",
+			"rule": "scrollable-region-focusable",
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--keyboard-end|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--keyboard-end",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: the English name in brackets (.language-dropdown__english) measures 3.62:1 (#66758c --ec-color-text-secondary on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) and 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) and 4.44:1 (#818188 --ec-color-text-secondary on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--keyboard-end|scrollable-region-focusable",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--keyboard-end",
+			"rule": "scrollable-region-focusable",
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--open|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--open",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: the label of the selected or highlighted item (--ec-color-accent text) measures 3.11:1 (#007aff --ec-color-accent on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) in the light theme, measures 4.27:1 (#007aff --ec-color-accent on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the English name in brackets (.language-dropdown__english) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--open|scrollable-region-focusable",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--open",
+			"rule": "scrollable-region-focusable",
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--open-arabic|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--open-arabic",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: the English name in brackets (.language-dropdown__english) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--open-arabic|scrollable-region-focusable",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--open-arabic",
+			"rule": "scrollable-region-focusable",
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--open-selected|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--open-selected",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: the label of the selected or highlighted item (--ec-color-accent text) measures 3.11:1 (#007aff --ec-color-accent on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) in the light theme, measures 4.27:1 (#007aff --ec-color-accent on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the English name in brackets (.language-dropdown__english) measures 3.62:1 (#66758c --ec-color-text-secondary on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) and 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) and 4.44:1 (#818188 --ec-color-text-secondary on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--open-selected|scrollable-region-focusable",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--open-selected",
+			"rule": "scrollable-region-focusable",
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
 			"fingerprint": "a11y-p72|settings-segmentedcontrol--arabic|color-contrast",
 			"kind": "a11y-p72",
 			"story": "settings-segmentedcontrol--arabic",

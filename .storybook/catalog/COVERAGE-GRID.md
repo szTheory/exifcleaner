@@ -2,7 +2,7 @@
 
 # Coverage grid
 
-21 subjects x 12 state classes = 252 cells: 55 covered, 115 waived, 82 gaps.
+21 subjects x 12 state classes = 252 cells: 57 covered, 123 waived, 72 gaps.
 
 A cell is covered by a scenario in scenarios.json, waived with a reason in waivers.json, or a gap. A gap is computed, never typed. Cells show the scenario count, `waived` or `gap`. A gap is owed by the phase in the Due column: primitive and pattern rows by Phase 72, area and screen rows by Phase 73.
 
@@ -17,7 +17,7 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 | ErrorBoundary | pattern | Phase 72 | 1 | waived | waived | waived | waived | waived | 4 | waived | waived | 1 | waived | waived |
 | ErrorExpansion | pattern | Phase 72 | waived | waived | waived | waived | waived | waived | 5 | 1 | 1 | 1 | waived | waived |
 | FolderRow | pattern | Phase 72 | 4 | 2 | 1 | waived | waived | 1 | waived | waived | waived | 1 | 1 | waived |
-| LanguageDropdown | pattern | Phase 72 | 1 | gap | gap | gap | gap | gap | gap | gap | gap | gap | 1 | gap |
+| LanguageDropdown | pattern | Phase 72 | 7 | waived | waived | waived | 1 | waived | waived | waived | 1 | waived | 1 | waived |
 | MetadataExpansion | pattern | Phase 72 | 5 | 1 | 1 | 1 | 1 | waived | waived | waived | waived | waived | 1 | waived |
 | MetadataField | pattern | Phase 72 | 2 | waived | waived | waived | 2 | waived | waived | waived | waived | waived | 1 | waived |
 | MetadataGroup | pattern | Phase 72 | waived | waived | 1 | 1 | 1 | waived | waived | waived | waived | waived | waived | waived |
@@ -113,6 +113,14 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 - FolderRow|denied: unreachable (src/renderer/components/file-list/FolderRow.tsx#onToggle): The fold button is always enabled and takes no disabled prop, and a folder the app may not read is dispatched as empty, so no refused row exists to draw.
 - FolderRow|stale: unreachable (src/renderer/components/file-list/FolderRow.tsx#fileCount): The row only mirrors the folder, count and status it is handed by the reducer and never rereads the folder, so it holds no state that can outlive its source.
 - FolderRow|huge: unreachable (src/renderer/components/file-list/FolderRow.tsx#renderCount): Thousands of files only lengthen one number in one string; the stress of many folder rows and file rows belongs to the table that repeats this row.
+- LanguageDropdown|empty: unreachable (src/renderer/components/settings/LanguageDropdown.tsx#LANGUAGE_NAMES): The list is built from a fixed constant of languages plus the System item, so it is never empty; a null current language is the System default the first story draws.
+- LanguageDropdown|one: unreachable (src/renderer/components/settings/LanguageDropdown.tsx#TOTAL_ITEMS): The list always holds System and the same fixed set of languages, with no count shown, so there is no one-item list and no singular wording.
+- LanguageDropdown|many: duplicate (language-dropdown.keyboard-end): The list always shows all 27 options at once, so many is the only size it has, and the End key story already opens that full list and scrolls it to the last item.
+- LanguageDropdown|loading: unreachable (src/renderer/components/settings/LanguageDropdown.tsx#useI18n): The only loading frame is the one before the dictionary arrives, when the label function returns raw keys for a single frame; no pending style or spinner exists to draw.
+- LanguageDropdown|error: unreachable (src/renderer/components/settings/LanguageDropdown.tsx#onLanguageChange): Choosing a language calls onLanguageChange and closes the list with no failure path of its own; saving the setting and any failure of it live outside the component.
+- LanguageDropdown|denied: unreachable (src/renderer/components/settings/LanguageDropdown.tsx#handleSelect): Every option can always be chosen and no item takes a disabled or refused form, so a blocked version of the list does not exist.
+- LanguageDropdown|long: unreachable (src/renderer/components/settings/LanguageDropdown.tsx#triggerLabel): The trigger label is fixed data, the longest being Portuguese (Brazil) with its English name, and it is cut with an ellipsis; how the trigger fits in a narrow drawer is an area question for Phase 73.
+- LanguageDropdown|huge: duplicate (language-dropdown.keyboard-end): The list is a fixed 27 options inside a 280px scroller, so the largest input is the scrolled list that the End key story already draws.
 - MetadataExpansion|loading: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#beforeMetadata): FileRow mounts the panel only for a Complete row that holds both maps, and a Pending, Reading or Processing row has no maps yet, so the panel is never drawn while a file is in flight.
 - MetadataExpansion|error: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#MetadataExpansion): A failed row shows ErrorExpansion in place of the panel, and the panel takes two maps with no failure input, so a failure never reaches it.
 - MetadataExpansion|denied: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#handleCopyAll): A refused file ends in the error state and shows its refusal text in ErrorExpansion, and the panel has no input that could carry a refusal.

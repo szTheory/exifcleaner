@@ -374,6 +374,78 @@
 			]
 		},
 		{
+			"id": "language-dropdown.item-hover",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone moves the pointer down the open list and each item under it takes the highlight, the same one the arrow keys set.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--item-hover"
+			]
+		},
+		{
+			"id": "language-dropdown.keyboard-end",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "Someone presses End in the open list and the focus jumps to the last language and scrolls it into view.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--keyboard-end"
+			]
+		},
+		{
+			"id": "language-dropdown.keyboard-focus",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone tabs to the closed language trigger and sees a visible focus ring around it.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--keyboard-focus"
+			]
+		},
+		{
+			"id": "language-dropdown.keyboard-pick",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone opens the list with the arrow keys, moves down two items and presses Enter to choose that language.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--keyboard-pick"
+			]
+		},
+		{
+			"id": "language-dropdown.open",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone opens the language list and sees System and every language in its own script, each with its English name.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--open"
+			]
+		},
+		{
+			"id": "language-dropdown.open-selected",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone who chose German opens the list and sees a check mark and the accent colour on that one language.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--open-selected"
+			]
+		},
+		{
 			"id": "language-dropdown.rtl-locales",
 			"persona": "P-sharer",
 			"job": "J-09",
@@ -383,7 +455,8 @@
 			"proofBoundary": "story",
 			"stories": [
 				"settings-languagedropdown--arabic",
-				"settings-languagedropdown--persian"
+				"settings-languagedropdown--persian",
+				"settings-languagedropdown--open-arabic"
 			]
 		},
 		{
@@ -396,6 +469,30 @@
 			"proofBoundary": "story",
 			"stories": [
 				"settings-languagedropdown--default"
+			]
+		},
+		{
+			"id": "language-dropdown.trigger-hover",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone moves the pointer over the language trigger and its border darkens.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--trigger-hover"
+			]
+		},
+		{
+			"id": "language-dropdown.unknown-code",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "stale",
+			"tier": "pattern",
+			"situation": "A saved language code that the list no longer knows shows on the trigger as the raw code and not as a name.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--unknown-code"
 			]
 		},
 		{

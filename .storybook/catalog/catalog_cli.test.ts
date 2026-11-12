@@ -253,15 +253,21 @@ describe("catalog.mjs coverage grid against a temp git repo", () => {
 		withRepo((repo) => {
 			const file = path.join(repo, SCENARIOS);
 			const doc = JSON.parse(fs.readFileSync(file, "utf8")) as {
-				scenarios: Array<{ id: string }>;
+				scenarios: Array<{ id: string; stateClass: string }>;
 			};
 			fs.writeFileSync(
 				file,
 				`${JSON.stringify(
 					{
 						...doc,
+						// Every LanguageDropdown happy scenario goes (Phase 72 added several),
+						// so the cell is a gap at head and was covered at the merge-base.
 						scenarios: doc.scenarios.filter(
-							(scenario) => scenario.id !== "language-dropdown.system-default",
+							(scenario) =>
+								!(
+									scenario.id.startsWith("language-dropdown.") &&
+									scenario.stateClass === "happy"
+								),
 						),
 					},
 					null,

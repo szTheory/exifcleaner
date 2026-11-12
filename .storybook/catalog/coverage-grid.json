@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 55,
-		"waived": 115,
-		"gaps": 82
+		"covered": 57,
+		"waived": 123,
+		"gaps": 72
 	},
 	"rows": [
 		{
@@ -909,35 +909,82 @@
 				"happy": {
 					"status": "covered",
 					"scenarios": [
-						"language-dropdown.system-default"
+						"language-dropdown.item-hover",
+						"language-dropdown.keyboard-focus",
+						"language-dropdown.keyboard-pick",
+						"language-dropdown.open",
+						"language-dropdown.open-selected",
+						"language-dropdown.system-default",
+						"language-dropdown.trigger-hover"
 					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/LanguageDropdown.tsx#LANGUAGE_NAMES",
+						"reason": "The list is built from a fixed constant of languages plus the System item, so it is never empty; a null current language is the System default the first story draws."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/LanguageDropdown.tsx#TOTAL_ITEMS",
+						"reason": "The list always holds System and the same fixed set of languages, with no count shown, so there is no one-item list and no singular wording."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "language-dropdown.keyboard-end",
+						"reason": "The list always shows all 27 options at once, so many is the only size it has, and the End key story already opens that full list and scrolls it to the last item."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"language-dropdown.keyboard-end"
+					]
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/LanguageDropdown.tsx#useI18n",
+						"reason": "The only loading frame is the one before the dictionary arrives, when the label function returns raw keys for a single frame; no pending style or spinner exists to draw."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/LanguageDropdown.tsx#onLanguageChange",
+						"reason": "Choosing a language calls onLanguageChange and closes the list with no failure path of its own; saving the setting and any failure of it live outside the component."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/LanguageDropdown.tsx#handleSelect",
+						"reason": "Every option can always be chosen and no item takes a disabled or refused form, so a blocked version of the list does not exist."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"language-dropdown.unknown-code"
+					]
 				},
 				"long": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/LanguageDropdown.tsx#triggerLabel",
+						"reason": "The trigger label is fixed data, the longest being Portuguese (Brazil) with its English name, and it is cut with an ellipsis; how the trigger fits in a narrow drawer is an area question for Phase 73."
+					}
 				},
 				"intl": {
 					"status": "covered",
@@ -946,7 +993,12 @@
 					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "language-dropdown.keyboard-end",
+						"reason": "The list is a fixed 27 options inside a 280px scroller, so the largest input is the scrolled list that the End key story already draws."
+					}
 				}
 			}
 		},
