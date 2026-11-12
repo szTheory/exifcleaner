@@ -22,7 +22,8 @@ type SyntheticPointer = {
 // parallel `yarn test:storybook` on a busy host starved a 5 s limit (Phase 72, 72-02).
 // The permanent negative control (a pointer-events: none target) passes a short
 // `timeoutMs` of its own so it stays quick.
-const HOVER_TIMEOUT_MS = 20_000;
+// Exported so the gate can assert the story projects' test timeout stays above it.
+export const HOVER_TIMEOUT_MS = 20_000;
 
 function underVitest(): boolean {
 	return (

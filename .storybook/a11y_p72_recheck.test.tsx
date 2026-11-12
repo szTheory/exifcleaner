@@ -271,6 +271,11 @@ function plantedEntry(story: string, rule: string): Entry {
 	};
 }
 
+// Each control below runs one to four axe passes in a real browser. The gate project sets
+// no testTimeout, so the 15 s browser default applied and a loaded host could time one
+// out before it asserted anything (review WR-01).
+const CONTROL_TIMEOUT_MS = 60_000;
+
 describe("a11y-p72 baseline (SC2, D-21)", () => {
 	test("the stories that disable a rule are exactly the baseline entries", () => {
 		expect(REAL_STORIES.length).toBeGreaterThan(50);
@@ -402,35 +407,51 @@ describe("a11y-p72 baseline (SC2, D-21)", () => {
 });
 
 describe("a11y-p72 re-check controls (planted, never red on disk)", () => {
-	test("a planted entry for a story that passes is reported as fixed", async () => {
-		const entry = plantedEntry(PASSING_ID, "color-contrast");
-		expect(await recheckProblems([entry], fixtureRunner)).toEqual([
-			`fixed, remove the entry ${entry.fingerprint}`,
-		]);
-	});
+	test(
+		"a planted entry for a story that passes is reported as fixed",
+		async () => {
+			const entry = plantedEntry(PASSING_ID, "color-contrast");
+			expect(await recheckProblems([entry], fixtureRunner)).toEqual([
+				`fixed, remove the entry ${entry.fingerprint}`,
+			]);
+		},
+		CONTROL_TIMEOUT_MS,
+	);
 
-	test("a story with color-contrast disabled and a nameless button still rejects with button-name", async () => {
-		const fresh = composeStories(fixtureStories)["FreshViolation"];
-		expect(fresh.id).toBe(FRESH_ID);
-		await expect(fresh.run()).rejects.toThrow(/button-name/);
-	});
+	test(
+		"a story with color-contrast disabled and a nameless button still rejects with button-name",
+		async () => {
+			const fresh = composeStories(fixtureStories)["FreshViolation"];
+			expect(fresh.id).toBe(FRESH_ID);
+			await expect(fresh.run()).rejects.toThrow(/button-name/);
+		},
+		CONTROL_TIMEOUT_MS,
+	);
 
-	test("re-enabling the disabled rule on the planted story adds color-contrast to the rejection", async () => {
-		const message = await fixtureRunner(FRESH_ID, "color-contrast", "light");
-		expect(message).toContain("color-contrast");
-	});
+	test(
+		"re-enabling the disabled rule on the planted story adds color-contrast to the rejection",
+		async () => {
+			const message = await fixtureRunner(FRESH_ID, "color-contrast", "light");
+			expect(message).toContain("color-contrast");
+		},
+		CONTROL_TIMEOUT_MS,
+	);
 
-	test("the real ToggleSwitch light-only entry stays green: it fails in light and passes in dark (theme-union)", async () => {
-		const story = "settings-toggleswitch--on";
-		const light = await realRunner(story, "color-contrast", "light");
-		const dark = await realRunner(story, "color-contrast", "dark");
-		expect(light).toContain("color-contrast");
-		expect(dark).toBeNull();
-		expect(
-			await recheckProblems(
-				[plantedEntry(story, "color-contrast")],
-				realRunner,
-			),
-		).toEqual([]);
-	});
+	test(
+		"the real ToggleSwitch light-only entry stays green: it fails in light and passes in dark (theme-union)",
+		async () => {
+			const story = "settings-toggleswitch--on";
+			const light = await realRunner(story, "color-contrast", "light");
+			const dark = await realRunner(story, "color-contrast", "dark");
+			expect(light).toContain("color-contrast");
+			expect(dark).toBeNull();
+			expect(
+				await recheckProblems(
+					[plantedEntry(story, "color-contrast")],
+					realRunner,
+				),
+			).toEqual([]);
+		},
+		CONTROL_TIMEOUT_MS,
+	);
 });

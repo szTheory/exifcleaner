@@ -119,5 +119,6 @@ describe("withRealHover (D-11)", () => {
 			requestAnimationFrame(() => resolve()),
 		);
 		expect(second.matches(":hover")).toBe(false);
-	});
+		// Calls withRealHover with its default hover limit, so the test outlives it.
+	}, 60_000);
 });

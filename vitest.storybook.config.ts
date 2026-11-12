@@ -16,6 +16,13 @@ const browser = () => ({
 	instances: [{ browser: "chromium" as const }],
 });
 
+// Per-test limit of the two story projects. Vitest browser mode defaults to 15 s, which is
+// shorter than withRealHover's own 20 s hover limit (story_support/real_pointer.ts), so a
+// starved hover died as a generic "Test timed out" before the helper's message could fire.
+// The addon generates the story tests, so the limit cannot be set per story. A test in
+// .storybook/hover_timeout.test.ts asserts it stays above that hover limit.
+const STORY_TEST_TIMEOUT_MS = 60_000;
+
 // Light and dark differ only by the `theme` global; the stories are the same.
 const THEMES = ["light", "dark"] as const;
 
@@ -31,7 +38,11 @@ export default defineConfig({
 						initialGlobals: { theme },
 					}),
 				],
-				test: { name: `storybook-${theme}`, browser: browser() },
+				test: {
+					name: `storybook-${theme}`,
+					browser: browser(),
+					testTimeout: STORY_TEST_TIMEOUT_MS,
+				},
 			})),
 			{
 				// addon-a11y only throws on a violation when VITEST_STORYBOOK is
