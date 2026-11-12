@@ -66,6 +66,10 @@ const CASES: Case[] = [
 		name: "shown red: waiver_full_row.json",
 		build: () => fixture("waiver_full_row.json"),
 		expected: ["full-row"],
+		// The fixture waives all twelve states of ChevronIcon; its covered cells are
+		// emptied so a story landing in one of them (Phase 72) adds no waiver-shadowed
+		// problem that is not under test here.
+		context: () => ({ ...ctx, coveredCells: new Set<string>() }),
 	},
 	{
 		name: "shown red: waiver_full_column.json",

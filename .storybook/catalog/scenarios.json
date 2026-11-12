@@ -2,6 +2,42 @@
 	"schemaVersion": 1,
 	"scenarios": [
 		{
+			"id": "chevron-icon.arabic",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "intl",
+			"tier": "primitive",
+			"situation": "An Arabic speaker sees the row arrow in a right-to-left layout, where it is not mirrored.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-chevronicon--arabic"
+			]
+		},
+		{
+			"id": "chevron-icon.collapsed",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone scanning a large run sees a folder or file row that is closed, with the arrow pointing right.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-chevronicon--collapsed"
+			]
+		},
+		{
+			"id": "chevron-icon.expanded",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone opens a row to see what was removed and the arrow turns to point down.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-chevronicon--expanded"
+			]
+		},
+		{
 			"id": "error-expansion.cleanup",
 			"persona": "P-batch",
 			"job": "J-04",
@@ -98,6 +134,54 @@
 			]
 		},
 		{
+			"id": "gear-icon.closed",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone looks for the settings on first launch and finds the gear button labelled Open settings.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-gearicon--closed"
+			]
+		},
+		{
+			"id": "gear-icon.hover",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone points at the gear button and its colour darkens to show it can be pressed.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-gearicon--hover"
+			]
+		},
+		{
+			"id": "gear-icon.keyboard-focus",
+			"persona": "P-photographer",
+			"job": "J-02",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone tabs to the gear button and sees a focus ring before opening the settings.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-gearicon--keyboard-focus"
+			]
+		},
+		{
+			"id": "gear-icon.open",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "With the settings drawer showing, the gear button is labelled Close settings so it can be shut again.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-gearicon--open"
+			]
+		},
+		{
 			"id": "language-dropdown.rtl-locales",
 			"persona": "P-sharer",
 			"job": "J-09",
@@ -120,6 +204,162 @@
 			"proofBoundary": "story",
 			"stories": [
 				"settings-languagedropdown--default"
+			]
+		},
+		{
+			"id": "segmented-control.arabic",
+			"persona": "P-sharer",
+			"job": "J-01",
+			"stateClass": "intl",
+			"tier": "primitive",
+			"situation": "An Arabic speaker reads the three appearance segments in a right-to-left layout.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--arabic"
+			]
+		},
+		{
+			"id": "segmented-control.dark-active",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone picks the Dark appearance and sees that segment chosen while the others stay unselected.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--dark-active"
+			]
+		},
+		{
+			"id": "segmented-control.keyboard-focus",
+			"persona": "P-photographer",
+			"job": "J-02",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone tabs to the appearance control and sees a focus ring on the chosen segment.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--keyboard-focus"
+			]
+		},
+		{
+			"id": "segmented-control.keyboard-wrap",
+			"persona": "P-photographer",
+			"job": "J-02",
+			"stateClass": "boundary",
+			"tier": "primitive",
+			"situation": "Someone presses the right arrow on the last segment and the choice wraps to the first one.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--keyboard-wrap"
+			]
+		},
+		{
+			"id": "segmented-control.light-active",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone opens the app for the first time and sees the Light appearance as the chosen segment.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--light-active"
+			]
+		},
+		{
+			"id": "segmented-control.long-labels",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "long",
+			"tier": "primitive",
+			"situation": "A Russian speaker sees the longest translated segment labels still fit inside the control.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--long-labels"
+			]
+		},
+		{
+			"id": "segmented-control.system-active",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone leaves the appearance on Auto and sees that segment chosen, the default for a first launch.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--system-active"
+			]
+		},
+		{
+			"id": "status-icon.complete",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "A file is finished and shows a check, and a file with no metadata found shows the same check.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusicon--complete"
+			]
+		},
+		{
+			"id": "status-icon.complete-animated",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "The first file finishes in front of the person and its check draws itself in once.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusicon--complete-animated"
+			]
+		},
+		{
+			"id": "status-icon.failed",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "primitive",
+			"situation": "A file could not be cleaned and its row shows a red cross announced as an error.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusicon--failed"
+			]
+		},
+		{
+			"id": "status-icon.failed-labelled",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "primitive",
+			"situation": "A failed file's cross is announced with the reason for the failure rather than the word error.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusicon--failed-labelled"
+			]
+		},
+		{
+			"id": "status-icon.pending",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "loading",
+			"tier": "primitive",
+			"situation": "A file in a big drop is waiting its turn and shows a small grey dot until it is picked up.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusicon--pending"
+			]
+		},
+		{
+			"id": "status-icon.processing",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "loading",
+			"tier": "primitive",
+			"situation": "A file is being read or cleaned and shows a spinner, and a file still being read looks the same.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusicon--processing"
 			]
 		},
 		{

@@ -74,6 +74,62 @@
 			"disposition": "fix-v5.1"
 		},
 		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--arabic|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--arabic",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--dark-active|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--dark-active",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--keyboard-focus|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--keyboard-wrap|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--keyboard-wrap",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--light-active|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--light-active",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--long-labels|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--long-labels",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--system-active|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--system-active",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
 			"fingerprint": "a11y-p72|settings-toggleswitch--keyboard-focus|color-contrast",
 			"kind": "a11y-p72",
 			"story": "settings-toggleswitch--keyboard-focus",

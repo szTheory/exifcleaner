@@ -223,6 +223,9 @@ describe("gapRatchet and zeroGapProblems", () => {
 
 	test("shown red: waiver deleted at head leaves a gap that was waived at base", async () => {
 		const head = asDocument(await realModel());
+		// The cell is planted at head as a gap, so the control follows the catalog as
+		// subjects close (Phase 72) instead of naming a cell that is waived today.
+		rowOf(head, "ChevronIcon").cells["huge"] = { status: "gap" };
 		const base = clone(head);
 		rowOf(base, "ChevronIcon").cells["huge"] = {
 			status: "waived",

@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 9,
-		"waived": 17,
-		"gaps": 226
+		"covered": 19,
+		"waived": 55,
+		"gaps": 178
 	},
 	"rows": [
 		{
@@ -14,40 +14,97 @@
 			"tier": "primitive",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"chevron-icon.collapsed",
+						"chevron-icon.expanded"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon",
+						"reason": "The chevron is a fixed 12 pixel glyph that always draws its one polyline, so a blank or zero-item chevron is not a state it has."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/ChevronIcon.tsx#expanded",
+						"reason": "The glyph carries a direction and no count, so there is no singular or plural form to test; its two directions are the collapsed and expanded scenarios."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/ChevronIcon.tsx#className",
+						"reason": "Each row draws its own chevron, so several of them side by side is the file table or folder row story and adds nothing to this glyph."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/ChevronIcon.tsx#expanded",
+						"reason": "expanded is a boolean with exactly two values, and ChevronIcon.tsx has no limit or threshold between them at which the glyph changes."
+					}
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon",
+						"reason": "The glyph has no pending look; a row that is still being read has no chevron to turn, because only finished rows can expand."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon",
+						"reason": "The chevron has no error prop and no error class, so a failed appearance is not something it can draw; the failed row shows a status icon instead."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon",
+						"reason": "The glyph is drawn with aria-hidden and no disabled or read-only form, so a refused chevron is not a state it can show."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon",
+						"reason": "The chevron references no file, so nothing it shows can outlive a source; it only reflects whether its row is open."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon",
+						"reason": "The glyph is a fixed 12 by 12 pixel svg with no text, so length cannot stress its layout; only the row it sits in can be long."
+					}
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"chevron-icon.arabic"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon",
+						"reason": "With no list, count or text, a large quantity cannot be fed into a single glyph, so the quantity stress belongs to the table that repeats it."
+					}
 				}
 			}
 		},
@@ -56,40 +113,101 @@
 			"tier": "primitive",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"gear-icon.closed",
+						"gear-icon.hover",
+						"gear-icon.keyboard-focus",
+						"gear-icon.open"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/GearIcon.tsx#GearIcon",
+						"reason": "The gear button always draws its one svg and always has an accessible label, so a blank or zero-item button is not a state it has."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/GearIcon.tsx#isOpen",
+						"reason": "The button has no count; its only variation is the open or closed label, so there is no singular wording or one-item layout to test."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/GearIcon.tsx#onClick",
+						"reason": "The status bar renders a single gear button and there is nowhere in the app that lays several of them out together."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/GearIcon.tsx#isOpen",
+						"reason": "isOpen is a boolean with two values and GearIcon.tsx has no limit at which the button changes, so there is no edge to sit on."
+					}
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/GearIcon.tsx#GearIcon",
+						"reason": "The gear button has no pending look and is rendered with the status bar, so there is no waiting appearance of the button to show."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/GearIcon.tsx#onClick",
+						"reason": "The button takes only isOpen and onClick and draws no error style, so a failed press has nothing on the gear to display."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/GearIcon.tsx#onClick",
+						"reason": "The button element takes no disabled attribute and the status bar always lets it be pressed, so a refused gear is not rendered."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/GearIcon.tsx#isOpen",
+						"reason": "The button holds no file or source and only mirrors whether the drawer is open, so nothing in it can outlive what it refers to."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/GearIcon.tsx#GearIcon",
+						"reason": "The button is a fixed 28 pixel square with an icon and an aria-label that is not drawn, so text length cannot stress its layout."
+					}
 				},
 				"intl": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/GearIcon.tsx#GearIcon",
+						"reason": "The aria-label is hardcoded English in the component and drawn nowhere, and the glyph is symmetric, so the locale changes nothing it renders."
+					}
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/icons/GearIcon.tsx#GearIcon",
+						"reason": "With no list, count or text input, a large quantity cannot be fed to the gear, so the quantity stress belongs to the table elsewhere."
+					}
 				}
 			}
 		},
@@ -98,40 +216,95 @@
 			"tier": "primitive",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"segmented-control.dark-active",
+						"segmented-control.keyboard-focus",
+						"segmented-control.light-active",
+						"segmented-control.system-active"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SegmentedControl.tsx#options",
+						"reason": "SettingsDrawer always passes exactly three options, and the control computes its indicator from them, so a control with no segments is not a state it has."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SegmentedControl.tsx#activeIndex",
+						"reason": "The control has three segments with one chosen at a time; there is no singular or plural wording, only a chosen index, so no one-item form exists."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SegmentedControl.tsx#options",
+						"reason": "The segment count is fixed at three by the caller and the indicator width is a third of the track, so a larger set is not a state the control supports."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"segmented-control.keyboard-wrap"
+					]
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SegmentedControl.tsx#value",
+						"reason": "The control takes a settled value and shows no pending style; the theme is applied by the provider around it, so no waiting appearance exists to show."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SegmentedControl.tsx#onChange",
+						"reason": "onChange only reports the chosen value and the control has no error prop or error style, so a failed choice cannot be drawn on the segments."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SegmentedControl.tsx#SegmentedControl",
+						"reason": "None of the segment buttons takes a disabled attribute and no call site passes one, so a refused or locked choice is not rendered anywhere."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SegmentedControl.tsx#label",
+						"reason": "The control holds no file or source, only the current theme value, so nothing in it can outlive the thing it refers to."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"segmented-control.long-labels"
+					]
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"segmented-control.arabic"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "segmented-control.long-labels",
+						"reason": "The control has a fixed three segments and its widest input is the longest translated labels, which the long-labels scenario already shows."
+					}
 				}
 			}
 		},
@@ -140,40 +313,97 @@
 			"tier": "primitive",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"status-icon.complete",
+						"status-icon.complete-animated"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/StatusIcon.tsx#status",
+						"reason": "The icon is always drawn for one of six statuses from a switch that ends in assertNever, so a blank or zero-item icon is not a state it has."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/StatusIcon.tsx#StatusIcon",
+						"reason": "The icon shows one status for one row and has no count, so there is no singular or plural wording to test."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/StatusIcon.tsx#shouldAnimate",
+						"reason": "Each row draws its own icon, so a column of mixed icons is the file table area story; the icon itself shows a single status."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/StatusIcon.tsx#status",
+						"reason": "The status is a closed set of six values with no number or threshold between them, so there is no limit the icon can sit on."
+					}
 				},
 				"loading": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"status-icon.pending",
+						"status-icon.processing"
+					]
 				},
 				"error": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"status-icon.failed",
+						"status-icon.failed-labelled"
+					]
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "status-icon.failed-labelled",
+						"reason": "A refused file shows the same red cross as any failure, with the refusal reason as its accessible label, which the failed-labelled scenario already shows."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "status-icon.failed",
+						"reason": "A file whose final save failed shows the same cross as any other failure and the icon has no source of its own, so the failed scenario already covers it."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/StatusIcon.tsx#accessibleLabel",
+						"reason": "The accessible label is read aloud and never drawn, and the glyph is a fixed 16 pixel svg, so text length cannot stress the icon layout."
+					}
 				},
 				"intl": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/StatusIcon.tsx#status",
+						"reason": "The aria-label strings are hardcoded English and the glyphs are symmetric, so a locale or text direction changes nothing the icon renders."
+					}
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/StatusIcon.tsx#StatusIcon",
+						"reason": "With no list, count or text input, a large quantity cannot be fed into one icon, so the quantity stress belongs to the table that repeats it."
+					}
 				}
 			}
 		},

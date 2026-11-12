@@ -2,16 +2,16 @@
 
 # Coverage grid
 
-21 subjects x 12 state classes = 252 cells: 9 covered, 17 waived, 226 gaps.
+21 subjects x 12 state classes = 252 cells: 19 covered, 55 waived, 178 gaps.
 
 A cell is covered by a scenario in scenarios.json, waived with a reason in waivers.json, or a gap. A gap is computed, never typed. Cells show the scenario count, `waived` or `gap`. A gap is owed by the phase in the Due column: primitive and pattern rows by Phase 72, area and screen rows by Phase 73.
 
 | Subject | Tier | Due | happy | empty | one | many | boundary | loading | error | denied | stale | long | intl | huge |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ChevronIcon | primitive | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
-| GearIcon | primitive | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
-| SegmentedControl | primitive | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
-| StatusIcon | primitive | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
+| ChevronIcon | primitive | Phase 72 | 2 | waived | waived | waived | waived | waived | waived | waived | waived | waived | 1 | waived |
+| GearIcon | primitive | Phase 72 | 4 | waived | waived | waived | waived | waived | waived | waived | waived | waived | waived | waived |
+| SegmentedControl | primitive | Phase 72 | 4 | waived | waived | waived | 1 | waived | waived | waived | waived | 1 | 1 | waived |
+| StatusIcon | primitive | Phase 72 | 2 | waived | waived | waived | waived | 2 | 2 | waived | waived | waived | waived | waived |
 | ToggleSwitch | primitive | Phase 72 | 3 | waived | waived | waived | waived | waived | waived | waived | waived | 1 | 1 | waived |
 | TypePill | primitive | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | ErrorBoundary | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
@@ -32,6 +32,44 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 
 ## Waivers
 
+- ChevronIcon|empty: unreachable (src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon): The chevron is a fixed 12 pixel glyph that always draws its one polyline, so a blank or zero-item chevron is not a state it has.
+- ChevronIcon|one: unreachable (src/renderer/components/icons/ChevronIcon.tsx#expanded): The glyph carries a direction and no count, so there is no singular or plural form to test; its two directions are the collapsed and expanded scenarios.
+- ChevronIcon|many: unreachable (src/renderer/components/icons/ChevronIcon.tsx#className): Each row draws its own chevron, so several of them side by side is the file table or folder row story and adds nothing to this glyph.
+- ChevronIcon|boundary: unreachable (src/renderer/components/icons/ChevronIcon.tsx#expanded): expanded is a boolean with exactly two values, and ChevronIcon.tsx has no limit or threshold between them at which the glyph changes.
+- ChevronIcon|loading: unreachable (src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon): The glyph has no pending look; a row that is still being read has no chevron to turn, because only finished rows can expand.
+- ChevronIcon|error: unreachable (src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon): The chevron has no error prop and no error class, so a failed appearance is not something it can draw; the failed row shows a status icon instead.
+- ChevronIcon|denied: unreachable (src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon): The glyph is drawn with aria-hidden and no disabled or read-only form, so a refused chevron is not a state it can show.
+- ChevronIcon|stale: unreachable (src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon): The chevron references no file, so nothing it shows can outlive a source; it only reflects whether its row is open.
+- ChevronIcon|long: unreachable (src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon): The glyph is a fixed 12 by 12 pixel svg with no text, so length cannot stress its layout; only the row it sits in can be long.
+- ChevronIcon|huge: unreachable (src/renderer/components/icons/ChevronIcon.tsx#ChevronIcon): With no list, count or text, a large quantity cannot be fed into a single glyph, so the quantity stress belongs to the table that repeats it.
+- GearIcon|empty: unreachable (src/renderer/components/icons/GearIcon.tsx#GearIcon): The gear button always draws its one svg and always has an accessible label, so a blank or zero-item button is not a state it has.
+- GearIcon|one: unreachable (src/renderer/components/icons/GearIcon.tsx#isOpen): The button has no count; its only variation is the open or closed label, so there is no singular wording or one-item layout to test.
+- GearIcon|many: unreachable (src/renderer/components/icons/GearIcon.tsx#onClick): The status bar renders a single gear button and there is nowhere in the app that lays several of them out together.
+- GearIcon|boundary: unreachable (src/renderer/components/icons/GearIcon.tsx#isOpen): isOpen is a boolean with two values and GearIcon.tsx has no limit at which the button changes, so there is no edge to sit on.
+- GearIcon|loading: unreachable (src/renderer/components/icons/GearIcon.tsx#GearIcon): The gear button has no pending look and is rendered with the status bar, so there is no waiting appearance of the button to show.
+- GearIcon|error: unreachable (src/renderer/components/icons/GearIcon.tsx#onClick): The button takes only isOpen and onClick and draws no error style, so a failed press has nothing on the gear to display.
+- GearIcon|denied: unreachable (src/renderer/components/icons/GearIcon.tsx#onClick): The button element takes no disabled attribute and the status bar always lets it be pressed, so a refused gear is not rendered.
+- GearIcon|stale: unreachable (src/renderer/components/icons/GearIcon.tsx#isOpen): The button holds no file or source and only mirrors whether the drawer is open, so nothing in it can outlive what it refers to.
+- GearIcon|long: unreachable (src/renderer/components/icons/GearIcon.tsx#GearIcon): The button is a fixed 28 pixel square with an icon and an aria-label that is not drawn, so text length cannot stress its layout.
+- GearIcon|intl: unreachable (src/renderer/components/icons/GearIcon.tsx#GearIcon): The aria-label is hardcoded English in the component and drawn nowhere, and the glyph is symmetric, so the locale changes nothing it renders.
+- GearIcon|huge: unreachable (src/renderer/components/icons/GearIcon.tsx#GearIcon): With no list, count or text input, a large quantity cannot be fed to the gear, so the quantity stress belongs to the table elsewhere.
+- SegmentedControl|empty: unreachable (src/renderer/components/settings/SegmentedControl.tsx#options): SettingsDrawer always passes exactly three options, and the control computes its indicator from them, so a control with no segments is not a state it has.
+- SegmentedControl|one: unreachable (src/renderer/components/settings/SegmentedControl.tsx#activeIndex): The control has three segments with one chosen at a time; there is no singular or plural wording, only a chosen index, so no one-item form exists.
+- SegmentedControl|many: unreachable (src/renderer/components/settings/SegmentedControl.tsx#options): The segment count is fixed at three by the caller and the indicator width is a third of the track, so a larger set is not a state the control supports.
+- SegmentedControl|loading: unreachable (src/renderer/components/settings/SegmentedControl.tsx#value): The control takes a settled value and shows no pending style; the theme is applied by the provider around it, so no waiting appearance exists to show.
+- SegmentedControl|error: unreachable (src/renderer/components/settings/SegmentedControl.tsx#onChange): onChange only reports the chosen value and the control has no error prop or error style, so a failed choice cannot be drawn on the segments.
+- SegmentedControl|denied: unreachable (src/renderer/components/settings/SegmentedControl.tsx#SegmentedControl): None of the segment buttons takes a disabled attribute and no call site passes one, so a refused or locked choice is not rendered anywhere.
+- SegmentedControl|stale: unreachable (src/renderer/components/settings/SegmentedControl.tsx#label): The control holds no file or source, only the current theme value, so nothing in it can outlive the thing it refers to.
+- SegmentedControl|huge: duplicate (segmented-control.long-labels): The control has a fixed three segments and its widest input is the longest translated labels, which the long-labels scenario already shows.
+- StatusIcon|empty: unreachable (src/renderer/components/ui/StatusIcon.tsx#status): The icon is always drawn for one of six statuses from a switch that ends in assertNever, so a blank or zero-item icon is not a state it has.
+- StatusIcon|one: unreachable (src/renderer/components/ui/StatusIcon.tsx#StatusIcon): The icon shows one status for one row and has no count, so there is no singular or plural wording to test.
+- StatusIcon|many: unreachable (src/renderer/components/ui/StatusIcon.tsx#shouldAnimate): Each row draws its own icon, so a column of mixed icons is the file table area story; the icon itself shows a single status.
+- StatusIcon|boundary: unreachable (src/renderer/components/ui/StatusIcon.tsx#status): The status is a closed set of six values with no number or threshold between them, so there is no limit the icon can sit on.
+- StatusIcon|denied: duplicate (status-icon.failed-labelled): A refused file shows the same red cross as any failure, with the refusal reason as its accessible label, which the failed-labelled scenario already shows.
+- StatusIcon|stale: duplicate (status-icon.failed): A file whose final save failed shows the same cross as any other failure and the icon has no source of its own, so the failed scenario already covers it.
+- StatusIcon|long: unreachable (src/renderer/components/ui/StatusIcon.tsx#accessibleLabel): The accessible label is read aloud and never drawn, and the glyph is a fixed 16 pixel svg, so text length cannot stress the icon layout.
+- StatusIcon|intl: unreachable (src/renderer/components/ui/StatusIcon.tsx#status): The aria-label strings are hardcoded English and the glyphs are symmetric, so a locale or text direction changes nothing the icon renders.
+- StatusIcon|huge: unreachable (src/renderer/components/ui/StatusIcon.tsx#StatusIcon): With no list, count or text input, a large quantity cannot be fed into one icon, so the quantity stress belongs to the table that repeats it.
 - ToggleSwitch|empty: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#label): The switch always renders a label and a description handed in by its parent, so a blank or zero-item toggle is not a state it has.
 - ToggleSwitch|one: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#checked): A switch shows one boolean for one setting and carries no count, so there is no singular wording or one-item layout to test.
 - ToggleSwitch|many: unreachable (src/renderer/components/settings/ToggleSwitch.tsx#id): Each switch is independent with its own id and renders alone; the six switches stacked in a drawer belong to the settings drawer area story.

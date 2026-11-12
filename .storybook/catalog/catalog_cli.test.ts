@@ -47,6 +47,23 @@ async function gridCounts(): Promise<string> {
 	return `${c.subjects} subjects, ${c.cells} cells, ${c.covered} covered, ${c.waived} waived, ${c.gaps} gaps`;
 }
 
+// A gap cell outside the screen tier, taken from the real model so the "every tier"
+// control keeps proving what it names as primitive and pattern subjects close
+// (Phase 72). It stays non-vacuous while any area subject still has a gap.
+async function firstNonScreenGap(): Promise<string> {
+	const grid = await loadGrid(repoRoot);
+	if (grid.model === null) {
+		throw new Error(grid.problems.map((found) => found.message).join("; "));
+	}
+	for (const row of grid.model.rows) {
+		if (row.tier === "screen") continue;
+		for (const [stateClass, cell] of Object.entries(row.cells)) {
+			if (cell.status === "gap") return `gap|${row.subject}|${stateClass}`;
+		}
+	}
+	throw new Error("no non-screen gap is left; this control needs one");
+}
+
 function run(repo: string, args: string[]) {
 	return runNode(realScript(CATALOG), args, repo);
 }
@@ -361,12 +378,13 @@ describe("catalog.mjs coverage grid against a temp git repo", () => {
 		});
 	});
 
-	test("shown red: zero-gaps without --tier looks at every tier, and --tier needs --zero-gaps", () => {
+	test("shown red: zero-gaps without --tier looks at every tier, and --tier needs --zero-gaps", async () => {
+		const nonScreenGap = await firstNonScreenGap();
 		withRepo((repo) => {
 			const before = snapshotDir(repo);
 			const all = run(repo, ["--check", "--base", "main", "--zero-gaps"]);
 			expect(all.status).toBe(1);
-			expect(all.stderr).toContain("gap|ChevronIcon|happy");
+			expect(all.stderr).toContain(nonScreenGap);
 			const bare = run(repo, ["--check", "--base", "main", "--tier", "screen"]);
 			expect(bare.status).toBe(1);
 			expect(bare.stderr).toContain("--tier only applies with --zero-gaps");
