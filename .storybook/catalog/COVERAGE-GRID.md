@@ -2,7 +2,7 @@
 
 # Coverage grid
 
-21 subjects x 12 state classes = 252 cells: 28 covered, 70 waived, 154 gaps.
+21 subjects x 12 state classes = 252 cells: 34 covered, 76 waived, 142 gaps.
 
 A cell is covered by a scenario in scenarios.json, waived with a reason in waivers.json, or a gap. A gap is computed, never typed. Cells show the scenario count, `waived` or `gap`. A gap is owed by the phase in the Due column: primitive and pattern rows by Phase 72, area and screen rows by Phase 73.
 
@@ -18,7 +18,7 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 | ErrorExpansion | pattern | Phase 72 | waived | waived | waived | waived | waived | waived | 5 | 1 | 1 | 1 | waived | waived |
 | FolderRow | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | LanguageDropdown | pattern | Phase 72 | 1 | gap | gap | gap | gap | gap | gap | gap | gap | gap | 1 | gap |
-| MetadataExpansion | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
+| MetadataExpansion | pattern | Phase 72 | 5 | 1 | 1 | 1 | 1 | waived | waived | waived | waived | waived | 1 | waived |
 | MetadataField | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | MetadataGroup | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | StatusBar | pattern | Phase 72 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
@@ -98,6 +98,12 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 - ErrorExpansion|loading: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#handleCopy): A row in flight is Pending, Reading or Processing and cannot expand; the pattern appears only after a verdict, and its copy write settles at once.
 - ErrorExpansion|intl: unreachable (src/renderer/components/file-list/ErrorExpansion.tsx#Click to copy): The pattern renders engine English text and the hardcoded English hint Click to copy, so no locale string reaches it and a locale adds no state of its own.
 - ErrorExpansion|huge: duplicate (error-expansion.long-detail): One error string is the largest input the pattern takes; thousands of files stress the file table and the status bar, and long-detail already covers the string size.
+- MetadataExpansion|loading: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#beforeMetadata): FileRow mounts the panel only for a Complete row that holds both maps, and a Pending, Reading or Processing row has no maps yet, so the panel is never drawn while a file is in flight.
+- MetadataExpansion|error: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#MetadataExpansion): A failed row shows ErrorExpansion in place of the panel, and the panel takes two maps with no failure input, so a failure never reaches it.
+- MetadataExpansion|denied: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#handleCopyAll): A refused file ends in the error state and shows its refusal text in ErrorExpansion, and the panel has no input that could carry a refusal.
+- MetadataExpansion|stale: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#afterMetadata): The panel draws the two maps it was handed and never rereads the file, so it holds no stale state of its own; a source changed by another app ends the row in a commit failure that ErrorExpansion shows.
+- MetadataExpansion|long: unreachable (src/renderer/components/file-list/MetadataExpansion.tsx#removedGroups): Each value is cut to 80 characters with the full text in a title before it reaches the panel layout, so no value longer than the cut can stress the panel; the cut itself is the field boundary story.
+- MetadataExpansion|huge: duplicate (metadata-expansion.scrolls-at-max-height): Any number of fields lands in the same 300 pixel scrolling surface, so thousands of fields look like the scroll story; the large batch stress belongs to the file table.
 - Toast|loading: unreachable (src/renderer/components/ui/Toast.tsx#message): The notice appears only after the copy or the skip has happened and never announces work in progress, so it has no pending form.
 - Toast|error: unreachable (src/renderer/components/ui/Toast.tsx#visible): Toast has no error variant or style; a failed reveal is shown as ordinary notice text, which is the reveal-failed scenario, so a separate error cell adds nothing.
 - Toast|denied: unreachable (src/renderer/components/ui/Toast.tsx#Toast): The notice takes no disabled or refused form and the file:reveal handler's only failure is a missing file (the reveal-failed scenario), so no deterministic refusal is left to display.

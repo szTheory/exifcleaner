@@ -207,6 +207,126 @@
 			]
 		},
 		{
+			"id": "metadata-expansion.all-removed",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone opens a cleaned photo and reads that all five fields were removed, with no list of kept fields to open.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--all-removed"
+			]
+		},
+		{
+			"id": "metadata-expansion.arabic-plural",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "intl",
+			"tier": "pattern",
+			"situation": "An Arabic speaker opens a cleaned file with two fields removed and reads the count from the general plural wording.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--arabic-plural"
+			]
+		},
+		{
+			"id": "metadata-expansion.copy-hover",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone points at Copy all and its background changes to show it can be pressed.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--copy-hover"
+			]
+		},
+		{
+			"id": "metadata-expansion.keyboard-focus",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone tabs to Copy all and sees a focus ring before copying the list.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--keyboard-focus"
+			]
+		},
+		{
+			"id": "metadata-expansion.mixed",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "many",
+			"tier": "pattern",
+			"situation": "Someone opens a cleaned file and reads two fields removed and one still present, with the removed ones listed under their group.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--mixed"
+			]
+		},
+		{
+			"id": "metadata-expansion.no-metadata",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "empty",
+			"tier": "pattern",
+			"situation": "Someone opens a cleaned file that only carried file-system fields, so the panel says No metadata found and offers nothing to copy.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--no-metadata"
+			]
+		},
+		{
+			"id": "metadata-expansion.one-removed",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "one",
+			"tier": "pattern",
+			"situation": "Someone opens a file where one field was removed and reads the singular wording.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--one-removed"
+			]
+		},
+		{
+			"id": "metadata-expansion.present-details-open",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone opens the still present list to check which fields the cleaned file kept.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--present-details-open"
+			]
+		},
+		{
+			"id": "metadata-expansion.scrolls-at-max-height",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "Someone opens a file with thirty camera settings and scrolls the list inside a panel that stops growing at 300 pixels.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--scrolls-at-max-height"
+			]
+		},
+		{
+			"id": "metadata-expansion.unchanged",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone opens a file whose cleaning changed nothing and reads 0 fields removed with its one field still present.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--unchanged"
+			]
+		},
+		{
 			"id": "segmented-control.arabic",
 			"persona": "P-sharer",
 			"job": "J-01",

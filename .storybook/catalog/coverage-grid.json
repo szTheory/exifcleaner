@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 28,
-		"waived": 70,
-		"gaps": 154
+		"covered": 34,
+		"waived": 76,
+		"gaps": 142
 	},
 	"rows": [
 		{
@@ -846,40 +846,92 @@
 			"tier": "pattern",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"metadata-expansion.all-removed",
+						"metadata-expansion.copy-hover",
+						"metadata-expansion.keyboard-focus",
+						"metadata-expansion.present-details-open",
+						"metadata-expansion.unchanged"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"metadata-expansion.no-metadata"
+					]
 				},
 				"one": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"metadata-expansion.one-removed"
+					]
 				},
 				"many": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"metadata-expansion.mixed"
+					]
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"metadata-expansion.scrolls-at-max-height"
+					]
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataExpansion.tsx#beforeMetadata",
+						"reason": "FileRow mounts the panel only for a Complete row that holds both maps, and a Pending, Reading or Processing row has no maps yet, so the panel is never drawn while a file is in flight."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataExpansion.tsx#MetadataExpansion",
+						"reason": "A failed row shows ErrorExpansion in place of the panel, and the panel takes two maps with no failure input, so a failure never reaches it."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataExpansion.tsx#handleCopyAll",
+						"reason": "A refused file ends in the error state and shows its refusal text in ErrorExpansion, and the panel has no input that could carry a refusal."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataExpansion.tsx#afterMetadata",
+						"reason": "The panel draws the two maps it was handed and never rereads the file, so it holds no stale state of its own; a source changed by another app ends the row in a commit failure that ErrorExpansion shows."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/MetadataExpansion.tsx#removedGroups",
+						"reason": "Each value is cut to 80 characters with the full text in a title before it reaches the panel layout, so no value longer than the cut can stress the panel; the cut itself is the field boundary story."
+					}
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"metadata-expansion.arabic-plural"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "metadata-expansion.scrolls-at-max-height",
+						"reason": "Any number of fields lands in the same 300 pixel scrolling surface, so thousands of fields look like the scroll story; the large batch stress belongs to the file table."
+					}
 				}
 			}
 		},

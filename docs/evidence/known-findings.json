@@ -74,6 +74,86 @@
 			"disposition": "fix-v5.1"
 		},
 		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--all-removed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--all-removed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--arabic-plural|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--arabic-plural",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--copy-hover|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--copy-hover",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--keyboard-focus|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--mixed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--mixed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--no-metadata|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--no-metadata",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__empty measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--one-removed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--one-removed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--present-details-open|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--present-details-open",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) and 3.73:1 (#66758c --ec-color-text-secondary on #dae9e4 --ec-color-preserved-bg) in the light theme, measures 3.52:1 (#818188 --ec-color-text-secondary on #1e3226 --ec-color-preserved-bg) and 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--scrolls-at-max-height|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--scrolls-at-max-height",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--unchanged|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--unchanged",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
 			"fingerprint": "a11y-p72|settings-segmentedcontrol--arabic|color-contrast",
 			"kind": "a11y-p72",
 			"story": "settings-segmentedcontrol--arabic",
