@@ -46,3 +46,10 @@ export function lintText(text: string, ruleset: CopyRuleset): LintHit[];
 export function selfTestProblems(
 	ruleset: CopyRuleset,
 ): Array<{ ruleId: string; side: "bad" | "ok" }>;
+
+export function templatePattern(enValue: string): RegExp;
+
+export function excusedTemplates(
+	registerDoc: unknown,
+	en: Readonly<Record<string, string>>,
+): RegExp[];

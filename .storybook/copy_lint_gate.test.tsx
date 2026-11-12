@@ -19,6 +19,8 @@ const {
 	DisableIgnored,
 	NonEnglish,
 	Empty,
+	ExcusedTemplate,
+	TemplateMiss,
 } = composeStories(fixtureStories);
 
 test("shown red: Planted rejects with banned.just", async () => {
@@ -51,6 +53,14 @@ test("resolves: FixtureText (excused by a visible fixtureText substring)", async
 
 test("resolves: NonEnglish (only en is linted)", async () => {
 	await expect(NonEnglish.run()).resolves.not.toThrow();
+});
+
+test("resolves: ExcusedTemplate (exactly a baselined en template)", async () => {
+	await expect(ExcusedTemplate.run()).resolves.not.toThrow();
+});
+
+test("shown red: TemplateMiss rejects with vocab|fields|tags (a look-alike is not excused)", async () => {
+	await expect(TemplateMiss.run()).rejects.toThrow(/vocab\|fields\|tags/);
 });
 
 test("collectCopyUnits skips Storybook's own preview wrappers and nothing else", () => {

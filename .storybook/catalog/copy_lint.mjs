@@ -430,3 +430,49 @@ export function selfTestProblems(ruleset) {
 	}
 	return found;
 }
+
+/**
+ * The pattern a rendered string must match, whole, to be the baselined en
+ * string it came from: the normalized value with every `{...}` placeholder as
+ * `.+?`, everything else literal, anchored, case-insensitive.
+ *
+ * @param {string} enValue
+ * @returns {RegExp}
+ */
+export function templatePattern(enValue) {
+	const body = escapeRegExp(normalizeForLint(enValue)).replaceAll(MASK, ".+?");
+	return new RegExp(`^${body}$`, "i");
+}
+
+/**
+ * Templates of the en strings the register baselines as a vocab, banned or
+ * name finding (D-12): a rendered unit that is exactly such a string is
+ * excused, because a story hit cannot itself be baselined (additions are
+ * rejected) and a story of the status bar would otherwise fail at once on the
+ * baselined "{count} tags removed". Anything but the exact template still
+ * fails.
+ *
+ * @param {unknown} registerDoc
+ * @param {Readonly<Record<string, string>>} en
+ * @returns {RegExp[]}
+ */
+export function excusedTemplates(registerDoc, en) {
+	if (!isPlainObject(registerDoc) || !Array.isArray(registerDoc["entries"])) {
+		throw new Error("the register document is malformed");
+	}
+	const keys = new Set();
+	for (const entry of registerDoc["entries"]) {
+		if (
+			isPlainObject(entry) &&
+			["vocab", "banned", "name"].includes(entry["kind"]) &&
+			typeof entry["ref"] === "string" &&
+			entry["ref"].startsWith("en:")
+		) {
+			keys.add(entry["ref"].slice("en:".length));
+		}
+	}
+	return [...keys]
+		.sort(compareCodeUnits)
+		.filter((key) => typeof en[key] === "string")
+		.map((key) => templatePattern(en[key]));
+}

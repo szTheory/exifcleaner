@@ -1,13 +1,16 @@
 import { describe, expect, test } from "vitest";
 import en from "../../.resources/locales/en.json";
 import brandPin from "../../brand.pin.json";
+import copyFindings from "./copy-findings.json";
 import glossary from "./glossary.json";
 import {
 	RULE_CODES,
 	buildRuleset,
+	excusedTemplates,
 	lintText,
 	normalizeForLint,
 	selfTestProblems,
+	templatePattern,
 	validateRules,
 } from "./copy_lint.mjs";
 import rules from "./copy_lint_rules.json";
@@ -331,5 +334,42 @@ describe("the real en.json", () => {
 				"xattrFailedSummary vocab|fields|attributes",
 			].sort(),
 		);
+	});
+});
+
+describe("excused templates (D-12)", () => {
+	test("a template matches its own string whole, with each placeholder as a run of text", () => {
+		const template = templatePattern("{count} tags removed");
+		expect(template.test("3 tags removed")).toBe(true);
+		expect(template.test("12 TAGS REMOVED")).toBe(true);
+		expect(template.test("3 tags remain")).toBe(false);
+		expect(template.test("Done: 3 tags removed. Just now")).toBe(false);
+	});
+
+	test("regex characters in the en value stay literal", () => {
+		const template = templatePattern("Copy (all) [now]?");
+		expect(template.test("Copy (all) [now]?")).toBe(true);
+		expect(template.test("Copy all now")).toBe(false);
+	});
+
+	test("one template per baselined vocab, banned or name en finding, none for the other kinds", () => {
+		const templates = excusedTemplates(copyFindings, en);
+		const baselined = new Set(
+			copyFindings.entries
+				.filter(
+					(entry) =>
+						["vocab", "banned", "name"].includes(entry.kind) &&
+						entry.ref.startsWith("en:"),
+				)
+				.map((entry) => entry.ref),
+		);
+		expect(templates).toHaveLength(baselined.size);
+		expect(baselined.size).toBe(7);
+		expect(templates.some((t) => t.test("5 tags removed"))).toBe(true);
+	});
+
+	test("shown red: a register with no baselined en finding excuses nothing", () => {
+		expect(excusedTemplates({ entries: [] }, en)).toEqual([]);
+		expect(() => excusedTemplates({}, en)).toThrow(/malformed/);
 	});
 });

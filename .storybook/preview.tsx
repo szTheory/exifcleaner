@@ -29,8 +29,9 @@ import "../src/renderer/styles/toast.css";
 import "../src/renderer/styles/type_pill.css";
 import "./harness.css";
 import copyLintRules from "./catalog/copy_lint_rules.json";
+import copyFindings from "./catalog/copy-findings.json";
 import glossary from "./catalog/glossary.json";
-import { buildRuleset } from "./catalog/copy_lint.mjs";
+import { buildRuleset, excusedTemplates } from "./catalog/copy_lint.mjs";
 import { collectCopyUnits, copyLintHits } from "./catalog/copy_lint_dom";
 import { LOCALE_DICTIONARY } from "./locale_dictionary";
 
@@ -97,6 +98,17 @@ export function isCopyLintParameter(
 
 // Built once per module load: the rules plus the glossary-derived vocabulary.
 const COPY_RULESET = buildRuleset(copyLintRules, glossary);
+
+// The English strings come from the one dictionary the stories already load,
+// never a second copy. A rendered unit that is exactly a baselined en string
+// (statusBar.tagsRemoved, say) is excused; anything else still fails.
+const ENGLISH_STRINGS: Record<string, string> = Object.fromEntries(
+	Object.entries(LOCALE_DICTIONARY).flatMap(([key, locales]) => {
+		const text = locales["en"];
+		return text === undefined ? [] : [[key, text]];
+	}),
+);
+const EXCUSED_TEMPLATES = excusedTemplates(copyFindings, ENGLISH_STRINGS);
 
 function themeOf(globals: Record<string, unknown>): "light" | "dark" {
 	return globals["theme"] === "dark" ? "dark" : "light";
@@ -169,7 +181,7 @@ const preview: Preview = {
 				: [];
 		const hits = copyLintHits(collectCopyUnits(document.body), COPY_RULESET, {
 			fixtureText,
-			templates: [],
+			templates: EXCUSED_TEMPLATES,
 		});
 		if (hits.length > 0) {
 			throw new Error(

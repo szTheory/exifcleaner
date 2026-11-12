@@ -67,3 +67,14 @@ export const NonEnglish: Story = {
 export const Empty: Story = {
 	render: () => <div />,
 };
+
+// The baselined statusBar.tagsRemoved template ("{count} tags removed"): a
+// rendered string that is exactly that template is excused.
+export const ExcusedTemplate: Story = {
+	render: () => <p>3 tags removed</p>,
+};
+
+// A look-alike that is not the template: still a vocabulary finding.
+export const TemplateMiss: Story = {
+	render: () => <p>3 tags remain</p>,
+};
