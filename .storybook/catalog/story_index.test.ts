@@ -36,16 +36,31 @@ function walkStories(dir: string): string[] {
 }
 
 describe("the real stories", () => {
-	test("the three LanguageDropdown ids match the Phase 70 index", async () => {
+	test("the Phase 70 LanguageDropdown ids stay in the index and every story matches its own file's meta", async () => {
 		const stories = await enumerateStories(repoRoot);
-		expect(stories.map((story) => story.id)).toEqual([
+		const ids = stories.map((story) => story.id);
+		for (const seed of [
 			"settings-languagedropdown--arabic",
 			"settings-languagedropdown--default",
 			"settings-languagedropdown--persian",
-		]);
+		]) {
+			expect(ids).toContain(seed);
+		}
+		// Anti-vacuity: the three seed stories plus the eight ErrorExpansion stories.
+		expect(stories.length).toBeGreaterThanOrEqual(11);
 		for (const story of stories) {
+			const source = fs.readFileSync(path.join(repoRoot, story.file), "utf8");
+			expect(source, story.file).toContain(
+				`title: ${JSON.stringify(story.title)}`,
+			);
+			expect(source, story.file).toContain(`component: ${story.component}`);
+		}
+		const language = stories.filter(
+			(story) => story.component === "LanguageDropdown",
+		);
+		expect(language).toHaveLength(3);
+		for (const story of language) {
 			expect(story.title).toBe("Settings/LanguageDropdown");
-			expect(story.component).toBe("LanguageDropdown");
 			expect(story.file).toBe(
 				"src/renderer/components/settings/LanguageDropdown.stories.tsx",
 			);

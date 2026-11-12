@@ -2,6 +2,102 @@
 	"schemaVersion": 1,
 	"scenarios": [
 		{
+			"id": "error-expansion.cleanup",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "The cleaned copy was written but a leftover file could not be removed, and the row names its path.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--cleanup"
+			]
+		},
+		{
+			"id": "error-expansion.commit",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "stale",
+			"tier": "pattern",
+			"situation": "Another app changed the file while it was being cleaned, so the row reports that the final step failed.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--commit"
+			]
+		},
+		{
+			"id": "error-expansion.generic-failure",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "The engine stopped before it gave a verdict, so the row shows its plain message and no failure kind.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--generic-failure"
+			]
+		},
+		{
+			"id": "error-expansion.long-detail",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "long",
+			"tier": "pattern",
+			"situation": "A failure carries a long leftover path, so the row detail wraps instead of running past the window edge.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--long-detail"
+			]
+		},
+		{
+			"id": "error-expansion.refused",
+			"persona": "P-photographer",
+			"job": "J-05",
+			"stateClass": "denied",
+			"tier": "pattern",
+			"situation": "A RAF file is refused because writing it can damage the original, and the row says it was left unchanged.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--refused"
+			]
+		},
+		{
+			"id": "error-expansion.verification",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "The cleaned copy could not be checked, so someone opens the row to read why before trusting the result.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--verification"
+			]
+		},
+		{
+			"id": "error-expansion.write",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "A cleaned copy could not be written, so someone opens the row to read what failed and where the leftover file is.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--write"
+			]
+		},
+		{
+			"id": "error-expansion.xattr",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "Embedded metadata is gone, but macOS kept some of the file's extra data, and the row names the cleaned file.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--xattr"
+			]
+		},
+		{
 			"id": "language-dropdown.rtl-locales",
 			"persona": "P-sharer",
 			"job": "J-09",

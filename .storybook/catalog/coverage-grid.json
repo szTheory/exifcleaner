@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 2,
-		"waived": 0,
-		"gaps": 250
+		"covered": 6,
+		"waived": 8,
+		"gaps": 238
 	},
 	"rows": [
 		{
@@ -308,40 +308,96 @@
 			"tier": "pattern",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/ErrorExpansion.tsx#ErrorExpansion",
+						"reason": "FileRow mounts ErrorExpansion only for an expanded row in the Error status, so no cleaned or unchanged row ever renders it."
+					}
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/ErrorExpansion.tsx#error",
+						"reason": "FileRow renders the pattern only when the error text is not null, and every failure path supplies one, so an empty pattern never appears."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/ErrorExpansion.tsx#error",
+						"reason": "The pattern shows one error string for one row and has no count, so there is no singular or plural wording to test."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/ErrorExpansion.tsx#onCopy",
+						"reason": "Only one row is expanded at a time (expandedRowId), so the pattern never renders twice; a mixed batch is the file table's area story."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "error-expansion.long-detail",
+						"reason": "ErrorExpansion codes no length cap or size limit, and the longest string it ever wraps is the long-detail scenario, so a boundary row would repeat it."
+					}
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/ErrorExpansion.tsx#handleCopy",
+						"reason": "A row in flight is Pending, Reading or Processing and cannot expand; the pattern appears only after a verdict, and its copy write settles at once."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"error-expansion.cleanup",
+						"error-expansion.generic-failure",
+						"error-expansion.verification",
+						"error-expansion.write",
+						"error-expansion.xattr"
+					]
 				},
 				"denied": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"error-expansion.refused"
+					]
 				},
 				"stale": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"error-expansion.commit"
+					]
 				},
 				"long": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"error-expansion.long-detail"
+					]
 				},
 				"intl": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/ErrorExpansion.tsx#Click to copy",
+						"reason": "The pattern renders engine English text and the hardcoded English hint Click to copy, so no locale string reaches it and a locale adds no state of its own."
+					}
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "error-expansion.long-detail",
+						"reason": "One error string is the largest input the pattern takes; thousands of files stress the file table and the status bar, and long-detail already covers the string size."
+					}
 				}
 			}
 		},

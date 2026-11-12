@@ -72,7 +72,10 @@ const CASES: Case[] = [
 		build: () => fixture("waiver_full_column.json"),
 		expected: ["full-column"],
 		// The fixture names every subject of the day; the context is limited to
-		// those subjects so a later subject does not make the fixture stale.
+		// those subjects so a later subject does not make the fixture stale. The
+		// covered cells are emptied too: the fixture waives one state for every
+		// subject, and a story landing in that state (ErrorExpansion|stale in
+		// Phase 72) would add a waiver-shadowed problem that is not under test here.
 		context: () => {
 			const named = (
 				fixture("waiver_full_column.json") as {
@@ -81,6 +84,7 @@ const CASES: Case[] = [
 			).waivers.map((entry) => entry.subject);
 			return {
 				...ctx,
+				coveredCells: new Set<string>(),
 				subjects: new Map(
 					[...ctx.subjects].filter(([id]) => named.includes(id)),
 				),

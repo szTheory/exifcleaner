@@ -1,4 +1,61 @@
 {
 	"schemaVersion": 1,
-	"waivers": []
+	"waivers": [
+		{
+			"subject": "ErrorExpansion",
+			"stateClass": "happy",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/file-list/ErrorExpansion.tsx#ErrorExpansion",
+			"reason": "FileRow mounts ErrorExpansion only for an expanded row in the Error status, so no cleaned or unchanged row ever renders it."
+		},
+		{
+			"subject": "ErrorExpansion",
+			"stateClass": "empty",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/file-list/ErrorExpansion.tsx#error",
+			"reason": "FileRow renders the pattern only when the error text is not null, and every failure path supplies one, so an empty pattern never appears."
+		},
+		{
+			"subject": "ErrorExpansion",
+			"stateClass": "one",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/file-list/ErrorExpansion.tsx#error",
+			"reason": "The pattern shows one error string for one row and has no count, so there is no singular or plural wording to test."
+		},
+		{
+			"subject": "ErrorExpansion",
+			"stateClass": "many",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/file-list/ErrorExpansion.tsx#onCopy",
+			"reason": "Only one row is expanded at a time (expandedRowId), so the pattern never renders twice; a mixed batch is the file table's area story."
+		},
+		{
+			"subject": "ErrorExpansion",
+			"stateClass": "boundary",
+			"basis": "duplicate",
+			"ref": "error-expansion.long-detail",
+			"reason": "ErrorExpansion codes no length cap or size limit, and the longest string it ever wraps is the long-detail scenario, so a boundary row would repeat it."
+		},
+		{
+			"subject": "ErrorExpansion",
+			"stateClass": "loading",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/file-list/ErrorExpansion.tsx#handleCopy",
+			"reason": "A row in flight is Pending, Reading or Processing and cannot expand; the pattern appears only after a verdict, and its copy write settles at once."
+		},
+		{
+			"subject": "ErrorExpansion",
+			"stateClass": "intl",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/file-list/ErrorExpansion.tsx#Click to copy",
+			"reason": "The pattern renders engine English text and the hardcoded English hint Click to copy, so no locale string reaches it and a locale adds no state of its own."
+		},
+		{
+			"subject": "ErrorExpansion",
+			"stateClass": "huge",
+			"basis": "duplicate",
+			"ref": "error-expansion.long-detail",
+			"reason": "One error string is the largest input the pattern takes; thousands of files stress the file table and the status bar, and long-detail already covers the string size."
+		}
+	]
 }

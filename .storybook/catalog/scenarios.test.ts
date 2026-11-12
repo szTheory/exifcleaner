@@ -36,16 +36,16 @@ describe("the real manifest", () => {
 		expect(checkManifest(inputs)).toEqual([]);
 	});
 
-	test("anti-vacuity: the run saw the LanguageDropdown stories and both seed scenarios", () => {
+	test("anti-vacuity: the run saw the LanguageDropdown stories and both Phase 70 seed scenarios", () => {
 		const ids = inputs.stories.map((story) => story.id);
 		expect(ids.length).toBeGreaterThanOrEqual(3);
 		expect(ids).toContain("settings-languagedropdown--default");
 		expect(ids).toContain("settings-languagedropdown--arabic");
 		expect(ids).toContain("settings-languagedropdown--persian");
-		expect(real.scenarios.map((scenario) => scenario.id)).toEqual([
-			"language-dropdown.rtl-locales",
-			"language-dropdown.system-default",
-		]);
+		const scenarioIds = real.scenarios.map((scenario) => scenario.id);
+		expect(scenarioIds).toContain("language-dropdown.rtl-locales");
+		expect(scenarioIds).toContain("language-dropdown.system-default");
+		expect(scenarioIds.length).toBeGreaterThanOrEqual(2);
 	});
 
 	test("canonical form: scenarios.json is canonicalJson of its parse, sorted by id", () => {

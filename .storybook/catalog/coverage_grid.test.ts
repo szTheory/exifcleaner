@@ -62,16 +62,16 @@ describe("the committed coverage grid", () => {
 		}
 	});
 
-	test("counts are 21 subjects x 12 states = 252 cells with exactly the two seed cells covered", async () => {
+	test("counts are 21 subjects x 12 states = 252 cells, partitioned, with both Phase 70 seed cells covered", async () => {
 		const model = await realModel();
-		expect(model.counts).toEqual({
-			subjects: 21,
-			states: 12,
-			cells: 252,
-			covered: 2,
-			waived: 0,
-			gaps: 250,
-		});
+		expect(model.counts.subjects).toBe(21);
+		expect(model.counts.states).toBe(12);
+		expect(model.counts.cells).toBe(252);
+		// Phase 72 grows covered and waived and shrinks gaps; the partition stays whole.
+		expect(model.counts.covered + model.counts.waived + model.counts.gaps).toBe(
+			252,
+		);
+		expect(model.counts.covered).toBeGreaterThanOrEqual(2);
 		const covered: string[] = [];
 		for (const row of model.rows) {
 			for (const [stateClass, cell] of Object.entries(row.cells)) {
@@ -79,10 +79,8 @@ describe("the committed coverage grid", () => {
 					covered.push(cellKey(row.subject, stateClass));
 			}
 		}
-		expect(covered.sort()).toEqual([
-			"LanguageDropdown|happy",
-			"LanguageDropdown|intl",
-		]);
+		expect(covered).toContain("LanguageDropdown|happy");
+		expect(covered).toContain("LanguageDropdown|intl");
 	});
 
 	test("a gap is computed: no cell carries a hand-typed status in waivers.json", () => {
