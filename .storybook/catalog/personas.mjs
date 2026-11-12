@@ -20,10 +20,12 @@ import {
 	resolveInRoot,
 	sortProblems,
 } from "./closed.mjs";
-import { buildRuleset } from "./copy_lint.mjs";
+import { buildRuleset, lintText } from "./copy_lint.mjs";
+import { normalizeText } from "./glossary.mjs";
 import {
 	CLAIM_ABOUT,
 	CLAIM_TAGS,
+	FILTERED_TREES,
 	JOB_ID_PATTERN,
 	PERSONA_IDS,
 	RED_FLAG_ID_PATTERN,
@@ -42,6 +44,7 @@ const GLOSSARY_PATH = ".storybook/catalog/glossary.json";
 // Every code validateCatalog can return. personas.test.ts keeps one mutant per
 // code, so a new rule needs a mutant.
 export const CATALOG_CODES = Object.freeze([
+	"assumed-needs-validate-by",
 	"bad-about",
 	"bad-date",
 	"bad-field",
@@ -54,14 +57,34 @@ export const CATALOG_CODES = Object.freeze([
 	"bad-validate-by",
 	"duplicate-id",
 	"duplicate-ref",
+	"forbidden-missing",
+	"forbidden-not-banned",
+	"gate-not-never-say",
+	"job-count",
+	"job-no-claim",
+	"job-no-persona",
+	"job-text-short",
 	"missing-field",
 	"not-object",
+	"persona-job-count",
 	"persona-list",
+	"persona-missing-field",
+	"persona-no-red-flag",
+	"personal-data",
+	"prevalence-word",
+	"quoted-text",
 	"schema-version",
+	"solution-word",
+	"source-unresolved",
 	"spam-ref",
+	"tag-source-mismatch",
 	"text-too-long",
 	"unknown-field",
+	"unknown-gate",
+	"unknown-job",
+	"unknown-persona",
 	"unsorted",
+	"validate-by-unexpected",
 ]);
 
 const TOP_REQUIRED = ["schemaVersion", "coreJob", "personas", "jobs"];
@@ -83,6 +106,32 @@ const PERSONA_FIELDS = Object.freeze(["trigger", "need", "context", "stakes"]);
 const JOB_FIELDS = Object.freeze(["evidence"]);
 
 const MAX_TEXT_UNITS = 300;
+const MIN_JOB_UNITS = 20;
+const MAX_JOBS = 12;
+const MIN_PERSONA_JOBS = 2;
+const MAX_PERSONA_JOBS = 4;
+const REQUIRED_PERSONA_FIELDS = Object.freeze(["trigger", "need", "stakes"]);
+
+// A job names an outcome, never a control (D-15). The glossary adds the label
+// of every OS-owned term and of Save as copy.
+const SOLUTION_WORDS = Object.freeze([
+	"button",
+	"click",
+	"dialog",
+	"toggle",
+	"menu",
+	"drag",
+	"window",
+	"column",
+	"setting",
+	"settings",
+]);
+const PREVALENCE_WORD = /\b(most|many|all|every|typical|always)\b/i;
+const HANDLE = /@[A-Za-z0-9_]/;
+const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+/;
+// A double quote, a curly quote, or a single quote that opens a word. An
+// apostrophe inside a word never matches.
+const QUOTATION = /["\u201C\u201D\u2018]|(^|[\s(])'/;
 const PERSONA_ID_PATTERN = /^P-[a-z]+$/;
 const ISSUE_REF_PATTERN = /^#\d+$/;
 // #351 is spam and is never cited.
@@ -597,12 +646,366 @@ function shapeProblems(doc) {
 	return problems;
 }
 
+function escapeRegExp(text) {
+	return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function containsWord(text, word) {
+	return new RegExp(
+		`(?<![\\p{L}\\p{N}])${escapeRegExp(normalizeText(word))}(?![\\p{L}\\p{N}])`,
+		"u",
+	).test(normalizeText(text));
+}
+
+// The D-16 matrix, one function for claims and red flags. A red flag's `about`
+// is derived from its kind by the caller. Returns true when the pair is valid.
+function tagMatchesSource({ tag, about, source }) {
+	if (source.kind === "issue" && source.by === "maintainer") {
+		return tag === "proposal";
+	}
+	if (tag !== "confirmed") return true;
+	if (about === "user") {
+		return source.kind === "issue" && source.by === "user";
+	}
+	return ["code", "string", "brand", "maintainer"].includes(source.kind);
+}
+
+function sourceResolves(source, ctx) {
+	if (source.kind === "code") {
+		const inTree = FILTERED_TREES.some(
+			(tree) => source.path === tree || source.path.startsWith(`${tree}/`),
+		);
+		if (!inTree)
+			return `code path ${source.path} is outside the filtered trees`;
+		const text = ctx.readText(source.path);
+		if (text === null) return `code path ${source.path} does not exist`;
+		if (!text.includes(source.symbol)) {
+			return `${source.path} does not contain ${source.symbol}`;
+		}
+	} else if (source.kind === "string") {
+		if (!ctx.enKeys.includes(source.key)) {
+			return `string key ${source.key} is not in en.json`;
+		}
+	} else if (source.kind === "brand") {
+		if (source.pin !== ctx.brandPin) {
+			return "brand pin is not the commit in brand.pin.json";
+		}
+	}
+	return null;
+}
+
+// Rules shared by a claim and a red flag: label against source, validateBy,
+// source resolution, prevalence and quotation.
+function labelProblems({ record, about, where, ctx, problems }) {
+	const mark = { id: where };
+	if (!tagMatchesSource({ tag: record.tag, about, source: record.source })) {
+		problems.push(
+			problem(
+				"tag-source-mismatch",
+				`${where} is ${record.tag} about ${about} but its source is ${record.source.kind}${record.source.by === undefined ? "" : ` by ${record.source.by}`}`,
+				mark,
+			),
+		);
+	}
+	if (record.tag === "assumed" && !Object.hasOwn(record, "validateBy")) {
+		problems.push(
+			problem(
+				"assumed-needs-validate-by",
+				`${where} is assumed and needs validateBy`,
+				mark,
+			),
+		);
+	}
+	if (record.tag !== "assumed" && Object.hasOwn(record, "validateBy")) {
+		problems.push(
+			problem(
+				"validate-by-unexpected",
+				`${where} has validateBy but is not assumed`,
+				mark,
+			),
+		);
+	}
+	const unresolved = sourceResolves(record.source, ctx);
+	if (unresolved !== null) {
+		problems.push(problem("source-unresolved", `${where} ${unresolved}`, mark));
+	}
+	if (
+		record.tag === "confirmed" &&
+		about === "user" &&
+		PREVALENCE_WORD.test(record.text)
+	) {
+		problems.push(
+			problem(
+				"prevalence-word",
+				`${where} is a confirmed user claim and states prevalence`,
+				mark,
+			),
+		);
+	}
+	if (QUOTATION.test(record.text)) {
+		problems.push(
+			problem(
+				"quoted-text",
+				`${where} contains a quotation mark; paraphrase instead`,
+				mark,
+			),
+		);
+	}
+}
+
+function redFlagProblems({ flag, jobIds, ctx, problems }) {
+	const where = `red flag ${flag.id}`;
+	const mark = { id: flag.id };
+	labelProblems({
+		record: flag,
+		about: flag.kind === "never-happen" ? "user" : "product",
+		where,
+		ctx,
+		problems,
+	});
+	for (const job of flag.jobs) {
+		if (!jobIds.has(job)) {
+			problems.push(
+				problem("unknown-job", `${where} names unknown job ${job}`, mark),
+			);
+		}
+	}
+	const forbidden = flag.forbidden ?? [];
+	if (flag.kind === "never-say") {
+		if (forbidden.length === 0) {
+			problems.push(
+				problem(
+					"forbidden-missing",
+					`${where} is never-say and needs forbidden phrases`,
+					mark,
+				),
+			);
+		}
+		const banned = (phrase) =>
+			lintText(phrase, ctx.ruleset).some((hit) =>
+				hit.ruleId.startsWith("banned."),
+			);
+		for (const phrase of forbidden) {
+			if (!banned(phrase)) {
+				problems.push(
+					problem(
+						"forbidden-not-banned",
+						`${where} forbidden phrase ${JSON.stringify(phrase)} fires no banned copy-lint rule`,
+						mark,
+					),
+				);
+			}
+		}
+	}
+	if (Object.hasOwn(flag, "gate")) {
+		if (flag.kind !== "never-say") {
+			problems.push(
+				problem(
+					"gate-not-never-say",
+					`${where} has a gate but is not never-say`,
+					mark,
+				),
+			);
+		} else {
+			const rule = ctx.ruleset.rules.find(
+				(candidate) => candidate.id === flag.gate,
+			);
+			const fires = (phrase) =>
+				lintText(phrase, ctx.ruleset).some((hit) => hit.ruleId === flag.gate);
+			if (rule === undefined || !forbidden.every(fires)) {
+				problems.push(
+					problem(
+						"unknown-gate",
+						`${where} gate ${flag.gate} is not a copy-lint rule that fires on each forbidden phrase`,
+						mark,
+					),
+				);
+			}
+		}
+	}
+}
+
+function collectStrings(value, out) {
+	if (typeof value === "string") out.push(value);
+	else if (Array.isArray(value))
+		for (const item of value) collectStrings(item, out);
+	else if (isPlainObject(value)) {
+		for (const item of Object.values(value)) collectStrings(item, out);
+	}
+}
+
+function solutionWords(ctx) {
+	const labels = [];
+	const terms = isPlainObject(ctx.glossary) ? ctx.glossary["terms"] : undefined;
+	for (const term of Array.isArray(terms) ? terms : []) {
+		if (
+			isPlainObject(term) &&
+			(term["status"] === "os-owned" || term["id"] === "save-as-copy") &&
+			typeof term["ui_label"] === "string"
+		) {
+			labels.push(term["ui_label"]);
+		}
+	}
+	return [...SOLUTION_WORDS, ...labels];
+}
+
+/**
+ * The value layer, run only on a structurally valid catalog.
+ *
+ * @param {any} doc
+ * @param {any} ctx
+ */
+function valueProblems(doc, ctx) {
+	const problems = [];
+	const personaIds = new Set(doc.personas.map((persona) => persona.id));
+	const jobIds = new Set(doc.jobs.map((job) => job.id));
+
+	for (const clause of doc.coreJob.clauses) {
+		labelProblems({
+			record: clause,
+			about: clause.about,
+			where: `coreJob ${clause.field}`,
+			ctx,
+			problems,
+		});
+	}
+	for (const persona of doc.personas) {
+		persona.claims.forEach((claim, index) =>
+			labelProblems({
+				record: claim,
+				about: claim.about,
+				where: `${persona.id} claims[${index}]`,
+				ctx,
+				problems,
+			}),
+		);
+		for (const field of REQUIRED_PERSONA_FIELDS) {
+			if (!persona.claims.some((claim) => claim.field === field)) {
+				problems.push(
+					problem(
+						"persona-missing-field",
+						`${persona.id} needs a ${field} claim`,
+						{ id: persona.id },
+					),
+				);
+			}
+		}
+		if (persona.redFlags.length === 0) {
+			problems.push(
+				problem(
+					"persona-no-red-flag",
+					`${persona.id} needs at least one red flag`,
+					{ id: persona.id },
+				),
+			);
+		}
+		for (const flag of persona.redFlags) {
+			redFlagProblems({ flag, jobIds, ctx, problems });
+		}
+	}
+
+	const solution = solutionWords(ctx);
+	const perPersona = new Map([...personaIds].map((id) => [id, 0]));
+	for (const job of doc.jobs) {
+		const mark = { id: job.id };
+		job.claims.forEach((claim, index) =>
+			labelProblems({
+				record: claim,
+				about: claim.about,
+				where: `${job.id} claims[${index}]`,
+				ctx,
+				problems,
+			}),
+		);
+		if (job.claims.length === 0) {
+			problems.push(
+				problem("job-no-claim", `${job.id} needs at least one claim`, mark),
+			);
+		}
+		if (job.personas.length === 0) {
+			problems.push(
+				problem("job-no-persona", `${job.id} needs at least one persona`, mark),
+			);
+		}
+		for (const personaId of job.personas) {
+			if (!personaIds.has(personaId)) {
+				problems.push(
+					problem(
+						"unknown-persona",
+						`${job.id} names unknown persona ${personaId}`,
+						mark,
+					),
+				);
+			} else {
+				perPersona.set(personaId, (perPersona.get(personaId) ?? 0) + 1);
+			}
+		}
+		for (const key of ["when", "want", "so"]) {
+			if (job[key].trim().length < MIN_JOB_UNITS) {
+				problems.push(
+					problem(
+						"job-text-short",
+						`${job.id} ${key} needs at least ${MIN_JOB_UNITS} characters`,
+						mark,
+					),
+				);
+			}
+		}
+		for (const key of ["want", "so"]) {
+			const found = solution.find((word) => containsWord(job[key], word));
+			if (found !== undefined) {
+				problems.push(
+					problem(
+						"solution-word",
+						`${job.id} ${key} names a control (${found}); state an outcome`,
+						mark,
+					),
+				);
+			}
+		}
+	}
+	if (doc.jobs.length > MAX_JOBS) {
+		problems.push(
+			problem(
+				"job-count",
+				`at most ${MAX_JOBS} jobs, found ${doc.jobs.length}`,
+			),
+		);
+	} else {
+		for (const [personaId, count] of perPersona) {
+			if (count < MIN_PERSONA_JOBS || count > MAX_PERSONA_JOBS) {
+				problems.push(
+					problem(
+						"persona-job-count",
+						`${personaId} is served by ${count} jobs; ${MIN_PERSONA_JOBS} to ${MAX_PERSONA_JOBS} allowed`,
+						{ id: personaId },
+					),
+				);
+			}
+		}
+	}
+
+	const strings = [];
+	collectStrings(doc, strings);
+	if (strings.some((text) => HANDLE.test(text) || EMAIL.test(text))) {
+		problems.push(
+			problem(
+				"personal-data",
+				"the catalog contains an @handle or an email address",
+			),
+		);
+	}
+	return problems;
+}
+
 /**
  * @param {unknown} doc
- * @param {{ readText: (relPath: string) => string | null, enKeys: readonly string[], brandPin: string, ruleset: { rules: ReadonlyArray<any> }, glossary: unknown }} _ctx
+ * @param {{ readText: (relPath: string) => string | null, enKeys: readonly string[], brandPin: string, ruleset: { rules: ReadonlyArray<any> }, glossary: unknown }} ctx
  */
-export function validateCatalog(doc, _ctx) {
-	return sortProblems(shapeProblems(doc));
+export function validateCatalog(doc, ctx) {
+	const shape = shapeProblems(doc);
+	if (shape.length > 0) return sortProblems(shape);
+	return sortProblems(valueProblems(doc, ctx));
 }
 
 /**
