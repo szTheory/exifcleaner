@@ -285,8 +285,10 @@ describe("a11y-p72 baseline (SC2, D-21)", () => {
 		expect(pairProblems(disabled, entries)).toEqual([]);
 		expect(disabled).toEqual(entries);
 		expect(disabled.length).toBe(REAL_ENTRIES.length);
+		// Every axe-kind entry (a11y, a11y-p72, a11y-p73, ...) is re-proven here, so the
+		// count is over isA11yKind and no single kind literal (WR-06).
 		expect(
-			baseline.entries.filter((entry) => entry.kind === "a11y-p72").length,
+			baseline.entries.filter((entry) => isA11yKind(entry.kind)).length,
 		).toBe(REAL_ENTRIES.length);
 	});
 
