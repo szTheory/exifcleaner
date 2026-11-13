@@ -72,6 +72,62 @@
 			"reason": "With no list, count or text, a large quantity cannot be fed into a single glyph, so the quantity stress belongs to the table that repeats it."
 		},
 		{
+			"subject": "EmptyState",
+			"stateClass": "empty",
+			"basis": "duplicate",
+			"ref": "empty-state.copy-mode-on",
+			"reason": "The screen is itself the empty state, so its empty cell is the same screen the copy-mode-on scenario already draws."
+		},
+		{
+			"subject": "EmptyState",
+			"stateClass": "one",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/EmptyState.tsx#EmptyState",
+			"reason": "The screen draws no items and no count, so there is no singular or plural wording to test; the only plural text it could show would be a file count, which it never receives."
+		},
+		{
+			"subject": "EmptyState",
+			"stateClass": "many",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/EmptyState.tsx#onChooseFiles",
+			"reason": "The screen takes two callbacks and no file list, so it cannot show several items; several rows are drawn by the FileTable stories."
+		},
+		{
+			"subject": "EmptyState",
+			"stateClass": "boundary",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/EmptyState.tsx#saveAsCopy",
+			"reason": "Its only inputs are two booleans and a nullable boolean, so there is no size or length limit at which it could behave differently."
+		},
+		{
+			"subject": "EmptyState",
+			"stateClass": "error",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/EmptyState.tsx#dragActive",
+			"reason": "The screen has no failure state: an unreadable setting shows as the null copy mode, and a failed file shows in the table and in toasts, never here."
+		},
+		{
+			"subject": "EmptyState",
+			"stateClass": "denied",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/EmptyState.tsx#onChooseFolder",
+			"reason": "The screen enforces no policy and refuses nothing; a refused file is a row in the table, which the empty screen is replaced by."
+		},
+		{
+			"subject": "EmptyState",
+			"stateClass": "stale",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/EmptyState.tsx#empty-state__inner",
+			"reason": "The screen shows no information taken from a file or a folder, so nothing on it can outlive its source."
+		},
+		{
+			"subject": "EmptyState",
+			"stateClass": "huge",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/ui/EmptyState.tsx#empty-state__actions",
+			"reason": "The screen shows a title, a prompt, two buttons and one line, whatever the session did before, so no quantity can stress it."
+		},
+		{
 			"subject": "ErrorBoundary",
 			"stateClass": "empty",
 			"basis": "unreachable",
@@ -210,6 +266,41 @@
 			"basis": "unreachable",
 			"ref": "src/renderer/components/file-list/FileRow.tsx#file",
 			"reason": "FileRow takes a single file prop and draws one row, so there is no plural state inside it; rows side by side are drawn by the FileTable stories."
+		},
+		{
+			"subject": "FileTable",
+			"stateClass": "one",
+			"basis": "duplicate",
+			"ref": "status-bar.single-file",
+			"reason": "FileTable has no count or singular wording of its own and a one-row table is the same markup as a longer one; the singular count text belongs to the status bar."
+		},
+		{
+			"subject": "FileTable",
+			"stateClass": "error",
+			"basis": "duplicate",
+			"ref": "file-row.generic-failure",
+			"reason": "A failed file is the state of one row, which the FileRow error stories draw; the table only sorts it last, and SortTwiceKeepsRank shows that."
+		},
+		{
+			"subject": "FileTable",
+			"stateClass": "denied",
+			"basis": "duplicate",
+			"ref": "file-row.refused",
+			"reason": "A refused file is the state of one row, which the FileRow refused story draws; the table adds no behaviour of its own for it."
+		},
+		{
+			"subject": "FileTable",
+			"stateClass": "stale",
+			"basis": "duplicate",
+			"ref": "file-row.commit",
+			"reason": "A file changed under the app is the state of one row, which the FileRow commit story draws; the table never revalidates a row after it is shown."
+		},
+		{
+			"subject": "FileTable",
+			"stateClass": "huge",
+			"basis": "duplicate",
+			"ref": "file-row.huge-size",
+			"reason": "The magnitudes that stress a table cell are drawn by the FileRow huge size and huge count stories, and the 100-row batch is the App screen, so a table story would repeat them."
 		},
 		{
 			"subject": "FolderRow",

@@ -2,7 +2,7 @@
 
 # Coverage grid
 
-21 subjects x 12 state classes = 252 cells: 66 covered, 126 waived, 60 gaps.
+21 subjects x 12 state classes = 252 cells: 77 covered, 139 waived, 36 gaps.
 
 A cell is covered by a scenario in scenarios.json, waived with a reason in waivers.json, or a gap. A gap is computed, never typed. Cells show the scenario count, `waived` or `gap`. A gap is owed by the phase in the Due column: primitive and pattern rows by Phase 72, area and screen rows by Phase 73.
 
@@ -24,9 +24,9 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 | StatusBar | pattern | Phase 72 | 3 | 1 | 1 | waived | 1 | 1 | waived | waived | waived | waived | 1 | waived |
 | Toast | pattern | Phase 72 | 1 | 1 | 1 | 1 | 1 | waived | waived | waived | 1 | 1 | 1 | waived |
 | DropZone | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
-| EmptyState | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
+| EmptyState | area | Phase 73 | 7 | waived | waived | waived | waived | 2 | waived | waived | waived | 2 | 1 | waived |
 | FileRow | area | Phase 73 | 8 | waived | waived | waived | 3 | 3 | 7 | 1 | 1 | 3 | 5 | 2 |
-| FileTable | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
+| FileTable | area | Phase 73 | 3 | 1 | waived | 4 | 1 | 1 | waived | waived | waived | 2 | 3 | waived |
 | SettingsDrawer | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | App | screen | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 
@@ -155,9 +155,22 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 - Toast|error: unreachable (src/renderer/components/ui/Toast.tsx#visible): Toast has no error variant or style; a failed reveal is shown as ordinary notice text, which is the reveal-failed scenario, so a separate error cell adds nothing.
 - Toast|denied: unreachable (src/renderer/components/ui/Toast.tsx#Toast): The notice takes no disabled or refused form and the file:reveal handler's only failure is a missing file (the reveal-failed scenario), so no deterministic refusal is left to display.
 - Toast|huge: duplicate (toast.long-message): The notice holds one short sentence with a count, so the largest input is its longest translation, which the long-message scenario already shows.
+- EmptyState|empty: duplicate (empty-state.copy-mode-on): The screen is itself the empty state, so its empty cell is the same screen the copy-mode-on scenario already draws.
+- EmptyState|one: unreachable (src/renderer/components/ui/EmptyState.tsx#EmptyState): The screen draws no items and no count, so there is no singular or plural wording to test; the only plural text it could show would be a file count, which it never receives.
+- EmptyState|many: unreachable (src/renderer/components/ui/EmptyState.tsx#onChooseFiles): The screen takes two callbacks and no file list, so it cannot show several items; several rows are drawn by the FileTable stories.
+- EmptyState|boundary: unreachable (src/renderer/components/ui/EmptyState.tsx#saveAsCopy): Its only inputs are two booleans and a nullable boolean, so there is no size or length limit at which it could behave differently.
+- EmptyState|error: unreachable (src/renderer/components/ui/EmptyState.tsx#dragActive): The screen has no failure state: an unreadable setting shows as the null copy mode, and a failed file shows in the table and in toasts, never here.
+- EmptyState|denied: unreachable (src/renderer/components/ui/EmptyState.tsx#onChooseFolder): The screen enforces no policy and refuses nothing; a refused file is a row in the table, which the empty screen is replaced by.
+- EmptyState|stale: unreachable (src/renderer/components/ui/EmptyState.tsx#empty-state__inner): The screen shows no information taken from a file or a folder, so nothing on it can outlive its source.
+- EmptyState|huge: unreachable (src/renderer/components/ui/EmptyState.tsx#empty-state__actions): The screen shows a title, a prompt, two buttons and one line, whatever the session did before, so no quantity can stress it.
 - FileRow|empty: unreachable (src/renderer/components/file-list/FileRow.tsx#FileRow): A row always stands for exactly one file, so a row with nothing in it is not a state; a table with no files is the FileTable empty case and the empty screen is EmptyState.
 - FileRow|one: duplicate (metadata-expansion.one-removed): A row has no singular wording of its own; the one-field count shown when a row is opened belongs to MetadataExpansion, whose one-removed scenario already draws it.
 - FileRow|many: unreachable (src/renderer/components/file-list/FileRow.tsx#file): FileRow takes a single file prop and draws one row, so there is no plural state inside it; rows side by side are drawn by the FileTable stories.
+- FileTable|one: duplicate (status-bar.single-file): FileTable has no count or singular wording of its own and a one-row table is the same markup as a longer one; the singular count text belongs to the status bar.
+- FileTable|error: duplicate (file-row.generic-failure): A failed file is the state of one row, which the FileRow error stories draw; the table only sorts it last, and SortTwiceKeepsRank shows that.
+- FileTable|denied: duplicate (file-row.refused): A refused file is the state of one row, which the FileRow refused story draws; the table adds no behaviour of its own for it.
+- FileTable|stale: duplicate (file-row.commit): A file changed under the app is the state of one row, which the FileRow commit story draws; the table never revalidates a row after it is shown.
+- FileTable|huge: duplicate (file-row.huge-size): The magnitudes that stress a table cell are drawn by the FileRow huge size and huge count stories, and the 100-row batch is the App screen, so a table story would repeat them.
 
 ## State classes
 

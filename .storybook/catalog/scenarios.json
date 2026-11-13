@@ -38,6 +38,150 @@
 			]
 		},
 		{
+			"id": "empty-state.button-hover",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone moves the pointer over Choose files and the button background darkens.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-emptystate--button-hover"
+			]
+		},
+		{
+			"id": "empty-state.button-keyboard-focus",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone tabs to Choose files and sees a visible focus ring around the button.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-emptystate--button-keyboard-focus"
+			]
+		},
+		{
+			"id": "empty-state.copy-mode-off",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone opens the app with Save as copy off and reads that files will be cleaned in place.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-emptystate--copy-mode-off"
+			]
+		},
+		{
+			"id": "empty-state.copy-mode-off-dragging",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone drags files over the window with Save as copy off, and the prompt asks them to drop the files.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-emptystate--copy-mode-off-dragging"
+			]
+		},
+		{
+			"id": "empty-state.copy-mode-on",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone opens the app with Save as copy on and reads that the originals stay unchanged.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-emptystate--copy-mode-on"
+			]
+		},
+		{
+			"id": "empty-state.copy-mode-on-dragging",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone drags files over the window with Save as copy on, and the prompt asks them to drop the files.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-emptystate--copy-mode-on-dragging"
+			]
+		},
+		{
+			"id": "empty-state.copy-mode-unknown",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "loading",
+			"tier": "area",
+			"situation": "The app opens before its settings are read, so the screen shows no line about copies or in-place cleaning.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-emptystate--copy-mode-unknown"
+			]
+		},
+		{
+			"id": "empty-state.copy-mode-unknown-dragging",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "loading",
+			"tier": "area",
+			"situation": "Someone drags a file over the window before settings are read, and the prompt asks them to drop it.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-emptystate--copy-mode-unknown-dragging"
+			]
+		},
+		{
+			"id": "empty-state.german-empty",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "long",
+			"tier": "area",
+			"situation": "Someone using German opens the app and sees the empty screen with its longer words.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-emptystate--german-empty"
+			]
+		},
+		{
+			"id": "empty-state.malayalam-empty",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "long",
+			"tier": "area",
+			"situation": "Someone using Malayalam opens the app and sees the empty screen in a script with tall letters.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-emptystate--malayalam-empty"
+			]
+		},
+		{
+			"id": "empty-state.persian-empty",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "intl",
+			"tier": "area",
+			"situation": "Someone using Persian opens the app and sees the empty screen mirrored right to left.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-emptystate--persian-empty"
+			]
+		},
+		{
+			"id": "empty-state.secondary-button-hover",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone moves the pointer over Choose folder and its border takes the accent colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-emptystate--secondary-button-hover"
+			]
+		},
+		{
 			"id": "error-boundary.button-hover",
 			"persona": "P-batch",
 			"job": "J-04",
@@ -602,6 +746,186 @@
 			"proofBoundary": "story",
 			"stories": [
 				"file-list-filerow--zwj-family-name"
+			]
+		},
+		{
+			"id": "file-table.arabic-batch",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "intl",
+			"tier": "area",
+			"situation": "Someone using Arabic sees a mixed batch with the table and the status bar mirrored right to left.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--arabic-batch"
+			]
+		},
+		{
+			"id": "file-table.folder-complete",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone drops a folder of two files and the table shows the folder row with its count above both files.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--folder-complete"
+			]
+		},
+		{
+			"id": "file-table.folder-empty",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "empty",
+			"tier": "area",
+			"situation": "Someone drops a folder with nothing supported in it and the table shows its row reading zero supported files.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--folder-empty"
+			]
+		},
+		{
+			"id": "file-table.folder-scanning",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "loading",
+			"tier": "area",
+			"situation": "Someone drops a big folder and the table shows its row still scanning, with no files under it yet.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--folder-scanning"
+			]
+		},
+		{
+			"id": "file-table.german-batch",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "long",
+			"tier": "area",
+			"situation": "Someone using German sees a mixed batch in the table and the status bar at the default window width.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--german-batch"
+			]
+		},
+		{
+			"id": "file-table.header-hover",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone moves the pointer over a column header and its label changes to the full text colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--header-hover"
+			]
+		},
+		{
+			"id": "file-table.hungarian-batch",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "long",
+			"tier": "area",
+			"situation": "Someone using Hungarian sees a mixed batch in the table and the status bar at the default window width.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--hungarian-batch"
+			]
+		},
+		{
+			"id": "file-table.japanese-batch",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "intl",
+			"tier": "area",
+			"situation": "Someone using Japanese sees a mixed batch in the table and the status bar, with no spaces to wrap at.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--japanese-batch"
+			]
+		},
+		{
+			"id": "file-table.mixed-statuses",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "many",
+			"tier": "area",
+			"situation": "A run is under way with a failed file, a waiting file and a finished file, and the rows keep the order they were added in.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--mixed-statuses"
+			]
+		},
+		{
+			"id": "file-table.persian-batch",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "intl",
+			"tier": "area",
+			"situation": "Someone using Persian sees a mixed batch with the table and the status bar mirrored right to left.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--persian-batch"
+			]
+		},
+		{
+			"id": "file-table.sort-button-keyboard-focus",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone tabs to the Name column header and sees a visible focus ring around its sort button.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--sort-button-keyboard-focus"
+			]
+		},
+		{
+			"id": "file-table.sort-by-name-ascending",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "many",
+			"tier": "area",
+			"situation": "Someone sorts a finished batch by name and the rows reorder from A to Z with the column marked ascending.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--sort-by-name-ascending"
+			]
+		},
+		{
+			"id": "file-table.sort-by-name-descending",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "many",
+			"tier": "area",
+			"situation": "Someone clicks the name column twice and the rows reorder from Z to A with the column marked descending.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--sort-by-name-descending"
+			]
+		},
+		{
+			"id": "file-table.sort-by-size-with-tie",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "boundary",
+			"tier": "area",
+			"situation": "Two files of the same size are sorted by size, and the table keeps the pair in the order they were added.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--sort-by-size-with-tie"
+			]
+		},
+		{
+			"id": "file-table.sort-twice-keeps-rank",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "many",
+			"tier": "area",
+			"situation": "Someone sorts a mixed batch both ways and finished files stay above waiting ones, with failed files last.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filetable--sort-twice-keeps-rank"
 			]
 		},
 		{
