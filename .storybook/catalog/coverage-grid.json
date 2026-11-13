@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 60,
-		"waived": 123,
-		"gaps": 69
+		"covered": 66,
+		"waived": 126,
+		"gaps": 60
 	},
 	"rows": [
 		{
@@ -1557,22 +1557,57 @@
 			"tier": "area",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.already-clean",
+						"file-row.already-clean-expanded",
+						"file-row.cleaned",
+						"file-row.cleaned-expanded",
+						"file-row.copy-mode-disclosure",
+						"file-row.row-hover",
+						"file-row.row-keyboard-focus",
+						"file-row.unchanged"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/FileRow.tsx#FileRow",
+						"reason": "A row always stands for exactly one file, so a row with nothing in it is not a state; a table with no files is the FileTable empty case and the empty screen is EmptyState."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "metadata-expansion.one-removed",
+						"reason": "A row has no singular wording of its own; the one-field count shown when a row is opened belongs to MetadataExpansion, whose one-removed scenario already draws it."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/FileRow.tsx#file",
+						"reason": "FileRow takes a single file prop and draws one row, so there is no plural state inside it; rows side by side are drawn by the FileTable stories."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.just-under-megabyte",
+						"file-row.many-dots-name",
+						"file-row.zero-byte-no-metadata"
+					]
 				},
 				"loading": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.pending",
+						"file-row.processing",
+						"file-row.reading"
+					]
 				},
 				"error": {
 					"status": "covered",
@@ -1582,7 +1617,8 @@
 						"file-row.generic-failure",
 						"file-row.verification",
 						"file-row.write",
-						"file-row.xattr"
+						"file-row.xattr",
+						"file-row.zero-byte-error"
 					]
 				},
 				"denied": {
@@ -1598,13 +1634,29 @@
 					]
 				},
 				"long": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.german-compound-name",
+						"file-row.japanese-long-name",
+						"file-row.long-unbroken-name"
+					]
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.arabic-digits-name",
+						"file-row.hebrew-latin-name",
+						"file-row.lro-pdf-name",
+						"file-row.rlo-name",
+						"file-row.zwj-family-name"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.huge-size",
+						"file-row.huge-tag-counts"
+					]
 				}
 			}
 		},

@@ -191,6 +191,27 @@
 			"reason": "One error string is the largest input the pattern takes; thousands of files stress the file table and the status bar, and long-detail already covers the string size."
 		},
 		{
+			"subject": "FileRow",
+			"stateClass": "empty",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/file-list/FileRow.tsx#FileRow",
+			"reason": "A row always stands for exactly one file, so a row with nothing in it is not a state; a table with no files is the FileTable empty case and the empty screen is EmptyState."
+		},
+		{
+			"subject": "FileRow",
+			"stateClass": "one",
+			"basis": "duplicate",
+			"ref": "metadata-expansion.one-removed",
+			"reason": "A row has no singular wording of its own; the one-field count shown when a row is opened belongs to MetadataExpansion, whose one-removed scenario already draws it."
+		},
+		{
+			"subject": "FileRow",
+			"stateClass": "many",
+			"basis": "unreachable",
+			"ref": "src/renderer/components/file-list/FileRow.tsx#file",
+			"reason": "FileRow takes a single file prop and draws one row, so there is no plural state inside it; rows side by side are drawn by the FileTable stories."
+		},
+		{
 			"subject": "FolderRow",
 			"stateClass": "many",
 			"basis": "duplicate",

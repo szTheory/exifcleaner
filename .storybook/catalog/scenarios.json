@@ -206,6 +206,66 @@
 			]
 		},
 		{
+			"id": "file-row.already-clean",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "A file with no removable metadata is left alone, and its row says the file was not rewritten.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--already-clean"
+			]
+		},
+		{
+			"id": "file-row.already-clean-expanded",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone opens the row of a file with nothing to remove and reads the same plain message inside it.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--already-clean-expanded"
+			]
+		},
+		{
+			"id": "file-row.arabic-digits-name",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "intl",
+			"tier": "area",
+			"situation": "A file name has Arabic words with Arabic-Indic digits, and its row shows the name without scrambling it.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--arabic-digits-name"
+			]
+		},
+		{
+			"id": "file-row.cleaned",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "A file is cleaned in place and its row shows a check, the removed verdict and the before and after counts.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--cleaned"
+			]
+		},
+		{
+			"id": "file-row.cleaned-expanded",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone opens a cleaned row to read which fields were removed and which are still present.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--cleaned-expanded"
+			]
+		},
+		{
 			"id": "file-row.cleanup",
 			"persona": "P-batch",
 			"job": "J-04",
@@ -228,6 +288,18 @@
 			"proofBoundary": "story",
 			"stories": [
 				"file-list-filerow--commit"
+			]
+		},
+		{
+			"id": "file-row.copy-mode-disclosure",
+			"persona": "P-photographer",
+			"job": "J-05",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Save as copy is on, so the row says it was written to a copy and the original stays as it was.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--copy-mode-disclosure"
 			]
 		},
 		{
@@ -255,6 +327,150 @@
 			]
 		},
 		{
+			"id": "file-row.german-compound-name",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "long",
+			"tier": "area",
+			"situation": "A long German compound word names a file, and the row cuts it at the edge of the name cell.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--german-compound-name"
+			]
+		},
+		{
+			"id": "file-row.hebrew-latin-name",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "intl",
+			"tier": "area",
+			"situation": "A file name mixes Hebrew and Latin letters, and its row shows the name in reading order.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--hebrew-latin-name"
+			]
+		},
+		{
+			"id": "file-row.huge-size",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "huge",
+			"tier": "area",
+			"situation": "A file of one tebibyte shows in the size cell with the largest unit the app has.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--huge-size"
+			]
+		},
+		{
+			"id": "file-row.huge-tag-counts",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "huge",
+			"tier": "area",
+			"situation": "A file with counts of six digits shows both numbers in cells built for three digits.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--huge-tag-counts"
+			]
+		},
+		{
+			"id": "file-row.japanese-long-name",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "long",
+			"tier": "area",
+			"situation": "A long Japanese name has no spaces to wrap at, so the row cuts it at the edge of the name cell.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--japanese-long-name"
+			]
+		},
+		{
+			"id": "file-row.just-under-megabyte",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "boundary",
+			"tier": "area",
+			"situation": "A file one kilobyte short of a megabyte shows how the size cell rounds at the unit edge.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--just-under-megabyte"
+			]
+		},
+		{
+			"id": "file-row.long-unbroken-name",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "long",
+			"tier": "area",
+			"situation": "A name of 180 letters with no break stays on one line in the name cell and runs out of room.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--long-unbroken-name"
+			]
+		},
+		{
+			"id": "file-row.lro-pdf-name",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "intl",
+			"tier": "area",
+			"situation": "A file name mixes left-to-right and right-to-left overrides that are each closed, and the row shows it.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--lro-pdf-name"
+			]
+		},
+		{
+			"id": "file-row.many-dots-name",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "boundary",
+			"tier": "area",
+			"situation": "A name with a run of sixteen dots makes the row show where the name ends and the extension begins.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--many-dots-name"
+			]
+		},
+		{
+			"id": "file-row.pending",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "loading",
+			"tier": "area",
+			"situation": "A file in a large run waits its turn, so its row shows a pending dot and no counts yet.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--pending"
+			]
+		},
+		{
+			"id": "file-row.processing",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "loading",
+			"tier": "area",
+			"situation": "The app is removing metadata from a file, so its row shows a spinner while the counts stay empty.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--processing"
+			]
+		},
+		{
+			"id": "file-row.reading",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "loading",
+			"tier": "area",
+			"situation": "The app is reading a file's metadata, so its row shows a spinner and no counts yet.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--reading"
+			]
+		},
+		{
 			"id": "file-row.refused",
 			"persona": "P-photographer",
 			"job": "J-05",
@@ -264,6 +480,54 @@
 			"proofBoundary": "story",
 			"stories": [
 				"file-list-filerow--refused"
+			]
+		},
+		{
+			"id": "file-row.rlo-name",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "intl",
+			"tier": "area",
+			"situation": "A file name carries a right-to-left override, so its row can draw the extension in a different order.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--rlo-name"
+			]
+		},
+		{
+			"id": "file-row.row-hover",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone moves the pointer over a cleaned row and its background changes to the surface colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--row-hover"
+			]
+		},
+		{
+			"id": "file-row.row-keyboard-focus",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone tabs to a cleaned row and sees a visible focus ring around the whole row.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--row-keyboard-focus"
+			]
+		},
+		{
+			"id": "file-row.unchanged",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "A file was rewritten but nothing measured changed, so the row says so instead of claiming a removal.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--unchanged"
 			]
 		},
 		{
@@ -302,6 +566,42 @@
 			"stories": [
 				"file-list-filerow--xattr",
 				"file-list-filerow--xattr-without-residual"
+			]
+		},
+		{
+			"id": "file-row.zero-byte-error",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "area",
+			"situation": "A file with no bytes in it cannot be read, so the row shows an error and a size of zero.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--zero-byte-error"
+			]
+		},
+		{
+			"id": "file-row.zero-byte-no-metadata",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "boundary",
+			"tier": "area",
+			"situation": "A file with no bytes has no metadata to remove, so the row says nothing was found and shows zero.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--zero-byte-no-metadata"
+			]
+		},
+		{
+			"id": "file-row.zwj-family-name",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "intl",
+			"tier": "area",
+			"situation": "A file name has a family emoji joined by zero width joiners, and its row keeps it as one picture.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--zwj-family-name"
 			]
 		},
 		{

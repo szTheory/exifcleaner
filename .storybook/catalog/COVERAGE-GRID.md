@@ -2,7 +2,7 @@
 
 # Coverage grid
 
-21 subjects x 12 state classes = 252 cells: 60 covered, 123 waived, 69 gaps.
+21 subjects x 12 state classes = 252 cells: 66 covered, 126 waived, 60 gaps.
 
 A cell is covered by a scenario in scenarios.json, waived with a reason in waivers.json, or a gap. A gap is computed, never typed. Cells show the scenario count, `waived` or `gap`. A gap is owed by the phase in the Due column: primitive and pattern rows by Phase 72, area and screen rows by Phase 73.
 
@@ -25,7 +25,7 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 | Toast | pattern | Phase 72 | 1 | 1 | 1 | 1 | 1 | waived | waived | waived | 1 | 1 | 1 | waived |
 | DropZone | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | EmptyState | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
-| FileRow | area | Phase 73 | gap | gap | gap | gap | gap | gap | 6 | 1 | 1 | gap | gap | gap |
+| FileRow | area | Phase 73 | 8 | waived | waived | waived | 3 | 3 | 7 | 1 | 1 | 3 | 5 | 2 |
 | FileTable | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | SettingsDrawer | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | App | screen | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
@@ -155,6 +155,9 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 - Toast|error: unreachable (src/renderer/components/ui/Toast.tsx#visible): Toast has no error variant or style; a failed reveal is shown as ordinary notice text, which is the reveal-failed scenario, so a separate error cell adds nothing.
 - Toast|denied: unreachable (src/renderer/components/ui/Toast.tsx#Toast): The notice takes no disabled or refused form and the file:reveal handler's only failure is a missing file (the reveal-failed scenario), so no deterministic refusal is left to display.
 - Toast|huge: duplicate (toast.long-message): The notice holds one short sentence with a count, so the largest input is its longest translation, which the long-message scenario already shows.
+- FileRow|empty: unreachable (src/renderer/components/file-list/FileRow.tsx#FileRow): A row always stands for exactly one file, so a row with nothing in it is not a state; a table with no files is the FileTable empty case and the empty screen is EmptyState.
+- FileRow|one: duplicate (metadata-expansion.one-removed): A row has no singular wording of its own; the one-field count shown when a row is opened belongs to MetadataExpansion, whose one-removed scenario already draws it.
+- FileRow|many: unreachable (src/renderer/components/file-list/FileRow.tsx#file): FileRow takes a single file prop and draws one row, so there is no plural state inside it; rows side by side are drawn by the FileTable stories.
 
 ## State classes
 

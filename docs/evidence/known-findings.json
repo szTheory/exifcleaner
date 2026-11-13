@@ -621,6 +621,94 @@
 			"disposition": "fix-v5.1"
 		},
 		{
+			"fingerprint": "a11y-p73|file-list-filerow--already-clean|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--already-clean",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--already-clean|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--already-clean",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--already-clean-expanded|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--already-clean-expanded",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--already-clean-expanded|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--already-clean-expanded",
+			"rule": "color-contrast",
+			"reason": "Selector .metadata-expansion__empty (the empty expansion text) measures 2.24:1 in the light theme and 3.08:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #f5f6f8 light and #636369 on #141416 dark (foreground --ec-color-muted), 14px; Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--arabic-digits-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--arabic-digits-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--arabic-digits-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--arabic-digits-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the PNG pill) measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec (--ec-pill-png-text on --ec-pill-png-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleaned|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleaned",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleaned|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleaned",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleaned-expanded|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleaned-expanded",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleaned-expanded|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleaned-expanded",
+			"rule": "aria-required-children",
+			"reason": "Selector div[role=\"rowgroup\"] fails in both themes: axe reports children that a role=rowgroup must not contain (button, details, div[aria-label]), because FileRow puts its expansion region (a button, a details element and a labelled div) beside the row inside the table's rowgroup, as FileTable renders it; a component structure defect in FileRow and FileTable, not the story frame; Selector div[role=\"table\"] fails in both themes: axe reports children that a role=table must not contain (button, details, div[aria-label]), because FileRow puts its expansion region (a button, a details element and a labelled div) beside the row inside the table's rowgroup, as FileTable renders it; a component structure defect in FileRow and FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleaned-expanded|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleaned-expanded",
+			"rule": "color-contrast",
+			"reason": "Selector .metadata-expansion__content > .metadata-group > .metadata-group__header[title=\"Other\"] > .metadata-group__count (the group field count) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (foreground --ec-color-text-secondary), 14px; Selector .metadata-expansion__copy-btn (the Copy all button) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (foreground --ec-color-text-secondary), 14px; Selector .metadata-expansion__summary (the removed and still present summary) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (foreground --ec-color-text-secondary), 14px; Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; Selector summary (the still present toggle) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited text colour, no colour rule of its own), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
 			"fingerprint": "a11y-p73|file-list-filerow--cleanup|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--cleanup",
@@ -669,6 +757,22 @@
 			"disposition": "fix-v5.1"
 		},
 		{
+			"fingerprint": "a11y-p73|file-list-filerow--copy-mode-disclosure|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--copy-mode-disclosure",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--copy-mode-disclosure|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--copy-mode-disclosure",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
 			"fingerprint": "a11y-p73|file-list-filerow--error-collapsed|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--error-collapsed",
@@ -701,6 +805,174 @@
 			"disposition": "fix-v5.1"
 		},
 		{
+			"fingerprint": "a11y-p73|file-list-filerow--german-compound-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--german-compound-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--german-compound-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--german-compound-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--hebrew-latin-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--hebrew-latin-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--hebrew-latin-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--hebrew-latin-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--huge-size|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--huge-size",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--huge-size|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--huge-size",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--huge-tag-counts|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--huge-tag-counts",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--huge-tag-counts|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--huge-tag-counts",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--japanese-long-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--japanese-long-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--japanese-long-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--japanese-long-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--just-under-megabyte|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--just-under-megabyte",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--just-under-megabyte|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--just-under-megabyte",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--long-unbroken-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--long-unbroken-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--long-unbroken-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--long-unbroken-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--lro-pdf-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--lro-pdf-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--lro-pdf-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--lro-pdf-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the PNG pill) measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec (--ec-pill-png-text on --ec-pill-png-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--many-dots-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--many-dots-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--many-dots-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--many-dots-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--pending|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--pending",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--processing|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--processing",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--reading|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--reading",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
 			"fingerprint": "a11y-p73|file-list-filerow--refused|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--refused",
@@ -714,6 +986,70 @@
 			"story": "file-list-filerow--refused",
 			"rule": "color-contrast",
 			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--rlo-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--rlo-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--rlo-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--rlo-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--row-hover|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--row-hover",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--row-hover|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--row-hover",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--row-keyboard-focus|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--row-keyboard-focus",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--row-keyboard-focus|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--row-keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--unchanged|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--unchanged",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--unchanged|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--unchanged",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
 			"disposition": "fix-v5.1"
 		},
 		{
@@ -794,6 +1130,54 @@
 			"story": "file-list-filerow--xattr-without-residual",
 			"rule": "color-contrast",
 			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-error|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--zero-byte-error",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-error|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--zero-byte-error",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-no-metadata|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--zero-byte-no-metadata",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-no-metadata|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--zero-byte-no-metadata",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--zwj-family-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--zwj-family-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--zwj-family-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--zwj-family-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the PNG pill) measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec (--ec-pill-png-text on --ec-pill-png-bg), 14px; the fix belongs to v5.1.",
 			"disposition": "fix-v5.1"
 		}
 	]
