@@ -91,7 +91,7 @@ async function expectScreen({
 		// saveAsCopy null: the line is hidden from assistive tech and holds a
 		// non-breaking space only.
 		await expect(mode).toHaveAttribute("aria-hidden", "true");
-		await expect(mode?.textContent).toBe(" ");
+		await expect(mode?.textContent).toBe("\u00a0");
 	} else {
 		await expect(mode).toHaveAttribute("aria-hidden", "false");
 		await expect(mode?.textContent).toBe(outputLine);
