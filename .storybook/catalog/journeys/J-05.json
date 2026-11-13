@@ -1,0 +1,61 @@
+{
+	"schemaVersion": 1,
+	"job": "J-05",
+	"title": "Keep the original while trying a cleaning",
+	"steps": [
+		{
+			"scenario": "app.empty",
+			"action": {
+				"role": "button",
+				"name": "Open settings"
+			},
+			"proof": "story+e2e",
+			"e2e": {
+				"spec": "tests/e2e/settings.spec.ts",
+				"test": "opens and closes the settings drawer"
+			}
+		},
+		{
+			"scenario": "settings-drawer.all-toggles-off",
+			"action": {
+				"role": "switch",
+				"name": "Save as copy"
+			},
+			"proof": "story+e2e",
+			"e2e": {
+				"spec": "tests/e2e/settings.spec.ts",
+				"test": "toggles save-as-copy switch and verifies _cleaned setting propagation"
+			},
+			"note": "The e2e test sets the value through the settings IPC and reads the switch state; it does not click the switch."
+		},
+		{
+			"scenario": "file-row.copy-mode-disclosure",
+			"action": {
+				"role": "row",
+				"name": "test.jpg. Metadata removed. Written to a copy."
+			},
+			"proof": "story"
+		},
+		{
+			"scenario": "app.all-done",
+			"action": {
+				"role": "button",
+				"name": "Reveal cleaned copy in file manager"
+			},
+			"proof": "story",
+			"note": "Reveal is shown present and named; no e2e or story opens the file manager."
+		},
+		{
+			"scenario": "settings-drawer.all-toggles-off",
+			"action": {
+				"role": "button",
+				"name": "Close settings"
+			},
+			"proof": "story+e2e",
+			"e2e": {
+				"spec": "tests/e2e/settings.spec.ts",
+				"test": "opens and closes the settings drawer"
+			}
+		}
+	]
+}

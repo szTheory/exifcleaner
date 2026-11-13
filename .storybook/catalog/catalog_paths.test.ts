@@ -19,7 +19,7 @@ export const UNGATED_INPUTS: Readonly<Record<string, string>> = {
 	".resources/translation-glossary.json":
 		"read by translation_glossary.test.ts only; a pull request touching only this file skips the Storybook job and the drift surfaces on the next Storybook-triggering pull request",
 	"tests/e2e":
-		"read only for e2e waiver refs; valid only while waivers.json has no waiver with basis e2e, which this file asserts, so the first e2e waiver fails here until tests/e2e/** joins both path lists",
+		"read for e2e waiver refs and for the e2e test titles the journeys name (journeys.mjs parses them, never runs them); a pull request touching only tests/e2e skips the Storybook job, so a renamed or skipped journey e2e title surfaces on the next Storybook-triggering pull request (P-11 residual); the waiver rule stays: valid only while waivers.json has no waiver with basis e2e, which this file asserts, so the first e2e waiver fails here until tests/e2e/** joins both path lists",
 	"scripts/is_main_module.mjs":
 		"imported by every catalog CLI; ci.yml runs its behaviour on every pull request through tests/scripts/is_main_module.test.ts and tests/scripts/entry_point_symlink.test.ts",
 };

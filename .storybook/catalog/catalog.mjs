@@ -32,6 +32,11 @@ import {
 	renderGridMarkdown,
 	zeroGapProblems,
 } from "./grid.mjs";
+import {
+	checkJourneys,
+	loadJourneyInputs,
+	renderJourneys,
+} from "./journeys.mjs";
 import { readMergeBase, resolveBaseRef } from "./merge_base.mjs";
 import {
 	CATALOG_PATH,
@@ -53,6 +58,9 @@ export const CHECK_INPUTS = Object.freeze([
 	"src",
 	"tests/e2e",
 ]);
+
+// The generated journey view (Phase 73, FLW-01, D-22); its data is journeys/*.json.
+export const JOURNEYS_MD_PATH = ".storybook/catalog/JOURNEYS.md";
 
 const FLAGS = new Set(["--check", "--write", "--zero-gaps"]);
 
@@ -119,6 +127,24 @@ function catalogProblems(root) {
 function firstProblem(problems) {
 	const first = problems[0];
 	return `${first?.code}: ${first?.message}`;
+}
+
+/**
+ * The journey files and what checkJourneys finds wrong with them (schema, job
+ * set, scenario ids and the static e2e proof). A problem keeps its own code and
+ * its message says it is a journeys problem, so a planted defect reads as one.
+ *
+ * @param {string} root
+ */
+function journeyProblems(root) {
+	const inputs = loadJourneyInputs(root);
+	return {
+		journeys: inputs.journeys,
+		problems: checkJourneys(inputs).map((found) => ({
+			code: found.code,
+			message: `journeys: ${found.message}`,
+		})),
+	};
 }
 
 /**
@@ -196,6 +222,10 @@ export async function generatedFiles(root) {
 	if (catalog.problems.length > 0) {
 		throw new Error(firstProblem(catalog.problems));
 	}
+	const journeys = journeyProblems(root);
+	if (journeys.problems.length > 0) {
+		throw new Error(firstProblem(journeys.problems));
+	}
 	const grid = await loadGrid(root);
 	if (grid.model === null) {
 		throw new Error(firstProblem(grid.problems));
@@ -203,6 +233,7 @@ export async function generatedFiles(root) {
 	return [
 		[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))],
 		[PERSONAS_MD_PATH, renderPersonas(/** @type {any} */ (catalog.doc))],
+		[JOURNEYS_MD_PATH, renderJourneys(/** @type {any} */ (journeys.journeys))],
 		[GRID_JSON_PATH, renderGridJson(grid.model)],
 		[GRID_MD_PATH, renderGridMarkdown(grid.model)],
 	];
@@ -224,6 +255,10 @@ export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 	if (catalog.problems.length > 0) {
 		return { ok: false, problems: catalog.problems, files: 0, notes: [] };
 	}
+	const journeys = journeyProblems(root);
+	if (journeys.problems.length > 0) {
+		return { ok: false, problems: journeys.problems, files: 0, notes: [] };
+	}
 	const grid = await loadGrid(root);
 	if (grid.model === null) {
 		return { ok: false, problems: grid.problems, files: 0, notes: [] };
@@ -232,6 +267,7 @@ export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 	const files = [
 		[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))],
 		[PERSONAS_MD_PATH, renderPersonas(/** @type {any} */ (catalog.doc))],
+		[JOURNEYS_MD_PATH, renderJourneys(/** @type {any} */ (journeys.journeys))],
 		[GRID_JSON_PATH, renderGridJson(grid.model)],
 		[GRID_MD_PATH, renderGridMarkdown(grid.model)],
 	];

@@ -6,8 +6,12 @@ import {
 import { within } from "storybook/test";
 import { describe, expect, test } from "vitest";
 import scenarioDocument from "./catalog/scenarios.json";
-import { stepProblems } from "./catalog/journey_probe.mjs";
-import type { Journey, ProbeResult } from "./catalog/journey_probe.mjs";
+import { stepId, stepProblems } from "./catalog/journey_probe.mjs";
+import type {
+	Journey,
+	JourneyStep,
+	ProbeResult,
+} from "./catalog/journey_probe.mjs";
 import * as deadEndStories from "./fixtures/journey_dead_end.stories";
 import preview from "./preview";
 
@@ -86,6 +90,26 @@ const CONTROL_STORIES = new Map([
 const SCENARIOS: Scenarios = new Map(
 	scenarioDocument.scenarios.map((scenario) => [scenario.id, scenario.stories]),
 );
+
+// The nine real journey files (73-05, D-22), in file-name order. import.meta.glob
+// needs a string literal; JOURNEYS_DIR in journeys.mjs is the same directory, but this
+// browser file may not import that node-only module.
+const REAL_JOURNEYS: readonly Journey[] = Object.entries(
+	import.meta.glob<Journey>("./catalog/journeys/*.json", {
+		eager: true,
+		import: "default",
+	}),
+)
+	.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+	.map(([, journey]) => journey);
+
+function isProbed(step: JourneyStep): boolean {
+	return (
+		(step.proof === "story" || step.proof === "story+e2e") &&
+		typeof step.action.role === "string" &&
+		typeof step.action.name === "string"
+	);
+}
 
 // Runs the story as a user would first see it; null when it ran, else the
 // rejection message (a play that throws, or a copy-lint hit from the preview).
@@ -428,6 +452,82 @@ describe("journey dead-end controls over planted stories (D-24)", () => {
 				});
 				expect(brief(problems)).toEqual(expected);
 			}
+		},
+		CONTROL_TIMEOUT_MS,
+	);
+});
+
+// FLW-01 SC3 on real data: the nine journey files run against the real stories. A dead
+// end in real data (a control renamed, removed, disabled or taken out of the tab order)
+// turns this red, and the control below shows the check can fail on a real journey.
+describe("journey gate over the real journey files (FLW-01, SC3, D-22, D-23)", () => {
+	test(
+		"every probed step of every real journey resolves in a story of its scenario",
+		async () => {
+			const started = performance.now();
+			const { probe, runs } = makeProbe({
+				index: REAL_STORIES,
+				journeys: REAL_JOURNEYS,
+				scenarios: SCENARIOS,
+			});
+			const found: Array<{ code: string; step: string }> = [];
+			let probed = 0;
+			for (const journey of REAL_JOURNEYS) {
+				probed += (journey.steps ?? []).filter(isProbed).length;
+				found.push(
+					...(await stepProblems({ journey, scenarios: SCENARIOS, probe })),
+				);
+			}
+			// Not vacuous: real steps were probed and real stories ran, each at most once.
+			expect(REAL_JOURNEYS).toHaveLength(9);
+			expect(probed).toBeGreaterThanOrEqual(20);
+			expect(Math.max(...runs.values())).toBe(1);
+			expect(brief(found)).toEqual([]);
+			console.info(
+				`journey gate: ${probed} probed steps, ${runs.size} story runs, ${((performance.now() - started) / 1000).toFixed(1)} s`,
+			);
+		},
+		CONTROL_TIMEOUT_MS,
+	);
+
+	test(
+		"a real journey with one action name changed yields exactly one action-missing for that step",
+		async () => {
+			const journey = REAL_JOURNEYS.find((candidate) =>
+				(candidate.steps ?? []).some(isProbed),
+			);
+			if (journey?.steps === undefined) throw new Error("no real probed step");
+			const index = journey.steps.findIndex(isProbed);
+			const original = journey.steps[index];
+			if (original?.action.name === undefined) {
+				throw new Error("the first probed step has no action name");
+			}
+			const mutated: Journey = {
+				...journey,
+				steps: journey.steps.map((step, at) =>
+					at === index
+						? {
+								...step,
+								action: { ...step.action, name: `${original.action.name}n` },
+							}
+						: step,
+				),
+			};
+			const { probe } = makeProbe({
+				index: REAL_STORIES,
+				journeys: [mutated],
+				scenarios: SCENARIOS,
+			});
+			const problems = await stepProblems({
+				journey: mutated,
+				scenarios: SCENARIOS,
+				probe,
+			});
+			expect(brief(problems)).toEqual([
+				`action-missing ${stepId(journey.job, index)}`,
+			]);
+			// The real file was never touched: the unmodified journey still has the name.
+			expect(journey.steps[index]?.action.name).toBe(original.action.name);
 		},
 		CONTROL_TIMEOUT_MS,
 	);

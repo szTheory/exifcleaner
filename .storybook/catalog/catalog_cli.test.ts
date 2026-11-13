@@ -20,6 +20,8 @@ import { STATE_CLASSES } from "./vocab.mjs";
 const CATALOG = ".storybook/catalog/catalog.mjs";
 const GLOSSARY_MD = ".storybook/catalog/GLOSSARY.md";
 const PERSONAS_MD = ".storybook/catalog/PERSONAS.md";
+const JOURNEYS_MD = ".storybook/catalog/JOURNEYS.md";
+const JOURNEYS_DIR = ".storybook/catalog/journeys";
 const GLOSSARY_JSON = ".storybook/catalog/glossary.json";
 const REGISTER = ".storybook/catalog/copy-findings.json";
 const GRID_JSON = ".storybook/catalog/coverage-grid.json";
@@ -172,6 +174,63 @@ describe("catalog.mjs against a temp git repo", () => {
 			expect(result.stderr).toContain(
 				"PERSONAS.md is stale; run yarn catalog:write",
 			);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: one changed byte in JOURNEYS.md fails --check and changes nothing", () => {
+		withRepo((repo) => {
+			const file = path.join(repo, JOURNEYS_MD);
+			fs.writeFileSync(file, `${fs.readFileSync(file, "utf8")}x`);
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("CATALOG CHECK FAILED");
+			expect(result.stderr).toContain(
+				"JOURNEYS.md is stale; run yarn catalog:write",
+			);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: a journey step naming an unknown scenario fails --check and changes nothing", () => {
+		withRepo((repo) => {
+			const file = path.join(repo, JOURNEYS_DIR, "J-09.json");
+			const doc = JSON.parse(fs.readFileSync(file, "utf8")) as {
+				steps: Array<{ scenario: string }>;
+			};
+			const first = doc.steps[0];
+			if (first === undefined) throw new Error("J-09 has no steps");
+			first.scenario = "planted.unknown-scenario";
+			fs.writeFileSync(file, `${JSON.stringify(doc, null, "\t")}\n`);
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("CATALOG CHECK FAILED");
+			expect(result.stderr).toContain("journeys: J-09.1");
+			expect(result.stderr).toContain("planted.unknown-scenario");
+			// The invalid journey stops --write as well, and changes nothing.
+			const written = run(repo, ["--write"]);
+			expect(written.status).toBe(1);
+			expect(written.stderr).toContain("planted.unknown-scenario");
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: a journey naming an e2e test that does not exist fails --check and changes nothing", () => {
+		withRepo((repo) => {
+			const file = path.join(repo, JOURNEYS_DIR, "J-09.json");
+			const doc = JSON.parse(fs.readFileSync(file, "utf8")) as {
+				steps: Array<{ e2e?: { spec: string; test: string } }>;
+			};
+			const proved = doc.steps.find((step) => step.e2e !== undefined);
+			if (proved?.e2e === undefined) throw new Error("J-09 has no e2e step");
+			proved.e2e.test = "a test that no spec declares";
+			fs.writeFileSync(file, `${JSON.stringify(doc, null, "\t")}\n`);
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("e2e-title-missing");
 			assertDirEffect(before, snapshotDir(repo), {});
 		});
 	});

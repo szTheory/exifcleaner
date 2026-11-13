@@ -1,0 +1,63 @@
+{
+	"schemaVersion": 1,
+	"job": "J-02",
+	"title": "Keep orientation, colour and resolution when cleaning",
+	"steps": [
+		{
+			"scenario": "app.empty",
+			"action": {
+				"role": "button",
+				"name": "Open settings"
+			},
+			"proof": "story+e2e",
+			"e2e": {
+				"spec": "tests/e2e/settings.spec.ts",
+				"test": "opens and closes the settings drawer"
+			}
+		},
+		{
+			"scenario": "settings-drawer.all-toggles-on",
+			"action": {
+				"role": "switch",
+				"name": "Preserve orientation"
+			},
+			"proof": "story+e2e",
+			"e2e": {
+				"spec": "tests/e2e/settings.spec.ts",
+				"test": "toggles preserve orientation switch"
+			}
+		},
+		{
+			"scenario": "settings-drawer.all-toggles-on",
+			"action": {
+				"role": "switch",
+				"name": "Preserve color profile"
+			},
+			"proof": "story"
+		},
+		{
+			"scenario": "settings-drawer.all-toggles-on",
+			"action": {
+				"role": "switch",
+				"name": "Preserve resolution"
+			},
+			"proof": "story+e2e",
+			"e2e": {
+				"spec": "tests/e2e/settings.spec.ts",
+				"test": "toggles preserve resolution switch as the third row (FID-01, D-39)"
+			}
+		},
+		{
+			"scenario": "settings-drawer.all-toggles-on",
+			"action": {
+				"role": "button",
+				"name": "Close settings"
+			},
+			"proof": "story+e2e",
+			"e2e": {
+				"spec": "tests/e2e/settings.spec.ts",
+				"test": "opens and closes the settings drawer"
+			}
+		}
+	]
+}

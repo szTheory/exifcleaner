@@ -1,0 +1,58 @@
+{
+	"schemaVersion": 1,
+	"job": "J-03",
+	"title": "See what was removed and what remains",
+	"steps": [
+		{
+			"scenario": "file-row.cleaned",
+			"action": {
+				"role": "row",
+				"name": "test.jpg. Metadata removed"
+			},
+			"proof": "story+e2e",
+			"e2e": {
+				"spec": "tests/e2e/metadata-inspection.spec.ts",
+				"test": "expands a processed file to show metadata details"
+			}
+		},
+		{
+			"scenario": "file-row.cleaned-expanded",
+			"action": {
+				"gesture": "read the groups of metadata that were found"
+			},
+			"proof": "e2e",
+			"e2e": {
+				"spec": "tests/e2e/metadata-inspection.spec.ts",
+				"test": "shows metadata groups with before/after diff"
+			}
+		},
+		{
+			"scenario": "file-row.cleaned-expanded",
+			"action": {
+				"gesture": "read which fields were removed"
+			},
+			"proof": "e2e",
+			"e2e": {
+				"spec": "tests/e2e/metadata-inspection.spec.ts",
+				"test": "shows removed indicators for stripped metadata tags"
+			}
+		},
+		{
+			"scenario": "file-row.cleaned-expanded",
+			"action": {
+				"role": "button",
+				"name": "Copy all"
+			},
+			"proof": "story"
+		},
+		{
+			"scenario": "file-row.cleaned-expanded",
+			"action": {
+				"role": "row",
+				"name": "test.jpg. Metadata removed"
+			},
+			"proof": "story",
+			"note": "The same row collapses the list again; no e2e collapses it."
+		}
+	]
+}
