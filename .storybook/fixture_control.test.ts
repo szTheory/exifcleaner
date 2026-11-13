@@ -97,8 +97,12 @@ const FIXTURE_ABS = path.join(repoRoot, FIXTURE_REL);
 // One RegExp, no flags (a `g` or `y` flag makes `test` stateful). It is the `find` of
 // the only resolve.alias entry; Vite replaces the whole matched specifier with the
 // entry's `replacement`, the absolute path of the tmp copy.
+// F-01 (73-01): the second alternative is the single-dot sibling form a new story_support
+// module writes (`./process_outcomes`); without it a screen story built on such a module
+// would read the unmutated fixture and the D-13 control would be vacuous. It admits that
+// one sibling only: `./known_a11y` and `../story_support/known_a11y` stay unmatched.
 export const FIXTURE_SPECIFIER =
-	/^(?:\.\.?\/)+(?:src\/renderer\/)?story_support\/process_outcomes(?:\.ts)?$/;
+	/^(?:(?:\.\.?\/)+(?:src\/renderer\/)?story_support\/|\.\/)process_outcomes(?:\.ts)?$/;
 
 // --- consumers and the specifier matcher --------------------------------------
 
@@ -815,12 +819,18 @@ describe("fixture alias matcher (B-1)", () => {
 		);
 	});
 
-	test("a planted sibling story_support import is not matched, and a too-wide matcher is reported", () => {
+	test("the sibling fixture form is redirected, a sibling non-fixture import is not, and a too-wide matcher is reported", () => {
 		expect(FIXTURE_SPECIFIER.test("../story_support/known_a11y")).toBe(false);
+		expect(FIXTURE_SPECIFIER.test("./known_a11y")).toBe(false);
 		expect(FIXTURE_SPECIFIER.test("../story_support/process_outcomes")).toBe(
 			true,
 		);
-		expect(FIXTURE_SPECIFIER.test("./process_outcomes")).toBe(false);
+		expect(
+			FIXTURE_SPECIFIER.test(
+				"../../src/renderer/story_support/process_outcomes.ts",
+			),
+		).toBe(true);
+		expect(FIXTURE_SPECIFIER.test("./process_outcomes")).toBe(true);
 		const planted = [
 			{ importer: "x.stories.tsx", specifier: "../story_support/known_a11y" },
 		];

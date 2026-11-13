@@ -15,6 +15,7 @@ import {
 	repoRoot,
 	runNode,
 } from "./temp_repo";
+import { STATE_CLASSES } from "./vocab.mjs";
 
 const CATALOG = ".storybook/catalog/catalog.mjs";
 const GLOSSARY_MD = ".storybook/catalog/GLOSSARY.md";
@@ -25,6 +26,7 @@ const GRID_JSON = ".storybook/catalog/coverage-grid.json";
 const GRID_MD = ".storybook/catalog/COVERAGE-GRID.md";
 const SCENARIOS = ".storybook/catalog/scenarios.json";
 const WAIVERS = ".storybook/catalog/waivers.json";
+const SUBJECTS = ".storybook/catalog/subjects.json";
 const FIXTURES = ".storybook/catalog/fixtures";
 
 function withRepo(body: (repo: string) => void): void {
@@ -47,21 +49,85 @@ async function gridCounts(): Promise<string> {
 	return `${c.subjects} subjects, ${c.cells} cells, ${c.covered} covered, ${c.waived} waived, ${c.gaps} gaps`;
 }
 
-// A gap cell outside the screen tier, taken from the real model so the "every tier"
-// control keeps proving what it names as primitive and pattern subjects close
-// (Phase 72). It stays non-vacuous while any area subject still has a gap.
-async function firstNonScreenGap(): Promise<string> {
-	const grid = await loadGrid(repoRoot);
+// The zero-gaps controls plant their own gaps inside their temp repo (D-03), never
+// reading the live grid: the real App row's gaps close in 73-04, and a control that
+// needed one would turn red the moment the catalog is complete. Each plant is
+// regenerated with the real CLI and committed to the temp repo's `main`, so the
+// ratchet sees no change and only the zero-gaps check can fail.
+function commitPlant(repo: string, message: string): void {
+	const written = run(repo, ["--write"]);
+	expect(written.status, written.stderr).toBe(0);
+	git(repo, ["add", "-A"]);
+	git(repo, ["commit", "-q", "-m", message]);
+}
+
+async function gridRow(repo: string, subject: string) {
+	const grid = await loadGrid(repo);
 	if (grid.model === null) {
 		throw new Error(grid.problems.map((found) => found.message).join("; "));
 	}
-	for (const row of grid.model.rows) {
-		if (row.tier === "screen") continue;
-		for (const [stateClass, cell] of Object.entries(row.cells)) {
-			if (cell.status === "gap") return `gap|${row.subject}|${stateClass}`;
-		}
+	return grid.model.rows.find((row) => row.subject === subject);
+}
+
+// Opens one primitive-tier cell: the first primitive subject's first waiver is
+// dropped from the temp copy of waivers.json. Returns the cell as `Subject|class`.
+async function openPrimitiveCell(repo: string): Promise<string> {
+	const subjects = JSON.parse(
+		fs.readFileSync(path.join(repo, SUBJECTS), "utf8"),
+	) as Array<{ id: string; tier: string }>;
+	const primitive = new Set(
+		subjects.filter((entry) => entry.tier === "primitive").map((e) => e.id),
+	);
+	const file = path.join(repo, WAIVERS);
+	const original = fs.readFileSync(file, "utf8");
+	const doc = JSON.parse(original) as {
+		waivers: Array<{ subject: string; stateClass: string }>;
+	};
+	const target = doc.waivers.find((waiver) => primitive.has(waiver.subject));
+	if (target === undefined) {
+		throw new Error("no primitive-tier waiver to open a gap with");
 	}
-	throw new Error("no non-screen gap is left; this control needs one");
+	fs.writeFileSync(
+		file,
+		`${JSON.stringify(
+			{ ...doc, waivers: doc.waivers.filter((waiver) => waiver !== target) },
+			null,
+			"\t",
+		)}\n`,
+	);
+	// Anti-vacuity: the planted edit changed the temp file, and the regenerated
+	// grid shows the cell as a gap.
+	expect(fs.readFileSync(file, "utf8")).not.toBe(original);
+	commitPlant(repo, "open one primitive cell");
+	const row = await gridRow(repo, target.subject);
+	expect(row?.cells[target.stateClass]?.status).toBe("gap");
+	return `${target.subject}|${target.stateClass}`;
+}
+
+// Adds a screen-tier subject, `PlantedScreen`, to the temp repo: a subjects.json row in
+// sorted position and the minimal non-story component file scanSubjectIds needs. The
+// grid then shows its 12 cells as gaps, with no scenario or waiver of the real catalog
+// involved.
+async function plantScreenSubject(repo: string): Promise<void> {
+	const file = path.join(repo, SUBJECTS);
+	const original = fs.readFileSync(file, "utf8");
+	const doc = JSON.parse(original) as Array<{ id: string; tier: string }>;
+	doc.push({ id: "PlantedScreen", tier: "screen" });
+	doc.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+	fs.writeFileSync(file, `${JSON.stringify(doc, null, "\t")}\n`);
+	const dir = path.join(repo, "src/renderer/components/planted");
+	fs.mkdirSync(dir, { recursive: true });
+	fs.writeFileSync(
+		path.join(dir, "PlantedScreen.tsx"),
+		"export function PlantedScreen(): null {\n\treturn null;\n}\n",
+	);
+	expect(fs.readFileSync(file, "utf8")).not.toBe(original);
+	commitPlant(repo, "plant a screen subject");
+	const row = await gridRow(repo, "PlantedScreen");
+	expect(row?.tier).toBe("screen");
+	expect(STATE_CLASSES.map((c) => row?.cells[c]?.status)).toEqual(
+		STATE_CLASSES.map(() => "gap"),
+	);
 }
 
 function run(repo: string, args: string[]) {
@@ -365,8 +431,12 @@ describe("catalog.mjs coverage grid against a temp git repo", () => {
 		});
 	});
 
-	test("shown red: zero-gaps screen names the App gaps", () => {
-		withRepo((repo) => {
+	test("shown red: zero-gaps screen names every gap of a planted screen row", async () => {
+		// Independent of the live App row (D-03): the temp repo gets its own screen
+		// subject, so the outcome is the same whether App has 12 gaps or none.
+		const repo = makeCatalogRepo();
+		try {
+			await plantScreenSubject(repo);
 			const before = snapshotDir(repo);
 			const result = run(repo, [
 				"--check",
@@ -377,20 +447,34 @@ describe("catalog.mjs coverage grid against a temp git repo", () => {
 				"screen",
 			]);
 			expect(result.status).toBe(1);
-			expect(result.stderr).toContain("gap|App|happy");
-			expect(result.stderr).toContain("gap|App|huge");
+			for (const stateClass of STATE_CLASSES) {
+				expect(result.stderr).toContain(`gap|PlantedScreen|${stateClass}`);
+			}
 			expect(result.stderr).not.toContain("gap|ChevronIcon");
 			assertDirEffect(before, snapshotDir(repo), {});
-		});
+		} finally {
+			fs.rmSync(repo, { recursive: true, force: true });
+		}
 	});
 
 	test("shown red: zero-gaps without --tier looks at every tier, and --tier needs --zero-gaps", async () => {
-		const nonScreenGap = await firstNonScreenGap();
-		withRepo((repo) => {
+		const repo = makeCatalogRepo();
+		try {
+			const cell = await openPrimitiveCell(repo);
 			const before = snapshotDir(repo);
 			const all = run(repo, ["--check", "--base", "main", "--zero-gaps"]);
 			expect(all.status).toBe(1);
-			expect(all.stderr).toContain(nonScreenGap);
+			expect(all.stderr).toContain(`gap|${cell}`);
+			const primitive = run(repo, [
+				"--check",
+				"--base",
+				"main",
+				"--zero-gaps",
+				"--tier",
+				"primitive",
+			]);
+			expect(primitive.status).toBe(1);
+			expect(primitive.stderr).toContain(`gap|${cell}`);
 			const bare = run(repo, ["--check", "--base", "main", "--tier", "screen"]);
 			expect(bare.status).toBe(1);
 			expect(bare.stderr).toContain("--tier only applies with --zero-gaps");
@@ -405,7 +489,9 @@ describe("catalog.mjs coverage grid against a temp git repo", () => {
 			expect(unknown.status).toBe(1);
 			expect(unknown.stderr).toContain("unknown tier atom");
 			assertDirEffect(before, snapshotDir(repo), {});
-		});
+		} finally {
+			fs.rmSync(repo, { recursive: true, force: true });
+		}
 	});
 
 	test("shown red: a planted full-row waivers.json fails --check and refuses --write", () => {
