@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import { CHECK_INPUTS } from "./catalog.mjs";
+import { resolveInRoot } from "./closed.mjs";
 import {
 	JOURNEY_PROBE_CODES,
 	stepProblems,
@@ -27,8 +28,11 @@ import { repoRoot } from "./temp_repo";
 // guard test pins the mutant codes to JOURNEY_CODES so a new code cannot land
 // without a control. The browser half (the dead-end probe over real DOM) is
 // .storybook/journey_gate.test.tsx; its probe codes are driven here with a fake
-// probe. Nothing is planted on disk: every defect is built in memory, spec text
-// included, and no tests/e2e file is read except the real ones named below.
+// probe. Every defect is built in memory, spec text included. The specs the planted
+// journeys name are written to a temporary root and read from there (73-fix WR-05):
+// no test in this file reads tests/e2e of the repository, which the Storybook workflow
+// does not watch. The real journeys are checked against the real specs by the catalog
+// CLI (`catalog.mjs --check`), the one place a journey actually names a test.
 //
 // Planted spec text that needs a skipped, fixme'd or focused runner call is built
 // from fragments at run time, the way no_skip.test.ts builds its controls, because
@@ -41,7 +45,7 @@ const ONLY = ["on", "ly"].join("");
 type Doc = Record<string, unknown>;
 type Planted = JourneyFile[];
 
-const inputs = loadJourneyInputs(repoRoot);
+const catalogInputs = loadJourneyInputs(repoRoot);
 
 const REAL_SPEC = "tests/e2e/settings.spec.ts";
 const REAL_TITLE = "opens and closes the settings drawer";
@@ -53,6 +57,53 @@ const PLANTED_SPEC = "tests/e2e/planted.spec.ts";
 const PLANTED_TITLE = "opens the thing";
 const EXEMPT_REASON =
 	"The job is an outcome the app reports, with no control to operate.";
+const ERROR_SPEC = "tests/e2e/error-handling.spec.ts";
+const ERROR_TITLE = "handles a corrupted file without crashing";
+const ERROR_DYNAMIC_HEAD = "filters out unsupported file format ";
+
+// The three specs the tests name, written to a realpath'd temporary root in beforeAll.
+// The shapes mirror the real files: static titles inside a describe callback, and one
+// template-literal title with a dynamic tail.
+let specRoot = "";
+beforeAll(() => {
+	// realpath: os.tmpdir() is itself a symlink on macOS (/var -> /private/var).
+	specRoot = fs.realpathSync(
+		fs.mkdtempSync(path.join(os.tmpdir(), "journeys-specs-")),
+	);
+	const files: Record<string, string> = {
+		[REAL_SPEC]: specWith([call(REAL_TITLE)]),
+		[OTHER_SPEC]: specWith([call(OTHER_TITLE)]),
+		[ERROR_SPEC]: specWith([
+			call(ERROR_TITLE),
+			`\t${RUN}(\`${ERROR_DYNAMIC_HEAD}\${format}\`, async () => {});`,
+		]),
+	};
+	for (const [relPath, text] of Object.entries(files)) {
+		fs.mkdirSync(path.dirname(path.join(specRoot, relPath)), {
+			recursive: true,
+		});
+		fs.writeFileSync(path.join(specRoot, relPath), text);
+	}
+});
+afterAll(() => fs.rmSync(specRoot, { recursive: true, force: true }));
+
+// The catalog ids are the real ones; only the spec reader is swapped. It is the same
+// confinement (resolveInRoot) the real reader uses, rooted at the planted specs.
+const inputs = {
+	...catalogInputs,
+	readSpec(relPath: string): string | null {
+		if (specRoot === "") {
+			throw new Error("the planted specs are written in beforeAll");
+		}
+		const resolved = resolveInRoot(specRoot, relPath);
+		if (resolved === null) return null;
+		try {
+			return fs.readFileSync(resolved, "utf8");
+		} catch {
+			return null;
+		}
+	},
+};
 
 function isDoc(value: unknown): value is Doc {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -393,13 +444,39 @@ describe("the planted baseline", () => {
 		expect(check(planted())).toEqual([]);
 	});
 
-	test("the planted spec and title are really declared in the real spec files", () => {
+	test("the planted specs hold the planted titles and live in a temporary root outside the repository", () => {
+		expect(path.relative(repoRoot, specRoot).startsWith("..")).toBe(true);
 		const real = inputs.readSpec(REAL_SPEC) ?? "";
 		const other = inputs.readSpec(OTHER_SPEC) ?? "";
 		expect(real.length).toBeGreaterThan(0);
 		expect(other.length).toBeGreaterThan(0);
 		expect(real).toContain(REAL_TITLE);
 		expect(other).toContain(OTHER_TITLE);
+	});
+});
+
+// 73-fix WR-05: tests/e2e is outside the Storybook workflow paths, so an e2e rename must
+// not be able to turn this unit suite red on an unrelated PR. Nothing below may read a
+// live e2e spec.
+describe("no unit test reads the live e2e specs (WR-05)", () => {
+	test("checking the planted baseline reads nothing under tests/e2e of the repository", () => {
+		const live = path.join(repoRoot, "tests", "e2e");
+		const reads: string[] = [];
+		const original = fs.readFileSync;
+		const spy = vi.spyOn(fs, "readFileSync").mockImplementation(((
+			...args: unknown[]
+		) => {
+			reads.push(String(args[0]));
+			return Reflect.apply(original, fs, args);
+		}) as typeof fs.readFileSync);
+		try {
+			expect(check(planted())).toEqual([]);
+		} finally {
+			spy.mockRestore();
+		}
+		expect(reads.filter((file) => file.startsWith(live))).toEqual([]);
+		// Anti-vacuity: the spy saw the planted specs being read.
+		expect(reads.filter((file) => file.startsWith(specRoot)).length).toBe(2);
 	});
 });
 
@@ -674,7 +751,7 @@ describe("static e2e proof (D-24, T-73-09, T-73-10)", () => {
 		expect(codes(set, plantedSpecReader(text))).toEqual(["e2e-title-missing"]);
 	});
 
-	test("the real settings spec yields its static title inside test.describe (P-6)", () => {
+	test("a settings-shaped spec yields its static title inside test.describe (P-6)", () => {
 		const parsed = e2eTitles({
 			text: inputs.readSpec(REAL_SPEC) ?? "",
 			file: REAL_SPEC,
@@ -685,15 +762,26 @@ describe("static e2e proof (D-24, T-73-09, T-73-10)", () => {
 		expect(parsed.modified).toEqual([]);
 	});
 
-	test("the real error-handling spec yields static titles and a dynamic prefix", () => {
+	test("an error-handling-shaped spec yields static titles and a dynamic prefix", () => {
 		const parsed = e2eTitles({
-			text: inputs.readSpec("tests/e2e/error-handling.spec.ts") ?? "",
-			file: "tests/e2e/error-handling.spec.ts",
+			text: inputs.readSpec(ERROR_SPEC) ?? "",
+			file: ERROR_SPEC,
 		});
-		expect(parsed.titles).toContain(
-			"handles a corrupted file without crashing",
-		);
-		expect(parsed.dynamic).toContain("filters out unsupported file format ");
+		expect(parsed.titles).toContain(ERROR_TITLE);
+		expect(parsed.dynamic).toContain(ERROR_DYNAMIC_HEAD);
+	});
+
+	// Both title forms through the check itself: a static title is live, and a title that
+	// only starts with a template literal's static head is e2e-title-dynamic.
+	test("the planted error-handling spec makes its static title live and its templated title dynamic", () => {
+		const set = planted();
+		firstStep(set, "J-03")["e2e"] = { spec: ERROR_SPEC, test: ERROR_TITLE };
+		expect(codes(set)).toEqual([]);
+		firstStep(set, "J-03")["e2e"] = {
+			spec: ERROR_SPEC,
+			test: `${ERROR_DYNAMIC_HEAD}png`,
+		};
+		expect(codes(set)).toEqual(["e2e-title-dynamic"]);
 	});
 
 	test.each([
@@ -713,7 +801,7 @@ describe("static e2e proof (D-24, T-73-09, T-73-10)", () => {
 			return inputs.readSpec(relPath);
 		});
 		expect(problems).toEqual(["e2e-path"]);
-		// J-04's own real spec is read; the mutated path never is.
+		// J-04's own planted spec is read; the mutated path never is.
 		expect(reads).not.toContain(spec);
 	});
 
@@ -741,7 +829,7 @@ describe("static e2e proof (D-24, T-73-09, T-73-10)", () => {
 		expect(codes(set)).toEqual(["e2e-path"]);
 	});
 
-	test("the real reader confines every path to the repo root (T-71-14)", () => {
+	test("the planted reader confines every path to its root (T-71-14)", () => {
 		expect(inputs.readSpec("../package.json")).toBeNull();
 		expect(inputs.readSpec("/etc/passwd")).toBeNull();
 		expect(inputs.readSpec("tests/e2e/../../package.json")).toBeNull();
@@ -775,6 +863,18 @@ describe("loadJourneyInputs", () => {
 		expect(loaded.journeys).toEqual([]);
 		expect(loaded.jobIds).toEqual(inputs.jobIds);
 		expect(loaded.scenarioIds.has(FALLBACK)).toBe(true);
+	});
+
+	test("the real loader's reader confines every path to its root (T-71-14) and reads under it", () => {
+		const reader = loadJourneyInputs(tmp).readSpec;
+		// A file planted inside the temporary catalog copy, not in the symlinked tests/e2e.
+		const plantedFile = ".storybook/catalog/planted_spec.txt";
+		fs.writeFileSync(path.join(tmp, plantedFile), "planted spec text\n");
+		expect(reader(plantedFile)).toBe("planted spec text\n");
+		expect(reader("../package.json")).toBeNull();
+		expect(reader("/etc/passwd")).toBeNull();
+		expect(reader("tests/e2e/../../package.json")).toBeNull();
+		expect(reader("tests/e2e/does-not-exist.spec.ts")).toBeNull();
 	});
 
 	test("journey files are read in file-name order and non-JSON files are ignored", () => {
