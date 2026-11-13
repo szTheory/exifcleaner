@@ -1504,9 +1504,9 @@
 				"boundary": {
 					"status": "waived",
 					"waiver": {
-						"basis": "e2e",
-						"ref": "tests/e2e/folder-recursion.spec.ts",
-						"reason": "The zone's only limits are timers, the 1500 ms folder collapse and the 3000 ms skip notice, which no story may start; the folder recursion spec proves the skip notice end to end."
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/DropZone.tsx#SKIP_TOAST_DELAY_MS",
+						"reason": "The zone's only limits are timers, the 1500 ms folder collapse and the 3000 ms skip notice, which no story may start; the Toast stories draw the notice itself and the folder recursion spec covers it end to end."
 					}
 				},
 				"loading": {
