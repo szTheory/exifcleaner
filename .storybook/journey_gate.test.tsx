@@ -8,6 +8,7 @@ import { describe, expect, test } from "vitest";
 import scenarioDocument from "./catalog/scenarios.json";
 import { stepProblems } from "./catalog/journey_probe.mjs";
 import type { Journey, ProbeResult } from "./catalog/journey_probe.mjs";
+import * as deadEndStories from "./fixtures/journey_dead_end.stories";
 import preview from "./preview";
 
 // FLW-01 / D-23: the browser half of the journey dead-end check. A journey step
@@ -75,6 +76,12 @@ const realModules = import.meta.glob<CsfModule>(
 	{ eager: true },
 );
 const REAL_STORIES = indexStories(realModules);
+// The planted dead ends (fixtures/journey_dead_end.stories.tsx) join the real stories
+// only for the browser controls below; the gate over real journeys never sees them.
+const CONTROL_STORIES = new Map([
+	...REAL_STORIES,
+	...indexStories({ deadEnds: deadEndStories }),
+]);
 
 const SCENARIOS: Scenarios = new Map(
 	scenarioDocument.scenarios.map((scenario) => [scenario.id, scenario.stories]),
@@ -212,6 +219,45 @@ async function realProblems(journey: Journey) {
 	};
 }
 
+function fixtureJourney(scenario: string): Journey {
+	return {
+		schemaVersion: 1,
+		job: "J-04",
+		title: "Planted fixture control",
+		steps: [
+			{
+				scenario,
+				action: { role: "button", name: "Clear" },
+				proof: "story",
+			},
+		],
+	};
+}
+
+const FIXTURE_SCENARIOS: Scenarios = new Map([
+	["fixture.disabled", ["fixtures-journeydeadend--disabled-button"]],
+	["fixture.roleless", ["fixtures-journeydeadend--roleless-clickable"]],
+	["fixture.unreachable", ["fixtures-journeydeadend--unreachable-button"]],
+	["fixture.rejects", ["fixtures-journeydeadend--play-rejects"]],
+]);
+
+async function fixtureProblems(scenario: string) {
+	const journey = fixtureJourney(scenario);
+	const { probe, runs } = makeProbe({
+		index: CONTROL_STORIES,
+		journeys: [journey],
+		scenarios: FIXTURE_SCENARIOS,
+	});
+	return {
+		problems: await stepProblems({
+			journey,
+			scenarios: FIXTURE_SCENARIOS,
+			probe,
+		}),
+		runs,
+	};
+}
+
 function brief(problems: ReadonlyArray<{ code: string; step: string }>) {
 	return problems.map((problem) => `${problem.code} ${problem.step}`);
 }
@@ -315,6 +361,73 @@ describe("journey dead-end gate over real stories (FLW-01, D-23)", () => {
 			).toEqual({
 				status: "missing",
 			});
+		},
+		CONTROL_TIMEOUT_MS,
+	);
+});
+
+// D-24 controls: every browser code shown against real DOM, one planted story each.
+// The expected code is the whole result (toEqual of one entry), so a story that fails
+// two ways, or fails the wrong way, is red here.
+describe("journey dead-end controls over planted stories (D-24)", () => {
+	test.each([
+		["fixture.disabled", "action-disabled", "a disabled button"],
+		["fixture.roleless", "action-missing", "a role-less clickable div"],
+		["fixture.unreachable", "action-unreachable", "a tabIndex -1 button"],
+		["fixture.rejects", "story-run-failed", "a play that rejects"],
+		["fixture.unknown", "unknown-scenario", "a scenario no map lists"],
+	])(
+		"%s yields exactly %s (%s)",
+		async (scenario, code) => {
+			const { problems, runs } = await fixtureProblems(scenario);
+			expect(brief(problems)).toEqual([`${code} J-04.1`]);
+			if (code === "story-run-failed") {
+				// The rejection is carried as evidence, never mistaken for a missing control.
+				expect(problems[0]?.message).toContain("planted play failure");
+			}
+			if (code === "unknown-scenario") {
+				// No story is run for a scenario the map does not list.
+				expect(runs.size).toBe(0);
+			} else {
+				expect([...runs.values()]).toEqual([1]);
+			}
+		},
+		CONTROL_TIMEOUT_MS,
+	);
+
+	test(
+		"action names match by exact equality: Choose files with the ellipsis resolves, three dots do not",
+		async () => {
+			const journeyFor = (name: string): Journey => ({
+				schemaVersion: 1,
+				job: "J-09",
+				title: "Encoding control",
+				steps: [
+					{
+						scenario: "empty-state.copy-mode-on",
+						action: { role: "button", name },
+						proof: "story",
+					},
+				],
+			});
+			for (const [name, expected] of [
+				["Choose files…", []],
+				["Choose files...", ["action-missing J-09.1"]],
+				["choose files…", ["action-missing J-09.1"]],
+			] as const) {
+				const journey = journeyFor(name);
+				const { probe } = makeProbe({
+					index: REAL_STORIES,
+					journeys: [journey],
+					scenarios: SCENARIOS,
+				});
+				const problems = await stepProblems({
+					journey,
+					scenarios: SCENARIOS,
+					probe,
+				});
+				expect(brief(problems)).toEqual(expected);
+			}
 		},
 		CONTROL_TIMEOUT_MS,
 	);
