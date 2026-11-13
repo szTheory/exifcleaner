@@ -1,15 +1,21 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { composeStories } from "@storybook/react-vite";
 import ts from "typescript";
 import { describe, expect, test } from "vitest";
-import { FAILURE_CASES } from "../src/renderer/story_support/process_outcomes";
+import * as FileRowStories from "../src/renderer/components/file-list/FileRow.stories";
+import {
+	FAILURE_CASES,
+	FAILURE_WITHOUT_RESIDUAL,
+} from "../src/renderer/story_support/process_outcomes";
 import { enumerateStories } from "./catalog/story_index.mjs";
 import { repoRoot } from "./catalog/temp_repo";
 
 // D-05: the FileEntry.failureKind union, the FAILURE_CASES fixture keys and the
 // ErrorExpansion kind stories are one set. A kind added to the union without a
-// fixture and a story fails here. Phase 73 SC1 extends this test (FileRow's per-kind
-// summaries) rather than adding a second mechanism.
+// fixture and a story fails here. Phase 73 SC1 extends this test (no new mechanism): a
+// FileRow branch below checks the same union against the composed FileRow stories' args,
+// never against story-id slugs (D-09).
 //
 // The two stories that show no kind are declared, never inferred: GenericFailure is
 // the `{ success: false, error }` branch (no failureKind), LongDetail is a wrapping
@@ -93,6 +99,57 @@ export function failureKindCoverageProblems({
 	for (const kind of storyKinds) {
 		if (!union.includes(kind)) {
 			problems.push(`story ${kind} is not a failure kind`);
+		}
+	}
+	return problems.sort(compare);
+}
+
+type FileRowStoryLike = {
+	name: string;
+	args: {
+		file?: {
+			failureKind?: string | undefined;
+			residualPath?: string | undefined;
+		};
+		isExpanded?: boolean | undefined;
+	};
+};
+
+// D-09 / SC1: a story counts for a failure kind only when it is expanded and its file
+// has that failureKind (an expanded error row is the only place the per-kind detail
+// renders); a collapsed row never counts. For the kinds that differ by residual path,
+// one counting story must carry a residualPath and one must not.
+export function fileRowKindProblems({
+	union,
+	without,
+	stories,
+}: {
+	union: readonly string[];
+	without: readonly string[];
+	stories: readonly FileRowStoryLike[];
+}): string[] {
+	const counting = (kind: string): FileRowStoryLike[] =>
+		stories.filter(
+			(story) =>
+				story.args.file?.failureKind === kind && story.args.isExpanded === true,
+		);
+	const problems: string[] = [];
+	for (const kind of union) {
+		if (counting(kind).length === 0) {
+			problems.push(`union member ${kind} has no expanded FileRow story`);
+		}
+	}
+	for (const kind of without) {
+		const withKind = counting(kind);
+		if (
+			!withKind.some((story) => story.args.file?.residualPath !== undefined)
+		) {
+			problems.push(`${kind} has no FileRow story with a residualPath`);
+		}
+		if (
+			!withKind.some((story) => story.args.file?.residualPath === undefined)
+		) {
+			problems.push(`${kind} has no FileRow story without a residualPath`);
 		}
 	}
 	return problems.sort(compare);
@@ -203,5 +260,67 @@ describe("failureKind union coverage (D-05)", () => {
 				storyKinds,
 			}),
 		).toEqual(["union member xattr has no ErrorExpansion story"]);
+	});
+});
+
+function composedFileRowStories(): FileRowStoryLike[] {
+	return Object.values(composeStories(FileRowStories)).map((story) => ({
+		name: story.storyName ?? "",
+		args: story.args,
+	}));
+}
+
+describe("FileRow failure coverage (SC1, D-09)", () => {
+	const without = Object.keys(FAILURE_WITHOUT_RESIDUAL).sort(compare);
+
+	test("the real union and the composed FileRow stories agree", () => {
+		const stories = composedFileRowStories();
+		// Anti-vacuity: the composed list is the real story file, not an empty one.
+		expect(stories.length).toBeGreaterThanOrEqual(10);
+		expect(
+			fileRowKindProblems({
+				union: unionFromSource(REAL_TEXT),
+				without,
+				stories,
+			}),
+		).toEqual([]);
+	});
+
+	test("a union member planted in an in-memory copy has no expanded FileRow story", () => {
+		const planted = REAL_TEXT.replace(
+			'| "xattr"\n\t\t| "refused"',
+			'| "xattr"\n\t\t| "planted"\n\t\t| "refused"',
+		);
+		expect(planted).not.toBe(REAL_TEXT);
+		expect(
+			fileRowKindProblems({
+				union: unionFromSource(planted),
+				without,
+				stories: composedFileRowStories(),
+			}),
+		).toEqual(["union member planted has no expanded FileRow story"]);
+	});
+
+	test("a dropped Xattr story leaves no xattr story with a residualPath", () => {
+		const stories = composedFileRowStories();
+		const kept = stories.filter((story) => story.name !== "Xattr");
+		expect(kept.length).toBe(stories.length - 1);
+		expect(
+			fileRowKindProblems({ union: REAL_UNION, without, stories: kept }),
+		).toEqual(["xattr has no FileRow story with a residualPath"]);
+	});
+
+	test("a story named Write that renders verification does not cover write with a residualPath", () => {
+		const stories = composedFileRowStories();
+		const verification = stories.find((story) => story.name === "Verification");
+		expect(verification).toBeDefined();
+		const misnamed = stories.map((story) =>
+			story.name === "Write"
+				? { name: "Write", args: verification?.args ?? {} }
+				: story,
+		);
+		expect(
+			fileRowKindProblems({ union: REAL_UNION, without, stories: misnamed }),
+		).toEqual(["write has no FileRow story with a residualPath"]);
 	});
 });

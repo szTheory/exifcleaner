@@ -206,6 +206,67 @@
 			]
 		},
 		{
+			"id": "file-row.cleanup",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "area",
+			"situation": "A leftover file could not be removed after a failed check, so the row says so and names its path when it has one.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--cleanup",
+				"file-list-filerow--cleanup-without-residual"
+			]
+		},
+		{
+			"id": "file-row.commit",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "stale",
+			"tier": "area",
+			"situation": "Another app changed the file while it was being cleaned, so the row says the cleaned file could not be saved over it.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--commit"
+			]
+		},
+		{
+			"id": "file-row.error-collapsed",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "error",
+			"tier": "area",
+			"situation": "A failed file in a long run stays folded, showing only its summary, until someone opens it to read why.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--error-collapsed"
+			]
+		},
+		{
+			"id": "file-row.generic-failure",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "area",
+			"situation": "The engine stopped before it gave a verdict, so the row shows its plain message and no failure summary.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--generic-failure"
+			]
+		},
+		{
+			"id": "file-row.refused",
+			"persona": "P-photographer",
+			"job": "J-05",
+			"stateClass": "denied",
+			"tier": "area",
+			"situation": "A RAF file is refused because writing it can damage the original, and the row says it was left unchanged.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--refused"
+			]
+		},
+		{
 			"id": "file-row.verification",
 			"persona": "P-source",
 			"job": "J-04",
@@ -215,6 +276,32 @@
 			"proofBoundary": "story",
 			"stories": [
 				"file-list-filerow--verification"
+			]
+		},
+		{
+			"id": "file-row.write",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "area",
+			"situation": "A cleaned copy could not be written, so the row says so and opens to the leftover file's path, with and without that path.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--write",
+				"file-list-filerow--write-without-residual"
+			]
+		},
+		{
+			"id": "file-row.xattr",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "area",
+			"situation": "Embedded metadata is gone but macOS kept some extra file data, so the row says so, with and without the cleaned file's path.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-filerow--xattr",
+				"file-list-filerow--xattr-without-residual"
 			]
 		},
 		{

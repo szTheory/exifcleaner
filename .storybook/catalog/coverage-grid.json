@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 58,
+		"covered": 60,
 		"waived": 123,
-		"gaps": 71
+		"gaps": 69
 	},
 	"rows": [
 		{
@@ -1577,14 +1577,25 @@
 				"error": {
 					"status": "covered",
 					"scenarios": [
-						"file-row.verification"
+						"file-row.cleanup",
+						"file-row.error-collapsed",
+						"file-row.generic-failure",
+						"file-row.verification",
+						"file-row.write",
+						"file-row.xattr"
 					]
 				},
 				"denied": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.refused"
+					]
 				},
 				"stale": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.commit"
+					]
 				},
 				"long": {
 					"status": "gap"

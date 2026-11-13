@@ -2,7 +2,7 @@
 
 # Coverage grid
 
-21 subjects x 12 state classes = 252 cells: 58 covered, 123 waived, 71 gaps.
+21 subjects x 12 state classes = 252 cells: 60 covered, 123 waived, 69 gaps.
 
 A cell is covered by a scenario in scenarios.json, waived with a reason in waivers.json, or a gap. A gap is computed, never typed. Cells show the scenario count, `waived` or `gap`. A gap is owed by the phase in the Due column: primitive and pattern rows by Phase 72, area and screen rows by Phase 73.
 
@@ -25,7 +25,7 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 | Toast | pattern | Phase 72 | 1 | 1 | 1 | 1 | 1 | waived | waived | waived | 1 | 1 | 1 | waived |
 | DropZone | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | EmptyState | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
-| FileRow | area | Phase 73 | gap | gap | gap | gap | gap | gap | 1 | gap | gap | gap | gap | gap |
+| FileRow | area | Phase 73 | gap | gap | gap | gap | gap | gap | 6 | 1 | 1 | gap | gap | gap |
 | FileTable | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | SettingsDrawer | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
 | App | screen | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
