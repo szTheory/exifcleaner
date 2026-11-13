@@ -11,8 +11,29 @@ export function unregisterSender(webContentsId: number): void {
 	allowedSenders.delete(webContentsId);
 }
 
-export function validateSender(event: { sender: { id: number } }): boolean {
-	return allowedSenders.has(event.sender.id);
+// Checks the URL of the document that sent the message, not just which window it came from.
+// The preload script runs in whatever document a window shows, so a window ID alone cannot
+// tell the bundled app apart from some other document that was loaded into the same window.
+let isTrustedSenderUrl: ((url: string) => boolean) | null = null;
+
+export function setTrustedSenderUrlPolicy(
+	predicate: ((url: string) => boolean) | null,
+): void {
+	isTrustedSenderUrl = predicate;
+}
+
+export function validateSender(event: {
+	sender: { id: number };
+	senderFrame?: { url: string } | null;
+}): boolean {
+	if (!allowedSenders.has(event.sender.id)) {
+		return false;
+	}
+	if (isTrustedSenderUrl === null) {
+		return true;
+	}
+	const frame = event.senderFrame;
+	return frame !== undefined && frame !== null && isTrustedSenderUrl(frame.url);
 }
 
 export function createValidatedHandler<TPayload, TResult>(

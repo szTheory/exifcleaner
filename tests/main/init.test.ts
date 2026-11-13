@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
 	initContainer: vi.fn(),
 	registerAllowedSender: vi.fn(),
 	unregisterSender: vi.fn(),
+	setTrustedSenderUrlPolicy: vi.fn(),
 	hardenNavigation: vi.fn(),
 	installPermissionGate: vi.fn(),
 	setupExifHandlers: vi.fn(),
@@ -39,6 +40,7 @@ vi.mock("../../src/main/security/permissions", () => ({
 vi.mock("../../src/main/ipc/ipc_validation", () => ({
 	registerAllowedSender: mocks.registerAllowedSender,
 	unregisterSender: mocks.unregisterSender,
+	setTrustedSenderUrlPolicy: mocks.setTrustedSenderUrlPolicy,
 }));
 vi.mock("../../src/main/i18n", () => ({
 	setupI18nHandlers: vi.fn(),
@@ -128,7 +130,17 @@ describe("main process initialization", () => {
 		destroyed?.();
 
 		expect(mocks.registerAllowedSender).toHaveBeenCalledWith(44);
-		expect(mocks.hardenNavigation).toHaveBeenCalledWith(window);
+		expect(mocks.hardenNavigation).toHaveBeenCalledWith(
+			window,
+			expect.objectContaining({
+				rendererEntryUrl: expect.stringMatching(
+					/^file:\/\/.*\/renderer\/index\.html$/u,
+				),
+			}),
+		);
+		const trustedUrl = mocks.setTrustedSenderUrlPolicy.mock.calls[0]?.[0] as
+			((url: string) => boolean) | undefined;
+		expect(trustedUrl?.("file:///tmp/evil.html")).toBe(false);
 		expect(mocks.unregisterSender).toHaveBeenCalledWith(44);
 	});
 
