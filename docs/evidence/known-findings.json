@@ -9,6 +9,27 @@
 		},
 		"a11y-p73": {
 			"sealed": true
+		},
+		"access-gap": {
+			"sealed": true
+		},
+		"dead-end": {
+			"sealed": true
+		},
+		"i18n-gap": {
+			"sealed": true
+		},
+		"layout-gap": {
+			"sealed": true
+		},
+		"silent-failure": {
+			"sealed": true
+		},
+		"token-gap": {
+			"sealed": true
+		},
+		"unrendered-outcome": {
+			"sealed": true
 		}
 	},
 	"entries": [
@@ -2059,6 +2080,421 @@
 			"rule": "color-contrast",
 			"reason": "Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; the fix belongs to v5.1.",
 			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filerow--cleaned-expanded|rowgroup-holds-non-row-children",
+			"kind": "access-gap",
+			"story": "file-list-filerow--cleaned-expanded",
+			"rule": "rowgroup-holds-non-row-children",
+			"reason": "The metadata expansion (a button, a details element and a labelled div) sits in the role=rowgroup at FileTable.tsx:124 beside the row, so axe aria-required-children fails on the table and the rowgroup and the table structure is invalid for assistive tech.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filerow--cleaned|row-aria-expanded-unsupported-in-table",
+			"kind": "access-gap",
+			"story": "file-list-filerow--cleaned",
+			"rule": "row-aria-expanded-unsupported-in-table",
+			"reason": "FileRow.tsx:146 puts aria-expanded on the role=row element inside the role=table section (FileTable.tsx:115), where axe aria-conditional-attr reports the attribute as unsupported, so assistive tech may not announce the expanded state of any complete or error row.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filerow--long-unbroken-name|name-text-has-no-title",
+			"kind": "access-gap",
+			"story": "file-list-filerow--long-unbroken-name",
+			"rule": "name-text-has-no-title",
+			"reason": "The name text carries no title attribute: a 180-code-unit name has scrollWidth 1526 in a 180 px bdi, so a pointer user cannot read its tail; the full name is reachable through the row's aria-label and Reveal, so the harm is limited.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filerow--processing|progress-row-announced-as-pending",
+			"kind": "access-gap",
+			"story": "file-list-filerow--processing",
+			"rule": "progress-row-announced-as-pending",
+			"reason": "The Processing row is announced as 'test.jpg. Pending': with no outcomeKind or failureKind FileRow.tsx:61-68 leaves outcomeSummary undefined and the aria-label falls back to the pending status key at FileRow.tsx:144, while StatusIcon.tsx:32-40 labels the same row Processing, so an assistive-tech user hears a pending file while it is being read or written; this is the row name contradicting its own icon, not seed 7's icon wording.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filetable--mixed-statuses|reveal-transition-reduced-motion",
+			"kind": "access-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "reveal-transition-reduced-motion",
+			"reason": "The reduced-motion concern is a catalog artefact, not a defect: the Complete row renders the .file-table__reveal span (FileRow.tsx:199-201) and its opacity transition is file_table.css:156 inside the rule at :143, but the prefers-reduced-motion: reduce block at file_table.css:170-174 sets transition: none for it, so a reduced-motion user gets no transition.",
+			"disposition": "reject",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filetable--mixed-statuses|status-column-header-empty",
+			"kind": "access-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "status-column-header-empty",
+			"reason": "FileTable.tsx:117 renders an empty role=columnheader for the status column, so axe empty-table-header reports a column header with no text visible to screen readers and the status column has no name.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filetable--mixed-statuses|table-section-role-not-allowed",
+			"kind": "access-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "table-section-role-not-allowed",
+			"reason": "FileTable.tsx:115 renders the table as a section element with role=table, which axe aria-allowed-role reports as a role the element does not allow; a div or a native table would carry the role.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filetable--mixed-statuses|toast-live-region-inside-table",
+			"kind": "access-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "toast-live-region-inside-table",
+			"reason": "FileTable.tsx:189 renders the Toast live region (role=status, Toast.tsx:13) inside the role=table section, so axe aria-required-children reports a child that is not a row or rowgroup.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|file-list-metadataexpansion--mixed|removed-count-announced-twice",
+			"kind": "access-gap",
+			"story": "file-list-metadataexpansion--mixed",
+			"rule": "removed-count-announced-twice",
+			"reason": "The expanded row prints the removed and present counts in MetadataExpansion.tsx:90-92 and the details summary at :115 prints the present count again ('1 field still present' appears twice in the Mixed play), so a screen reader reads that count twice; the repeat is brief and the details summary is a control, so it is accepted.",
+			"disposition": "accept",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|screens-app--mid-batch|row-aria-expanded-unsupported-in-table",
+			"kind": "access-gap",
+			"story": "screens-app--mid-batch",
+			"rule": "row-aria-expanded-unsupported-in-table",
+			"reason": "In the real App every complete or error row puts aria-expanded on a role=row (FileRow.tsx:146) inside the role=table, which axe aria-conditional-attr reports as unsupported.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|screens-app--mid-batch|status-column-header-empty",
+			"kind": "access-gap",
+			"story": "screens-app--mid-batch",
+			"rule": "status-column-header-empty",
+			"reason": "In the real App the status column header (FileTable.tsx:117) has no visible text, so axe empty-table-header reports it and a screen reader finds an unnamed column.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|screens-app--mid-batch|table-section-role-not-allowed",
+			"kind": "access-gap",
+			"story": "screens-app--mid-batch",
+			"rule": "table-section-role-not-allowed",
+			"reason": "The real App shows the same section role=table (FileTable.tsx:115) that axe aria-allowed-role reports on the FileTable story, here inside the full screen with the status bar.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|screens-app--mid-batch|toast-live-region-inside-table",
+			"kind": "access-gap",
+			"story": "screens-app--mid-batch",
+			"rule": "toast-live-region-inside-table",
+			"reason": "In the real App the Toast live region (role=status) still sits inside the table section (FileTable.tsx:189), which axe aria-required-children reports.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|settings-languagedropdown--keyboard-end|no-aria-activedescendant",
+			"kind": "access-gap",
+			"story": "settings-languagedropdown--keyboard-end",
+			"rule": "no-aria-activedescendant",
+			"reason": "LanguageDropdown.tsx:204 is a role listbox of role option divs (:214, :239) that never take focus and no aria-activedescendant is set anywhere in the file, so a screen reader hears no moving selection while the arrow keys change the highlight; axe also reports scrollable-region-focusable here, which this entry subsumes.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|ui-errorboundary--fallback|reduced-motion-transition-unguarded",
+			"kind": "access-gap",
+			"story": "ui-errorboundary--fallback",
+			"rule": "reduced-motion-transition-unguarded",
+			"reason": "error_boundary.css:35 sets transition: background-color 0.15s ease on .error-boundary__button and the file has no prefers-reduced-motion block (the grep of error_boundary.css finds none), so the button hover transition ignores a reduce preference; the effect is a 150 ms colour change.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|ui-statusicon--processing|reading-and-no-metadata-share-labels",
+			"kind": "access-gap",
+			"story": "ui-statusicon--processing",
+			"rule": "reading-and-no-metadata-share-labels",
+			"reason": "StatusIcon.tsx:32-40 gives the Reading and Processing statuses the same role img with the label Processing and NoMetadataFound shares Complete (outerHTML equality plays in the 72-02 stories), so assistive tech cannot tell a file being read from one being written or a clean file from a cleaned one.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "dead-end|file-list-errorexpansion--verification|click-to-copy-not-keyboard-reachable",
+			"kind": "dead-end",
+			"story": "file-list-errorexpansion--verification",
+			"rule": "click-to-copy-not-keyboard-reachable",
+			"reason": "ErrorExpansion.tsx:18-24 renders the error text as a pre with onClick and no role or tabIndex (the story shows no interactive element at all), so a keyboard user cannot copy the error and the Click to copy hint at :25-30 points at a gesture they cannot make.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "dead-end|screens-app--all-done|no-per-row-remove",
+			"kind": "dead-end",
+			"story": "screens-app--all-done",
+			"rule": "no-per-row-remove",
+			"reason": "No row offers a remove control (FileRow.tsx renders only the expand toggle at :147 and :160 and, on complete rows, Reveal at :199-223), so the only way to drop one file is Clear at App.tsx:94-96, which empties the whole list.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "dead-end|screens-app--all-error|no-retry-for-failed-file",
+			"kind": "dead-end",
+			"story": "screens-app--all-error",
+			"rule": "no-retry-for-failed-file",
+			"reason": "A failed row offers only expand (FileRow.tsx:41-42, :147) and no control re-runs a failed file; the only Try again resets a render crash (ErrorBoundary.tsx:42-48), so Clear and choosing the file again is the workaround.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|file-list-filerow--huge-size|file-size-english-units-ungrouped-counts",
+			"kind": "i18n-gap",
+			"story": "file-list-filerow--huge-size",
+			"rule": "file-size-english-units-ungrouped-counts",
+			"reason": "formatFileSize reads 1 TiB (1,099,511,627,776 bytes) as '1024 GB' and 1,048,575 bytes as '1024 KB' with English units only, and tag counts print as raw integers ('654321', '123456') with no digit grouping, in every locale.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|file-list-filerow--rlo-name|rtl-override-reorders-name",
+			"kind": "i18n-gap",
+			"story": "file-list-filerow--rlo-name",
+			"rule": "rtl-override-reorders-name",
+			"reason": "By measured glyph positions the name 'holiday' U+202E 'gnp.jpg' draws as 'holiday' then 'gpj.png', so a JPG file reads as a PNG while the type pill says JPG; the bdi dir=auto isolate does not contain the override's reordering, which lets a crafted name misstate the file type.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "i18n-gap|file-list-filetable--persian-batch|header-text-align-left-under-rtl",
+			"kind": "i18n-gap",
+			"story": "file-list-filetable--persian-batch",
+			"rule": "header-text-align-left-under-rtl",
+			"reason": "Under dir rtl (ar and fa) all six header cells keep a computed text-align of left because file_table.css:24 and :30 hard-code it, so labels sit at the left edge of each cell in a mirrored table; the fa header row is 30 px like en, so the wrap guess was not confirmed.",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|file-list-folderrow--single-file|folder-count-no-singular",
+			"kind": "i18n-gap",
+			"story": "file-list-folderrow--single-file",
+			"rule": "folder-count-no-singular",
+			"reason": "FolderRow.tsx:74-75 fills the folder.files template ('{count} files') with the count, so one file reads '1 files'; the SingleFile story deliberately does not assert the wording.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|file-list-metadataexpansion--arabic-plural|ar-lacks-dual-category",
+			"kind": "i18n-gap",
+			"story": "file-list-metadataexpansion--arabic-plural",
+			"rule": "ar-lacks-dual-category",
+			"reason": "ar.json carries only metadata.removed.one and metadata.removed.other (no two category) although Arabic distinguishes the count 2, so two removed fields read through the general wording; the code supports a dedicated category and the fix is translator content that needs the maintainer's approval.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|icons-chevronicon--arabic|chevron-not-mirrored",
+			"kind": "i18n-gap",
+			"story": "icons-chevronicon--arabic",
+			"rule": "chevron-not-mirrored",
+			"reason": "The chevron always points right and the expanded rule is rotate(90deg) at metadata_expansion.css:167; no stylesheet under src/renderer/styles has an rtl or :dir() rule, so the glyph is not mirrored in a right-to-left layout (read from source).",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|settings-segmentedcontrol--arabic|indicator-ignores-rtl",
+			"kind": "i18n-gap",
+			"story": "settings-segmentedcontrol--arabic",
+			"rule": "indicator-ignores-rtl",
+			"reason": "segmented_control.css:50-54 places the indicator at left: 2px at a third of the width and moves it by index, and no stylesheet under src/renderer/styles has an rtl or :dir() rule, while the flex row of segments reverses in a right-to-left layout, so as read from the source the highlight sits on the wrong segment for every choice but the middle one; not measured in a story.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "i18n-gap|ui-statusbar--single-file|tags-count-no-singular",
+			"kind": "i18n-gap",
+			"story": "ui-statusbar--single-file",
+			"rule": "tags-count-no-singular",
+			"reason": "StatusBar.tsx:57-61 fills the statusBar.tagsRemoved template ('{count} tags removed') with the count, so one tag reads '1 tags removed'; copy-findings already records statusBar.tagsRemoved as fix-v5.1, so the disposition matches it.",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|ui-toast--skipped-one|skipped-count-no-singular",
+			"kind": "i18n-gap",
+			"story": "ui-toast--skipped-one",
+			"rule": "skipped-count-no-singular",
+			"reason": "The template intake.unsupportedSkipped ('{count} unsupported files skipped') is filled with 1 as '1 unsupported files skipped', and two e2e specs pin that exact text (error-handling.spec.ts:168, folder-recursion.spec.ts:95), so fixing the wording also changes those specs.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "layout-gap|file-list-filerow--cleaned|size-cell-clips-size-change",
+			"kind": "layout-gap",
+			"story": "file-list-filerow--cleaned",
+			"rule": "size-cell-clips-size-change",
+			"reason": "The size cell for a cleaned row reads '1.0 KB to 512 B' at scrollWidth 124 in an 80 px cell (clientWidth 80), so ordinary data clips under overflow hidden at the default 580 px window and the after size is cut off.",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "layout-gap|file-list-filerow--commit|secondary-summary-clips-in-name-column",
+			"kind": "layout-gap",
+			"story": "file-list-filerow--commit",
+			"rule": "secondary-summary-clips-in-name-column",
+			"reason": "The secondary summary clips in the 196 px name column (unchanged scrollWidth 278, already clean 414, write failed 454, commit failed 1076), so the sentence that says the original is unchanged is cut off exactly where a person looks for it; the row also grows to 53 px for a summary and 60 px with the copy disclosure against 44 px otherwise.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "layout-gap|file-list-filerow--huge-tag-counts|after-count-clips-six-digits",
+			"kind": "layout-gap",
+			"story": "file-list-filerow--huge-tag-counts",
+			"rule": "after-count-clips-six-digits",
+			"reason": "A six-digit AFTER tag count '123456' measures scrollWidth 120 in an 88 px cell, so it clips (73-02 measurement on the huge-tag-counts story).",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "layout-gap|screens-app--large-batch|row-stagger-lacks-backwards-fill",
+			"kind": "layout-gap",
+			"story": "screens-app--large-batch",
+			"rule": "row-stagger-lacks-backwards-fill",
+			"reason": "Read from file_table.css:182 (animation-delay: var(--ec-stagger-delay)) and :198-199 (animation ... forwards with no backwards fill) with the delay set to index times 30 ms at FileRow.tsx:119, so row 100 stays fully drawn for about 2970 ms and then flashes to transparent and fades in; hidden by reduced motion in the harness and not measured.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "layout-gap|settings-settingsdrawer--german-drawer|drawer-content-grows-past-window",
+			"kind": "layout-gap",
+			"story": "settings-settingsdrawer--german-drawer",
+			"rule": "drawer-content-grows-past-window",
+			"reason": "The drawer content height is 983 px in de (scrollHeight 983, clientHeight 312 in the story frame; 854 px in en), so the drawer scrolls and the last switches sit below the fold; they stay reachable by scrolling, so the harm is latent.",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "layout-gap|settings-settingsdrawer--hungarian-drawer|drawer-content-grows-past-window",
+			"kind": "layout-gap",
+			"story": "settings-settingsdrawer--hungarian-drawer",
+			"rule": "drawer-content-grows-past-window",
+			"reason": "The drawer content height is 965 px in hu (scrollHeight 965, clientHeight 312 in the story frame; 854 px in en), so the drawer scrolls like the German one and the last switches sit below the fold, reachable by scrolling.",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "layout-gap|ui-emptystate--malayalam-empty|empty-state-overflows-minimum-height",
+			"kind": "layout-gap",
+			"story": "ui-emptystate--malayalam-empty",
+			"rule": "empty-state-overflows-minimum-height",
+			"reason": "The ml EmptyState frame measures 327 px against its 312 px minimum, 15 px over (section 327 px, inner 263 px), while de measures 312 (section 298 px) and fa 312 (section 278 px).",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "silent-failure|file-list-filerow--verification|failure-summary-no-exhaustiveness",
+			"kind": "silent-failure",
+			"story": "file-list-filerow--verification",
+			"rule": "failure-summary-no-exhaustiveness",
+			"reason": "FileRow.tsx:47-60 maps failureKind to its summary with an if-chain that ends in undefined and has no assertNever, so a failureKind added to the union later renders a row with no failure summary; the union is also declared inline in AppContext.tsx FileEntry, the UPDATE_FILE_ERROR action and ipc_channels.ts.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "silent-failure|file-list-folderrow--empty-expanded|unreadable-folder-reads-as-empty",
+			"kind": "silent-failure",
+			"story": "file-list-folderrow--empty-expanded",
+			"rule": "unreadable-folder-reads-as-empty",
+			"reason": "DropZone.tsx:91-99 answers a folder.expand error with UPDATE_FOLDER_STATE status empty and fileCount 0, the same state as a folder with no supported file (DropZone.tsx:116), and FolderRow.tsx:76-77 draws both as 0 supported files; the en.json string intake.foldersUnreadable is used by no source file, so a refused or unreadable folder tells the person nothing about the failure.",
+			"disposition": "fix-v5.2",
+			"severity": "critical"
+		},
+		{
+			"fingerprint": "silent-failure|screens-app--all-error|status-bar-omits-failures",
+			"kind": "silent-failure",
+			"story": "screens-app--all-error",
+			"rule": "status-bar-omits-failures",
+			"reason": "With three failed rows the status bar reads '0 of 3 cleaned' and '0 tags removed' and shows no failure count: App.tsx:38-41 counts only outcomeKind cleaned and StatusBar.tsx:49-67 has no failure segment (en.json has no statusBar failure key); each row names its own failure, so the person is not told nothing, but the summary does not report the failures.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "silent-failure|screens-app--mid-batch|clear-during-processing-keeps-writing",
+			"kind": "silent-failure",
+			"story": "screens-app--mid-batch",
+			"rule": "clear-during-processing-keeps-writing",
+			"reason": "Clear is enabled while row 3 shows Processing (App.tsx:94-96); as read from the call sites and not reproduced in a story, CLEAR_FILES empties the list (AppContext.tsx:99-106) while processFileEntries keeps iterating the entries it captured with no cancellation check (use_process_files.ts:20-147), so the remaining files are still written while no row reports them and the person is told nothing about those results.",
+			"disposition": "fix-v5.2",
+			"severity": "critical"
+		},
+		{
+			"fingerprint": "silent-failure|settings-languagedropdown--item-hover|hover-moves-keyboard-selection",
+			"kind": "silent-failure",
+			"story": "settings-languagedropdown--item-hover",
+			"rule": "hover-moves-keyboard-selection",
+			"reason": "LanguageDropdown.tsx:217 and :242 set focusedIndex from onMouseEnter, the same state the arrow keys move, so the pointer resting over the list moves the keyboard highlight and, as read from the source, Enter then picks the item under the pointer instead of the one the keyboard chose; the ItemHover story asserts the shared --focused class.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "silent-failure|ui-toast--skipped-many|toasts-share-one-position",
+			"kind": "silent-failure",
+			"story": "ui-toast--skipped-many",
+			"rule": "toasts-share-one-position",
+			"reason": "toast.css:4-5 fixes every .toast at bottom calc(44px + var(--ec-space-4)); DropZone.tsx:281 and FileTable.tsx:189 each render their own Toast and App.tsx:82-84 mounts FileTable inside DropZone, so a skipped-files notice and a copy notice shown together draw at the same spot (read from source, not reproduced in a story).",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "token-gap|settings-languagedropdown--item-hover|hover-token-undefined",
+			"kind": "token-gap",
+			"story": "settings-languagedropdown--item-hover",
+			"rule": "hover-token-undefined",
+			"reason": "language_dropdown.css:82 reads var(--ec-color-hover, rgba(0, 0, 0, 0.04)) and --ec-color-hover is defined in no stylesheet, so the hover and focused item fall back to the literal rgba in both themes (measured #dfe3e6 over the light surface and #1b1b1e over the dark one).",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "token-gap|ui-errorboundary--fallback|spacing-tokens-undefined",
+			"kind": "token-gap",
+			"story": "ui-errorboundary--fallback",
+			"rule": "spacing-tokens-undefined",
+			"reason": "error_boundary.css:7-28 and file_list.css:2-14 use var(--spacing-xs) to var(--spacing-xl) (7 uses) and no stylesheet or token file under src defines any --spacing-* property, so those paddings, margins and gaps resolve to nothing and the crash screen and the file list lose their spacing.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "unrendered-outcome|file-list-folderrow--scanning|discovering-status-never-dispatched",
+			"kind": "unrendered-outcome",
+			"story": "file-list-folderrow--scanning",
+			"rule": "discovering-status-never-dispatched",
+			"reason": "FolderRow.tsx:72-73 renders a found-count for status discovering with the folder.found string, but the status appears only in the AppContext.tsx:8 type and that case: DropZone.tsx dispatches scanning (:87), empty (:95, :116) and complete (:127), so the branch never shows and no story can show it.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "unrendered-outcome|screens-app--all-done|engine-evidence-not-shown",
+			"kind": "unrendered-outcome",
+			"story": "screens-app--all-done",
+			"rule": "engine-evidence-not-shown",
+			"reason": "RemoveMetadataResult.evidence {engine, outputMode, leakCheck} reaches the renderer (ipc_channels.ts:59-73) but use_process_files.ts:102-125 dispatches UPDATE_FILE_METADATA without it (AppContext.tsx:60-70 has no evidence field), so no row says which engine wrote the file or whether the leak check ran; the output mode itself stays visible through the copy disclosure.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		}
+	],
+	"verdicts": [
+		{
+			"fingerprint": "access-gap|file-list-filetable--mixed-statuses|reveal-transition-reduced-motion",
+			"verdict": "reject",
+			"reason": "Not a defect, a catalog artefact: file_table.css:156 sets the opacity transition on .file-table__reveal inside the rule at :143 and the prefers-reduced-motion: reduce block at :170-174 sets transition: none for it, so a person who asked for reduced motion gets none; the Complete row renders the element (FileRow.tsx:199-201).",
+			"decidedAt": "2026-11-13",
+			"decidedBy": "maintainer",
+			"reply": "delegate-merge"
 		}
 	]
 }
