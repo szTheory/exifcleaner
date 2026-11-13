@@ -791,8 +791,20 @@ export const RowKeyboardFocus: Story = {
 	},
 };
 
+// The real pointer rests at the top-left corner of the page (its start position, and
+// where every earlier real hover leaves it), and a row that is the first element of the
+// frame sits under that corner, so :hover would already match before this story hovers
+// anything and the colour would never change. The top padding keeps the row clear of the
+// corner. A Linux browser showed it (73-04 hosted run); the macOS layout hid it.
 export const RowHover: Story = {
 	args: { file: cleanedInPlace() },
+	decorators: [
+		(Story) => (
+			<div style={{ paddingTop: "48px" }}>
+				<Story />
+			</div>
+		),
+	],
 	parameters: {
 		a11y: knownA11y("file-list-filerow--row-hover"),
 		copyLint: { fixtureText: rowLabelFixture("test.jpg", "outcome.cleaned") },

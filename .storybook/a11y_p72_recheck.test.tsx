@@ -225,6 +225,36 @@ export function makeRunner(index: readonly Indexed[]): Runner {
 	};
 }
 
+// Axe scans a different set of nodes in the same story on macOS and on Linux (73-04): the
+// Arabic table batch is scanned on only two nodes on macOS and on 27 on Linux, and the
+// Persian one the other way round, so a rule that fires on one platform can stay silent on
+// the other with nothing in the story changed. The entries named here reproduce on Linux,
+// the CI platform and the authority (D-06), and are not asked to reproduce anywhere else;
+// every other entry still has to reproduce on every platform. The map is checked against
+// the baseline below, so a stale name is reported, and `entriesForPlatform` is the only
+// place the exception is applied.
+export const LINUX_ONLY_ENTRIES: Readonly<Record<string, string>> =
+	Object.freeze({
+		"a11y-p73|file-list-filetable--arabic-batch|color-contrast":
+			"axe scans two nodes of this story on macOS and never fires the rule; on Linux it fires on the sort buttons, the type pills and the status bar",
+	});
+
+export function isLinux(): boolean {
+	return (
+		/\bLinux\b/.test(navigator.userAgent) &&
+		!/\bAndroid\b/.test(navigator.userAgent)
+	);
+}
+
+export function entriesForPlatform(
+	entries: readonly Entry[],
+	linux: boolean,
+): Entry[] {
+	return linux
+		? [...entries]
+		: entries.filter((entry) => !(entry.fingerprint in LINUX_ONLY_ENTRIES));
+}
+
 export async function recheckProblems(
 	entries: readonly Entry[],
 	runner: Runner,
@@ -399,13 +429,39 @@ describe("a11y-p72 baseline (SC2, D-21)", () => {
 		{ timeout: 600_000 },
 		async () => {
 			const started = Date.now();
-			expect(await recheckProblems(REAL_ENTRIES, realRunner)).toEqual([]);
+			const entries = entriesForPlatform(REAL_ENTRIES, isLinux());
+			expect(await recheckProblems(entries, realRunner)).toEqual([]);
 			// Recorded as the A11y re-check line in 72-EVIDENCE.md.
 			console.info(
-				`A11y re-check (72-05): ${REAL_ENTRIES.length} entries, ${Math.ceil((Date.now() - started) / 1000)}s, 0 problems`,
+				`A11y re-check (72-05): ${entries.length} entries, ${Math.ceil((Date.now() - started) / 1000)}s, 0 problems`,
 			);
 		},
 	);
+});
+
+describe("platform-dependent entries (73-04)", () => {
+	test("every Linux-only entry is a real baseline entry with a stated reason", () => {
+		const fingerprints = REAL_ENTRIES.map((entry) => entry.fingerprint);
+		for (const [fingerprint, reason] of Object.entries(LINUX_ONLY_ENTRIES)) {
+			expect(fingerprints).toContain(fingerprint);
+			expect(reason.length).toBeGreaterThan(40);
+		}
+	});
+
+	test("off Linux the Linux-only entries are left out, on Linux every entry is kept", () => {
+		const [fingerprint] = Object.keys(LINUX_ONLY_ENTRIES);
+		if (fingerprint === undefined) throw new Error("no Linux-only entry");
+		const [kind = "", story = "", rule = ""] = fingerprint.split("|");
+		const linuxOnly: Entry = { fingerprint, kind, story, rule };
+		const ordinary = plantedEntry(PASSING_ID, "color-contrast");
+		expect(entriesForPlatform([linuxOnly, ordinary], false)).toEqual([
+			ordinary,
+		]);
+		expect(entriesForPlatform([linuxOnly, ordinary], true)).toEqual([
+			linuxOnly,
+			ordinary,
+		]);
+	});
 });
 
 describe("a11y-p72 re-check controls (planted, never red on disk)", () => {
