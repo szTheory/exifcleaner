@@ -2,6 +2,18 @@
 	"schemaVersion": 1,
 	"scenarios": [
 		{
+			"id": "app.all-done",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "many",
+			"tier": "screen",
+			"situation": "A run finishes with a file cleaned, a file with nothing removed and a file that had no metadata, and every row is final.",
+			"proofBoundary": "story",
+			"stories": [
+				"screens-app--all-done"
+			]
+		},
+		{
 			"id": "app.all-error",
 			"persona": "P-source",
 			"job": "J-04",
@@ -11,6 +23,66 @@
 			"proofBoundary": "story",
 			"stories": [
 				"screens-app--all-error"
+			]
+		},
+		{
+			"id": "app.drawer-open",
+			"persona": "P-photographer",
+			"job": "J-02",
+			"stateClass": "happy",
+			"tier": "screen",
+			"situation": "Someone opens Settings from the gear and finds the preserve switches, the theme modes and the language list.",
+			"proofBoundary": "story",
+			"stories": [
+				"screens-app--drawer-open"
+			]
+		},
+		{
+			"id": "app.empty",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "empty",
+			"tier": "screen",
+			"situation": "Someone opens the app for the first time and sees a prompt to add files, two buttons and no rows.",
+			"proofBoundary": "story",
+			"stories": [
+				"screens-app--empty"
+			]
+		},
+		{
+			"id": "app.error-boundary-failure",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "screen",
+			"situation": "The app cannot read the platform it runs on, so the window shows Something went wrong and a Try again button.",
+			"proofBoundary": "story",
+			"stories": [
+				"screens-app--error-boundary-failure"
+			]
+		},
+		{
+			"id": "app.large-batch",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "huge",
+			"tier": "screen",
+			"situation": "A hundred files are handed over at once: ninety-nine are finished and the last is still being worked on.",
+			"proofBoundary": "story",
+			"stories": [
+				"screens-app--large-batch"
+			]
+		},
+		{
+			"id": "app.mid-batch",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "loading",
+			"tier": "screen",
+			"situation": "A run is under way: two files are finished, the third is still being worked on, and Clear is offered meanwhile.",
+			"proofBoundary": "story",
+			"stories": [
+				"screens-app--mid-batch"
 			]
 		},
 		{

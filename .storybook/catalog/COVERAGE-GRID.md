@@ -2,7 +2,7 @@
 
 # Coverage grid
 
-21 subjects x 12 state classes = 252 cells: 78 covered, 139 waived, 35 gaps.
+21 subjects x 12 state classes = 252 cells: 83 covered, 145 waived, 24 gaps.
 
 A cell is covered by a scenario in scenarios.json, waived with a reason in waivers.json, or a gap. A gap is computed, never typed. Cells show the scenario count, `waived` or `gap`. A gap is owed by the phase in the Due column: primitive and pattern rows by Phase 72, area and screen rows by Phase 73.
 
@@ -28,7 +28,7 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 | FileRow | area | Phase 73 | 8 | waived | waived | waived | 3 | 3 | 7 | 1 | 1 | 3 | 5 | 2 |
 | FileTable | area | Phase 73 | 3 | 1 | waived | 4 | 1 | 1 | waived | waived | waived | 2 | 3 | waived |
 | SettingsDrawer | area | Phase 73 | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap | gap |
-| App | screen | Phase 73 | gap | gap | gap | gap | gap | gap | 1 | gap | gap | gap | gap | gap |
+| App | screen | Phase 73 | 1 | 1 | waived | 1 | waived | 1 | 2 | waived | waived | waived | waived | 1 |
 
 ## Waivers
 
@@ -171,6 +171,12 @@ A cell is covered by a scenario in scenarios.json, waived with a reason in waive
 - FileTable|denied: duplicate (file-row.refused): A refused file is the state of one row, which the FileRow refused story draws; the table adds no behaviour of its own for it.
 - FileTable|stale: duplicate (file-row.commit): A file changed under the app is the state of one row, which the FileRow commit story draws; the table never revalidates a row after it is shown.
 - FileTable|huge: duplicate (file-row.huge-size): The magnitudes that stress a table cell are drawn by the FileRow huge size and huge count stories, and the 100-row batch is the App screen, so a table story would repeat them.
+- App|one: duplicate (status-bar.single-file): A screen with one file is the same table with one row; the singular wording is the status bar's own text, which the single-file scenario already draws.
+- App|boundary: duplicate (file-row.zero-byte-error): A file at a size limit is the state of one row, which the FileRow zero-byte and size stories draw; the screen adds no limit of its own.
+- App|denied: duplicate (file-row.refused): A refused file is the state of one row, which the FileRow refused story draws; the screen shows it as a row and adds no behaviour of its own.
+- App|stale: duplicate (file-row.commit): A file changed under the app is the state of one row, which the FileRow commit story draws; the screen never revalidates a row after it is shown.
+- App|long: duplicate (file-row.long-unbroken-name): Long names and long summaries stress one row, which the FileRow name stories draw inside the same 580 px frame, so a screen story would repeat them.
+- App|intl: duplicate (file-table.arabic-batch): Right-to-left and CJK locales are drawn by the FileTable locale stories as the same table and status bar markup the screen mounts.
 
 ## State classes
 

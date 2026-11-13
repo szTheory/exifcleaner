@@ -2,6 +2,48 @@
 	"schemaVersion": 1,
 	"waivers": [
 		{
+			"subject": "App",
+			"stateClass": "one",
+			"basis": "duplicate",
+			"ref": "status-bar.single-file",
+			"reason": "A screen with one file is the same table with one row; the singular wording is the status bar's own text, which the single-file scenario already draws."
+		},
+		{
+			"subject": "App",
+			"stateClass": "boundary",
+			"basis": "duplicate",
+			"ref": "file-row.zero-byte-error",
+			"reason": "A file at a size limit is the state of one row, which the FileRow zero-byte and size stories draw; the screen adds no limit of its own."
+		},
+		{
+			"subject": "App",
+			"stateClass": "denied",
+			"basis": "duplicate",
+			"ref": "file-row.refused",
+			"reason": "A refused file is the state of one row, which the FileRow refused story draws; the screen shows it as a row and adds no behaviour of its own."
+		},
+		{
+			"subject": "App",
+			"stateClass": "stale",
+			"basis": "duplicate",
+			"ref": "file-row.commit",
+			"reason": "A file changed under the app is the state of one row, which the FileRow commit story draws; the screen never revalidates a row after it is shown."
+		},
+		{
+			"subject": "App",
+			"stateClass": "long",
+			"basis": "duplicate",
+			"ref": "file-row.long-unbroken-name",
+			"reason": "Long names and long summaries stress one row, which the FileRow name stories draw inside the same 580 px frame, so a screen story would repeat them."
+		},
+		{
+			"subject": "App",
+			"stateClass": "intl",
+			"basis": "duplicate",
+			"ref": "file-table.arabic-batch",
+			"reason": "Right-to-left and CJK locales are drawn by the FileTable locale stories as the same table and status bar markup the screen mounts."
+		},
+		{
 			"subject": "ChevronIcon",
 			"stateClass": "empty",
 			"basis": "unreachable",
