@@ -1,0 +1,59 @@
+{
+	"schemaVersion": 1,
+	"job": "J-09",
+	"title": "First run: choose files and see them cleaned",
+	"steps": [
+		{
+			"scenario": "empty-state.copy-mode-on",
+			"action": {
+				"role": "button",
+				"name": "Choose files…"
+			},
+			"proof": "story",
+			"note": "The native file dialog is never opened by a story or an e2e test."
+		},
+		{
+			"scenario": "drop-zone.drag-over",
+			"action": {
+				"gesture": "drop files on the window"
+			},
+			"proof": "unproven",
+			"note": "No story or e2e test performs a real drop; e2e sends the file-open-add-files IPC instead."
+		},
+		{
+			"scenario": "app.all-done",
+			"action": {
+				"gesture": "the files are read and cleaned and a row appears for each"
+			},
+			"proof": "e2e",
+			"e2e": {
+				"spec": "tests/e2e/file-processing.spec.ts",
+				"test": "strips EXIF metadata from a single JPEG file"
+			},
+			"note": "e2e sends the file-open-add-files IPC and never opens the native dialog."
+		},
+		{
+			"scenario": "status-bar.all-cleaned",
+			"action": {
+				"gesture": "read the cleaned count in the status bar"
+			},
+			"proof": "e2e",
+			"e2e": {
+				"spec": "tests/e2e/file-processing.spec.ts",
+				"test": "updates the status bar with file count"
+			}
+		},
+		{
+			"scenario": "app.all-done",
+			"action": {
+				"role": "button",
+				"name": "Clear"
+			},
+			"proof": "story+e2e",
+			"e2e": {
+				"spec": "tests/e2e/file-processing.spec.ts",
+				"test": "supports Clean more cycle"
+			}
+		}
+	]
+}

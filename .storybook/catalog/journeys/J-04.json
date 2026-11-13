@@ -1,0 +1,48 @@
+{
+	"schemaVersion": 1,
+	"job": "J-04",
+	"title": "Be told which file failed and what state it is in",
+	"steps": [
+		{
+			"scenario": "app.all-error",
+			"action": {
+				"role": "row",
+				"name": "alpha.jpg. Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged."
+			},
+			"proof": "story"
+		},
+		{
+			"scenario": "file-row.verification",
+			"action": {
+				"role": "row",
+				"name": "test.jpg. Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged."
+			},
+			"proof": "story",
+			"note": "The failed row opens to its error detail; no e2e expands a failed row."
+		},
+		{
+			"scenario": "error-expansion.verification",
+			"action": {
+				"gesture": "click the error text to copy it"
+			},
+			"proof": "unproven",
+			"note": "The error text is a pre with a click handler and no role or tab stop, so a keyboard user cannot copy it; register entry dead-end|file-list-errorexpansion--verification|click-to-copy-not-keyboard-reachable."
+		},
+		{
+			"scenario": "app.all-error",
+			"action": {
+				"gesture": "retry the failed file"
+			},
+			"proof": "unproven",
+			"note": "No retry control exists for a failed file: the error row offers only expand and the only Try again resets a render crash on another screen; register entry dead-end|screens-app--all-error|no-retry-for-failed-file."
+		},
+		{
+			"scenario": "app.all-error",
+			"action": {
+				"role": "button",
+				"name": "Clear"
+			},
+			"proof": "story"
+		}
+	]
+}

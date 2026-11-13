@@ -16,6 +16,7 @@ import {
 	check as checkRegister,
 	loadObservation,
 } from "./copy_findings_ratchet.mjs";
+import { renderFindings } from "./findings_view.mjs";
 import {
 	GLOSSARY_MD_PATH,
 	GLOSSARY_PATH,
@@ -32,6 +33,11 @@ import {
 	renderGridMarkdown,
 	zeroGapProblems,
 } from "./grid.mjs";
+import {
+	checkJourneys,
+	loadJourneyInputs,
+	renderJourneys,
+} from "./journeys.mjs";
 import { readMergeBase, resolveBaseRef } from "./merge_base.mjs";
 import {
 	CATALOG_PATH,
@@ -50,9 +56,18 @@ export const CHECK_INPUTS = Object.freeze([
 	".resources/locales/en.json",
 	".resources/translation-glossary.json",
 	"brand.pin.json",
+	"docs/evidence/known-findings.json",
 	"src",
 	"tests/e2e",
 ]);
+
+// The generated journey view (Phase 73, FLW-01, D-22); its data is journeys/*.json.
+export const JOURNEYS_MD_PATH = ".storybook/catalog/JOURNEYS.md";
+
+// The generated findings register view (Phase 73, FLW-02, D-30, R-3). Its data is the one
+// shrink-only baseline plus the copy findings register, which it lists as a cross-reference.
+export const FINDINGS_MD_PATH = ".storybook/catalog/FINDINGS.md";
+const KNOWN_FINDINGS_PATH = "docs/evidence/known-findings.json";
 
 const FLAGS = new Set(["--check", "--write", "--zero-gaps"]);
 
@@ -119,6 +134,39 @@ function catalogProblems(root) {
 function firstProblem(problems) {
 	const first = problems[0];
 	return `${first?.code}: ${first?.message}`;
+}
+
+/**
+ * FINDINGS.md: the register (docs/evidence/known-findings.json) in full, the rejected
+ * findings with their verdict rows, the accessibility baseline summarised and the copy
+ * findings register as a cross-reference. The register's own rules are the ratchet's
+ * (scripts/findings_ratchet.mjs); this only renders what the files hold.
+ *
+ * @param {string} root
+ */
+function findingsView(root) {
+	return renderFindings({
+		baseline: /** @type {any} */ (readJson(root, KNOWN_FINDINGS_PATH)),
+		copyFindings: /** @type {any} */ (readJson(root, COPY_FINDINGS_PATH)),
+	});
+}
+
+/**
+ * The journey files and what checkJourneys finds wrong with them (schema, job
+ * set, scenario ids and the static e2e proof). A problem keeps its own code and
+ * its message says it is a journeys problem, so a planted defect reads as one.
+ *
+ * @param {string} root
+ */
+function journeyProblems(root) {
+	const inputs = loadJourneyInputs(root);
+	return {
+		journeys: inputs.journeys,
+		problems: checkJourneys(inputs).map((found) => ({
+			code: found.code,
+			message: `journeys: ${found.message}`,
+		})),
+	};
 }
 
 /**
@@ -196,6 +244,10 @@ export async function generatedFiles(root) {
 	if (catalog.problems.length > 0) {
 		throw new Error(firstProblem(catalog.problems));
 	}
+	const journeys = journeyProblems(root);
+	if (journeys.problems.length > 0) {
+		throw new Error(firstProblem(journeys.problems));
+	}
 	const grid = await loadGrid(root);
 	if (grid.model === null) {
 		throw new Error(firstProblem(grid.problems));
@@ -203,6 +255,8 @@ export async function generatedFiles(root) {
 	return [
 		[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))],
 		[PERSONAS_MD_PATH, renderPersonas(/** @type {any} */ (catalog.doc))],
+		[JOURNEYS_MD_PATH, renderJourneys(/** @type {any} */ (journeys.journeys))],
+		[FINDINGS_MD_PATH, findingsView(root)],
 		[GRID_JSON_PATH, renderGridJson(grid.model)],
 		[GRID_MD_PATH, renderGridMarkdown(grid.model)],
 	];
@@ -224,6 +278,10 @@ export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 	if (catalog.problems.length > 0) {
 		return { ok: false, problems: catalog.problems, files: 0, notes: [] };
 	}
+	const journeys = journeyProblems(root);
+	if (journeys.problems.length > 0) {
+		return { ok: false, problems: journeys.problems, files: 0, notes: [] };
+	}
 	const grid = await loadGrid(root);
 	if (grid.model === null) {
 		return { ok: false, problems: grid.problems, files: 0, notes: [] };
@@ -232,6 +290,8 @@ export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 	const files = [
 		[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))],
 		[PERSONAS_MD_PATH, renderPersonas(/** @type {any} */ (catalog.doc))],
+		[JOURNEYS_MD_PATH, renderJourneys(/** @type {any} */ (journeys.journeys))],
+		[FINDINGS_MD_PATH, findingsView(root)],
 		[GRID_JSON_PATH, renderGridJson(grid.model)],
 		[GRID_MD_PATH, renderGridMarkdown(grid.model)],
 	];

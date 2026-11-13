@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import {
@@ -6,6 +6,12 @@ import {
 	LOCALE_FILES,
 	buildDictionary,
 } from "./locale_dictionary";
+
+// WR-04 (D-19): the locale count follows the directory, so adding a locale file cannot
+// turn this red by itself; `> 0` keeps the derivation from going vacuous.
+const LOCALE_COUNT = readdirSync(
+	path.resolve(import.meta.dirname, "../.resources/locales"),
+).filter((file) => file.endsWith(".json")).length;
 
 const STRINGS_JSON: unknown = JSON.parse(
 	readFileSync(
@@ -17,7 +23,8 @@ const STRINGS_JSON: unknown = JSON.parse(
 describe("storybook locale dictionary", () => {
 	test("is the same dictionary the app ships (.resources/strings.json)", () => {
 		// Anti-vacuity: the glob found every locale file.
-		expect(Object.keys(LOCALE_FILES)).toHaveLength(26);
+		expect(LOCALE_COUNT).toBeGreaterThan(0);
+		expect(Object.keys(LOCALE_FILES)).toHaveLength(LOCALE_COUNT);
 		expect(LOCALE_DICTIONARY).toEqual(STRINGS_JSON);
 	});
 
@@ -39,7 +46,7 @@ describe("storybook locale dictionary", () => {
 					([file]) => !file.endsWith(`/${locale}.json`),
 				),
 			);
-			expect(Object.keys(without)).toHaveLength(25);
+			expect(Object.keys(without)).toHaveLength(LOCALE_COUNT - 1);
 			expect(buildDictionary(without)).not.toEqual(STRINGS_JSON);
 		},
 	);

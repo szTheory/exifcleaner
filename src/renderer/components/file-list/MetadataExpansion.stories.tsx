@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
+import ar from "../../../../.resources/locales/ar.json";
 import { knownA11y } from "../../story_support/known_a11y";
 import type { FileEntry } from "../../contexts/AppContext";
 import { OUTCOME_CASES, entryFor } from "../../story_support/process_outcomes";
@@ -245,11 +246,14 @@ export const ArabicPlural: Story = {
 	},
 	play: async ({ canvasElement }) => {
 		await waitFor(() => expect(document.documentElement.dir).toBe("rtl"));
-		await within(canvasElement).findByText("نسخ الكل");
-		// Arabic selects the "two" plural category for 2, which ar.json does not carry,
-		// so the `.other` text is what renders (formatMetadataCount's fallback).
+		await within(canvasElement).findByText(ar["copyAll"]);
+		// Dual first because Arabic has the plural category two (72 hand-off); the general
+		// plural is the fallback until ar.json carries one (formatMetadataCount's own).
+		const arLookup: Readonly<Record<string, string | undefined>> = ar;
+		const removed =
+			arLookup["metadata.removed.two"] ?? ar["metadata.removed.other"];
 		await expect(await summaryText(canvasElement)).toBe(
-			"الحقول المُزالة: 2 · 1 حقل ما زال موجودًا",
+			`${removed.replace("{count}", "2")} · ${ar["metadata.present.one"].replace("{count}", "1")}`,
 		);
 	},
 };

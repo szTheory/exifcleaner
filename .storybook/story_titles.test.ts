@@ -13,6 +13,7 @@ export const TITLE_GROUPS: Readonly<Record<string, string>> = Object.freeze({
 	ui: "UI",
 	icons: "Icons",
 	"file-list": "File list",
+	screens: "Screens",
 });
 
 const COMPONENTS_DIR = "src/renderer/components/";
@@ -85,13 +86,14 @@ describe("story titles follow the D-01 folder map", () => {
 		expect(titleProblems(stories)).toEqual([]);
 	});
 
-	test("the group map is frozen and covers exactly the four directories", () => {
+	test("the group map is frozen and covers exactly the five directories", () => {
 		expect(Object.isFrozen(TITLE_GROUPS)).toBe(true);
 		expect(TITLE_GROUPS).toEqual({
 			settings: "Settings",
 			ui: "UI",
 			icons: "Icons",
 			"file-list": "File list",
+			screens: "Screens",
 		});
 	});
 

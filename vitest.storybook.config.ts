@@ -63,7 +63,8 @@ export default defineConfig({
 					include: [".storybook/**/*.test.ts"],
 					allowOnly: false,
 					testTimeout: 120_000,
-					hookTimeout: 180_000,
+					// D-04: offline.test.ts builds Storybook twice and visits every story serially in one hook.
+					hookTimeout: 300_000,
 				},
 			},
 		],

@@ -17,7 +17,7 @@ describe("checked-in findings baseline (D-29)", () => {
 	);
 	const text = readFileSync(file, "utf8");
 
-	test("is valid, keeps the sealed a11y kind empty, and seals a11y-p72 (D-19, D-20)", () => {
+	test("is valid, keeps the sealed a11y kind empty, and seals a11y-p72 and a11y-p73 (D-19, D-20, R-1)", () => {
 		const parsed = JSON.parse(text) as {
 			schemaVersion: number;
 			kinds: Record<string, { sealed?: boolean }>;
@@ -27,6 +27,7 @@ describe("checked-in findings baseline (D-29)", () => {
 		expect(parsed.schemaVersion).toBe(1);
 		expect(parsed.kinds["a11y"]).toEqual({ sealed: true });
 		expect(parsed.kinds["a11y-p72"]).toEqual({ sealed: true });
+		expect(parsed.kinds["a11y-p73"]).toEqual({ sealed: true });
 		// Nothing is ever added to the a11y kind; the Phase 72 entries are all a11y-p72
 		// (later phases add their own kinds, so only the a11y kind is pinned empty).
 		expect(parsed.entries.filter((entry) => entry.kind === "a11y")).toEqual([]);

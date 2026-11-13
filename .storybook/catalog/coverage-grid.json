@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 57,
-		"waived": 123,
-		"gaps": 72
+		"covered": 89,
+		"waived": 163,
+		"gaps": 0
 	},
 	"rows": [
 		{
@@ -1359,12 +1359,10 @@
 					}
 				},
 				"long": {
-					"status": "waived",
-					"waiver": {
-						"basis": "unreachable",
-						"ref": "src/renderer/components/ui/StatusBar.tsx#interpolate",
-						"reason": "The three segments are short sentences filled with numbers; how the longest translations wrap across the whole bar is an area question that belongs to Phase 73."
-					}
+					"status": "covered",
+					"scenarios": [
+						"status-bar.turkish-long"
+					]
 				},
 				"intl": {
 					"status": "covered",
@@ -1473,40 +1471,99 @@
 			"tier": "area",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"drop-zone.drag-over",
+						"drop-zone.idle"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "drop-zone.idle",
+						"reason": "The zone with nothing dropped is the empty screen inside the drop area, which the idle scenario draws; the zone has no empty state of its own."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "status-bar.single-file",
+						"reason": "The zone has no count or singular wording of its own; a drop of one file is a one-row table and the singular count text belongs to the status bar."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "app.all-done",
+						"reason": "A drop of several files is turned into table rows by the app, which the all-done screen draws; the zone itself only wraps what the app shows."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/DropZone.tsx#SKIP_TOAST_DELAY_MS",
+						"reason": "The zone's only limits are timers, the 1500 ms folder collapse and the 3000 ms skip notice, which no story may start; the Toast stories draw the notice itself and the folder recursion spec covers it end to end."
+					}
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "empty-state.copy-mode-unknown",
+						"reason": "Before the saved settings load the zone shows the empty screen with the output line blank, which the copy-mode-unknown scenario already draws."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/DropZone.tsx#expandAndProcessFolder",
+						"reason": "The zone has no failure display of its own: a folder it cannot read is shown as an empty folder row, and a file that fails is a row in the table."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-row.refused",
+						"reason": "A refused file is the state of one row, which the FileRow refused story draws; the drop area refuses nothing and adds no behaviour of its own."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-row.commit",
+						"reason": "A file changed under the app is the state of one row, which the FileRow commit story draws; the zone never revalidates what was dropped."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "empty-state.german-empty",
+						"reason": "The only text the zone shows is the empty screen's, whose longest translations are drawn by the EmptyState German and Malayalam stories."
+					}
 				},
 				"intl": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "empty-state.persian-empty",
+						"reason": "The only text the zone shows is the empty screen's, whose right-to-left form is drawn by the EmptyState Persian story."
+					}
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "app.large-batch",
+						"reason": "A drop of thousands of files is processed and listed by the app, which the large-batch screen draws; the zone holds no list that could grow."
+					}
 				}
 			}
 		},
@@ -1515,40 +1572,100 @@
 			"tier": "area",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"empty-state.button-hover",
+						"empty-state.button-keyboard-focus",
+						"empty-state.copy-mode-off",
+						"empty-state.copy-mode-off-dragging",
+						"empty-state.copy-mode-on",
+						"empty-state.copy-mode-on-dragging",
+						"empty-state.secondary-button-hover"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "empty-state.copy-mode-on",
+						"reason": "The screen is itself the empty state, so its empty cell is the same screen the copy-mode-on scenario already draws."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/EmptyState.tsx#EmptyState",
+						"reason": "The screen draws no items and no count, so there is no singular or plural wording to test; the only plural text it could show would be a file count, which it never receives."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/EmptyState.tsx#onChooseFiles",
+						"reason": "The screen takes two callbacks and no file list, so it cannot show several items; several rows are drawn by the FileTable stories."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/EmptyState.tsx#saveAsCopy",
+						"reason": "Its only inputs are two booleans and a nullable boolean, so there is no size or length limit at which it could behave differently."
+					}
 				},
 				"loading": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"empty-state.copy-mode-unknown",
+						"empty-state.copy-mode-unknown-dragging"
+					]
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/EmptyState.tsx#dragActive",
+						"reason": "The screen has no failure state: an unreadable setting shows as the null copy mode, and a failed file shows in the table and in toasts, never here."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/EmptyState.tsx#onChooseFolder",
+						"reason": "The screen enforces no policy and refuses nothing; a refused file is a row in the table, which the empty screen is replaced by."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/EmptyState.tsx#empty-state__inner",
+						"reason": "The screen shows no information taken from a file or a folder, so nothing on it can outlive its source."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"empty-state.german-empty",
+						"empty-state.malayalam-empty"
+					]
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"empty-state.persian-empty"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/EmptyState.tsx#empty-state__actions",
+						"reason": "The screen shows a title, a prompt, two buttons and one line, whatever the session did before, so no quantity can stress it."
+					}
 				}
 			}
 		},
@@ -1557,40 +1674,106 @@
 			"tier": "area",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.already-clean",
+						"file-row.already-clean-expanded",
+						"file-row.cleaned",
+						"file-row.cleaned-expanded",
+						"file-row.copy-mode-disclosure",
+						"file-row.row-hover",
+						"file-row.row-keyboard-focus",
+						"file-row.unchanged"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/FileRow.tsx#FileRow",
+						"reason": "A row always stands for exactly one file, so a row with nothing in it is not a state; a table with no files is the FileTable empty case and the empty screen is EmptyState."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "metadata-expansion.one-removed",
+						"reason": "A row has no singular wording of its own; the one-field count shown when a row is opened belongs to MetadataExpansion, whose one-removed scenario already draws it."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/file-list/FileRow.tsx#file",
+						"reason": "FileRow takes a single file prop and draws one row, so there is no plural state inside it; rows side by side are drawn by the FileTable stories."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.just-under-megabyte",
+						"file-row.many-dots-name",
+						"file-row.zero-byte-no-metadata"
+					]
 				},
 				"loading": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.pending",
+						"file-row.processing",
+						"file-row.reading"
+					]
 				},
 				"error": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.cleanup",
+						"file-row.error-collapsed",
+						"file-row.generic-failure",
+						"file-row.verification",
+						"file-row.write",
+						"file-row.xattr",
+						"file-row.zero-byte-error"
+					]
 				},
 				"denied": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.refused"
+					]
 				},
 				"stale": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.commit"
+					]
 				},
 				"long": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.german-compound-name",
+						"file-row.japanese-long-name",
+						"file-row.long-unbroken-name"
+					]
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.arabic-digits-name",
+						"file-row.hebrew-latin-name",
+						"file-row.lro-pdf-name",
+						"file-row.rlo-name",
+						"file-row.zwj-family-name"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-row.huge-size",
+						"file-row.huge-tag-counts"
+					]
 				}
 			}
 		},
@@ -1599,40 +1782,94 @@
 			"tier": "area",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-table.folder-complete",
+						"file-table.header-hover",
+						"file-table.sort-button-keyboard-focus"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-table.folder-empty"
+					]
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "status-bar.single-file",
+						"reason": "FileTable has no count or singular wording of its own and a one-row table is the same markup as a longer one; the singular count text belongs to the status bar."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-table.mixed-statuses",
+						"file-table.sort-by-name-ascending",
+						"file-table.sort-by-name-descending",
+						"file-table.sort-twice-keeps-rank"
+					]
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-table.sort-by-size-with-tie"
+					]
 				},
 				"loading": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-table.folder-scanning"
+					]
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-row.generic-failure",
+						"reason": "A failed file is the state of one row, which the FileRow error stories draw; the table only sorts it last, and SortTwiceKeepsRank shows that."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-row.refused",
+						"reason": "A refused file is the state of one row, which the FileRow refused story draws; the table adds no behaviour of its own for it."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-row.commit",
+						"reason": "A file changed under the app is the state of one row, which the FileRow commit story draws; the table never revalidates a row after it is shown."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-table.german-batch",
+						"file-table.hungarian-batch"
+					]
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"file-table.arabic-batch",
+						"file-table.japanese-batch",
+						"file-table.persian-batch"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-row.huge-size",
+						"reason": "The magnitudes that stress a table cell are drawn by the FileRow huge size and huge count stories, and the 100-row batch is the App screen, so a table story would repeat them."
+					}
 				}
 			}
 		},
@@ -1641,40 +1878,101 @@
 			"tier": "area",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"settings-drawer.all-toggles-on",
+						"settings-drawer.close-button-hover",
+						"settings-drawer.close-button-keyboard-focus",
+						"settings-drawer.language-list-open",
+						"settings-drawer.non-mac-platform",
+						"settings-drawer.theme-mode-dark-selected",
+						"settings-drawer.theme-mode-light-selected",
+						"settings-drawer.theme-mode-system-selected"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SettingsDrawer.tsx#settings-drawer__body",
+						"reason": "The drawer always lists the same fixed sections and switches, so no state has none of them; the only blank form is before its settings load."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SettingsDrawer.tsx#isMac",
+						"reason": "The drawer has no count or plural wording: every switch is a fixed sentence, and the one switch that comes and goes is the macOS attributes switch."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "settings-drawer.all-toggles-on",
+						"reason": "The drawer always shows all of its switches together, which the all-toggles-on scenario draws; there is no variable list of items."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"settings-drawer.all-toggles-off"
+					]
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SettingsDrawer.tsx#isReady",
+						"reason": "Until its settings load the drawer renders nothing at all, so there is no loading screen to draw; the mock answers at once."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SettingsDrawer.tsx#handleToggle",
+						"reason": "The drawer has no failure display of its own: handleToggle never reads the result of settings.set, so there is no error screen to draw."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "settings-drawer.non-mac-platform",
+						"reason": "The only thing the drawer withholds is the macOS attributes switch off a Mac, which the non-Mac scenario draws as a switch that is absent."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "language-dropdown.unknown-code",
+						"reason": "A saved language the list no longer knows is the language dropdown's stale state, drawn by its unknown-code scenario; no other setting is reread."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"settings-drawer.german-drawer",
+						"settings-drawer.hungarian-drawer"
+					]
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"settings-drawer.arabic-drawer",
+						"settings-drawer.persian-drawer"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "settings-drawer.language-list-open",
+						"reason": "The largest list the drawer holds is the language list, which the language-list-open scenario draws in full."
+					}
 				}
 			}
 		},
@@ -1683,40 +1981,89 @@
 			"tier": "screen",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"app.drawer-open"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"app.empty"
+					]
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "status-bar.single-file",
+						"reason": "A screen with one file is the same table with one row; the singular wording is the status bar's own text, which the single-file scenario already draws."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"app.all-done"
+					]
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-row.zero-byte-error",
+						"reason": "A file at a size limit is the state of one row, which the FileRow zero-byte and size stories draw; the screen adds no limit of its own."
+					}
 				},
 				"loading": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"app.mid-batch"
+					]
 				},
 				"error": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"app.all-error",
+						"app.error-boundary-failure"
+					]
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-row.refused",
+						"reason": "A refused file is the state of one row, which the FileRow refused story draws; the screen shows it as a row and adds no behaviour of its own."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-row.commit",
+						"reason": "A file changed under the app is the state of one row, which the FileRow commit story draws; the screen never revalidates a row after it is shown."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-row.long-unbroken-name",
+						"reason": "Long names and long summaries stress one row, which the FileRow name stories draw inside the same 580 px frame, so a screen story would repeat them."
+					}
 				},
 				"intl": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-table.arabic-batch",
+						"reason": "Right-to-left and CJK locales are drawn by the FileTable locale stories as the same table and status bar markup the screen mounts."
+					}
 				},
 				"huge": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"app.large-batch"
+					]
 				}
 			}
 		}

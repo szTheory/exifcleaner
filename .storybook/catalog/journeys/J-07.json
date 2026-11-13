@@ -1,0 +1,49 @@
+{
+	"schemaVersion": 1,
+	"job": "J-07",
+	"title": "See which files are cleaned, failed or need a look",
+	"steps": [
+		{
+			"scenario": "app.all-done",
+			"action": {
+				"role": "button",
+				"name": "Name"
+			},
+			"proof": "story",
+			"note": "Sorting has no e2e test; the story shows the header control only."
+		},
+		{
+			"scenario": "file-table.sort-by-name-ascending",
+			"action": {
+				"role": "button",
+				"name": "Name. Sorted ascending"
+			},
+			"proof": "story"
+		},
+		{
+			"scenario": "file-table.mixed-statuses",
+			"action": {
+				"role": "row",
+				"name": "err.jpg. ExifTool crashed unexpectedly. Restart the app to retry."
+			},
+			"proof": "story"
+		},
+		{
+			"scenario": "app.all-done",
+			"action": {
+				"role": "button",
+				"name": "Reveal cleaned copy in file manager"
+			},
+			"proof": "story",
+			"note": "Shown present and named; no e2e or story opens the file manager."
+		},
+		{
+			"scenario": "app.all-done",
+			"action": {
+				"role": "button",
+				"name": "Reveal original in file manager"
+			},
+			"proof": "story"
+		}
+	]
+}

@@ -11,6 +11,12 @@ type Doc = {
 	entries: ReadonlyArray<{ kind: string; story: string; rule: string }>;
 };
 
+// Same axe-kind rule as a11y_known.ts, copied (the kind pattern is `a11y` or
+// `a11y-p<n>`); the story set below covers every axe kind, not only a11y-p72 (WR-06).
+function isA11yKind(kind: string): boolean {
+	return /^a11y(-p\d+)?$/.test(kind);
+}
+
 const baseline = JSON.parse(
 	readFileSync(
 		path.resolve(import.meta.dirname, "../docs/evidence/known-findings.json"),
@@ -20,7 +26,13 @@ const baseline = JSON.parse(
 
 describe("story_support knownA11yFrom equals the .storybook copy (C5)", () => {
 	test("for every story with a real baseline entry", () => {
-		const stories = [...new Set(baseline.entries.map((entry) => entry.story))];
+		const stories = [
+			...new Set(
+				baseline.entries
+					.filter((entry) => isA11yKind(entry.kind))
+					.map((entry) => entry.story),
+			),
+		];
 		for (const story of stories) {
 			expect(storySupportFrom(baseline, story), story).toEqual(
 				storybookFrom(baseline, story),

@@ -6,6 +6,30 @@
 		},
 		"a11y-p72": {
 			"sealed": true
+		},
+		"a11y-p73": {
+			"sealed": true
+		},
+		"access-gap": {
+			"sealed": true
+		},
+		"dead-end": {
+			"sealed": true
+		},
+		"i18n-gap": {
+			"sealed": true
+		},
+		"layout-gap": {
+			"sealed": true
+		},
+		"silent-failure": {
+			"sealed": true
+		},
+		"token-gap": {
+			"sealed": true
+		},
+		"unrendered-outcome": {
+			"sealed": true
 		}
 	},
 	"entries": [
@@ -616,6 +640,1870 @@
 			"rule": "color-contrast",
 			"reason": "Selector .type-pill--dng (the RAW family pills) measures 2.93:1 in the light theme only, below 4.5:1: foreground #b08060 (--ec-pill-dng-text) on background #f0eceb (--ec-pill-dng-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
 			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--already-clean|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--already-clean",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--already-clean|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--already-clean",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--already-clean-expanded|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--already-clean-expanded",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--already-clean-expanded|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--already-clean-expanded",
+			"rule": "color-contrast",
+			"reason": "Selector .metadata-expansion__empty (the empty expansion text) measures 2.24:1 in the light theme and 3.08:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #f5f6f8 light and #636369 on #141416 dark (foreground --ec-color-muted), 14px; Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--arabic-digits-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--arabic-digits-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--arabic-digits-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--arabic-digits-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the PNG pill) measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec (--ec-pill-png-text on --ec-pill-png-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleaned|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleaned",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleaned|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleaned",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleaned-expanded|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleaned-expanded",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleaned-expanded|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleaned-expanded",
+			"rule": "aria-required-children",
+			"reason": "Selector div[role=\"rowgroup\"] fails in both themes: axe reports children that a role=rowgroup must not contain (button, details, div[aria-label]), because FileRow puts its expansion region (a button, a details element and a labelled div) beside the row inside the table's rowgroup, as FileTable renders it; a component structure defect in FileRow and FileTable, not the story frame; Selector div[role=\"table\"] fails in both themes: axe reports children that a role=table must not contain (button, details, div[aria-label]), because FileRow puts its expansion region (a button, a details element and a labelled div) beside the row inside the table's rowgroup, as FileTable renders it; a component structure defect in FileRow and FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleaned-expanded|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleaned-expanded",
+			"rule": "color-contrast",
+			"reason": "Selector .metadata-expansion__content > .metadata-group > .metadata-group__header[title=\"Other\"] > .metadata-group__count (the group field count) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (foreground --ec-color-text-secondary), 14px; Selector .metadata-expansion__copy-btn (the Copy all button) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (foreground --ec-color-text-secondary), 14px; Selector .metadata-expansion__summary (the removed and still present summary) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (foreground --ec-color-text-secondary), 14px; Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; Selector summary (the still present toggle) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited text colour, no colour rule of its own), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleanup|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleanup",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleanup|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleanup",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleanup-without-residual|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleanup-without-residual",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--cleanup-without-residual|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--cleanup-without-residual",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--commit|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--commit",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--commit|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--commit",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--copy-mode-disclosure|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--copy-mode-disclosure",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--copy-mode-disclosure|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--copy-mode-disclosure",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--error-collapsed|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--error-collapsed",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--error-collapsed|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--error-collapsed",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--generic-failure|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--generic-failure",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--generic-failure|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--generic-failure",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--german-compound-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--german-compound-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--german-compound-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--german-compound-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--hebrew-latin-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--hebrew-latin-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--hebrew-latin-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--hebrew-latin-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--huge-size|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--huge-size",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--huge-size|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--huge-size",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--huge-tag-counts|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--huge-tag-counts",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--huge-tag-counts|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--huge-tag-counts",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--japanese-long-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--japanese-long-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--japanese-long-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--japanese-long-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--just-under-megabyte|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--just-under-megabyte",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--just-under-megabyte|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--just-under-megabyte",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--long-unbroken-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--long-unbroken-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--long-unbroken-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--long-unbroken-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--lro-pdf-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--lro-pdf-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--lro-pdf-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--lro-pdf-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the PNG pill) measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec (--ec-pill-png-text on --ec-pill-png-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--many-dots-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--many-dots-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--many-dots-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--many-dots-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--pending|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--pending",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--processing|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--processing",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--reading|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--reading",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--refused|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--refused",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--refused|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--refused",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--rlo-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--rlo-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--rlo-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--rlo-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--row-hover|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--row-hover",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--row-hover|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--row-hover",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--row-keyboard-focus|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--row-keyboard-focus",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--row-keyboard-focus|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--row-keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--unchanged|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--unchanged",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--unchanged|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--unchanged",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--verification|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--verification",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--verification|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--verification",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg over the error row), 14px; selector .file-table__copy-hint measures 4.32:1 in the light theme only: #66758c (--ec-color-text-secondary) on #f5f6f8 (--ec-color-bg), 16px; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--write|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--write",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--write|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--write",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--write-without-residual|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--write-without-residual",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--write-without-residual|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--write-without-residual",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--xattr|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--xattr",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--xattr|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--xattr",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--xattr-without-residual|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--xattr-without-residual",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--xattr-without-residual|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--xattr-without-residual",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-error|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--zero-byte-error",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-error|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--zero-byte-error",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-no-metadata|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--zero-byte-no-metadata",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-no-metadata|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--zero-byte-no-metadata",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--zwj-family-name|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--zwj-family-name",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filerow--zwj-family-name|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filerow--zwj-family-name",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill (the PNG pill) measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec (--ec-pill-png-text on --ec-pill-png-bg), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--arabic-batch|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--arabic-batch",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--arabic-batch|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--arabic-batch",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--arabic-batch|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--arabic-batch",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--arabic-batch|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--arabic-batch",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--heic measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 on #ebeaef, 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--arabic-batch|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--arabic-batch",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-complete|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-complete",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-complete|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-complete",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-complete|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-complete",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-complete|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-complete",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .folder-row__count (the folder file count) measures 2.04:1 in the light theme and 2.84:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #e8ecf0 light and #636369 on #1c1c1f dark (foreground --ec-color-muted), 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-complete|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-complete",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-empty|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-empty",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-empty|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-empty",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-empty|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-empty",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .folder-row__count (the folder file count) measures 2.04:1 in the light theme and 2.84:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #e8ecf0 light and #636369 on #1c1c1f dark (foreground --ec-color-muted), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-empty|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-empty",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-scanning|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-scanning",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-scanning|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-scanning",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-scanning|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-scanning",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .folder-row__count (the folder file count) measures 2.04:1 in the light theme and 2.84:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #e8ecf0 light and #636369 on #1c1c1f dark (foreground --ec-color-muted), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--folder-scanning|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--folder-scanning",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--german-batch|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--german-batch",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--german-batch|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--german-batch",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--german-batch|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--german-batch",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--german-batch|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--german-batch",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8, 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--heic measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 on #ebeaef, 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--german-batch|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--german-batch",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--header-hover|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--header-hover",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--header-hover|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--header-hover",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--header-hover|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--header-hover",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--header-hover|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--header-hover",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--header-hover|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--header-hover",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--hungarian-batch|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--hungarian-batch",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--hungarian-batch|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--hungarian-batch",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--hungarian-batch|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--hungarian-batch",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--hungarian-batch|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--hungarian-batch",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8, 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--heic measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 on #ebeaef, 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--hungarian-batch|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--hungarian-batch",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--japanese-batch|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--japanese-batch",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--japanese-batch|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--japanese-batch",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--japanese-batch|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--japanese-batch",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--japanese-batch|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--japanese-batch",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8, 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--heic measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 on #ebeaef, 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--japanese-batch|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--japanese-batch",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--mixed-statuses|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--mixed-statuses|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--mixed-statuses|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--mixed-statuses|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--mixed-statuses|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--persian-batch|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--persian-batch",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--persian-batch|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--persian-batch",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--persian-batch|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--persian-batch",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--persian-batch|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--persian-batch",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__summary measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8, 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--heic measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 on #ebeaef, 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--persian-batch|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--persian-batch",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-button-keyboard-focus|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-button-keyboard-focus",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-button-keyboard-focus|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-button-keyboard-focus",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-button-keyboard-focus|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-button-keyboard-focus",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-button-keyboard-focus|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-button-keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-button-keyboard-focus|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-button-keyboard-focus",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-ascending|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-name-ascending",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-ascending|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-name-ascending",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-ascending|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-name-ascending",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-ascending|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-name-ascending",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-ascending|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-name-ascending",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-descending|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-name-descending",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-descending|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-name-descending",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-descending|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-name-descending",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-descending|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-name-descending",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-descending|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-name-descending",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-size-with-tie|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-size-with-tie",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-size-with-tie|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-size-with-tie",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-size-with-tie|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-size-with-tie",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-size-with-tie|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-size-with-tie",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-by-size-with-tie|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-by-size-with-tie",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-twice-keeps-rank|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-twice-keeps-rank",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-twice-keeps-rank|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-twice-keeps-rank",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-twice-keeps-rank|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-twice-keeps-rank",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-twice-keeps-rank|color-contrast",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-twice-keeps-rank",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|file-list-filetable--sort-twice-keeps-rank|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "file-list-filetable--sort-twice-keeps-rank",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-done|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-done",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-done|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-done",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-done|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-done",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-done|color-contrast",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-done",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-done|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-done",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-error|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-error",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-error|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-error",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-error|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-error",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-error|color-contrast",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-error",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--jpg measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark, 14px; Selector .type-pill--png measures 3.05:1 in the light theme and 4.46:1 in the dark theme, below 4.5:1: foreground #5a9070 on #f1e7e5 light and #6aa080 on #402921 dark, 14px; Selector .type-pill--webp measures 2.05:1 in the light theme and 2.2:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #f5e9ea light and #636369 on #472826 dark, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-error|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-error",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--drawer-open|color-contrast",
+			"kind": "a11y-p73",
+			"story": "screens-app--drawer-open",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--error-boundary-failure|color-contrast",
+			"kind": "a11y-p73",
+			"story": "screens-app--error-boundary-failure",
+			"rule": "color-contrast",
+			"reason": "Selector .error-boundary__button (Try again) measures 3.62:1 in the light theme and 3.85:1 in the dark theme, below 4.5:1: foreground #007aff on #fff0f0 light and #007aff on #3d1a16 dark (--ec-color-accent on --ec-color-error-bg), 14px; Selector .error-boundary__detail (the error detail) measures 4.22:1 in the light theme and 3.99:1 in the dark theme, below 4.5:1: foreground #66758c on #fff0f0 light and #818188 on #3d1a16 dark (--ec-color-text-secondary on --ec-color-error-bg), 14px; Selector .error-boundary__message (Something went wrong.) measures 4.46:1 in the light theme and 3.13:1 in the dark theme, below 4.5:1: foreground #c44536 on #fff0f0 light and #c44536 on #3d1a16 dark (--ec-color-error on --ec-color-error-bg), 20px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--large-batch|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "screens-app--large-batch",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--large-batch|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "screens-app--large-batch",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--large-batch|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "screens-app--large-batch",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--large-batch|color-contrast",
+			"kind": "a11y-p73",
+			"story": "screens-app--large-batch",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--heic measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 on #ebeaef, 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--large-batch|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "screens-app--large-batch",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--mid-batch|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "screens-app--mid-batch",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--mid-batch|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "screens-app--mid-batch",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--mid-batch|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "screens-app--mid-batch",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--mid-batch|color-contrast",
+			"kind": "a11y-p73",
+			"story": "screens-app--mid-batch",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--mid-batch|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "screens-app--mid-batch",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--all-toggles-off|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--all-toggles-off",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--all-toggles-on|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--all-toggles-on",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--arabic-drawer|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--arabic-drawer",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--close-button-hover|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--close-button-hover",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--close-button-keyboard-focus|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--close-button-keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--german-drawer|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--german-drawer",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--hungarian-drawer|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--hungarian-drawer",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--language-list-open|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--language-list-open",
+			"rule": "color-contrast",
+			"reason": "Selector .language-dropdown__english (the English name in brackets) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; Selector span (the label of the highlighted item) measures 3.11:1 in the light theme and 4.27:1 in the dark theme, below 4.5:1: foreground #007aff on #dfe3e6 light and #007aff on #1b1b1e dark (--ec-color-accent on --ec-color-surface under the --ec-color-hover fallback), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--language-list-open|scrollable-region-focusable",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--language-list-open",
+			"rule": "scrollable-region-focusable",
+			"reason": "The open list .language-dropdown__list inside the drawer (max-height 280px, overflow-y auto, one option per language plus System) is a scrollable region with no focusable content and no tabindex of its own, so axe reports that the element should have focusable content and should be focusable in both themes; the options are role option divs that never take focus, the same defect as settings-languagedropdown--open, and the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--non-mac-platform|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--non-mac-platform",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--persian-drawer|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--persian-drawer",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--theme-mode-dark-selected|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--theme-mode-dark-selected",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--theme-mode-light-selected|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--theme-mode-light-selected",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--theme-mode-system-selected|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--theme-mode-system-selected",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|ui-statusbar--turkish-long-status|color-contrast",
+			"kind": "a11y-p73",
+			"story": "ui-statusbar--turkish-long-status",
+			"rule": "color-contrast",
+			"reason": "Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filerow--cleaned-expanded|rowgroup-holds-non-row-children",
+			"kind": "access-gap",
+			"story": "file-list-filerow--cleaned-expanded",
+			"rule": "rowgroup-holds-non-row-children",
+			"reason": "The metadata expansion (a button, a details element and a labelled div) sits in the role=rowgroup at FileTable.tsx:124 beside the row, so axe aria-required-children fails on the table and the rowgroup and the table structure is invalid for assistive tech.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filerow--cleaned|row-aria-expanded-unsupported-in-table",
+			"kind": "access-gap",
+			"story": "file-list-filerow--cleaned",
+			"rule": "row-aria-expanded-unsupported-in-table",
+			"reason": "FileRow.tsx:146 puts aria-expanded on the role=row element inside the role=table section (FileTable.tsx:115), where axe aria-conditional-attr reports the attribute as unsupported, so assistive tech may not announce the expanded state of any complete or error row.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filerow--long-unbroken-name|name-text-has-no-title",
+			"kind": "access-gap",
+			"story": "file-list-filerow--long-unbroken-name",
+			"rule": "name-text-has-no-title",
+			"reason": "The name text carries no title attribute: a 180-code-unit name has scrollWidth 1526 in a 180 px bdi, so a pointer user cannot read its tail; the full name is reachable through the row's aria-label and Reveal, so the harm is limited.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filerow--processing|progress-row-announced-as-pending",
+			"kind": "access-gap",
+			"story": "file-list-filerow--processing",
+			"rule": "progress-row-announced-as-pending",
+			"reason": "The Processing row is announced as 'test.jpg. Pending': with no outcomeKind or failureKind FileRow.tsx:61-68 leaves outcomeSummary undefined and the aria-label falls back to the pending status key at FileRow.tsx:144, while StatusIcon.tsx:32-40 labels the same row Processing, so an assistive-tech user hears a pending file while it is being read or written; this is the row name contradicting its own icon, not seed 7's icon wording.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filetable--mixed-statuses|reveal-transition-reduced-motion",
+			"kind": "access-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "reveal-transition-reduced-motion",
+			"reason": "The reduced-motion concern is a catalog artefact, not a defect: the Complete row renders the .file-table__reveal span (FileRow.tsx:199-201) and its opacity transition is file_table.css:156 inside the rule at :143, but the prefers-reduced-motion: reduce block at file_table.css:170-174 sets transition: none for it, so a reduced-motion user gets no transition.",
+			"disposition": "reject",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filetable--mixed-statuses|status-column-header-empty",
+			"kind": "access-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "status-column-header-empty",
+			"reason": "FileTable.tsx:117 renders an empty role=columnheader for the status column, so axe empty-table-header reports a column header with no text visible to screen readers and the status column has no name.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filetable--mixed-statuses|table-section-role-not-allowed",
+			"kind": "access-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "table-section-role-not-allowed",
+			"reason": "FileTable.tsx:115 renders the table as a section element with role=table, which axe aria-allowed-role reports as a role the element does not allow; a div or a native table would carry the role.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|file-list-filetable--mixed-statuses|toast-live-region-inside-table",
+			"kind": "access-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "toast-live-region-inside-table",
+			"reason": "FileTable.tsx:189 renders the Toast live region (role=status, Toast.tsx:13) inside the role=table section, so axe aria-required-children reports a child that is not a row or rowgroup.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|file-list-metadataexpansion--mixed|removed-count-announced-twice",
+			"kind": "access-gap",
+			"story": "file-list-metadataexpansion--mixed",
+			"rule": "removed-count-announced-twice",
+			"reason": "The expanded row prints the removed and present counts in MetadataExpansion.tsx:90-92 and the details summary at :115 prints the present count again ('1 field still present' appears twice in the Mixed play), so a screen reader reads that count twice; the repeat is brief and the details summary is a control, so it is accepted.",
+			"disposition": "accept",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|screens-app--mid-batch|row-aria-expanded-unsupported-in-table",
+			"kind": "access-gap",
+			"story": "screens-app--mid-batch",
+			"rule": "row-aria-expanded-unsupported-in-table",
+			"reason": "In the real App every complete or error row puts aria-expanded on a role=row (FileRow.tsx:146) inside the role=table, which axe aria-conditional-attr reports as unsupported.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|screens-app--mid-batch|status-column-header-empty",
+			"kind": "access-gap",
+			"story": "screens-app--mid-batch",
+			"rule": "status-column-header-empty",
+			"reason": "In the real App the status column header (FileTable.tsx:117) has no visible text, so axe empty-table-header reports it and a screen reader finds an unnamed column.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|screens-app--mid-batch|table-section-role-not-allowed",
+			"kind": "access-gap",
+			"story": "screens-app--mid-batch",
+			"rule": "table-section-role-not-allowed",
+			"reason": "The real App shows the same section role=table (FileTable.tsx:115) that axe aria-allowed-role reports on the FileTable story, here inside the full screen with the status bar.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|screens-app--mid-batch|toast-live-region-inside-table",
+			"kind": "access-gap",
+			"story": "screens-app--mid-batch",
+			"rule": "toast-live-region-inside-table",
+			"reason": "In the real App the Toast live region (role=status) still sits inside the table section (FileTable.tsx:189), which axe aria-required-children reports.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|settings-languagedropdown--keyboard-end|no-aria-activedescendant",
+			"kind": "access-gap",
+			"story": "settings-languagedropdown--keyboard-end",
+			"rule": "no-aria-activedescendant",
+			"reason": "LanguageDropdown.tsx:204 is a role listbox of role option divs (:214, :239) that never take focus and no aria-activedescendant is set anywhere in the file, so a screen reader hears no moving selection while the arrow keys change the highlight; axe also reports scrollable-region-focusable here, which this entry subsumes.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "access-gap|ui-errorboundary--fallback|reduced-motion-transition-unguarded",
+			"kind": "access-gap",
+			"story": "ui-errorboundary--fallback",
+			"rule": "reduced-motion-transition-unguarded",
+			"reason": "error_boundary.css:35 sets transition: background-color 0.15s ease on .error-boundary__button and the file has no prefers-reduced-motion block (the grep of error_boundary.css finds none), so the button hover transition ignores a reduce preference; the effect is a 150 ms colour change.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "access-gap|ui-statusicon--processing|reading-and-no-metadata-share-labels",
+			"kind": "access-gap",
+			"story": "ui-statusicon--processing",
+			"rule": "reading-and-no-metadata-share-labels",
+			"reason": "StatusIcon.tsx:32-40 gives the Reading and Processing statuses the same role img with the label Processing and NoMetadataFound shares Complete (outerHTML equality plays in the 72-02 stories), so assistive tech cannot tell a file being read from one being written or a clean file from a cleaned one.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "dead-end|file-list-errorexpansion--verification|click-to-copy-not-keyboard-reachable",
+			"kind": "dead-end",
+			"story": "file-list-errorexpansion--verification",
+			"rule": "click-to-copy-not-keyboard-reachable",
+			"reason": "ErrorExpansion.tsx:18-24 renders the error text as a pre with onClick and no role or tabIndex (the story shows no interactive element at all), so a keyboard user cannot copy the error and the Click to copy hint at :25-30 points at a gesture they cannot make.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "dead-end|screens-app--all-done|no-per-row-remove",
+			"kind": "dead-end",
+			"story": "screens-app--all-done",
+			"rule": "no-per-row-remove",
+			"reason": "No row offers a remove control (FileRow.tsx renders only the expand toggle at :147 and :160 and, on complete rows, Reveal at :199-223), so the only way to drop one file is Clear at App.tsx:94-96, which empties the whole list.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "dead-end|screens-app--all-error|no-retry-for-failed-file",
+			"kind": "dead-end",
+			"story": "screens-app--all-error",
+			"rule": "no-retry-for-failed-file",
+			"reason": "A failed row offers only expand (FileRow.tsx:41-42, :147) and no control re-runs a failed file; the only Try again resets a render crash (ErrorBoundary.tsx:42-48), so Clear and choosing the file again is the workaround.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|file-list-filerow--huge-size|file-size-english-units-ungrouped-counts",
+			"kind": "i18n-gap",
+			"story": "file-list-filerow--huge-size",
+			"rule": "file-size-english-units-ungrouped-counts",
+			"reason": "formatFileSize reads 1 TiB (1,099,511,627,776 bytes) as '1024 GB' and 1,048,575 bytes as '1024 KB' with English units only, and tag counts print as raw integers ('654321', '123456') with no digit grouping, in every locale.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|file-list-filerow--rlo-name|rtl-override-reorders-name",
+			"kind": "i18n-gap",
+			"story": "file-list-filerow--rlo-name",
+			"rule": "rtl-override-reorders-name",
+			"reason": "By measured glyph positions the name 'holiday' U+202E 'gnp.jpg' draws as 'holiday' then 'gpj.png', so a JPG file reads as a PNG while the type pill says JPG; the bdi dir=auto isolate does not contain the override's reordering, which lets a crafted name misstate the file type.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "i18n-gap|file-list-filetable--persian-batch|header-text-align-left-under-rtl",
+			"kind": "i18n-gap",
+			"story": "file-list-filetable--persian-batch",
+			"rule": "header-text-align-left-under-rtl",
+			"reason": "Under dir rtl (ar and fa) all six header cells keep a computed text-align of left because file_table.css:24 and :30 hard-code it, so labels sit at the left edge of each cell in a mirrored table; the fa header row is 30 px like en, so the wrap guess was not confirmed.",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|file-list-folderrow--single-file|folder-count-no-singular",
+			"kind": "i18n-gap",
+			"story": "file-list-folderrow--single-file",
+			"rule": "folder-count-no-singular",
+			"reason": "FolderRow.tsx:74-75 fills the folder.files template ('{count} files') with the count, so one file reads '1 files'; the SingleFile story deliberately does not assert the wording.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|file-list-metadataexpansion--arabic-plural|ar-lacks-dual-category",
+			"kind": "i18n-gap",
+			"story": "file-list-metadataexpansion--arabic-plural",
+			"rule": "ar-lacks-dual-category",
+			"reason": "ar.json carries only metadata.removed.one and metadata.removed.other (no two category) although Arabic distinguishes the count 2, so two removed fields read through the general wording; the code supports a dedicated category and the fix is translator content that needs the maintainer's approval.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|icons-chevronicon--arabic|chevron-not-mirrored",
+			"kind": "i18n-gap",
+			"story": "icons-chevronicon--arabic",
+			"rule": "chevron-not-mirrored",
+			"reason": "The chevron always points right and the expanded rule is rotate(90deg) at metadata_expansion.css:167; no stylesheet under src/renderer/styles has an rtl or :dir() rule, so the glyph is not mirrored in a right-to-left layout (read from source).",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|settings-segmentedcontrol--arabic|indicator-ignores-rtl",
+			"kind": "i18n-gap",
+			"story": "settings-segmentedcontrol--arabic",
+			"rule": "indicator-ignores-rtl",
+			"reason": "segmented_control.css:50-54 places the indicator at left: 2px at a third of the width and moves it by index, and no stylesheet under src/renderer/styles has an rtl or :dir() rule, while the flex row of segments reverses in a right-to-left layout, so as read from the source the highlight sits on the wrong segment for every choice but the middle one; not measured in a story.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "i18n-gap|ui-statusbar--single-file|tags-count-no-singular",
+			"kind": "i18n-gap",
+			"story": "ui-statusbar--single-file",
+			"rule": "tags-count-no-singular",
+			"reason": "StatusBar.tsx:57-61 fills the statusBar.tagsRemoved template ('{count} tags removed') with the count, so one tag reads '1 tags removed'; copy-findings already records statusBar.tagsRemoved as fix-v5.1, so the disposition matches it.",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "i18n-gap|ui-toast--skipped-one|skipped-count-no-singular",
+			"kind": "i18n-gap",
+			"story": "ui-toast--skipped-one",
+			"rule": "skipped-count-no-singular",
+			"reason": "The template intake.unsupportedSkipped ('{count} unsupported files skipped') is filled with 1 as '1 unsupported files skipped', and two e2e specs pin that exact text (error-handling.spec.ts:168, folder-recursion.spec.ts:95), so fixing the wording also changes those specs.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "layout-gap|file-list-filerow--cleaned|size-cell-clips-size-change",
+			"kind": "layout-gap",
+			"story": "file-list-filerow--cleaned",
+			"rule": "size-cell-clips-size-change",
+			"reason": "The size cell for a cleaned row reads '1.0 KB to 512 B' at scrollWidth 124 in an 80 px cell (clientWidth 80), so ordinary data clips under overflow hidden at the default 580 px window and the after size is cut off.",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "layout-gap|file-list-filerow--commit|secondary-summary-clips-in-name-column",
+			"kind": "layout-gap",
+			"story": "file-list-filerow--commit",
+			"rule": "secondary-summary-clips-in-name-column",
+			"reason": "The secondary summary clips in the 196 px name column (unchanged scrollWidth 278, already clean 414, write failed 454, commit failed 1076), so the sentence that says the original is unchanged is cut off exactly where a person looks for it; the row also grows to 53 px for a summary and 60 px with the copy disclosure against 44 px otherwise.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "layout-gap|file-list-filerow--huge-tag-counts|after-count-clips-six-digits",
+			"kind": "layout-gap",
+			"story": "file-list-filerow--huge-tag-counts",
+			"rule": "after-count-clips-six-digits",
+			"reason": "A six-digit AFTER tag count '123456' measures scrollWidth 120 in an 88 px cell, so it clips (73-02 measurement on the huge-tag-counts story).",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "layout-gap|screens-app--large-batch|row-stagger-lacks-backwards-fill",
+			"kind": "layout-gap",
+			"story": "screens-app--large-batch",
+			"rule": "row-stagger-lacks-backwards-fill",
+			"reason": "Read from file_table.css:182 (animation-delay: var(--ec-stagger-delay)) and :198-199 (animation ... forwards with no backwards fill) with the delay set to index times 30 ms at FileRow.tsx:119, so row 100 stays fully drawn for about 2970 ms and then flashes to transparent and fades in; hidden by reduced motion in the harness and not measured.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "layout-gap|settings-settingsdrawer--german-drawer|drawer-content-grows-past-window",
+			"kind": "layout-gap",
+			"story": "settings-settingsdrawer--german-drawer",
+			"rule": "drawer-content-grows-past-window",
+			"reason": "The drawer content height is 983 px in de (scrollHeight 983, clientHeight 312 in the story frame; 854 px in en), so the drawer scrolls and the last switches sit below the fold; they stay reachable by scrolling, so the harm is latent.",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "layout-gap|settings-settingsdrawer--hungarian-drawer|drawer-content-grows-past-window",
+			"kind": "layout-gap",
+			"story": "settings-settingsdrawer--hungarian-drawer",
+			"rule": "drawer-content-grows-past-window",
+			"reason": "The drawer content height is 965 px in hu (scrollHeight 965, clientHeight 312 in the story frame; 854 px in en), so the drawer scrolls like the German one and the last switches sit below the fold, reachable by scrolling.",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "layout-gap|ui-emptystate--malayalam-empty|empty-state-overflows-minimum-height",
+			"kind": "layout-gap",
+			"story": "ui-emptystate--malayalam-empty",
+			"rule": "empty-state-overflows-minimum-height",
+			"reason": "The ml EmptyState frame measures 327 px against its 312 px minimum, 15 px over (section 327 px, inner 263 px), while de measures 312 (section 298 px) and fa 312 (section 278 px).",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "silent-failure|file-list-filerow--verification|failure-summary-no-exhaustiveness",
+			"kind": "silent-failure",
+			"story": "file-list-filerow--verification",
+			"rule": "failure-summary-no-exhaustiveness",
+			"reason": "FileRow.tsx:47-60 maps failureKind to its summary with an if-chain that ends in undefined and has no assertNever, so a failureKind added to the union later renders a row with no failure summary; the union is also declared inline in AppContext.tsx FileEntry, the UPDATE_FILE_ERROR action and ipc_channels.ts.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "silent-failure|file-list-folderrow--empty-expanded|unreadable-folder-reads-as-empty",
+			"kind": "silent-failure",
+			"story": "file-list-folderrow--empty-expanded",
+			"rule": "unreadable-folder-reads-as-empty",
+			"reason": "DropZone.tsx:91-99 answers a folder.expand error with UPDATE_FOLDER_STATE status empty and fileCount 0, the same state as a folder with no supported file (DropZone.tsx:116), and FolderRow.tsx:76-77 draws both as 0 supported files; the en.json string intake.foldersUnreadable is used by no source file, so a refused or unreadable folder tells the person nothing about the failure.",
+			"disposition": "fix-v5.2",
+			"severity": "critical"
+		},
+		{
+			"fingerprint": "silent-failure|screens-app--all-error|status-bar-omits-failures",
+			"kind": "silent-failure",
+			"story": "screens-app--all-error",
+			"rule": "status-bar-omits-failures",
+			"reason": "With three failed rows the status bar reads '0 of 3 cleaned' and '0 tags removed' and shows no failure count: App.tsx:38-41 counts only outcomeKind cleaned and StatusBar.tsx:49-67 has no failure segment (en.json has no statusBar failure key); each row names its own failure, so the person is not told nothing, but the summary does not report the failures.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "silent-failure|screens-app--mid-batch|clear-during-processing-keeps-writing",
+			"kind": "silent-failure",
+			"story": "screens-app--mid-batch",
+			"rule": "clear-during-processing-keeps-writing",
+			"reason": "Clear is enabled while row 3 shows Processing (App.tsx:94-96); as read from the call sites and not reproduced in a story, CLEAR_FILES empties the list (AppContext.tsx:99-106) while processFileEntries keeps iterating the entries it captured with no cancellation check (use_process_files.ts:20-147), so the remaining files are still written while no row reports them and the person is told nothing about those results.",
+			"disposition": "fix-v5.2",
+			"severity": "critical"
+		},
+		{
+			"fingerprint": "silent-failure|settings-languagedropdown--item-hover|hover-moves-keyboard-selection",
+			"kind": "silent-failure",
+			"story": "settings-languagedropdown--item-hover",
+			"rule": "hover-moves-keyboard-selection",
+			"reason": "LanguageDropdown.tsx:217 and :242 set focusedIndex from onMouseEnter, the same state the arrow keys move, so the pointer resting over the list moves the keyboard highlight and, as read from the source, Enter then picks the item under the pointer instead of the one the keyboard chose; the ItemHover story asserts the shared --focused class.",
+			"disposition": "fix-v5.2",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "silent-failure|settings-settingsdrawer--all-toggles-on|toggle-write-result-ignored",
+			"kind": "silent-failure",
+			"story": "settings-settingsdrawer--all-toggles-on",
+			"rule": "toggle-write-result-ignored",
+			"reason": "SettingsDrawer.tsx:94 handleToggle calls window.api.settings.set(...) and never reads the Promise<{ success: boolean; error: string | null }> it returns (api_types.ts:53-55); the switches are drawn from settings state that only the onChanged callback updates (SettingsDrawer.tsx:87, :238-275), so a write that fails leaves the switch where it was and the person is told nothing (read from source, not reproduced in a story; settings_handlers.ts:35 answers success true today).",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "silent-failure|ui-toast--skipped-many|toasts-share-one-position",
+			"kind": "silent-failure",
+			"story": "ui-toast--skipped-many",
+			"rule": "toasts-share-one-position",
+			"reason": "toast.css:4-5 fixes every .toast at bottom calc(44px + var(--ec-space-4)); DropZone.tsx:281 and FileTable.tsx:189 each render their own Toast and App.tsx:82-84 mounts FileTable inside DropZone, so a skipped-files notice and a copy notice shown together draw at the same spot (read from source, not reproduced in a story).",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "token-gap|settings-languagedropdown--item-hover|hover-token-undefined",
+			"kind": "token-gap",
+			"story": "settings-languagedropdown--item-hover",
+			"rule": "hover-token-undefined",
+			"reason": "language_dropdown.css:82 reads var(--ec-color-hover, rgba(0, 0, 0, 0.04)) and --ec-color-hover is defined in no stylesheet, so the hover and focused item fall back to the literal rgba in both themes (measured #dfe3e6 over the light surface and #1b1b1e over the dark one).",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "token-gap|ui-errorboundary--fallback|spacing-tokens-undefined",
+			"kind": "token-gap",
+			"story": "ui-errorboundary--fallback",
+			"rule": "spacing-tokens-undefined",
+			"reason": "error_boundary.css:7-28 and file_list.css:2-14 use var(--spacing-xs) to var(--spacing-xl) (7 uses) and no stylesheet or token file under src defines any --spacing-* property, so those paddings, margins and gaps resolve to nothing and the crash screen and the file list lose their spacing.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "unrendered-outcome|file-list-folderrow--scanning|discovering-status-never-dispatched",
+			"kind": "unrendered-outcome",
+			"story": "file-list-folderrow--scanning",
+			"rule": "discovering-status-never-dispatched",
+			"reason": "FolderRow.tsx:72-73 renders a found-count for status discovering with the folder.found string, but the status appears only in the AppContext.tsx:8 type and that case: DropZone.tsx dispatches scanning (:87), empty (:95, :116) and complete (:127), so the branch never shows and no story can show it.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "unrendered-outcome|screens-app--all-done|engine-evidence-not-shown",
+			"kind": "unrendered-outcome",
+			"story": "screens-app--all-done",
+			"rule": "engine-evidence-not-shown",
+			"reason": "RemoveMetadataResult.evidence {engine, outputMode, leakCheck} reaches the renderer (ipc_channels.ts:59-73) but use_process_files.ts:102-125 dispatches UPDATE_FILE_METADATA without it (AppContext.tsx:60-70 has no evidence field), so no row says which engine wrote the file or whether the leak check ran; the output mode itself stays visible through the copy disclosure.",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		}
+	],
+	"verdicts": [
+		{
+			"fingerprint": "access-gap|file-list-filetable--mixed-statuses|reveal-transition-reduced-motion",
+			"verdict": "reject",
+			"reason": "Not a defect, a catalog artefact: file_table.css:156 sets the opacity transition on .file-table__reveal inside the rule at :143 and the prefers-reduced-motion: reduce block at :170-174 sets transition: none for it, so a person who asked for reduced motion gets none; the Complete row renders the element (FileRow.tsx:199-201).",
+			"decidedAt": "2026-11-13",
+			"decidedBy": "maintainer",
+			"reply": "delegate-merge"
 		}
 	]
 }

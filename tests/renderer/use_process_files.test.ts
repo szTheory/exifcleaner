@@ -9,9 +9,12 @@ import type { AppAction } from "../../src/renderer/contexts/AppContext";
 // the frozen `beforeTags === 0` early exit (use_process_files.ts:30-52) stays visible.
 import {
 	FAILURE_CASES,
+	FAILURE_WITHOUT_RESIDUAL,
+	GENERIC_FAILURE,
 	OUTCOME_CASES,
 	fileEntry,
 } from "../../src/renderer/story_support/process_outcomes";
+import type { FailureCase } from "../../src/renderer/story_support/process_outcomes";
 
 // Mock window.api
 function createMockApi(): {
@@ -428,10 +431,25 @@ describe("processFileEntries", () => {
 		).toBe(false);
 	});
 
-	it.each(["verification", "cleanup", "xattr"] as const)(
-		"stores %s terminal failure details without reading AFTER metadata",
-		async (failureKind) => {
-			const fixtureCase = FAILURE_CASES[failureKind];
+	// WR-03: every failure fixture the FileRow stories consume (all six typed kinds, the
+	// three without-residual variants and the generic failure) must produce its own
+	// UPDATE_FILE_ERROR through the real pipeline, so a fixture cannot drift from the
+	// hook the stories claim to mirror. The `{ success: false, error }` branch and the
+	// typed branches both leave the AFTER read unperformed (use_process_files.ts:60-95).
+	const failureTable: ReadonlyArray<[string, FailureCase]> = [
+		...Object.entries(FAILURE_CASES),
+		...Object.entries(FAILURE_WITHOUT_RESIDUAL).map(
+			([kind, fixtureCase]): [string, FailureCase] => [
+				`${kind}-without-residual`,
+				fixtureCase,
+			],
+		),
+		["generic", GENERIC_FAILURE],
+	];
+
+	it.each(failureTable)(
+		"dispatches the %s fixture's own UPDATE_FILE_ERROR without reading AFTER metadata",
+		async (_name, fixtureCase) => {
 			const errorAction = fixtureCase.actions.find(
 				(action) => action.type === "UPDATE_FILE_ERROR",
 			);

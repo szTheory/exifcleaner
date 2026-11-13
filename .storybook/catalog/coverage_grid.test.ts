@@ -294,21 +294,36 @@ describe("gapRatchet and zeroGapProblems", () => {
 		});
 	});
 
-	test("zeroGapProblems of a model without gaps is empty and of the real model with tier screen lists the 12 App cells", async () => {
-		const model = await realModel();
-		const full = clone(model);
+	test("zeroGapProblems over a planted model: a model without gaps is empty, and the planted App and primitive gaps are listed by tier", async () => {
+		// Planted, never read from the live grid (D-03): the App row's gaps close in
+		// 73-04, and this case must keep proving the tier filter after that.
+		const full = clone(await realModel());
 		for (const row of full.rows) {
 			for (const stateClass of STATE_CLASSES) {
 				row.cells[stateClass] = { status: "covered", scenarios: ["x.y"] };
 			}
 		}
 		expect(zeroGapProblems(full)).toEqual([]);
-		const screen = zeroGapProblems(model, ["screen"]);
+		const planted = clone(full);
+		const app = planted.rows.find((row) => row.subject === "App");
+		const primitive = planted.rows.find((row) => row.tier === "primitive");
+		if (app === undefined || primitive === undefined) {
+			throw new Error("the model has no App row or no primitive-tier row");
+		}
+		for (const stateClass of STATE_CLASSES) {
+			app.cells[stateClass] = { status: "gap" };
+		}
+		primitive.cells["happy"] = { status: "gap" };
+		const screen = zeroGapProblems(planted, ["screen"]);
 		expect(screen.map((found) => found.message)).toEqual(
 			STATE_CLASSES.map((stateClass) => `gap|App|${stateClass}`),
 		);
 		expect(codes(screen)).toEqual(Array.from({ length: 12 }, () => "gap"));
-		expect(zeroGapProblems(model).length).toBe(model.counts.gaps);
+		const every = zeroGapProblems(planted);
+		expect(every.length).toBe(13);
+		expect(every.map((found) => found.message)).toContain(
+			`gap|${primitive.subject}|happy`,
+		);
 	});
 });
 

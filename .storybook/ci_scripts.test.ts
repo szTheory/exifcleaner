@@ -9,7 +9,11 @@ import {
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
+import baseline from "../docs/evidence/known-findings.json";
 import {
+	DISPOSITIONS,
+	FINDINGS_RATCHET_CODES,
+	REGISTER_KINDS,
 	check,
 	diffBaseline,
 	fingerprint,
@@ -17,8 +21,10 @@ import {
 	validateBaseline,
 	type BaselineDocument,
 	type BaselineEntry,
+	type Verdict,
 } from "../scripts/findings_ratchet.mjs";
 import { assertDirEffect, snapshotDir } from "../tests/helpers/dir_effect";
+import { DISPOSITIONS as VOCAB_DISPOSITIONS } from "./catalog/vocab.mjs";
 
 const repoRoot = path.resolve(import.meta.dirname, "..");
 const RATCHET = path.join(repoRoot, "scripts", "findings_ratchet.mjs");
@@ -30,12 +36,16 @@ function entry(kind: string, story: string, rule: string): BaselineEntry {
 		story,
 		rule,
 		reason: "planted for a test",
+		disposition: "fix-v5.1",
 	};
 }
 
+// `verdicts` is written only when given: an absent log must validate as [] (the
+// merge-base copy on master has none).
 function doc(
 	kinds: Record<string, boolean>,
 	entries: BaselineEntry[] = [],
+	verdicts?: Verdict[],
 ): BaselineDocument {
 	return {
 		schemaVersion: 1,
@@ -43,6 +53,7 @@ function doc(
 			Object.entries(kinds).map(([name, sealed]) => [name, { sealed }]),
 		),
 		entries,
+		...(verdicts === undefined ? {} : { verdicts }),
 	};
 }
 
@@ -97,7 +108,7 @@ describe("findings_ratchet: fingerprint and validateBaseline", () => {
 		],
 		[
 			"entry of an undeclared kind",
-			doc({ a11y: true }, [entry("finding", STORY, "x")]),
+			doc({ a11y: true }, [entry("a11y-p72", STORY, "x")]),
 			"undeclared-kind",
 		],
 		[
@@ -150,20 +161,20 @@ describe("findings_ratchet: check", () => {
 
 	test("new kind introduced once with entries passes", () => {
 		const base = doc({ a11y: true });
-		const head = doc({ a11y: true, "a11y-phase72": true }, [
-			entry("a11y-phase72", STORY, "color-contrast"),
+		const head = doc({ a11y: true, "a11y-p72": true }, [
+			entry("a11y-p72", STORY, "color-contrast"),
 		]);
 		expect(check({ head, base })).toEqual({ ok: true, problems: [] });
 	});
 
 	test("second addition to a sealed new kind is added", () => {
-		const introduced = doc({ a11y: true, "a11y-phase72": true }, [
-			entry("a11y-phase72", STORY, "color-contrast"),
+		const introduced = doc({ a11y: true, "a11y-p72": true }, [
+			entry("a11y-p72", STORY, "color-contrast"),
 		]);
 		// The introduction is now the merge-base copy.
-		const head = doc({ a11y: true, "a11y-phase72": true }, [
-			entry("a11y-phase72", STORY, "color-contrast"),
-			entry("a11y-phase72", OTHER, "color-contrast"),
+		const head = doc({ a11y: true, "a11y-p72": true }, [
+			entry("a11y-p72", STORY, "color-contrast"),
+			entry("a11y-p72", OTHER, "color-contrast"),
 		]);
 		const result = check({ head, base: introduced });
 		expect(result.ok).toBe(false);
@@ -172,8 +183,8 @@ describe("findings_ratchet: check", () => {
 
 	test("unsealed new kind is new-kind-unsealed", () => {
 		const base = doc({ a11y: true });
-		const head = doc({ a11y: true, "a11y-phase72": false }, [
-			entry("a11y-phase72", STORY, "x"),
+		const head = doc({ a11y: true, "a11y-p72": false }, [
+			entry("a11y-p72", STORY, "x"),
 		]);
 		expect(codes(check({ head, base }))).toEqual(["new-kind-unsealed"]);
 	});
@@ -240,6 +251,457 @@ describe("findings_ratchet: prune", () => {
 			observed: new Set(),
 		});
 		expect(result.ok).toBe(false);
+	});
+});
+
+// --- findings register rules (Phase 73, FLW-02, D-26 to D-30) -------------------
+
+const REG = "silent-failure";
+const SLUG = "planted-slug";
+
+function registerEntry(
+	story: string,
+	patch: Partial<BaselineEntry> = {},
+	kind: string = REG,
+	rule: string = SLUG,
+): BaselineEntry {
+	return { ...entry(kind, story, rule), severity: "major", ...patch };
+}
+
+function rejectEntry(story: string = STORY): BaselineEntry {
+	return registerEntry(story, { disposition: "reject" });
+}
+
+function verdict(of: BaselineEntry, patch: Partial<Verdict> = {}): Verdict {
+	return {
+		fingerprint: of.fingerprint,
+		verdict: "reject",
+		reason: "planted: a catalog artefact, not a defect",
+		decidedAt: "2026-11-13",
+		decidedBy: "maintainer",
+		reply: "planted for a test",
+		...patch,
+	};
+}
+
+function regDoc(
+	entries: BaselineEntry[],
+	verdicts?: Verdict[],
+): BaselineDocument {
+	return doc({ a11y: true, "a11y-p72": true, [REG]: true }, entries, verdicts);
+}
+
+// The shape master has today: axe kinds only, every entry with a disposition, no
+// verdicts. check() validates this copy with the head's validator, so it must stay
+// valid under every rule above (every field added is optional at the top level).
+const MASTER_SHAPED = doc({ a11y: true, "a11y-p72": true }, [
+	entry("a11y-p72", STORY, "color-contrast"),
+]);
+
+function problemsOf(value: unknown): string[] {
+	return validateBaseline(value).map((found) => found.code);
+}
+
+type Unit = [name: string, run: () => string[], expected: string[]];
+
+// One planted defect per new code, each yielding exactly its own code (the
+// blast-radius assertion: toEqual of the whole code list, never toContain).
+const REGISTER_UNITS: ReadonlyArray<Unit> = [
+	[
+		"a register entry without a story",
+		() =>
+			problemsOf({
+				...regDoc([]),
+				entries: [{ ...registerEntry(STORY), story: undefined }],
+			}),
+		["entry-field"],
+	],
+	[
+		"an entry without a disposition",
+		() =>
+			problemsOf({
+				...regDoc([]),
+				entries: [{ ...registerEntry(STORY), disposition: undefined }],
+			}),
+		["entry-field"],
+	],
+	[
+		"disposition wontfix",
+		() =>
+			problemsOf(regDoc([registerEntry(STORY, { disposition: "wontfix" })])),
+		["bad-disposition"],
+	],
+	[
+		"a register entry without a severity",
+		() =>
+			problemsOf({
+				...regDoc([]),
+				entries: [{ ...registerEntry(STORY), severity: undefined }],
+			}),
+		["bad-severity"],
+	],
+	[
+		"severity high",
+		() => problemsOf(regDoc([registerEntry(STORY, { severity: "high" })])),
+		["bad-severity"],
+	],
+	[
+		"a register rule that is not a kebab slug",
+		() => {
+			const rule = "Not A Slug";
+			return problemsOf(
+				regDoc([
+					registerEntry(STORY, {
+						rule,
+						fingerprint: fingerprint(REG, STORY, rule),
+					}),
+				]),
+			);
+		},
+		["bad-slug"],
+	],
+	[
+		"kind contrast",
+		() =>
+			problemsOf(
+				doc({ a11y: true, contrast: true }, [
+					registerEntry(STORY, {}, "contrast"),
+				]),
+			),
+		["unknown-kind"],
+	],
+	[
+		"an a11y-prefixed kind outside the axe pattern",
+		() =>
+			problemsOf(
+				doc({ a11y: true, "a11y-contrast": true }, [
+					registerEntry(STORY, {}, "a11y-contrast"),
+				]),
+			),
+		["unknown-kind"],
+	],
+	[
+		"a reject entry without a verdict row",
+		() => problemsOf(regDoc([rejectEntry()])),
+		["reject-unrecorded"],
+	],
+	[
+		"a verdict row without a reject entry",
+		() => {
+			const kept = registerEntry(STORY);
+			return problemsOf(regDoc([kept], [verdict(kept)]));
+		},
+		["verdict-orphan"],
+	],
+	[
+		"a verdict row dated 2026-02-30",
+		() => {
+			const rejected = rejectEntry();
+			return problemsOf(
+				regDoc([rejected], [verdict(rejected, { decidedAt: "2026-02-30" })]),
+			);
+		},
+		["verdict-shape"],
+	],
+	[
+		"a verdict row decided by bot",
+		() => {
+			const rejected = rejectEntry();
+			return problemsOf(
+				regDoc([rejected], [verdict(rejected, { decidedBy: "bot" })]),
+			);
+		},
+		["verdict-shape"],
+	],
+	[
+		"a merge-base verdict row edited in head",
+		() => {
+			const rejected = rejectEntry();
+			const base = regDoc([rejected], [verdict(rejected)]);
+			const head = regDoc(
+				[rejected],
+				[verdict(rejected, { reply: "rewritten after the fact" })],
+			);
+			return codes(check({ head, base }));
+		},
+		["verdict-rewritten"],
+	],
+	[
+		"a merge-base verdict row removed in head",
+		() => {
+			const rejected = rejectEntry();
+			const base = regDoc([rejected], [verdict(rejected)]);
+			return codes(check({ head: regDoc([], []), base }));
+		},
+		["verdict-rewritten"],
+	],
+];
+
+describe("findings register: one planted defect, one code (D-30)", () => {
+	test.each(REGISTER_UNITS)("%s", (_name, run, expected) => {
+		expect(run()).toEqual(expected);
+	});
+
+	test("green controls: a reject entry with its row, a document without verdicts and the master-shaped base all validate", () => {
+		const rejected = rejectEntry();
+		expect(problemsOf(regDoc([rejected], [verdict(rejected)]))).toEqual([]);
+		expect("verdicts" in MASTER_SHAPED).toBe(false);
+		expect(problemsOf(regDoc([registerEntry(STORY)]))).toEqual([]);
+		expect(problemsOf(MASTER_SHAPED)).toEqual([]);
+		expect(
+			problemsOf(
+				doc({ a11y: true, "a11y-p73": true }, [entry("a11y-p73", STORY, "x")]),
+			),
+		).toEqual([]);
+	});
+
+	test("the real baseline validates and passes against a master-shaped base", () => {
+		expect(problemsOf(baseline)).toEqual([]);
+		// Master holds the a11y and a11y-p72 entries; the head adds the sealed
+		// a11y-p73 kind (and, later, register kinds) on top.
+		const base = doc(
+			{ a11y: true, "a11y-p72": true },
+			baseline.entries
+				.filter((found) => found.kind === "a11y-p72")
+				.map((found) => ({ ...found })),
+		);
+		expect(problemsOf(base)).toEqual([]);
+		expect(
+			check({ head: baseline as unknown as BaselineDocument, base }),
+		).toEqual({ ok: true, problems: [] });
+	});
+
+	test("the same story and rule under two kinds are two fingerprints, a repeated fingerprint is duplicate", () => {
+		const two = [
+			registerEntry(STORY, {}, "token-gap"),
+			registerEntry(STORY, {}, "access-gap"),
+		];
+		expect(
+			problemsOf(
+				doc({ a11y: true, "token-gap": true, "access-gap": true }, two),
+			),
+		).toEqual([]);
+		expect(
+			problemsOf(
+				doc({ a11y: true, "token-gap": true }, [
+					registerEntry(STORY, {}, "token-gap"),
+					registerEntry(STORY, {}, "token-gap"),
+				]),
+			),
+		).toEqual(["duplicate"]);
+	});
+
+	test("first introduction of a sealed register kind passes once; a second change to it is added", () => {
+		const first = regDoc([registerEntry(STORY), registerEntry(OTHER)]);
+		expect(check({ head: first, base: MASTER_SHAPED })).toEqual({
+			ok: true,
+			problems: [],
+		});
+		// After merge the introduction is the merge-base copy, not the previous commit.
+		const third = registerEntry("settings-languagedropdown--persian");
+		expect(
+			codes(check({ head: regDoc([...first.entries, third]), base: first })),
+		).toEqual(["added"]);
+	});
+
+	test("a register kind introduced unsealed is new-kind-unsealed", () => {
+		const head = doc({ a11y: true, "a11y-p72": true, [REG]: false }, [
+			registerEntry(STORY),
+		]);
+		expect(codes(check({ head, base: MASTER_SHAPED }))).toEqual([
+			"new-kind-unsealed",
+		]);
+	});
+
+	test("a verdict row that stays unchanged, or a new row for a new reject, passes against the base", () => {
+		const first = rejectEntry();
+		const second = rejectEntry(OTHER);
+		const base = regDoc([first], [verdict(first)]);
+		expect(check({ head: base, base })).toEqual({ ok: true, problems: [] });
+		// Flipping an existing entry to reject is the post-seed route and needs a new row;
+		// the entry is not new, so it is not an addition either.
+		const flippedBase = regDoc([registerEntry(OTHER)]);
+		const flipped = regDoc([second], [verdict(second)]);
+		expect(check({ head: flipped, base: flippedBase })).toEqual({
+			ok: true,
+			problems: [],
+		});
+	});
+
+	test("the dispositions inlined in the ratchet equal vocab.mjs DISPOSITIONS", () => {
+		expect([...DISPOSITIONS]).toEqual([...VOCAB_DISPOSITIONS]);
+	});
+});
+
+describe("findings register: stale entries and prune (D-28)", () => {
+	const axe = entry("a11y-p72", STORY, "color-contrast");
+	const register = registerEntry(OTHER);
+	const both = doc({ a11y: true, "a11y-p72": true, [REG]: true }, [
+		axe,
+		register,
+	]);
+
+	test("a stale axe entry says run --write to prune and a stale register entry says it is never pruned", () => {
+		const axeOnly = check({
+			head: both,
+			base: both,
+			observed: new Set([OTHER]),
+		});
+		expect(codes(axeOnly)).toEqual(["stale"]);
+		expect(axeOnly.problems[0]?.message).toContain("run --write to prune");
+		const registerOnly = check({
+			head: both,
+			base: both,
+			observed: new Set([STORY]),
+		});
+		expect(codes(registerOnly)).toEqual(["stale"]);
+		expect(registerOnly.problems[0]?.message).toContain(
+			"register entries are never pruned",
+		);
+		expect(registerOnly.problems[0]?.message).not.toContain("run --write");
+	});
+
+	test("prune removes a stale axe entry and keeps the register entry", () => {
+		const result = prune({
+			head: both,
+			base: both,
+			observed: new Set([OTHER]),
+		});
+		expect(result.ok).toBe(true);
+		if (result.ok) {
+			expect(result.doc.entries.map((found) => found.fingerprint)).toEqual([
+				register.fingerprint,
+			]);
+		}
+	});
+
+	test("prune refuses a stale register entry and returns no document", () => {
+		const result = prune({
+			head: both,
+			base: both,
+			observed: new Set([STORY]),
+		});
+		expect(result.ok).toBe(false);
+		expect("doc" in result).toBe(false);
+		if (!result.ok) {
+			expect(codes(result)).toEqual(["stale"]);
+			expect(result.problems[0]?.message).toContain(
+				"register entries are never pruned",
+			);
+		}
+	});
+
+	test("prune with both stale refuses and removes nothing", () => {
+		const result = prune({ head: both, base: both, observed: new Set() });
+		expect(result.ok).toBe(false);
+		expect("doc" in result).toBe(false);
+	});
+
+	// 73-fix WR-02: axe kinds may carry a reject verdict. Pruning such an entry keeps its
+	// row (a verdict is permanent) and so would write a file that fails its own --check.
+	const AXE_REJECT_KINDS = { a11y: true, "a11y-p73": true };
+	const axeRejected: BaselineEntry = {
+		...entry("a11y-p73", STORY, "planted-rule"),
+		disposition: "reject",
+	};
+	const axeRejectDoc = doc(
+		AXE_REJECT_KINDS,
+		[axeRejected, entry("a11y-p73", OTHER, "planted-rule")],
+		[verdict(axeRejected)],
+	);
+
+	test("prune refuses a stale axe entry that carries a reject verdict row and returns no document", () => {
+		const result = prune({
+			head: axeRejectDoc,
+			base: axeRejectDoc,
+			observed: new Set([OTHER]),
+		});
+		expect(result.ok).toBe(false);
+		expect("doc" in result).toBe(false);
+		if (!result.ok) {
+			expect(codes(result)).toEqual(["stale"]);
+			expect(result.problems[0]?.message).toContain(axeRejected.fingerprint);
+		}
+	});
+
+	test("prune still removes a stale axe entry without a verdict beside a live reject entry, and the result passes check", () => {
+		const observed = new Set([STORY]);
+		const result = prune({ head: axeRejectDoc, base: axeRejectDoc, observed });
+		expect(result.ok).toBe(true);
+		if (result.ok) {
+			expect(result.doc.entries.map((found) => found.fingerprint)).toEqual([
+				axeRejected.fingerprint,
+			]);
+			expect(result.doc.verdicts).toEqual([verdict(axeRejected)]);
+			expect(check({ head: result.doc, base: axeRejectDoc, observed })).toEqual(
+				{ ok: true, problems: [] },
+			);
+		}
+	});
+
+	test("every document prune accepts passes check with the same inputs (never a self-invalid file)", () => {
+		const subjects: [string, BaselineDocument, Set<string>][] = [
+			[
+				"axe stale only",
+				doc({ a11y: true }, [entry("a11y", STORY, "x")]),
+				new Set([OTHER]),
+			],
+			["register live, axe stale", both, new Set([OTHER])],
+			["nothing stale", axeRejectDoc, new Set([STORY, OTHER])],
+		];
+		for (const [name, head, observed] of subjects) {
+			const result = prune({ head, base: head, observed });
+			expect(result.ok, name).toBe(true);
+			if (result.ok) {
+				expect(check({ head: result.doc, base: head, observed }), name).toEqual(
+					{ ok: true, problems: [] },
+				);
+			}
+		}
+	});
+
+	// 73-fix WR-01: the verdict seal (D-29) is unchanged; only the message is made true.
+	// For an entry that carries a reject verdict neither "restore the story or remove the
+	// entry" nor "run --write to prune" can be followed, so the stale text names the one
+	// real exit.
+	const rejectRegister = rejectEntry(STORY);
+	const rejectRegisterDoc = regDoc([rejectRegister], [verdict(rejectRegister)]);
+
+	test.each([
+		["register entry", rejectRegisterDoc, rejectRegister],
+		["axe entry", axeRejectDoc, axeRejected],
+	])(
+		"a stale %s that carries a reject verdict says retiring it takes its own rules commit",
+		(_name, head, rejected) => {
+			const result = check({ head, base: head, observed: new Set([OTHER]) });
+			const stale = result.problems.filter((found) =>
+				found.message.includes(rejected.fingerprint),
+			);
+			expect(stale.map((found) => found.code)).toEqual(["stale"]);
+			const message = stale[0]?.message ?? "";
+			expect(message).toContain(
+				"retiring it requires its own commit that changes the ratchet rules",
+			);
+			expect(message).not.toContain("remove the entry");
+			expect(message).not.toContain("run --write");
+			expect(message).not.toContain("restore the story");
+		},
+	);
+
+	test("the verdict seal is not relaxed: a stale reject entry removed together with its row is still verdict-rewritten", () => {
+		const observed = new Set([OTHER]);
+		expect(
+			codes(check({ head: regDoc([], []), base: rejectRegisterDoc, observed })),
+		).toEqual(["verdict-rewritten"]);
+		expect(
+			codes(
+				check({
+					head: regDoc([registerEntry(OTHER)], [verdict(rejectRegister)]),
+					base: rejectRegisterDoc,
+					observed,
+				}),
+			),
+		).toEqual(["verdict-orphan"]);
 	});
 });
 
@@ -492,6 +954,373 @@ describe("findings_ratchet CLI against a temp git repo", () => {
 		} finally {
 			rmSync(repo, { recursive: true, force: true });
 		}
+	});
+
+	// 73-fix IN-04: a bare --index used to store undefined and skip the stale check, so a
+	// workflow line that lost its path still printed PASSED. A flag that needs a value and
+	// has none (end of the arguments, or another flag in its place) fails closed.
+	test.each([
+		["a bare trailing --index", ["--check", "--base", "main", "--index"]],
+		["a bare trailing --base", ["--check", "--index", "{index}", "--base"]],
+		[
+			"--index followed by another flag",
+			["--check", "--index", "--base", "main"],
+		],
+		["--base followed by another flag", ["--check", "--base", "--write"]],
+		["a bare --index with --write", ["--write", "--base", "main", "--index"]],
+	])("%s fails closed with a needs-a-value message", (_name, template) => {
+		// The stale axe entry would be reported if the stale check ran; a skipped check
+		// would print PASSED, which is the defect.
+		const repo = makeRepo(doc({ a11y: true }, [entry("a11y", STORY, "x")]));
+		try {
+			const index = writeIndex(repo, [OTHER]);
+			const args = template.map((arg) => (arg === "{index}" ? index : arg));
+			const dir = path.join(repo, "docs", "evidence");
+			const before = snapshotDir(dir);
+			const result = runRatchet(repo, args);
+			expect(result.status).toBe(1);
+			expect(result.stdout).not.toContain("PASSED");
+			expect(result.stderr).toContain("FINDINGS RATCHET FAILED");
+			expect(result.stderr).toMatch(/--(index|base) needs a value/);
+			assertDirEffect(before, snapshotDir(dir), {});
+		} finally {
+			rmSync(repo, { recursive: true, force: true });
+		}
+	});
+});
+
+// --- findings register controls against a temporary git repository (D-30) --------
+
+// The codes in the CLI's failure text: `✗ FINDINGS RATCHET FAILED: code: message; ...`.
+function stderrCodes(stderr: string): string[] {
+	const body = (stderr.split("FINDINGS RATCHET FAILED: ")[1] ?? "").replace(
+		/^refusing to write: /,
+		"",
+	);
+	const known = new RegExp(
+		`(?:^|; )(${FINDINGS_RATCHET_CODES.join("|")}): `,
+		"g",
+	);
+	return [...body.matchAll(known)].map((match) => match[1] ?? "");
+}
+
+type CliCase = {
+	name: string;
+	// What main holds (the merge-base copy), and what the working tree holds.
+	base: BaselineDocument;
+	head: unknown;
+	stories: string[];
+	mode?: "--check" | "--write";
+	// The whole list of codes the run reports; [] means it passes.
+	codes: string[];
+	says?: string;
+};
+
+const SOMEONE_ELSE = "settings-languagedropdown--persian";
+const rejected = rejectEntry();
+const RECORDED = regDoc([rejected], [verdict(rejected)]);
+// An axe-kind entry with a reject verdict row (axe kinds may carry one, 73-fix WR-02).
+const axeRejectedEntry: BaselineEntry = {
+	...entry("a11y-p73", STORY, "planted-rule"),
+	disposition: "reject",
+};
+const AXE_RECORDED = doc(
+	{ a11y: true, "a11y-p73": true },
+	[axeRejectedEntry],
+	[verdict(axeRejectedEntry)],
+);
+
+// Each case runs the real script against a temp git repo and asserts the whole
+// docs/evidence directory delta: a failing or refused run changes nothing.
+const CLI_CASES: readonly CliCase[] = [
+	{
+		name: "a register entry without a story",
+		base: MASTER_SHAPED,
+		head: {
+			...regDoc([]),
+			entries: [{ ...registerEntry(STORY), story: undefined }],
+		},
+		stories: [STORY],
+		codes: ["entry-field"],
+	},
+	{
+		name: "an entry without a disposition",
+		base: MASTER_SHAPED,
+		head: {
+			...regDoc([]),
+			entries: [{ ...registerEntry(STORY), disposition: undefined }],
+		},
+		stories: [STORY],
+		codes: ["entry-field"],
+	},
+	{
+		name: "disposition wontfix",
+		base: MASTER_SHAPED,
+		head: regDoc([registerEntry(STORY, { disposition: "wontfix" })]),
+		stories: [STORY],
+		codes: ["bad-disposition"],
+	},
+	{
+		name: "a register entry whose story is absent from the index",
+		base: regDoc([registerEntry(STORY)]),
+		head: regDoc([registerEntry(STORY)]),
+		stories: [OTHER],
+		codes: ["stale"],
+		says: "register entries are never pruned",
+	},
+	{
+		name: "an unknown kind",
+		base: MASTER_SHAPED,
+		head: doc({ a11y: true, "a11y-p72": true, contrast: true }, [
+			registerEntry(STORY, {}, "contrast"),
+		]),
+		stories: [STORY],
+		codes: ["unknown-kind"],
+	},
+	{
+		name: "an a11y-prefixed kind outside the axe pattern",
+		base: MASTER_SHAPED,
+		head: doc({ a11y: true, "a11y-p72": true, "a11y-contrast": true }, [
+			registerEntry(STORY, {}, "a11y-contrast"),
+		]),
+		stories: [STORY],
+		codes: ["unknown-kind"],
+	},
+	{
+		name: "a reject entry with no verdict row",
+		base: MASTER_SHAPED,
+		head: regDoc([rejectEntry()]),
+		stories: [STORY],
+		codes: ["reject-unrecorded"],
+	},
+	{
+		name: "a verdict row with no reject entry",
+		base: MASTER_SHAPED,
+		head: regDoc([registerEntry(STORY)], [verdict(registerEntry(STORY))]),
+		stories: [STORY],
+		codes: ["verdict-orphan"],
+	},
+	{
+		name: "a merge-base verdict row edited in the working tree",
+		base: RECORDED,
+		head: regDoc([rejected], [verdict(rejected, { reply: "rewritten" })]),
+		stories: [STORY],
+		codes: ["verdict-rewritten"],
+	},
+	{
+		name: "--write with a stale register entry is refused and the file is unchanged",
+		base: regDoc([registerEntry(STORY)]),
+		head: regDoc([registerEntry(STORY)]),
+		stories: [OTHER],
+		mode: "--write",
+		codes: ["stale"],
+		says: "refusing to write",
+	},
+	{
+		name: "a reject register entry whose story is absent from the index: --check names the rules-commit route (73-fix WR-01)",
+		base: RECORDED,
+		head: RECORDED,
+		stories: [OTHER],
+		codes: ["stale"],
+		says: "retiring it requires its own commit that changes the ratchet rules",
+	},
+	{
+		name: "--write with a stale axe entry that carries a reject verdict is refused and the file is unchanged (73-fix WR-02)",
+		base: AXE_RECORDED,
+		head: AXE_RECORDED,
+		stories: [OTHER],
+		mode: "--write",
+		codes: ["stale"],
+		says: "refusing to write",
+	},
+	{
+		name: "an entry added to a register kind that exists at the merge-base",
+		base: regDoc([registerEntry(STORY)]),
+		head: regDoc([registerEntry(STORY), registerEntry(OTHER)]),
+		stories: [STORY, OTHER],
+		codes: ["added"],
+	},
+	{
+		name: "a register kind introduced unsealed",
+		base: MASTER_SHAPED,
+		head: doc({ a11y: true, "a11y-p72": true, [REG]: false }, [
+			registerEntry(STORY),
+		]),
+		stories: [STORY],
+		codes: ["new-kind-unsealed"],
+	},
+	{
+		name: "first introduction of a sealed register kind with two entries (green)",
+		base: MASTER_SHAPED,
+		head: regDoc([registerEntry(STORY), registerEntry(OTHER)]),
+		stories: [STORY, OTHER],
+		codes: [],
+	},
+	{
+		name: "a reject entry with its verdict row (green)",
+		base: MASTER_SHAPED,
+		head: RECORDED,
+		stories: [STORY],
+		codes: [],
+	},
+	{
+		name: "a stale axe entry beside a live register entry: --check says stale",
+		base: doc({ a11y: true, [REG]: true }, [
+			entry("a11y", SOMEONE_ELSE, "x"),
+			registerEntry(STORY),
+		]),
+		head: doc({ a11y: true, [REG]: true }, [
+			entry("a11y", SOMEONE_ELSE, "x"),
+			registerEntry(STORY),
+		]),
+		stories: [STORY],
+		codes: ["stale"],
+		says: "run --write to prune",
+	},
+];
+
+describe("findings register CLI against a temp git repo (D-30)", () => {
+	test.each(CLI_CASES.map((control) => [control.name, control] as const))(
+		"%s",
+		(_name, control) => {
+			const repo = makeRepo(control.base);
+			try {
+				writeBaseline(repo, control.head);
+				const index = writeIndex(repo, control.stories);
+				const dir = path.join(repo, "docs", "evidence");
+				const file = path.join(dir, "known-findings.json");
+				const contents = readFileSync(file, "utf8");
+				const before = snapshotDir(dir);
+				const result = runRatchet(repo, [
+					control.mode ?? "--check",
+					"--base",
+					"main",
+					"--index",
+					index,
+				]);
+				if (control.codes.length === 0) {
+					expect(result.status, result.stderr).toBe(0);
+					expect(result.stdout).toContain("✓ FINDINGS RATCHET PASSED");
+				} else {
+					expect(result.status).toBe(1);
+					expect(result.stderr).toContain("FINDINGS RATCHET FAILED");
+					expect(stderrCodes(result.stderr)).toEqual(control.codes);
+					if (control.says !== undefined) {
+						expect(result.stderr).toContain(control.says);
+					}
+				}
+				// A failing, refused or passing check never writes: the directory is as it was.
+				expect(readFileSync(file, "utf8")).toBe(contents);
+				assertDirEffect(before, snapshotDir(dir), {});
+			} finally {
+				rmSync(repo, { recursive: true, force: true });
+			}
+		},
+	);
+
+	test("a second --write after a successful prune changes nothing (idempotent)", () => {
+		const stale = doc({ a11y: true }, [entry("a11y", STORY, "x")]);
+		const repo = makeRepo(stale);
+		try {
+			const index = writeIndex(repo, [OTHER]);
+			const dir = path.join(repo, "docs", "evidence");
+			const first = runRatchet(repo, [
+				"--write",
+				"--base",
+				"main",
+				"--index",
+				index,
+			]);
+			expect(first.status, first.stderr).toBe(0);
+			expect(first.stdout).toContain("pruned 1 stale entries");
+			const afterFirst = snapshotDir(dir);
+			const second = runRatchet(repo, [
+				"--write",
+				"--base",
+				"main",
+				"--index",
+				index,
+			]);
+			expect(second.status, second.stderr).toBe(0);
+			expect(second.stdout).toContain("pruned 0 stale entries");
+			assertDirEffect(afterFirst, snapshotDir(dir), {});
+		} finally {
+			rmSync(repo, { recursive: true, force: true });
+		}
+	});
+
+	test("an entry added to an a11y-p72 kind that exists at the merge-base is added (axe control beside the register one)", () => {
+		const kinds = { a11y: true, "a11y-p72": true };
+		const base = doc(kinds, [entry("a11y-p72", STORY, "color-contrast")]);
+		const head = doc(kinds, [
+			entry("a11y-p72", STORY, "color-contrast"),
+			entry("a11y-p72", OTHER, "color-contrast"),
+		]);
+		expect(codes(check({ head, base }))).toEqual(["added"]);
+	});
+});
+
+describe("findings ratchet: every code has a control (D-30)", () => {
+	const NEW_CODES = [
+		"unknown-kind",
+		"bad-disposition",
+		"bad-severity",
+		"bad-slug",
+		"verdict-shape",
+		"reject-unrecorded",
+		"verdict-orphan",
+		"verdict-rewritten",
+	];
+
+	test("FINDINGS_RATCHET_CODES is frozen, sorted and free of duplicates", () => {
+		expect(Object.isFrozen(FINDINGS_RATCHET_CODES)).toBe(true);
+		expect([...FINDINGS_RATCHET_CODES]).toEqual(
+			[...new Set(FINDINGS_RATCHET_CODES)].sort(),
+		);
+	});
+
+	test("every new code is in the list and is the expected code of at least one unit control", () => {
+		const unitCodes = REGISTER_UNITS.flatMap((unit) => unit[2]);
+		for (const code of NEW_CODES) {
+			expect(FINDINGS_RATCHET_CODES, code).toContain(code);
+			expect(unitCodes, code).toContain(code);
+		}
+	});
+
+	test("every control expects a code the script can emit, and the SC4 codes also have a temp-repo run", () => {
+		const unitCodes = REGISTER_UNITS.flatMap((unit) => unit[2]);
+		const cliCodes = CLI_CASES.flatMap((control) => control.codes);
+		for (const code of [...unitCodes, ...cliCodes]) {
+			expect(FINDINGS_RATCHET_CODES, code).toContain(code);
+		}
+		// The SC4 behaviours with a run against a real temp git repo: the rest are shown
+		// by units only (a slug, a severity or a verdict shape is not a repository fact).
+		for (const code of [
+			"unknown-kind",
+			"bad-disposition",
+			"reject-unrecorded",
+			"verdict-orphan",
+			"verdict-rewritten",
+			"entry-field",
+			"stale",
+			"added",
+			"new-kind-unsealed",
+		]) {
+			expect(cliCodes, code).toContain(code);
+		}
+	});
+
+	test("the register kinds are the closed list of D-27 and none is named a11y", () => {
+		expect([...REGISTER_KINDS]).toEqual([
+			"access-gap",
+			"dead-end",
+			"i18n-gap",
+			"layout-gap",
+			"silent-failure",
+			"token-gap",
+			"unrendered-outcome",
+		]);
+		expect(REGISTER_KINDS.some((kind) => kind.startsWith("a11y"))).toBe(false);
 	});
 });
 

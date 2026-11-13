@@ -1,5 +1,9 @@
 export const CHECK_INPUTS: readonly string[];
 
+export const JOURNEYS_MD_PATH: string;
+
+export const FINDINGS_MD_PATH: string;
+
 export function parseArguments(argv: string[]): {
 	flags: Set<string>;
 	base: string | undefined;

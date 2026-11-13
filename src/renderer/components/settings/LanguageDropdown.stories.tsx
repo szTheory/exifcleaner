@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, fn, waitFor, within } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
+import ar from "../../../../.resources/locales/ar.json";
 import fa from "../../../../.resources/locales/fa.json";
+import { LANGUAGE_NAMES } from "../../../domain";
 import { LanguageDropdown } from "./LanguageDropdown";
-import { userEvent } from "storybook/test";
 import { knownA11y } from "../../story_support/known_a11y";
 import { withRealHover } from "../../story_support/real_pointer";
 
@@ -53,12 +54,29 @@ export const Persian: Story = {
 
 // Phase 72 additions (D-17): the stories above are the Phase 70 stories and are not
 // edited. The list is rendered inline (not in a portal) under `isOpen`, 280px high
-// against System plus 26 languages (27 options: the "25" in the component's own
+// against System plus every entry of LANGUAGE_NAMES (the "25" in the component's own
 // comment is stale), so it scrolls and carries `scrollable-region-focusable`, a
 // measured component defect with a baseline entry per story that opens it (D-22).
 // Item hover is conflated with keyboard focus: onMouseEnter sets the same `--focused`
 // class the arrow keys set, a recorded Phase 73 finding, and the list has no
 // aria-activedescendant, so the stories read the class.
+// WR-04 (D-19): counts and names come from LANGUAGE_NAMES and the locale files, never
+// from a literal, so adding a language or editing a translation cannot turn these
+// stories red on its own. The list is System plus one option per language.
+const OPTION_COUNT = LANGUAGE_NAMES.length + 1;
+
+function languageAt(index: number): (typeof LANGUAGE_NAMES)[number] {
+	const entry = LANGUAGE_NAMES[index];
+	if (entry === undefined) throw new Error(`no language at index ${index}`);
+	return entry;
+}
+
+function languageByCode(code: string): (typeof LANGUAGE_NAMES)[number] {
+	const entry = LANGUAGE_NAMES.find((candidate) => candidate.code === code);
+	if (entry === undefined) throw new Error(`no language ${code}`);
+	return entry;
+}
+
 async function openList(canvasElement: HTMLElement): Promise<HTMLElement> {
 	const canvas = within(canvasElement);
 	await userEvent.click(await canvas.findByRole("button"));
@@ -70,7 +88,9 @@ export const Open: Story = {
 	play: async ({ canvasElement }) => {
 		const list = await openList(canvasElement);
 		await expect(list).toBeVisible();
-		await expect(within(list).getAllByRole("option")).toHaveLength(27);
+		await expect(within(list).getAllByRole("option")).toHaveLength(
+			OPTION_COUNT,
+		);
 		await expect(within(canvasElement).getByRole("button")).toHaveAttribute(
 			"aria-expanded",
 			"true",
@@ -82,21 +102,22 @@ export const OpenSelected: Story = {
 	parameters: { a11y: knownA11y("settings-languagedropdown--open-selected") },
 	args: { currentLanguage: "de" },
 	play: async ({ canvasElement }) => {
+		const de = languageByCode("de");
 		await expect(within(canvasElement).getByRole("button")).toHaveTextContent(
-			"Deutsch (German)",
+			`${de.nativeName} (${de.englishName})`,
 		);
 		const list = await openList(canvasElement);
 		const selected = within(list)
 			.getAllByRole("option")
 			.filter((option) => option.getAttribute("aria-selected") === "true");
 		await expect(selected).toHaveLength(1);
-		await expect(selected[0]).toHaveTextContent("Deutsch");
+		await expect(selected[0]).toHaveTextContent(de.nativeName);
 		await expect(selected[0]).toHaveClass("language-dropdown__item--selected");
 		await expect(selected[0]?.querySelector("svg")).not.toBeNull();
 	},
 };
 
-// The last option is item 27 (index 26). End moves the focus there and the focused
+// The last option is the last language (index LANGUAGE_NAMES.length). End moves the focus there and the focused
 // item is scrolled into view, so the list has scrolled.
 export const KeyboardEnd: Story = {
 	parameters: { a11y: knownA11y("settings-languagedropdown--keyboard-end") },
@@ -109,17 +130,22 @@ export const KeyboardEnd: Story = {
 		await expect(list.scrollTop).toBe(0);
 		await userEvent.keyboard("{End}");
 		const options = within(list).getAllByRole("option");
-		await expect(options).toHaveLength(27);
+		await expect(options).toHaveLength(OPTION_COUNT);
+		const last = languageAt(LANGUAGE_NAMES.length - 1);
 		await waitFor(() =>
-			expect(options[26]).toHaveClass("language-dropdown__item--focused"),
+			expect(options[LANGUAGE_NAMES.length]).toHaveClass(
+				"language-dropdown__item--focused",
+			),
 		);
-		await expect(options[26]).toHaveTextContent("日本語");
+		await expect(options[LANGUAGE_NAMES.length]).toHaveTextContent(
+			last.nativeName,
+		);
 		await waitFor(() => expect(list.scrollTop).toBeGreaterThan(0));
 	},
 };
 
 // ArrowDown opens the list on System, two more ArrowDown presses reach the second
-// language (cs), and Enter picks it.
+// language, and Enter picks it.
 export const KeyboardPick: Story = {
 	parameters: { a11y: knownA11y("settings-languagedropdown--keyboard-pick") },
 	play: async ({ canvasElement, args }) => {
@@ -131,7 +157,9 @@ export const KeyboardPick: Story = {
 		await userEvent.keyboard("{ArrowDown}{ArrowDown}");
 		await userEvent.keyboard("{Enter}");
 		await expect(args.onLanguageChange).toHaveBeenCalledTimes(1);
-		await expect(args.onLanguageChange).toHaveBeenCalledWith("cs");
+		await expect(args.onLanguageChange).toHaveBeenCalledWith(
+			languageAt(1).code,
+		);
 		await waitFor(() => expect(canvas.queryByRole("listbox")).toBeNull());
 	},
 };
@@ -155,8 +183,10 @@ export const OpenArabic: Story = {
 		await waitFor(() => expect(document.documentElement.dir).toBe("rtl"));
 		const list = await openList(canvasElement);
 		await expect(list).toBeVisible();
-		await expect(list).toHaveAccessibleName("اللغة");
-		await expect(within(list).getAllByRole("option")).toHaveLength(27);
+		await expect(list).toHaveAccessibleName(ar["language"]);
+		await expect(within(list).getAllByRole("option")).toHaveLength(
+			OPTION_COUNT,
+		);
 	},
 };
 

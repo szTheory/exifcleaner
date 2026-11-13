@@ -1,0 +1,60 @@
+{
+	"schemaVersion": 1,
+	"job": "J-06",
+	"title": "Clean a whole folder in one go",
+	"steps": [
+		{
+			"scenario": "empty-state.copy-mode-on",
+			"action": {
+				"role": "button",
+				"name": "Choose folder…"
+			},
+			"proof": "story",
+			"note": "The native folder dialog is never opened by a story or an e2e test."
+		},
+		{
+			"scenario": "drop-zone.drag-over",
+			"action": {
+				"gesture": "drop a folder on the window"
+			},
+			"proof": "unproven",
+			"note": "No story or e2e test performs a real drop; e2e sends the file-open-add-files IPC instead."
+		},
+		{
+			"scenario": "file-table.folder-complete",
+			"action": {
+				"gesture": "the supported files of the folder arrive as rows under one folder row"
+			},
+			"proof": "e2e",
+			"e2e": {
+				"spec": "tests/e2e/folder-recursion.spec.ts",
+				"test": "reports one skipped unsupported file and processes supported files from a nested folder"
+			}
+		},
+		{
+			"scenario": "folder-row.complete-collapsed",
+			"action": {
+				"role": "button",
+				"name": "Expand Trip 2026/"
+			},
+			"proof": "story",
+			"note": "Shown present and named; no e2e expands or collapses a folder row."
+		},
+		{
+			"scenario": "folder-row.complete-expanded",
+			"action": {
+				"role": "button",
+				"name": "Collapse Trip 2026/"
+			},
+			"proof": "story"
+		},
+		{
+			"scenario": "app.all-done",
+			"action": {
+				"role": "button",
+				"name": "Clear"
+			},
+			"proof": "story"
+		}
+	]
+}

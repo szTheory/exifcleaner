@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import "../../styles/settings_drawer.css";
 import ar from "../../../../.resources/locales/ar.json";
+import tr from "../../../../.resources/locales/tr.json";
 import { knownA11y } from "../../story_support/known_a11y";
 import { GearIcon } from "../icons/GearIcon";
 import { StatusBar } from "./StatusBar";
@@ -11,6 +12,11 @@ import { StatusBar } from "./StatusBar";
 // so nothing here re-implements those sums. The gear slot holds a real GearIcon, as
 // App.tsx passes, and the gear's own rules live in the settings drawer stylesheet, so
 // this file imports it (D-13).
+//
+// The long cell is the Turkish status (the longest of the 26 locales, 71 characters
+// against 48 in English), drawn at the app's 580 px window width (D-18, D-20). It asserts
+// presence and non-empty text only: how the bar wraps is a measured layout fact, not a
+// literal.
 //
 // Unreachable combinations, recorded as waivers and never drawn: stats without
 // `onCleanMore` (App always passes it when there are files) and `totalCount` 0 with
@@ -220,5 +226,36 @@ export const KeyboardFocus: Story = {
 		const style = getComputedStyle(clear);
 		await expect(style.outlineStyle).not.toBe("none");
 		await expect(style.outlineStyle).toBe("solid");
+	},
+};
+
+export const TurkishLongStatus: Story = {
+	parameters: { a11y: knownA11y("ui-statusbar--turkish-long-status") },
+	globals: { locale: "tr" },
+	args: {
+		completedCount: 128,
+		totalCount: 128,
+		totalTagsRemoved: 1234,
+		elapsedSeconds: 59,
+		onCleanMore: fn(),
+	},
+	render: (args) => (
+		<div style={{ width: "580px" }}>
+			<StatusBar {...args} />
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		await waitFor(() => expect(document.documentElement.lang).toBe("tr"));
+		await waitFor(() =>
+			expect(stat(canvasElement, "cleaned").textContent ?? "").not.toBe(""),
+		);
+		for (const name of ["cleaned", "tags-removed", "elapsed"]) {
+			await expect(stat(canvasElement, name).textContent ?? "").not.toBe("");
+		}
+		await expect(
+			within(canvasElement).getByRole("button", {
+				name: tr["statusBar.clear"],
+			}),
+		).toBeInTheDocument();
 	},
 };
