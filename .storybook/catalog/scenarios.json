@@ -211,7 +211,7 @@
 			"job": "J-04",
 			"stateClass": "error",
 			"tier": "area",
-			"situation": "A cleaned copy failed its check, so the row says it could not verify the output and keeps the original.",
+			"situation": "The check on a new copy failed, so the row says it could not verify it and your original is unchanged.",
 			"proofBoundary": "story",
 			"stories": [
 				"file-list-filerow--verification"
