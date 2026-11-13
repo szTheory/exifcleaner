@@ -14,13 +14,35 @@
 //     kind exists at the merge-base, so it shrinks like any other kind: adding
 //     a second entry is rejected as `added`. A new kind declared
 //     `"sealed": false` is rejected as `new-kind-unsealed`.
-//   - Kinds named `a11y` or `a11y-<suffix>` are read by `knownA11y` in
+//   - Kinds named `a11y` or `a11y-pN` are read by `knownA11y` in
 //     .storybook/a11y_known.ts to disable an axe rule for one story.
 //   - There is no reseed or re-admission path. Changing these rules is a
 //     separate change from any baseline data (D-29).
 //
 // A merge-base that has no baseline file (the Phase 70 bootstrap) counts as
 // "no kinds, no entries", so every kind in the head is newly introduced.
+//
+// The findings register (Phase 73, FLW-02, D-26 to D-30) is this same file and
+// this same ratchet:
+//   - The fingerprint `kind|story|rule` IS the finding id; story ids are frozen,
+//     so a renamed story reads as `stale`, never as a silent re-key.
+//   - Every entry carries a `disposition` (fix-v5.1, fix-v5.2, accept, reject).
+//     Entries of a register kind also carry a `severity` (critical, major, minor)
+//     and a kebab-slug `rule`. The kinds are a CLOSED list: the axe pattern
+//     /^a11y(-p\d+)?$/ plus REGISTER_KINDS, so a later change cannot invent a kind
+//     to add entries (`unknown-kind`); that includes an `a11y-` prefix outside the
+//     pattern, which the a11y tests would read as an axe-disable kind.
+//   - Disposition `reject` (not a defect, or a catalog artefact; the entry stays
+//     listed and quiet) is valid only with a row of the optional top-level
+//     `verdicts` log recording the maintainer's decision, and a merge-base row
+//     can never be edited or removed. That log is the only way to silence a
+//     finding.
+//   - `--write` prunes stale entries of axe kinds only. A stale register entry
+//     blocks it: a renamed or removed story must not silently delete a finding.
+//   - check() validates the merge-base copy with the same validator, so every
+//     field added here is optional at the top level (an absent `verdicts` counts
+//     as []), and the copy on master, with no register kinds and no verdicts, stays
+//     valid. Rules and data change in separate commits (70 D-29).
 
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -29,9 +51,104 @@ import { isMainModule } from "./is_main_module.mjs";
 
 export const BASELINE_PATH = "docs/evidence/known-findings.json";
 
-const TOP_LEVEL_KEYS = ["schemaVersion", "kinds", "entries"];
-const ENTRY_REQUIRED = ["fingerprint", "kind", "story", "rule", "reason"];
-const ENTRY_KEYS = new Set([...ENTRY_REQUIRED, "disposition"]);
+const TOP_LEVEL_KEYS = ["schemaVersion", "kinds", "entries", "verdicts"];
+const ENTRY_REQUIRED = [
+	"fingerprint",
+	"kind",
+	"story",
+	"rule",
+	"reason",
+	"disposition",
+];
+const ENTRY_KEYS = new Set([...ENTRY_REQUIRED, "severity"]);
+const VERDICT_KEYS = [
+	"fingerprint",
+	"verdict",
+	"reason",
+	"decidedAt",
+	"decidedBy",
+	"reply",
+];
+
+// Inlined, never imported: this script stays standalone. A test pins DISPOSITIONS to
+// .storybook/catalog/vocab.mjs, which owns the vocabulary.
+export const DISPOSITIONS = Object.freeze([
+	"fix-v5.1",
+	"fix-v5.2",
+	"accept",
+	"reject",
+]);
+
+// By whose trust or access is affected: critical, the person is told something false,
+// or nothing, about a result or failure; major, the job completes but a group is
+// impaired; minor, cosmetic, latent or hygiene.
+export const SEVERITIES = Object.freeze(["critical", "major", "minor"]);
+
+// The closed list of hand-authored register kinds. A kind is declared only when it
+// has an entry (an empty kind declared early is a sealed kind later).
+export const REGISTER_KINDS = Object.freeze([
+	"access-gap",
+	"dead-end",
+	"i18n-gap",
+	"layout-gap",
+	"silent-failure",
+	"token-gap",
+	"unrendered-outcome",
+]);
+
+// Axe kinds: `a11y` and one `a11y-pN` per phase. Their severity is derived (major) in
+// the generated view, so the sealed entries are not rewritten to carry one.
+export const AXE_KIND = /^a11y(-p\d+)?$/;
+
+const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+// Every code this script can emit, so a test can pin one control to each.
+export const FINDINGS_RATCHET_CODES = Object.freeze([
+	"added",
+	"bad-disposition",
+	"bad-severity",
+	"bad-slug",
+	"base-invalid",
+	"duplicate",
+	"entries",
+	"entry-field",
+	"entry-shape",
+	"fingerprint-mismatch",
+	"kind-removed",
+	"kind-shape",
+	"kinds",
+	"new-kind-unsealed",
+	"not-object",
+	"reject-unrecorded",
+	"schema-version",
+	"stale",
+	"undeclared-kind",
+	"unknown-field",
+	"unknown-kind",
+	"unsealed",
+	"verdict-orphan",
+	"verdict-rewritten",
+	"verdict-shape",
+]);
+
+function isKnownKind(kind) {
+	return AXE_KIND.test(kind) || REGISTER_KINDS.includes(kind);
+}
+
+// `YYYY-MM-DD` that survives a UTC round trip, so 2026-02-30 is false. A copy of
+// isCalendarDate in .storybook/catalog/closed.mjs, for the same standalone reason.
+function isCalendarDate(text) {
+	if (typeof text !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+		return false;
+	}
+	const [year, month, day] = text.split("-").map(Number);
+	const date = new Date(Date.UTC(year, month - 1, day));
+	return (
+		date.getUTCFullYear() === year &&
+		date.getUTCMonth() === month - 1 &&
+		date.getUTCDate() === day
+	);
+}
 
 function isPlainObject(value) {
 	return (
@@ -75,6 +192,18 @@ export function validateBaseline(doc) {
 		problems.push(problem("schema-version", "schemaVersion must be 1"));
 	}
 	const kinds = isPlainObject(doc.kinds) ? doc.kinds : undefined;
+	// One unknown-kind per distinct name, wherever it first appears.
+	const unknownReported = new Set();
+	const reportUnknownKind = (name, where) => {
+		if (isKnownKind(name) || unknownReported.has(name)) return;
+		unknownReported.add(name);
+		problems.push(
+			problem(
+				"unknown-kind",
+				`${where} names kind ${name}, which is not allowed: a kind is the axe pattern a11y or a11y-pN, or one of ${REGISTER_KINDS.join(", ")}`,
+			),
+		);
+	};
 	if (kinds === undefined) {
 		problems.push(problem("kinds", "kinds must be an object"));
 	} else {
@@ -91,6 +220,7 @@ export function validateBaseline(doc) {
 					),
 				);
 			}
+			reportUnknownKind(name, "kinds");
 		}
 	}
 	if (!Array.isArray(doc.entries)) {
@@ -98,6 +228,7 @@ export function validateBaseline(doc) {
 		return problems;
 	}
 	const seen = new Set();
+	const rejected = new Set();
 	doc.entries.forEach((entry, index) => {
 		const where = `entries[${index}]`;
 		if (!isPlainObject(entry)) {
@@ -121,17 +252,6 @@ export function validateBaseline(doc) {
 				complete = false;
 			}
 		}
-		if (
-			"disposition" in entry &&
-			(typeof entry.disposition !== "string" || entry.disposition === "")
-		) {
-			problems.push(
-				problem(
-					"entry-field",
-					`${where}.disposition must be a non-empty string`,
-				),
-			);
-		}
 		if (!complete) return;
 		if (kinds !== undefined && !Object.hasOwn(kinds, entry.kind)) {
 			problems.push(
@@ -141,6 +261,41 @@ export function validateBaseline(doc) {
 				),
 			);
 		}
+		reportUnknownKind(entry.kind, where);
+		if (!DISPOSITIONS.includes(entry.disposition)) {
+			problems.push(
+				problem(
+					"bad-disposition",
+					`${where}.disposition ${entry.disposition} must be one of ${DISPOSITIONS.join(", ")}`,
+				),
+			);
+		}
+		if (Object.hasOwn(entry, "severity")) {
+			if (!SEVERITIES.includes(entry.severity)) {
+				problems.push(
+					problem(
+						"bad-severity",
+						`${where}.severity must be one of ${SEVERITIES.join(", ")}`,
+					),
+				);
+			}
+		} else if (REGISTER_KINDS.includes(entry.kind)) {
+			problems.push(
+				problem(
+					"bad-severity",
+					`${where} is a ${entry.kind} entry and needs a severity (${SEVERITIES.join(", ")})`,
+				),
+			);
+		}
+		if (REGISTER_KINDS.includes(entry.kind) && !SLUG.test(entry.rule)) {
+			problems.push(
+				problem(
+					"bad-slug",
+					`${where}.rule ${entry.rule} must be a kebab slug for a ${entry.kind} entry`,
+				),
+			);
+		}
+		if (entry.disposition === "reject") rejected.add(entry.fingerprint);
 		const expected = fingerprint(entry.kind, entry.story, entry.rule);
 		if (entry.fingerprint !== expected) {
 			problems.push(
@@ -160,6 +315,99 @@ export function validateBaseline(doc) {
 		}
 		seen.add(entry.fingerprint);
 	});
+	problems.push(...validateVerdicts(doc, rejected));
+	return problems;
+}
+
+/**
+ * The verdict log: absent counts as []; closed rows; a `reject` entry needs its row
+ * and a row needs its `reject` entry.
+ *
+ * @param {object} doc
+ * @param {Set<string>} rejected fingerprints of the entries with disposition reject
+ */
+function validateVerdicts(doc, rejected) {
+	const problems = [];
+	const rows = Object.hasOwn(doc, "verdicts") ? doc.verdicts : [];
+	if (!Array.isArray(rows)) {
+		return [problem("verdict-shape", "verdicts must be an array")];
+	}
+	const recorded = new Set();
+	rows.forEach((row, index) => {
+		const where = `verdicts[${index}]`;
+		if (!isPlainObject(row)) {
+			problems.push(problem("verdict-shape", `${where} must be an object`));
+			return;
+		}
+		for (const key of Object.keys(row)) {
+			if (!VERDICT_KEYS.includes(key)) {
+				problems.push(
+					problem("verdict-shape", `${where} has unknown key ${key}`),
+				);
+			}
+		}
+		for (const key of VERDICT_KEYS) {
+			if (key === "decidedAt") continue;
+			const value = row[key];
+			if (typeof value !== "string" || value.trim() === "") {
+				problems.push(
+					problem(
+						"verdict-shape",
+						`${where}.${key} must be a non-empty string`,
+					),
+				);
+			}
+		}
+		if (row.verdict !== undefined && row.verdict !== "reject") {
+			problems.push(
+				problem("verdict-shape", `${where}.verdict must be reject`),
+			);
+		}
+		if (row.decidedBy !== undefined && row.decidedBy !== "maintainer") {
+			problems.push(
+				problem("verdict-shape", `${where}.decidedBy must be maintainer`),
+			);
+		}
+		if (!isCalendarDate(row.decidedAt)) {
+			problems.push(
+				problem(
+					"verdict-shape",
+					`${where}.decidedAt must be a calendar date YYYY-MM-DD`,
+				),
+			);
+		}
+		if (typeof row.fingerprint === "string" && row.fingerprint !== "") {
+			if (recorded.has(row.fingerprint)) {
+				problems.push(
+					problem(
+						"verdict-shape",
+						`${where} repeats the verdict for ${row.fingerprint}`,
+					),
+				);
+			}
+			recorded.add(row.fingerprint);
+		}
+	});
+	for (const fingerprint of rejected) {
+		if (!recorded.has(fingerprint)) {
+			problems.push(
+				problem(
+					"reject-unrecorded",
+					`entry ${fingerprint} has disposition reject and no verdict row recording the maintainer's decision`,
+				),
+			);
+		}
+	}
+	for (const fingerprint of recorded) {
+		if (!rejected.has(fingerprint)) {
+			problems.push(
+				problem(
+					"verdict-orphan",
+					`verdict row ${fingerprint} has no entry with disposition reject`,
+				),
+			);
+		}
+	}
 	return problems;
 }
 
@@ -167,6 +415,22 @@ function entriesOf(doc) {
 	return doc !== null && doc !== undefined && Array.isArray(doc.entries)
 		? doc.entries
 		: [];
+}
+
+function verdictsOf(doc) {
+	return doc !== null && doc !== undefined && Array.isArray(doc.verdicts)
+		? doc.verdicts
+		: [];
+}
+
+function staleProblem(entry) {
+	const rest = AXE_KIND.test(entry.kind)
+		? "run --write to prune"
+		: "register entries are never pruned: restore the story or remove the entry in a reviewed change";
+	return problem(
+		"stale",
+		`entry ${entry.fingerprint} names story ${entry.story}, which is not in the catalog (${rest})`,
+	);
 }
 
 /**
@@ -238,24 +502,35 @@ export function check({ head, base, observed }) {
 			);
 		}
 	}
+	const headRows = new Map(
+		verdictsOf(head).map((row) => [row.fingerprint, row]),
+	);
+	for (const row of verdictsOf(base)) {
+		const now = headRows.get(row.fingerprint);
+		if (
+			now === undefined ||
+			!VERDICT_KEYS.every((key) => now[key] === row[key])
+		) {
+			problems.push(
+				problem(
+					"verdict-rewritten",
+					`verdict row ${row.fingerprint} exists at the merge-base and was ${now === undefined ? "removed" : "edited"} (recorded verdicts are permanent)`,
+				),
+			);
+		}
+	}
 	if (observed !== undefined) {
 		for (const entry of head.entries) {
-			if (!observed.has(entry.story)) {
-				problems.push(
-					problem(
-						"stale",
-						`entry ${entry.fingerprint} names story ${entry.story}, which is not in the catalog (run --write to prune)`,
-					),
-				);
-			}
+			if (!observed.has(entry.story)) problems.push(staleProblem(entry));
 		}
 	}
 	return { ok: problems.length === 0, problems };
 }
 
 /**
- * Removes stale entries only. Refuses when anything other than staleness is
- * wrong (an addition, a malformed baseline).
+ * Removes stale entries of axe kinds only. Refuses when anything other than axe
+ * staleness is wrong: an addition, a malformed baseline, or a stale register
+ * entry (a renamed or removed story must not silently delete a finding).
  *
  * @param {{head: object, base: object | null, observed: Set<string>}} subject
  * @returns {{ok: true, doc: object} | {ok: false, problems: {code: string, message: string}[]}}
@@ -264,6 +539,12 @@ export function prune({ head, base, observed }) {
 	const result = check({ head, base, observed });
 	const blocking = result.problems.filter((found) => found.code !== "stale");
 	if (blocking.length > 0) return { ok: false, problems: blocking };
+	const staleRegister = head.entries.filter(
+		(entry) => !observed.has(entry.story) && !AXE_KIND.test(entry.kind),
+	);
+	if (staleRegister.length > 0) {
+		return { ok: false, problems: staleRegister.map(staleProblem) };
+	}
 	return {
 		ok: true,
 		doc: {
