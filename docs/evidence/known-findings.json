@@ -1931,6 +1931,126 @@
 			"rule": "empty-table-header",
 			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
 			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--all-toggles-off|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--all-toggles-off",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--all-toggles-on|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--all-toggles-on",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--arabic-drawer|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--arabic-drawer",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--close-button-hover|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--close-button-hover",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--close-button-keyboard-focus|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--close-button-keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--german-drawer|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--german-drawer",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--hungarian-drawer|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--hungarian-drawer",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--language-list-open|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--language-list-open",
+			"rule": "color-contrast",
+			"reason": "Selector .language-dropdown__english (the English name in brackets) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; Selector span (the label of the highlighted item) measures 3.11:1 in the light theme and 4.27:1 in the dark theme, below 4.5:1: foreground #007aff on #dfe3e6 light and #007aff on #1b1b1e dark (--ec-color-accent on --ec-color-surface under the --ec-color-hover fallback), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--language-list-open|scrollable-region-focusable",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--language-list-open",
+			"rule": "scrollable-region-focusable",
+			"reason": "The open list .language-dropdown__list inside the drawer (max-height 280px, overflow-y auto, one option per language plus System) is a scrollable region with no focusable content and no tabindex of its own, so axe reports that the element should have focusable content and should be focusable in both themes; the options are role option divs that never take focus, the same defect as settings-languagedropdown--open, and the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--non-mac-platform|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--non-mac-platform",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--persian-drawer|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--persian-drawer",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--theme-mode-dark-selected|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--theme-mode-dark-selected",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--theme-mode-light-selected|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--theme-mode-light-selected",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|settings-settingsdrawer--theme-mode-system-selected|color-contrast",
+			"kind": "a11y-p73",
+			"story": "settings-settingsdrawer--theme-mode-system-selected",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|ui-statusbar--turkish-long-status|color-contrast",
+			"kind": "a11y-p73",
+			"story": "ui-statusbar--turkish-long-status",
+			"rule": "color-contrast",
+			"reason": "Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
 		}
 	]
 }

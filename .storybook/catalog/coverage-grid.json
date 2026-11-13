@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 83,
-		"waived": 145,
-		"gaps": 24
+		"covered": 89,
+		"waived": 163,
+		"gaps": 0
 	},
 	"rows": [
 		{
@@ -1359,12 +1359,10 @@
 					}
 				},
 				"long": {
-					"status": "waived",
-					"waiver": {
-						"basis": "unreachable",
-						"ref": "src/renderer/components/ui/StatusBar.tsx#interpolate",
-						"reason": "The three segments are short sentences filled with numbers; how the longest translations wrap across the whole bar is an area question that belongs to Phase 73."
-					}
+					"status": "covered",
+					"scenarios": [
+						"status-bar.turkish-long"
+					]
 				},
 				"intl": {
 					"status": "covered",
@@ -1473,40 +1471,99 @@
 			"tier": "area",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"drop-zone.drag-over",
+						"drop-zone.idle"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "drop-zone.idle",
+						"reason": "The zone with nothing dropped is the empty screen inside the drop area, which the idle scenario draws; the zone has no empty state of its own."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "status-bar.single-file",
+						"reason": "The zone has no count or singular wording of its own; a drop of one file is a one-row table and the singular count text belongs to the status bar."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "app.all-done",
+						"reason": "A drop of several files is turned into table rows by the app, which the all-done screen draws; the zone itself only wraps what the app shows."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "e2e",
+						"ref": "tests/e2e/folder-recursion.spec.ts",
+						"reason": "The zone's only limits are timers, the 1500 ms folder collapse and the 3000 ms skip notice, which no story may start; the folder recursion spec proves the skip notice end to end."
+					}
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "empty-state.copy-mode-unknown",
+						"reason": "Before the saved settings load the zone shows the empty screen with the output line blank, which the copy-mode-unknown scenario already draws."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/ui/DropZone.tsx#expandAndProcessFolder",
+						"reason": "The zone has no failure display of its own: a folder it cannot read is shown as an empty folder row, and a file that fails is a row in the table."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-row.refused",
+						"reason": "A refused file is the state of one row, which the FileRow refused story draws; the drop area refuses nothing and adds no behaviour of its own."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "file-row.commit",
+						"reason": "A file changed under the app is the state of one row, which the FileRow commit story draws; the zone never revalidates what was dropped."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "empty-state.german-empty",
+						"reason": "The only text the zone shows is the empty screen's, whose longest translations are drawn by the EmptyState German and Malayalam stories."
+					}
 				},
 				"intl": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "empty-state.persian-empty",
+						"reason": "The only text the zone shows is the empty screen's, whose right-to-left form is drawn by the EmptyState Persian story."
+					}
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "app.large-batch",
+						"reason": "A drop of thousands of files is processed and listed by the app, which the large-batch screen draws; the zone holds no list that could grow."
+					}
 				}
 			}
 		},
@@ -1821,40 +1878,101 @@
 			"tier": "area",
 			"cells": {
 				"happy": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"settings-drawer.all-toggles-on",
+						"settings-drawer.close-button-hover",
+						"settings-drawer.close-button-keyboard-focus",
+						"settings-drawer.language-list-open",
+						"settings-drawer.non-mac-platform",
+						"settings-drawer.theme-mode-dark-selected",
+						"settings-drawer.theme-mode-light-selected",
+						"settings-drawer.theme-mode-system-selected"
+					]
 				},
 				"empty": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SettingsDrawer.tsx#settings-drawer__body",
+						"reason": "The drawer always lists the same fixed sections and switches, so no state has none of them; the only blank form is before its settings load."
+					}
 				},
 				"one": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SettingsDrawer.tsx#isMac",
+						"reason": "The drawer has no count or plural wording: every switch is a fixed sentence, and the one switch that comes and goes is the macOS attributes switch."
+					}
 				},
 				"many": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "settings-drawer.all-toggles-on",
+						"reason": "The drawer always shows all of its switches together, which the all-toggles-on scenario draws; there is no variable list of items."
+					}
 				},
 				"boundary": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"settings-drawer.all-toggles-off"
+					]
 				},
 				"loading": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SettingsDrawer.tsx#isReady",
+						"reason": "Until its settings load the drawer renders nothing at all, so there is no loading screen to draw; the mock answers at once."
+					}
 				},
 				"error": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "unreachable",
+						"ref": "src/renderer/components/settings/SettingsDrawer.tsx#handleToggle",
+						"reason": "The drawer has no failure display of its own: handleToggle never reads the result of settings.set, so there is no error screen to draw."
+					}
 				},
 				"denied": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "settings-drawer.non-mac-platform",
+						"reason": "The only thing the drawer withholds is the macOS attributes switch off a Mac, which the non-Mac scenario draws as a switch that is absent."
+					}
 				},
 				"stale": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "language-dropdown.unknown-code",
+						"reason": "A saved language the list no longer knows is the language dropdown's stale state, drawn by its unknown-code scenario; no other setting is reread."
+					}
 				},
 				"long": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"settings-drawer.german-drawer",
+						"settings-drawer.hungarian-drawer"
+					]
 				},
 				"intl": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"settings-drawer.arabic-drawer",
+						"settings-drawer.persian-drawer"
+					]
 				},
 				"huge": {
-					"status": "gap"
+					"status": "waived",
+					"waiver": {
+						"basis": "duplicate",
+						"ref": "settings-drawer.language-list-open",
+						"reason": "The largest list the drawer holds is the language list, which the language-list-open scenario draws in full."
+					}
 				}
 			}
 		},

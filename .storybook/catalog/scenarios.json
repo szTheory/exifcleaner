@@ -122,6 +122,30 @@
 			]
 		},
 		{
+			"id": "drop-zone.drag-over",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone drags files over the window and the drop area switches to its highlighted state and the drop prompt.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-dropzone--drag-over"
+			]
+		},
+		{
+			"id": "drop-zone.idle",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone opens the app and the drop area shows the empty screen with no highlight, ready for files.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-dropzone--idle"
+			]
+		},
+		{
 			"id": "empty-state.button-hover",
 			"persona": "P-sharer",
 			"job": "J-09",
@@ -1604,6 +1628,162 @@
 			]
 		},
 		{
+			"id": "settings-drawer.all-toggles-off",
+			"persona": "P-sharer",
+			"job": "J-01",
+			"stateClass": "boundary",
+			"tier": "area",
+			"situation": "Someone turns every switch off, Save as copy included, and sees all six unchecked in the drawer.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--all-toggles-off"
+			]
+		},
+		{
+			"id": "settings-drawer.all-toggles-on",
+			"persona": "P-photographer",
+			"job": "J-05",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone opens the settings with every switch on, Save as copy included, and sees all six checked.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--all-toggles-on"
+			]
+		},
+		{
+			"id": "settings-drawer.arabic-drawer",
+			"persona": "P-sharer",
+			"job": "J-01",
+			"stateClass": "intl",
+			"tier": "area",
+			"situation": "An Arabic speaker opens the settings and reads the whole drawer laid out right to left.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--arabic-drawer"
+			]
+		},
+		{
+			"id": "settings-drawer.close-button-hover",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone points at the close button in the drawer and its colour darkens to show it can be pressed.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--close-button-hover"
+			]
+		},
+		{
+			"id": "settings-drawer.close-button-keyboard-focus",
+			"persona": "P-photographer",
+			"job": "J-02",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone opens the settings with the keyboard and sees a focus ring on the close button.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--close-button-keyboard-focus"
+			]
+		},
+		{
+			"id": "settings-drawer.german-drawer",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "long",
+			"tier": "area",
+			"situation": "A German speaker opens the settings and the longer translated labels make the drawer taller than the window.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--german-drawer"
+			]
+		},
+		{
+			"id": "settings-drawer.hungarian-drawer",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "long",
+			"tier": "area",
+			"situation": "A Hungarian speaker opens the settings and the longer translated labels make the drawer taller than the window.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--hungarian-drawer"
+			]
+		},
+		{
+			"id": "settings-drawer.language-list-open",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone opens the language list in the drawer and sees System and every language, scrolled inside the panel.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--language-list-open"
+			]
+		},
+		{
+			"id": "settings-drawer.non-mac-platform",
+			"persona": "P-photographer",
+			"job": "J-02",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "On Windows or Linux the drawer shows five switches and leaves out the macOS attributes one.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--non-mac-platform"
+			]
+		},
+		{
+			"id": "settings-drawer.persian-drawer",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "intl",
+			"tier": "area",
+			"situation": "A Persian speaker opens the settings and reads the whole drawer laid out right to left.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--persian-drawer"
+			]
+		},
+		{
+			"id": "settings-drawer.theme-mode-dark-selected",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone opens the settings with the Dark appearance chosen and sees that segment selected in the drawer.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--theme-mode-dark-selected"
+			]
+		},
+		{
+			"id": "settings-drawer.theme-mode-light-selected",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone opens the settings with the Light appearance chosen and sees that segment selected in the drawer.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--theme-mode-light-selected"
+			]
+		},
+		{
+			"id": "settings-drawer.theme-mode-system-selected",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "area",
+			"situation": "Someone opens the settings with the Auto appearance chosen and sees that segment selected in the drawer.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-settingsdrawer--theme-mode-system-selected"
+			]
+		},
+		{
 			"id": "status-bar.all-cleaned",
 			"persona": "P-batch",
 			"job": "J-06",
@@ -1697,6 +1877,18 @@
 			"proofBoundary": "story",
 			"stories": [
 				"ui-statusbar--single-file"
+			]
+		},
+		{
+			"id": "status-bar.turkish-long",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "long",
+			"tier": "pattern",
+			"situation": "A Turkish speaker sees the longest status wording across the bar at the window width, with every part readable.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--turkish-long-status"
 			]
 		},
 		{
