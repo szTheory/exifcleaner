@@ -2,6 +2,18 @@
 	"schemaVersion": 1,
 	"scenarios": [
 		{
+			"id": "app.all-error",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "screen",
+			"situation": "Every file in a run fails, so each row names its failure and the status bar reads zero of three cleaned.",
+			"proofBoundary": "story",
+			"stories": [
+				"screens-app--all-error"
+			]
+		},
+		{
 			"id": "chevron-icon.arabic",
 			"persona": "P-batch",
 			"job": "J-07",

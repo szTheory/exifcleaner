@@ -28,12 +28,18 @@
 //      -> the composed Mixed test of metadata_expansion_i18n.test.ts AND the
 //      MetadataExpansion Mixed story go red;
 //   4. `failureKind` of the UPDATE_FILE_ERROR action of FAILURE_CASES.verification
-//      becomes "write" -> the file_row verification summary test goes red.
+//      becomes "write" -> the file_row verification summary test goes red (renderer
+//      side) AND the AllError screen story goes red (story side, 73-04).
 //
-// Documented asymmetry (RESEARCH C3, D-08 as refined): mutation 4 has NO story side.
-// `verification` carries no residualPath, so `errorTextFor` and every ErrorExpansion
-// story (which takes only a string) stay unchanged: the stories may stay green while
-// the renderer test goes red. That is expected, not a vacuous control.
+// Documented asymmetry (RESEARCH C3, D-08 as refined, closed by 73-04 D-13): mutation 4
+// now has a story side. `verification` carries no residualPath, so `errorTextFor` and
+// every ErrorExpansion story (which takes only a string) stay unchanged and stay green,
+// but the AllError screen (src/renderer/components/screens/App.stories.tsx) renders the
+// real App through the real processFileEntries over the shared fixtures: the edited
+// argument also feeds `removeResult.failureKind`, the hook maps that to the failed row's
+// summary, and the screen asserts the verification row's accessible name as a literal, so
+// it goes red. The asymmetry that remains is the opposite one: the ErrorExpansion stories
+// cannot see this mutation, the screen can.
 //
 // The fixture builds FAILURE_CASES.cleanup and .verification through a helper
 // (`failure(kind, detail, residualPath)`), so for those two the edit lands on the call
@@ -46,7 +52,7 @@
 //
 // Route (D-08): STORY_ROUTE is "nested-browser": the story side runs the
 // storybook-light project (one theme: the coupling is theme-independent, and one
-// theme halves the nested cost) limited to the two story files. S-2 (72-01) proved the
+// theme halves the nested cost) limited to the story files. S-2 (72-01) proved the
 // nested route works and V-answers carries no `no-nested-browser`. Under
 // `no-nested-browser` or a failed S-2 the story side would instead run the root config
 // filtered with `-t "composed"` through the same redirect (the node-composed story
@@ -576,6 +582,7 @@ const RENDERER_FILES = [
 const STORY_FILES = [
 	"src/renderer/components/file-list/ErrorExpansion.stories.tsx",
 	"src/renderer/components/file-list/MetadataExpansion.stories.tsx",
+	"src/renderer/components/screens/App.stories.tsx",
 ];
 const TIMEOUT_MS = 100_000;
 
@@ -730,6 +737,7 @@ function gitStatus(): string {
 const WATCHED_DIRS = [
 	"src/renderer/story_support",
 	"src/renderer/components/file-list",
+	"src/renderer/components/screens",
 	"tests/renderer",
 ];
 
@@ -768,6 +776,7 @@ const ERROR_STORIES =
 	"src/renderer/components/file-list/ErrorExpansion.stories.tsx";
 const METADATA_STORIES =
 	"src/renderer/components/file-list/MetadataExpansion.stories.tsx";
+const SCREEN_STORIES = "src/renderer/components/screens/App.stories.tsx";
 
 function mutation(id: string): Mutation {
 	const found = MUTATIONS.find((m) => m.id === id);
@@ -1015,7 +1024,7 @@ describe("shared-fixture coupling (SC3, D-08)", () => {
 		);
 	});
 
-	test("failureKind of the verification UPDATE_FILE_ERROR action: the file_row verification summary test goes red (no story side: C3)", () => {
+	test("failureKind of the verification UPDATE_FILE_ERROR action: the file_row verification summary test goes red (renderer side)", () => {
 		const result = untouched(() =>
 			runCase({ mutation: mutation("failureKind"), side: "renderer" }),
 		);
@@ -1026,6 +1035,22 @@ describe("shared-fixture coupling (SC3, D-08)", () => {
 		).toBeGreaterThan(0);
 		console.info(
 			`Fixture control: failureKind renderer red: ${JSON.stringify(result.failed.map((f) => `${f.file}: ${f.fullName}`))}`,
+		);
+	});
+
+	test("failureKind of the verification UPDATE_FILE_ERROR action: the AllError screen story goes red (story side)", () => {
+		const result = untouched(() =>
+			runCase({ mutation: mutation("failureKind"), side: "story" }),
+		);
+		expectRan(result);
+		expect(result.status).not.toBe(0);
+		// The screen is the only story that sees this mutation: the ErrorExpansion and
+		// MetadataExpansion stories take a string or a metadata pair, never a failureKind.
+		expect(
+			failedIn(result, SCREEN_STORIES, /All Error/).length,
+		).toBeGreaterThan(0);
+		console.info(
+			`Fixture control: failureKind story red: ${JSON.stringify(result.failed.map((f) => `${f.file}: ${f.fullName}`))}`,
 		);
 	});
 });

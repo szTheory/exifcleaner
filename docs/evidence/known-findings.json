@@ -1755,6 +1755,46 @@
 			"rule": "empty-table-header",
 			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
 			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-error|aria-allowed-role",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-error",
+			"rule": "aria-allowed-role",
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-error|aria-conditional-attr",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-error",
+			"rule": "aria-conditional-attr",
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-error|aria-required-children",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-error",
+			"rule": "aria-required-children",
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-error|color-contrast",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-error",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--jpg measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark, 14px; Selector .type-pill--png measures 3.05:1 in the light theme and 4.46:1 in the dark theme, below 4.5:1: foreground #5a9070 on #f1e7e5 light and #6aa080 on #402921 dark, 14px; Selector .type-pill--webp measures 2.05:1 in the light theme and 2.2:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #f5e9ea light and #636369 on #472826 dark, 14px; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p73|screens-app--all-error|empty-table-header",
+			"kind": "a11y-p73",
+			"story": "screens-app--all-error",
+			"rule": "empty-table-header",
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
 		}
 	]
 }

@@ -4,9 +4,9 @@
 		"subjects": 21,
 		"states": 12,
 		"cells": 252,
-		"covered": 77,
+		"covered": 78,
 		"waived": 139,
-		"gaps": 36
+		"gaps": 35
 	},
 	"rows": [
 		{
@@ -1881,7 +1881,10 @@
 					"status": "gap"
 				},
 				"error": {
-					"status": "gap"
+					"status": "covered",
+					"scenarios": [
+						"app.all-error"
+					]
 				},
 				"denied": {
 					"status": "gap"
