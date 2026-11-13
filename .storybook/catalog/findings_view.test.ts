@@ -198,30 +198,67 @@ describe("renderFindings byte properties", () => {
 	});
 });
 
+type RenderInputs = Parameters<typeof renderFindings>[0];
+
+// Everything the real-documents run asserts, as one function over any two documents, so
+// the same assertions also run on a register burned down to zero (the intended end
+// state). It asserts the shape of the output, never that anything is left to list.
+function expectRegistersAccounted({
+	baseline: base,
+	copyFindings: copy,
+}: RenderInputs) {
+	const text = renderFindings({ baseline: base, copyFindings: copy });
+	expect(text).toContain("## Accessibility baseline (summary)");
+	expect(text).toContain("## Copy findings (cross-reference)");
+
+	const summary = section(text, "Accessibility baseline (summary)");
+	const counted = [...summary.matchAll(/\| major \| (\d+) \|/g)].reduce(
+		(sum, match) => sum + Number(match[1]),
+		0,
+	);
+	const axe = (base.entries ?? []).filter(
+		(found) =>
+			/^a11y(-p\d+)?$/.test(found.kind) && found.disposition !== "reject",
+	);
+	expect(counted).toBe(axe.length);
+	const summaryLines = summary.split("\n");
+	if (axe.length === 0) {
+		// An empty register renders "none", not a table.
+		expect(summaryLines).toContain("none");
+	} else {
+		expect(summaryLines).toContain(
+			"| Kind | Rule | Disposition | Severity | Count |",
+		);
+	}
+
+	const copyEntries = copy.entries ?? [];
+	const copySection = section(text, "Copy findings (cross-reference)");
+	const copyLines = copySection.split("\n");
+	const tableLines = copyLines.filter((line) => line.startsWith("| "));
+	if (copyEntries.length === 0) {
+		expect(copyLines).toContain("none");
+		expect(tableLines).toEqual([]);
+	} else {
+		expect(tableLines[0]).toBe("| Fingerprint | Disposition |");
+		// Two table lines (header and separator), then one row per copy finding.
+		expect(tableLines.length - 2).toBe(copyEntries.length);
+	}
+}
+
 describe("renderFindings over the real documents", () => {
 	test("the real baseline and copy-findings render, with the axe summary and every entry accounted for", () => {
-		const text = renderFindings({
-			baseline: baseline as unknown as Parameters<
-				typeof renderFindings
-			>[0]["baseline"],
+		expectRegistersAccounted({
+			baseline: baseline as unknown as RenderInputs["baseline"],
 			copyFindings,
 		});
-		expect(text).toContain("## Accessibility baseline (summary)");
-		expect(text).toContain("## Copy findings (cross-reference)");
-		const summary = section(text, "Accessibility baseline (summary)");
-		const counted = [...summary.matchAll(/\| major \| (\d+) \|/g)].reduce(
-			(sum, match) => sum + Number(match[1]),
-			0,
-		);
-		const axe = baseline.entries.filter((found) =>
-			/^a11y(-p\d+)?$/.test(found.kind),
-		);
-		expect(axe.length).toBeGreaterThan(0);
-		expect(counted).toBe(axe.length);
-		const copy = section(text, "Copy findings (cross-reference)");
-		// Two table lines (header and separator), then one row per copy finding.
-		const tableLines = copy.split("\n").filter((line) => line.startsWith("| "));
-		expect(copyFindings.entries.length).toBeGreaterThan(0);
-		expect(tableLines.length - 2).toBe(copyFindings.entries.length);
+	});
+
+	// 73-fix WR-04: burning the registers down to zero is the goal, so it must not turn
+	// the suite red. The last fix PR would otherwise fail a test it did not cause.
+	test("a register burned down to zero axe entries and zero copy findings still renders its sections", () => {
+		expectRegistersAccounted({
+			baseline: { entries: [], verdicts: [] },
+			copyFindings: { entries: [] },
+		});
 	});
 });
