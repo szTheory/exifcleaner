@@ -659,6 +659,50 @@ describe("findings register: stale entries and prune (D-28)", () => {
 			}
 		}
 	});
+
+	// 73-fix WR-01: the verdict seal (D-29) is unchanged; only the message is made true.
+	// For an entry that carries a reject verdict neither "restore the story or remove the
+	// entry" nor "run --write to prune" can be followed, so the stale text names the one
+	// real exit.
+	const rejectRegister = rejectEntry(STORY);
+	const rejectRegisterDoc = regDoc([rejectRegister], [verdict(rejectRegister)]);
+
+	test.each([
+		["register entry", rejectRegisterDoc, rejectRegister],
+		["axe entry", axeRejectDoc, axeRejected],
+	])(
+		"a stale %s that carries a reject verdict says retiring it takes its own rules commit",
+		(_name, head, rejected) => {
+			const result = check({ head, base: head, observed: new Set([OTHER]) });
+			const stale = result.problems.filter((found) =>
+				found.message.includes(rejected.fingerprint),
+			);
+			expect(stale.map((found) => found.code)).toEqual(["stale"]);
+			const message = stale[0]?.message ?? "";
+			expect(message).toContain(
+				"retiring it requires its own commit that changes the ratchet rules",
+			);
+			expect(message).not.toContain("remove the entry");
+			expect(message).not.toContain("run --write");
+			expect(message).not.toContain("restore the story");
+		},
+	);
+
+	test("the verdict seal is not relaxed: a stale reject entry removed together with its row is still verdict-rewritten", () => {
+		const observed = new Set([OTHER]);
+		expect(
+			codes(check({ head: regDoc([], []), base: rejectRegisterDoc, observed })),
+		).toEqual(["verdict-rewritten"]);
+		expect(
+			codes(
+				check({
+					head: regDoc([registerEntry(OTHER)], [verdict(rejectRegister)]),
+					base: rejectRegisterDoc,
+					observed,
+				}),
+			),
+		).toEqual(["verdict-orphan"]);
+	});
 });
 
 // --- CLI against a temporary git repository -------------------------------
@@ -1039,6 +1083,14 @@ const CLI_CASES: readonly CliCase[] = [
 		mode: "--write",
 		codes: ["stale"],
 		says: "refusing to write",
+	},
+	{
+		name: "a reject register entry whose story is absent from the index: --check names the rules-commit route (73-fix WR-01)",
+		base: RECORDED,
+		head: RECORDED,
+		stories: [OTHER],
+		codes: ["stale"],
+		says: "retiring it requires its own commit that changes the ratchet rules",
 	},
 	{
 		name: "--write with a stale axe entry that carries a reject verdict is refused and the file is unchanged (73-fix WR-02)",

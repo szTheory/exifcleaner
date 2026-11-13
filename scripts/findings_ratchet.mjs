@@ -528,7 +528,9 @@ export function check({ head, base, observed }) {
 	}
 	if (observed !== undefined) {
 		for (const entry of head.entries) {
-			if (!observed.has(entry.story)) problems.push(staleProblem(entry));
+			if (!observed.has(entry.story)) {
+				problems.push(staleProblem(entry, headRows.has(entry.fingerprint)));
+			}
 		}
 	}
 	return { ok: problems.length === 0, problems };
