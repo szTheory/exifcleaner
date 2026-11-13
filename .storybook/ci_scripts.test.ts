@@ -596,6 +596,69 @@ describe("findings register: stale entries and prune (D-28)", () => {
 		expect(result.ok).toBe(false);
 		expect("doc" in result).toBe(false);
 	});
+
+	// 73-fix WR-02: axe kinds may carry a reject verdict. Pruning such an entry keeps its
+	// row (a verdict is permanent) and so would write a file that fails its own --check.
+	const AXE_REJECT_KINDS = { a11y: true, "a11y-p73": true };
+	const axeRejected: BaselineEntry = {
+		...entry("a11y-p73", STORY, "planted-rule"),
+		disposition: "reject",
+	};
+	const axeRejectDoc = doc(
+		AXE_REJECT_KINDS,
+		[axeRejected, entry("a11y-p73", OTHER, "planted-rule")],
+		[verdict(axeRejected)],
+	);
+
+	test("prune refuses a stale axe entry that carries a reject verdict row and returns no document", () => {
+		const result = prune({
+			head: axeRejectDoc,
+			base: axeRejectDoc,
+			observed: new Set([OTHER]),
+		});
+		expect(result.ok).toBe(false);
+		expect("doc" in result).toBe(false);
+		if (!result.ok) {
+			expect(codes(result)).toEqual(["stale"]);
+			expect(result.problems[0]?.message).toContain(axeRejected.fingerprint);
+		}
+	});
+
+	test("prune still removes a stale axe entry without a verdict beside a live reject entry, and the result passes check", () => {
+		const observed = new Set([STORY]);
+		const result = prune({ head: axeRejectDoc, base: axeRejectDoc, observed });
+		expect(result.ok).toBe(true);
+		if (result.ok) {
+			expect(result.doc.entries.map((found) => found.fingerprint)).toEqual([
+				axeRejected.fingerprint,
+			]);
+			expect(result.doc.verdicts).toEqual([verdict(axeRejected)]);
+			expect(check({ head: result.doc, base: axeRejectDoc, observed })).toEqual(
+				{ ok: true, problems: [] },
+			);
+		}
+	});
+
+	test("every document prune accepts passes check with the same inputs (never a self-invalid file)", () => {
+		const subjects: [string, BaselineDocument, Set<string>][] = [
+			[
+				"axe stale only",
+				doc({ a11y: true }, [entry("a11y", STORY, "x")]),
+				new Set([OTHER]),
+			],
+			["register live, axe stale", both, new Set([OTHER])],
+			["nothing stale", axeRejectDoc, new Set([STORY, OTHER])],
+		];
+		for (const [name, head, observed] of subjects) {
+			const result = prune({ head, base: head, observed });
+			expect(result.ok, name).toBe(true);
+			if (result.ok) {
+				expect(check({ head: result.doc, base: head, observed }), name).toEqual(
+					{ ok: true, problems: [] },
+				);
+			}
+		}
+	});
 });
 
 // --- CLI against a temporary git repository -------------------------------
@@ -880,6 +943,16 @@ type CliCase = {
 const SOMEONE_ELSE = "settings-languagedropdown--persian";
 const rejected = rejectEntry();
 const RECORDED = regDoc([rejected], [verdict(rejected)]);
+// An axe-kind entry with a reject verdict row (axe kinds may carry one, 73-fix WR-02).
+const axeRejectedEntry: BaselineEntry = {
+	...entry("a11y-p73", STORY, "planted-rule"),
+	disposition: "reject",
+};
+const AXE_RECORDED = doc(
+	{ a11y: true, "a11y-p73": true },
+	[axeRejectedEntry],
+	[verdict(axeRejectedEntry)],
+);
 
 // Each case runs the real script against a temp git repo and asserts the whole
 // docs/evidence directory delta: a failing or refused run changes nothing.
@@ -962,6 +1035,15 @@ const CLI_CASES: readonly CliCase[] = [
 		name: "--write with a stale register entry is refused and the file is unchanged",
 		base: regDoc([registerEntry(STORY)]),
 		head: regDoc([registerEntry(STORY)]),
+		stories: [OTHER],
+		mode: "--write",
+		codes: ["stale"],
+		says: "refusing to write",
+	},
+	{
+		name: "--write with a stale axe entry that carries a reject verdict is refused and the file is unchanged (73-fix WR-02)",
+		base: AXE_RECORDED,
+		head: AXE_RECORDED,
 		stories: [OTHER],
 		mode: "--write",
 		codes: ["stale"],

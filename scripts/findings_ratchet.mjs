@@ -39,6 +39,8 @@
 //     finding.
 //   - `--write` prunes stale entries of axe kinds only. A stale register entry
 //     blocks it: a renamed or removed story must not silently delete a finding.
+//     So does a stale entry of any kind that carries a verdict row (the row is
+//     permanent), and the pruned document is re-checked before it is written.
 //   - check() validates the merge-base copy with the same validator, so every
 //     field added here is optional at the top level (an absent `verdicts` counts
 //     as []), and the copy on master, with no register kinds and no verdicts, stays
@@ -423,10 +425,15 @@ function verdictsOf(doc) {
 		: [];
 }
 
-function staleProblem(entry) {
-	const rest = AXE_KIND.test(entry.kind)
-		? "run --write to prune"
-		: "register entries are never pruned: restore the story or remove the entry in a reviewed change";
+// `verdicted`: the entry carries a recorded verdict row. That row can never be removed
+// (D-29), so neither pruning nor deleting the entry is an admissible head: the message
+// must not point at either (73-fix WR-02).
+function staleProblem(entry, verdicted = false) {
+	const rest = verdicted
+		? "the entry carries a recorded reject verdict, which is permanent: it can be neither pruned nor removed in a data change, and retiring it requires its own commit that changes the ratchet rules"
+		: AXE_KIND.test(entry.kind)
+			? "run --write to prune"
+			: "register entries are never pruned: restore the story or remove the entry in a reviewed change";
 	return problem(
 		"stale",
 		`entry ${entry.fingerprint} names story ${entry.story}, which is not in the catalog (${rest})`,
@@ -529,8 +536,11 @@ export function check({ head, base, observed }) {
 
 /**
  * Removes stale entries of axe kinds only. Refuses when anything other than axe
- * staleness is wrong: an addition, a malformed baseline, or a stale register
- * entry (a renamed or removed story must not silently delete a finding).
+ * staleness is wrong: an addition, a malformed baseline, a stale register entry (a
+ * renamed or removed story must not silently delete a finding) or a stale entry of
+ * any kind that carries a verdict row (the row is permanent, so removing the entry
+ * would orphan it). The result is checked again before it is returned, so a
+ * document that fails `--check` is never written (73-fix WR-02).
  *
  * @param {{head: object, base: object | null, observed: Set<string>}} subject
  * @returns {{ok: true, doc: object} | {ok: false, problems: {code: string, message: string}[]}}
@@ -539,19 +549,27 @@ export function prune({ head, base, observed }) {
 	const result = check({ head, base, observed });
 	const blocking = result.problems.filter((found) => found.code !== "stale");
 	if (blocking.length > 0) return { ok: false, problems: blocking };
-	const staleRegister = head.entries.filter(
-		(entry) => !observed.has(entry.story) && !AXE_KIND.test(entry.kind),
+	const verdicted = new Set(verdictsOf(head).map((row) => row.fingerprint));
+	const refused = head.entries.filter(
+		(entry) =>
+			!observed.has(entry.story) &&
+			(!AXE_KIND.test(entry.kind) || verdicted.has(entry.fingerprint)),
 	);
-	if (staleRegister.length > 0) {
-		return { ok: false, problems: staleRegister.map(staleProblem) };
+	if (refused.length > 0) {
+		return {
+			ok: false,
+			problems: refused.map((entry) =>
+				staleProblem(entry, verdicted.has(entry.fingerprint)),
+			),
+		};
 	}
-	return {
-		ok: true,
-		doc: {
-			...head,
-			entries: head.entries.filter((entry) => observed.has(entry.story)),
-		},
+	const doc = {
+		...head,
+		entries: head.entries.filter((entry) => observed.has(entry.story)),
 	};
+	const recheck = check({ head: doc, base, observed });
+	if (!recheck.ok) return { ok: false, problems: recheck.problems };
+	return { ok: true, doc };
 }
 
 function gitText(args) {
