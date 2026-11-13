@@ -630,12 +630,18 @@ export default {
 `;
 }
 
+// `only` narrows a story-side run to the one story file and story the mutation is known
+// to break (D-05 trim, 73-05): a mutated story-side run asserts that THAT story goes red,
+// so loading the other story files re-proves nothing. The unmutated story-side run stays
+// whole (anti-vacuity: every story of every file passes unmutated).
 export function runCase({
 	mutation,
 	side,
+	only,
 }: {
 	mutation: Mutation | null;
 	side: Side;
+	only?: { file: string; name: string };
 }): CaseResult {
 	const tmp = realpathSync(
 		mkdtempSync(path.join(os.tmpdir(), "fixture-control-")),
@@ -659,7 +665,11 @@ export function runCase({
 				configPath,
 				"--reporter=json",
 				`--outputFile=${reportPath}`,
-				...(side === "renderer" ? RENDERER_FILES : STORY_FILES),
+				...(side === "renderer"
+					? RENDERER_FILES
+					: only === undefined
+						? STORY_FILES
+						: [only.file, "-t", only.name]),
 			],
 			{
 				cwd: repoRoot,
@@ -986,7 +996,11 @@ describe("shared-fixture coupling (SC3, D-08)", () => {
 
 	test("detail of the cleanup UPDATE_FILE_ERROR action: the ErrorExpansion Cleanup story goes red", () => {
 		const result = untouched(() =>
-			runCase({ mutation: mutation("detail"), side: "story" }),
+			runCase({
+				mutation: mutation("detail"),
+				side: "story",
+				only: { file: ERROR_STORIES, name: "Cleanup" },
+			}),
 		);
 		expectRan(result);
 		expect(result.status).not.toBe(0);
@@ -1012,7 +1026,11 @@ describe("shared-fixture coupling (SC3, D-08)", () => {
 
 	test("afterMetadata of the cleaned UPDATE_FILE_METADATA action: the MetadataExpansion Mixed story goes red", () => {
 		const result = untouched(() =>
-			runCase({ mutation: mutation("afterMetadata"), side: "story" }),
+			runCase({
+				mutation: mutation("afterMetadata"),
+				side: "story",
+				only: { file: METADATA_STORIES, name: "Mixed" },
+			}),
 		);
 		expectRan(result);
 		expect(result.status).not.toBe(0);
@@ -1040,7 +1058,11 @@ describe("shared-fixture coupling (SC3, D-08)", () => {
 
 	test("failureKind of the verification UPDATE_FILE_ERROR action: the AllError screen story goes red (story side)", () => {
 		const result = untouched(() =>
-			runCase({ mutation: mutation("failureKind"), side: "story" }),
+			runCase({
+				mutation: mutation("failureKind"),
+				side: "story",
+				only: { file: SCREEN_STORIES, name: "All Error" },
+			}),
 		);
 		expectRan(result);
 		expect(result.status).not.toBe(0);
