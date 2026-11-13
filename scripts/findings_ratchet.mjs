@@ -614,7 +614,13 @@ function parseArguments(argv) {
 	for (let index = 0; index < argv.length; index += 1) {
 		const arg = argv[index];
 		if (arg === "--index" || arg === "--base") {
-			values.set(arg, argv[index + 1]);
+			// A flag that lost its value must fail, not store undefined: a bare --index
+			// would otherwise skip the stale check and still print PASSED (73-fix IN-04).
+			const value = argv[index + 1];
+			if (value === undefined || value.startsWith("--")) {
+				throw new Error(`${arg} needs a value`);
+			}
+			values.set(arg, value);
 			index += 1;
 		} else {
 			flags.add(arg);

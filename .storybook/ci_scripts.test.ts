@@ -955,6 +955,38 @@ describe("findings_ratchet CLI against a temp git repo", () => {
 			rmSync(repo, { recursive: true, force: true });
 		}
 	});
+
+	// 73-fix IN-04: a bare --index used to store undefined and skip the stale check, so a
+	// workflow line that lost its path still printed PASSED. A flag that needs a value and
+	// has none (end of the arguments, or another flag in its place) fails closed.
+	test.each([
+		["a bare trailing --index", ["--check", "--base", "main", "--index"]],
+		["a bare trailing --base", ["--check", "--index", "{index}", "--base"]],
+		[
+			"--index followed by another flag",
+			["--check", "--index", "--base", "main"],
+		],
+		["--base followed by another flag", ["--check", "--base", "--write"]],
+		["a bare --index with --write", ["--write", "--base", "main", "--index"]],
+	])("%s fails closed with a needs-a-value message", (_name, template) => {
+		// The stale axe entry would be reported if the stale check ran; a skipped check
+		// would print PASSED, which is the defect.
+		const repo = makeRepo(doc({ a11y: true }, [entry("a11y", STORY, "x")]));
+		try {
+			const index = writeIndex(repo, [OTHER]);
+			const args = template.map((arg) => (arg === "{index}" ? index : arg));
+			const dir = path.join(repo, "docs", "evidence");
+			const before = snapshotDir(dir);
+			const result = runRatchet(repo, args);
+			expect(result.status).toBe(1);
+			expect(result.stdout).not.toContain("PASSED");
+			expect(result.stderr).toContain("FINDINGS RATCHET FAILED");
+			expect(result.stderr).toMatch(/--(index|base) needs a value/);
+			assertDirEffect(before, snapshotDir(dir), {});
+		} finally {
+			rmSync(repo, { recursive: true, force: true });
+		}
+	});
 });
 
 // --- findings register controls against a temporary git repository (D-30) --------
