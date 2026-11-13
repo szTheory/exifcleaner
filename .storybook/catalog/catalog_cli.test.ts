@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { assertDirEffect, snapshotDir } from "../../tests/helpers/dir_effect";
+import { loadGrid } from "./grid.mjs";
 import { enumerateStories } from "./story_index.mjs";
 import {
 	GIT_ENV,
@@ -33,6 +34,34 @@ function withRepo(body: (repo: string) => void): void {
 	} finally {
 		fs.rmSync(repo, { recursive: true, force: true });
 	}
+}
+
+// The expected `grid:` counts text, computed from the real model so the CLI tests
+// follow the catalog as stories land (Phase 72).
+async function gridCounts(): Promise<string> {
+	const grid = await loadGrid(repoRoot);
+	if (grid.model === null) {
+		throw new Error(grid.problems.map((found) => found.message).join("; "));
+	}
+	const c = grid.model.counts;
+	return `${c.subjects} subjects, ${c.cells} cells, ${c.covered} covered, ${c.waived} waived, ${c.gaps} gaps`;
+}
+
+// A gap cell outside the screen tier, taken from the real model so the "every tier"
+// control keeps proving what it names as primitive and pattern subjects close
+// (Phase 72). It stays non-vacuous while any area subject still has a gap.
+async function firstNonScreenGap(): Promise<string> {
+	const grid = await loadGrid(repoRoot);
+	if (grid.model === null) {
+		throw new Error(grid.problems.map((found) => found.message).join("; "));
+	}
+	for (const row of grid.model.rows) {
+		if (row.tier === "screen") continue;
+		for (const [stateClass, cell] of Object.entries(row.cells)) {
+			if (cell.status === "gap") return `gap|${row.subject}|${stateClass}`;
+		}
+	}
+	throw new Error("no non-screen gap is left; this control needs one");
 }
 
 function run(repo: string, args: string[]) {
@@ -201,10 +230,17 @@ describe("catalog.mjs coverage grid against a temp git repo", () => {
 	test("shown red: coverage-grid.json drift (one changed byte)", () => {
 		withRepo((repo) => {
 			const file = path.join(repo, GRID_JSON);
-			fs.writeFileSync(
-				file,
-				fs.readFileSync(file, "utf8").replace('"gaps": 250', '"gaps": 251'),
+			const original = fs.readFileSync(file, "utf8");
+			// Derived from the current JSON so the mutation never goes vacuous when the
+			// counts move (Phase 72): bump gaps by one.
+			const gaps = /"gaps": (\d+)/.exec(original);
+			expect(gaps).not.toBeNull();
+			const mutated = original.replace(
+				/"gaps": \d+/,
+				`"gaps": ${Number(gaps?.[1]) + 1}`,
 			);
+			expect(mutated).not.toBe(original);
+			fs.writeFileSync(file, mutated);
 			const before = snapshotDir(repo);
 			const result = run(repo, ["--check", "--base", "main"]);
 			expect(result.status).toBe(1);
@@ -217,15 +253,21 @@ describe("catalog.mjs coverage grid against a temp git repo", () => {
 		withRepo((repo) => {
 			const file = path.join(repo, SCENARIOS);
 			const doc = JSON.parse(fs.readFileSync(file, "utf8")) as {
-				scenarios: Array<{ id: string }>;
+				scenarios: Array<{ id: string; stateClass: string }>;
 			};
 			fs.writeFileSync(
 				file,
 				`${JSON.stringify(
 					{
 						...doc,
+						// Every LanguageDropdown happy scenario goes (Phase 72 added several),
+						// so the cell is a gap at head and was covered at the merge-base.
 						scenarios: doc.scenarios.filter(
-							(scenario) => scenario.id !== "language-dropdown.system-default",
+							(scenario) =>
+								!(
+									scenario.id.startsWith("language-dropdown.") &&
+									scenario.stateClass === "happy"
+								),
 						),
 					},
 					null,
@@ -243,7 +285,8 @@ describe("catalog.mjs coverage grid against a temp git repo", () => {
 		});
 	});
 
-	test("grid bootstrap: a merge-base without coverage-grid.json is admitted once", () => {
+	test("grid bootstrap: a merge-base without coverage-grid.json is admitted once", async () => {
+		const counts = await gridCounts();
 		withRepo((repo) => {
 			const json = fs.readFileSync(path.join(repo, GRID_JSON), "utf8");
 			const markdown = fs.readFileSync(path.join(repo, GRID_MD), "utf8");
@@ -254,19 +297,18 @@ describe("catalog.mjs coverage grid against a temp git repo", () => {
 			const before = snapshotDir(repo);
 			const result = run(repo, ["--check", "--base", "main"]);
 			expect(result.status, result.stderr).toBe(0);
-			expect(result.stdout).toMatch(
-				/grid: 21 subjects, 252 cells, 2 covered, 0 waived, 250 gaps \(bootstrap\)/,
-			);
+			expect(result.stdout).toContain(`grid: ${counts} (bootstrap)`);
 			assertDirEffect(before, snapshotDir(repo), {});
 		});
 	});
 
-	test("grid at the merge-base: a normal run reports the merge-base sha", () => {
+	test("grid at the merge-base: a normal run reports the merge-base sha", async () => {
+		const counts = await gridCounts();
 		withRepo((repo) => {
 			const result = run(repo, ["--check", "--base", "main"]);
 			expect(result.status, result.stderr).toBe(0);
 			expect(result.stdout).toMatch(
-				/grid: 21 subjects, 252 cells, 2 covered, 0 waived, 250 gaps \(merge-base [0-9a-f]{7}\)/,
+				new RegExp(`grid: ${counts} \\(merge-base [0-9a-f]{7}\\)`),
 			);
 		});
 	});
@@ -342,12 +384,13 @@ describe("catalog.mjs coverage grid against a temp git repo", () => {
 		});
 	});
 
-	test("shown red: zero-gaps without --tier looks at every tier, and --tier needs --zero-gaps", () => {
+	test("shown red: zero-gaps without --tier looks at every tier, and --tier needs --zero-gaps", async () => {
+		const nonScreenGap = await firstNonScreenGap();
 		withRepo((repo) => {
 			const before = snapshotDir(repo);
 			const all = run(repo, ["--check", "--base", "main", "--zero-gaps"]);
 			expect(all.status).toBe(1);
-			expect(all.stderr).toContain("gap|ChevronIcon|happy");
+			expect(all.stderr).toContain(nonScreenGap);
 			const bare = run(repo, ["--check", "--base", "main", "--tier", "screen"]);
 			expect(bare.status).toBe(1);
 			expect(bare.stderr).toContain("--tier only applies with --zero-gaps");

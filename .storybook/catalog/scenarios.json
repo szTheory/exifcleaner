@@ -2,6 +2,450 @@
 	"schemaVersion": 1,
 	"scenarios": [
 		{
+			"id": "chevron-icon.arabic",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "intl",
+			"tier": "primitive",
+			"situation": "An Arabic speaker sees the row arrow in a right-to-left layout, where it is not mirrored.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-chevronicon--arabic"
+			]
+		},
+		{
+			"id": "chevron-icon.collapsed",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone scanning a large run sees a folder or file row that is closed, with the arrow pointing right.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-chevronicon--collapsed"
+			]
+		},
+		{
+			"id": "chevron-icon.expanded",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone opens a row to see what was removed and the arrow turns to point down.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-chevronicon--expanded"
+			]
+		},
+		{
+			"id": "error-boundary.button-hover",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "Someone moves the pointer over Try again and the button fills with the highlight colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-errorboundary--button-hover"
+			]
+		},
+		{
+			"id": "error-boundary.fallback",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "A screen fails while drawing and the guard shows a plain message with the cause and a Try again button.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-errorboundary--fallback"
+			]
+		},
+		{
+			"id": "error-boundary.fallback-long-message",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "long",
+			"tier": "pattern",
+			"situation": "A drawing failure carries a very long file path and the message wraps inside the box and does not run off the edge.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-errorboundary--fallback-long-message"
+			]
+		},
+		{
+			"id": "error-boundary.healthy",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "The app draws its screens as normal and the error guard stays out of the way, with no message and no logged error.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-errorboundary--healthy"
+			]
+		},
+		{
+			"id": "error-boundary.keyboard-focus",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "Someone tabs to the Try again button of the error message and sees a visible focus ring around it.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-errorboundary--keyboard-focus"
+			]
+		},
+		{
+			"id": "error-boundary.try-again-recovers",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "After a drawing failure the cause goes away, Try again is pressed and the screen comes back with the alert gone.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-errorboundary--try-again-recovers"
+			]
+		},
+		{
+			"id": "error-expansion.cleanup",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "The cleaned copy was written but a leftover file could not be removed, and the row names its path.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--cleanup"
+			]
+		},
+		{
+			"id": "error-expansion.commit",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "stale",
+			"tier": "pattern",
+			"situation": "Another app changed the file while it was being cleaned, so the row reports that the final step failed.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--commit"
+			]
+		},
+		{
+			"id": "error-expansion.generic-failure",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "The engine stopped before it gave a verdict, so the row shows its plain message and no failure kind.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--generic-failure"
+			]
+		},
+		{
+			"id": "error-expansion.long-detail",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "long",
+			"tier": "pattern",
+			"situation": "A failure carries a long leftover path, so the row detail wraps instead of running past the window edge.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--long-detail"
+			]
+		},
+		{
+			"id": "error-expansion.refused",
+			"persona": "P-photographer",
+			"job": "J-05",
+			"stateClass": "denied",
+			"tier": "pattern",
+			"situation": "A RAF file is refused because writing it can damage the original, and the row says it was left unchanged.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--refused"
+			]
+		},
+		{
+			"id": "error-expansion.verification",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "The cleaned copy could not be checked, so someone opens the row to read why before trusting the result.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--verification"
+			]
+		},
+		{
+			"id": "error-expansion.write",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "A cleaned copy could not be written, so someone opens the row to read what failed and where the leftover file is.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--write"
+			]
+		},
+		{
+			"id": "error-expansion.xattr",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "pattern",
+			"situation": "Embedded metadata is gone, but macOS kept some of the file's extra data, and the row names the cleaned file.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-errorexpansion--xattr"
+			]
+		},
+		{
+			"id": "folder-row.bidi-name",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "intl",
+			"tier": "pattern",
+			"situation": "Someone using Arabic drops a folder with an Arabic name and the row shows it in the right direction.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--bidi-name"
+			]
+		},
+		{
+			"id": "folder-row.complete-collapsed",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "After a large run someone folds a folder away and its row shows a chevron pointing right with the same count.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--complete-collapsed"
+			]
+		},
+		{
+			"id": "folder-row.complete-expanded",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone drops a folder and its row shows the folder, a chevron pointing down and how many files it holds.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--complete-expanded"
+			]
+		},
+		{
+			"id": "folder-row.empty-collapsed",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "empty",
+			"tier": "pattern",
+			"situation": "The row of a folder with nothing supported is folded away at once and still reads zero supported files.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--empty-collapsed"
+			]
+		},
+		{
+			"id": "folder-row.empty-expanded",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "empty",
+			"tier": "pattern",
+			"situation": "Someone drops a folder with nothing supported in it and its row reads zero supported files for a moment.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--empty-expanded"
+			]
+		},
+		{
+			"id": "folder-row.keyboard-focus",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone tabs to the fold button of a folder row and sees a visible focus ring around it.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--keyboard-focus"
+			]
+		},
+		{
+			"id": "folder-row.long-path",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "long",
+			"tier": "pattern",
+			"situation": "A folder deep in the tree shows a shortened path in the row and keeps the full path in its tooltip and name.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--long-path"
+			]
+		},
+		{
+			"id": "folder-row.scanning",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "loading",
+			"tier": "pattern",
+			"situation": "Someone drops a big folder and the row shows that it is still being scanned before any file count is known.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--scanning"
+			]
+		},
+		{
+			"id": "folder-row.single-file",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "one",
+			"tier": "pattern",
+			"situation": "Someone drops a folder that holds exactly one supported file and its row shows a count of one.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--single-file"
+			]
+		},
+		{
+			"id": "folder-row.toggle-hover",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone moves the pointer over the fold button of a folder row and the chevron changes to the accent colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-folderrow--toggle-hover"
+			]
+		},
+		{
+			"id": "gear-icon.closed",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone looks for the settings on first launch and finds the gear button labelled Open settings.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-gearicon--closed"
+			]
+		},
+		{
+			"id": "gear-icon.hover",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone points at the gear button and its colour darkens to show it can be pressed.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-gearicon--hover"
+			]
+		},
+		{
+			"id": "gear-icon.keyboard-focus",
+			"persona": "P-photographer",
+			"job": "J-02",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone tabs to the gear button and sees a focus ring before opening the settings.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-gearicon--keyboard-focus"
+			]
+		},
+		{
+			"id": "gear-icon.open",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "With the settings drawer showing, the gear button is labelled Close settings so it can be shut again.",
+			"proofBoundary": "story",
+			"stories": [
+				"icons-gearicon--open"
+			]
+		},
+		{
+			"id": "language-dropdown.item-hover",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone moves the pointer down the open list and each item under it takes the highlight, the same one the arrow keys set.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--item-hover"
+			]
+		},
+		{
+			"id": "language-dropdown.keyboard-end",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "Someone presses End in the open list and the focus jumps to the last language and scrolls it into view.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--keyboard-end"
+			]
+		},
+		{
+			"id": "language-dropdown.keyboard-focus",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone tabs to the closed language trigger and sees a visible focus ring around it.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--keyboard-focus"
+			]
+		},
+		{
+			"id": "language-dropdown.keyboard-pick",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone opens the list with the arrow keys, moves down two items and presses Enter to choose that language.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--keyboard-pick"
+			]
+		},
+		{
+			"id": "language-dropdown.open",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone opens the language list and sees System and every language in its own script, each with its English name.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--open"
+			]
+		},
+		{
+			"id": "language-dropdown.open-selected",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone who chose German opens the list and sees a check mark and the accent colour on that one language.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--open-selected"
+			]
+		},
+		{
 			"id": "language-dropdown.rtl-locales",
 			"persona": "P-sharer",
 			"job": "J-09",
@@ -11,7 +455,8 @@
 			"proofBoundary": "story",
 			"stories": [
 				"settings-languagedropdown--arabic",
-				"settings-languagedropdown--persian"
+				"settings-languagedropdown--persian",
+				"settings-languagedropdown--open-arabic"
 			]
 		},
 		{
@@ -24,6 +469,739 @@
 			"proofBoundary": "story",
 			"stories": [
 				"settings-languagedropdown--default"
+			]
+		},
+		{
+			"id": "language-dropdown.trigger-hover",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone moves the pointer over the language trigger and its border darkens.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--trigger-hover"
+			]
+		},
+		{
+			"id": "language-dropdown.unknown-code",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "stale",
+			"tier": "pattern",
+			"situation": "A saved language code that the list no longer knows shows on the trigger as the raw code and not as a name.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-languagedropdown--unknown-code"
+			]
+		},
+		{
+			"id": "metadata-expansion.all-removed",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone opens a cleaned photo and reads that all five fields were removed, with no list of kept fields to open.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--all-removed"
+			]
+		},
+		{
+			"id": "metadata-expansion.arabic-plural",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "intl",
+			"tier": "pattern",
+			"situation": "An Arabic speaker opens a cleaned file with two fields removed and reads the count from the general plural wording.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--arabic-plural"
+			]
+		},
+		{
+			"id": "metadata-expansion.copy-hover",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone points at Copy all and its background changes to show it can be pressed.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--copy-hover"
+			]
+		},
+		{
+			"id": "metadata-expansion.keyboard-focus",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone tabs to Copy all and sees a focus ring before copying the list.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--keyboard-focus"
+			]
+		},
+		{
+			"id": "metadata-expansion.mixed",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "many",
+			"tier": "pattern",
+			"situation": "Someone opens a cleaned file and reads two fields removed and one still present, with the removed ones listed under their group.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--mixed"
+			]
+		},
+		{
+			"id": "metadata-expansion.no-metadata",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "empty",
+			"tier": "pattern",
+			"situation": "Someone opens a cleaned file that only carried file-system fields, so the panel says No metadata found and offers nothing to copy.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--no-metadata"
+			]
+		},
+		{
+			"id": "metadata-expansion.one-removed",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "one",
+			"tier": "pattern",
+			"situation": "Someone opens a file where one field was removed and reads the singular wording.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--one-removed"
+			]
+		},
+		{
+			"id": "metadata-expansion.present-details-open",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone opens the still present list to check which fields the cleaned file kept.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--present-details-open"
+			]
+		},
+		{
+			"id": "metadata-expansion.scrolls-at-max-height",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "Someone opens a file with thirty camera settings and scrolls the list inside a panel that stops growing at 300 pixels.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--scrolls-at-max-height"
+			]
+		},
+		{
+			"id": "metadata-expansion.unchanged",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone opens a file whose cleaning changed nothing and reads 0 fields removed with its one field still present.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadataexpansion--unchanged"
+			]
+		},
+		{
+			"id": "metadata-field.bidi-value",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "intl",
+			"tier": "pattern",
+			"situation": "Someone reads an office name that mixes Arabic and Latin letters and finds each part in its own reading direction.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatafield--bidi-value"
+			]
+		},
+		{
+			"id": "metadata-field.cut-at-limit",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "Someone reads a description of 81 characters that is cut after 80 with an ellipsis, and finds the full text by pointing at it.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatafield--cut-at-limit"
+			]
+		},
+		{
+			"id": "metadata-field.exactly-at-limit",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "Someone reads a description of exactly 80 characters, which shows in full with no ellipsis.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatafield--exactly-at-limit"
+			]
+		},
+		{
+			"id": "metadata-field.removed-and-preserved",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone reads a removed field marked with a minus and a kept field marked with a check, each with its value.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatafield--removed",
+				"file-list-metadatafield--preserved"
+			]
+		},
+		{
+			"id": "metadata-field.structured-value",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone reads a removed location field whose value is a list of two numbers, shown as its plain text.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatafield--structured-value"
+			]
+		},
+		{
+			"id": "metadata-group.many-fields",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "many",
+			"tier": "pattern",
+			"situation": "Someone sees a Camera group that holds six removed fields and its count of 6.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatagroup--many-fields"
+			]
+		},
+		{
+			"id": "metadata-group.one-field",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "one",
+			"tier": "pattern",
+			"situation": "Someone sees a Camera group that holds one removed field and its count of 1.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatagroup--one-field"
+			]
+		},
+		{
+			"id": "metadata-group.unmapped-group",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "Someone sees a group the app has no name for under the heading Other, and can point at it to read the real group name.",
+			"proofBoundary": "story",
+			"stories": [
+				"file-list-metadatagroup--unmapped-group"
+			]
+		},
+		{
+			"id": "segmented-control.arabic",
+			"persona": "P-sharer",
+			"job": "J-01",
+			"stateClass": "intl",
+			"tier": "primitive",
+			"situation": "An Arabic speaker reads the three appearance segments in a right-to-left layout.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--arabic"
+			]
+		},
+		{
+			"id": "segmented-control.dark-active",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone picks the Dark appearance and sees that segment chosen while the others stay unselected.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--dark-active"
+			]
+		},
+		{
+			"id": "segmented-control.keyboard-focus",
+			"persona": "P-photographer",
+			"job": "J-02",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone tabs to the appearance control and sees a focus ring on the chosen segment.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--keyboard-focus"
+			]
+		},
+		{
+			"id": "segmented-control.keyboard-wrap",
+			"persona": "P-photographer",
+			"job": "J-02",
+			"stateClass": "boundary",
+			"tier": "primitive",
+			"situation": "Someone presses the right arrow on the last segment and the choice wraps to the first one.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--keyboard-wrap"
+			]
+		},
+		{
+			"id": "segmented-control.light-active",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone opens the app for the first time and sees the Light appearance as the chosen segment.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--light-active"
+			]
+		},
+		{
+			"id": "segmented-control.long-labels",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "long",
+			"tier": "primitive",
+			"situation": "A Russian speaker sees the longest translated segment labels still fit inside the control.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--long-labels"
+			]
+		},
+		{
+			"id": "segmented-control.system-active",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone leaves the appearance on Auto and sees that segment chosen, the default for a first launch.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-segmentedcontrol--system-active"
+			]
+		},
+		{
+			"id": "status-bar.all-cleaned",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "A folder run ends and the bar reads three of three cleaned with the fields removed and a Clear button to start again.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--all-cleaned"
+			]
+		},
+		{
+			"id": "status-bar.arabic",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "intl",
+			"tier": "pattern",
+			"situation": "Someone using Arabic sees the counts, the time and the Clear button of the bar laid out right to left.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--arabic"
+			]
+		},
+		{
+			"id": "status-bar.idle",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "empty",
+			"tier": "pattern",
+			"situation": "Someone opens the app with no file yet and the bottom bar shows only the settings gear, with no counts.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--idle"
+			]
+		},
+		{
+			"id": "status-bar.keyboard-focus",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone tabs from the settings gear to the Clear button of the bar and sees a visible focus ring on each stop.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--keyboard-focus"
+			]
+		},
+		{
+			"id": "status-bar.mid-batch",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Partway through a run the bar shows one of three cleaned, the fields removed so far and the seconds passed.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--mid-batch"
+			]
+		},
+		{
+			"id": "status-bar.nothing-removed",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "Files that were already clean give zero of twelve cleaned and zero fields removed, so the zero reads as a result and not a gap.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--nothing-removed"
+			]
+		},
+		{
+			"id": "status-bar.running",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "loading",
+			"tier": "pattern",
+			"situation": "A large run has begun and the bar reads zero of three cleaned with no time passed.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--running"
+			]
+		},
+		{
+			"id": "status-bar.single-file",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "one",
+			"tier": "pattern",
+			"situation": "Someone cleans a single file and the bar reads one of one cleaned with a count of one field removed.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusbar--single-file"
+			]
+		},
+		{
+			"id": "status-icon.complete",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "A file is finished and shows a check, and a file with no metadata found shows the same check.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusicon--complete"
+			]
+		},
+		{
+			"id": "status-icon.complete-animated",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "The first file finishes in front of the person and its check draws itself in once.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusicon--complete-animated"
+			]
+		},
+		{
+			"id": "status-icon.failed",
+			"persona": "P-batch",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "primitive",
+			"situation": "A file could not be cleaned and its row shows a red cross announced as an error.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusicon--failed"
+			]
+		},
+		{
+			"id": "status-icon.failed-labelled",
+			"persona": "P-source",
+			"job": "J-04",
+			"stateClass": "error",
+			"tier": "primitive",
+			"situation": "A failed file's cross is announced with the reason for the failure rather than the word error.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusicon--failed-labelled"
+			]
+		},
+		{
+			"id": "status-icon.pending",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "loading",
+			"tier": "primitive",
+			"situation": "A file in a big drop is waiting its turn and shows a small grey dot until it is picked up.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusicon--pending"
+			]
+		},
+		{
+			"id": "status-icon.processing",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "loading",
+			"tier": "primitive",
+			"situation": "A file is being read or cleaned and shows a spinner, and a file still being read looks the same.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-statusicon--processing"
+			]
+		},
+		{
+			"id": "toast.arabic",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "intl",
+			"tier": "pattern",
+			"situation": "An Arabic speaker copies the list and the confirmation notice appears in Arabic in a right-to-left layout.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--arabic"
+			]
+		},
+		{
+			"id": "toast.copied",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "pattern",
+			"situation": "Someone copies the removed-metadata list and a short notice confirms the text is on the clipboard.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--copied"
+			]
+		},
+		{
+			"id": "toast.faded-out",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "boundary",
+			"tier": "pattern",
+			"situation": "The notice timer runs out, so the message is still set but the notice has faded away.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--faded-out"
+			]
+		},
+		{
+			"id": "toast.hidden",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "empty",
+			"tier": "pattern",
+			"situation": "Nothing has been copied or skipped, so the notice holds no text and stays out of sight.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--hidden"
+			]
+		},
+		{
+			"id": "toast.long-message",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "long",
+			"tier": "pattern",
+			"situation": "In the narrow default window the longest translated skipped notice wraps inside the window width.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--long-message"
+			]
+		},
+		{
+			"id": "toast.reveal-failed",
+			"persona": "P-batch",
+			"job": "J-07",
+			"stateClass": "stale",
+			"tier": "pattern",
+			"situation": "Someone reveals a result that was moved or deleted after its row appeared and is told it no longer exists.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--reveal-failed"
+			]
+		},
+		{
+			"id": "toast.skipped-many",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "many",
+			"tier": "pattern",
+			"situation": "A drop contains several unsupported files and the notice says how many were skipped.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--skipped-many"
+			]
+		},
+		{
+			"id": "toast.skipped-one",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "one",
+			"tier": "pattern",
+			"situation": "A drop contains a single unsupported file and the notice reports the one that was skipped.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-toast--skipped-one"
+			]
+		},
+		{
+			"id": "toggle-switch.arabic",
+			"persona": "P-sharer",
+			"job": "J-01",
+			"stateClass": "intl",
+			"tier": "primitive",
+			"situation": "An Arabic speaker reads a setting in a right-to-left layout with its label and description in Arabic.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-toggleswitch--arabic"
+			]
+		},
+		{
+			"id": "toggle-switch.keyboard-focus",
+			"persona": "P-photographer",
+			"job": "J-02",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone tabs to a setting with the keyboard and sees a focus ring on the switch before changing it.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-toggleswitch--keyboard-focus"
+			]
+		},
+		{
+			"id": "toggle-switch.long-labels",
+			"persona": "P-sharer",
+			"job": "J-09",
+			"stateClass": "long",
+			"tier": "primitive",
+			"situation": "A Spanish speaker opens the settings and the longest translated label and description still fit beside the switch.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-toggleswitch--long-labels"
+			]
+		},
+		{
+			"id": "toggle-switch.off",
+			"persona": "P-sharer",
+			"job": "J-01",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone leaves a setting off before sharing a file and can see from the switch and its label that it is not applied.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-toggleswitch--off"
+			]
+		},
+		{
+			"id": "toggle-switch.on",
+			"persona": "P-photographer",
+			"job": "J-05",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone turns on Save as copy so the original is kept exactly as it was, and reads the setting description.",
+			"proofBoundary": "story",
+			"stories": [
+				"settings-toggleswitch--on"
+			]
+		},
+		{
+			"id": "type-pill.heic",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone checks a cleaned phone photo and sees its type as a HEIC or HEIF badge in one colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--heic"
+			]
+		},
+		{
+			"id": "type-pill.jpeg",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone checks a cleaned photo and sees its type as a JPG or JPEG badge in one colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--jpeg"
+			]
+		},
+		{
+			"id": "type-pill.media",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "A folder of recordings is cleaned and every audio and video type shows the same media colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--media"
+			]
+		},
+		{
+			"id": "type-pill.neutral",
+			"persona": "P-batch",
+			"job": "J-06",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "A mixed folder is cleaned and the supported types with no colour of their own show a plain badge.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--neutral"
+			]
+		},
+		{
+			"id": "type-pill.pdf",
+			"persona": "P-source",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone checks a cleaned document and sees its type as a PDF badge in its own colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--pdf"
+			]
+		},
+		{
+			"id": "type-pill.png",
+			"persona": "P-sharer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone checks a cleaned screenshot and sees its type as a PNG badge in its own colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--png"
+			]
+		},
+		{
+			"id": "type-pill.raw",
+			"persona": "P-photographer",
+			"job": "J-03",
+			"stateClass": "happy",
+			"tier": "primitive",
+			"situation": "Someone checks cleaned camera files and every RAW type, from DNG to SRW, shows the same colour.",
+			"proofBoundary": "story",
+			"stories": [
+				"ui-typepill--raw"
 			]
 		}
 	]

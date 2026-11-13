@@ -17,14 +17,19 @@ describe("checked-in findings baseline (D-29)", () => {
 	);
 	const text = readFileSync(file, "utf8");
 
-	test("is valid, ships empty, and its only kind is the sealed a11y kind", () => {
-		const parsed: unknown = JSON.parse(text);
+	test("is valid, keeps the sealed a11y kind empty, and seals a11y-p72 (D-19, D-20)", () => {
+		const parsed = JSON.parse(text) as {
+			schemaVersion: number;
+			kinds: Record<string, { sealed?: boolean }>;
+			entries: Array<{ kind: string }>;
+		};
 		expect(validateBaseline(parsed)).toEqual([]);
-		expect(parsed).toEqual({
-			schemaVersion: 1,
-			kinds: { a11y: { sealed: true } },
-			entries: [],
-		});
+		expect(parsed.schemaVersion).toBe(1);
+		expect(parsed.kinds["a11y"]).toEqual({ sealed: true });
+		expect(parsed.kinds["a11y-p72"]).toEqual({ sealed: true });
+		// Nothing is ever added to the a11y kind; the Phase 72 entries are all a11y-p72
+		// (later phases add their own kinds, so only the a11y kind is pinned empty).
+		expect(parsed.entries.filter((entry) => entry.kind === "a11y")).toEqual([]);
 	});
 
 	test("is serialized tab-indented with a trailing newline", () => {
@@ -57,7 +62,7 @@ describe("knownA11yFrom (D-27)", () => {
 		expect(knownA11yFrom(baseline, STORY)).toEqual({});
 	});
 
-	test("the shipped baseline is empty, so no story is excused", () => {
+	test("a story with no baseline entry is not excused (ToggleSwitch has no export named Default)", () => {
 		expect(knownA11y(STORY)).toEqual({});
 	});
 });

@@ -3,7 +3,619 @@
 	"kinds": {
 		"a11y": {
 			"sealed": true
+		},
+		"a11y-p72": {
+			"sealed": true
 		}
 	},
-	"entries": []
+	"entries": [
+		{
+			"fingerprint": "a11y-p72|file-list-errorexpansion--cleanup|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-errorexpansion--cleanup",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-errorexpansion--commit|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-errorexpansion--commit",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-errorexpansion--generic-failure|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-errorexpansion--generic-failure",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-errorexpansion--long-detail|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-errorexpansion--long-detail",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-errorexpansion--refused|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-errorexpansion--refused",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-errorexpansion--verification|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-errorexpansion--verification",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-errorexpansion--write|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-errorexpansion--write",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-errorexpansion--xattr|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-errorexpansion--xattr",
+			"rule": "color-contrast",
+			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--bidi-name|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--bidi-name",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--complete-collapsed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--complete-collapsed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--complete-expanded|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--complete-expanded",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--empty-collapsed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--empty-collapsed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--empty-expanded|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--empty-expanded",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--keyboard-focus|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--long-path|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--long-path",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--scanning|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--scanning",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count--scanning (the Scanning text, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--single-file|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--single-file",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-folderrow--toggle-hover|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-folderrow--toggle-hover",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--all-removed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--all-removed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--arabic-plural|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--arabic-plural",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--copy-hover|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--copy-hover",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--keyboard-focus|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--mixed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--mixed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--no-metadata|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--no-metadata",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__empty measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--one-removed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--one-removed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--present-details-open|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--present-details-open",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) and 3.73:1 (#66758c --ec-color-text-secondary on #dae9e4 --ec-color-preserved-bg) in the light theme, measures 3.52:1 (#818188 --ec-color-text-secondary on #1e3226 --ec-color-preserved-bg) and 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--scrolls-at-max-height|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--scrolls-at-max-height",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadataexpansion--unchanged|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadataexpansion--unchanged",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadatafield--bidi-value|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadatafield--bidi-value",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadatafield--cut-at-limit|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadatafield--cut-at-limit",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadatafield--exactly-at-limit|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadatafield--exactly-at-limit",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadatafield--preserved|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadatafield--preserved",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.73:1 (#66758c --ec-color-text-secondary on #dae9e4 --ec-color-preserved-bg) in the light theme, measures 3.52:1 (#818188 --ec-color-text-secondary on #1e3226 --ec-color-preserved-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadatafield--removed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadatafield--removed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadatafield--structured-value|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadatafield--structured-value",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadatagroup--many-fields|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadatagroup--many-fields",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadatagroup--one-field|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadatagroup--one-field",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|file-list-metadatagroup--unmapped-group|color-contrast",
+			"kind": "a11y-p72",
+			"story": "file-list-metadatagroup--unmapped-group",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--item-hover|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--item-hover",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: the label of the selected or highlighted item (--ec-color-accent text) measures 3.38:1 (#007aff --ec-color-accent on #e8ecf0 --ec-color-surface) in the light theme, measures 4.23:1 (#007aff --ec-color-accent on #1c1c1f --ec-color-surface) in the dark theme; the English name in brackets (.language-dropdown__english) measures 3.62:1 (#66758c --ec-color-text-secondary on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) and 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) and 4.44:1 (#818188 --ec-color-text-secondary on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--item-hover|scrollable-region-focusable",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--item-hover",
+			"rule": "scrollable-region-focusable",
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--keyboard-end|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--keyboard-end",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: the English name in brackets (.language-dropdown__english) measures 3.62:1 (#66758c --ec-color-text-secondary on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) and 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) and 4.44:1 (#818188 --ec-color-text-secondary on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--keyboard-end|scrollable-region-focusable",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--keyboard-end",
+			"rule": "scrollable-region-focusable",
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--open|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--open",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: the label of the selected or highlighted item (--ec-color-accent text) measures 3.11:1 (#007aff --ec-color-accent on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) in the light theme, measures 4.27:1 (#007aff --ec-color-accent on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the English name in brackets (.language-dropdown__english) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--open|scrollable-region-focusable",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--open",
+			"rule": "scrollable-region-focusable",
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--open-arabic|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--open-arabic",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: the English name in brackets (.language-dropdown__english) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--open-arabic|scrollable-region-focusable",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--open-arabic",
+			"rule": "scrollable-region-focusable",
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--open-selected|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--open-selected",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at 14px normal weight: the label of the selected or highlighted item (--ec-color-accent text) measures 3.11:1 (#007aff --ec-color-accent on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) in the light theme, measures 4.27:1 (#007aff --ec-color-accent on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the English name in brackets (.language-dropdown__english) measures 3.62:1 (#66758c --ec-color-text-secondary on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) and 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) and 4.44:1 (#818188 --ec-color-text-secondary on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-languagedropdown--open-selected|scrollable-region-focusable",
+			"kind": "a11y-p72",
+			"story": "settings-languagedropdown--open-selected",
+			"rule": "scrollable-region-focusable",
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--arabic|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--arabic",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--dark-active|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--dark-active",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--keyboard-focus|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--keyboard-wrap|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--keyboard-wrap",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--light-active|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--light-active",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--long-labels|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--long-labels",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-segmentedcontrol--system-active|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-segmentedcontrol--system-active",
+			"rule": "color-contrast",
+			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-toggleswitch--keyboard-focus|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-toggleswitch--keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 14px normal weight; the dark theme passes; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-toggleswitch--long-labels|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-toggleswitch--long-labels",
+			"rule": "color-contrast",
+			"reason": "Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 14px normal weight; the dark theme passes; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-toggleswitch--off|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-toggleswitch--off",
+			"rule": "color-contrast",
+			"reason": "Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 14px normal weight; the dark theme passes; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|settings-toggleswitch--on|color-contrast",
+			"kind": "a11y-p72",
+			"story": "settings-toggleswitch--on",
+			"rule": "color-contrast",
+			"reason": "Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 14px normal weight; the dark theme passes; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-errorboundary--button-hover|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-errorboundary--button-hover",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): .error-boundary__button (Try again), 14px measures 3.62:1 (#007aff --ec-color-accent on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.85:1 (#007aff --ec-color-accent on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__detail, 14px measures 4.22:1 (#66758c --ec-color-text-secondary on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.99:1 (#818188 --ec-color-text-secondary on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__message, 20px measures 4.46:1 (#c44536 --ec-color-error on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.13:1 (#c44536 --ec-color-error on #3d1a16 --ec-color-error-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-errorboundary--fallback|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-errorboundary--fallback",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): .error-boundary__button (Try again), 14px measures 3.62:1 (#007aff --ec-color-accent on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.85:1 (#007aff --ec-color-accent on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__detail, 14px measures 4.22:1 (#66758c --ec-color-text-secondary on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.99:1 (#818188 --ec-color-text-secondary on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__message, 20px measures 4.46:1 (#c44536 --ec-color-error on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.13:1 (#c44536 --ec-color-error on #3d1a16 --ec-color-error-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-errorboundary--fallback-long-message|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-errorboundary--fallback-long-message",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): .error-boundary__button (Try again), 14px measures 3.62:1 (#007aff --ec-color-accent on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.85:1 (#007aff --ec-color-accent on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__detail, 14px measures 4.22:1 (#66758c --ec-color-text-secondary on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.99:1 (#818188 --ec-color-text-secondary on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__message, 20px measures 4.46:1 (#c44536 --ec-color-error on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.13:1 (#c44536 --ec-color-error on #3d1a16 --ec-color-error-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-errorboundary--keyboard-focus|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-errorboundary--keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): .error-boundary__button (Try again), 14px measures 3.62:1 (#007aff --ec-color-accent on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.85:1 (#007aff --ec-color-accent on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__detail, 14px measures 4.22:1 (#66758c --ec-color-text-secondary on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.99:1 (#818188 --ec-color-text-secondary on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__message, 20px measures 4.46:1 (#c44536 --ec-color-error on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.13:1 (#c44536 --ec-color-error on #3d1a16 --ec-color-error-bg) in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--all-cleaned|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--all-cleaned",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--arabic|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--arabic",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--keyboard-focus|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--keyboard-focus",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--mid-batch|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--mid-batch",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--nothing-removed|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--nothing-removed",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--running|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--running",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-statusbar--single-file|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-statusbar--single-file",
+			"rule": "color-contrast",
+			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--heic|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--heic",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill--heic (the HEIC and HEIF pills) measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 (--ec-pill-heic-text) on background #ebeaef (--ec-pill-heic-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--jpeg|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--jpeg",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill--jpg (the JPG and JPEG pills) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 (--ec-pill-jpg-text) on background #e9eef2 (--ec-pill-jpg-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--media|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--media",
+			"rule": "color-contrast",
+			"reason": "Selectors .type-pill--mov and .type-pill--mp4 (the media family pills) measure 2.71:1 in the light theme only, below 4.5:1: foreground #a09060 (--ec-pill-mov-text) on background #eeeeeb (--ec-pill-mov-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--neutral|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--neutral",
+			"rule": "color-contrast",
+			"reason": "Selectors .type-pill--gif, --tiff, --tif and --webp (the neutral pills, base .type-pill rule) measure 2.09:1 in the light theme (foreground #9da7b6 --ec-color-muted on background #eceef1) and 2.63:1 in the dark theme (#636369 on #222326), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--pdf|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--pdf",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill--pdf measures 3.72:1 in the light theme (foreground #a06a60 on background #eeeaeb) and 4.48:1 in the dark theme (#b07a70 on #281f20), both below 4.5:1 (--ec-pill-pdf-text on --ec-pill-pdf-bg composited on the page), 14px normal weight; the family token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--png|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--png",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 (--ec-pill-png-text) on background #e8edec (--ec-pill-png-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		},
+		{
+			"fingerprint": "a11y-p72|ui-typepill--raw|color-contrast",
+			"kind": "a11y-p72",
+			"story": "ui-typepill--raw",
+			"rule": "color-contrast",
+			"reason": "Selector .type-pill--dng (the RAW family pills) measures 2.93:1 in the light theme only, below 4.5:1: foreground #b08060 (--ec-pill-dng-text) on background #f0eceb (--ec-pill-dng-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
+			"disposition": "fix-v5.1"
+		}
+	]
 }

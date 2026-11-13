@@ -333,6 +333,42 @@ describe("findings_ratchet CLI against a temp git repo", () => {
 		}
 	});
 
+	// 72-05 (D-21): the first control (an entry added to the merge-base a11y kind) is
+	// the case above; this is the second, against the real sealed kind name. A change
+	// that adds an entry to an a11y-p72 kind that already exists at the merge-base is
+	// rejected with `added`, so the Phase 72 baseline can only shrink after it merges.
+	test("a second change adding an entry to an existing a11y-p72 kind is rejected with added", () => {
+		const kinds = { a11y: true, "a11y-p72": true };
+		const repo = makeRepo(
+			doc(kinds, [entry("a11y-p72", STORY, "color-contrast")]),
+		);
+		try {
+			writeBaseline(
+				repo,
+				doc(kinds, [
+					entry("a11y-p72", STORY, "color-contrast"),
+					entry("a11y-p72", OTHER, "color-contrast"),
+				]),
+			);
+			const index = writeIndex(repo, [STORY, OTHER]);
+			const dir = path.join(repo, "docs", "evidence");
+			const before = snapshotDir(dir);
+			const result = runRatchet(repo, [
+				"--check",
+				"--base",
+				"main",
+				"--index",
+				index,
+			]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("FINDINGS RATCHET FAILED");
+			expect(result.stderr).toContain("added");
+			assertDirEffect(before, snapshotDir(dir), {});
+		} finally {
+			rmSync(repo, { recursive: true, force: true });
+		}
+	});
+
 	test("--write with an added entry is refused and leaves the file unchanged", () => {
 		const repo = makeRepo(doc({ a11y: true }));
 		try {

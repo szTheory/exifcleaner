@@ -62,16 +62,16 @@ describe("the committed coverage grid", () => {
 		}
 	});
 
-	test("counts are 21 subjects x 12 states = 252 cells with exactly the two seed cells covered", async () => {
+	test("counts are 21 subjects x 12 states = 252 cells, partitioned, with both Phase 70 seed cells covered", async () => {
 		const model = await realModel();
-		expect(model.counts).toEqual({
-			subjects: 21,
-			states: 12,
-			cells: 252,
-			covered: 2,
-			waived: 0,
-			gaps: 250,
-		});
+		expect(model.counts.subjects).toBe(21);
+		expect(model.counts.states).toBe(12);
+		expect(model.counts.cells).toBe(252);
+		// Phase 72 grows covered and waived and shrinks gaps; the partition stays whole.
+		expect(model.counts.covered + model.counts.waived + model.counts.gaps).toBe(
+			252,
+		);
+		expect(model.counts.covered).toBeGreaterThanOrEqual(2);
 		const covered: string[] = [];
 		for (const row of model.rows) {
 			for (const [stateClass, cell] of Object.entries(row.cells)) {
@@ -79,10 +79,8 @@ describe("the committed coverage grid", () => {
 					covered.push(cellKey(row.subject, stateClass));
 			}
 		}
-		expect(covered.sort()).toEqual([
-			"LanguageDropdown|happy",
-			"LanguageDropdown|intl",
-		]);
+		expect(covered).toContain("LanguageDropdown|happy");
+		expect(covered).toContain("LanguageDropdown|intl");
 	});
 
 	test("a gap is computed: no cell carries a hand-typed status in waivers.json", () => {
@@ -225,6 +223,9 @@ describe("gapRatchet and zeroGapProblems", () => {
 
 	test("shown red: waiver deleted at head leaves a gap that was waived at base", async () => {
 		const head = asDocument(await realModel());
+		// The cell is planted at head as a gap, so the control follows the catalog as
+		// subjects close (Phase 72) instead of naming a cell that is waived today.
+		rowOf(head, "ChevronIcon").cells["huge"] = { status: "gap" };
 		const base = clone(head);
 		rowOf(base, "ChevronIcon").cells["huge"] = {
 			status: "waived",
@@ -262,13 +263,27 @@ describe("gapRatchet and zeroGapProblems", () => {
 		const removed = clone(base);
 		removed.rows = removed.rows.filter((row) => row.subject !== "Toast");
 		expect(gapRatchet({ base, head: removed }).problems).toEqual([]);
+		expect(gapRatchet({ base, head: base }).problems).toEqual([]);
+	});
+
+	test("a gap closed at head is fine: the cell is a gap at base and covered at head", async () => {
+		// The gap is planted at base, so the control follows the catalog as it fills
+		// (Toast|happy is already covered in the committed grid) and always changes a cell
+		// from gap to closed instead of comparing a covered cell with itself.
+		const base = asDocument(await realModel());
+		rowOf(base, "Toast").cells["happy"] = { status: "gap" };
 		const closed = clone(base);
 		rowOf(closed, "Toast").cells["happy"] = {
 			status: "covered",
 			scenarios: ["toast.happy"],
 		};
+		expect(rowOf(base, "Toast").cells["happy"]?.status).toBe("gap");
+		expect(rowOf(closed, "Toast").cells["happy"]?.status).toBe("covered");
 		expect(gapRatchet({ base, head: closed }).problems).toEqual([]);
-		expect(gapRatchet({ base, head: base }).problems).toEqual([]);
+		// The same transition the other way round is the regression the ratchet reports.
+		expect(codes(gapRatchet({ base: closed, head: base }).problems)).toEqual([
+			"gap-added",
+		]);
 	});
 
 	test("an absent base grid is admitted once as bootstrap, even for a head with gaps", async () => {
