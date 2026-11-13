@@ -2442,6 +2442,15 @@
 			"severity": "major"
 		},
 		{
+			"fingerprint": "silent-failure|settings-settingsdrawer--all-toggles-on|toggle-write-result-ignored",
+			"kind": "silent-failure",
+			"story": "settings-settingsdrawer--all-toggles-on",
+			"rule": "toggle-write-result-ignored",
+			"reason": "SettingsDrawer.tsx:94 handleToggle calls window.api.settings.set(...) and never reads the Promise<{ success: boolean; error: string | null }> it returns (api_types.ts:53-55); the switches are drawn from settings state that only the onChanged callback updates (SettingsDrawer.tsx:87, :238-275), so a write that fails leaves the switch where it was and the person is told nothing (read from source, not reproduced in a story; settings_handlers.ts:35 answers success true today).",
+			"disposition": "fix-v5.2",
+			"severity": "minor"
+		},
+		{
 			"fingerprint": "silent-failure|ui-toast--skipped-many|toasts-share-one-position",
 			"kind": "silent-failure",
 			"story": "ui-toast--skipped-many",
