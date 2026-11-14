@@ -161,8 +161,8 @@ One row per `expect(`, `expect.soft(` or `expect.poll(` call inside a test callb
 
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | kept | expect(title).toBeVisible() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 2 | kept | expect(titleText).toContain("Add files to clean") | real-electron |  |  | flips to deleted in 75-02 (D-01) |
+| 1 | deleted | expect(title).toBeVisible() | screens-app--empty | text | Add files to clean | English default; the IPC half stays in the kept French test |
+| 2 | deleted | expect(titleText).toContain("Add files to clean") | screens-app--empty | text | Add files to clean | English default; the IPC half stays in the kept French test |
 
 ### switches language via IPC and updates UI text
 
@@ -190,12 +190,14 @@ One row per `expect(`, `expect.soft(` or `expect.poll(` call inside a test callb
 
 ### uses RTL direction, visual action order, and a localized count in Arabic
 
+Title kept per D-04 (never retitle a kept test; no journey pins it). It overclaims: visual action order moved to ui-emptystate--persian-empty.
+
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | kept | expect(window.locator("html")).toHaveAttribute("dir", "rtl") | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 2 | kept | expect(filesBox).not.toBeNull() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 3 | kept | expect(folderBox).not.toBeNull() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 4 | kept | expect(filesBox?.x).toBeGreaterThan(folderBox?.x ?? Number.POSITIVE_INFINITY) | real-electron |  |  | flips to deleted in 75-02 (D-01) |
+| 1 | deleted | expect(window.locator("html")).toHaveAttribute("dir", "rtl") | ui-emptystate--persian-empty | rtl | dir: "rtl" | fa stands in for ar, both right to left; expectLocale asserts documentElement.dir |
+| 2 | deleted | expect(filesBox).not.toBeNull() | ui-emptystate--persian-empty | rtl | getBoundingClientRect | fa stands in for ar, both right to left; the play throws unless the first button renders |
+| 3 | deleted | expect(folderBox).not.toBeNull() | ui-emptystate--persian-empty | rtl | getBoundingClientRect | fa stands in for ar, both right to left; the play throws unless the second button renders |
+| 4 | deleted | expect(filesBox?.x).toBeGreaterThan(folderBox?.x ?? Number.POSITIVE_INFINITY) | ui-emptystate--persian-empty | rtl | getBoundingClientRect | fa stands in for ar, both right to left; first button sits right of the second |
 | 5 | kept | expect(window.locator(".toast")).toContainText("ملفات غير مدعومة تم تخطيها: 1") | ipc |  |  |  |
 
 ## metadata-inspection
