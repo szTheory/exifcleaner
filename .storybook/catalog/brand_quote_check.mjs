@@ -15,7 +15,11 @@
 //     every `brand.section` is exactly one heading and every `brand.quote`
 //     occurs verbatim inside that heading's own line range, and every
 //     `tokens.path` resolves in the cache tokens.json to a `$value.hex` equal,
-//     case-insensitively, to `tokens.value`.
+//     case-insensitively, to `tokens.value`;
+//   - token_map.json (Phase 74, D-18): its `brandPin` equals that commit, and
+//     every `adopt` brand ref and every `derive` source path resolves in the
+//     cache tokens.json, the `adopt` ones to a `$value.hex` equal,
+//     case-insensitively, to the hex the map holds.
 // A section written with a level prefix (`## In the product`) matches only the
 // heading of that level and text; BRAND.md repeats two heading texts (`Type`,
 // `In the product`) at two levels, and a bare citation of either stays
@@ -37,6 +41,7 @@ const DEFAULT_CACHE = ".brand-cache/unpacked/exifcleaner-brand";
 const RULES_PATH = ".storybook/catalog/copy_lint_rules.json";
 const CATALOG_PATH = ".storybook/catalog/catalog.json";
 const UI_SPEC_PATH = ".storybook/catalog/ui-spec.json";
+const TOKEN_MAP_PATH = ".storybook/catalog/token_map.json";
 const PIN_PATH = "brand.pin.json";
 
 /**
@@ -191,11 +196,56 @@ export function specTokenSources(specDoc) {
 }
 
 /**
- * Pure over text, so a test can call it without a spawn. `specDoc` and
- * `tokensDoc` are optional: without a `specDoc` only the rules and the catalog
- * are checked.
+ * Every brand colour reference of token_map.json: the `adopt` entries' light and
+ * dark `{ token, hex }`, each with the hex the map holds, and the `derive`
+ * entries' `from` paths, which carry no hex. Malformed entries are skipped (the
+ * cache-free validator reports them).
  *
- * @param {{ brandText: string, rulesDoc: unknown, catalogDoc: unknown, pin: string, specDoc?: unknown, tokensDoc?: unknown }} input
+ * @param {unknown} tokenMapDoc
+ * @returns {Array<{ location: string, name: string, token: unknown, hex: unknown }>}
+ */
+export function mapBrandRefs(tokenMapDoc) {
+	if (!isPlainObject(tokenMapDoc) || !Array.isArray(tokenMapDoc["entries"])) {
+		return [];
+	}
+	const found = [];
+	for (const entry of tokenMapDoc["entries"]) {
+		if (!isPlainObject(entry)) continue;
+		const name = String(entry["name"]);
+		if (entry["disposition"] === "adopt" && isPlainObject(entry["brand"])) {
+			for (const side of ["light", "dark"]) {
+				const ref = entry["brand"][side];
+				if (!isPlainObject(ref)) continue;
+				found.push({
+					location: `${name} brand.${side}`,
+					name,
+					token: ref["token"],
+					hex: ref["hex"],
+				});
+			}
+		} else if (
+			entry["disposition"] === "derive" &&
+			Array.isArray(entry["from"])
+		) {
+			for (const token of entry["from"]) {
+				found.push({
+					location: `${name} from`,
+					name,
+					token,
+					hex: undefined,
+				});
+			}
+		}
+	}
+	return found;
+}
+
+/**
+ * Pure over text, so a test can call it without a spawn. `specDoc`, `tokenMapDoc`
+ * and `tokensDoc` are optional: without a `specDoc` only the rules and the
+ * catalog are checked, and without a `tokenMapDoc` the map is not checked.
+ *
+ * @param {{ brandText: string, rulesDoc: unknown, catalogDoc: unknown, pin: string, specDoc?: unknown, tokenMapDoc?: unknown, tokensDoc?: unknown }} input
  * @returns {Array<{ code: string, location: string, message: string }>}
  */
 export function checkBrandQuotes({
@@ -204,6 +254,7 @@ export function checkBrandQuotes({
 	catalogDoc,
 	pin,
 	specDoc,
+	tokenMapDoc,
 	tokensDoc,
 }) {
 	const problems = [];
@@ -324,6 +375,34 @@ export function checkBrandQuotes({
 			}
 		}
 	}
+	if (isPlainObject(tokenMapDoc)) {
+		if (tokenMapDoc["brandPin"] !== pin) {
+			add(
+				"map-pin-mismatch",
+				"token_map.json",
+				"brandPin is not the commit in brand.pin.json",
+			);
+		}
+		for (const ref of mapBrandRefs(tokenMapDoc)) {
+			const cacheHex = resolveTokenPath(tokensDoc, String(ref.token));
+			if (cacheHex === null) {
+				add(
+					"map-token-path-missing",
+					ref.location,
+					`tokens path ${ref.token} is not a colour in tokens.json (token_map.json)`,
+				);
+			} else if (
+				ref.hex !== undefined &&
+				cacheHex.toUpperCase() !== String(ref.hex).toUpperCase()
+			) {
+				add(
+					"map-token-hex-mismatch",
+					ref.location,
+					`${ref.name}: tokens path ${ref.token} is ${cacheHex} in tokens.json but ${ref.hex} in token_map.json`,
+				);
+			}
+		}
+	}
 	return problems.sort(
 		(a, b) =>
 			compareCodeUnits(a.code, b.code) ||
@@ -368,6 +447,7 @@ export function main(argv = process.argv.slice(2)) {
 		const rulesDoc = readJson(root, RULES_PATH);
 		const catalogDoc = readJson(root, CATALOG_PATH);
 		const specDoc = readJson(root, UI_SPEC_PATH);
+		const tokenMapDoc = readJson(root, TOKEN_MAP_PATH);
 		const tokensDoc = JSON.parse(tokensText);
 		const pin = /** @type {{ commit: string }} */ (readJson(root, PIN_PATH))
 			.commit;
@@ -377,6 +457,7 @@ export function main(argv = process.argv.slice(2)) {
 			catalogDoc,
 			pin,
 			specDoc,
+			tokenMapDoc,
 			tokensDoc,
 		});
 		if (problems.length > 0) {
@@ -392,8 +473,9 @@ export function main(argv = process.argv.slice(2)) {
 		const sections = catalogBrandSources(catalogDoc).length;
 		const quotes = specBrandSources(specDoc).length;
 		const tokens = specTokenSources(specDoc).length;
+		const mapRefs = mapBrandRefs(tokenMapDoc).length;
 		console.log(
-			`✓ BRAND QUOTE CHECK PASSED — ${rules} rules, ${sections} catalog sections, ${quotes} spec quotes, ${tokens} spec tokens`,
+			`✓ BRAND QUOTE CHECK PASSED — ${rules} rules, ${sections} catalog sections, ${quotes} spec quotes, ${tokens} spec tokens, ${mapRefs} map brand refs`,
 		);
 		console.log(`pin ${pin}`);
 		return 0;

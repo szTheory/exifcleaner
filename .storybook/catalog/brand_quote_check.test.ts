@@ -6,6 +6,7 @@ import { assertDirEffect, snapshotDir } from "../../tests/helpers/dir_effect";
 import {
 	checkBrandQuotes,
 	headingRanges,
+	mapBrandRefs,
 	resolveTokenPath,
 	specBrandSources,
 	specTokenSources,
@@ -17,6 +18,7 @@ const CACHE = ".brand-cache/unpacked/exifcleaner-brand";
 const RULES = ".storybook/catalog/copy_lint_rules.json";
 const CATALOG = ".storybook/catalog/catalog.json";
 const SPEC = ".storybook/catalog/ui-spec.json";
+const TOKEN_MAP = ".storybook/catalog/token_map.json";
 const USAGE =
 	"usage: node .storybook/catalog/brand_quote_check.mjs [--cache <dir>]";
 
@@ -79,19 +81,47 @@ function plantedBrand(repo: string): string {
 }
 
 // A planted tokens.json: the nested `{ color: { dark: { tide: { $value: { hex }
-// } } } }` shape of the real file, built from the spec's `tokens` sources.
+// } } } }` shape of the real file, built from the spec's `tokens` sources and
+// from every brand path token_map.json adopts or derives from (hexes from the
+// map; a derive path no `adopt` ref or spec value gives a hex for fails here).
 function plantedTokens(repo: string): Record<string, unknown> {
-	const root: Record<string, unknown> = {};
+	const hexes = new Map<string, string>();
 	for (const source of specTokenSources(readJsonFile<unknown>(repo, SPEC))) {
+		hexes.set(String(source.path), String(source.value));
+	}
+	const refs = mapBrandRefs(readJsonFile<unknown>(repo, TOKEN_MAP));
+	for (const ref of refs) {
+		if (typeof ref.hex === "string") hexes.set(String(ref.token), ref.hex);
+	}
+	for (const ref of refs) {
+		if (!hexes.has(String(ref.token))) {
+			throw new Error(`no hex to plant for ${ref.name} ${ref.token}`);
+		}
+	}
+	const root: Record<string, unknown> = {};
+	for (const [dotted, hex] of hexes) {
 		let node = root;
-		for (const key of String(source.path).split(".")) {
+		for (const key of dotted.split(".")) {
 			const next = node[key] ?? {};
 			node[key] = next;
 			node = next as Record<string, unknown>;
 		}
-		node["$value"] = { hex: source.value };
+		node["$value"] = { hex };
 	}
 	return root;
+}
+
+// The pure check over a repo's planted files, the map only (no spec, so a map
+// defect is not mixed with the spec's own codes).
+function mapProblems(repo: string, cacheDir: string) {
+	return checkBrandQuotes({
+		brandText: fs.readFileSync(path.join(cacheDir, "BRAND.md"), "utf8"),
+		rulesDoc: { brandPin: "x", rules: [] },
+		catalogDoc: {},
+		pin: readJsonFile<{ commit: string }>(repo, "brand.pin.json").commit,
+		tokenMapDoc: readJsonFile(repo, TOKEN_MAP),
+		tokensDoc: readJsonFile(repo, path.join(CACHE, "tokens.json")),
+	}).filter((found) => found.code !== "rule-pin-mismatch");
 }
 
 function withRepo(
@@ -135,7 +165,7 @@ describe("brand_quote_check against a planted cache", () => {
 			const result = run(repo);
 			expect(result.status, result.stderr).toBe(0);
 			expect(result.stdout).toMatch(
-				/BRAND QUOTE CHECK PASSED — \d+ rules, \d+ catalog sections, \d+ spec quotes, \d+ spec tokens/,
+				/BRAND QUOTE CHECK PASSED — \d+ rules, \d+ catalog sections, \d+ spec quotes, \d+ spec tokens, [1-9]\d* map brand refs/,
 			);
 			assertDirEffect(before, snapshotDir(repo), {});
 		});
@@ -348,6 +378,88 @@ describe("brand_quote_check against a planted cache", () => {
 				"spec-token-path-missing",
 			]);
 		});
+	});
+
+	test("shown red: a tampered map brand hex", () => {
+		withRepo((repo, cacheDir) => {
+			rewrite(repo, path.join(CACHE, "tokens.json"), (doc) => {
+				doc.color.secondary.pewter.$value.hex = "#000000";
+			});
+			const before = snapshotDir(repo);
+			const result = run(repo);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("BRAND QUOTE CHECK FAILED");
+			expect(result.stderr).toContain("--ec-color-text-secondary");
+			expect(result.stderr).toContain("color.secondary.pewter");
+			expect(result.stderr).toContain("#000000");
+			assertDirEffect(before, snapshotDir(repo), {});
+			// The map alone: exactly one problem, with its own code.
+			expect(mapProblems(repo, cacheDir).map((found) => found.code)).toEqual([
+				"map-token-hex-mismatch",
+			]);
+		});
+	});
+
+	test("shown red: a missing map brand path", () => {
+		withRepo((repo, cacheDir) => {
+			rewrite(repo, path.join(CACHE, "tokens.json"), (doc) => {
+				delete doc.color.dark.tide;
+			});
+			const before = snapshotDir(repo);
+			const result = run(repo);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("--ec-color-surface brand.dark");
+			expect(result.stderr).toContain("color.dark.tide");
+			expect(result.stderr).toContain("is not a colour in tokens.json");
+			assertDirEffect(before, snapshotDir(repo), {});
+			// The adopt ref and the derive source that name the path, each its own entry.
+			const found = mapProblems(repo, cacheDir);
+			expect(found.map((problem) => problem.code)).toEqual([
+				"map-token-path-missing",
+				"map-token-path-missing",
+			]);
+			expect(found.map((problem) => problem.location)).toEqual([
+				"--ec-color-error-bg from",
+				"--ec-color-surface brand.dark",
+			]);
+		});
+	});
+
+	test("shown red: map brandPin must equal brand.pin.json", () => {
+		withRepo((repo, cacheDir) => {
+			rewrite(repo, TOKEN_MAP, (doc) => {
+				doc.brandPin = "0".repeat(40);
+			});
+			const before = snapshotDir(repo);
+			const result = run(repo);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("token_map.json");
+			expect(result.stderr).toContain("brandPin is not the commit");
+			assertDirEffect(before, snapshotDir(repo), {});
+			expect(mapProblems(repo, cacheDir).map((found) => found.code)).toEqual([
+				"map-pin-mismatch",
+			]);
+		});
+	});
+
+	test("mapBrandRefs lists every adopt ref and derive source, and skips malformed entries", () => {
+		const refs = mapBrandRefs(
+			JSON.parse(fs.readFileSync(path.join(repoRoot, TOKEN_MAP), "utf8")),
+		);
+		// Four adopt entries with a light and a dark ref, and one derive with two sources.
+		expect(refs).toHaveLength(10);
+		expect(refs.filter((ref) => ref.hex === undefined)).toHaveLength(2);
+		expect(mapBrandRefs(null)).toEqual([]);
+		expect(mapBrandRefs({ entries: "x" })).toEqual([]);
+		expect(
+			mapBrandRefs({
+				entries: [
+					7,
+					{ name: "--a", disposition: "adopt", brand: 3 },
+					{ name: "--b", disposition: "derive", from: "color.x" },
+				],
+			}),
+		).toEqual([]);
 	});
 
 	test("shown red: a prototype path never resolves", () => {

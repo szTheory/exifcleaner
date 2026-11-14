@@ -20,12 +20,20 @@ export function specTokenSources(
 	specDoc: unknown,
 ): Array<{ location: string; path: unknown; value: unknown }>;
 
+export function mapBrandRefs(tokenMapDoc: unknown): Array<{
+	location: string;
+	name: string;
+	token: unknown;
+	hex: unknown;
+}>;
+
 export function checkBrandQuotes(input: {
 	brandText: string;
 	rulesDoc: unknown;
 	catalogDoc: unknown;
 	pin: string;
 	specDoc?: unknown;
+	tokenMapDoc?: unknown;
 	tokensDoc?: unknown;
 }): Array<{ code: string; location: string; message: string }>;
 
