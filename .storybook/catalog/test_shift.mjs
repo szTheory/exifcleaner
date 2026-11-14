@@ -18,8 +18,10 @@
 // storybook-node tests and by catalog.mjs. `checkTestShift` is pure: the ledger and the spec
 // texts come in as parameters, structural problems return early so one planted defect yields
 // one code, and lengths are UTF-16 code units.
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import ts from "typescript";
+import { readCsf } from "storybook/internal/csf-tools";
 import {
 	compareCodeUnits,
 	isPlainObject,
@@ -29,6 +31,8 @@ import {
 	sortProblems,
 	closedKeys,
 } from "./closed.mjs";
+import { UNTITLED_SENTINEL } from "./story_index.mjs";
+import { COVERS, KEPT_REASONS } from "./vocab.mjs";
 
 export const TEST_SHIFT_PATH = ".storybook/catalog/test-shift.json";
 export const TEST_SHIFT_MD_PATH = ".storybook/catalog/TEST-SHIFT.md";
@@ -46,21 +50,35 @@ export const LEDGER_SPECS = Object.freeze([
 // Every problem code this module can raise, sorted by code unit. One mutant per code lives in
 // test_shift.test.ts, and a meta-test pins the two lists together.
 export const TEST_SHIFT_CODES = Object.freeze([
+	"bad-baseline",
+	"bad-covers",
+	"bad-reason",
+	"bad-shape",
 	"bad-type",
+	"baseline-drift",
+	"baseline-missing",
+	"baseline-not-ancestor",
 	"duplicate-title",
 	"dynamic-title",
+	"evidence-missing",
 	"kept-drift",
 	"missing-field",
 	"not-deleted",
 	"not-object",
 	"schema-version",
 	"stale",
+	"story-missing",
+	"subject-mismatch",
 	"unknown-field",
 	"unledgered",
 ]);
 
 const MODIFIERS = ["skip", "fixme", "only"];
 const HOOKS = ["beforeEach", "afterEach", "beforeAll", "afterAll"];
+// A note is capped so the ledger cannot become prose.
+const NOTE_LIMIT = 160;
+const SHA_PATTERN = /^[0-9a-f]{40}$/;
+const NAME_PATTERN = /^[A-Za-z_$][\w$]*$/;
 
 /**
  * @param {ts.Expression} expression
@@ -235,14 +253,6 @@ export function e2eAssertions({ text, file }) {
 	return { tests, dynamic, hookExpects };
 }
 
-/**
- * @param {unknown} value
- * @returns {value is string}
- */
-function nonEmptyString(value) {
-	return typeof value === "string" && value !== "";
-}
-
 // Structure first and values second, returning early so one planted defect gives one code.
 /**
  * @param {unknown} doc
@@ -261,11 +271,13 @@ function shapeProblems(doc) {
 	if (doc["schemaVersion"] !== 1) {
 		found.push(problem("schema-version", "schemaVersion must be 1"));
 	}
-	if (
-		Object.hasOwn(doc, "baselineCommit") &&
-		typeof doc["baselineCommit"] !== "string"
-	) {
-		found.push(problem("bad-type", "baselineCommit must be a string"));
+	if (Object.hasOwn(doc, "baselineCommit")) {
+		const sha = doc["baselineCommit"];
+		if (typeof sha !== "string") {
+			found.push(problem("bad-type", "baselineCommit must be a string"));
+		} else if (!SHA_PATTERN.test(sha)) {
+			found.push(baselineShapeProblem());
+		}
 	}
 	const specs = doc["specs"];
 	if (Object.hasOwn(doc, "specs")) {
@@ -281,6 +293,35 @@ function shapeProblems(doc) {
 		}
 	}
 	return found;
+}
+
+function baselineShapeProblem() {
+	return problem(
+		"bad-baseline",
+		"baselineCommit must be a full 40-hex commit sha, so it can never be read as a git option",
+	);
+}
+
+/**
+ * @param {string} where
+ * @param {Record<string, unknown>} object
+ * @param {string} key
+ */
+function noteProblems(where, object, key) {
+	if (!Object.hasOwn(object, key)) return [];
+	const note = object[key];
+	if (typeof note !== "string") {
+		return [problem("bad-type", `${where} ${key} must be a string`)];
+	}
+	if (note === "" || note.length > NOTE_LIMIT) {
+		return [
+			problem(
+				"bad-shape",
+				`${where} ${key} must be 1 to ${NOTE_LIMIT} code units`,
+			),
+		];
+	}
+	return [];
 }
 
 /**
@@ -306,24 +347,65 @@ function specShapeProblems(spec, entries) {
 				where,
 			),
 		);
-		if (Object.hasOwn(entry, "title") && typeof entry["title"] !== "string") {
-			found.push(problem("bad-type", `${where} title must be a string`));
+		if (Object.hasOwn(entry, "title")) {
+			if (typeof entry["title"] !== "string") {
+				found.push(problem("bad-type", `${where} title must be a string`));
+			} else if (entry["title"] === "") {
+				found.push(problem("bad-shape", `${where} title must not be empty`));
+			}
+		}
+		found.push(...noteProblems(where, entry, "note"));
+		if (
+			Object.hasOwn(entry, "addedAfterBaseline") &&
+			typeof entry["addedAfterBaseline"] !== "boolean"
+		) {
+			found.push(
+				problem("bad-type", `${where} addedAfterBaseline must be a boolean`),
+			);
 		}
 		const items = entry["items"];
-		if (Object.hasOwn(entry, "items")) {
-			if (!Array.isArray(items)) {
-				found.push(problem("bad-type", `${where} items must be an array`));
-			} else {
-				items.forEach((item, at) => {
-					found.push(...itemShapeProblems(`${where} item ${at + 1}`, item));
-				});
-			}
+		if (!Object.hasOwn(entry, "items")) return;
+		if (!Array.isArray(items)) {
+			found.push(problem("bad-type", `${where} items must be an array`));
+			return;
+		}
+		if (items.length === 0) {
+			found.push(problem("bad-shape", `${where} has zero items`));
+			return;
+		}
+		const itemProblems = items.flatMap((item, at) =>
+			itemShapeProblems(`${where} item ${at + 1}`, item),
+		);
+		found.push(...itemProblems);
+		if (itemProblems.length > 0) return;
+		if (items.some((item, at) => item["n"] !== at + 1)) {
+			found.push(
+				problem(
+					"bad-shape",
+					`${where} item n values must run 1 to ${items.length}`,
+				),
+			);
+		}
+		if (
+			entry["addedAfterBaseline"] === true &&
+			items.some((item) => item["verdict"] === "deleted")
+		) {
+			found.push(
+				problem(
+					"bad-shape",
+					`${where} is marked addedAfterBaseline, so it may hold kept items only`,
+				),
+			);
 		}
 	});
 	return found;
 }
 
 /**
+ * Required keys differ by verdict. A deleted item needs a story and forbids a reason, a kept
+ * item needs a reason from the closed list. Those cases are mapped before the closed key check
+ * so one planted defect gives one code.
+ *
  * @param {string} where
  * @param {unknown} item
  */
@@ -331,35 +413,103 @@ function itemShapeProblems(where, item) {
 	if (!isPlainObject(item)) {
 		return [problem("bad-type", `${where} must be an object`)];
 	}
-	const found = closedKeys(
+	const verdict = item["verdict"];
+	if (!Object.hasOwn(item, "verdict")) {
+		return [problem("missing-field", `${where} is missing verdict`)];
+	}
+	if (verdict !== "kept" && verdict !== "deleted") {
+		return [problem("bad-type", `${where} verdict must be kept or deleted`)];
+	}
+	if (verdict === "deleted") {
+		if (!Object.hasOwn(item, "story") || Object.hasOwn(item, "reason")) {
+			return [
+				problem(
+					"bad-shape",
+					`${where} a deleted item needs a story and forbids a reason`,
+				),
+			];
+		}
+		const keys = closedKeys(
+			item,
+			["n", "code", "verdict", "story", "subject", "covers", "evidence"],
+			["note"],
+			where,
+		);
+		if (keys.length > 0) return keys;
+		const found = [];
+		for (const key of ["code", "story", "subject", "evidence"]) {
+			found.push(...stringFieldProblems(where, item, key));
+		}
+		const covers = item["covers"];
+		if (typeof covers !== "string") {
+			found.push(problem("bad-type", `${where} covers must be a string`));
+		} else if (!COVERS.includes(covers)) {
+			found.push(
+				problem(
+					"bad-covers",
+					`${where} covers "${covers}" is not in the vocabulary`,
+				),
+			);
+		}
+		found.push(...noteProblems(where, item, "note"));
+		return found;
+	}
+	const reason = item["reason"];
+	if (typeof reason !== "string" || !KEPT_REASONS.includes(reason)) {
+		return [
+			problem(
+				"bad-reason",
+				`${where} a kept item needs a reason from ${KEPT_REASONS.join(", ")}`,
+			),
+		];
+	}
+	const keys = closedKeys(
 		item,
-		["n", "code", "verdict"],
-		["reason", "note", "story", "subject", "covers", "evidence"],
+		["n", "code", "verdict", "reason"],
+		["note"],
 		where,
 	);
-	if (
-		Object.hasOwn(item, "verdict") &&
-		item["verdict"] !== "kept" &&
-		item["verdict"] !== "deleted"
-	) {
-		found.push(problem("bad-type", `${where} verdict must be kept or deleted`));
+	if (keys.length > 0) return keys;
+	return [
+		...stringFieldProblems(where, item, "code"),
+		...noteProblems(where, item, "note"),
+	];
+}
+
+/**
+ * @param {string} where
+ * @param {Record<string, unknown>} object
+ * @param {string} key
+ */
+function stringFieldProblems(where, object, key) {
+	const value = object[key];
+	if (typeof value !== "string") {
+		return [problem("bad-type", `${where} ${key} must be a string`)];
 	}
-	if (Object.hasOwn(item, "code") && typeof item["code"] !== "string") {
-		found.push(problem("bad-type", `${where} code must be a string`));
-	}
-	return found;
+	return value === ""
+		? [problem("bad-shape", `${where} ${key} must not be empty`)]
+		: [];
 }
 
 /**
  * Every live test has an entry, a kept item's code multiset equals the live expect multiset,
- * an entry whose test is gone keeps nothing, an all-deleted entry whose test remains is red.
+ * an entry whose test is gone keeps nothing, an all-deleted entry whose test remains is red,
+ * and every deleted item names a story that exists, whose component is the item's subject
+ * and whose export scope holds the item's evidence literal.
  *
  * @param {object} inputs
  * @param {unknown} inputs.doc the parsed ledger, unvalidated
  * @param {Readonly<Record<string, string>>} inputs.specTexts spec stem to file text
+ * @param {ReadonlyArray<{ id: string, component: string | null }>} [inputs.stories]
+ * @param {ReadonlyMap<string, { scope: string }>} [inputs.scopes] story id to its evidence scope
  * @returns {Array<{ code: string, message: string, id?: string | undefined }>}
  */
-export function checkTestShift({ doc, specTexts }) {
+export function checkTestShift({
+	doc,
+	specTexts,
+	stories = [],
+	scopes = new Map(),
+}) {
 	const structural = shapeProblems(doc);
 	if (structural.length > 0) return sortProblems(structural);
 	const specs = /** @type {Record<string, any[]>} */ (
@@ -368,8 +518,70 @@ export function checkTestShift({ doc, specTexts }) {
 	const found = [];
 	for (const spec of LEDGER_SPECS) {
 		found.push(...checkSpec(spec, specs[spec] ?? [], specTexts[spec] ?? ""));
+		found.push(...storyProblems(spec, specs[spec] ?? [], stories, scopes));
 	}
 	return sortProblems(found);
+}
+
+/**
+ * @param {string} spec
+ * @param {any[]} entries
+ * @param {ReadonlyArray<{ id: string, component: string | null }>} stories
+ * @param {ReadonlyMap<string, { scope: string }>} scopes
+ */
+function storyProblems(spec, entries, stories, scopes) {
+	const byId = new Map(stories.map((story) => [story.id, story]));
+	const found = [];
+	for (const entry of entries) {
+		for (const item of entry.items) {
+			if (item.verdict !== "deleted") continue;
+			const id = `${spec}/${entry.title}`;
+			const where = `${spec}: "${entry.title}" item ${item.n}`;
+			const record = byId.get(item.story);
+			if (record === undefined) {
+				found.push(
+					problem(
+						"story-missing",
+						`${where} names the story ${item.story}, which does not exist`,
+						{ id },
+					),
+				);
+				continue;
+			}
+			if (record.component !== item.subject) {
+				found.push(
+					problem(
+						"subject-mismatch",
+						`${where} has subject ${item.subject} but ${item.story} is a story of ${record.component}`,
+						{ id },
+					),
+				);
+				continue;
+			}
+			const scope = scopes.get(item.story)?.scope ?? "";
+			if (!scope.includes(item.evidence)) {
+				found.push(
+					problem(
+						"evidence-missing",
+						`${where}: the evidence "${item.evidence}" is not in the source of ${item.story}`,
+						{ id },
+					),
+				);
+			} else if (
+				item.covers === "focus-order" &&
+				!scope.includes("toHaveFocus")
+			) {
+				found.push(
+					problem(
+						"evidence-missing",
+						`${where}: a focus-order item needs toHaveFocus in the source of ${item.story}`,
+						{ id },
+					),
+				);
+			}
+		}
+	}
+	return found;
 }
 
 /**
@@ -562,4 +774,232 @@ export function renderTestShift(doc) {
 		"- The dark-mode test \"renders all components correctly in dark mode\" scans the whole document for zero-opacity elements. The story side covers only the `screens-app--empty` level-1 heading's `toBeVisible`, which checks that element and its ancestor chain, plus the play's `data-theme` assertion. This is a named reduction, not equivalence.",
 	);
 	return `${lines.join("\n")}\n`;
+}
+
+// Slice by line and column: Babel's character offsets are not text offsets for a
+// tab-indented file (measured on all 189 stories at the time of writing).
+/**
+ * @param {string} code
+ * @param {string[]} lines
+ * @param {{ start: { line: number, column: number }, end: { line: number, column: number } }} loc
+ */
+function sliceOf(code, lines, loc) {
+	/** @param {number} line @param {number} column */
+	const at = (line, column) =>
+		lines
+			.slice(0, line - 1)
+			.reduce((total, text) => total + text.length + 1, 0) + column;
+	return code.slice(
+		at(loc.start.line, loc.start.column),
+		at(loc.end.line, loc.end.column),
+	);
+}
+
+/**
+ * The evidence scope of every story in one file: the story export's own source plus the
+ * same-file helper functions that export calls (one level; a helper's helpers are not
+ * followed). File-level constants are not functions, so evidence that lives only in a shared
+ * constant is cited by its identifier. Nothing is executed.
+ *
+ * @param {string} absPath
+ * @returns {Promise<Map<string, { exportName: string, own: string, scope: string }>>}
+ */
+export async function storySources(absPath) {
+	const code = fs.readFileSync(absPath, "utf8");
+	const lines = code.split("\n");
+	const csf = await readCsf(absPath, {
+		makeTitle: (/** @type {string | null | undefined} */ title) =>
+			title ?? UNTITLED_SENTINEL,
+	});
+	csf.parse();
+	/** @type {Map<string, string>} */
+	const helpers = new Map();
+	for (const statement of /** @type {any} */ (csf)._ast.program.body) {
+		const declaration =
+			statement.type === "ExportNamedDeclaration"
+				? statement.declaration
+				: statement;
+		if (declaration?.type === "FunctionDeclaration" && declaration.id) {
+			helpers.set(declaration.id.name, sliceOf(code, lines, declaration.loc));
+		} else if (declaration?.type === "VariableDeclaration") {
+			for (const declarator of declaration.declarations) {
+				const isFunction =
+					declarator.init?.type === "ArrowFunctionExpression" ||
+					declarator.init?.type === "FunctionExpression";
+				if (declarator.id?.type === "Identifier" && isFunction) {
+					helpers.set(
+						declarator.id.name,
+						sliceOf(code, lines, declaration.loc),
+					);
+				}
+			}
+		}
+	}
+	/** @type {Map<string, { exportName: string, own: string, scope: string }>} */
+	const out = new Map();
+	for (const input of csf.indexInputs) {
+		const node = csf.getStoryExport(input.exportName);
+		const own = sliceOf(code, lines, /** @type {any} */ (node).loc);
+		const called = [...helpers]
+			.filter(([name]) => NAME_PATTERN.test(name) && calls(own, name))
+			.map(([, source]) => source);
+		out.set(input.__id, {
+			exportName: input.exportName,
+			own,
+			scope: [own, ...called].join("\n"),
+		});
+	}
+	return out;
+}
+
+// Does `source` call `name(`? The name is an AST identifier checked against NAME_PATTERN,
+// with `$` escaped, never ledger data, and the pattern is linear.
+/**
+ * @param {string} source
+ * @param {string} name
+ */
+function calls(source, name) {
+	return new RegExp(`(?<![\\w$])${name.replaceAll("$", "\\$")}\\s*\\(`).test(
+		source,
+	);
+}
+
+/**
+ * @param {unknown} doc
+ * @returns {string[]}
+ */
+function deletedStoryIds(doc) {
+	/** @type {string[]} */
+	const ids = [];
+	if (!isPlainObject(doc) || !isPlainObject(doc["specs"])) return ids;
+	for (const entries of Object.values(doc["specs"])) {
+		if (!Array.isArray(entries)) continue;
+		for (const entry of entries) {
+			if (!isPlainObject(entry) || !Array.isArray(entry["items"])) continue;
+			for (const item of entry["items"]) {
+				if (
+					isPlainObject(item) &&
+					item["verdict"] === "deleted" &&
+					typeof item["story"] === "string"
+				) {
+					ids.push(item["story"]);
+				}
+			}
+		}
+	}
+	return ids;
+}
+
+/**
+ * The evidence scope of each story a deleted item names, reading each story file once and
+ * no file when the ledger names no story.
+ *
+ * @param {string} root
+ * @param {ReadonlyArray<{ id: string, file: string }>} stories
+ * @param {unknown} doc
+ * @returns {Promise<Map<string, { exportName: string, own: string, scope: string }>>}
+ */
+export async function loadStoryScopes(root, stories, doc) {
+	const wanted = new Set(deletedStoryIds(doc));
+	const files = new Set();
+	for (const story of stories) {
+		if (wanted.has(story.id)) files.add(story.file);
+	}
+	const scopes = new Map();
+	for (const file of [...files].sort(compareCodeUnits)) {
+		const resolved = resolveInRoot(root, file);
+		if (resolved === null) continue;
+		for (const [id, source] of await storySources(resolved)) {
+			scopes.set(id, source);
+		}
+	}
+	return scopes;
+}
+
+/**
+ * @param {string[]} args
+ * @param {string} cwd
+ * @returns {string}
+ */
+function gitText(args, cwd) {
+	return execFileSync("git", args, {
+		cwd,
+		encoding: "utf8",
+		maxBuffer: 64 * 1024 * 1024,
+		stdio: ["ignore", "pipe", "pipe"],
+	});
+}
+
+/**
+ * The ledger against git. `baselineCommit` must be a full sha, a commit in this clone and an
+ * ancestor of HEAD (the Storybook job checks out with fetch-depth: 0), and the (title, code)
+ * multiset the ledger holds for each spec, less entries marked addedAfterBaseline, must equal
+ * the one `git show <baselineCommit>:tests/e2e/<spec>.spec.ts` yields through e2eAssertions.
+ * The sha is validated before any git call and only the six literal spec names are read.
+ * The CLI does not call this: a temp repo has no baseline. The real-repo test does.
+ *
+ * @param {string} root
+ * @param {unknown} doc
+ * @param {{ git?: (args: string[], cwd: string) => string }} [options]
+ * @returns {Array<{ code: string, message: string }>}
+ */
+export function checkTestShiftBaseline(root, doc, options = {}) {
+	const git = options.git ?? gitText;
+	const sha = isPlainObject(doc) ? doc["baselineCommit"] : undefined;
+	if (typeof sha !== "string" || !SHA_PATTERN.test(sha)) {
+		return [baselineShapeProblem()];
+	}
+	try {
+		git(["cat-file", "-e", `${sha}^{commit}`], root);
+	} catch {
+		return [
+			problem(
+				"baseline-missing",
+				`baselineCommit ${sha.slice(0, 7)} is not in this clone; the Storybook job checks out with fetch-depth: 0`,
+			),
+		];
+	}
+	try {
+		git(["merge-base", "--is-ancestor", sha, "HEAD"], root);
+	} catch {
+		return [
+			problem(
+				"baseline-not-ancestor",
+				`baselineCommit ${sha.slice(0, 7)} is not an ancestor of HEAD`,
+			),
+		];
+	}
+	const specs = /** @type {Record<string, any[]>} */ (
+		/** @type {any} */ (doc).specs
+	);
+	const found = [];
+	for (const spec of LEDGER_SPECS) {
+		const walk = e2eAssertions({
+			text: git(["show", `${sha}:tests/e2e/${spec}.spec.ts`], root),
+			file: `${spec}.spec.ts`,
+		});
+		const baseline = walk.tests
+			.filter((test) => !test.modified)
+			.flatMap((test) => test.expects.map((code) => `${test.title}\0${code}`))
+			.sort(compareCodeUnits);
+		const ledger = (Array.isArray(specs?.[spec]) ? specs[spec] : [])
+			.filter((entry) => entry.addedAfterBaseline !== true)
+			.flatMap((entry) =>
+				entry.items.map((item) => `${entry.title}\0${item.code}`),
+			)
+			.sort(compareCodeUnits);
+		if (
+			baseline.length !== ledger.length ||
+			baseline.some((line, index) => line !== ledger[index])
+		) {
+			found.push(
+				problem(
+					"baseline-drift",
+					`${spec}: the ledger (${ledger.length} items) differs from the baseline commit (${baseline.length} expect calls)`,
+					{ id: spec },
+				),
+			);
+		}
+	}
+	return sortProblems(found);
 }

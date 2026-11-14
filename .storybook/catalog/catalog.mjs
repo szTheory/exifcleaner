@@ -49,6 +49,7 @@ import {
 import {
 	TEST_SHIFT_MD_PATH,
 	checkTestShift,
+	loadStoryScopes,
 	loadTestShiftInputs,
 	renderTestShift,
 } from "./test_shift.mjs";
@@ -200,17 +201,19 @@ function journeyProblems(root) {
 }
 
 /**
- * The test-shift ledger (Phase 75, TST-01, D-06) and what checkTestShift finds wrong with it
- * and with the six e2e specs it covers. A problem keeps its own code and its message says it
- * is a test-shift problem.
+ * The test-shift ledger (Phase 75, TST-01, D-06) and what checkTestShift finds wrong with it,
+ * with the six e2e specs it covers and with the stories its deleted items name. A problem
+ * keeps its own code and its message says it is a test-shift problem.
  *
  * @param {string} root
+ * @param {ReadonlyArray<{ id: string, file: string, component: string | null }>} stories
  */
-function testShiftProblems(root) {
+async function testShiftProblems(root, stories) {
 	const inputs = loadTestShiftInputs(root);
+	const scopes = await loadStoryScopes(root, stories, inputs.doc);
 	return {
 		doc: inputs.doc,
-		problems: checkTestShift(inputs).map((found) => ({
+		problems: checkTestShift({ ...inputs, stories, scopes }).map((found) => ({
 			code: found.code,
 			message: `test-shift: ${found.message}`,
 		})),
@@ -308,7 +311,7 @@ export async function generatedFiles(root) {
 	if (grid.model === null) {
 		throw new Error(firstProblem(grid.problems));
 	}
-	const testShift = testShiftProblems(root);
+	const testShift = await testShiftProblems(root, grid.stories);
 	if (testShift.problems.length > 0) {
 		throw new Error(firstProblem(testShift.problems));
 	}
@@ -357,7 +360,7 @@ export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 	if (grid.model === null) {
 		return { ok: false, problems: grid.problems, files: 0, notes: [] };
 	}
-	const testShift = testShiftProblems(root);
+	const testShift = await testShiftProblems(root, grid.stories);
 	if (testShift.problems.length > 0) {
 		return { ok: false, problems: testShift.problems, files: 0, notes: [] };
 	}
