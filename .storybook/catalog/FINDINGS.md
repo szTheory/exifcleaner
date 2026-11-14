@@ -51,8 +51,63 @@ A finding is a defect or gap the catalog exposed and the product does not yet fi
 | silent-failure\|ui-toast--skipped-many\|toasts-share-one-position | ui-toast--skipped-many | minor | fix-v5.2 | toast.css:4-5 fixes every .toast at bottom calc(44px + var(--ec-space-4)); DropZone.tsx:281 and FileTable.tsx:189 each render their own Toast and App.tsx:82-84 mounts FileTable inside DropZone, so a skipped-files notice and a copy notice shown together draw at the same spot (read from source, not reproduced in a story). |
 | token-gap\|settings-languagedropdown--item-hover\|hover-token-undefined | settings-languagedropdown--item-hover | minor | fix-v5.1 | language_dropdown.css:82 reads var(--ec-color-hover, rgba(0, 0, 0, 0.04)) and --ec-color-hover is defined in no stylesheet, so the hover and focused item fall back to the literal rgba in both themes (measured #dfe3e6 over the light surface and #1b1b1e over the dark one). |
 | token-gap\|ui-errorboundary--fallback\|spacing-tokens-undefined | ui-errorboundary--fallback | major | fix-v5.1 | error_boundary.css:7-28 and file_list.css:2-14 use var(--spacing-xs) to var(--spacing-xl) (7 uses) and no stylesheet or token file under src defines any --spacing-* property, so those paddings, margins and gaps resolve to nothing and the crash screen and the file list lose their spacing. |
+| token-map-gap\|file-list-filerow--copy-mode-disclosure\|line-height-token-undefined | file-list-filerow--copy-mode-disclosure | minor | fix-v5.1 | file_table.css:139 sets line-height: var(--ec-line-height-normal) on .file-table__copy-disclosure, and --ec-line-height-normal is declared in no stylesheet (tokens.css holds no --ec-line-height-* token), so the declaration is invalid at computed-value time; v5.1 declares the unitless --ec-line-height-* tokens of the UI-SPEC scale (D-09) and points the rule at one of them. |
+| token-map-gap\|ui-emptystate--copy-mode-on\|empty-state-secondary-hardcoded | ui-emptystate--copy-mode-on | minor | fix-v5.1 | empty_state.css:2 declares --empty-state-secondary as #59677b on .empty-state and empty_state.css:118 as #94949b on [data-theme="dark"] .empty-state, outside tokens.css, so the empty state's secondary text colour is two literals that no token reaches (the contrast pairs list it as a local token); v5.1 reads --ec-color-text-secondary instead (Pewter in light, Fog in dark). |
 | unrendered-outcome\|file-list-folderrow--scanning\|discovering-status-never-dispatched | file-list-folderrow--scanning | minor | fix-v5.2 | FolderRow.tsx:72-73 renders a found-count for status discovering with the folder.found string, but the status appears only in the AppContext.tsx:8 type and that case: DropZone.tsx dispatches scanning (:87), empty (:95, :116) and complete (:127), so the branch never shows and no story can show it. |
 | unrendered-outcome\|screens-app--all-done\|engine-evidence-not-shown | screens-app--all-done | minor | fix-v5.2 | RemoveMetadataResult.evidence {engine, outputMode, leakCheck} reaches the renderer (ipc_channels.ts:59-73) but use_process_files.ts:102-125 dispatches UPDATE_FILE_METADATA without it (AppContext.tsx:60-70 has no evidence field), so no row says which engine wrote the file or whether the leak check ran; the output mode itself stays visible through the copy disclosure. |
+
+## Contrast gaps
+
+Static contrast failures from tests/renderer/contrast: a foreground and backdrop token pair below 4.5:1 (text) or 3:1 (non-text and focus) in a theme. One entry per pair, backdrop and theme is in docs/evidence/known-findings.json with its measured reason; this table groups them by pair and backdrop. Severity is major. v5.1 removes them with the palette change.
+
+66 entries across 44 pairs
+
+| Pair | Themes | Story | Disposition |
+| --- | --- | --- | --- |
+| accent-text-on-bg | light | ui-statusbar--all-cleaned | fix-v5.1 |
+| accent-text-on-error-bg | dark, light | ui-statusbar--all-cleaned | fix-v5.1 |
+| accent-text-on-item-hover | dark, light | ui-statusbar--all-cleaned | fix-v5.1 |
+| accent-text-on-surface | dark, light | ui-statusbar--all-cleaned | fix-v5.1 |
+| drop-zone-border-on-gold-bg | light | ui-dropzone--drag-over | fix-v5.1 |
+| empty-state-secondary-on-item-hover | light | ui-emptystate--copy-mode-on | fix-v5.1 |
+| error-text-on-bg | dark | ui-errorboundary--fallback | fix-v5.1 |
+| error-text-on-error-bg | dark, light | ui-errorboundary--fallback | fix-v5.1 |
+| error-text-on-item-hover | dark, light | ui-errorboundary--fallback | fix-v5.1 |
+| error-text-on-surface | dark, light | ui-errorboundary--fallback | fix-v5.1 |
+| muted-on-bg | dark, light | file-list-folderrow--complete-collapsed | fix-v5.1 |
+| muted-on-error-bg | dark, light | file-list-folderrow--complete-collapsed | fix-v5.1 |
+| muted-on-item-hover | dark, light | file-list-folderrow--complete-collapsed | fix-v5.1 |
+| muted-on-surface | dark, light | file-list-folderrow--complete-collapsed | fix-v5.1 |
+| neutral-pill-on-neutral-pill-over-bg | dark, light | ui-typepill--neutral | fix-v5.1 |
+| neutral-pill-on-neutral-pill-over-surface | dark, light | ui-typepill--neutral | fix-v5.1 |
+| pill-dng-on-pill-dng-bg-over-bg | light | ui-typepill--raw | fix-v5.1 |
+| pill-dng-on-pill-dng-bg-over-surface | light | ui-typepill--raw | fix-v5.1 |
+| pill-heic-on-pill-heic-bg-over-bg | light | ui-typepill--heic | fix-v5.1 |
+| pill-heic-on-pill-heic-bg-over-surface | light | ui-typepill--heic | fix-v5.1 |
+| pill-jpg-on-pill-jpg-bg-over-bg | light | ui-typepill--jpeg | fix-v5.1 |
+| pill-jpg-on-pill-jpg-bg-over-surface | light | ui-typepill--jpeg | fix-v5.1 |
+| pill-mov-on-pill-mov-bg-over-bg | light | ui-typepill--media | fix-v5.1 |
+| pill-mov-on-pill-mov-bg-over-surface | light | ui-typepill--media | fix-v5.1 |
+| pill-pdf-on-pill-pdf-bg-over-bg | dark, light | ui-typepill--pdf | fix-v5.1 |
+| pill-pdf-on-pill-pdf-bg-over-surface | dark, light | ui-typepill--pdf | fix-v5.1 |
+| pill-png-on-pill-png-bg-over-bg | light | ui-typepill--png | fix-v5.1 |
+| pill-png-on-pill-png-bg-over-surface | light | ui-typepill--png | fix-v5.1 |
+| selection-on-accent | dark, light | file-list-filetable--mixed-statuses | fix-v5.1 |
+| spinner-on-bg | light | ui-statusicon--processing | fix-v5.1 |
+| success-icon-on-bg | light | ui-statusicon--complete | fix-v5.1 |
+| success-icon-on-error-bg | light | ui-statusicon--complete | fix-v5.1 |
+| success-icon-on-item-hover | light | ui-statusicon--complete | fix-v5.1 |
+| success-icon-on-surface | light | ui-statusicon--complete | fix-v5.1 |
+| success-icon-preserved-on-preserved-bg | light | file-list-metadataexpansion--mixed | fix-v5.1 |
+| text-secondary-on-bg | light | file-list-filetable--mixed-statuses | fix-v5.1 |
+| text-secondary-on-error-bg | dark, light | file-list-filetable--mixed-statuses | fix-v5.1 |
+| text-secondary-on-item-hover | dark, light | file-list-filetable--mixed-statuses | fix-v5.1 |
+| text-secondary-on-surface | dark, light | file-list-filetable--mixed-statuses | fix-v5.1 |
+| text-secondary-preserved-on-preserved-bg | dark, light | file-list-metadataexpansion--mixed | fix-v5.1 |
+| text-secondary-removed-on-removed-bg | dark, light | file-list-metadataexpansion--mixed | fix-v5.1 |
+| toggle-off-track-on-bg | dark, light | settings-toggleswitch--off | fix-v5.1 |
+| toggle-off-track-on-surface | dark, light | settings-toggleswitch--off | fix-v5.1 |
+| toggle-thumb-off-on-ec-toggle-off-track | light | settings-toggleswitch--off | fix-v5.1 |
 
 ## Rejected (verdict log)
 

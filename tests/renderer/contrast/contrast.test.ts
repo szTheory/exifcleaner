@@ -48,7 +48,15 @@ const PAIRS = readJson<ContrastPairsDocument>(
 );
 const BASELINE = readJson<{
 	kinds: Record<string, { sealed: boolean }>;
-	entries: Array<{ fingerprint: string; kind: string; reason: string }>;
+	entries: Array<{
+		fingerprint: string;
+		kind: string;
+		story: string;
+		rule: string;
+		reason: string;
+		disposition: string;
+		severity?: string;
+	}>;
 }>("docs/evidence/known-findings.json");
 
 function colour(text: string) {
@@ -289,7 +297,12 @@ const SHEETS: Record<string, string> = Object.fromEntries(
 		.map((name) => [name, readText(`${STYLES_DIR}/${name}`)]),
 );
 const TOKEN_MAP = readJson<{
-	entries: Array<{ name: string; disposition: string; finding?: string }>;
+	entries: Array<{
+		name: string;
+		disposition: string;
+		finding?: string;
+		reason?: string;
+	}>;
 }>(".storybook/catalog/token_map.json");
 const UI_SPEC = readJson<unknown>(".storybook/catalog/ui-spec.json");
 const PIN = readJson<{ commit: string }>("brand.pin.json").commit;
@@ -799,5 +812,154 @@ describe("the BRAND.md Color: combinations ratios (G3)", () => {
 		if (first === undefined) throw new Error("no ratio row");
 		first.ratio = "14.70";
 		expect(codes(brandRatioProblems(doc))).toEqual(["brand-ratio-mismatch"]);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// The sealed baseline (D-24, D-25): the failing set and the `contrast-gap` entries
+// of docs/evidence/known-findings.json are the same set, both ways. A failure with
+// no entry is a new failure; an entry whose pair now passes is the shrink and must
+// be removed. v5.1 removes these entries together with the axe symptom entries.
+// ---------------------------------------------------------------------------
+
+describe("the real baseline holds exactly today's contrast failures", () => {
+	const results = evaluate(PAIRS, TOKENS_CSS);
+	const failing = failingFingerprints(results);
+	const entries = BASELINE.entries.filter((e) => e.kind === "contrast-gap");
+
+	test("a new failure is red and a fixed pair still listed is red", () => {
+		const { newFailures, fixedStillListed } = compareBaseline(
+			failing,
+			BASELINE.entries,
+		);
+		expect(
+			newFailures,
+			`a failing pair has no contrast-gap entry; the kind is sealed, so fix the pair instead of listing it: ${newFailures.join(", ")}`,
+		).toEqual([]);
+		expect(
+			fixedStillListed,
+			`these contrast-gap entries now pass; remove the entry: ${fixedStillListed.join(", ")}`,
+		).toEqual([]);
+		expect(entries).toHaveLength(failing.size);
+	});
+
+	test("shown red: dropping an entry makes its failure new, and a stale entry is fixed-still-listed", () => {
+		const [dropped] = entries;
+		if (dropped === undefined) throw new Error("no contrast-gap entry");
+		const without = BASELINE.entries.filter(
+			(e) => e.fingerprint !== dropped.fingerprint,
+		);
+		expect(compareBaseline(failing, without).newFailures).toEqual([
+			dropped.fingerprint,
+		]);
+		const stale = [
+			...BASELINE.entries,
+			{ ...dropped, fingerprint: `${dropped.fingerprint}-gone` },
+		];
+		expect(compareBaseline(failing, stale).fixedStillListed).toEqual([
+			`${dropped.fingerprint}-gone`,
+		]);
+	});
+
+	test("every entry quotes the measured ratio and theme, its pair's story, major and fix-v5.1", () => {
+		const byFingerprint = new Map(results.map((r) => [r.fingerprint, r]));
+		expect(entries.length).toBeGreaterThanOrEqual(51);
+		for (const entry of entries) {
+			const result = byFingerprint.get(entry.fingerprint);
+			expect(result, entry.fingerprint).toBeDefined();
+			if (result === undefined) continue;
+			expect(entry.reason, entry.fingerprint).toContain(
+				`measures ${formatRatio(result.ratio)}:1`,
+			);
+			expect(entry.reason, entry.fingerprint).toContain(
+				`in the ${result.theme} theme`,
+			);
+			expect(entry.reason, entry.fingerprint).toContain(result.fgHex);
+			expect(entry.reason, entry.fingerprint).toContain(result.bgHex);
+			expect(entry.story).toBe(result.story);
+			expect(entry.rule).toBe(result.rule);
+			expect(entry.severity).toBe("major");
+			expect(entry.disposition).toBe("fix-v5.1");
+			expect(entry.fingerprint).toBe(
+				`contrast-gap|${entry.story}|${entry.rule}`,
+			);
+			expect(entry.rule.startsWith("a11y")).toBe(false);
+		}
+	});
+
+	test("the entries are the evaluator's own reasons, so a reason cannot go stale", () => {
+		const byFingerprint = new Map(results.map((r) => [r.fingerprint, r]));
+		for (const entry of entries) {
+			const result = byFingerprint.get(entry.fingerprint);
+			if (result === undefined) throw new Error(entry.fingerprint);
+			expect(entry).toEqual(contrastGapEntry(result));
+		}
+	});
+
+	test("the failing set is split as recorded: light, dark, text, non-text and no focus failure", () => {
+		const failed = results.filter((r) => !r.pass);
+		expect(failed.filter((r) => r.role === "focus")).toEqual([]);
+		expect(failed.filter((r) => r.theme === "light").length).toBeGreaterThan(0);
+		expect(failed.filter((r) => r.theme === "dark").length).toBeGreaterThan(0);
+	});
+
+	test("no kind of the baseline is an axe kind unless it is a11y or a11y-pN", () => {
+		for (const kind of Object.keys(BASELINE.kinds)) {
+			if (kind.startsWith("a11y")) {
+				expect(kind, kind).toMatch(/^a11y(-p\d+)?$/);
+			}
+		}
+		expect(BASELINE.kinds["contrast-gap"]).toEqual({ sealed: true });
+		expect(BASELINE.kinds["token-map-gap"]).toEqual({ sealed: true });
+		const kinds = Object.keys(BASELINE.kinds);
+		expect(kinds).toEqual([...kinds].sort());
+	});
+
+	test("disposition coherence: no exempt token is in a failing pair and every keep-platform token that is says what v5.1 changes", () => {
+		const exempt = new Set((PAIRS.exempt ?? []).map((entry) => entry.name));
+		const overlay = new Map(PAIRS.overlays.map((o) => [o.id, o.layers]));
+		const tokensOf = (result: (typeof results)[number]) =>
+			[result.fgRef, result.bgRef, ...(overlay.get(result.bgRef) ?? [])].filter(
+				(ref) => ref.startsWith("--"),
+			);
+		const inFailing = new Set(
+			results.filter((r) => !r.pass).flatMap((r) => tokensOf(r)),
+		);
+		for (const name of exempt) {
+			expect(
+				inFailing.has(name),
+				`${name} is exempt and in a failing pair`,
+			).toBe(false);
+		}
+		const platform = [...inFailing]
+			.filter((name) => {
+				const entry = TOKEN_MAP.entries.find((e) => e.name === name);
+				return entry?.disposition === "keep-platform";
+			})
+			.sort();
+		expect(platform).toEqual([
+			"--ec-color-accent",
+			"--ec-color-error",
+			"--ec-toggle-off-track",
+		]);
+		for (const name of platform) {
+			const entry = TOKEN_MAP.entries.find((e) => e.name === name);
+			expect(entry?.reason, name).toContain("v5.1");
+		}
+	});
+
+	test("the two token-map-gap entries are sealed and each is referenced by exactly one map entry", () => {
+		const gaps = BASELINE.entries.filter((e) => e.kind === "token-map-gap");
+		expect(gaps.map((e) => e.fingerprint).sort()).toEqual([
+			"token-map-gap|file-list-filerow--copy-mode-disclosure|line-height-token-undefined",
+			"token-map-gap|ui-emptystate--copy-mode-on|empty-state-secondary-hardcoded",
+		]);
+		for (const gap of gaps) {
+			expect(gap.severity).toBe("minor");
+			expect(gap.disposition).toBe("fix-v5.1");
+			expect(
+				TOKEN_MAP.entries.filter((e) => e.finding === gap.fingerprint),
+			).toHaveLength(1);
+		}
 	});
 });

@@ -282,7 +282,8 @@
 		{
 			"name": "--ec-line-height-normal",
 			"disposition": "retire",
-			"reason": "Declared in no stylesheet: file_table.css:139 reads var(--ec-line-height-normal), so the line-height declaration is invalid at computed-value time; v5.1 replaces it with unitless --ec-line-height-* tokens (D-09)."
+			"reason": "Declared in no stylesheet: file_table.css:139 reads var(--ec-line-height-normal), so the line-height declaration is invalid at computed-value time; v5.1 replaces it with unitless --ec-line-height-* tokens (D-09).",
+			"finding": "token-map-gap|file-list-filerow--copy-mode-disclosure|line-height-token-undefined"
 		},
 		{
 			"name": "--ec-pill-dng-bg",
@@ -426,7 +427,8 @@
 		{
 			"name": "--empty-state-secondary",
 			"disposition": "retire",
-			"reason": "Declared locally outside tokens.css: empty_state.css:2 sets #59677b (light) and empty_state.css:118 sets #94949b (dark), and it is read at empty_state.css:25, empty_state.css:46 and empty_state.css:110; v5.1 reads --ec-color-text-secondary (Pewter in light, Fog in dark) instead."
+			"reason": "Declared locally outside tokens.css: empty_state.css:2 sets #59677b (light) and empty_state.css:118 sets #94949b (dark), and it is read at empty_state.css:25, empty_state.css:46 and empty_state.css:110; v5.1 reads --ec-color-text-secondary (Pewter in light, Fog in dark) instead.",
+			"finding": "token-map-gap|ui-emptystate--copy-mode-on|empty-state-secondary-hardcoded"
 		},
 		{
 			"name": "--spacing-lg",

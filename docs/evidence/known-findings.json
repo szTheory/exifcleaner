@@ -13,6 +13,9 @@
 		"access-gap": {
 			"sealed": true
 		},
+		"contrast-gap": {
+			"sealed": true
+		},
 		"dead-end": {
 			"sealed": true
 		},
@@ -26,6 +29,9 @@
 			"sealed": true
 		},
 		"token-gap": {
+			"sealed": true
+		},
+		"token-map-gap": {
 			"sealed": true
 		},
 		"unrendered-outcome": {
@@ -2226,6 +2232,600 @@
 			"severity": "major"
 		},
 		{
+			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|selection-on-accent-dark",
+			"kind": "contrast-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "selection-on-accent-dark",
+			"reason": "Selector ::selection: the literal white #ffffff on --ec-color-accent #007aff measures 4.01:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|selection-on-accent-light",
+			"kind": "contrast-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "selection-on-accent-light",
+			"reason": "Selector ::selection: the literal white #ffffff on --ec-color-accent #007aff measures 4.01:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-bg-light",
+			"kind": "contrast-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "text-secondary-on-bg-light",
+			"reason": "Selector .file-table__header: --ec-color-text-secondary #66758c on --ec-color-bg #f5f6f8 measures 4.32:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-error-bg-dark",
+			"kind": "contrast-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "text-secondary-on-error-bg-dark",
+			"reason": "Selector .file-table__header: --ec-color-text-secondary #818188 on --ec-color-error-bg #3d1a16 measures 3.99:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-error-bg-light",
+			"kind": "contrast-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "text-secondary-on-error-bg-light",
+			"reason": "Selector .file-table__header: --ec-color-text-secondary #66758c on --ec-color-error-bg #fff0f0 measures 4.22:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-item-hover-dark",
+			"kind": "contrast-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "text-secondary-on-item-hover-dark",
+			"reason": "Selector .file-table__header: --ec-color-text-secondary #818188 on overlay item-hover #1b1b1e measures 4.44:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-item-hover-light",
+			"kind": "contrast-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "text-secondary-on-item-hover-light",
+			"reason": "Selector .file-table__header: --ec-color-text-secondary #66758c on overlay item-hover #dfe3e6 measures 3.62:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-surface-dark",
+			"kind": "contrast-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "text-secondary-on-surface-dark",
+			"reason": "Selector .file-table__header: --ec-color-text-secondary #818188 on --ec-color-surface #1c1c1f measures 4.39:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-surface-light",
+			"kind": "contrast-gap",
+			"story": "file-list-filetable--mixed-statuses",
+			"rule": "text-secondary-on-surface-light",
+			"reason": "Selector .file-table__header: --ec-color-text-secondary #66758c on --ec-color-surface #e8ecf0 measures 3.94:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-bg-dark",
+			"kind": "contrast-gap",
+			"story": "file-list-folderrow--complete-collapsed",
+			"rule": "muted-on-bg-dark",
+			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #636369 on --ec-color-bg #141416 measures 3.08:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-bg-light",
+			"kind": "contrast-gap",
+			"story": "file-list-folderrow--complete-collapsed",
+			"rule": "muted-on-bg-light",
+			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #9da7b6 on --ec-color-bg #f5f6f8 measures 2.24:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-error-bg-dark",
+			"kind": "contrast-gap",
+			"story": "file-list-folderrow--complete-collapsed",
+			"rule": "muted-on-error-bg-dark",
+			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #636369 on --ec-color-error-bg #3d1a16 measures 2.59:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-error-bg-light",
+			"kind": "contrast-gap",
+			"story": "file-list-folderrow--complete-collapsed",
+			"rule": "muted-on-error-bg-light",
+			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #9da7b6 on --ec-color-error-bg #fff0f0 measures 2.19:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-item-hover-dark",
+			"kind": "contrast-gap",
+			"story": "file-list-folderrow--complete-collapsed",
+			"rule": "muted-on-item-hover-dark",
+			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #636369 on overlay item-hover #1b1b1e measures 2.87:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-item-hover-light",
+			"kind": "contrast-gap",
+			"story": "file-list-folderrow--complete-collapsed",
+			"rule": "muted-on-item-hover-light",
+			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #9da7b6 on overlay item-hover #dfe3e6 measures 1.88:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-surface-dark",
+			"kind": "contrast-gap",
+			"story": "file-list-folderrow--complete-collapsed",
+			"rule": "muted-on-surface-dark",
+			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #636369 on --ec-color-surface #1c1c1f measures 2.84:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-surface-light",
+			"kind": "contrast-gap",
+			"story": "file-list-folderrow--complete-collapsed",
+			"rule": "muted-on-surface-light",
+			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #9da7b6 on --ec-color-surface #e8ecf0 measures 2.04:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-metadataexpansion--mixed|success-icon-preserved-on-preserved-bg-light",
+			"kind": "contrast-gap",
+			"story": "file-list-metadataexpansion--mixed",
+			"rule": "success-icon-preserved-on-preserved-bg-light",
+			"reason": "Selector .metadata-field--preserved .metadata-field__icon: --ec-color-success #34c759 on overlay preserved-bg #dae9e4 measures 1.77:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-metadataexpansion--mixed|text-secondary-preserved-on-preserved-bg-dark",
+			"kind": "contrast-gap",
+			"story": "file-list-metadataexpansion--mixed",
+			"rule": "text-secondary-preserved-on-preserved-bg-dark",
+			"reason": "Selector .metadata-field--preserved .metadata-field__value: --ec-color-text-secondary #818188 on overlay preserved-bg #1e3226 measures 3.52:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-metadataexpansion--mixed|text-secondary-preserved-on-preserved-bg-light",
+			"kind": "contrast-gap",
+			"story": "file-list-metadataexpansion--mixed",
+			"rule": "text-secondary-preserved-on-preserved-bg-light",
+			"reason": "Selector .metadata-field--preserved .metadata-field__value: --ec-color-text-secondary #66758c on overlay preserved-bg #dae9e4 measures 3.73:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-metadataexpansion--mixed|text-secondary-removed-on-removed-bg-dark",
+			"kind": "contrast-gap",
+			"story": "file-list-metadataexpansion--mixed",
+			"rule": "text-secondary-removed-on-removed-bg-dark",
+			"reason": "Selector .metadata-field--removed .metadata-field__value: --ec-color-text-secondary #818188 on overlay removed-bg #372122 measures 3.86:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|file-list-metadataexpansion--mixed|text-secondary-removed-on-removed-bg-light",
+			"kind": "contrast-gap",
+			"story": "file-list-metadataexpansion--mixed",
+			"rule": "text-secondary-removed-on-removed-bg-light",
+			"reason": "Selector .metadata-field--removed .metadata-field__value: --ec-color-text-secondary #66758c on overlay removed-bg #eadee1 measures 3.57:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|settings-toggleswitch--off|toggle-off-track-on-bg-dark",
+			"kind": "contrast-gap",
+			"story": "settings-toggleswitch--off",
+			"rule": "toggle-off-track-on-bg-dark",
+			"reason": "Selector .toggle-switch__track: --ec-toggle-off-track #3a3a3e on --ec-color-bg #141416 measures 1.62:1 in the dark theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|settings-toggleswitch--off|toggle-off-track-on-bg-light",
+			"kind": "contrast-gap",
+			"story": "settings-toggleswitch--off",
+			"rule": "toggle-off-track-on-bg-light",
+			"reason": "Selector .toggle-switch__track: --ec-toggle-off-track #d1d1d6 on --ec-color-bg #f5f6f8 measures 1.40:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|settings-toggleswitch--off|toggle-off-track-on-surface-dark",
+			"kind": "contrast-gap",
+			"story": "settings-toggleswitch--off",
+			"rule": "toggle-off-track-on-surface-dark",
+			"reason": "Selector .toggle-switch__track: --ec-toggle-off-track #3a3a3e on --ec-color-surface #1c1c1f measures 1.50:1 in the dark theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|settings-toggleswitch--off|toggle-off-track-on-surface-light",
+			"kind": "contrast-gap",
+			"story": "settings-toggleswitch--off",
+			"rule": "toggle-off-track-on-surface-light",
+			"reason": "Selector .toggle-switch__track: --ec-toggle-off-track #d1d1d6 on --ec-color-surface #e8ecf0 measures 1.28:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|settings-toggleswitch--off|toggle-thumb-off-on-ec-toggle-off-track-light",
+			"kind": "contrast-gap",
+			"story": "settings-toggleswitch--off",
+			"rule": "toggle-thumb-off-on-ec-toggle-off-track-light",
+			"reason": "Selector .toggle-switch__thumb: the literal #ffffff #ffffff on --ec-toggle-off-track #d1d1d6 measures 1.52:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-dropzone--drag-over|drop-zone-border-on-gold-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-dropzone--drag-over",
+			"rule": "drop-zone-border-on-gold-bg-light",
+			"reason": "Selector .drop-zone--active: --ec-color-gold #f8d057 on overlay gold-bg #f5f4f0 measures 1.34:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-emptystate--copy-mode-on|empty-state-secondary-on-item-hover-light",
+			"kind": "contrast-gap",
+			"story": "ui-emptystate--copy-mode-on",
+			"rule": "empty-state-secondary-on-item-hover-light",
+			"reason": "Selector .empty-state__instruction, .empty-state__output-mode: --empty-state-secondary #59677b on overlay item-hover #dfe3e6 measures 4.45:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-bg-dark",
+			"kind": "contrast-gap",
+			"story": "ui-errorboundary--fallback",
+			"rule": "error-text-on-bg-dark",
+			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on --ec-color-bg #141416 measures 3.72:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-error-bg-dark",
+			"kind": "contrast-gap",
+			"story": "ui-errorboundary--fallback",
+			"rule": "error-text-on-error-bg-dark",
+			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on --ec-color-error-bg #3d1a16 measures 3.13:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-error-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-errorboundary--fallback",
+			"rule": "error-text-on-error-bg-light",
+			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on --ec-color-error-bg #fff0f0 measures 4.46:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-item-hover-dark",
+			"kind": "contrast-gap",
+			"story": "ui-errorboundary--fallback",
+			"rule": "error-text-on-item-hover-dark",
+			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on overlay item-hover #1b1b1e measures 3.47:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-item-hover-light",
+			"kind": "contrast-gap",
+			"story": "ui-errorboundary--fallback",
+			"rule": "error-text-on-item-hover-light",
+			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on overlay item-hover #dfe3e6 measures 3.82:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-surface-dark",
+			"kind": "contrast-gap",
+			"story": "ui-errorboundary--fallback",
+			"rule": "error-text-on-surface-dark",
+			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on --ec-color-surface #1c1c1f measures 3.44:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-surface-light",
+			"kind": "contrast-gap",
+			"story": "ui-errorboundary--fallback",
+			"rule": "error-text-on-surface-light",
+			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on --ec-color-surface #e8ecf0 measures 4.16:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-statusbar--all-cleaned",
+			"rule": "accent-text-on-bg-light",
+			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on --ec-color-bg #f5f6f8 measures 3.71:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-error-bg-dark",
+			"kind": "contrast-gap",
+			"story": "ui-statusbar--all-cleaned",
+			"rule": "accent-text-on-error-bg-dark",
+			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on --ec-color-error-bg #3d1a16 measures 3.85:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-error-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-statusbar--all-cleaned",
+			"rule": "accent-text-on-error-bg-light",
+			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on --ec-color-error-bg #fff0f0 measures 3.62:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-item-hover-dark",
+			"kind": "contrast-gap",
+			"story": "ui-statusbar--all-cleaned",
+			"rule": "accent-text-on-item-hover-dark",
+			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on overlay item-hover #1b1b1e measures 4.27:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-item-hover-light",
+			"kind": "contrast-gap",
+			"story": "ui-statusbar--all-cleaned",
+			"rule": "accent-text-on-item-hover-light",
+			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on overlay item-hover #dfe3e6 measures 3.11:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-surface-dark",
+			"kind": "contrast-gap",
+			"story": "ui-statusbar--all-cleaned",
+			"rule": "accent-text-on-surface-dark",
+			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on --ec-color-surface #1c1c1f measures 4.23:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-surface-light",
+			"kind": "contrast-gap",
+			"story": "ui-statusbar--all-cleaned",
+			"rule": "accent-text-on-surface-light",
+			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on --ec-color-surface #e8ecf0 measures 3.38:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-statusicon--complete|success-icon-on-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-statusicon--complete",
+			"rule": "success-icon-on-bg-light",
+			"reason": "Selector .status-icon__check: --ec-color-success #34c759 on --ec-color-bg #f5f6f8 measures 2.05:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-statusicon--complete|success-icon-on-error-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-statusicon--complete",
+			"rule": "success-icon-on-error-bg-light",
+			"reason": "Selector .status-icon__check: --ec-color-success #34c759 on --ec-color-error-bg #fff0f0 measures 2.00:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-statusicon--complete|success-icon-on-item-hover-light",
+			"kind": "contrast-gap",
+			"story": "ui-statusicon--complete",
+			"rule": "success-icon-on-item-hover-light",
+			"reason": "Selector .status-icon__check: --ec-color-success #34c759 on overlay item-hover #dfe3e6 measures 1.71:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-statusicon--complete|success-icon-on-surface-light",
+			"kind": "contrast-gap",
+			"story": "ui-statusicon--complete",
+			"rule": "success-icon-on-surface-light",
+			"reason": "Selector .status-icon__check: --ec-color-success #34c759 on --ec-color-surface #e8ecf0 measures 1.86:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-statusicon--processing|spinner-on-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-statusicon--processing",
+			"rule": "spinner-on-bg-light",
+			"reason": "Selector .status-icon__spinner: --ec-color-muted #9da7b6 on --ec-color-bg #f5f6f8 measures 2.24:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--heic|pill-heic-on-pill-heic-bg-over-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--heic",
+			"rule": "pill-heic-on-pill-heic-bg-over-bg-light",
+			"reason": "Selector .type-pill--heic, .type-pill--heif: --ec-pill-heic-text #8a7aa0 on overlay pill-heic-bg-over-bg #ebeaef measures 3.26:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--heic|pill-heic-on-pill-heic-bg-over-surface-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--heic",
+			"rule": "pill-heic-on-pill-heic-bg-over-surface-light",
+			"reason": "Selector .type-pill--heic, .type-pill--heif: --ec-pill-heic-text #8a7aa0 on overlay pill-heic-bg-over-surface #dfe1e8 measures 2.99:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--jpeg|pill-jpg-on-pill-jpg-bg-over-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--jpeg",
+			"rule": "pill-jpg-on-pill-jpg-bg-over-bg-light",
+			"reason": "Selector .type-pill--jpg, .type-pill--jpeg: --ec-pill-jpg-text #6a8fa8 on overlay pill-jpg-bg-over-bg #e9eef2 measures 2.94:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--jpeg|pill-jpg-on-pill-jpg-bg-over-surface-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--jpeg",
+			"rule": "pill-jpg-on-pill-jpg-bg-over-surface-light",
+			"reason": "Selector .type-pill--jpg, .type-pill--jpeg: --ec-pill-jpg-text #6a8fa8 on overlay pill-jpg-bg-over-surface #dde4ea measures 2.67:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--media|pill-mov-on-pill-mov-bg-over-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--media",
+			"rule": "pill-mov-on-pill-mov-bg-over-bg-light",
+			"reason": "Selector .type-pill--mov, .type-pill--mp4: --ec-pill-mov-text #a09060 on overlay pill-mov-bg-over-bg #eeeeeb measures 2.71:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--media|pill-mov-on-pill-mov-bg-over-surface-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--media",
+			"rule": "pill-mov-on-pill-mov-bg-over-surface-light",
+			"reason": "Selector .type-pill--mov, .type-pill--mp4: --ec-pill-mov-text #a09060 on overlay pill-mov-bg-over-surface #e2e4e3 measures 2.47:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--neutral|neutral-pill-on-neutral-pill-over-bg-dark",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--neutral",
+			"rule": "neutral-pill-on-neutral-pill-over-bg-dark",
+			"reason": "Selector .type-pill: --ec-color-muted #636369 on overlay neutral-pill-over-bg #222326 measures 2.63:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--neutral|neutral-pill-on-neutral-pill-over-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--neutral",
+			"rule": "neutral-pill-on-neutral-pill-over-bg-light",
+			"reason": "Selector .type-pill: --ec-color-muted #9da7b6 on overlay neutral-pill-over-bg #eceef1 measures 2.09:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--neutral|neutral-pill-on-neutral-pill-over-surface-dark",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--neutral",
+			"rule": "neutral-pill-on-neutral-pill-over-surface-dark",
+			"reason": "Selector .type-pill: --ec-color-muted #636369 on overlay neutral-pill-over-surface #292a2e measures 2.40:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--neutral|neutral-pill-on-neutral-pill-over-surface-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--neutral",
+			"rule": "neutral-pill-on-neutral-pill-over-surface-light",
+			"reason": "Selector .type-pill: --ec-color-muted #9da7b6 on overlay neutral-pill-over-surface #e1e5ea measures 1.92:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--pdf|pill-pdf-on-pill-pdf-bg-over-bg-dark",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--pdf",
+			"rule": "pill-pdf-on-pill-pdf-bg-over-bg-dark",
+			"reason": "Selector .type-pill--pdf: --ec-pill-pdf-text #b07a70 on overlay pill-pdf-bg-over-bg #281f20 measures 4.48:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--pdf|pill-pdf-on-pill-pdf-bg-over-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--pdf",
+			"rule": "pill-pdf-on-pill-pdf-bg-over-bg-light",
+			"reason": "Selector .type-pill--pdf: --ec-pill-pdf-text #a06a60 on overlay pill-pdf-bg-over-bg #eeeaeb measures 3.72:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--pdf|pill-pdf-on-pill-pdf-bg-over-surface-dark",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--pdf",
+			"rule": "pill-pdf-on-pill-pdf-bg-over-surface-dark",
+			"reason": "Selector .type-pill--pdf: --ec-pill-pdf-text #b07a70 on overlay pill-pdf-bg-over-surface #2e2627 measures 4.12:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--pdf|pill-pdf-on-pill-pdf-bg-over-surface-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--pdf",
+			"rule": "pill-pdf-on-pill-pdf-bg-over-surface-light",
+			"reason": "Selector .type-pill--pdf: --ec-pill-pdf-text #a06a60 on overlay pill-pdf-bg-over-surface #e2e1e4 measures 3.41:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--png|pill-png-on-pill-png-bg-over-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--png",
+			"rule": "pill-png-on-pill-png-bg-over-bg-light",
+			"reason": "Selector .type-pill--png: --ec-pill-png-text #5a9070 on overlay pill-png-bg-over-bg #e8edec measures 3.13:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--png|pill-png-on-pill-png-bg-over-surface-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--png",
+			"rule": "pill-png-on-pill-png-bg-over-surface-light",
+			"reason": "Selector .type-pill--png: --ec-pill-png-text #5a9070 on overlay pill-png-bg-over-surface #dce4e5 measures 2.87:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--raw|pill-dng-on-pill-dng-bg-over-bg-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--raw",
+			"rule": "pill-dng-on-pill-dng-bg-over-bg-light",
+			"reason": "Selector .type-pill--dng, .type-pill--cr2: --ec-pill-dng-text #b08060 on overlay pill-dng-bg-over-bg #f0eceb measures 2.93:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
+			"fingerprint": "contrast-gap|ui-typepill--raw|pill-dng-on-pill-dng-bg-over-surface-light",
+			"kind": "contrast-gap",
+			"story": "ui-typepill--raw",
+			"rule": "pill-dng-on-pill-dng-bg-over-surface-light",
+			"reason": "Selector .type-pill--dng, .type-pill--cr2: --ec-pill-dng-text #b08060 on overlay pill-dng-bg-over-surface #e4e3e3 measures 2.68:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
+			"disposition": "fix-v5.1",
+			"severity": "major"
+		},
+		{
 			"fingerprint": "dead-end|file-list-errorexpansion--verification|click-to-copy-not-keyboard-reachable",
 			"kind": "dead-end",
 			"story": "file-list-errorexpansion--verification",
@@ -2476,6 +3076,24 @@
 			"reason": "error_boundary.css:7-28 and file_list.css:2-14 use var(--spacing-xs) to var(--spacing-xl) (7 uses) and no stylesheet or token file under src defines any --spacing-* property, so those paddings, margins and gaps resolve to nothing and the crash screen and the file list lose their spacing.",
 			"disposition": "fix-v5.1",
 			"severity": "major"
+		},
+		{
+			"fingerprint": "token-map-gap|file-list-filerow--copy-mode-disclosure|line-height-token-undefined",
+			"kind": "token-map-gap",
+			"story": "file-list-filerow--copy-mode-disclosure",
+			"rule": "line-height-token-undefined",
+			"reason": "file_table.css:139 sets line-height: var(--ec-line-height-normal) on .file-table__copy-disclosure, and --ec-line-height-normal is declared in no stylesheet (tokens.css holds no --ec-line-height-* token), so the declaration is invalid at computed-value time; v5.1 declares the unitless --ec-line-height-* tokens of the UI-SPEC scale (D-09) and points the rule at one of them.",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
+		},
+		{
+			"fingerprint": "token-map-gap|ui-emptystate--copy-mode-on|empty-state-secondary-hardcoded",
+			"kind": "token-map-gap",
+			"story": "ui-emptystate--copy-mode-on",
+			"rule": "empty-state-secondary-hardcoded",
+			"reason": "empty_state.css:2 declares --empty-state-secondary as #59677b on .empty-state and empty_state.css:118 as #94949b on [data-theme=\"dark\"] .empty-state, outside tokens.css, so the empty state's secondary text colour is two literals that no token reaches (the contrast pairs list it as a local token); v5.1 reads --ec-color-text-secondary instead (Pewter in light, Fog in dark).",
+			"disposition": "fix-v5.1",
+			"severity": "minor"
 		},
 		{
 			"fingerprint": "unrendered-outcome|file-list-folderrow--scanning|discovering-status-never-dispatched",
