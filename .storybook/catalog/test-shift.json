@@ -655,16 +655,22 @@
 					{
 						"n": 1,
 						"code": "expect(fileRow).toBeVisible()",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "file-list-filerow--cleaned-expanded",
+						"subject": "FileRow",
+						"covers": "layout",
+						"evidence": "aria-expanded",
+						"note": "Row exposes aria-expanded true through expectRow; the e2e asserted the complete row visible"
 					},
 					{
 						"n": 2,
 						"code": "expect(expansion).toBeVisible()",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "file-list-filerow--cleaned-expanded",
+						"subject": "FileRow",
+						"covers": "layout",
+						"evidence": "metadata-expansion__summary",
+						"note": "Expansion summary element is present and its text asserted; the e2e asserted .metadata-expansion visible"
 					}
 				]
 			},
@@ -680,9 +686,12 @@
 					{
 						"n": 2,
 						"code": "expect(groupCount).toBeGreaterThan(0)",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "file-list-metadatagroup--one-field",
+						"subject": "MetadataGroup",
+						"covers": "layout",
+						"evidence": "metadata-group__header",
+						"note": "Group header found with its title, name and count; the e2e only counted headers"
 					},
 					{
 						"n": 3,
@@ -716,9 +725,12 @@
 					{
 						"n": 3,
 						"code": "expect(iconText).toBe(\"\\u2212\")",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "file-list-metadatafield--removed",
+						"subject": "MetadataField",
+						"covers": "text",
+						"evidence": "−",
+						"note": "Raw U+2212 character in the story; the e2e wrote it as an escape"
 					},
 					{
 						"n": 4,
@@ -729,9 +741,12 @@
 					{
 						"n": 5,
 						"code": "expect(preservedIconText).toBe(\"\\u2713\")",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "file-list-metadatafield--preserved",
+						"subject": "MetadataField",
+						"covers": "text",
+						"evidence": "✓",
+						"note": "Raw U+2713 character in the story; the e2e wrote it as an escape"
 					}
 				]
 			}

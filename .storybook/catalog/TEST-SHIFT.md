@@ -206,15 +206,15 @@ Title kept per D-04 (never retitle a kept test; no journey pins it). It overclai
 
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | kept | expect(fileRow).toBeVisible() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 2 | kept | expect(expansion).toBeVisible() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
+| 1 | deleted | expect(fileRow).toBeVisible() | file-list-filerow--cleaned-expanded | layout | aria-expanded | Row exposes aria-expanded true through expectRow; the e2e asserted the complete row visible |
+| 2 | deleted | expect(expansion).toBeVisible() | file-list-filerow--cleaned-expanded | layout | metadata-expansion__summary | Expansion summary element is present and its text asserted; the e2e asserted .metadata-expansion visible |
 
 ### shows metadata groups with before/after diff
 
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | kept | expect(expansion).toBeVisible() | real-electron |  |  |  |
-| 2 | kept | expect(groupCount).toBeGreaterThan(0) | real-electron |  |  | flips to deleted in 75-02 (D-01) |
+| 2 | deleted | expect(groupCount).toBeGreaterThan(0) | file-list-metadatagroup--one-field | layout | metadata-group__header | Group header found with its title, name and count; the e2e only counted headers |
 | 3 | kept | expect(fieldCount).toBeGreaterThan(0) | filesystem |  |  |  |
 | 4 | kept | expect(hasKnownTag, `Expected at least one of ${knownTags.join(", ")} in metadata fields. Found: ${allNames.join(", ")}`).toBe(true) | filesystem |  |  |  |
 
@@ -224,9 +224,9 @@ Title kept per D-04 (never retitle a kept test; no journey pins it). It overclai
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | kept | expect(expansion).toBeVisible() | real-electron |  |  |  |
 | 2 | kept | expect(removedCount).toBeGreaterThan(0) | filesystem |  |  |  |
-| 3 | kept | expect(iconText).toBe("\u2212") | real-electron |  |  | flips to deleted in 75-02 (D-01) |
+| 3 | deleted | expect(iconText).toBe("\u2212") | file-list-metadatafield--removed | text | − | Raw U+2212 character in the story; the e2e wrote it as an escape |
 | 4 | kept | expect(preservedCount).toBeGreaterThan(0) | filesystem |  |  |  |
-| 5 | kept | expect(preservedIconText).toBe("\u2713") | real-electron |  |  | flips to deleted in 75-02 (D-01) |
+| 5 | deleted | expect(preservedIconText).toBe("\u2713") | file-list-metadatafield--preserved | text | ✓ | Raw U+2713 character in the story; the e2e wrote it as an escape |
 
 ## Known limits
 
