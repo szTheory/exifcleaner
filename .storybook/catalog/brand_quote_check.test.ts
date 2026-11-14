@@ -7,6 +7,7 @@ import {
 	checkBrandQuotes,
 	headingRanges,
 	mapBrandRefs,
+	pairsBrandRefs,
 	resolveTokenPath,
 	specBrandSources,
 	specTokenSources,
@@ -19,6 +20,7 @@ const RULES = ".storybook/catalog/copy_lint_rules.json";
 const CATALOG = ".storybook/catalog/catalog.json";
 const SPEC = ".storybook/catalog/ui-spec.json";
 const TOKEN_MAP = ".storybook/catalog/token_map.json";
+const PAIRS = "tests/renderer/contrast/contrast_pairs.json";
 const USAGE =
 	"usage: node .storybook/catalog/brand_quote_check.mjs [--cache <dir>]";
 
@@ -93,6 +95,11 @@ function plantedTokens(repo: string): Record<string, unknown> {
 	for (const ref of refs) {
 		if (typeof ref.hex === "string") hexes.set(String(ref.token), ref.hex);
 	}
+	// The contrast pairs document cites colour paths of its own (the proposed set
+	// and the BRAND.md ratio rows); their hexes are planted too.
+	for (const ref of pairsBrandRefs(readJsonFile<unknown>(repo, PAIRS))) {
+		hexes.set(String(ref.token), String(ref.hex));
+	}
 	for (const ref of refs) {
 		if (!hexes.has(String(ref.token))) {
 			throw new Error(`no hex to plant for ${ref.name} ${ref.token}`);
@@ -124,12 +131,29 @@ function mapProblems(repo: string, cacheDir: string) {
 	}).filter((found) => found.code !== "rule-pin-mismatch");
 }
 
+// The pairs document alone (no spec, no map), so a pairs defect is not mixed with
+// the other documents' codes.
+function pairsProblems(repo: string, cacheDir: string) {
+	return checkBrandQuotes({
+		brandText: fs.readFileSync(path.join(cacheDir, "BRAND.md"), "utf8"),
+		rulesDoc: { brandPin: "x", rules: [] },
+		catalogDoc: {},
+		pin: readJsonFile<{ commit: string }>(repo, "brand.pin.json").commit,
+		pairsDoc: readJsonFile(repo, PAIRS),
+		tokensDoc: readJsonFile(repo, path.join(CACHE, "tokens.json")),
+	}).filter((found) => found.code !== "rule-pin-mismatch");
+}
+
 function withRepo(
 	body: (repo: string, cacheDir: string) => void,
 	{ plant = true, tokens = true }: { plant?: boolean; tokens?: boolean } = {},
 ): void {
 	const repo = makeCatalogRepo();
 	try {
+		// The pairs document is not a CHECK_INPUTS entry, so the temp repository
+		// does not hold it until it is copied from the real one.
+		fs.mkdirSync(path.join(repo, path.dirname(PAIRS)), { recursive: true });
+		fs.copyFileSync(path.join(repoRoot, PAIRS), path.join(repo, PAIRS));
 		const cacheDir = path.join(repo, CACHE);
 		if (plant) {
 			fs.mkdirSync(cacheDir, { recursive: true });
@@ -165,7 +189,7 @@ describe("brand_quote_check against a planted cache", () => {
 			const result = run(repo);
 			expect(result.status, result.stderr).toBe(0);
 			expect(result.stdout).toMatch(
-				/BRAND QUOTE CHECK PASSED — \d+ rules, \d+ catalog sections, \d+ spec quotes, \d+ spec tokens, [1-9]\d* map brand refs/,
+				/BRAND QUOTE CHECK PASSED — \d+ rules, \d+ catalog sections, \d+ spec quotes, \d+ spec tokens, [1-9]\d* map brand refs, [1-9]\d* pairs refs/,
 			);
 			assertDirEffect(before, snapshotDir(repo), {});
 		});
@@ -423,6 +447,99 @@ describe("brand_quote_check against a planted cache", () => {
 				"--ec-color-surface brand.dark",
 			]);
 		});
+	});
+
+	test("shown red: a tampered proposed hex", () => {
+		withRepo((repo, cacheDir) => {
+			// color.light.exifcleaner-teal is cited by the pairs document alone, so the
+			// pairs check is the only one that can see this tamper.
+			rewrite(repo, path.join(CACHE, "tokens.json"), (doc) => {
+				doc.color.light["exifcleaner-teal"].$value.hex = "#000000";
+			});
+			const before = snapshotDir(repo);
+			const result = run(repo);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("BRAND QUOTE CHECK FAILED");
+			expect(result.stderr).toContain("color.light.exifcleaner-teal");
+			expect(result.stderr).toContain("#000000");
+			assertDirEffect(before, snapshotDir(repo), {});
+			expect(pairsProblems(repo, cacheDir).map((found) => found.code)).toEqual([
+				"pairs-token-hex-mismatch",
+				"pairs-token-hex-mismatch",
+			]);
+		});
+	});
+
+	test("shown red: a tampered hex of a proposed colour the spec also cites", () => {
+		withRepo((repo, cacheDir) => {
+			rewrite(repo, path.join(CACHE, "tokens.json"), (doc) => {
+				doc.color.light["steady-teal"].$value.hex = "#000000";
+			});
+			const before = snapshotDir(repo);
+			const result = run(repo);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("color.light.steady-teal");
+			assertDirEffect(before, snapshotDir(repo), {});
+			const found = pairsProblems(repo, cacheDir);
+			expect(found.length).toBeGreaterThan(0);
+			expect([...new Set(found.map((problem) => problem.code))]).toEqual([
+				"pairs-token-hex-mismatch",
+			]);
+		});
+	});
+
+	test("shown red: a missing pairs path", () => {
+		withRepo((repo, cacheDir) => {
+			rewrite(repo, path.join(CACHE, "tokens.json"), (doc) => {
+				delete doc.color.light["exifcleaner-teal"];
+			});
+			const before = snapshotDir(repo);
+			const result = run(repo);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("color.light.exifcleaner-teal");
+			expect(result.stderr).toContain("is not a colour in tokens.json");
+			assertDirEffect(before, snapshotDir(repo), {});
+			expect([
+				...new Set(pairsProblems(repo, cacheDir).map((found) => found.code)),
+			]).toEqual(["pairs-token-path-missing"]);
+		});
+	});
+
+	test("shown red: pairs brandPin must equal brand.pin.json", () => {
+		withRepo((repo, cacheDir) => {
+			rewrite(repo, PAIRS, (doc) => {
+				doc.brandPin = "0".repeat(40);
+			});
+			const before = snapshotDir(repo);
+			const result = run(repo);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("contrast_pairs.json");
+			expect(result.stderr).toContain("brandPin is not the commit");
+			assertDirEffect(before, snapshotDir(repo), {});
+			expect(pairsProblems(repo, cacheDir).map((found) => found.code)).toEqual([
+				"pairs-pin-mismatch",
+			]);
+		});
+	});
+
+	test("pairsBrandRefs lists every colour path of the proposed set and the ratio rows, and skips ids", () => {
+		const refs = pairsBrandRefs(
+			JSON.parse(fs.readFileSync(path.join(repoRoot, PAIRS), "utf8")),
+		);
+		expect(refs.length).toBeGreaterThan(20);
+		for (const ref of refs) expect(String(ref.token)).toMatch(/^color\./);
+		expect(pairsBrandRefs(null)).toEqual([]);
+		expect(pairsBrandRefs({ proposed: "x", brandRatios: 3 })).toEqual([]);
+		expect(
+			pairsBrandRefs({
+				proposed: [
+					7,
+					{ id: "a", fg: { ref: "dark-rinse.pressed-light", hex: "#DCE6E5" } },
+					{ id: "b", fg: { ref: "color.dark.tide", hex: "#12403C" }, bg: 3 },
+				],
+				brandRatios: [{ fg: { ref: "color.dark.tide", hex: "#12403C" } }],
+			}).map((ref) => ref.token),
+		).toEqual(["color.dark.tide", "color.dark.tide"]);
 	});
 
 	test("shown red: map brandPin must equal brand.pin.json", () => {

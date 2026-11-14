@@ -3,10 +3,18 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 import {
+	backdrops,
+	brandRatioProblems,
+	colourLiterals,
 	compareBaseline,
 	contrastGapEntry,
 	evaluate,
 	failingFingerprints,
+	g1Problems,
+	g2Report,
+	pairsShapeProblems,
+	proposedConsistencyProblems,
+	proposedResults,
 	reasonFor,
 	type ContrastPair,
 	type ContrastPairsDocument,
@@ -263,5 +271,517 @@ describe("tracer: text-secondary through tokens.css, flattening and the ratio", 
 			"disposition",
 			"severity",
 		]);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// The completeness guards (D-22). Each is shown red by an in-memory planting: a
+// cloned document or a stylesheet map with one edit, never a file on disk.
+// ---------------------------------------------------------------------------
+
+const STYLES_DIR = "src/renderer/styles";
+const SHEETS: Record<string, string> = Object.fromEntries(
+	fs
+		.readdirSync(path.join(REPO, STYLES_DIR))
+		.filter((name) => name.endsWith(".css"))
+		.sort()
+		.map((name) => [name, readText(`${STYLES_DIR}/${name}`)]),
+);
+const TOKEN_MAP = readJson<{
+	entries: Array<{ name: string; disposition: string; finding?: string }>;
+}>(".storybook/catalog/token_map.json");
+const UI_SPEC = readJson<unknown>(".storybook/catalog/ui-spec.json");
+const PIN = readJson<{ commit: string }>("brand.pin.json").commit;
+
+function codes(problems: Array<{ code: string }>): string[] {
+	return problems.map((found) => found.code);
+}
+
+function g2(
+	sheets: Record<string, string> = SHEETS,
+	doc: ContrastPairsDocument = PAIRS,
+	tokenMap: typeof TOKEN_MAP = TOKEN_MAP,
+) {
+	return g2Report(sheets, doc, TOKENS_CSS, tokenMap);
+}
+
+function withRule(file: string, rule: string): Record<string, string> {
+	return { ...SHEETS, [file]: `${SHEETS[file] ?? ""}\n${rule}\n` };
+}
+
+function withoutPairs(...ids: string[]): ContrastPairsDocument {
+	const doc = clone(PAIRS);
+	doc.pairs = doc.pairs.filter((pair) => !ids.includes(pair.id));
+	return doc;
+}
+
+describe("the pair list is real, not a stub", () => {
+	test("it declares more than thirty pairs and evaluates over a hundred results", () => {
+		expect(PAIRS.pairs.length).toBeGreaterThanOrEqual(30);
+		expect(evaluate(PAIRS, TOKENS_CSS).length).toBeGreaterThanOrEqual(100);
+		for (const pair of PAIRS.pairs) {
+			expect(pair.id.startsWith("a11y"), pair.id).toBe(false);
+			expect(pair.id, pair.id).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+		}
+	});
+
+	test("every rule slug is unique, so no two failures share a fingerprint", () => {
+		const fingerprints = evaluate(PAIRS, TOKENS_CSS).map((r) => r.fingerprint);
+		expect(new Set(fingerprints).size).toBe(fingerprints.length);
+	});
+
+	test("the hover overlay is a surface the text pairs are measured on (D-06)", () => {
+		expect(PAIRS.surfaces).toContain("item-hover");
+		const pair = PAIRS.pairs.find(
+			(candidate) => candidate.id === "text-secondary",
+		);
+		expect(pair).toBeDefined();
+		expect(backdrops(pair as ContrastPair, PAIRS).map((b) => b.ref)).toContain(
+			"item-hover",
+		);
+		// text-secondary on the hover overlay in the light theme measures 3.62:1.
+		const result = evaluate(PAIRS, TOKENS_CSS).find(
+			(r) => r.rule === "text-secondary-on-item-hover-light",
+		);
+		expect(formatRatio(result?.ratio ?? 0)).toBe("3.62");
+		expect(result?.bgHex).toBe("#dfe3e6");
+	});
+
+	test("the pill text pairs list the pill over the ground and over the surface", () => {
+		for (const family of ["jpg", "heic", "png", "pdf", "mov", "dng"]) {
+			const pair = PAIRS.pairs.find((p) => p.id === `pill-${family}`);
+			expect(pair, family).toBeDefined();
+			expect(backdrops(pair as ContrastPair, PAIRS).map((b) => b.ref)).toEqual([
+				`pill-${family}-bg-over-bg`,
+				`pill-${family}-bg-over-surface`,
+			]);
+		}
+	});
+});
+
+describe("G1: every colour token is a foreground, a backdrop or exempt", () => {
+	test("the real tokens.css and pairs document have no problem", () => {
+		expect(g1Problems(TOKENS_CSS, PAIRS)).toEqual([]);
+	});
+
+	test("shown red: a new colour token with no pair and no exemption", () => {
+		const planted = TOKENS_CSS.replace(
+			"\t--ec-color-info: #3b7fc4;",
+			() => "\t--ec-color-planted: #123456;\n\t--ec-color-info: #3b7fc4;",
+		).replace(
+			"\t--ec-color-info: #6ba3d6;",
+			() => "\t--ec-color-planted: #123456;\n\t--ec-color-info: #6ba3d6;",
+		);
+		expect(planted.match(/--ec-color-planted/g)).toHaveLength(2);
+		const found = g1Problems(planted, PAIRS);
+		expect(codes(found)).toEqual(["g1-uncovered-token"]);
+		expect(found[0]?.message).toContain("--ec-color-planted");
+	});
+
+	test("shown red: a light colour token the dark block does not define", () => {
+		const planted = TOKENS_CSS.replace("\t--ec-color-muted: #636369;\n", "");
+		expect(planted).not.toBe(TOKENS_CSS);
+		const found = g1Problems(planted, PAIRS);
+		expect(codes(found)).toEqual(["g1-missing-dark"]);
+		expect(found[0]?.message).toContain("--ec-color-muted");
+	});
+
+	test("an alias is judged through its target, never on its own", () => {
+		// --color-bg holds var(--ec-color-bg) in both blocks; it is no token of its own.
+		const planted = TOKENS_CSS.replaceAll(
+			"--color-bg: var(--ec-color-bg);",
+			"--color-bg: var(--ec-color-bg);\n\t--color-bg-twin: var(--ec-color-bg);",
+		);
+		expect(g1Problems(planted, PAIRS)).toEqual([]);
+	});
+});
+
+describe("colourLiterals: the literal scan", () => {
+	test("finds hex, rgb and rgba calls, and the three keywords, nested var included", () => {
+		expect(colourLiterals("1px solid #006bd6").map((l) => l.text)).toEqual([
+			"#006bd6",
+		]);
+		expect(
+			colourLiterals("rgba(0, 0, 0, var(--ec-backdrop-opacity))").map(
+				(l) => l.text,
+			),
+		).toEqual(["rgba(0, 0, 0, var(--ec-backdrop-opacity))"]);
+		expect(
+			colourLiterals("var(--ec-color-hover, rgba(0, 0, 0, 0.04))").map(
+				(l) => l.normalised,
+			),
+		).toEqual(["rgba(0, 0, 0, 0.04)"]);
+		expect(colourLiterals("2px solid transparent").map((l) => l.text)).toEqual([
+			"transparent",
+		]);
+		expect(colourLiterals("white").map((l) => l.text)).toEqual(["white"]);
+	});
+
+	test("a keyword inside a name, and inherit, currentColor and none, are not literals", () => {
+		expect(colourLiterals("var(--ec-color-white)")).toEqual([]);
+		expect(colourLiterals("inherit")).toEqual([]);
+		expect(colourLiterals("currentColor")).toEqual([]);
+		expect(colourLiterals("none")).toEqual([]);
+	});
+
+	test("whitespace and case are normalised, nothing else", () => {
+		expect(
+			colourLiterals("RGBA( 0,0 ,0,  0.04 )").map((l) => l.normalised),
+		).toEqual(["rgba(0, 0, 0, 0.04)"]);
+		expect(colourLiterals("#FFF").map((l) => l.normalised)).toEqual(["#fff"]);
+	});
+
+	test("a 200 KB value returns well inside a second (T-74-14)", () => {
+		const hashes = "#".repeat(200_000);
+		const calls = "rgba(".repeat(40_000);
+		const names = "var(".repeat(50_000);
+		const started = Date.now();
+		colourLiterals(hashes);
+		colourLiterals(calls);
+		colourLiterals(names);
+		expect(Date.now() - started).toBeLessThan(1000);
+	});
+});
+
+describe("G2: every stylesheet colour use is classified", () => {
+	test("the real stylesheets, pairs document and token map have no problem", () => {
+		const report = g2();
+		expect(report.problems).toEqual([]);
+		// Anti-vacuity: a rule set that classifies nothing would pass the line above.
+		expect(report.classified).toBeGreaterThanOrEqual(100);
+		expect(report.background).toBeGreaterThanOrEqual(25);
+	});
+
+	test("every declared literal's files really hold it", () => {
+		const literals = PAIRS.literals as Array<{
+			value: string;
+			files: string[];
+		}>;
+		expect(literals.length).toBeGreaterThanOrEqual(10);
+		for (const entry of literals) {
+			for (const file of entry.files) {
+				const text = SHEETS[file];
+				expect(text, `${entry.value} in ${file}`).toBeDefined();
+				const held = colourLiterals(text ?? "").some(
+					(literal) => literal.normalised === entry.value,
+				);
+				expect(held, `${entry.value} in ${file}`).toBe(true);
+			}
+		}
+	});
+
+	const planted: Array<[string, string, string, string[]]> = [
+		[
+			"a token that is only a surface, used as text",
+			"app.css",
+			".planted { color: var(--ec-color-error-bg); }",
+			["g2-unpaired-foreground"],
+		],
+		[
+			"a foreground no pair takes as a backdrop, used as a background",
+			"app.css",
+			".planted { background: var(--ec-color-muted); }",
+			["g2-unknown-surface"],
+		],
+		[
+			"an exempt token without a fill reason, used as a background",
+			"app.css",
+			".planted { background: var(--ec-shadow-drawer); }",
+			["g2-unknown-surface"],
+		],
+		[
+			"a text pair foreground used as an outline",
+			"app.css",
+			".planted { outline: 2px solid var(--ec-color-text-secondary); }",
+			["g2-unpaired-focus"],
+		],
+		[
+			"an undeclared token under a border colour",
+			"app.css",
+			".planted { border-color: var(--ec-color-planted-x); }",
+			["g2-unclassified-token"],
+		],
+		[
+			"an undeclared token with a fallback and no token map finding",
+			"app.css",
+			".planted { background: var(--ec-color-planted-y, #ffffff); }",
+			["g2-unclassified-token"],
+		],
+		[
+			"the registered hover name whose fallback literal is no backdrop",
+			"app.css",
+			".planted { background: var(--ec-color-hover, #ffffff); }",
+			["g2-unknown-surface"],
+		],
+		[
+			"a colour literal no entry declares",
+			"app.css",
+			".planted { color: #abcdef; }",
+			["g2-undeclared-literal"],
+		],
+		[
+			"color-mix",
+			"app.css",
+			".planted { color: color-mix(in srgb, red, blue); }",
+			["g2-forbidden-function"],
+		],
+		[
+			"light-dark",
+			"app.css",
+			".planted { background: light-dark(#fff, #000); }",
+			["g2-forbidden-function"],
+		],
+	];
+	for (const [name, file, rule, expected] of planted) {
+		test(`shown red: ${name}`, () => {
+			expect(codes(g2(withRule(file, rule)).problems)).toEqual(expected);
+		});
+	}
+
+	test("the registered hover fallback is classified against the backdrop union, not skipped", () => {
+		// The real tree uses it, and it passes only because the fallback is the
+		// hover overlay's own layer.
+		const hover = Object.entries(SHEETS).filter(([, text]) =>
+			text.includes("var(--ec-color-hover, rgba(0, 0, 0, 0.04))"),
+		);
+		expect(hover.map(([file]) => file)).toEqual(["language_dropdown.css"]);
+		expect(g2().problems).toEqual([]);
+	});
+
+	test("route: dropping the fill reason of the border exemption reds the separator", () => {
+		const doc = clone(PAIRS);
+		const entry = (doc.exempt as Array<Record<string, string>>).find(
+			(candidate) => candidate["name"] === "--ec-color-border",
+		);
+		if (entry === undefined) throw new Error("no border exemption");
+		delete entry["fill"];
+		const found = g2(SHEETS, doc).problems;
+		expect(codes(found)).toEqual(["g2-unknown-surface"]);
+		expect(found.map((problem) => problem.file)).toEqual([
+			"language_dropdown.css",
+		]);
+	});
+
+	test("route: dropping the fill reason of the backdrop opacity reds the scrim", () => {
+		const doc = clone(PAIRS);
+		const entry = (doc.exempt as Array<Record<string, string>>).find(
+			(candidate) => candidate["name"] === "--ec-backdrop-opacity",
+		);
+		if (entry === undefined) throw new Error("no backdrop exemption");
+		delete entry["fill"];
+		const found = g2(SHEETS, doc).problems;
+		expect(codes(found)).toEqual(["g2-unknown-surface"]);
+		expect(found.map((problem) => problem.file)).toEqual([
+			"settings_drawer.css",
+		]);
+	});
+
+	test("route: dropping the hover token's finding from the map reds exactly that name", () => {
+		const map = clone(TOKEN_MAP);
+		const entry = map.entries.find(
+			(candidate) => candidate.name === "--ec-color-hover",
+		);
+		if (entry === undefined) throw new Error("no hover entry");
+		delete entry.finding;
+		const found = g2(SHEETS, PAIRS, map).problems;
+		expect(codes(found)).toEqual(["g2-unclassified-token"]);
+		expect(found[0]?.message).toContain("--ec-color-hover");
+	});
+
+	test("route: dropping the selection and the on-track thumb pairs reds both accent backdrops", () => {
+		const found = g2(
+			SHEETS,
+			withoutPairs("selection", "toggle-thumb-on"),
+		).problems;
+		expect(codes(found)).toEqual(["g2-unknown-surface", "g2-unknown-surface"]);
+		expect(found.map((problem) => problem.file).sort()).toEqual([
+			"toggle_switch.css",
+			"tokens.css",
+		]);
+	});
+
+	test("route: dropping the off-track thumb pair reds the off track", () => {
+		const found = g2(SHEETS, withoutPairs("toggle-thumb-off")).problems;
+		expect(codes(found)).toEqual(["g2-unknown-surface"]);
+		expect(found.map((problem) => problem.file)).toEqual(["toggle_switch.css"]);
+	});
+
+	test("route: dropping the toast pair reds the toast in four places", () => {
+		const found = g2(SHEETS, withoutPairs("toast-text")).problems;
+		expect(found.map((problem) => problem.file)).toEqual([
+			"toast.css",
+			"toast.css",
+			"toast.css",
+			"toast.css",
+		]);
+		expect(codes(found).sort()).toEqual([
+			"g2-unknown-surface",
+			"g2-unknown-surface",
+			"g2-unpaired-foreground",
+			"g2-unpaired-foreground",
+		]);
+	});
+});
+
+describe("the pairs document is a closed shape", () => {
+	test("the real document has no problem", () => {
+		expect(pairsShapeProblems(PAIRS)).toEqual([]);
+	});
+
+	test("shown red: an unknown top-level key", () => {
+		const doc = { ...clone(PAIRS), extra: 1 };
+		expect(codes(pairsShapeProblems(doc))).toEqual(["pairs-shape"]);
+	});
+
+	test("shown red: a pair with the role large", () => {
+		const doc = clone(PAIRS);
+		const pair = doc.pairs[0];
+		if (pair === undefined) throw new Error("no pair");
+		(pair as { role: string }).role = "large";
+		expect(codes(pairsShapeProblems(doc))).toEqual(["pairs-shape"]);
+	});
+
+	test("shown red: a pair without a story", () => {
+		const doc = clone(PAIRS);
+		const pair = doc.pairs[0] as unknown as Record<string, unknown> | undefined;
+		if (pair === undefined) throw new Error("no pair");
+		delete pair["story"];
+		expect(codes(pairsShapeProblems(doc))).toEqual(["pairs-shape"]);
+	});
+
+	test("shown red: an exempt entry with a key other than name, reason and fill", () => {
+		const doc = clone(PAIRS);
+		const entry = (doc.exempt as Array<Record<string, unknown>>)[0];
+		if (entry === undefined) throw new Error("no exempt entry");
+		entry["why"] = "extra";
+		expect(codes(pairsShapeProblems(doc))).toEqual(["pairs-shape"]);
+	});
+
+	test("shown red: a literal that names no pair, and a duplicate pair id", () => {
+		const doc = clone(PAIRS);
+		const literal = (doc.literals as Array<Record<string, unknown>>).find(
+			(candidate) => typeof candidate["pair"] === "string",
+		);
+		if (literal === undefined) throw new Error("no pair literal");
+		literal["pair"] = "no-such-pair";
+		expect(codes(pairsShapeProblems(doc))).toEqual(["pairs-shape"]);
+		const twice = clone(PAIRS);
+		const first = twice.pairs[0];
+		if (first === undefined) throw new Error("no pair");
+		twice.pairs.push({ ...first });
+		expect(codes(pairsShapeProblems(twice))).toEqual(["pairs-shape"]);
+	});
+});
+
+describe("the proposed v5.1 palette (D-26): hermetic, all-pass, never baselined", () => {
+	test("every proposed pair meets its role threshold", () => {
+		const results = proposedResults(PAIRS);
+		expect(results.length).toBeGreaterThanOrEqual(20);
+		const failing = results.filter((result) => !result.pass);
+		expect(failing.map((r) => `${r.id} ${formatRatio(r.ratio)}:1`)).toEqual([]);
+	});
+
+	test("it holds pill text on the resting pill and on the ground, by tokens path", () => {
+		const raw = JSON.stringify(PAIRS.proposed);
+		expect(raw).not.toContain('"ref":"dark-rinse.pill-on-raised"');
+		expect(raw).toContain('"ref":"color.light.clean-white"');
+		expect(raw).toContain('"ref":"color.dark.deep-teal"');
+	});
+
+	test("the pin, the ui-spec hexes and the adopted map hexes agree", () => {
+		expect(
+			proposedConsistencyProblems(PAIRS, {
+				uiSpec: UI_SPEC,
+				tokenMap: TOKEN_MAP,
+				pin: PIN,
+			}),
+		).toEqual([]);
+	});
+
+	test("shown red: a proposed hex edited away from the spec names the ref", () => {
+		const doc = clone(PAIRS);
+		const proposed = doc.proposed as Array<{
+			fg: { ref: string; hex: string };
+		}>;
+		const target = proposed.find(
+			(row) => row.fg.ref === "color.light.deep-teal",
+		);
+		if (target === undefined) throw new Error("no deep teal row");
+		target.fg.hex = "#0A2E2C";
+		const found = proposedConsistencyProblems(doc, {
+			uiSpec: UI_SPEC,
+			tokenMap: TOKEN_MAP,
+			pin: PIN,
+		});
+		expect(found.length).toBeGreaterThan(0);
+		expect(
+			found.some((problem) =>
+				problem.message.includes("color.light.deep-teal"),
+			),
+		).toBe(true);
+	});
+
+	test("shown red: a proposed colour path the spec does not source names the path", () => {
+		const doc = clone(PAIRS);
+		const proposed = doc.proposed as Array<{
+			fg: { ref: string; hex: string };
+		}>;
+		const target = proposed.find(
+			(row) => row.fg.ref === "color.light.deep-teal",
+		);
+		if (target === undefined) throw new Error("no deep teal row");
+		target.fg.ref = "color.light.exifcleaner-teal";
+		const found = proposedConsistencyProblems(doc, {
+			uiSpec: UI_SPEC,
+			tokenMap: TOKEN_MAP,
+			pin: PIN,
+		});
+		expect(
+			found.some(
+				(problem) =>
+					problem.code === "proposed-path-unsourced" &&
+					problem.message.includes("color.light.exifcleaner-teal"),
+			),
+		).toBe(true);
+	});
+
+	test("shown red: a brandPin that is not the pinned commit", () => {
+		const doc = { ...clone(PAIRS), brandPin: "0".repeat(40) };
+		expect(
+			codes(
+				proposedConsistencyProblems(doc, {
+					uiSpec: UI_SPEC,
+					tokenMap: TOKEN_MAP,
+					pin: PIN,
+				}),
+			),
+		).toEqual(["proposed-pin-mismatch"]);
+	});
+
+	test("shown red: a proposed pair below its threshold is reported failing", () => {
+		const doc = clone(PAIRS);
+		const proposed = doc.proposed as Array<{
+			bg: { ref: string; hex: string };
+		}>;
+		const first = proposed[0];
+		if (first === undefined) throw new Error("no proposed pair");
+		first.bg = { ref: first.bg.ref, hex: "#0F766E" };
+		expect(proposedResults(doc).some((result) => !result.pass)).toBe(true);
+	});
+});
+
+describe("the BRAND.md Color: combinations ratios (G3)", () => {
+	test("twelve rows, each rounding to the quoted ratio within 0.005", () => {
+		expect(PAIRS.brandRatios).toHaveLength(12);
+		expect(brandRatioProblems(PAIRS)).toEqual([]);
+	});
+
+	test("shown red: a quoted ratio the colours do not give", () => {
+		const doc = clone(PAIRS);
+		const rows = doc.brandRatios as Array<{ ratio: string }>;
+		const first = rows[0];
+		if (first === undefined) throw new Error("no ratio row");
+		first.ratio = "14.70";
+		expect(codes(brandRatioProblems(doc))).toEqual(["brand-ratio-mismatch"]);
 	});
 });
