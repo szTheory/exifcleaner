@@ -9,10 +9,12 @@
 // `deleted` (a story now holds it).
 //
 // What a `deleted` item honestly proves: the story id exists, the story's component is the
-// item's subject, and the story's export source (plus the same-file helpers that export
-// calls) contains the item's evidence literal. It does NOT prove the story passes (the
-// Storybook light and dark projects prove that), and a literal's presence does not prove it
-// belongs to the statement making the claim. TEST-SHIFT.md states both limits.
+// item's subject, the story has a play function, and the play (plus the same-file helpers it
+// calls, comments removed) contains the item's evidence literal, which is at least four
+// characters. A literal in a comment, in `args` or in `parameters` does not count. It does NOT
+// prove the story passes (the Storybook light and dark projects prove that), and a literal's
+// presence does not prove it belongs to the statement making the claim; `covers` is
+// author-attested apart from the focus-order rule. TEST-SHIFT.md states these limits.
 //
 // This module is node only: it reaches node:fs and the typescript compiler. It is imported by
 // storybook-node tests and by catalog.mjs. `checkTestShift` is pure: the ledger and the spec
@@ -61,6 +63,7 @@ export const TEST_SHIFT_CODES = Object.freeze([
 	"duplicate-title",
 	"dynamic-title",
 	"evidence-missing",
+	"evidence-vacuous",
 	"kept-drift",
 	"missing-field",
 	"not-deleted",
@@ -77,6 +80,8 @@ const MODIFIERS = ["skip", "fixme", "only"];
 const HOOKS = ["beforeEach", "afterEach", "beforeAll", "afterAll"];
 // A note is capped so the ledger cannot become prose.
 const NOTE_LIMIT = 160;
+// A literal this short ("e") is found in nearly any play, so it proves nothing about the claim.
+const MIN_EVIDENCE = 4;
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
 const NAME_PATTERN = /^[A-Za-z_$][\w$]*$/;
 
@@ -494,14 +499,15 @@ function stringFieldProblems(where, object, key) {
 /**
  * Every live test has an entry, a kept item's code multiset equals the live expect multiset,
  * an entry whose test is gone keeps nothing, an all-deleted entry whose test remains is red,
- * and every deleted item names a story that exists, whose component is the item's subject
- * and whose export scope holds the item's evidence literal.
+ * and every deleted item names a story that exists, whose component is the item's subject,
+ * that has a play function, and whose play scope (comments removed) holds the item's
+ * evidence literal, at least four characters long.
  *
  * @param {object} inputs
  * @param {unknown} inputs.doc the parsed ledger, unvalidated
  * @param {Readonly<Record<string, string>>} inputs.specTexts spec stem to file text
  * @param {ReadonlyArray<{ id: string, component: string | null }>} [inputs.stories]
- * @param {ReadonlyMap<string, { scope: string }>} [inputs.scopes] story id to its evidence scope
+ * @param {ReadonlyMap<string, { play: string, scope: string }>} [inputs.scopes] story id to its play and evidence scope
  * @returns {Array<{ code: string, message: string, id?: string | undefined }>}
  */
 export function checkTestShift({
@@ -527,7 +533,7 @@ export function checkTestShift({
  * @param {string} spec
  * @param {any[]} entries
  * @param {ReadonlyArray<{ id: string, component: string | null }>} stories
- * @param {ReadonlyMap<string, { scope: string }>} scopes
+ * @param {ReadonlyMap<string, { play: string, scope: string }>} scopes
  */
 function storyProblems(spec, entries, stories, scopes) {
 	const byId = new Map(stories.map((story) => [story.id, story]));
@@ -558,12 +564,33 @@ function storyProblems(spec, entries, stories, scopes) {
 				);
 				continue;
 			}
-			const scope = scopes.get(item.story)?.scope ?? "";
+			const read = scopes.get(item.story);
+			if (read !== undefined && read.play === "") {
+				found.push(
+					problem(
+						"evidence-vacuous",
+						`${where}: ${item.story} has no play function, so no assertion in it can carry the claim`,
+						{ id },
+					),
+				);
+				continue;
+			}
+			if (item.evidence.length < MIN_EVIDENCE) {
+				found.push(
+					problem(
+						"evidence-vacuous",
+						`${where}: the evidence "${item.evidence}" is shorter than ${MIN_EVIDENCE} characters and would match almost any play`,
+						{ id },
+					),
+				);
+				continue;
+			}
+			const scope = read?.scope ?? "";
 			if (!scope.includes(item.evidence)) {
 				found.push(
 					problem(
 						"evidence-missing",
-						`${where}: the evidence "${item.evidence}" is not in the source of ${item.story}`,
+						`${where}: the evidence "${item.evidence}" is not in the play of ${item.story} or the same-file helpers it calls (comments, args and parameters do not count)`,
 						{ id },
 					),
 				);
@@ -574,7 +601,7 @@ function storyProblems(spec, entries, stories, scopes) {
 				found.push(
 					problem(
 						"evidence-missing",
-						`${where}: a focus-order item needs toHaveFocus in the source of ${item.story}`,
+						`${where}: a focus-order item needs toHaveFocus in the play of ${item.story}`,
 						{ id },
 					),
 				);
@@ -770,7 +797,7 @@ export function renderTestShift(doc) {
 		"- Assertions inside helper functions are invisible to the count. The six specs call two such helpers, `assertDirEffect` (throws on an unexpected directory change) and `waitForProcessing` (throws on a timeout).",
 		"- Two `afterEach` console-error guards, one in app-launch and one in metadata-inspection, sit outside any test. They stay and guard every kept test.",
 		'- A story\'s simulated Tab is not a trusted browser Tab. The accessibility test "traps focus within settings drawer when open" stays as the real-Chromium backstop for focus handling.',
-		"- A `deleted` item's evidence literal is matched by presence in the story's export source plus the same-file helpers it calls. That does not prove the literal belongs to the statement making the claim.",
+		"- A `deleted` item's evidence literal (at least four characters) is matched by presence in the story's play function plus the same-file helpers the play calls, one level deep, with comments removed. `args`, `parameters` and comments do not count, and a story with no play is rejected. Presence does not prove the literal belongs to the statement making the claim, and `covers` is author-attested apart from the focus-order rule (it needs `toHaveFocus` in the play).",
 		'- The dark-mode test "renders all components correctly in dark mode" ran a whole-document zero-opacity scan (elements with children whose computed opacity is 0) in the Electron window. The `screens-app--empty` play runs the same scan over the story canvas, so anything the Storybook harness renders outside the canvas is not scanned, and the play\'s `data-theme` assertion carries the dark half.',
 	);
 	return `${lines.join("\n")}\n`;
@@ -779,30 +806,76 @@ export function renderTestShift(doc) {
 // Slice by line and column: Babel's character offsets are not text offsets for a
 // tab-indented file (measured on all 189 stories at the time of writing).
 /**
+ * @param {string[]} lines
+ * @param {number} line
+ * @param {number} column
+ */
+function offsetOf(lines, line, column) {
+	return (
+		lines
+			.slice(0, line - 1)
+			.reduce((total, text) => total + text.length + 1, 0) + column
+	);
+}
+
+/**
  * @param {string} code
  * @param {string[]} lines
  * @param {{ start: { line: number, column: number }, end: { line: number, column: number } }} loc
  */
 function sliceOf(code, lines, loc) {
-	/** @param {number} line @param {number} column */
-	const at = (line, column) =>
-		lines
-			.slice(0, line - 1)
-			.reduce((total, text) => total + text.length + 1, 0) + column;
 	return code.slice(
-		at(loc.start.line, loc.start.column),
-		at(loc.end.line, loc.end.column),
+		offsetOf(lines, loc.start.line, loc.start.column),
+		offsetOf(lines, loc.end.line, loc.end.column),
 	);
 }
 
+/** @typedef {{ start: { line: number, column: number }, end: { line: number, column: number } }} Loc */
+
 /**
- * The evidence scope of every story in one file: the story export's own source plus the
- * same-file helper functions that export calls (one level; a helper's helpers are not
- * followed). File-level constants are not functions, so evidence that lives only in a shared
- * constant is cited by its identifier. Nothing is executed.
+ * The same slice with every comment inside it replaced by one space, so a literal that lives
+ * only in a comment is not found, and two tokens a comment separated stay separate.
+ *
+ * @param {string} code
+ * @param {string[]} lines
+ * @param {Loc} loc
+ * @param {ReadonlyArray<{ loc: Loc }>} comments in source order
+ */
+function sliceWithoutComments(code, lines, loc, comments) {
+	const end = offsetOf(lines, loc.end.line, loc.end.column);
+	let cursor = offsetOf(lines, loc.start.line, loc.start.column);
+	let out = "";
+	for (const comment of comments) {
+		const from = offsetOf(
+			lines,
+			comment.loc.start.line,
+			comment.loc.start.column,
+		);
+		const to = offsetOf(lines, comment.loc.end.line, comment.loc.end.column);
+		if (from < cursor || to > end) continue;
+		out += `${code.slice(cursor, from)} `;
+		cursor = to;
+	}
+	return out + code.slice(cursor, end);
+}
+
+/**
+ * The evidence scope of every story in one file:
+ *
+ *   own    the story export's whole source, comments included
+ *   play   the story's `play` function source with comments removed ("" when the story has
+ *          none; a play that is a same-file function name resolves to that function; a play
+ *          set on the file's meta counts)
+ *   scope  the play plus the same-file helper functions the play calls (one level; a helper's
+ *          helpers are not followed), comments removed ("" when there is no play)
+ *
+ * A deleted item's evidence must be in `scope`, so a literal in a comment, in `args` or in
+ * `parameters` is not evidence. File-level constants are not functions, so evidence that lives
+ * only in a shared constant is cited by its identifier at the place the play uses it. Nothing
+ * is executed.
  *
  * @param {string} absPath
- * @returns {Promise<Map<string, { exportName: string, own: string, scope: string }>>}
+ * @returns {Promise<Map<string, { exportName: string, own: string, play: string, scope: string }>>}
  */
 export async function storySources(absPath) {
 	const code = fs.readFileSync(absPath, "utf8");
@@ -812,6 +885,16 @@ export async function storySources(absPath) {
 			title ?? UNTITLED_SENTINEL,
 	});
 	csf.parse();
+	const tokens = /** @type {any} */ (csf)._ast.tokens;
+	if (!Array.isArray(tokens)) {
+		throw new Error(
+			`csf-tools returned no token list for ${absPath}, so comments cannot be removed`,
+		);
+	}
+	const comments = tokens.filter(
+		(/** @type {any} */ token) =>
+			token.type === "CommentLine" || token.type === "CommentBlock",
+	);
 	/** @type {Map<string, string>} */
 	const helpers = new Map();
 	for (const statement of /** @type {any} */ (csf)._ast.program.body) {
@@ -820,7 +903,10 @@ export async function storySources(absPath) {
 				? statement.declaration
 				: statement;
 		if (declaration?.type === "FunctionDeclaration" && declaration.id) {
-			helpers.set(declaration.id.name, sliceOf(code, lines, declaration.loc));
+			helpers.set(
+				declaration.id.name,
+				sliceWithoutComments(code, lines, declaration.loc, comments),
+			);
 		} else if (declaration?.type === "VariableDeclaration") {
 			for (const declarator of declaration.declarations) {
 				const isFunction =
@@ -829,24 +915,37 @@ export async function storySources(absPath) {
 				if (declarator.id?.type === "Identifier" && isFunction) {
 					helpers.set(
 						declarator.id.name,
-						sliceOf(code, lines, declaration.loc),
+						sliceWithoutComments(code, lines, declaration.loc, comments),
 					);
 				}
 			}
 		}
 	}
-	/** @type {Map<string, { exportName: string, own: string, scope: string }>} */
+	/** @type {Map<string, { exportName: string, own: string, play: string, scope: string }>} */
 	const out = new Map();
 	for (const input of csf.indexInputs) {
 		const node = csf.getStoryExport(input.exportName);
 		const own = sliceOf(code, lines, /** @type {any} */ (node).loc);
-		const called = [...helpers]
-			.filter(([name]) => NAME_PATTERN.test(name) && calls(own, name))
-			.map(([, source]) => source);
+		const annotation =
+			/** @type {any} */ (csf)._storyAnnotations[input.exportName]?.play ??
+			/** @type {any} */ (csf)._metaAnnotations?.play;
+		const play =
+			annotation === undefined
+				? ""
+				: annotation.type === "Identifier"
+					? (helpers.get(annotation.name) ?? "")
+					: sliceWithoutComments(code, lines, annotation.loc, comments);
+		const called =
+			play === ""
+				? []
+				: [...helpers]
+						.filter(([name]) => NAME_PATTERN.test(name) && calls(play, name))
+						.map(([, source]) => source);
 		out.set(input.__id, {
 			exportName: input.exportName,
 			own,
-			scope: [own, ...called].join("\n"),
+			play,
+			scope: play === "" ? "" : [play, ...called].join("\n"),
 		});
 	}
 	return out;
@@ -897,7 +996,7 @@ function deletedStoryIds(doc) {
  * @param {string} root
  * @param {ReadonlyArray<{ id: string, file: string }>} stories
  * @param {unknown} doc
- * @returns {Promise<Map<string, { exportName: string, own: string, scope: string }>>}
+ * @returns {Promise<Map<string, { exportName: string, own: string, play: string, scope: string }>>}
  */
 export async function loadStoryScopes(root, stories, doc) {
 	const wanted = new Set(deletedStoryIds(doc));

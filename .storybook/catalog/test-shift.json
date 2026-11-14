@@ -264,8 +264,8 @@
 						"story": "ui-emptystate--copy-mode-on",
 						"subject": "EmptyState",
 						"covers": "layout",
-						"evidence": "gap",
-						"note": "Actions row computed gap at least 8 (added to the story in 75-01, D-02)"
+						"evidence": "getComputedStyle(actions).gap",
+						"note": "Actions row computed gap at least 8 (added to the story in 75-01, D-02); evidence lengthened, a 3-character literal is rejected (review WR-01)"
 					},
 					{
 						"n": 9,
@@ -729,8 +729,8 @@
 						"story": "file-list-metadatafield--removed",
 						"subject": "MetadataField",
 						"covers": "text",
-						"evidence": "−",
-						"note": "Raw U+2212 character in the story; the e2e wrote it as an escape"
+						"evidence": ".metadata-field__icon",
+						"note": "The play asserts the icon text is the raw U+2212 character; the icon selector is cited since a 1-character literal is rejected (review WR-01)"
 					},
 					{
 						"n": 4,
@@ -745,8 +745,8 @@
 						"story": "file-list-metadatafield--preserved",
 						"subject": "MetadataField",
 						"covers": "text",
-						"evidence": "✓",
-						"note": "Raw U+2713 character in the story; the e2e wrote it as an escape"
+						"evidence": ".metadata-field__icon",
+						"note": "The play asserts the icon text is the raw U+2713 character; the icon selector is cited since a 1-character literal is rejected (review WR-01)"
 					}
 				]
 			}

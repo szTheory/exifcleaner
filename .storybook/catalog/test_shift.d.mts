@@ -30,11 +30,14 @@ export interface TestShiftStory {
 	component: string | null;
 }
 
-// A story's evidence scope: the export's own source, and that plus the same-file helpers it
-// calls. A deleted item's evidence literal must appear in `scope`.
+// A story's evidence scope. `own` is the export's whole source. `play` is the story's play
+// function source with comments removed ("" when the story has no play). `scope` is the play
+// plus the same-file helpers the play calls, comments removed ("" when there is no play). A
+// deleted item's evidence literal must appear in `scope`.
 export interface StoryScope {
 	exportName: string;
 	own: string;
+	play: string;
 	scope: string;
 }
 

@@ -4,6 +4,7 @@
 // no_skip.test.ts (which scans this file's raw text) stays green.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { assertDirEffect, snapshotDir } from "../../tests/helpers/dir_effect";
@@ -73,6 +74,97 @@ for (const file of listStoryFiles(repoRoot)) {
 	for (const [id, source] of await storySources(path.join(repoRoot, file))) {
 		allScopes.set(id, source);
 	}
+}
+
+// A scratch story file for the evidence-scope rules: every literal is unique, so a match can
+// only come from the place the test names. It is parsed (never run) and removed at once.
+const SCRATCH_SOURCE = [
+	'import type { Meta, StoryObj } from "@storybook/react-vite";',
+	'import { expect, within } from "storybook/test";',
+	"",
+	"function Probe(): null {",
+	"\treturn null;",
+	"}",
+	"",
+	'const meta = { title: "Scratch/Probe", component: Probe } satisfies Meta<typeof Probe>;',
+	"// Framework-mandated default export.",
+	"export default meta;",
+	"type Story = StoryObj<typeof meta>;",
+	"",
+	"// zz-comment-above-export",
+	"export const Commented: Story = {",
+	"\t// zz-comment-in-export",
+	"\tplay: async ({ canvasElement }) => {",
+	"\t\t// zz-comment-in-play",
+	'\t\tawait expect(within(canvasElement).getByText("zz-played-text")).toBeVisible();',
+	"\t\t/* zz-block-comment-in-play */",
+	"\t},",
+	"};",
+	"export const ArgsOnly: Story = {",
+	'\targs: { label: "zz-args-only" },',
+	"\tplay: async ({ canvasElement }) => {",
+	"\t\tawait expect(canvasElement).toBeVisible();",
+	"\t},",
+	"};",
+	"export const ParamsOnly: Story = {",
+	'\tparameters: { zzKey: "zz-params-only" },',
+	"\tplay: async ({ canvasElement }) => {",
+	"\t\tawait expect(canvasElement).toBeVisible();",
+	"\t},",
+	"};",
+	'export const NoPlay: Story = { args: { label: "zz-no-play" } };',
+	"export const ViaHelper: Story = {",
+	"\tplay: async ({ canvasElement }) => {",
+	"\t\tawait expectHelper(canvasElement);",
+	"\t},",
+	"};",
+	"async function expectHelper(canvasElement: HTMLElement): Promise<void> {",
+	"\t// zz-comment-in-helper",
+	'\tawait expect(canvasElement).toHaveTextContent("zz-helper-text");',
+	"}",
+	"export const NamedPlay: Story = { play: namedPlay };",
+	"async function namedPlay(): Promise<void> {",
+	"\t// zz-comment-in-named",
+	"\tawait expect(1).toBe(1);",
+	"}",
+	"export const MethodPlay: Story = {",
+	"\tasync play() {",
+	"\t\tawait expect(2).toBe(2);",
+	"\t},",
+	"};",
+	"",
+].join("\n");
+const SCRATCH_IDS = {
+	commented: "scratch-probe--commented",
+	argsOnly: "scratch-probe--args-only",
+	paramsOnly: "scratch-probe--params-only",
+	noPlay: "scratch-probe--no-play",
+	viaHelper: "scratch-probe--via-helper",
+	namedPlay: "scratch-probe--named-play",
+	methodPlay: "scratch-probe--method-play",
+} as const;
+const scratchScopes = new Map<string, StoryScope>();
+{
+	const dir = fs.mkdtempSync(path.join(os.tmpdir(), "scratch-stories-"));
+	try {
+		const file = path.join(dir, "Probe.stories.tsx");
+		fs.writeFileSync(file, SCRATCH_SOURCE);
+		for (const [id, source] of await storySources(file)) {
+			scratchScopes.set(id, source);
+		}
+	} finally {
+		fs.rmSync(dir, { recursive: true, force: true });
+	}
+}
+const SCRATCH_STORIES = Object.values(SCRATCH_IDS).map((id) => ({
+	id,
+	component: "Probe",
+}));
+
+function scratchScope(id: string): StoryScope {
+	const found = scratchScopes.get(id);
+	if (found === undefined) throw new Error(`no scratch story ${id}`);
+	return found;
 }
 
 function at<T>(items: readonly T[], index: number): T {
@@ -166,6 +258,17 @@ function deletedFixture(over: Record<string, unknown> = {}) {
 
 function codesOf(fixture: { doc: Ledger; specTexts: Record<string, string> }) {
 	return check(fixture.doc, fixture.specTexts);
+}
+
+// A deleted item citing a scratch story, checked against the real stories plus the scratch ones.
+function scratchCodes(over: Record<string, unknown>): string[] {
+	const fixture = deletedFixture({ subject: "Probe", ...over });
+	return checkTestShift({
+		doc: fixture.doc,
+		specTexts: fixture.specTexts,
+		stories: [...stories, ...SCRATCH_STORIES],
+		scopes: new Map([...allScopes, ...scratchScopes]),
+	}).map((found) => found.code);
 }
 
 const NO_GIT = (): string => {
@@ -278,6 +381,45 @@ describe("storySources", () => {
 		const persian = allScopes.get("ui-emptystate--persian-empty");
 		expect(persian?.own).toContain("getBoundingClientRect");
 		expect(persian?.own).not.toContain("toHaveFocus");
+	});
+
+	test("the play scope drops comments, args and parameters and keeps the play and its helpers", () => {
+		const commented = scratchScope(SCRATCH_IDS.commented);
+		expect(commented.scope).toContain("zz-played-text");
+		for (const hidden of [
+			"zz-comment-above-export",
+			"zz-comment-in-export",
+			"zz-comment-in-play",
+			"zz-block-comment-in-play",
+		]) {
+			expect(commented.scope, hidden).not.toContain(hidden);
+			expect(commented.play, hidden).not.toContain(hidden);
+		}
+		// `own` is the whole export, comments inside it included: it is what the play is cut from.
+		expect(commented.own).toContain("zz-comment-in-play");
+		for (const [id, literal] of [
+			[SCRATCH_IDS.argsOnly, "zz-args-only"],
+			[SCRATCH_IDS.paramsOnly, "zz-params-only"],
+		] as const) {
+			expect(scratchScope(id).own, id).toContain(literal);
+			expect(scratchScope(id).scope, id).not.toContain(literal);
+			expect(scratchScope(id).play, id).toContain("canvasElement");
+		}
+		const viaHelper = scratchScope(SCRATCH_IDS.viaHelper);
+		expect(viaHelper.scope).toContain("zz-helper-text");
+		expect(viaHelper.scope).not.toContain("zz-comment-in-helper");
+		expect(viaHelper.play).not.toContain("zz-helper-text");
+		// A play given as a same-file function name resolves to that function, and a play
+		// written as an object method is the method.
+		const named = scratchScope(SCRATCH_IDS.namedPlay);
+		expect(named.play).toContain("expect(1)");
+		expect(named.play).not.toContain("zz-comment-in-named");
+		expect(scratchScope(SCRATCH_IDS.methodPlay).play).toContain("expect(2)");
+		// No play: nothing to match, not even the story's own args.
+		const noPlay = scratchScope(SCRATCH_IDS.noPlay);
+		expect(noPlay.play).toBe("");
+		expect(noPlay.scope).toBe("");
+		expect(noPlay.own).toContain("zz-no-play");
 	});
 
 	test("loadStoryScopes reads only the files of deleted items", async () => {
@@ -613,6 +755,64 @@ const MUTANTS: Mutant[] = [
 			codesOf(deletedFixture({ evidence: "No such literal anywhere" })),
 	},
 	{
+		name: "evidence that appears only in a comment of the play",
+		code: "evidence-missing",
+		codes: () =>
+			scratchCodes({
+				story: SCRATCH_IDS.commented,
+				evidence: "zz-comment-in-play",
+			}),
+	},
+	{
+		name: "evidence that appears only in a block comment of the play",
+		code: "evidence-missing",
+		codes: () =>
+			scratchCodes({
+				story: SCRATCH_IDS.commented,
+				evidence: "zz-block-comment-in-play",
+			}),
+	},
+	{
+		name: "evidence that appears only in the args of the story",
+		code: "evidence-missing",
+		codes: () =>
+			scratchCodes({ story: SCRATCH_IDS.argsOnly, evidence: "zz-args-only" }),
+	},
+	{
+		name: "evidence that appears only in the parameters of the story",
+		code: "evidence-missing",
+		codes: () =>
+			scratchCodes({
+				story: SCRATCH_IDS.paramsOnly,
+				evidence: "zz-params-only",
+			}),
+	},
+	{
+		name: "evidence that appears only in a comment of a helper the play calls",
+		code: "evidence-missing",
+		codes: () =>
+			scratchCodes({
+				story: SCRATCH_IDS.viaHelper,
+				evidence: "zz-comment-in-helper",
+			}),
+	},
+	{
+		name: "evidence of one character",
+		code: "evidence-vacuous",
+		codes: () => codesOf(deletedFixture({ evidence: "e" })),
+	},
+	{
+		name: "evidence of three characters",
+		code: "evidence-vacuous",
+		codes: () => codesOf(deletedFixture({ evidence: "gap" })),
+	},
+	{
+		name: "a cited story with no play function",
+		code: "evidence-vacuous",
+		codes: () =>
+			scratchCodes({ story: SCRATCH_IDS.noPlay, evidence: "zz-no-play" }),
+	},
+	{
 		name: "a kept code that no longer matches the live expect",
 		code: "kept-drift",
 		codes: () => {
@@ -729,14 +929,37 @@ describe("every rule code is shown red by its own mutant", () => {
 		);
 	});
 
+	test("evidence in the play, in a helper the play calls, or four characters long is clean", () => {
+		// The positive controls of the scope rules: the same stories, evidence the rule accepts.
+		expect(
+			scratchCodes({
+				story: SCRATCH_IDS.commented,
+				evidence: "zz-played-text",
+			}),
+		).toEqual([]);
+		expect(
+			scratchCodes({
+				story: SCRATCH_IDS.viaHelper,
+				evidence: "zz-helper-text",
+			}),
+		).toEqual([]);
+		expect(
+			scratchCodes({ story: SCRATCH_IDS.namedPlay, evidence: "expect(1)" }),
+		).toEqual([]);
+		expect(
+			scratchCodes({ story: SCRATCH_IDS.methodPlay, evidence: "expect(2)" }),
+		).toEqual([]);
+		expect(codesOf(deletedFixture({ evidence: "Add " }))).toEqual([]);
+	});
+
 	test("the mutant codes are exactly TEST_SHIFT_CODES", () => {
 		expect([...new Set(MUTANTS.map((mutant) => mutant.code))].sort()).toEqual([
 			...TEST_SHIFT_CODES,
 		]);
 	});
 
-	test("TEST_SHIFT_CODES is 21 frozen codes sorted by code unit", () => {
-		expect(TEST_SHIFT_CODES).toHaveLength(21);
+	test("TEST_SHIFT_CODES is 22 frozen codes sorted by code unit", () => {
+		expect(TEST_SHIFT_CODES).toHaveLength(22);
 		expect(Object.isFrozen(TEST_SHIFT_CODES)).toBe(true);
 		expect([...TEST_SHIFT_CODES]).toEqual([...TEST_SHIFT_CODES].sort());
 		expect(Object.isFrozen(LEDGER_SPECS)).toBe(true);
@@ -1048,6 +1271,69 @@ describe("catalog.mjs --check against a temp git repository", () => {
 			plantDeleted(repo, { evidence: "No such literal anywhere" });
 			const before = snapshotDir(repo);
 			expectRed(run(repo, ["--check", "--base", "main"]), ["evidence-missing"]);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: evidence of one character fails with evidence-vacuous and changes nothing", () => {
+		withRepo((repo) => {
+			plantDeleted(repo, { evidence: "e" });
+			const before = snapshotDir(repo);
+			expectRed(run(repo, ["--check", "--base", "main"]), ["evidence-vacuous"]);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: evidence only in a comment of the play fails with evidence-missing and changes nothing", () => {
+		withRepo((repo) => {
+			plantDeleted(repo, { evidence: "zz-comment-only-literal" });
+			plant(
+				repo,
+				"src/renderer/components/screens/App.stories.tsx",
+				(original) =>
+					original.replace(
+						"// Tab order: Choose files, Choose folder, then the settings gear.",
+						"// Tab order: Choose files, Choose folder, then the settings gear.\n\t\t// zz-comment-only-literal",
+					),
+			);
+			const before = snapshotDir(repo);
+			expectRed(run(repo, ["--check", "--base", "main"]), ["evidence-missing"]);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: evidence only in the parameters of the story fails with evidence-missing and changes nothing", () => {
+		withRepo((repo) => {
+			plantDeleted(repo, { evidence: "zz-params-only-literal" });
+			plant(
+				repo,
+				"src/renderer/components/screens/App.stories.tsx",
+				(original) =>
+					original.replace(
+						'parameters: { a11y: knownA11y("screens-app--empty") },',
+						'parameters: { a11y: knownA11y("screens-app--empty"), zzKey: "zz-params-only-literal" },',
+					),
+			);
+			const before = snapshotDir(repo);
+			expectRed(run(repo, ["--check", "--base", "main"]), ["evidence-missing"]);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: a cited story with no play function fails with evidence-vacuous and changes nothing", () => {
+		withRepo((repo) => {
+			plantDeleted(repo, {});
+			plant(
+				repo,
+				"src/renderer/components/screens/App.stories.tsx",
+				(original) =>
+					original.replace(
+						"play: async ({ canvasElement, globals }) => {",
+						"notAPlay: async ({ canvasElement, globals }) => {",
+					),
+			);
+			const before = snapshotDir(repo);
+			expectRed(run(repo, ["--check", "--base", "main"]), ["evidence-vacuous"]);
 			assertDirEffect(before, snapshotDir(repo), {});
 		});
 	});

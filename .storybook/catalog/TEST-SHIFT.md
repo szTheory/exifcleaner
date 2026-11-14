@@ -73,7 +73,7 @@ One row per `expect(`, `expect.soft(` or `expect.poll(` call inside a test callb
 | 5 | deleted | expect(emptyState.locator(".empty-state__button--secondary")).toHaveText("Choose folder…") | screens-app--empty | text | Choose folder… |  |
 | 6 | deleted | expect(outputMode).toHaveText(/Cleaned copies will be created — originals stay untouched\.\|Files will be cleaned in place\./) | screens-app--empty-copy-mode | text | Cleaned copies will be created | Real DropZone settings.get effect via mockApi.settings (review WR-03); the in-place sentence is COPY_OFF in ui-emptystate--copy-mode-off |
 | 7 | deleted | expect(metrics.buttonHeights.every((height) => height >= 40)).toBe(true) | ui-emptystate--copy-mode-on | layout | getBoundingClientRect | Both buttons at least 40 high, measured in real Chromium (added to the story in 75-01, D-02) |
-| 8 | deleted | expect(metrics.gap).toBeGreaterThanOrEqual(8) | ui-emptystate--copy-mode-on | layout | gap | Actions row computed gap at least 8 (added to the story in 75-01, D-02) |
+| 8 | deleted | expect(metrics.gap).toBeGreaterThanOrEqual(8) | ui-emptystate--copy-mode-on | layout | getComputedStyle(actions).gap | Actions row computed gap at least 8 (added to the story in 75-01, D-02); evidence lengthened, a 3-character literal is rejected (review WR-01) |
 | 9 | deleted | expect(metrics.buttonBackgrounds[0]).not.toBe(metrics.buttonBackgrounds[1]) | ui-emptystate--copy-mode-on | layout | backgroundColor | Primary and secondary backgroundColor differ (added to the story in 75-01, D-02) |
 
 ### keeps first-run content usable at 200% zoom
@@ -224,9 +224,9 @@ Title kept per D-04 (never retitle a kept test; no journey pins it). It overclai
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | kept | expect(expansion).toBeVisible() | real-electron |  |  |  |
 | 2 | kept | expect(removedCount).toBeGreaterThan(0) | filesystem |  |  |  |
-| 3 | deleted | expect(iconText).toBe("\u2212") | file-list-metadatafield--removed | text | − | Raw U+2212 character in the story; the e2e wrote it as an escape |
+| 3 | deleted | expect(iconText).toBe("\u2212") | file-list-metadatafield--removed | text | .metadata-field__icon | The play asserts the icon text is the raw U+2212 character; the icon selector is cited since a 1-character literal is rejected (review WR-01) |
 | 4 | kept | expect(preservedCount).toBeGreaterThan(0) | filesystem |  |  |  |
-| 5 | deleted | expect(preservedIconText).toBe("\u2713") | file-list-metadatafield--preserved | text | ✓ | Raw U+2713 character in the story; the e2e wrote it as an escape |
+| 5 | deleted | expect(preservedIconText).toBe("\u2713") | file-list-metadatafield--preserved | text | .metadata-field__icon | The play asserts the icon text is the raw U+2713 character; the icon selector is cited since a 1-character literal is rejected (review WR-01) |
 
 ## Known limits
 
@@ -234,5 +234,5 @@ Title kept per D-04 (never retitle a kept test; no journey pins it). It overclai
 - Assertions inside helper functions are invisible to the count. The six specs call two such helpers, `assertDirEffect` (throws on an unexpected directory change) and `waitForProcessing` (throws on a timeout).
 - Two `afterEach` console-error guards, one in app-launch and one in metadata-inspection, sit outside any test. They stay and guard every kept test.
 - A story's simulated Tab is not a trusted browser Tab. The accessibility test "traps focus within settings drawer when open" stays as the real-Chromium backstop for focus handling.
-- A `deleted` item's evidence literal is matched by presence in the story's export source plus the same-file helpers it calls. That does not prove the literal belongs to the statement making the claim.
+- A `deleted` item's evidence literal (at least four characters) is matched by presence in the story's play function plus the same-file helpers the play calls, one level deep, with comments removed. `args`, `parameters` and comments do not count, and a story with no play is rejected. Presence does not prove the literal belongs to the statement making the claim, and `covers` is author-attested apart from the focus-order rule (it needs `toHaveFocus` in the play).
 - The dark-mode test "renders all components correctly in dark mode" ran a whole-document zero-opacity scan (elements with children whose computed opacity is 0) in the Electron window. The `screens-app--empty` play runs the same scan over the story canvas, so anything the Storybook harness renders outside the canvas is not scanned, and the play's `data-theme` assertion carries the dark half.
