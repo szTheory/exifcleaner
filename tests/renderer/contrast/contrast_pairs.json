@@ -1,0 +1,25 @@
+{
+	"schemaVersion": 1,
+	"brandPin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+	"surfaces": [
+		"--ec-color-bg",
+		"--ec-color-surface",
+		"--ec-color-error-bg"
+	],
+	"overlays": [],
+	"localTokens": {},
+	"pairs": [
+		{
+			"id": "text-secondary",
+			"fg": "--ec-color-text-secondary",
+			"on": "surfaces",
+			"role": "text",
+			"selector": ".file-table__header",
+			"story": "file-list-filetable--mixed-statuses"
+		}
+	],
+	"literals": [],
+	"exempt": [],
+	"proposed": [],
+	"brandRatios": []
+}
