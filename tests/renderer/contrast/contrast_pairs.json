@@ -1,0 +1,1050 @@
+{
+	"schemaVersion": 1,
+	"brandPin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+	"surfaces": [
+		"--ec-color-bg",
+		"--ec-color-surface",
+		"--ec-color-error-bg",
+		"item-hover"
+	],
+	"overlays": [
+		{
+			"id": "gold-bg",
+			"layers": [
+				"--ec-color-bg",
+				"--ec-color-gold-bg"
+			]
+		},
+		{
+			"id": "item-hover",
+			"layers": [
+				"--ec-color-surface",
+				"rgba(0, 0, 0, 0.04)"
+			]
+		},
+		{
+			"id": "neutral-pill-over-bg",
+			"layers": [
+				"--ec-color-bg",
+				"rgba(157, 167, 182, 0.1)"
+			]
+		},
+		{
+			"id": "neutral-pill-over-surface",
+			"layers": [
+				"--ec-color-surface",
+				"rgba(157, 167, 182, 0.1)"
+			]
+		},
+		{
+			"id": "pill-dng-bg-over-bg",
+			"layers": [
+				"--ec-color-bg",
+				"--ec-pill-dng-bg"
+			]
+		},
+		{
+			"id": "pill-dng-bg-over-surface",
+			"layers": [
+				"--ec-color-surface",
+				"--ec-pill-dng-bg"
+			]
+		},
+		{
+			"id": "pill-heic-bg-over-bg",
+			"layers": [
+				"--ec-color-bg",
+				"--ec-pill-heic-bg"
+			]
+		},
+		{
+			"id": "pill-heic-bg-over-surface",
+			"layers": [
+				"--ec-color-surface",
+				"--ec-pill-heic-bg"
+			]
+		},
+		{
+			"id": "pill-jpg-bg-over-bg",
+			"layers": [
+				"--ec-color-bg",
+				"--ec-pill-jpg-bg"
+			]
+		},
+		{
+			"id": "pill-jpg-bg-over-surface",
+			"layers": [
+				"--ec-color-surface",
+				"--ec-pill-jpg-bg"
+			]
+		},
+		{
+			"id": "pill-mov-bg-over-bg",
+			"layers": [
+				"--ec-color-bg",
+				"--ec-pill-mov-bg"
+			]
+		},
+		{
+			"id": "pill-mov-bg-over-surface",
+			"layers": [
+				"--ec-color-surface",
+				"--ec-pill-mov-bg"
+			]
+		},
+		{
+			"id": "pill-pdf-bg-over-bg",
+			"layers": [
+				"--ec-color-bg",
+				"--ec-pill-pdf-bg"
+			]
+		},
+		{
+			"id": "pill-pdf-bg-over-surface",
+			"layers": [
+				"--ec-color-surface",
+				"--ec-pill-pdf-bg"
+			]
+		},
+		{
+			"id": "pill-png-bg-over-bg",
+			"layers": [
+				"--ec-color-bg",
+				"--ec-pill-png-bg"
+			]
+		},
+		{
+			"id": "pill-png-bg-over-surface",
+			"layers": [
+				"--ec-color-surface",
+				"--ec-pill-png-bg"
+			]
+		},
+		{
+			"id": "preserved-bg",
+			"layers": [
+				"--ec-color-surface",
+				"--ec-color-preserved-bg"
+			]
+		},
+		{
+			"id": "removed-bg",
+			"layers": [
+				"--ec-color-surface",
+				"--ec-color-removed-bg"
+			]
+		}
+	],
+	"localTokens": {
+		"--empty-state-secondary": {
+			"light": "#59677b",
+			"dark": "#94949b"
+		}
+	},
+	"pairs": [
+		{
+			"id": "text",
+			"fg": "--ec-color-text",
+			"on": "surfaces",
+			"role": "text",
+			"selector": ".app, .metadata-field__name",
+			"story": "file-list-filetable--mixed-statuses"
+		},
+		{
+			"id": "text-secondary",
+			"fg": "--ec-color-text-secondary",
+			"on": "surfaces",
+			"role": "text",
+			"selector": ".file-table__header",
+			"story": "file-list-filetable--mixed-statuses"
+		},
+		{
+			"id": "muted",
+			"fg": "--ec-color-muted",
+			"on": "surfaces",
+			"role": "text",
+			"selector": ".file-table__cell--muted, .folder-row__count",
+			"story": "file-list-folderrow--complete-collapsed"
+		},
+		{
+			"id": "accent-text",
+			"fg": "--ec-color-accent",
+			"on": "surfaces",
+			"role": "text",
+			"selector": ".status-bar__button, .language-dropdown__item--selected, .error-boundary__button",
+			"story": "ui-statusbar--all-cleaned"
+		},
+		{
+			"id": "error-text",
+			"fg": "--ec-color-error",
+			"on": "surfaces",
+			"role": "text",
+			"selector": ".error-boundary__message",
+			"story": "ui-errorboundary--fallback"
+		},
+		{
+			"id": "empty-state-secondary",
+			"fg": "--empty-state-secondary",
+			"on": "surfaces",
+			"role": "text",
+			"selector": ".empty-state__instruction, .empty-state__output-mode",
+			"story": "ui-emptystate--copy-mode-on"
+		},
+		{
+			"id": "text-removed",
+			"fg": "--ec-color-text",
+			"on": [
+				"removed-bg"
+			],
+			"role": "text",
+			"selector": ".metadata-field--removed .metadata-field__name",
+			"story": "file-list-metadataexpansion--mixed"
+		},
+		{
+			"id": "text-preserved",
+			"fg": "--ec-color-text",
+			"on": [
+				"preserved-bg"
+			],
+			"role": "text",
+			"selector": ".metadata-field--preserved .metadata-field__name",
+			"story": "file-list-metadataexpansion--mixed"
+		},
+		{
+			"id": "text-secondary-removed",
+			"fg": "--ec-color-text-secondary",
+			"on": [
+				"removed-bg"
+			],
+			"role": "text",
+			"selector": ".metadata-field--removed .metadata-field__value",
+			"story": "file-list-metadataexpansion--mixed"
+		},
+		{
+			"id": "text-secondary-preserved",
+			"fg": "--ec-color-text-secondary",
+			"on": [
+				"preserved-bg"
+			],
+			"role": "text",
+			"selector": ".metadata-field--preserved .metadata-field__value",
+			"story": "file-list-metadataexpansion--mixed"
+		},
+		{
+			"id": "pill-jpg",
+			"fg": "--ec-pill-jpg-text",
+			"on": [
+				"pill-jpg-bg-over-bg",
+				"pill-jpg-bg-over-surface"
+			],
+			"role": "text",
+			"selector": ".type-pill--jpg, .type-pill--jpeg",
+			"story": "ui-typepill--jpeg"
+		},
+		{
+			"id": "pill-heic",
+			"fg": "--ec-pill-heic-text",
+			"on": [
+				"pill-heic-bg-over-bg",
+				"pill-heic-bg-over-surface"
+			],
+			"role": "text",
+			"selector": ".type-pill--heic, .type-pill--heif",
+			"story": "ui-typepill--heic"
+		},
+		{
+			"id": "pill-png",
+			"fg": "--ec-pill-png-text",
+			"on": [
+				"pill-png-bg-over-bg",
+				"pill-png-bg-over-surface"
+			],
+			"role": "text",
+			"selector": ".type-pill--png",
+			"story": "ui-typepill--png"
+		},
+		{
+			"id": "pill-pdf",
+			"fg": "--ec-pill-pdf-text",
+			"on": [
+				"pill-pdf-bg-over-bg",
+				"pill-pdf-bg-over-surface"
+			],
+			"role": "text",
+			"selector": ".type-pill--pdf",
+			"story": "ui-typepill--pdf"
+		},
+		{
+			"id": "pill-mov",
+			"fg": "--ec-pill-mov-text",
+			"on": [
+				"pill-mov-bg-over-bg",
+				"pill-mov-bg-over-surface"
+			],
+			"role": "text",
+			"selector": ".type-pill--mov, .type-pill--mp4",
+			"story": "ui-typepill--media"
+		},
+		{
+			"id": "pill-dng",
+			"fg": "--ec-pill-dng-text",
+			"on": [
+				"pill-dng-bg-over-bg",
+				"pill-dng-bg-over-surface"
+			],
+			"role": "text",
+			"selector": ".type-pill--dng, .type-pill--cr2",
+			"story": "ui-typepill--raw"
+		},
+		{
+			"id": "neutral-pill",
+			"fg": "--ec-color-muted",
+			"on": [
+				"neutral-pill-over-bg",
+				"neutral-pill-over-surface"
+			],
+			"role": "text",
+			"selector": ".type-pill",
+			"story": "ui-typepill--neutral"
+		},
+		{
+			"id": "button-primary",
+			"fg": "#fff",
+			"on": [
+				"#006bd6"
+			],
+			"role": "text",
+			"selector": ".empty-state__button--primary",
+			"story": "ui-emptystate--copy-mode-on"
+		},
+		{
+			"id": "button-primary-hover",
+			"fg": "#fff",
+			"on": [
+				"#005ab8"
+			],
+			"role": "text",
+			"selector": ".empty-state__button--primary:hover",
+			"story": "ui-emptystate--copy-mode-on"
+		},
+		{
+			"id": "selection",
+			"fg": "white",
+			"on": [
+				"--ec-color-accent"
+			],
+			"role": "text",
+			"selector": "::selection",
+			"story": "file-list-filetable--mixed-statuses"
+		},
+		{
+			"id": "toast-text",
+			"fg": "--ec-color-bg",
+			"on": [
+				"--ec-color-text"
+			],
+			"role": "text",
+			"selector": ".toast",
+			"story": "ui-toast--copied"
+		},
+		{
+			"id": "success-icon",
+			"fg": "--ec-color-success",
+			"on": "surfaces",
+			"role": "non-text",
+			"selector": ".status-icon__check",
+			"story": "ui-statusicon--complete"
+		},
+		{
+			"id": "success-icon-preserved",
+			"fg": "--ec-color-success",
+			"on": [
+				"preserved-bg"
+			],
+			"role": "non-text",
+			"selector": ".metadata-field--preserved .metadata-field__icon",
+			"story": "file-list-metadataexpansion--mixed"
+		},
+		{
+			"id": "spinner",
+			"fg": "--ec-color-muted",
+			"on": [
+				"--ec-color-bg"
+			],
+			"role": "non-text",
+			"selector": ".status-icon__spinner",
+			"story": "ui-statusicon--processing"
+		},
+		{
+			"id": "drop-zone-border",
+			"fg": "--ec-color-gold",
+			"on": [
+				"gold-bg"
+			],
+			"role": "non-text",
+			"selector": ".drop-zone--active",
+			"story": "ui-dropzone--drag-over"
+		},
+		{
+			"id": "toggle-off-track",
+			"fg": "--ec-toggle-off-track",
+			"on": [
+				"--ec-color-bg",
+				"--ec-color-surface"
+			],
+			"role": "non-text",
+			"selector": ".toggle-switch__track",
+			"story": "settings-toggleswitch--off"
+		},
+		{
+			"id": "toggle-thumb-off",
+			"fg": "#ffffff",
+			"on": [
+				"--ec-toggle-off-track"
+			],
+			"role": "non-text",
+			"selector": ".toggle-switch__thumb",
+			"story": "settings-toggleswitch--off"
+		},
+		{
+			"id": "toggle-thumb-on",
+			"fg": "#ffffff",
+			"on": [
+				"--ec-color-accent"
+			],
+			"role": "non-text",
+			"selector": ".toggle-switch__track--on .toggle-switch__thumb",
+			"story": "settings-toggleswitch--on"
+		},
+		{
+			"id": "error-icon",
+			"fg": "--ec-color-error",
+			"on": "surfaces",
+			"role": "non-text",
+			"selector": ".status-icon__error",
+			"story": "ui-statusicon--failed"
+		},
+		{
+			"id": "error-icon-removed",
+			"fg": "--ec-color-error",
+			"on": [
+				"removed-bg"
+			],
+			"role": "non-text",
+			"selector": ".metadata-field--removed .metadata-field__icon",
+			"story": "file-list-metadataexpansion--mixed"
+		},
+		{
+			"id": "focus-ring",
+			"fg": "--ec-color-accent",
+			"on": "surfaces",
+			"role": "focus",
+			"selector": ":focus-visible",
+			"story": "settings-segmentedcontrol--keyboard-focus"
+		}
+	],
+	"literals": [
+		{
+			"value": "#005ab8",
+			"files": [
+				"empty_state.css"
+			],
+			"pair": "button-primary-hover"
+		},
+		{
+			"value": "#006bd6",
+			"files": [
+				"empty_state.css"
+			],
+			"pair": "button-primary"
+		},
+		{
+			"value": "#59677b",
+			"files": [
+				"empty_state.css"
+			],
+			"pair": "empty-state-secondary"
+		},
+		{
+			"value": "#94949b",
+			"files": [
+				"empty_state.css"
+			],
+			"pair": "empty-state-secondary"
+		},
+		{
+			"value": "#fff",
+			"files": [
+				"empty_state.css"
+			],
+			"pair": "button-primary"
+		},
+		{
+			"value": "#ffffff",
+			"files": [
+				"toggle_switch.css"
+			],
+			"pair": "toggle-thumb-off"
+		},
+		{
+			"value": "rgba(0, 0, 0, 0)",
+			"files": [
+				"settings_drawer.css"
+			],
+			"exempt": "The drawer scrim before it fades in: fully transparent, it paints nothing."
+		},
+		{
+			"value": "rgba(0, 0, 0, 0.04)",
+			"files": [
+				"language_dropdown.css"
+			],
+			"pair": "text-secondary"
+		},
+		{
+			"value": "rgba(0, 0, 0, 0.08)",
+			"files": [
+				"language_dropdown.css"
+			],
+			"exempt": "A box-shadow colour: it adds depth only and carries no information."
+		},
+		{
+			"value": "rgba(0, 0, 0, 0.1)",
+			"files": [
+				"segmented_control.css"
+			],
+			"exempt": "A box-shadow colour: it adds depth only and carries no information."
+		},
+		{
+			"value": "rgba(0, 0, 0, 0.15)",
+			"files": [
+				"toggle_switch.css"
+			],
+			"exempt": "A box-shadow colour: it adds depth only and carries no information."
+		},
+		{
+			"value": "rgba(0, 0, 0, 0.3)",
+			"files": [
+				"language_dropdown.css",
+				"toggle_switch.css"
+			],
+			"exempt": "A box-shadow colour: it adds depth only and carries no information."
+		},
+		{
+			"value": "rgba(0, 0, 0, var(--ec-backdrop-opacity))",
+			"files": [
+				"settings_drawer.css"
+			],
+			"exempt": "The settings drawer scrim: its alpha is the exempt --ec-backdrop-opacity, a non-text dimming layer that carries no information."
+		},
+		{
+			"value": "rgba(157, 167, 182, 0.1)",
+			"files": [
+				"type_pill.css"
+			],
+			"pair": "neutral-pill"
+		},
+		{
+			"value": "transparent",
+			"files": [
+				"drop_zone.css",
+				"error_boundary.css",
+				"file_table.css",
+				"metadata_expansion.css",
+				"segmented_control.css",
+				"status_icon.css"
+			],
+			"exempt": "Paints nothing, so there is no colour to measure."
+		},
+		{
+			"value": "white",
+			"files": [
+				"tokens.css"
+			],
+			"pair": "selection"
+		}
+	],
+	"exempt": [
+		{
+			"name": "--ec-backdrop-opacity",
+			"reason": "The alpha of the settings drawer scrim, not a colour: it dims the content behind the drawer and carries no information.",
+			"fill": "Painted as the alpha of the settings-drawer scrim rgba(0, 0, 0, var(--ec-backdrop-opacity)) (settings_drawer.css:37), a non-text dimming layer behind the drawer that carries no information."
+		},
+		{
+			"name": "--ec-border-status-bar",
+			"reason": "The status bar's top border (transparent in the light theme, the border colour in the dark theme) separates two regions that are each labelled; it carries no information."
+		},
+		{
+			"name": "--ec-color-border",
+			"reason": "Hairline dividers (the 1 px borders of rows, cards and controls) carry no information that a label does not also carry: every bordered control is labelled, so SC 1.4.11 does not apply to the line.",
+			"fill": "Painted as a fill by the 1 px language-dropdown separator (language_dropdown.css:105), a divider between labelled items that carries no information."
+		},
+		{
+			"name": "--ec-color-info",
+			"reason": "Declared in tokens.css and used nowhere in src/renderer, so no pixel is painted with it; token_map.json retires it for v5.1."
+		},
+		{
+			"name": "--ec-shadow-drawer",
+			"reason": "A shadow colour, not a foreground or a backdrop: the settings drawer's drop shadow adds depth only and carries no information."
+		}
+	],
+	"proposed": [
+		{
+			"id": "light-text-on-clean-white",
+			"role": "text",
+			"fg": {
+				"ref": "color.light.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"bg": {
+				"ref": "color.light.clean-white",
+				"hex": "#FFFFFF"
+			}
+		},
+		{
+			"id": "light-text-on-rinse",
+			"role": "text",
+			"fg": {
+				"ref": "color.light.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"bg": {
+				"ref": "color.light.rinse",
+				"hex": "#EEF6F5"
+			}
+		},
+		{
+			"id": "light-secondary-on-clean-white",
+			"role": "text",
+			"fg": {
+				"ref": "color.secondary.pewter",
+				"hex": "#4A625F"
+			},
+			"bg": {
+				"ref": "color.light.clean-white",
+				"hex": "#FFFFFF"
+			}
+		},
+		{
+			"id": "light-secondary-on-rinse",
+			"role": "text",
+			"fg": {
+				"ref": "color.secondary.pewter",
+				"hex": "#4A625F"
+			},
+			"bg": {
+				"ref": "color.light.rinse",
+				"hex": "#EEF6F5"
+			}
+		},
+		{
+			"id": "light-action-on-clean-white",
+			"role": "text",
+			"fg": {
+				"ref": "color.light.steady-teal",
+				"hex": "#0F766E"
+			},
+			"bg": {
+				"ref": "color.light.clean-white",
+				"hex": "#FFFFFF"
+			}
+		},
+		{
+			"id": "light-action-on-rinse",
+			"role": "text",
+			"fg": {
+				"ref": "color.light.steady-teal",
+				"hex": "#0F766E"
+			},
+			"bg": {
+				"ref": "color.light.rinse",
+				"hex": "#EEF6F5"
+			}
+		},
+		{
+			"id": "light-button-text-on-action",
+			"role": "text",
+			"fg": {
+				"ref": "color.light.clean-white",
+				"hex": "#FFFFFF"
+			},
+			"bg": {
+				"ref": "color.light.steady-teal",
+				"hex": "#0F766E"
+			}
+		},
+		{
+			"id": "light-pill-text-on-rinse",
+			"role": "text",
+			"fg": {
+				"ref": "color.light.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"bg": {
+				"ref": "color.light.rinse",
+				"hex": "#EEF6F5"
+			}
+		},
+		{
+			"id": "light-pill-text-on-ground",
+			"role": "text",
+			"fg": {
+				"ref": "color.light.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"bg": {
+				"ref": "color.light.clean-white",
+				"hex": "#FFFFFF"
+			}
+		},
+		{
+			"id": "light-text-on-pressed",
+			"role": "text",
+			"fg": {
+				"ref": "color.light.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"bg": {
+				"ref": "dark-rinse.pressed-light",
+				"hex": "#DCE6E5"
+			}
+		},
+		{
+			"id": "light-focus-on-clean-white",
+			"role": "focus",
+			"fg": {
+				"ref": "platform-owned.platform.accent-fallback",
+				"hex": "#007AFF"
+			},
+			"bg": {
+				"ref": "color.light.clean-white",
+				"hex": "#FFFFFF"
+			}
+		},
+		{
+			"id": "light-focus-on-rinse",
+			"role": "focus",
+			"fg": {
+				"ref": "platform-owned.platform.accent-fallback",
+				"hex": "#007AFF"
+			},
+			"bg": {
+				"ref": "color.light.rinse",
+				"hex": "#EEF6F5"
+			}
+		},
+		{
+			"id": "light-error-icon-on-clean-white",
+			"role": "non-text",
+			"fg": {
+				"ref": "platform-owned.platform.error-icon-light",
+				"hex": "#FF3B30"
+			},
+			"bg": {
+				"ref": "color.light.clean-white",
+				"hex": "#FFFFFF"
+			}
+		},
+		{
+			"id": "light-error-icon-on-rinse",
+			"role": "non-text",
+			"fg": {
+				"ref": "platform-owned.platform.error-icon-light",
+				"hex": "#FF3B30"
+			},
+			"bg": {
+				"ref": "color.light.rinse",
+				"hex": "#EEF6F5"
+			}
+		},
+		{
+			"id": "dark-text-on-deep-teal",
+			"role": "text",
+			"fg": {
+				"ref": "color.dark.clean-white",
+				"hex": "#FFFFFF"
+			},
+			"bg": {
+				"ref": "color.dark.deep-teal",
+				"hex": "#0A2E2B"
+			}
+		},
+		{
+			"id": "dark-text-on-tide",
+			"role": "text",
+			"fg": {
+				"ref": "color.dark.clean-white",
+				"hex": "#FFFFFF"
+			},
+			"bg": {
+				"ref": "color.dark.tide",
+				"hex": "#12403C"
+			}
+		},
+		{
+			"id": "dark-secondary-on-deep-teal",
+			"role": "text",
+			"fg": {
+				"ref": "color.secondary.fog",
+				"hex": "#A9C9C4"
+			},
+			"bg": {
+				"ref": "color.dark.deep-teal",
+				"hex": "#0A2E2B"
+			}
+		},
+		{
+			"id": "dark-secondary-on-tide",
+			"role": "text",
+			"fg": {
+				"ref": "color.secondary.fog",
+				"hex": "#A9C9C4"
+			},
+			"bg": {
+				"ref": "color.dark.tide",
+				"hex": "#12403C"
+			}
+		},
+		{
+			"id": "dark-action-on-deep-teal",
+			"role": "text",
+			"fg": {
+				"ref": "color.dark.seafoam",
+				"hex": "#5EEAD4"
+			},
+			"bg": {
+				"ref": "color.dark.deep-teal",
+				"hex": "#0A2E2B"
+			}
+		},
+		{
+			"id": "dark-action-on-tide",
+			"role": "text",
+			"fg": {
+				"ref": "color.dark.seafoam",
+				"hex": "#5EEAD4"
+			},
+			"bg": {
+				"ref": "color.dark.tide",
+				"hex": "#12403C"
+			}
+		},
+		{
+			"id": "dark-button-text-on-action",
+			"role": "text",
+			"fg": {
+				"ref": "color.dark.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"bg": {
+				"ref": "color.dark.seafoam",
+				"hex": "#5EEAD4"
+			}
+		},
+		{
+			"id": "dark-pill-text-on-tide",
+			"role": "text",
+			"fg": {
+				"ref": "color.secondary.fog",
+				"hex": "#A9C9C4"
+			},
+			"bg": {
+				"ref": "color.dark.tide",
+				"hex": "#12403C"
+			}
+		},
+		{
+			"id": "dark-pill-text-on-ground",
+			"role": "text",
+			"fg": {
+				"ref": "color.secondary.fog",
+				"hex": "#A9C9C4"
+			},
+			"bg": {
+				"ref": "color.dark.deep-teal",
+				"hex": "#0A2E2B"
+			}
+		},
+		{
+			"id": "dark-text-on-pressed",
+			"role": "text",
+			"fg": {
+				"ref": "color.dark.clean-white",
+				"hex": "#FFFFFF"
+			},
+			"bg": {
+				"ref": "dark-rinse.pressed-dark",
+				"hex": "#2E5753"
+			}
+		},
+		{
+			"id": "dark-focus-on-deep-teal",
+			"role": "focus",
+			"fg": {
+				"ref": "platform-owned.platform.accent-fallback",
+				"hex": "#007AFF"
+			},
+			"bg": {
+				"ref": "color.dark.deep-teal",
+				"hex": "#0A2E2B"
+			}
+		},
+		{
+			"id": "dark-error-icon-on-deep-teal",
+			"role": "non-text",
+			"fg": {
+				"ref": "platform-owned.platform.error-icon-dark",
+				"hex": "#FF453A"
+			},
+			"bg": {
+				"ref": "color.dark.deep-teal",
+				"hex": "#0A2E2B"
+			}
+		},
+		{
+			"id": "dark-error-icon-on-tide",
+			"role": "non-text",
+			"fg": {
+				"ref": "platform-owned.platform.error-icon-dark",
+				"hex": "#FF453A"
+			},
+			"bg": {
+				"ref": "color.dark.tide",
+				"hex": "#12403C"
+			}
+		}
+	],
+	"brandRatios": [
+		{
+			"fg": {
+				"ref": "color.light.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"bg": {
+				"ref": "color.light.clean-white",
+				"hex": "#FFFFFF"
+			},
+			"ratio": "14.60"
+		},
+		{
+			"fg": {
+				"ref": "color.secondary.pewter",
+				"hex": "#4A625F"
+			},
+			"bg": {
+				"ref": "color.light.clean-white",
+				"hex": "#FFFFFF"
+			},
+			"ratio": "6.56"
+		},
+		{
+			"fg": {
+				"ref": "color.light.steady-teal",
+				"hex": "#0F766E"
+			},
+			"bg": {
+				"ref": "color.light.clean-white",
+				"hex": "#FFFFFF"
+			},
+			"ratio": "5.47"
+		},
+		{
+			"fg": {
+				"ref": "color.light.clean-white",
+				"hex": "#FFFFFF"
+			},
+			"bg": {
+				"ref": "color.light.steady-teal",
+				"hex": "#0F766E"
+			},
+			"ratio": "5.47"
+		},
+		{
+			"fg": {
+				"ref": "color.light.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"bg": {
+				"ref": "color.light.rinse",
+				"hex": "#EEF6F5"
+			},
+			"ratio": "13.30"
+		},
+		{
+			"fg": {
+				"ref": "color.light.clean-white",
+				"hex": "#FFFFFF"
+			},
+			"bg": {
+				"ref": "color.light.exifcleaner-teal",
+				"hex": "#0D9488"
+			},
+			"ratio": "3.74"
+		},
+		{
+			"fg": {
+				"ref": "color.dark.clean-white",
+				"hex": "#FFFFFF"
+			},
+			"bg": {
+				"ref": "color.dark.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"ratio": "14.60"
+		},
+		{
+			"fg": {
+				"ref": "color.secondary.fog",
+				"hex": "#A9C9C4"
+			},
+			"bg": {
+				"ref": "color.dark.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"ratio": "8.23"
+		},
+		{
+			"fg": {
+				"ref": "color.dark.seafoam",
+				"hex": "#5EEAD4"
+			},
+			"bg": {
+				"ref": "color.dark.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"ratio": "9.87"
+		},
+		{
+			"fg": {
+				"ref": "color.dark.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"bg": {
+				"ref": "color.dark.seafoam",
+				"hex": "#5EEAD4"
+			},
+			"ratio": "9.87"
+		},
+		{
+			"fg": {
+				"ref": "color.mark.bristle-yellow",
+				"hex": "#F8D057"
+			},
+			"bg": {
+				"ref": "color.dark.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"ratio": "9.84"
+		},
+		{
+			"fg": {
+				"ref": "color.light.deep-teal",
+				"hex": "#0A2E2B"
+			},
+			"bg": {
+				"ref": "color.light.exifcleaner-teal",
+				"hex": "#0D9488"
+			},
+			"ratio": "3.90"
+		}
+	]
+}

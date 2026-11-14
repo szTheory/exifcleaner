@@ -248,3 +248,54 @@ export const FILTERED_TREES = Object.freeze([
 	"src/preload/api_types.ts",
 	".resources/locales",
 ]);
+
+// UI-SPEC (Phase 74, SPEC-01, D-27, D-28). The eight closed sections, in the
+// required key order of ui-spec.json and the render order of UI-SPEC.md.
+export const UI_SPEC_SECTIONS = Object.freeze([
+	"type",
+	"radii",
+	"spacing",
+	"focus",
+	"states",
+	"darkRinse",
+	"motion",
+	"platformOwned",
+]);
+// The reasons an `app` decision may give for a value neither the brand tokens
+// nor a brand quote settle (D-28).
+export const UI_SPEC_BASES = Object.freeze([
+	"brand-starting-point",
+	"wcag-derived",
+	"platform-default",
+	"maintainer-decision",
+]);
+// The states matrix is component x state x theme (D-13).
+export const UI_SPEC_STATES = Object.freeze([
+	"hover",
+	"pressed",
+	"disabled",
+	"selected",
+	"error",
+]);
+export const UI_SPEC_THEMES = Object.freeze(["light", "dark"]);
+
+// Token map (Phase 74, SPEC-02, D-15, D-16). The six dispositions of a custom
+// property: take the brand value, derive from brand colours, keep the platform
+// value, propose a brand addition, delete it in v5.1, or keep it local.
+export const TOKEN_DISPOSITIONS = Object.freeze([
+	"adopt",
+	"derive",
+	"keep-platform",
+	"propose-upstream",
+	"retire",
+	"local",
+]);
+// Custom properties that hold no per-theme value, so they live only in :root
+// (D-17 deviation, RESEARCH R-01: the 20 :root-only names measured on 2026-11-13).
+// A name outside these prefixes must be declared in both theme blocks.
+export const THEME_INVARIANT_PREFIXES = Object.freeze([
+	"--ec-space-",
+	"--ec-font-",
+	"--ec-ease-",
+	"--ec-duration-",
+]);

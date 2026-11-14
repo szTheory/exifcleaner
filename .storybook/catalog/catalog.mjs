@@ -46,6 +46,20 @@ import {
 	renderPersonas,
 	validateCatalog,
 } from "./personas.mjs";
+import {
+	TOKEN_MAP_MD_PATH,
+	TOKEN_MAP_PATH,
+	loadTokenMapContext,
+	renderTokenMap,
+	validateTokenMap,
+} from "./token_map.mjs";
+import {
+	UI_SPEC_MD_PATH,
+	UI_SPEC_PATH,
+	loadUiSpecContext,
+	renderUiSpec,
+	validateUiSpec,
+} from "./ui_spec.mjs";
 import { TIERS } from "./vocab.mjs";
 
 // Repo-relative inputs `--check` reads. Tests copy exactly these into a temp
@@ -129,6 +143,16 @@ function glossaryProblems(root) {
 function catalogProblems(root) {
 	const doc = readJson(root, CATALOG_PATH);
 	return { doc, problems: validateCatalog(doc, loadCatalogContext(root)) };
+}
+
+function uiSpecProblems(root) {
+	const doc = readJson(root, UI_SPEC_PATH);
+	return { doc, problems: validateUiSpec(doc, loadUiSpecContext(root)) };
+}
+
+function tokenMapProblems(root) {
+	const doc = readJson(root, TOKEN_MAP_PATH);
+	return { doc, problems: validateTokenMap(doc, loadTokenMapContext(root)) };
 }
 
 function firstProblem(problems) {
@@ -248,6 +272,14 @@ export async function generatedFiles(root) {
 	if (journeys.problems.length > 0) {
 		throw new Error(firstProblem(journeys.problems));
 	}
+	const uiSpec = uiSpecProblems(root);
+	if (uiSpec.problems.length > 0) {
+		throw new Error(firstProblem(uiSpec.problems));
+	}
+	const tokenMap = tokenMapProblems(root);
+	if (tokenMap.problems.length > 0) {
+		throw new Error(firstProblem(tokenMap.problems));
+	}
 	const grid = await loadGrid(root);
 	if (grid.model === null) {
 		throw new Error(firstProblem(grid.problems));
@@ -259,6 +291,8 @@ export async function generatedFiles(root) {
 		[FINDINGS_MD_PATH, findingsView(root)],
 		[GRID_JSON_PATH, renderGridJson(grid.model)],
 		[GRID_MD_PATH, renderGridMarkdown(grid.model)],
+		[UI_SPEC_MD_PATH, renderUiSpec(/** @type {any} */ (uiSpec.doc))],
+		[TOKEN_MAP_MD_PATH, renderTokenMap(/** @type {any} */ (tokenMap.doc))],
 	];
 }
 
@@ -282,6 +316,14 @@ export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 	if (journeys.problems.length > 0) {
 		return { ok: false, problems: journeys.problems, files: 0, notes: [] };
 	}
+	const uiSpec = uiSpecProblems(root);
+	if (uiSpec.problems.length > 0) {
+		return { ok: false, problems: uiSpec.problems, files: 0, notes: [] };
+	}
+	const tokenMap = tokenMapProblems(root);
+	if (tokenMap.problems.length > 0) {
+		return { ok: false, problems: tokenMap.problems, files: 0, notes: [] };
+	}
 	const grid = await loadGrid(root);
 	if (grid.model === null) {
 		return { ok: false, problems: grid.problems, files: 0, notes: [] };
@@ -294,6 +336,8 @@ export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 		[FINDINGS_MD_PATH, findingsView(root)],
 		[GRID_JSON_PATH, renderGridJson(grid.model)],
 		[GRID_MD_PATH, renderGridMarkdown(grid.model)],
+		[UI_SPEC_MD_PATH, renderUiSpec(/** @type {any} */ (uiSpec.doc))],
+		[TOKEN_MAP_MD_PATH, renderTokenMap(/** @type {any} */ (tokenMap.doc))],
 	];
 	for (const [relPath, expected] of files) {
 		let actual = "";

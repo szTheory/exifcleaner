@@ -1313,11 +1313,13 @@ describe("findings ratchet: every code has a control (D-30)", () => {
 	test("the register kinds are the closed list of D-27 and none is named a11y", () => {
 		expect([...REGISTER_KINDS]).toEqual([
 			"access-gap",
+			"contrast-gap",
 			"dead-end",
 			"i18n-gap",
 			"layout-gap",
 			"silent-failure",
 			"token-gap",
+			"token-map-gap",
 			"unrendered-outcome",
 		]);
 		expect(REGISTER_KINDS.some((kind) => kind.startsWith("a11y"))).toBe(false);

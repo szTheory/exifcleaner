@@ -15,7 +15,7 @@ import { STATE_CLASS_DEFS } from "./vocab.mjs";
 // Inputs deliberately left outside the filter (veto word `gate-all-inputs` at
 // the Phase 71 authority checkpoint records a follow-up that lists them).
 export const UNGATED_INPUTS: Readonly<Record<string, string>> = {
-	src: "--check reads only anchored files inside it, each asserted by the anchor coupling above",
+	src: "--check reads anchored files inside it, each asserted by the anchor coupling above, and the token map scans src/renderer/** only (D-17 scope), which both the pull_request and the push path lists of storybook.yml cover",
 	".resources/translation-glossary.json":
 		"read by translation_glossary.test.ts only; a pull request touching only this file skips the Storybook job and the drift surfaces on the next Storybook-triggering pull request",
 	"tests/e2e":

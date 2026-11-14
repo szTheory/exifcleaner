@@ -7,6 +7,9 @@
 //   - Register entries (every kind that is not an axe kind), in full: the
 //     fingerprint (which is the finding id), story, severity, disposition and
 //     reason. Entries with disposition `reject` are listed in their own section.
+//   - Contrast gaps (kind `contrast-gap`, when there are any): grouped by pair and
+//     backdrop (the rule without its trailing theme) with the themes that fail, the
+//     story and the disposition, and no reason column; the reasons stay in the JSON.
 //   - Rejected findings: each reject entry with its verdict row (the maintainer's
 //     recorded decision), because a rejected finding stays listed and quiet.
 //   - Accessibility baseline: axe kinds (`a11y`, `a11y-pN`) summarised by kind,
@@ -20,6 +23,12 @@
 // this module imports nothing from scripts/.
 
 const AXE_KIND = /^a11y(-p\d+)?$/;
+
+// The static contrast failures (Phase 74, D-24, D-25): one entry per pair, backdrop
+// and theme, dozens at a time, so they print grouped in their own section instead of
+// one full-reason row each in the register table.
+const CONTRAST_KIND = "contrast-gap";
+const THEME_SUFFIX = /-(light|dark)$/;
 
 /**
  * Code-unit order, never locale collation.
@@ -74,7 +83,13 @@ export function renderFindings({ baseline, copyFindings }) {
 		(baseline.verdicts ?? []).map((row) => [row.fingerprint, row]),
 	);
 	const live = entries.filter((entry) => entry.disposition !== "reject");
-	const register = live.filter((entry) => !AXE_KIND.test(entry.kind));
+	const kindsOutsideAxe = live.filter((entry) => !AXE_KIND.test(entry.kind));
+	const contrast = kindsOutsideAxe.filter(
+		(entry) => entry.kind === CONTRAST_KIND,
+	);
+	const register = kindsOutsideAxe.filter(
+		(entry) => entry.kind !== CONTRAST_KIND,
+	);
 	const axe = live.filter((entry) => AXE_KIND.test(entry.kind));
 	const rejected = entries.filter((entry) => entry.disposition === "reject");
 
@@ -101,6 +116,47 @@ export function renderFindings({ baseline, copyFindings }) {
 					entry.disposition,
 					entry.reason,
 				]),
+			),
+		);
+	}
+
+	if (contrast.length > 0) {
+		/** @type {Map<string, { themes: Set<string>, stories: Set<string>, dispositions: Set<string> }>} */
+		const groups = new Map();
+		for (const entry of contrast) {
+			const rule = String(entry.rule);
+			const key = rule.replace(THEME_SUFFIX, "");
+			const group = groups.get(key) ?? {
+				themes: new Set(),
+				stories: new Set(),
+				dispositions: new Set(),
+			};
+			const theme = THEME_SUFFIX.exec(rule)?.[1];
+			if (theme !== undefined) group.themes.add(theme);
+			group.stories.add(entry.story);
+			group.dispositions.add(entry.disposition);
+			groups.set(key, group);
+		}
+		const joined = (/** @type {Set<string>} */ values) =>
+			[...values].sort(compareCodeUnits).join(", ");
+		lines.push(
+			"",
+			"## Contrast gaps",
+			"",
+			"Static contrast failures from tests/renderer/contrast: a foreground and backdrop token pair below 4.5:1 (text) or 3:1 (non-text and focus) in a theme. One entry per pair, backdrop and theme is in docs/evidence/known-findings.json with its measured reason; this table groups them by pair and backdrop. Severity is major. v5.1 removes them with the palette change.",
+			"",
+			`${contrast.length} entries across ${groups.size} pairs`,
+			"",
+			...table(
+				["Pair", "Themes", "Story", "Disposition"],
+				[...groups.entries()]
+					.sort((a, b) => compareCodeUnits(a[0], b[0]))
+					.map(([key, group]) => [
+						key,
+						joined(group.themes),
+						joined(group.stories),
+						joined(group.dispositions),
+					]),
 			),
 		);
 	}
