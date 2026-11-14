@@ -219,6 +219,28 @@ export const Empty: Story = {
 	},
 };
 
+// The settings.get -> DropZone effect -> output-mode line chain, through the real App. The
+// EmptyState stories hand `saveAsCopy` in as a prop and never run that effect, so this is
+// the one story that fails when DropZone stops applying what `window.api.settings.get`
+// returns (the line then stays hidden, aria-hidden with a non-breaking space). It seeds the
+// mock through `parameters.mockApi.settings`, the same field the preview forwards to
+// `createMockApi`, and waits on the rendered line, so the effect's timing never matters.
+// The deleted app-launch e2e matched either output-mode sentence; the in-place one is
+// asserted by ui-emptystate--copy-mode-off, which also takes the prop.
+export const EmptyCopyMode: Story = {
+	parameters: {
+		a11y: knownA11y("screens-app--empty-copy-mode"),
+		mockApi: { settings: { saveAsCopy: true } },
+	},
+	play: async ({ canvasElement }) => {
+		await waitFor(() =>
+			expect(
+				canvasElement.querySelector(".empty-state__output-mode")?.textContent,
+			).toBe("Cleaned copies will be created — originals stay untouched."),
+		);
+	},
+};
+
 // A run under way: the third file never settles, so exactly two rows are complete and the
 // third shows Processing for as long as the story is open. The hook processes in order,
 // so a held file leaves the rows after it Pending; this one is last. The play waits for the

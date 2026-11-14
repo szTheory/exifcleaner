@@ -241,11 +241,11 @@
 						"n": 6,
 						"code": "expect(outputMode).toHaveText(/Cleaned copies will be created — originals stay untouched\\.|Files will be cleaned in place\\./)",
 						"verdict": "deleted",
-						"story": "ui-emptystate--copy-mode-on",
-						"subject": "EmptyState",
+						"story": "screens-app--empty-copy-mode",
+						"subject": "App",
 						"covers": "text",
-						"evidence": "COPY_ON",
-						"note": "Stricter than the e2e regex, which also accepted the in-place sentence; that one is COPY_OFF in ui-emptystate--copy-mode-off."
+						"evidence": "Cleaned copies will be created",
+						"note": "Real DropZone settings.get effect via mockApi.settings (review WR-03); the in-place sentence is COPY_OFF in ui-emptystate--copy-mode-off"
 					},
 					{
 						"n": 7,

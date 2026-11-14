@@ -46,7 +46,8 @@
 			"situation": "Someone opens the app for the first time and sees a prompt to add files, two buttons and no rows.",
 			"proofBoundary": "story",
 			"stories": [
-				"screens-app--empty"
+				"screens-app--empty",
+				"screens-app--empty-copy-mode"
 			]
 		},
 		{
