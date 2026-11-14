@@ -27,6 +27,10 @@ export function mapBrandRefs(tokenMapDoc: unknown): Array<{
 	hex: unknown;
 }>;
 
+export function pairsBrandRefs(
+	pairsDoc: unknown,
+): Array<{ location: string; token: string; hex: unknown }>;
+
 export function checkBrandQuotes(input: {
 	brandText: string;
 	rulesDoc: unknown;
@@ -34,6 +38,7 @@ export function checkBrandQuotes(input: {
 	pin: string;
 	specDoc?: unknown;
 	tokenMapDoc?: unknown;
+	pairsDoc?: unknown;
 	tokensDoc?: unknown;
 }): Array<{ code: string; location: string; message: string }>;
 

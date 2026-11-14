@@ -18,6 +18,37 @@ export interface ContrastOverlay {
 	layers: string[];
 }
 
+export interface ContrastLiteral {
+	value: string;
+	files: string[];
+	pair?: string;
+	exempt?: string;
+}
+
+export interface ContrastExempt {
+	name: string;
+	reason: string;
+	fill?: string;
+}
+
+export interface ContrastColour {
+	ref: string;
+	hex: string;
+}
+
+export interface ContrastProposed {
+	id: string;
+	role: ContrastRole;
+	fg: ContrastColour;
+	bg: ContrastColour;
+}
+
+export interface ContrastBrandRatio {
+	fg: ContrastColour;
+	bg: ContrastColour;
+	ratio: string;
+}
+
 export interface ContrastPairsDocument {
 	schemaVersion?: number;
 	brandPin?: string;
@@ -25,10 +56,10 @@ export interface ContrastPairsDocument {
 	overlays: ContrastOverlay[];
 	localTokens: Record<string, { light: string; dark: string }>;
 	pairs: ContrastPair[];
-	literals?: unknown[];
-	exempt?: unknown[];
-	proposed?: unknown[];
-	brandRatios?: unknown[];
+	literals?: ContrastLiteral[];
+	exempt?: ContrastExempt[];
+	proposed?: ContrastProposed[];
+	brandRatios?: ContrastBrandRatio[];
 }
 
 export interface ContrastResult {
@@ -57,6 +88,17 @@ export interface ContrastGapEntry {
 	reason: string;
 	disposition: "fix-v5.1";
 	severity: "major";
+}
+
+export interface ContrastProblem {
+	code: string;
+	message: string;
+	file?: string;
+	line?: number;
+}
+
+export interface TokenMapLike {
+	entries?: Array<{ name: string; disposition: string; finding?: string }>;
 }
 
 export interface ThemeTokenMaps {
@@ -115,6 +157,57 @@ export function reasonFor(result: {
 	threshold: number;
 }): string;
 
-export function contrastGapEntry(
-	result: ContrastResult,
-): ContrastGapEntry;
+export function contrastGapEntry(result: ContrastResult): ContrastGapEntry;
+
+export function normaliseLiteral(text: string): string;
+
+export function colourLiterals(
+	value: string,
+): Array<{ text: string; normalised: string }>;
+
+export function varReferences(
+	value: string,
+): Array<{ name: string; fallback: string | undefined }>;
+
+export function pairsShapeProblems(doc: unknown): ContrastProblem[];
+
+export function g1Problems(
+	tokensCss: string,
+	doc: ContrastPairsDocument,
+): ContrastProblem[];
+
+export function g2Report(
+	stylesheets: Record<string, string>,
+	doc: ContrastPairsDocument,
+	tokensCss: string,
+	tokenMap: TokenMapLike | undefined,
+): { problems: ContrastProblem[]; classified: number; background: number };
+
+export function g2Problems(
+	stylesheets: Record<string, string>,
+	doc: ContrastPairsDocument,
+	tokensCss: string,
+	tokenMap: TokenMapLike | undefined,
+): ContrastProblem[];
+
+export function proposedResults(doc: ContrastPairsDocument): Array<{
+	id: string;
+	role: string;
+	fgHex: string;
+	bgHex: string;
+	ratio: number;
+	threshold: number;
+	pass: boolean;
+}>;
+
+export function uiSpecIndex(uiSpec: unknown): {
+	byId: Map<string, string>;
+	byPath: Map<string, string>;
+};
+
+export function proposedConsistencyProblems(
+	doc: ContrastPairsDocument,
+	sources: { uiSpec: unknown; tokenMap: unknown; pin: string },
+): ContrastProblem[];
+
+export function brandRatioProblems(doc: ContrastPairsDocument): ContrastProblem[];

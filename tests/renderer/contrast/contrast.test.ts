@@ -16,6 +16,7 @@ import {
 	proposedConsistencyProblems,
 	proposedResults,
 	reasonFor,
+	varReferences,
 	type ContrastPair,
 	type ContrastPairsDocument,
 } from "./contrast_model.mjs";
@@ -297,6 +298,10 @@ function codes(problems: Array<{ code: string }>): string[] {
 	return problems.map((found) => found.code);
 }
 
+function records<T>(value: unknown): Array<Record<string, T>> {
+	return value as Array<Record<string, T>>;
+}
+
 function g2(
 	sheets: Record<string, string> = SHEETS,
 	doc: ContrastPairsDocument = PAIRS,
@@ -439,7 +444,18 @@ describe("colourLiterals: the literal scan", () => {
 		colourLiterals(hashes);
 		colourLiterals(calls);
 		colourLiterals(names);
+		varReferences(names);
+		varReferences(calls);
 		expect(Date.now() - started).toBeLessThan(1000);
+	});
+
+	test("a 200 KB declaration through the whole of G2 stays linear too", () => {
+		const sheets = {
+			"planted.css": `.a { color: ${"var(".repeat(50_000)}; background: ${"rgba(".repeat(40_000)}; border: ${"#".repeat(100_000)}; }`,
+		};
+		const started = Date.now();
+		g2Report(sheets, PAIRS, TOKENS_CSS, TOKEN_MAP);
+		expect(Date.now() - started).toBeLessThan(2000);
 	});
 });
 
@@ -550,7 +566,7 @@ describe("G2: every stylesheet colour use is classified", () => {
 
 	test("route: dropping the fill reason of the border exemption reds the separator", () => {
 		const doc = clone(PAIRS);
-		const entry = (doc.exempt as Array<Record<string, string>>).find(
+		const entry = records<string>(doc.exempt).find(
 			(candidate) => candidate["name"] === "--ec-color-border",
 		);
 		if (entry === undefined) throw new Error("no border exemption");
@@ -564,7 +580,7 @@ describe("G2: every stylesheet colour use is classified", () => {
 
 	test("route: dropping the fill reason of the backdrop opacity reds the scrim", () => {
 		const doc = clone(PAIRS);
-		const entry = (doc.exempt as Array<Record<string, string>>).find(
+		const entry = records<string>(doc.exempt).find(
 			(candidate) => candidate["name"] === "--ec-backdrop-opacity",
 		);
 		if (entry === undefined) throw new Error("no backdrop exemption");
@@ -651,7 +667,7 @@ describe("the pairs document is a closed shape", () => {
 
 	test("shown red: an exempt entry with a key other than name, reason and fill", () => {
 		const doc = clone(PAIRS);
-		const entry = (doc.exempt as Array<Record<string, unknown>>)[0];
+		const entry = records<unknown>(doc.exempt)[0];
 		if (entry === undefined) throw new Error("no exempt entry");
 		entry["why"] = "extra";
 		expect(codes(pairsShapeProblems(doc))).toEqual(["pairs-shape"]);
@@ -659,7 +675,7 @@ describe("the pairs document is a closed shape", () => {
 
 	test("shown red: a literal that names no pair, and a duplicate pair id", () => {
 		const doc = clone(PAIRS);
-		const literal = (doc.literals as Array<Record<string, unknown>>).find(
+		const literal = records<unknown>(doc.literals).find(
 			(candidate) => typeof candidate["pair"] === "string",
 		);
 		if (literal === undefined) throw new Error("no pair literal");

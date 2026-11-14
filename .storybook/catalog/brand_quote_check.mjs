@@ -19,7 +19,11 @@
 //   - token_map.json (Phase 74, D-18): its `brandPin` equals that commit, and
 //     every `adopt` brand ref and every `derive` source path resolves in the
 //     cache tokens.json, the `adopt` ones to a `$value.hex` equal,
-//     case-insensitively, to the hex the map holds.
+//     case-insensitively, to the hex the map holds;
+//   - tests/renderer/contrast/contrast_pairs.json (Phase 74, D-26): its `brandPin`
+//     equals that commit, and every `color.*` ref of its `proposed` set and its
+//     `brandRatios` rows resolves in the cache tokens.json to a `$value.hex` equal,
+//     case-insensitively, to the hex the pairs document holds.
 // A section written with a level prefix (`## In the product`) matches only the
 // heading of that level and text; BRAND.md repeats two heading texts (`Type`,
 // `In the product`) at two levels, and a bare citation of either stays
@@ -42,6 +46,7 @@ const RULES_PATH = ".storybook/catalog/copy_lint_rules.json";
 const CATALOG_PATH = ".storybook/catalog/catalog.json";
 const UI_SPEC_PATH = ".storybook/catalog/ui-spec.json";
 const TOKEN_MAP_PATH = ".storybook/catalog/token_map.json";
+const PAIRS_PATH = "tests/renderer/contrast/contrast_pairs.json";
 const PIN_PATH = "brand.pin.json";
 
 /**
@@ -241,11 +246,51 @@ export function mapBrandRefs(tokenMapDoc) {
 }
 
 /**
- * Pure over text, so a test can call it without a spawn. `specDoc`, `tokenMapDoc`
- * and `tokensDoc` are optional: without a `specDoc` only the rules and the
- * catalog are checked, and without a `tokenMapDoc` the map is not checked.
+ * Every brand colour path of the contrast pairs document: the `color.*` refs of its
+ * `proposed` pairs and of its `brandRatios` rows (a ref that is a UI-SPEC id is not
+ * a tokens.json path and is skipped; the cache-free tests compare those with
+ * ui-spec.json), each with the hex the document holds. Malformed rows are skipped
+ * (the document's own shape check reports them).
  *
- * @param {{ brandText: string, rulesDoc: unknown, catalogDoc: unknown, pin: string, specDoc?: unknown, tokenMapDoc?: unknown, tokensDoc?: unknown }} input
+ * @param {unknown} pairsDoc
+ * @returns {Array<{ location: string, token: string, hex: unknown }>}
+ */
+export function pairsBrandRefs(pairsDoc) {
+	if (!isPlainObject(pairsDoc)) return [];
+	const found = [];
+	const visit = (location, side) => {
+		if (!isPlainObject(side)) return;
+		const ref = side["ref"];
+		if (typeof ref === "string" && ref.startsWith("color.")) {
+			found.push({ location, token: ref, hex: side["hex"] });
+		}
+	};
+	const proposed = pairsDoc["proposed"];
+	if (Array.isArray(proposed)) {
+		for (const row of proposed) {
+			if (!isPlainObject(row)) continue;
+			visit(`proposed ${row["id"]} fg`, row["fg"]);
+			visit(`proposed ${row["id"]} bg`, row["bg"]);
+		}
+	}
+	const ratios = pairsDoc["brandRatios"];
+	if (Array.isArray(ratios)) {
+		ratios.forEach((row, index) => {
+			if (!isPlainObject(row)) return;
+			visit(`brandRatios[${index}] fg`, row["fg"]);
+			visit(`brandRatios[${index}] bg`, row["bg"]);
+		});
+	}
+	return found;
+}
+
+/**
+ * Pure over text, so a test can call it without a spawn. `specDoc`, `tokenMapDoc`,
+ * `pairsDoc` and `tokensDoc` are optional: without a `specDoc` only the rules and
+ * the catalog are checked, without a `tokenMapDoc` the map is not checked, and
+ * without a `pairsDoc` the contrast pairs are not checked.
+ *
+ * @param {{ brandText: string, rulesDoc: unknown, catalogDoc: unknown, pin: string, specDoc?: unknown, tokenMapDoc?: unknown, pairsDoc?: unknown, tokensDoc?: unknown }} input
  * @returns {Array<{ code: string, location: string, message: string }>}
  */
 export function checkBrandQuotes({
@@ -255,6 +300,7 @@ export function checkBrandQuotes({
 	pin,
 	specDoc,
 	tokenMapDoc,
+	pairsDoc,
 	tokensDoc,
 }) {
 	const problems = [];
@@ -403,6 +449,31 @@ export function checkBrandQuotes({
 			}
 		}
 	}
+	if (isPlainObject(pairsDoc)) {
+		if (pairsDoc["brandPin"] !== pin) {
+			add(
+				"pairs-pin-mismatch",
+				"contrast_pairs.json",
+				"brandPin is not the commit in brand.pin.json",
+			);
+		}
+		for (const ref of pairsBrandRefs(pairsDoc)) {
+			const cacheHex = resolveTokenPath(tokensDoc, ref.token);
+			if (cacheHex === null) {
+				add(
+					"pairs-token-path-missing",
+					ref.location,
+					`tokens path ${ref.token} is not a colour in tokens.json (contrast_pairs.json)`,
+				);
+			} else if (cacheHex.toUpperCase() !== String(ref.hex).toUpperCase()) {
+				add(
+					"pairs-token-hex-mismatch",
+					ref.location,
+					`tokens path ${ref.token} is ${cacheHex} in tokens.json but ${ref.hex} in contrast_pairs.json`,
+				);
+			}
+		}
+	}
 	return problems.sort(
 		(a, b) =>
 			compareCodeUnits(a.code, b.code) ||
@@ -448,6 +519,7 @@ export function main(argv = process.argv.slice(2)) {
 		const catalogDoc = readJson(root, CATALOG_PATH);
 		const specDoc = readJson(root, UI_SPEC_PATH);
 		const tokenMapDoc = readJson(root, TOKEN_MAP_PATH);
+		const pairsDoc = readJson(root, PAIRS_PATH);
 		const tokensDoc = JSON.parse(tokensText);
 		const pin = /** @type {{ commit: string }} */ (readJson(root, PIN_PATH))
 			.commit;
@@ -458,6 +530,7 @@ export function main(argv = process.argv.slice(2)) {
 			pin,
 			specDoc,
 			tokenMapDoc,
+			pairsDoc,
 			tokensDoc,
 		});
 		if (problems.length > 0) {
@@ -474,8 +547,9 @@ export function main(argv = process.argv.slice(2)) {
 		const quotes = specBrandSources(specDoc).length;
 		const tokens = specTokenSources(specDoc).length;
 		const mapRefs = mapBrandRefs(tokenMapDoc).length;
+		const pairsRefs = pairsBrandRefs(pairsDoc).length;
 		console.log(
-			`✓ BRAND QUOTE CHECK PASSED — ${rules} rules, ${sections} catalog sections, ${quotes} spec quotes, ${tokens} spec tokens, ${mapRefs} map brand refs`,
+			`✓ BRAND QUOTE CHECK PASSED — ${rules} rules, ${sections} catalog sections, ${quotes} spec quotes, ${tokens} spec tokens, ${mapRefs} map brand refs, ${pairsRefs} pairs refs`,
 		);
 		console.log(`pin ${pin}`);
 		return 0;
