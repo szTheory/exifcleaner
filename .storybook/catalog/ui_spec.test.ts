@@ -107,6 +107,142 @@ describe("the real ui-spec", () => {
 	});
 });
 
+// The ids 74-03's token-map targets and v5.1 depend on. A rename or a deletion
+// is a spec change, so the list is explicit rather than derived: the validator
+// proves the shape, this list proves the content exists (SPEC-01, 74-02).
+const REQUIRED_IDS: string[] = [
+	"type.family.sans",
+	"type.family.mono",
+	"type.family.mono-bundled",
+	"type.caption.size",
+	"type.caption.line-height",
+	"type.small.size",
+	"type.small.line-height",
+	"type.body.size",
+	"type.body.line-height",
+	"type.title.size",
+	"type.title.line-height",
+	"type.label.size",
+	"type.label.line-height",
+	"type.label.weight",
+	"type.label.case",
+	"type.label.tracking",
+	"type.label.letter-spacing",
+	"type.label.lang-scope",
+	"type.data.size",
+	"type.data.line-height",
+	"type.data.weight",
+	"type.data.weight-emphasis",
+	"type.data.numerals",
+	"type.data.column-unit",
+	"type.weight.regular",
+	"type.weight.semibold",
+	"type.not-adopted",
+	"radii.button",
+	"radii.card",
+	"radii.badge",
+	"radii.segmented-container",
+	"radii.segment",
+	"radii.menu",
+	"radii.icon-button",
+	"radii.toggle-track",
+	"radii.toggle-thumb",
+	"radii.table-row",
+	"radii.stray",
+	"spacing.base",
+	"spacing.space-1",
+	"spacing.space-2",
+	"spacing.space-3",
+	"spacing.space-4",
+	"spacing.space-6",
+	"spacing.space-8",
+	"spacing.space-12",
+	"spacing.legacy-names",
+	"spacing.target-min",
+	"spacing.control-primary-min",
+	"spacing.row-min",
+	"spacing.text-container",
+	"focus.ring.width",
+	"focus.ring.style",
+	"focus.ring.colour",
+	"focus.ring.trigger",
+	"focus.ring.offset-free",
+	"focus.ring.offset-inset",
+	"focus.ring.never-box-shadow",
+	"focus.accent-boundary",
+	"focus.dark-raised",
+	"focus.reveal-button",
+	"motion.reveal.duration",
+	"motion.reveal.ease",
+	"motion.reveal.bounce",
+	"motion.settle.behaviour",
+	"motion.settle.rise",
+	"motion.settle.duration",
+	"motion.stagger",
+	"motion.state-feedback.duration",
+	"motion.toggle.duration",
+	"motion.drawer.duration",
+	"motion.ease",
+	"motion.ease-spring",
+	"motion.counts",
+	"motion.progress",
+	"motion.reduced-motion",
+	"motion.v5-2-dispositions",
+];
+
+describe("the real ui-spec content (74-02)", () => {
+	const everyValue = valuesOf(real);
+	const byId = new Map(everyValue.map((value) => [value.id, value]));
+	const need = (id: string): UiSpecValue => {
+		const found = byId.get(id);
+		if (found === undefined) throw new Error(`missing required id ${id}`);
+		return found;
+	};
+
+	test("every required id exists", () => {
+		expect(REQUIRED_IDS.filter((id) => !byId.has(id))).toEqual([]);
+	});
+
+	test("the required list has no duplicate", () => {
+		expect(new Set(REQUIRED_IDS).size).toBe(REQUIRED_IDS.length);
+	});
+
+	test("Label tracking is the brand's +6% and its CSS form is an app starting point", () => {
+		const tracking = need("type.label.tracking");
+		expect(tracking.value).toBe("+6%");
+		expect(tracking.brand).toBeDefined();
+		const css = need("type.label.letter-spacing");
+		expect(css.app?.basis).toBe("brand-starting-point");
+	});
+
+	test("the brand-derived shapes, weights, counts and reveal cite BRAND.md", () => {
+		for (const id of [
+			"radii.button",
+			"radii.card",
+			"radii.badge",
+			"type.label.weight",
+			"type.data.weight",
+			"motion.reveal.duration",
+			"motion.counts",
+		]) {
+			expect(need(id).brand, id).toBeDefined();
+		}
+	});
+
+	test("every app decision in type, radii, spacing, focus and motion says why", () => {
+		for (const value of [
+			...real.type,
+			...real.radii,
+			...real.spacing,
+			...real.focus,
+			...real.motion,
+		]) {
+			if (value.app === undefined) continue;
+			expect(value.app.reason.length, value.id).toBeGreaterThanOrEqual(30);
+		}
+	});
+});
+
 // Helpers for the mutants. Each mutant starts from a fresh clone of the real
 // document and breaks exactly one rule.
 function sourceOf<K extends "tokens" | "brand" | "app">(
