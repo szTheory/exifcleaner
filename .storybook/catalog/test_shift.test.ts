@@ -360,7 +360,16 @@ describe("the real ledger", () => {
 			),
 			1,
 		);
-		const item = at(at(specOf(doc, "metadata-inspection"), 0).items, 0);
+		// A kept item of a test that stays live: an edited code is drift, while the code of a
+		// deleted item is not compared with the spec.
+		const item = at(
+			entryOf(
+				doc,
+				"metadata-inspection",
+				"shows metadata groups with before/after diff",
+			).items,
+			0,
+		);
 		item.code = `${item.code} `;
 		const result = checkTestShift({
 			doc,
