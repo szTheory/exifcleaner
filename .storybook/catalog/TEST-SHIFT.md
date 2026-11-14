@@ -104,10 +104,10 @@ One row per `expect(`, `expect.soft(` or `expect.poll(` call inside a test callb
 
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | kept | expect(dropZone).toBeVisible() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 2 | kept | expect(gearButton).toBeVisible() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 3 | kept | expect(emptyState).toBeVisible() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 4 | kept | expect(hasZeroOpacity).toBe(false) | real-electron |  |  | flips to deleted in 75-02 (D-01) |
+| 1 | deleted | expect(dropZone).toBeVisible() | screens-app--empty | layout | Add files to clean | Visible: h1 toBeVisible checks section.empty-state and DropZone ancestors (App.tsx:82-86); dark: data-theme assertion, storybook-dark |
+| 2 | deleted | expect(gearButton).toBeVisible() | screens-app--empty | theme | data-theme | Dark: data-theme assertion, storybook-dark; gear present: Open settings toHaveFocus (D-02 Tab order) |
+| 3 | deleted | expect(emptyState).toBeVisible() | screens-app--empty | layout | Add files to clean | Visible: h1 toBeVisible checks the section.empty-state ancestor (App.tsx:82-86); dark: data-theme assertion, storybook-dark |
+| 4 | deleted | expect(hasZeroOpacity).toBe(false) | screens-app--empty | layout | Add files to clean | Reduced: whole-document zero-opacity scan -> h1 ancestor chain only (Pitfall 10, TEST-SHIFT.md Known limits); dark: data-theme |
 
 ### switches back to light mode
 

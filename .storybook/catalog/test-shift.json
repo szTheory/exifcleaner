@@ -344,30 +344,42 @@
 					{
 						"n": 1,
 						"code": "expect(dropZone).toBeVisible()",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "layout",
+						"evidence": "Add files to clean",
+						"note": "Visible: h1 toBeVisible checks section.empty-state and DropZone ancestors (App.tsx:82-86); dark: data-theme assertion, storybook-dark"
 					},
 					{
 						"n": 2,
 						"code": "expect(gearButton).toBeVisible()",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "theme",
+						"evidence": "data-theme",
+						"note": "Dark: data-theme assertion, storybook-dark; gear present: Open settings toHaveFocus (D-02 Tab order)"
 					},
 					{
 						"n": 3,
 						"code": "expect(emptyState).toBeVisible()",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "layout",
+						"evidence": "Add files to clean",
+						"note": "Visible: h1 toBeVisible checks the section.empty-state ancestor (App.tsx:82-86); dark: data-theme assertion, storybook-dark"
 					},
 					{
 						"n": 4,
 						"code": "expect(hasZeroOpacity).toBe(false)",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "layout",
+						"evidence": "Add files to clean",
+						"note": "Reduced: whole-document zero-opacity scan -> h1 ancestor chain only (Pitfall 10, TEST-SHIFT.md Known limits); dark: data-theme"
 					}
 				]
 			},
