@@ -30,6 +30,13 @@ function clone(): UiSpecDocument {
 	return structuredClone(real);
 }
 
+// A value by id, so a mutant does not depend on which value happens to sort first.
+function valueById(values: UiSpecValue[], id: string): UiSpecValue {
+	const found = values.find((value) => value.id === id);
+	if (found === undefined) throw new Error(`no value ${id}`);
+	return found;
+}
+
 function at<T>(items: readonly T[], index: number): T {
 	const found = items[index];
 	if (found === undefined) throw new Error(`no item at ${index}`);
@@ -110,7 +117,7 @@ describe("the real ui-spec", () => {
 // The ids 74-03's token-map targets and v5.1 depend on. A rename or a deletion
 // is a spec change, so the list is explicit rather than derived: the validator
 // proves the shape, this list proves the content exists (SPEC-01, 74-02).
-const REQUIRED_IDS: string[] = [
+const REQUIRED_IDS = [
 	"type.family.sans",
 	"type.family.mono",
 	"type.family.mono-bundled",
@@ -421,7 +428,7 @@ const MUTANTS: Mutant[] = [
 		name: "an id with another section's prefix",
 		code: "bad-id",
 		mutate: (doc) => {
-			at(doc.radii, 0).id = "type.button";
+			valueById(doc.radii, "radii.button").id = "type.button";
 			return doc;
 		},
 	},
@@ -434,7 +441,11 @@ const MUTANTS: Mutant[] = [
 		name: "a value copied with the same id",
 		code: "duplicate-id",
 		mutate: (doc) => {
-			doc.spacing.splice(1, 0, structuredClone(at(doc.spacing, 0)));
+			doc.spacing.splice(
+				1,
+				0,
+				structuredClone(valueById(doc.spacing, "spacing.base")),
+			);
 			return doc;
 		},
 	},
@@ -475,7 +486,7 @@ const MUTANTS: Mutant[] = [
 		name: "a value with no source key",
 		code: "source-count",
 		mutate: (doc) => {
-			delete at(doc.type, 0).brand;
+			delete valueById(doc.type, "type.label.weight").brand;
 			return doc;
 		},
 	},
@@ -483,7 +494,7 @@ const MUTANTS: Mutant[] = [
 		name: "a value with two source keys",
 		code: "source-count",
 		mutate: (doc) => {
-			at(doc.type, 0).app = {
+			valueById(doc.type, "type.label.weight").app = {
 				basis: "wcag-derived",
 				reason: "a second source",
 			};
@@ -502,7 +513,7 @@ const MUTANTS: Mutant[] = [
 		name: "an app basis outside the closed four",
 		code: "bad-basis",
 		mutate: (doc) => {
-			sourceOf(at(doc.spacing, 0), "app").basis = "guess";
+			sourceOf(valueById(doc.spacing, "spacing.base"), "app").basis = "guess";
 			return doc;
 		},
 	},
@@ -510,7 +521,7 @@ const MUTANTS: Mutant[] = [
 		name: "an empty brand quote",
 		code: "bad-source",
 		mutate: (doc) => {
-			sourceOf(at(doc.type, 0), "brand").quote = "";
+			sourceOf(valueById(doc.type, "type.label.weight"), "brand").quote = "";
 			return doc;
 		},
 	},
@@ -518,7 +529,10 @@ const MUTANTS: Mutant[] = [
 		name: "an app source without its reason",
 		code: "bad-source",
 		mutate: (doc) => {
-			const app: Partial<UiSpecAppSource> = sourceOf(at(doc.spacing, 0), "app");
+			const app: Partial<UiSpecAppSource> = sourceOf(
+				valueById(doc.spacing, "spacing.base"),
+				"app",
+			);
 			delete app.reason;
 			return doc;
 		},
@@ -527,7 +541,10 @@ const MUTANTS: Mutant[] = [
 		name: "a tokens source with an extra key",
 		code: "bad-source",
 		mutate: (doc) => {
-			Object.assign(sourceOf(at(doc.darkRinse, 0), "tokens"), { extra: 1 });
+			Object.assign(
+				sourceOf(valueById(doc.darkRinse, "dark-rinse.surface"), "tokens"),
+				{ extra: 1 },
+			);
 			return doc;
 		},
 	},
@@ -535,7 +552,8 @@ const MUTANTS: Mutant[] = [
 		name: "a source that is not an object",
 		code: "bad-source",
 		mutate: (doc) => {
-			at(doc.spacing, 0).app = "guess" as unknown as UiSpecAppSource;
+			valueById(doc.spacing, "spacing.base").app =
+				"guess" as unknown as UiSpecAppSource;
 			return doc;
 		},
 	},
@@ -545,7 +563,7 @@ const MUTANTS: Mutant[] = [
 		name: "an empty value",
 		code: "empty-value",
 		mutate: (doc) => {
-			at(doc.spacing, 0).value = "";
+			valueById(doc.spacing, "spacing.base").value = "";
 			return doc;
 		},
 	},
@@ -553,7 +571,7 @@ const MUTANTS: Mutant[] = [
 		name: "the value TBD",
 		code: "placeholder-value",
 		mutate: (doc) => {
-			at(doc.spacing, 0).value = "TBD";
+			valueById(doc.spacing, "spacing.base").value = "TBD";
 			return doc;
 		},
 	},
@@ -561,7 +579,7 @@ const MUTANTS: Mutant[] = [
 		name: "a value with the word TODO in it",
 		code: "placeholder-value",
 		mutate: (doc) => {
-			at(doc.spacing, 0).value = "4px, todo";
+			valueById(doc.spacing, "spacing.base").value = "4px, todo";
 			return doc;
 		},
 	},
@@ -569,7 +587,7 @@ const MUTANTS: Mutant[] = [
 		name: "a brand value whose text is not in its quote",
 		code: "quote-missing-value",
 		mutate: (doc) => {
-			at(doc.radii, 0).value = "9 px";
+			valueById(doc.radii, "radii.button").value = "9 px";
 			return doc;
 		},
 	},
@@ -577,7 +595,8 @@ const MUTANTS: Mutant[] = [
 		name: "a tokens path that is not a colour",
 		code: "tokens-not-colour",
 		mutate: (doc) => {
-			sourceOf(at(doc.darkRinse, 0), "tokens").path = "font.mono";
+			sourceOf(valueById(doc.darkRinse, "dark-rinse.surface"), "tokens").path =
+				"font.mono";
 			return doc;
 		},
 	},
@@ -585,7 +604,7 @@ const MUTANTS: Mutant[] = [
 		name: "a tokens value that is not an uppercase #RRGGBB",
 		code: "tokens-not-colour",
 		mutate: (doc) => {
-			const value = at(doc.darkRinse, 0);
+			const value = valueById(doc.darkRinse, "dark-rinse.surface");
 			value.value = "#12403c";
 			sourceOf(value, "tokens").value = "#12403c";
 			return doc;
@@ -595,7 +614,8 @@ const MUTANTS: Mutant[] = [
 		name: "a tokens value that differs from the value",
 		code: "tokens-value-mismatch",
 		mutate: (doc) => {
-			sourceOf(at(doc.darkRinse, 0), "tokens").value = "#000000";
+			sourceOf(valueById(doc.darkRinse, "dark-rinse.surface"), "tokens").value =
+				"#000000";
 			return doc;
 		},
 	},
