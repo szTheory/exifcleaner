@@ -9,16 +9,22 @@
 					{
 						"n": 1,
 						"code": "expect(nonBodyFocused.length).toBeGreaterThan(0)",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "focus-order",
+						"evidence": "userEvent.tab()",
+						"note": "Story Tabs from a blurred start and asserts Choose files… gains focus, stronger than some non-body element; simulated Tab (D-03 residual)"
 					},
 					{
 						"n": 2,
 						"code": "expect(gearFocused).toBe(true)",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "focus-order",
+						"evidence": "Open settings",
+						"note": "Gear is the third Tab stop in the story; simulated Tab (D-03), real-Chromium backstop is the kept drawer focus-trap test"
 					}
 				]
 			},
@@ -28,23 +34,32 @@
 					{
 						"n": 1,
 						"code": "expect(primary).toBeFocused()",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "focus-order",
+						"evidence": "Choose files…",
+						"note": "First stop after a blurred start; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test"
 					},
 					{
 						"n": 2,
 						"code": "expect(page.locator(\".empty-state__button--secondary\")).toBeFocused()",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "focus-order",
+						"evidence": "Choose folder…",
+						"note": "Second stop; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test"
 					},
 					{
 						"n": 3,
 						"code": "expect(page.locator(\".gear-icon\")).toBeFocused()",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "focus-order",
+						"evidence": "Open settings",
+						"note": "Third stop; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test"
 					}
 				]
 			},
@@ -54,9 +69,12 @@
 					{
 						"n": 1,
 						"code": "expect(hasFocusIndicator).toBe(true)",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "ui-emptystate--button-keyboard-focus",
+						"subject": "EmptyState",
+						"covers": "focus-indicator",
+						"evidence": "outlineStyle",
+						"note": "Story checks :focus-visible and a solid outline on Choose files after Tab, not the gear; the e2e also accepted box-shadow"
 					}
 				]
 			},
@@ -66,37 +84,52 @@
 					{
 						"n": 1,
 						"code": "expect(buttonCount).toBeGreaterThan(0)",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "aria-name",
+						"evidence": "getAllByRole(\"button\")",
+						"note": "Buttons are found by role; the play throws unless both render"
 					},
 					{
 						"n": 2,
 						"code": "expect(gearAccessibleName).not.toBeNull()",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "icons-gearicon--closed",
+						"subject": "GearIcon",
+						"covers": "aria-name",
+						"evidence": "Open settings",
+						"note": "Partial: story finds the button by name Open settings and asserts toBeInTheDocument; e2e read the aria-label (Pitfall 10)"
 					},
 					{
 						"n": 3,
 						"code": "expect(gearAccessibleName).toContain(\"settings\")",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "icons-gearicon--closed",
+						"subject": "GearIcon",
+						"covers": "aria-name",
+						"evidence": "Open settings",
+						"note": "Partial: story finds the button by name Open settings; the e2e checked the aria-label contains settings (Pitfall 10)"
 					},
 					{
 						"n": 4,
 						"code": "expect(mainRole).toBeVisible()",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "aria-name",
+						"evidence": "getByRole(\"main\")",
+						"note": "Main landmark asserted visible by the Empty play (added in 75-01)"
 					},
 					{
 						"n": 5,
 						"code": "expect(dropZoneLabel).not.toBeNull()",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "ui-dropzone--idle",
+						"subject": "DropZone",
+						"covers": "aria-name",
+						"evidence": "File drop zone",
+						"note": "Region found by its accessible name File drop zone; the e2e read the aria-label attribute"
 					}
 				]
 			},

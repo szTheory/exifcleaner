@@ -12,32 +12,32 @@ One row per `expect(`, `expect.soft(` or `expect.poll(` call inside a test callb
 
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | kept | expect(nonBodyFocused.length).toBeGreaterThan(0) | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 2 | kept | expect(gearFocused).toBe(true) | real-electron |  |  | flips to deleted in 75-02 (D-01) |
+| 1 | deleted | expect(nonBodyFocused.length).toBeGreaterThan(0) | screens-app--empty | focus-order | userEvent.tab() | Story Tabs from a blurred start and asserts Choose files… gains focus, stronger than some non-body element; simulated Tab (D-03 residual) |
+| 2 | deleted | expect(gearFocused).toBe(true) | screens-app--empty | focus-order | Open settings | Gear is the third Tab stop in the story; simulated Tab (D-03), real-Chromium backstop is the kept drawer focus-trap test |
 
 ### uses file, folder, then settings focus order
 
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | kept | expect(primary).toBeFocused() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 2 | kept | expect(page.locator(".empty-state__button--secondary")).toBeFocused() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 3 | kept | expect(page.locator(".gear-icon")).toBeFocused() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
+| 1 | deleted | expect(primary).toBeFocused() | screens-app--empty | focus-order | Choose files… | First stop after a blurred start; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test |
+| 2 | deleted | expect(page.locator(".empty-state__button--secondary")).toBeFocused() | screens-app--empty | focus-order | Choose folder… | Second stop; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test |
+| 3 | deleted | expect(page.locator(".gear-icon")).toBeFocused() | screens-app--empty | focus-order | Open settings | Third stop; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test |
 
 ### shows visible focus indicator on focused elements
 
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | kept | expect(hasFocusIndicator).toBe(true) | real-electron |  |  | flips to deleted in 75-02 (D-01) |
+| 1 | deleted | expect(hasFocusIndicator).toBe(true) | ui-emptystate--button-keyboard-focus | focus-indicator | outlineStyle | Story checks :focus-visible and a solid outline on Choose files after Tab, not the gear; the e2e also accepted box-shadow |
 
 ### has ARIA roles on interactive elements
 
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | kept | expect(buttonCount).toBeGreaterThan(0) | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 2 | kept | expect(gearAccessibleName).not.toBeNull() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 3 | kept | expect(gearAccessibleName).toContain("settings") | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 4 | kept | expect(mainRole).toBeVisible() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 5 | kept | expect(dropZoneLabel).not.toBeNull() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
+| 1 | deleted | expect(buttonCount).toBeGreaterThan(0) | ui-emptystate--copy-mode-on | aria-name | getAllByRole("button") | Buttons are found by role; the play throws unless both render |
+| 2 | deleted | expect(gearAccessibleName).not.toBeNull() | icons-gearicon--closed | aria-name | Open settings | Partial: story finds the button by name Open settings and asserts toBeInTheDocument; e2e read the aria-label (Pitfall 10) |
+| 3 | deleted | expect(gearAccessibleName).toContain("settings") | icons-gearicon--closed | aria-name | Open settings | Partial: story finds the button by name Open settings; the e2e checked the aria-label contains settings (Pitfall 10) |
+| 4 | deleted | expect(mainRole).toBeVisible() | screens-app--empty | aria-name | getByRole("main") | Main landmark asserted visible by the Empty play (added in 75-01) |
+| 5 | deleted | expect(dropZoneLabel).not.toBeNull() | ui-dropzone--idle | aria-name | File drop zone | Region found by its accessible name File drop zone; the e2e read the aria-label attribute |
 
 ### traps focus within settings drawer when open
 
