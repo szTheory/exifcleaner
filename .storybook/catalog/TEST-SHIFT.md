@@ -66,15 +66,15 @@ One row per `expect(`, `expect.soft(` or `expect.poll(` call inside a test callb
 
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | kept | expect(emptyState).toBeVisible() | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 2 | kept | expect(emptyState.locator("h1")).toHaveText("Add files to clean") | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 3 | kept | expect(emptyState.locator('.empty-state__instruction[aria-hidden="false"]')).toHaveText("Drop images, videos, or PDFs here, or choose an option.") | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 4 | kept | expect(emptyState.locator(".empty-state__button--primary")).toHaveText("Choose files…") | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 5 | kept | expect(emptyState.locator(".empty-state__button--secondary")).toHaveText("Choose folder…") | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 6 | kept | expect(outputMode).toHaveText(/Cleaned copies will be created — originals stay untouched\.\|Files will be cleaned in place\./) | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 7 | kept | expect(metrics.buttonHeights.every((height) => height >= 40)).toBe(true) | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 8 | kept | expect(metrics.gap).toBeGreaterThanOrEqual(8) | real-electron |  |  | flips to deleted in 75-02 (D-01) |
-| 9 | kept | expect(metrics.buttonBackgrounds[0]).not.toBe(metrics.buttonBackgrounds[1]) | real-electron |  |  | flips to deleted in 75-02 (D-01) |
+| 1 | deleted | expect(emptyState).toBeVisible() | ui-emptystate--copy-mode-on | layout | toBeVisible | h1 toBeVisible also checks the section.empty-state ancestor, not only the heading; the e2e asserted the section itself |
+| 2 | deleted | expect(emptyState.locator("h1")).toHaveText("Add files to clean") | screens-app--empty | text | Add files to clean | Heading found by its accessible name; the e2e matched the h1 text |
+| 3 | deleted | expect(emptyState.locator('.empty-state__instruction[aria-hidden="false"]')).toHaveText("Drop images, videos, or PDFs here, or choose an option.") | ui-emptystate--copy-mode-on | text | SUBTITLE | SUBTITLE is a file-level constant reached through expectScreen, which compares the idle line's textContent to it |
+| 4 | deleted | expect(emptyState.locator(".empty-state__button--primary")).toHaveText("Choose files…") | screens-app--empty | text | Choose files… |  |
+| 5 | deleted | expect(emptyState.locator(".empty-state__button--secondary")).toHaveText("Choose folder…") | screens-app--empty | text | Choose folder… |  |
+| 6 | deleted | expect(outputMode).toHaveText(/Cleaned copies will be created — originals stay untouched\.\|Files will be cleaned in place\./) | ui-emptystate--copy-mode-on | text | COPY_ON | Stricter than the e2e regex, which also accepted the in-place sentence; that one is COPY_OFF in ui-emptystate--copy-mode-off. |
+| 7 | deleted | expect(metrics.buttonHeights.every((height) => height >= 40)).toBe(true) | ui-emptystate--copy-mode-on | layout | getBoundingClientRect | Both buttons at least 40 high, measured in real Chromium (added to the story in 75-01, D-02) |
+| 8 | deleted | expect(metrics.gap).toBeGreaterThanOrEqual(8) | ui-emptystate--copy-mode-on | layout | gap | Actions row computed gap at least 8 (added to the story in 75-01, D-02) |
+| 9 | deleted | expect(metrics.buttonBackgrounds[0]).not.toBe(metrics.buttonBackgrounds[1]) | ui-emptystate--copy-mode-on | layout | backgroundColor | Primary and secondary backgroundColor differ (added to the story in 75-01, D-02) |
 
 ### keeps first-run content usable at 200% zoom
 

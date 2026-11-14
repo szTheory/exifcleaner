@@ -192,65 +192,90 @@
 					{
 						"n": 1,
 						"code": "expect(emptyState).toBeVisible()",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "layout",
+						"evidence": "toBeVisible",
+						"note": "h1 toBeVisible also checks the section.empty-state ancestor, not only the heading; the e2e asserted the section itself"
 					},
 					{
 						"n": 2,
 						"code": "expect(emptyState.locator(\"h1\")).toHaveText(\"Add files to clean\")",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "text",
+						"evidence": "Add files to clean",
+						"note": "Heading found by its accessible name; the e2e matched the h1 text"
 					},
 					{
 						"n": 3,
 						"code": "expect(emptyState.locator('.empty-state__instruction[aria-hidden=\"false\"]')).toHaveText(\"Drop images, videos, or PDFs here, or choose an option.\")",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "text",
+						"evidence": "SUBTITLE",
+						"note": "SUBTITLE is a file-level constant reached through expectScreen, which compares the idle line's textContent to it"
 					},
 					{
 						"n": 4,
 						"code": "expect(emptyState.locator(\".empty-state__button--primary\")).toHaveText(\"Choose files…\")",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "text",
+						"evidence": "Choose files…"
 					},
 					{
 						"n": 5,
 						"code": "expect(emptyState.locator(\".empty-state__button--secondary\")).toHaveText(\"Choose folder…\")",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "text",
+						"evidence": "Choose folder…"
 					},
 					{
 						"n": 6,
 						"code": "expect(outputMode).toHaveText(/Cleaned copies will be created — originals stay untouched\\.|Files will be cleaned in place\\./)",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "text",
+						"evidence": "COPY_ON",
+						"note": "Stricter than the e2e regex, which also accepted the in-place sentence; that one is COPY_OFF in ui-emptystate--copy-mode-off."
 					},
 					{
 						"n": 7,
 						"code": "expect(metrics.buttonHeights.every((height) => height >= 40)).toBe(true)",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "layout",
+						"evidence": "getBoundingClientRect",
+						"note": "Both buttons at least 40 high, measured in real Chromium (added to the story in 75-01, D-02)"
 					},
 					{
 						"n": 8,
 						"code": "expect(metrics.gap).toBeGreaterThanOrEqual(8)",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "layout",
+						"evidence": "gap",
+						"note": "Actions row computed gap at least 8 (added to the story in 75-01, D-02)"
 					},
 					{
 						"n": 9,
 						"code": "expect(metrics.buttonBackgrounds[0]).not.toBe(metrics.buttonBackgrounds[1])",
-						"verdict": "kept",
-						"reason": "real-electron",
-						"note": "flips to deleted in 75-02 (D-01)"
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "layout",
+						"evidence": "backgroundColor",
+						"note": "Primary and secondary backgroundColor differ (added to the story in 75-01, D-02)"
 					}
 				]
 			},

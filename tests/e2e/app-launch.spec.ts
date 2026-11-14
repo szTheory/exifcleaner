@@ -56,42 +56,6 @@ test.describe("App Launch", () => {
 		expect(title).toBe("ExifCleaner");
 	});
 
-	test("shows the empty drop zone state", async () => {
-		const emptyState = window.locator("section.empty-state");
-		await expect(emptyState).toBeVisible();
-		await expect(emptyState.locator("h1")).toHaveText("Add files to clean");
-		await expect(
-			emptyState.locator('.empty-state__instruction[aria-hidden="false"]'),
-		).toHaveText("Drop images, videos, or PDFs here, or choose an option.");
-		await expect(
-			emptyState.locator(".empty-state__button--primary"),
-		).toHaveText("Choose files…");
-		await expect(
-			emptyState.locator(".empty-state__button--secondary"),
-		).toHaveText("Choose folder…");
-
-		const outputMode = emptyState.locator(".empty-state__output-mode");
-		await expect(outputMode).toHaveText(
-			/Cleaned copies will be created — originals stay untouched\.|Files will be cleaned in place\./,
-		);
-
-		const metrics = await emptyState.evaluate((section) => {
-			const buttons = Array.from(section.querySelectorAll("button"));
-			const styles = buttons.map((button) => getComputedStyle(button));
-			const actions = section.querySelector(".empty-state__actions");
-			return {
-				buttonHeights: buttons.map(
-					(button) => button.getBoundingClientRect().height,
-				),
-				buttonBackgrounds: styles.map((style) => style.backgroundColor),
-				gap: actions ? Number.parseFloat(getComputedStyle(actions).gap) : 0,
-			};
-		});
-		expect(metrics.buttonHeights.every((height) => height >= 40)).toBe(true);
-		expect(metrics.gap).toBeGreaterThanOrEqual(8);
-		expect(metrics.buttonBackgrounds[0]).not.toBe(metrics.buttonBackgrounds[1]);
-	});
-
 	test("keeps first-run content usable at 200% zoom", async () => {
 		await app.evaluate(({ BrowserWindow }) => {
 			const win = BrowserWindow.getAllWindows()[0];
