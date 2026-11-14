@@ -248,3 +248,33 @@ export const FILTERED_TREES = Object.freeze([
 	"src/preload/api_types.ts",
 	".resources/locales",
 ]);
+
+// UI-SPEC (Phase 74, SPEC-01, D-27, D-28). The eight closed sections, in the
+// required key order of ui-spec.json and the render order of UI-SPEC.md.
+export const UI_SPEC_SECTIONS = Object.freeze([
+	"type",
+	"radii",
+	"spacing",
+	"focus",
+	"states",
+	"darkRinse",
+	"motion",
+	"platformOwned",
+]);
+// The reasons an `app` decision may give for a value neither the brand tokens
+// nor a brand quote settle (D-28).
+export const UI_SPEC_BASES = Object.freeze([
+	"brand-starting-point",
+	"wcag-derived",
+	"platform-default",
+	"maintainer-decision",
+]);
+// The states matrix is component x state x theme (D-13).
+export const UI_SPEC_STATES = Object.freeze([
+	"hover",
+	"pressed",
+	"disabled",
+	"selected",
+	"error",
+]);
+export const UI_SPEC_THEMES = Object.freeze(["light", "dark"]);

@@ -1,0 +1,165 @@
+{
+	"schemaVersion": 1,
+	"brandPin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+	"type": [
+		{
+			"id": "type.label.weight",
+			"value": "600",
+			"brand": {
+				"section": "Type: the hierarchy",
+				"quote": "Label: Instrument Sans 600, 13/16 px, tracking +6%, capitals. Table headers, section labels. Sample: “FIELDS REMOVED”"
+			}
+		}
+	],
+	"radii": [
+		{
+			"id": "radii.button",
+			"value": "8 px",
+			"brand": {
+				"section": "## In the product",
+				"quote": "Shape language: soft rectangles, 8 px radius for buttons and cards, 6 px for badges."
+			}
+		}
+	],
+	"spacing": [
+		{
+			"id": "spacing.base",
+			"value": "4px",
+			"app": {
+				"basis": "maintainer-decision",
+				"reason": "D-11 keeps the existing 4 px-base --ec-space scale (tokens.css:44, --ec-space-1: 4px); the brand tokens set no spacing."
+			}
+		}
+	],
+	"focus": [
+		{
+			"id": "focus.ring.width",
+			"value": "2px",
+			"app": {
+				"basis": "wcag-derived",
+				"reason": "D-12: outline 2px solid on :focus-visible only, never box-shadow (forced-colors drops it); the ring must hold 3:1 against the adjacent colour (WCAG 2.2 SC 1.4.11), which Phase 74 checks for the fallback accent."
+			}
+		}
+	],
+	"states": {
+		"components": [
+			"primary-button"
+		],
+		"cells": [
+			{
+				"component": "primary-button",
+				"state": "disabled",
+				"theme": "dark",
+				"value": "opacity 0.4",
+				"app": {
+					"basis": "maintainer-decision",
+					"reason": "D-13: a [disabled] or aria-disabled control at opacity 0.4 with a default cursor; no disabled rule exists in the stylesheets today."
+				}
+			},
+			{
+				"component": "primary-button",
+				"state": "disabled",
+				"theme": "light",
+				"value": "opacity 0.4",
+				"app": {
+					"basis": "maintainer-decision",
+					"reason": "D-13: a [disabled] or aria-disabled control at opacity 0.4 with a default cursor; no disabled rule exists in the stylesheets today."
+				}
+			},
+			{
+				"component": "primary-button",
+				"state": "error",
+				"theme": "dark",
+				"na": "A button reports no error of its own; the failed row or message carries it with an icon and text (D-13)."
+			},
+			{
+				"component": "primary-button",
+				"state": "error",
+				"theme": "light",
+				"na": "A button reports no error of its own; the failed row or message carries it with an icon and text (D-13)."
+			},
+			{
+				"component": "primary-button",
+				"state": "hover",
+				"theme": "dark",
+				"value": "surface step",
+				"app": {
+					"basis": "brand-starting-point",
+					"reason": "D-06: BRAND.md Layout leaves component states to the platform; hover is a surface step, Rinse in light and Tide in dark."
+				}
+			},
+			{
+				"component": "primary-button",
+				"state": "hover",
+				"theme": "light",
+				"value": "surface step",
+				"app": {
+					"basis": "brand-starting-point",
+					"reason": "D-06: BRAND.md Layout leaves component states to the platform; hover is a surface step, Rinse in light and Tide in dark."
+				}
+			},
+			{
+				"component": "primary-button",
+				"state": "pressed",
+				"theme": "dark",
+				"value": "one step deeper",
+				"app": {
+					"basis": "brand-starting-point",
+					"reason": "D-06: pressed is one surface step deeper than hover, with no transform."
+				}
+			},
+			{
+				"component": "primary-button",
+				"state": "pressed",
+				"theme": "light",
+				"value": "one step deeper",
+				"app": {
+					"basis": "brand-starting-point",
+					"reason": "D-06: pressed is one surface step deeper than hover, with no transform."
+				}
+			},
+			{
+				"component": "primary-button",
+				"state": "selected",
+				"theme": "dark",
+				"na": "A button has no selected state; selection belongs to the segmented control and the table rows (D-13)."
+			},
+			{
+				"component": "primary-button",
+				"state": "selected",
+				"theme": "light",
+				"na": "A button has no selected state; selection belongs to the segmented control and the table rows (D-13)."
+			}
+		]
+	},
+	"darkRinse": [
+		{
+			"id": "dark-rinse.surface",
+			"value": "#12403C",
+			"tokens": {
+				"path": "color.dark.tide",
+				"value": "#12403C"
+			}
+		}
+	],
+	"motion": [
+		{
+			"id": "motion.reveal.duration",
+			"value": "200 ms",
+			"brand": {
+				"section": "### In the product",
+				"quote": "**Reveal.** Expanding a file’s before-and-after list opens in about 200 ms with an ordinary ease-out. Nothing bounces."
+			}
+		}
+	],
+	"platformOwned": [
+		{
+			"id": "platform-owned.platform.accent-fallback",
+			"value": "#007AFF",
+			"app": {
+				"basis": "platform-default",
+				"reason": "ACCENT_COLOR_FALLBACK at src/domain/accent_color.ts:4 is the accent when the OS reports none; getAccentColor in ThemeContext.tsx replaces it at runtime from systemPreferences.getAccentColor() (D-04), so the accent stays platform-owned."
+			}
+		}
+	]
+}

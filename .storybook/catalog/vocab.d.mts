@@ -28,3 +28,7 @@ export const JOB_ID_PATTERN: RegExp;
 export const RED_FLAG_ID_PATTERN: RegExp;
 export const SCENARIO_ID_PATTERN: RegExp;
 export const FILTERED_TREES: readonly string[];
+export const UI_SPEC_SECTIONS: readonly string[];
+export const UI_SPEC_BASES: readonly string[];
+export const UI_SPEC_STATES: readonly string[];
+export const UI_SPEC_THEMES: readonly string[];
