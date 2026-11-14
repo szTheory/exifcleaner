@@ -315,7 +315,9 @@ describe("brand_quote_check against a planted cache", () => {
 				specDoc: readJsonFile(repo, SPEC),
 				tokensDoc: readJsonFile(repo, path.join(CACHE, "tokens.json")),
 			});
-			expect(problems.map((found) => found.code)).toEqual([
+			// Every spec value that cites the planted path is red, with this one code.
+			expect(problems.length).toBeGreaterThan(0);
+			expect([...new Set(problems.map((found) => found.code))]).toEqual([
 				"spec-token-hex-mismatch",
 			]);
 		});
@@ -340,7 +342,9 @@ describe("brand_quote_check against a planted cache", () => {
 				specDoc: readJsonFile(repo, SPEC),
 				tokensDoc: readJsonFile(repo, path.join(CACHE, "tokens.json")),
 			});
-			expect(problems.map((found) => found.code)).toEqual([
+			// Every spec value that cites the planted path is red, with this one code.
+			expect(problems.length).toBeGreaterThan(0);
+			expect([...new Set(problems.map((found) => found.code))]).toEqual([
 				"spec-token-path-missing",
 			]);
 		});

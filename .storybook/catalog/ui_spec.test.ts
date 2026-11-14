@@ -405,20 +405,26 @@ function withExtraCell(
 	return sortCells(doc);
 }
 
-// A second component with a full set of ten cells, so the matrix stays complete.
+// A second component with a full set of ten cells (the first component's), so the
+// matrix stays complete.
 function withComponent(doc: UiSpecDocument, name: string): UiSpecDocument {
-	const copies = doc.states.cells.map((cell) => ({
-		...structuredClone(cell),
-		component: name,
-	}));
+	const first = at(doc.states.components, 0);
+	const copies = doc.states.cells
+		.filter((cell) => cell.component === first)
+		.map((cell) => ({ ...structuredClone(cell), component: name }));
 	doc.states.cells.push(...copies);
 	doc.states.components.push(name);
 	return sortCells(doc);
 }
 
+// Renames the first component, which sorts first both before and after, so the
+// only defect is the name.
 function renameComponent(doc: UiSpecDocument, name: string): UiSpecDocument {
-	doc.states.components = [name];
-	for (const cell of doc.states.cells) cell.component = name;
+	const first = at(doc.states.components, 0);
+	doc.states.components[0] = name;
+	for (const cell of doc.states.cells) {
+		if (cell.component === first) cell.component = name;
+	}
 	return sortCells(doc);
 }
 
@@ -545,7 +551,7 @@ const MUTANTS: Mutant[] = [
 	{
 		name: "a component name that is not a kebab slug",
 		code: "bad-id",
-		mutate: (doc) => renameComponent(doc, "Primary Button"),
+		mutate: (doc) => renameComponent(doc, "Drop Zone"),
 	},
 	{
 		name: "a value copied with the same id",
@@ -563,7 +569,11 @@ const MUTANTS: Mutant[] = [
 		name: "a component listed twice",
 		code: "duplicate-id",
 		mutate: (doc) => {
-			doc.states.components.push("primary-button");
+			// The last component again, so the list stays in order and only the
+			// repeat is the defect.
+			doc.states.components.push(
+				at(doc.states.components, doc.states.components.length - 1),
+			);
 			return doc;
 		},
 	},
