@@ -90,11 +90,13 @@ export const SEVERITIES = Object.freeze(["critical", "major", "minor"]);
 // has an entry (an empty kind declared early is a sealed kind later).
 export const REGISTER_KINDS = Object.freeze([
 	"access-gap",
+	"contrast-gap",
 	"dead-end",
 	"i18n-gap",
 	"layout-gap",
 	"silent-failure",
 	"token-gap",
+	"token-map-gap",
 	"unrendered-outcome",
 ]);
 

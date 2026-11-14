@@ -104,6 +104,69 @@ describe("renderFindings sections (planted documents)", () => {
 		);
 	});
 
+	test("contrast-gap entries print grouped by pair and backdrop, one row for both themes, with no reason column", () => {
+		const gap = (rule: string, story = "file-list-filetable--mixed-statuses") =>
+			entry("contrast-gap", story, rule, {
+				severity: "major",
+				reason: "a quoted measured reason that stays in the JSON",
+			});
+		const planted = renderFindings({
+			baseline: {
+				entries: [
+					REGISTER,
+					gap("text-secondary-on-bg-light"),
+					gap("text-secondary-on-bg-dark"),
+					gap(
+						"muted-on-surface-light",
+						"file-list-folderrow--complete-collapsed",
+					),
+				],
+			},
+			copyFindings: { entries: [] },
+		});
+		const gaps = section(planted, "Contrast gaps");
+		expect(gaps).toContain("3 entries across 2 pairs");
+		expect(gaps).toContain("| Pair | Themes | Story | Disposition |");
+		expect(gaps).toContain(
+			"| text-secondary-on-bg | dark, light | file-list-filetable--mixed-statuses | fix-v5.1 |",
+		);
+		expect(gaps).toContain(
+			"| muted-on-surface | light | file-list-folderrow--complete-collapsed | fix-v5.1 |",
+		);
+		expect(gaps).not.toContain("quoted measured reason");
+		// The other register kinds still print in full, and no contrast row is among them.
+		const register = section(planted, "Register");
+		expect(register).toContain(
+			"silent-failure\\|ui-toast--error\\|no-announcement",
+		);
+		expect(register).not.toContain("contrast-gap");
+		// The section sits after the register table and before the verdict log.
+		expect(planted.indexOf("## Contrast gaps")).toBeGreaterThan(
+			planted.indexOf("## Register"),
+		);
+		expect(planted.indexOf("## Contrast gaps")).toBeLessThan(
+			planted.indexOf("## Rejected (verdict log)"),
+		);
+	});
+
+	test("without contrast-gap entries there is no contrast section, and an all-contrast register prints none above it", () => {
+		expect(text).not.toContain("## Contrast gaps");
+		const only = renderFindings({
+			baseline: {
+				entries: [
+					entry("contrast-gap", "ui-a--one", "muted-on-bg-light", {
+						severity: "major",
+					}),
+				],
+			},
+			copyFindings: { entries: [] },
+		});
+		expect(section(only, "Register").trim().endsWith("none")).toBe(true);
+		expect(section(only, "Contrast gaps")).toContain(
+			"1 entries across 1 pairs",
+		);
+	});
+
 	test("a reject entry is excluded from the register and listed with its verdict row", () => {
 		expect(section(text, "Register")).not.toContain("hover-motion");
 		const rejected = section(text, "Rejected (verdict log)");
