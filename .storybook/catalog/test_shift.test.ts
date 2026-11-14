@@ -281,7 +281,32 @@ describe("storySources", () => {
 	});
 
 	test("loadStoryScopes reads only the files of deleted items", async () => {
-		expect((await loadStoryScopes(repoRoot, stories, real)).size).toBe(0);
+		// A ledger that names no story reads no file. The real ledger holds deleted items
+		// since 75-02, so the empty case is a ledger with no specs.
+		expect(
+			(await loadStoryScopes(repoRoot, stories, { ...real, specs: {} })).size,
+		).toBe(0);
+		const cited = new Set(
+			Object.values(real.specs)
+				.flat()
+				.flatMap((entry) => entry.items)
+				.flatMap((item) =>
+					item.verdict === "deleted" && item.story !== undefined
+						? [item.story]
+						: [],
+				),
+		);
+		const files = new Set(
+			stories.filter((story) => cited.has(story.id)).map((story) => story.file),
+		);
+		const realScopes = await loadStoryScopes(repoRoot, stories, real);
+		for (const id of cited) {
+			expect(realScopes.has(id), `${id} is read`).toBe(true);
+		}
+		for (const id of realScopes.keys()) {
+			const file = stories.find((story) => story.id === id)?.file ?? "";
+			expect(files.has(file), `${id} comes from a cited file`).toBe(true);
+		}
 		const fixture = deletedFixture();
 		const scopes = await loadStoryScopes(repoRoot, stories, fixture.doc);
 		expect(scopes.get("screens-app--empty")?.scope).toContain("toHaveFocus");
@@ -326,7 +351,15 @@ describe("the real ledger", () => {
 	test("sortProblems order: emission order is the reverse of the sorted order", () => {
 		const doc = clone();
 		const accessibility = specOf(doc, "accessibility");
-		accessibility.splice(0, 1);
+		// The drawer test is the one accessibility test that stays live after 75-02, so
+		// removing its entry leaves a live test with no ledger entry.
+		accessibility.splice(
+			accessibility.findIndex(
+				(entry) =>
+					entry.title === "traps focus within settings drawer when open",
+			),
+			1,
+		);
 		const item = at(at(specOf(doc, "metadata-inspection"), 0).items, 0);
 		item.code = `${item.code} `;
 		const result = checkTestShift({
@@ -674,9 +707,17 @@ describe("every rule code is shown red by its own mutant", () => {
 			...empty,
 			scope: empty.scope.replaceAll("toHaveFocus", "toBeEnabled"),
 		});
-		expect(check(fixture.doc, fixture.specTexts, scopes)).toEqual([
-			"evidence-missing",
-		]);
+		// The fixture item is red, and so is every real focus-order item, because they cite
+		// the same story and the same literal.
+		const realFocusOrder = Object.values(real.specs)
+			.flat()
+			.flatMap((entry) => entry.items)
+			.filter(
+				(item) => item.verdict === "deleted" && item.covers === "focus-order",
+			).length;
+		expect(check(fixture.doc, fixture.specTexts, scopes)).toEqual(
+			Array.from({ length: realFocusOrder + 1 }, () => "evidence-missing"),
+		);
 	});
 
 	test("the mutant codes are exactly TEST_SHIFT_CODES", () => {
