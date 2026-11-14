@@ -195,6 +195,55 @@ const REQUIRED_IDS = [
 	"motion.progress",
 	"motion.reduced-motion",
 	"motion.v5-2-dispositions",
+	"dark-rinse.surface",
+	"dark-rinse.basis",
+	"dark-rinse.light-surface",
+	"dark-rinse.hover-light",
+	"dark-rinse.hover-dark",
+	"dark-rinse.state-overlay-light",
+	"dark-rinse.state-overlay-dark",
+	"dark-rinse.pressed-light",
+	"dark-rinse.pressed-dark",
+	"dark-rinse.pill-on-raised",
+	"platform-owned.brand.bg-light",
+	"platform-owned.brand.bg-dark",
+	"platform-owned.brand.surface-light",
+	"platform-owned.brand.surface-dark",
+	"platform-owned.brand.text-light",
+	"platform-owned.brand.text-dark",
+	"platform-owned.brand.text-secondary-light",
+	"platform-owned.brand.text-secondary-dark",
+	"platform-owned.brand.cleaned-light",
+	"platform-owned.brand.cleaned-dark",
+	"platform-owned.brand.cleaned-scope",
+	"platform-owned.brand.action-light",
+	"platform-owned.brand.action-dark",
+	"platform-owned.brand.action-text-light",
+	"platform-owned.brand.action-text-dark",
+	"platform-owned.brand.action-scope",
+	"platform-owned.brand.links",
+	"platform-owned.brand.pill-bg-light",
+	"platform-owned.brand.pill-bg-dark",
+	"platform-owned.brand.pill-text-light",
+	"platform-owned.brand.pill-text-dark",
+	"platform-owned.brand.pill-per-type",
+	"platform-owned.brand.no-ui-role",
+	"platform-owned.brand.mark-bristle-yellow",
+	"platform-owned.brand.mark-band-orange",
+	"platform-owned.brand.derived-pairs",
+	"platform-owned.platform.accent-fallback",
+	"platform-owned.platform.accent-uses",
+	"platform-owned.platform.error-icon-light",
+	"platform-owned.platform.error-icon-dark",
+	"platform-owned.platform.error-text",
+	"platform-owned.platform.warnings",
+	"platform-owned.platform.window-controls",
+	"platform-owned.platform.border",
+	"platform-owned.platform.toggle-off-track",
+	"platform-owned.platform.shadow",
+	"platform-owned.platform.surfaces-not-shadow",
+	"platform-owned.platform.window-background",
+	"platform-owned.platform.selection",
 ];
 
 describe("the real ui-spec content (74-02)", () => {
@@ -233,6 +282,67 @@ describe("the real ui-spec content (74-02)", () => {
 			"motion.counts",
 		]) {
 			expect(need(id).brand, id).toBeDefined();
+		}
+	});
+
+	test("every platform-owned brand colour is a tokens source on a color path, the dark pill text an app starting point", () => {
+		const colours = everyValue.filter(
+			(value) =>
+				value.id.startsWith("platform-owned.brand.") &&
+				/-(light|dark)$/.test(value.id),
+		);
+		// bg, surface, text, text-secondary, cleaned, action, action-text, pill-bg
+		// and pill-text, each in two themes.
+		expect(colours.length).toBe(18);
+		for (const value of colours) {
+			if (value.id === "platform-owned.brand.pill-text-dark") {
+				expect(value.app?.basis, value.id).toBe("brand-starting-point");
+				continue;
+			}
+			expect(value.tokens, value.id).toBeDefined();
+			expect(value.tokens?.path.startsWith("color."), value.id).toBe(true);
+		}
+	});
+
+	test("the platform error icons keep the platform reds as platform defaults", () => {
+		const light = need("platform-owned.platform.error-icon-light");
+		const dark = need("platform-owned.platform.error-icon-dark");
+		expect(light.value).toBe("#FF3B30");
+		expect(dark.value).toBe("#FF453A");
+		expect(light.app?.basis).toBe("platform-default");
+		expect(dark.app?.basis).toBe("platform-default");
+	});
+
+	test("the hover and pressed steps are plain uppercase hexes (74-04 refs them)", () => {
+		for (const id of [
+			"dark-rinse.hover-light",
+			"dark-rinse.hover-dark",
+			"dark-rinse.pressed-light",
+			"dark-rinse.pressed-dark",
+		]) {
+			expect(need(id).value, id).toMatch(/^#[0-9A-F]{6}$/);
+		}
+	});
+
+	test("the states matrix is eight components by five states by two themes, every cell decided", () => {
+		expect(real.states.components).toEqual([
+			"drop-zone",
+			"icon-button",
+			"menu-item",
+			"primary-button",
+			"segment",
+			"table-row",
+			"text-link",
+			"toggle",
+		]);
+		expect(real.states.cells.length).toBe(80);
+		for (const cell of real.states.cells) {
+			const where = `${cell.component}|${cell.state}|${cell.theme}`;
+			if (cell.na !== undefined) {
+				expect(cell.na.length, where).toBeGreaterThanOrEqual(20);
+			} else {
+				expect(cell.value?.length ?? 0, where).toBeGreaterThan(0);
+			}
 		}
 	});
 
