@@ -1,0 +1,467 @@
+{
+	"schemaVersion": 1,
+	"brandPin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
+	"entries": [
+		{
+			"name": "--color-accent",
+			"disposition": "retire",
+			"reason": "backward-compat alias with live consumers error_boundary.css:29, error_boundary.css:32, error_boundary.css:43; v5.1 rewrites these call sites to var(--ec-color-accent), except error_boundary.css:32, a text use, which moves to the action colour (D-04: the accent is never text) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
+			"aliasOf": "--ec-color-accent"
+		},
+		{
+			"name": "--color-bg",
+			"disposition": "retire",
+			"reason": "backward-compat alias with live consumers app.css:5; v5.1 rewrites this call site to var(--ec-color-bg) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
+			"aliasOf": "--ec-color-bg"
+		},
+		{
+			"name": "--color-border",
+			"disposition": "retire",
+			"reason": "backward-compat alias with live consumers file_list.css:15; v5.1 rewrites this call site to var(--ec-color-border) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
+			"aliasOf": "--ec-color-border"
+		},
+		{
+			"name": "--color-drop-active",
+			"disposition": "retire",
+			"reason": "backward-compat alias with live consumers error_boundary.css:39; v5.1 rewrites this call site to the drop-target highlight on the platform accent instead of var(--ec-color-gold-bg), which is retired (D-05) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
+			"aliasOf": "--ec-color-gold-bg"
+		},
+		{
+			"name": "--color-error-bg",
+			"disposition": "retire",
+			"reason": "backward-compat alias with live consumers error_boundary.css:8; v5.1 rewrites this call site to var(--ec-color-error-bg) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
+			"aliasOf": "--ec-color-error-bg"
+		},
+		{
+			"name": "--color-error-text",
+			"disposition": "retire",
+			"reason": "backward-compat alias with live consumers error_boundary.css:15; v5.1 rewrites this call site to the primary text colour, var(--ec-color-text), instead of var(--ec-color-error): error text is never platform red (D-04) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
+			"aliasOf": "--ec-color-error"
+		},
+		{
+			"name": "--color-text",
+			"disposition": "retire",
+			"reason": "backward-compat alias with live consumers app.css:6, empty_state.css:32, file_list.css:24; v5.1 rewrites these call sites to var(--ec-color-text) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
+			"aliasOf": "--ec-color-text"
+		},
+		{
+			"name": "--color-text-secondary",
+			"disposition": "retire",
+			"reason": "backward-compat alias with live consumers error_boundary.css:21, file_list.css:29; v5.1 rewrites these call sites to var(--ec-color-text-secondary) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
+			"aliasOf": "--ec-color-text-secondary"
+		},
+		{
+			"name": "--ec-backdrop-opacity",
+			"disposition": "keep-platform",
+			"reason": "No brand equivalent (D-04): the opacity of the overlay behind the settings drawer (0.4 light, 0.6 dark) is a platform value the book does not set. The platform values are kept, and 74-04 exempts this token from the contrast test with a written reason, so it carries no sealed entry."
+		},
+		{
+			"name": "--ec-border-status-bar",
+			"disposition": "keep-platform",
+			"reason": "No brand equivalent (D-04): the status bar border is transparent in light and the border colour in dark, and the book defines no hairline colour. The platform values are kept, and 74-04 exempts this token from the contrast test with a written reason, so it carries no sealed entry.",
+			"spec": "platform-owned.platform.border"
+		},
+		{
+			"name": "--ec-color-accent",
+			"disposition": "keep-platform",
+			"reason": "Set at runtime from the system accent: ThemeContext.tsx:54 and ThemeContext.tsx:73 call document.documentElement.style.setProperty(\"--ec-color-accent\", ...) with the value of getAccentColor(), and the fallback is ACCENT_COLOR_FALLBACK #007AFF at src/domain/accent_color.ts:4, so the value stays platform-owned (D-04). v5.1 changes the uses, not the value: the accent is never text (accent-as-text moves to the action colour) and ::selection changes its text or fill treatment (white on #007AFF measures 4.01:1), which clears the accent entries 74-04 seals.",
+			"spec": "platform-owned.platform.accent-fallback"
+		},
+		{
+			"name": "--ec-color-bg",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.light.clean-white",
+					"hex": "#FFFFFF"
+				},
+				"dark": {
+					"token": "color.dark.deep-teal",
+					"hex": "#0A2E2B"
+				}
+			},
+			"spec": "platform-owned.brand.bg-light"
+		},
+		{
+			"name": "--ec-color-border",
+			"disposition": "keep-platform",
+			"reason": "No brand equivalent (D-04): the book defines no hairline colour. The platform values are kept, and 74-04 exempts this token from the contrast test with a written reason, so it carries no sealed entry.",
+			"spec": "platform-owned.platform.border"
+		},
+		{
+			"name": "--ec-color-error",
+			"disposition": "keep-platform",
+			"reason": "Platform red on icons only (D-04). v5.1 changes the app value #c44536 (the same in both theme blocks, tokens.css:14 and tokens.css:92) to the platform reds per theme and moves error text to the primary text colour, which clears the error-as-text entries 74-04 seals. 74-04 seals no error-icon entry: #c44536 measures 4.56:1 on the light ground #f5f6f8, 4.16:1 on the light surface #e8ecf0, 3.72:1 on the dark ground #141416 and 3.44:1 on the dark surface #1c1c1f (floored), so the icon passes 3:1 on today's grounds in both themes.",
+			"spec": "platform-owned.platform.error-icon-light"
+		},
+		{
+			"name": "--ec-color-error-bg",
+			"disposition": "derive",
+			"from": [
+				"color.light.rinse",
+				"color.dark.tide"
+			],
+			"rule": "error rows sit on the raised surface step; the error is carried by the platform-red icon and primary-text message (D-04, D-13)"
+		},
+		{
+			"name": "--ec-color-gold",
+			"disposition": "retire",
+			"reason": "Retired (D-05): Bristle Yellow is mark-only and the drop-zone active state uses the platform accent.",
+			"spec": "platform-owned.platform.accent-uses"
+		},
+		{
+			"name": "--ec-color-gold-bg",
+			"disposition": "retire",
+			"reason": "Retired with --ec-color-gold (D-05): the drop-zone active state uses the platform accent, so the gold tint has no role.",
+			"spec": "platform-owned.platform.accent-uses"
+		},
+		{
+			"name": "--ec-color-hover",
+			"disposition": "retire",
+			"reason": "Declared in no stylesheet: language_dropdown.css:82 reads var(--ec-color-hover, rgba(0, 0, 0, 0.04)) and always takes the fallback. Hover becomes the surface step (D-06), so v5.1 declares no hover token.",
+			"spec": "dark-rinse.hover-light",
+			"finding": "token-gap|settings-languagedropdown--item-hover|hover-token-undefined"
+		},
+		{
+			"name": "--ec-color-info",
+			"disposition": "retire",
+			"reason": "Declared (#3b7fc4 light, #6ba3d6 dark) and used by no stylesheet or component under src/renderer; no brand token replaces it."
+		},
+		{
+			"name": "--ec-color-muted",
+			"disposition": "retire",
+			"reason": "Fails the 4.5:1 text bar on every ground it sits on (2.04:1 to 3.08:1 in 74-RESEARCH); v5.1 merges it into the secondary text colour, --ec-color-text-secondary."
+		},
+		{
+			"name": "--ec-color-preserved-bg",
+			"disposition": "retire",
+			"reason": "v5.1 replaces the green tint on preserved-field rows (rgba(52, 199, 89, 0.08) light, rgba(48, 209, 88, 0.12) dark, tokens.css:21 and tokens.css:99): the preserved field is not cleaned, so it goes neutral (D-02)."
+		},
+		{
+			"name": "--ec-color-removed-bg",
+			"disposition": "retire",
+			"reason": "v5.1 replaces the red tint on removed-field rows (rgba(255, 59, 48, 0.08) light, rgba(255, 69, 58, 0.12) dark, tokens.css:20 and tokens.css:98): colour inside list rows means status (D-02) and no brand token replaces the tint."
+		},
+		{
+			"name": "--ec-color-success",
+			"disposition": "retire",
+			"reason": "Replaced by the cleaned colour, Steady Teal in light and Seafoam in dark (D-02); the app green #34c759 / #30d158 is not a brand colour, and 74-RESEARCH R-05 measures the light check icon at 2.05:1.",
+			"spec": "platform-owned.brand.cleaned-light"
+		},
+		{
+			"name": "--ec-color-surface",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.light.rinse",
+					"hex": "#EEF6F5"
+				},
+				"dark": {
+					"token": "color.dark.tide",
+					"hex": "#12403C"
+				}
+			},
+			"spec": "platform-owned.brand.surface-light"
+		},
+		{
+			"name": "--ec-color-text",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.light.deep-teal",
+					"hex": "#0A2E2B"
+				},
+				"dark": {
+					"token": "color.dark.clean-white",
+					"hex": "#FFFFFF"
+				}
+			},
+			"spec": "platform-owned.brand.text-light"
+		},
+		{
+			"name": "--ec-color-text-secondary",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.secondary.pewter",
+					"hex": "#4A625F"
+				},
+				"dark": {
+					"token": "color.secondary.fog",
+					"hex": "#A9C9C4"
+				}
+			},
+			"spec": "platform-owned.brand.text-secondary-light"
+		},
+		{
+			"name": "--ec-duration-fast",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The book gives no hover, pressed or focus feedback duration; the app keeps 150ms (tokens.css:67), and the v5.1 discuss-phase decides whether the book records it.",
+			"spec": "motion.state-feedback.duration"
+		},
+		{
+			"name": "--ec-duration-normal",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The book's reveal is about 200 ms and it publishes no duration token; the app keeps 200ms for settle (tokens.css:68), and the v5.1 discuss-phase decides whether the book records it.",
+			"spec": "motion.settle.duration"
+		},
+		{
+			"name": "--ec-duration-slow",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The book gives no drawer duration; the app keeps 300ms for the settings drawer only (D-14, tokens.css:69), and the v5.1 discuss-phase decides whether the book records it.",
+			"spec": "motion.drawer.duration"
+		},
+		{
+			"name": "--ec-ease-out",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The book asks for an ordinary ease-out and publishes no curve value; the spec uses the CSS keyword ease-out, which replaces this app cubic-bezier (D-14, tokens.css:65), and the v5.1 discuss-phase decides whether the book records the keyword.",
+			"spec": "motion.ease"
+		},
+		{
+			"name": "--ec-ease-spring",
+			"disposition": "retire",
+			"reason": "Retired (D-14): the cubic-bezier overshoots and the brand says nothing bounces in the product; its uses move to the ordinary ease-out.",
+			"spec": "motion.ease-spring"
+		},
+		{
+			"name": "--ec-font-family",
+			"disposition": "keep-platform",
+			"reason": "System sans stack (D-08, tokens.css:53): BRAND.md says that inside the app the interface keeps the system font, so ExifCleaner feels native; no font file is bundled.",
+			"spec": "type.family.sans"
+		},
+		{
+			"name": "--ec-font-family-mono",
+			"disposition": "keep-platform",
+			"reason": "System monospace stack (D-08, tokens.css:55): BRAND.md permits Geist Mono or the system monospace and the app keeps the system one; no font file is bundled.",
+			"spec": "type.family.mono"
+		},
+		{
+			"name": "--ec-font-size-body",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The book's type rows are marketing-sized and set no app UI scale; the app keeps 16px for body text (D-09), and the v5.1 discuss-phase decides whether the book adopts an app scale.",
+			"spec": "type.body.size"
+		},
+		{
+			"name": "--ec-font-size-heading",
+			"disposition": "retire",
+			"reason": "Retired (D-09): declared at tokens.css:60 (24px) and read by no stylesheet or component; v5.1 reintroduces a heading size only if it needs one."
+		},
+		{
+			"name": "--ec-font-size-label",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The book sets no app UI scale; today's token is 20px (tokens.css:59, read at settings_drawer.css:71), which the spec calls the title size (D-09) because the name clashes with the 12px Label role, so v5.1 renames it, and the v5.1 discuss-phase decides whether the book adopts an app scale.",
+			"spec": "type.title.size"
+		},
+		{
+			"name": "--ec-font-size-small",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The book's type rows are marketing-sized and set no app UI scale; the app keeps 14px as the default UI size (D-09), and the v5.1 discuss-phase decides whether the book adopts an app scale.",
+			"spec": "type.small.size"
+		},
+		{
+			"name": "--ec-font-weight-regular",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The book sets weights per role (Data 400, Label 600) and publishes no weight tokens; the app keeps regular 400 (tokens.css:61), and the v5.1 discuss-phase decides whether the book adopts weight tokens.",
+			"spec": "type.weight.regular"
+		},
+		{
+			"name": "--ec-font-weight-semibold",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The book sets weights per role (Data 400, Label 600) and publishes no weight tokens; the app keeps semibold 600 (tokens.css:62), and the v5.1 discuss-phase decides whether the book adopts weight tokens.",
+			"spec": "type.weight.semibold"
+		},
+		{
+			"name": "--ec-line-height-normal",
+			"disposition": "retire",
+			"reason": "Declared in no stylesheet: file_table.css:139 reads var(--ec-line-height-normal), so the line-height declaration is invalid at computed-value time; v5.1 replaces it with unitless --ec-line-height-* tokens (D-09)."
+		},
+		{
+			"name": "--ec-pill-dng-bg",
+			"disposition": "retire",
+			"reason": "Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
+			"spec": "platform-owned.brand.pill-per-type"
+		},
+		{
+			"name": "--ec-pill-dng-text",
+			"disposition": "retire",
+			"reason": "Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
+			"spec": "platform-owned.brand.pill-per-type"
+		},
+		{
+			"name": "--ec-pill-heic-bg",
+			"disposition": "retire",
+			"reason": "Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
+			"spec": "platform-owned.brand.pill-per-type"
+		},
+		{
+			"name": "--ec-pill-heic-text",
+			"disposition": "retire",
+			"reason": "Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
+			"spec": "platform-owned.brand.pill-per-type"
+		},
+		{
+			"name": "--ec-pill-jpg-bg",
+			"disposition": "retire",
+			"reason": "Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
+			"spec": "platform-owned.brand.pill-per-type"
+		},
+		{
+			"name": "--ec-pill-jpg-text",
+			"disposition": "retire",
+			"reason": "Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
+			"spec": "platform-owned.brand.pill-per-type"
+		},
+		{
+			"name": "--ec-pill-mov-bg",
+			"disposition": "retire",
+			"reason": "Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
+			"spec": "platform-owned.brand.pill-per-type"
+		},
+		{
+			"name": "--ec-pill-mov-text",
+			"disposition": "retire",
+			"reason": "Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
+			"spec": "platform-owned.brand.pill-per-type"
+		},
+		{
+			"name": "--ec-pill-pdf-bg",
+			"disposition": "retire",
+			"reason": "Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
+			"spec": "platform-owned.brand.pill-per-type"
+		},
+		{
+			"name": "--ec-pill-pdf-text",
+			"disposition": "retire",
+			"reason": "Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
+			"spec": "platform-owned.brand.pill-per-type"
+		},
+		{
+			"name": "--ec-pill-png-bg",
+			"disposition": "retire",
+			"reason": "Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
+			"spec": "platform-owned.brand.pill-per-type"
+		},
+		{
+			"name": "--ec-pill-png-text",
+			"disposition": "retire",
+			"reason": "Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
+			"spec": "platform-owned.brand.pill-per-type"
+		},
+		{
+			"name": "--ec-shadow-drawer",
+			"disposition": "keep-platform",
+			"reason": "No brand equivalent (D-04): the book separates surfaces by colour and gives no UI shadow value. The platform values are kept, and 74-04 exempts this token from the contrast test with a written reason, so it carries no sealed entry.",
+			"spec": "platform-owned.platform.shadow"
+		},
+		{
+			"name": "--ec-space-1",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The brand book sets no app spacing (BRAND.md Layout leaves the scale to the platform); the app keeps 4px on its 4 px-base scale, and the v5.1 discuss-phase decides whether the book adopts the scale.",
+			"spec": "spacing.space-1"
+		},
+		{
+			"name": "--ec-space-12",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The brand book sets no app spacing (BRAND.md Layout leaves the scale to the platform); the app keeps 48px on its 4 px-base scale, and the v5.1 discuss-phase decides whether the book adopts the scale.",
+			"spec": "spacing.space-12"
+		},
+		{
+			"name": "--ec-space-2",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The brand book sets no app spacing (BRAND.md Layout leaves the scale to the platform); the app keeps 8px on its 4 px-base scale, and the v5.1 discuss-phase decides whether the book adopts the scale.",
+			"spec": "spacing.space-2"
+		},
+		{
+			"name": "--ec-space-3",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The brand book sets no app spacing (BRAND.md Layout leaves the scale to the platform); the app keeps 12px on its 4 px-base scale, and the v5.1 discuss-phase decides whether the book adopts the scale.",
+			"spec": "spacing.space-3"
+		},
+		{
+			"name": "--ec-space-4",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The brand book sets no app spacing (BRAND.md Layout leaves the scale to the platform); the app keeps 16px on its 4 px-base scale, and the v5.1 discuss-phase decides whether the book adopts the scale.",
+			"spec": "spacing.space-4"
+		},
+		{
+			"name": "--ec-space-6",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The brand book sets no app spacing (BRAND.md Layout leaves the scale to the platform); the app keeps 24px on its 4 px-base scale, and the v5.1 discuss-phase decides whether the book adopts the scale.",
+			"spec": "spacing.space-6"
+		},
+		{
+			"name": "--ec-space-8",
+			"disposition": "propose-upstream",
+			"owner": "exifcleaner-brand, decided at the v5.1 discuss-phase",
+			"decision": "The brand book sets no app spacing (BRAND.md Layout leaves the scale to the platform); the app keeps 32px on its 4 px-base scale, and the v5.1 discuss-phase decides whether the book adopts the scale.",
+			"spec": "spacing.space-8"
+		},
+		{
+			"name": "--ec-stagger-delay",
+			"disposition": "local",
+			"reason": "Set inline per row at FileRow.tsx:119 (\"--ec-stagger-delay\": staggerIndex * 30 ms) and read at file_table.css:182 (animation-delay: var(--ec-stagger-delay, 0ms)); a runtime value that tokens.css never declares. v5.2 removes the stagger.",
+			"spec": "motion.stagger"
+		},
+		{
+			"name": "--ec-toggle-off-track",
+			"disposition": "keep-platform",
+			"reason": "Platform-owned role with no brand equivalent (D-04). v5.1 changes the app value #d1d1d6 (light) and #3a3a3e (dark) to a platform system colour meeting 3:1 against the bg and the surface, which clears the off-track and thumb entries 74-04 seals (D-25).",
+			"spec": "platform-owned.platform.toggle-off-track"
+		},
+		{
+			"name": "--empty-state-secondary",
+			"disposition": "retire",
+			"reason": "Declared locally outside tokens.css: empty_state.css:2 sets #59677b (light) and empty_state.css:118 sets #94949b (dark), and it is read at empty_state.css:25, empty_state.css:46 and empty_state.css:110; v5.1 reads --ec-color-text-secondary (Pewter in light, Fog in dark) instead."
+		},
+		{
+			"name": "--spacing-lg",
+			"disposition": "retire",
+			"reason": "Declared nowhere: error_boundary.css and file_list.css read var(--spacing-lg) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11).",
+			"spec": "spacing.legacy-names",
+			"finding": "token-gap|ui-errorboundary--fallback|spacing-tokens-undefined"
+		},
+		{
+			"name": "--spacing-md",
+			"disposition": "retire",
+			"reason": "Declared nowhere: error_boundary.css and file_list.css read var(--spacing-md) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11).",
+			"spec": "spacing.legacy-names",
+			"finding": "token-gap|ui-errorboundary--fallback|spacing-tokens-undefined"
+		},
+		{
+			"name": "--spacing-sm",
+			"disposition": "retire",
+			"reason": "Declared nowhere: error_boundary.css and file_list.css read var(--spacing-sm) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11).",
+			"spec": "spacing.legacy-names",
+			"finding": "token-gap|ui-errorboundary--fallback|spacing-tokens-undefined"
+		},
+		{
+			"name": "--spacing-xl",
+			"disposition": "retire",
+			"reason": "Declared nowhere: error_boundary.css and file_list.css read var(--spacing-xl) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11).",
+			"spec": "spacing.legacy-names",
+			"finding": "token-gap|ui-errorboundary--fallback|spacing-tokens-undefined"
+		},
+		{
+			"name": "--spacing-xs",
+			"disposition": "retire",
+			"reason": "Declared nowhere: error_boundary.css and file_list.css read var(--spacing-xs) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11).",
+			"spec": "spacing.legacy-names",
+			"finding": "token-gap|ui-errorboundary--fallback|spacing-tokens-undefined"
+		}
+	]
+}

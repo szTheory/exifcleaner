@@ -32,3 +32,5 @@ export const UI_SPEC_SECTIONS: readonly string[];
 export const UI_SPEC_BASES: readonly string[];
 export const UI_SPEC_STATES: readonly string[];
 export const UI_SPEC_THEMES: readonly string[];
+export const TOKEN_DISPOSITIONS: readonly string[];
+export const THEME_INVARIANT_PREFIXES: readonly string[];

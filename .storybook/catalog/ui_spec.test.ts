@@ -825,7 +825,7 @@ describe("catalog.mjs against a temp git repo", () => {
 			const result = run(repo, ["--check", "--base", "main"]);
 			expect(result.status, result.stderr).toBe(0);
 			expect(result.stdout).toContain("CATALOG CHECK PASSED");
-			expect(result.stdout).toContain("7 generated files current");
+			expect(result.stdout).toContain("8 generated files current");
 		});
 	});
 
