@@ -780,7 +780,7 @@ describe("a custom property added without a map entry (SC2, D-19)", () => {
 			expect(fs.readFileSync(view, "utf8")).toBe(expected);
 			const again = run(repo, ["--check", "--base", "main"]);
 			expect(again.status, again.stderr).toBe(0);
-			expect(again.stdout).toContain("8 generated files current");
+			expect(again.stdout).toContain("9 generated files current");
 		});
 	});
 });

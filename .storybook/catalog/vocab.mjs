@@ -299,3 +299,31 @@ export const THEME_INVARIANT_PREFIXES = Object.freeze([
 	"--ec-ease-",
 	"--ec-duration-",
 ]);
+
+// Test-shift ledger (Phase 75, TST-01, D-07). What a `deleted` item says the story now
+// covers. Seven members were fixed in D-07; `focus-indicator` is a flagged additive member
+// (orchestrator decision 1) so the locked deletion of the accessibility focus-indicator
+// test can be cited honestly (a story asserting the focus ring's outline style) instead of
+// being squeezed under `focus-order` or `layout`. It removes nothing.
+export const COVERS = Object.freeze([
+	"text",
+	"a11y-scan",
+	"focus-order",
+	"aria-name",
+	"theme",
+	"rtl",
+	"layout",
+	"focus-indicator",
+]);
+// Test-shift ledger (Phase 75, TST-01, D-07). Why a `kept` item stays in a real-Electron
+// spec: it needs real Electron or Chromium handling, the IPC bridge, the real filesystem,
+// the OS native theme, native window chrome, or a translated literal that D-18 forbids in
+// stories.
+export const KEPT_REASONS = Object.freeze([
+	"real-electron",
+	"ipc",
+	"filesystem",
+	"native-theme",
+	"window-chrome",
+	"not-renderable",
+]);

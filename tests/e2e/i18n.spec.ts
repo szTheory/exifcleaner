@@ -32,23 +32,6 @@ test.describe("Internationalization", () => {
 		}
 	});
 
-	test("displays UI text in default language (English)", async () => {
-		// First force English by sending language:changed IPC
-		await app.evaluate(({ BrowserWindow }, locale) => {
-			const win = BrowserWindow.getAllWindows()[0];
-			if (win) {
-				win.webContents.send("language:changed", locale);
-			}
-		}, "en");
-		await window.waitForTimeout(300);
-
-		// The empty state title should contain the English string
-		const title = window.locator(".empty-state__title");
-		await expect(title).toBeVisible();
-		const titleText = await title.textContent();
-		expect(titleText).toContain("Add files to clean");
-	});
-
 	test("switches language via IPC and updates UI text", async () => {
 		// Set to English first to have a known baseline
 		await app.evaluate(({ BrowserWindow }, locale) => {
@@ -127,18 +110,10 @@ test.describe("Internationalization", () => {
 			}
 		}, "ar");
 
-		await expect(window.locator("html")).toHaveAttribute("dir", "rtl");
-		const chooseFiles = window.getByRole("button", { name: "اختر ملفات…" });
-		const chooseFolder = window.getByRole("button", { name: "اختر مجلدًا…" });
-		const [filesBox, folderBox] = await Promise.all([
-			chooseFiles.boundingBox(),
-			chooseFolder.boundingBox(),
-		]);
-		expect(filesBox).not.toBeNull();
-		expect(folderBox).not.toBeNull();
-		expect(filesBox?.x).toBeGreaterThan(
-			folderBox?.x ?? Number.POSITIVE_INFINITY,
-		);
+		// A barrier, not an assertion: dir="rtl" is written after the locale re-render, which
+		// also re-subscribes file-open-add-files with the Arabic dictionary, so the toast below
+		// renders in Arabic. The visual action order moved to ui-emptystate--persian-empty.
+		await window.locator('html[dir="rtl"]').waitFor();
 
 		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {

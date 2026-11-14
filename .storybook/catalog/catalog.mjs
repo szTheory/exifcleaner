@@ -47,6 +47,13 @@ import {
 	validateCatalog,
 } from "./personas.mjs";
 import {
+	TEST_SHIFT_MD_PATH,
+	checkTestShift,
+	loadStoryScopes,
+	loadTestShiftInputs,
+	renderTestShift,
+} from "./test_shift.mjs";
+import {
 	TOKEN_MAP_MD_PATH,
 	TOKEN_MAP_PATH,
 	loadTokenMapContext,
@@ -194,6 +201,26 @@ function journeyProblems(root) {
 }
 
 /**
+ * The test-shift ledger (Phase 75, TST-01, D-06) and what checkTestShift finds wrong with it,
+ * with the six e2e specs it covers and with the stories its deleted items name. A problem
+ * keeps its own code and its message says it is a test-shift problem.
+ *
+ * @param {string} root
+ * @param {ReadonlyArray<{ id: string, file: string, component: string | null }>} stories
+ */
+async function testShiftProblems(root, stories) {
+	const inputs = loadTestShiftInputs(root);
+	const scopes = await loadStoryScopes(root, stories, inputs.doc);
+	return {
+		doc: inputs.doc,
+		problems: checkTestShift({ ...inputs, stories, scopes }).map((found) => ({
+			code: found.code,
+			message: `test-shift: ${found.message}`,
+		})),
+	};
+}
+
+/**
  * Story-index parity: the ids this tree's stories enumerate to must equal the
  * `story` entries of a built Storybook index. A missing index fails closed.
  *
@@ -284,6 +311,10 @@ export async function generatedFiles(root) {
 	if (grid.model === null) {
 		throw new Error(firstProblem(grid.problems));
 	}
+	const testShift = await testShiftProblems(root, grid.stories);
+	if (testShift.problems.length > 0) {
+		throw new Error(firstProblem(testShift.problems));
+	}
 	return [
 		[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))],
 		[PERSONAS_MD_PATH, renderPersonas(/** @type {any} */ (catalog.doc))],
@@ -293,6 +324,7 @@ export async function generatedFiles(root) {
 		[GRID_MD_PATH, renderGridMarkdown(grid.model)],
 		[UI_SPEC_MD_PATH, renderUiSpec(/** @type {any} */ (uiSpec.doc))],
 		[TOKEN_MAP_MD_PATH, renderTokenMap(/** @type {any} */ (tokenMap.doc))],
+		[TEST_SHIFT_MD_PATH, renderTestShift(/** @type {any} */ (testShift.doc))],
 	];
 }
 
@@ -328,6 +360,10 @@ export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 	if (grid.model === null) {
 		return { ok: false, problems: grid.problems, files: 0, notes: [] };
 	}
+	const testShift = await testShiftProblems(root, grid.stories);
+	if (testShift.problems.length > 0) {
+		return { ok: false, problems: testShift.problems, files: 0, notes: [] };
+	}
 	const stale = [];
 	const files = [
 		[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))],
@@ -338,6 +374,7 @@ export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 		[GRID_MD_PATH, renderGridMarkdown(grid.model)],
 		[UI_SPEC_MD_PATH, renderUiSpec(/** @type {any} */ (uiSpec.doc))],
 		[TOKEN_MAP_MD_PATH, renderTokenMap(/** @type {any} */ (tokenMap.doc))],
+		[TEST_SHIFT_MD_PATH, renderTestShift(/** @type {any} */ (testShift.doc))],
 	];
 	for (const [relPath, expected] of files) {
 		let actual = "";

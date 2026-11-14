@@ -131,6 +131,31 @@ export const CopyModeOn: Story = {
 			dragActive: false,
 			outputLine: COPY_ON,
 		});
+		// Layout metrics (empty_state.css): a level-1 title, two 40px-tall buttons, an 8px
+		// gap between them, and a primary button that differs from the secondary.
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByRole("heading", { level: 1 }),
+		).toBeVisible();
+		const [primary, secondary] = canvas.getAllByRole("button");
+		if (primary === undefined || secondary === undefined) {
+			throw new Error("both empty state buttons must render");
+		}
+		for (const button of [primary, secondary]) {
+			await expect(
+				button.getBoundingClientRect().height,
+			).toBeGreaterThanOrEqual(40);
+		}
+		const actions = canvasElement.querySelector(".empty-state__actions");
+		if (actions === null) {
+			throw new Error("the empty state actions row must render");
+		}
+		await expect(
+			Number.parseFloat(getComputedStyle(actions).gap),
+		).toBeGreaterThanOrEqual(8);
+		await expect(getComputedStyle(primary).backgroundColor).not.toBe(
+			getComputedStyle(secondary).backgroundColor,
+		);
 	},
 };
 
@@ -217,6 +242,14 @@ export const PersianEmpty: Story = {
 	parameters: { a11y: knownA11y("ui-emptystate--persian-empty") },
 	play: async ({ canvasElement }) => {
 		await expectLocale({ canvasElement, lang: "fa", dir: "rtl" });
+		// Right to left puts the first button (Choose files) right of the second.
+		const [files, folder] = within(canvasElement).getAllByRole("button");
+		if (files === undefined || folder === undefined) {
+			throw new Error("both empty state buttons must render");
+		}
+		await expect(files.getBoundingClientRect().left).toBeGreaterThan(
+			folder.getBoundingClientRect().left,
+		);
 	},
 };
 

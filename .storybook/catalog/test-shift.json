@@ -1,0 +1,755 @@
+{
+	"schemaVersion": 1,
+	"baselineCommit": "66c8c39f3f4223a1c099d739467a2704ef5be179",
+	"specs": {
+		"accessibility": [
+			{
+				"title": "supports keyboard tab navigation through interactive elements",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(nonBodyFocused.length).toBeGreaterThan(0)",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "focus-order",
+						"evidence": "userEvent.tab()",
+						"note": "Story Tabs from a blurred start and asserts Choose files… gains focus, stronger than some non-body element; simulated Tab (D-03 residual)"
+					},
+					{
+						"n": 2,
+						"code": "expect(gearFocused).toBe(true)",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "focus-order",
+						"evidence": "Open settings",
+						"note": "Gear is the third Tab stop in the story; simulated Tab (D-03), real-Chromium backstop is the kept drawer focus-trap test"
+					}
+				]
+			},
+			{
+				"title": "uses file, folder, then settings focus order",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(primary).toBeFocused()",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "focus-order",
+						"evidence": "Choose files…",
+						"note": "First stop after a blurred start; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test"
+					},
+					{
+						"n": 2,
+						"code": "expect(page.locator(\".empty-state__button--secondary\")).toBeFocused()",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "focus-order",
+						"evidence": "Choose folder…",
+						"note": "Second stop; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test"
+					},
+					{
+						"n": 3,
+						"code": "expect(page.locator(\".gear-icon\")).toBeFocused()",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "focus-order",
+						"evidence": "Open settings",
+						"note": "Third stop; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test"
+					}
+				]
+			},
+			{
+				"title": "shows visible focus indicator on focused elements",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(hasFocusIndicator).toBe(true)",
+						"verdict": "deleted",
+						"story": "ui-emptystate--button-keyboard-focus",
+						"subject": "EmptyState",
+						"covers": "focus-indicator",
+						"evidence": "outlineStyle",
+						"note": "Story checks :focus-visible and a solid outline on Choose files after Tab, not the gear; the e2e also accepted box-shadow"
+					}
+				]
+			},
+			{
+				"title": "has ARIA roles on interactive elements",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(buttonCount).toBeGreaterThan(0)",
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "aria-name",
+						"evidence": "getAllByRole(\"button\")",
+						"note": "Buttons are found by role; the play throws unless both render"
+					},
+					{
+						"n": 2,
+						"code": "expect(gearAccessibleName).not.toBeNull()",
+						"verdict": "deleted",
+						"story": "icons-gearicon--closed",
+						"subject": "GearIcon",
+						"covers": "aria-name",
+						"evidence": "Open settings",
+						"note": "Partial: story finds the button by name Open settings and asserts toBeInTheDocument; e2e read the aria-label (Pitfall 10)"
+					},
+					{
+						"n": 3,
+						"code": "expect(gearAccessibleName).toContain(\"settings\")",
+						"verdict": "deleted",
+						"story": "icons-gearicon--closed",
+						"subject": "GearIcon",
+						"covers": "aria-name",
+						"evidence": "Open settings",
+						"note": "Partial: story finds the button by name Open settings; the e2e checked the aria-label contains settings (Pitfall 10)"
+					},
+					{
+						"n": 4,
+						"code": "expect(mainRole).toBeVisible()",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "aria-name",
+						"evidence": "getByRole(\"main\")",
+						"note": "Main landmark asserted visible by the Empty play (added in 75-01)"
+					},
+					{
+						"n": 5,
+						"code": "expect(dropZoneLabel).not.toBeNull()",
+						"verdict": "deleted",
+						"story": "ui-dropzone--idle",
+						"subject": "DropZone",
+						"covers": "aria-name",
+						"evidence": "File drop zone",
+						"note": "Region found by its accessible name File drop zone; the e2e read the aria-label attribute"
+					}
+				]
+			},
+			{
+				"title": "traps focus within settings drawer when open",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(drawer).toBeVisible()",
+						"verdict": "kept",
+						"reason": "real-electron"
+					},
+					{
+						"n": 2,
+						"code": "expect(focusableCount).toBeGreaterThan(0)",
+						"verdict": "kept",
+						"reason": "real-electron"
+					},
+					{
+						"n": 3,
+						"code": "expect(outsideCount).toBe(0)",
+						"verdict": "kept",
+						"reason": "real-electron"
+					},
+					{
+						"n": 4,
+						"code": "expect(drawer).toHaveCount(0)",
+						"verdict": "kept",
+						"reason": "real-electron"
+					}
+				]
+			}
+		],
+		"app-launch": [
+			{
+				"title": "shows the main window on launch",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(isVisible).toBe(true)",
+						"verdict": "kept",
+						"reason": "window-chrome"
+					}
+				]
+			},
+			{
+				"title": "displays ExifCleaner as the window title",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(title).toBe(\"ExifCleaner\")",
+						"verdict": "kept",
+						"reason": "window-chrome"
+					}
+				]
+			},
+			{
+				"title": "shows the empty drop zone state",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(emptyState).toBeVisible()",
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "layout",
+						"evidence": "toBeVisible",
+						"note": "h1 toBeVisible also checks the section.empty-state ancestor, not only the heading; the e2e asserted the section itself"
+					},
+					{
+						"n": 2,
+						"code": "expect(emptyState.locator(\"h1\")).toHaveText(\"Add files to clean\")",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "text",
+						"evidence": "Add files to clean",
+						"note": "Heading found by its accessible name; the e2e matched the h1 text"
+					},
+					{
+						"n": 3,
+						"code": "expect(emptyState.locator('.empty-state__instruction[aria-hidden=\"false\"]')).toHaveText(\"Drop images, videos, or PDFs here, or choose an option.\")",
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "text",
+						"evidence": "SUBTITLE",
+						"note": "SUBTITLE is a file-level constant reached through expectScreen, which compares the idle line's textContent to it"
+					},
+					{
+						"n": 4,
+						"code": "expect(emptyState.locator(\".empty-state__button--primary\")).toHaveText(\"Choose files…\")",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "text",
+						"evidence": "Choose files…"
+					},
+					{
+						"n": 5,
+						"code": "expect(emptyState.locator(\".empty-state__button--secondary\")).toHaveText(\"Choose folder…\")",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "text",
+						"evidence": "Choose folder…"
+					},
+					{
+						"n": 6,
+						"code": "expect(outputMode).toHaveText(/Cleaned copies will be created — originals stay untouched\\.|Files will be cleaned in place\\./)",
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "text",
+						"evidence": "COPY_ON",
+						"note": "Stricter than the e2e regex, which also accepted the in-place sentence; that one is COPY_OFF in ui-emptystate--copy-mode-off."
+					},
+					{
+						"n": 7,
+						"code": "expect(metrics.buttonHeights.every((height) => height >= 40)).toBe(true)",
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "layout",
+						"evidence": "getBoundingClientRect",
+						"note": "Both buttons at least 40 high, measured in real Chromium (added to the story in 75-01, D-02)"
+					},
+					{
+						"n": 8,
+						"code": "expect(metrics.gap).toBeGreaterThanOrEqual(8)",
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "layout",
+						"evidence": "gap",
+						"note": "Actions row computed gap at least 8 (added to the story in 75-01, D-02)"
+					},
+					{
+						"n": 9,
+						"code": "expect(metrics.buttonBackgrounds[0]).not.toBe(metrics.buttonBackgrounds[1])",
+						"verdict": "deleted",
+						"story": "ui-emptystate--copy-mode-on",
+						"subject": "EmptyState",
+						"covers": "layout",
+						"evidence": "backgroundColor",
+						"note": "Primary and secondary backgroundColor differ (added to the story in 75-01, D-02)"
+					}
+				]
+			},
+			{
+				"title": "keeps first-run content usable at 200% zoom",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(window.locator(\".empty-state__button--primary\")).toBeVisible()",
+						"verdict": "kept",
+						"reason": "real-electron"
+					},
+					{
+						"n": 2,
+						"code": "expect(layout).not.toBeNull()",
+						"verdict": "kept",
+						"reason": "real-electron"
+					},
+					{
+						"n": 3,
+						"code": "expect(layout?.canScroll).toBe(true)",
+						"verdict": "kept",
+						"reason": "real-electron"
+					},
+					{
+						"n": 4,
+						"code": "expect(layout?.statusTop).toBeGreaterThanOrEqual(layout?.contentBottom ?? 0)",
+						"verdict": "kept",
+						"reason": "real-electron"
+					}
+				]
+			},
+			{
+				"title": "has DevTools closed on launch",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(isDevToolsOpened).toBe(false)",
+						"verdict": "kept",
+						"reason": "window-chrome"
+					}
+				]
+			}
+		],
+		"dark-mode": [
+			{
+				"title": "activates dark mode via nativeTheme",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(dataTheme).toBe(\"dark\")",
+						"verdict": "kept",
+						"reason": "native-theme"
+					},
+					{
+						"n": 2,
+						"code": "expect(shouldUseDark).toBe(true)",
+						"verdict": "kept",
+						"reason": "native-theme"
+					}
+				]
+			},
+			{
+				"title": "renders all components correctly in dark mode",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(dropZone).toBeVisible()",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "layout",
+						"evidence": "Add files to clean",
+						"note": "Visible: h1 toBeVisible checks section.empty-state and DropZone ancestors (App.tsx:82-86); dark: data-theme assertion, storybook-dark"
+					},
+					{
+						"n": 2,
+						"code": "expect(gearButton).toBeVisible()",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "theme",
+						"evidence": "data-theme",
+						"note": "Dark: data-theme assertion, storybook-dark; gear present: Open settings toHaveFocus (D-02 Tab order)"
+					},
+					{
+						"n": 3,
+						"code": "expect(emptyState).toBeVisible()",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "layout",
+						"evidence": "Add files to clean",
+						"note": "Visible: h1 toBeVisible checks the section.empty-state ancestor (App.tsx:82-86); dark: data-theme assertion, storybook-dark"
+					},
+					{
+						"n": 4,
+						"code": "expect(hasZeroOpacity).toBe(false)",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "layout",
+						"evidence": "Add files to clean",
+						"note": "Reduced: whole-document zero-opacity scan -> h1 ancestor chain only (Pitfall 10, TEST-SHIFT.md Known limits); dark: data-theme"
+					}
+				]
+			},
+			{
+				"title": "switches back to light mode",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(dataTheme).toBe(\"light\")",
+						"verdict": "kept",
+						"reason": "native-theme"
+					}
+				]
+			},
+			{
+				"title": "respects system theme setting",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(isVisible).toBe(true)",
+						"verdict": "kept",
+						"reason": "native-theme"
+					},
+					{
+						"n": 2,
+						"code": "expect(main).toBeVisible()",
+						"verdict": "kept",
+						"reason": "native-theme"
+					}
+				]
+			}
+		],
+		"file-size-display": [
+			{
+				"title": "shows the real byte size of a processed file",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(sizeWhenAdded, \"fixture must be non-empty for this test to mean anything\").toBeGreaterThan(0)",
+						"verdict": "kept",
+						"reason": "filesystem"
+					},
+					{
+						"n": 2,
+						"code": "expect(sizeWhenAdded).toBeLessThan(1024)",
+						"verdict": "kept",
+						"reason": "filesystem"
+					},
+					{
+						"n": 3,
+						"code": "expect(sizeCell).toHaveText(new RegExp(`^${sizeWhenAdded} B → [1-9][0-9]* B$`))",
+						"verdict": "kept",
+						"reason": "filesystem"
+					}
+				]
+			},
+			{
+				"title": "shows 0 B only when the file is genuinely empty",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(fs.statSync(emptyFile).size).toBe(0)",
+						"verdict": "kept",
+						"reason": "filesystem"
+					},
+					{
+						"n": 2,
+						"code": "expect(sizeCell).toHaveText(\"0 B\")",
+						"verdict": "kept",
+						"reason": "filesystem"
+					}
+				]
+			},
+			{
+				"title": "gives each row its own size rather than repeating one value",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(new Set(sizesWhenAdded).size, \"fixtures must have distinct sizes for this test to detect mismapping\").toBe(3)",
+						"verdict": "kept",
+						"reason": "filesystem"
+					},
+					{
+						"n": 2,
+						"code": "expect(labels).toHaveLength(3)",
+						"verdict": "kept",
+						"reason": "filesystem"
+					},
+					{
+						"n": 3,
+						"code": "expect(new Set(labels).size, \"each row should show its own size\").toBe(3)",
+						"verdict": "kept",
+						"reason": "filesystem"
+					},
+					{
+						"n": 4,
+						"code": "expect(labels).not.toContain(\"0 B\")",
+						"verdict": "kept",
+						"reason": "filesystem"
+					}
+				]
+			},
+			{
+				"title": "status bar reports a real tag count, not a placeholder",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(tagsRemoved).toBeVisible()",
+						"verdict": "kept",
+						"reason": "filesystem"
+					},
+					{
+						"n": 2,
+						"code": "expect(Number(value), \"sample.jpg carries metadata, so a zero here means the count is not wired\").toBeGreaterThan(0)",
+						"verdict": "kept",
+						"reason": "filesystem"
+					}
+				]
+			}
+		],
+		"i18n": [
+			{
+				"title": "displays UI text in default language (English)",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(title).toBeVisible()",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "text",
+						"evidence": "Add files to clean",
+						"note": "English default; the IPC half stays in the kept French test"
+					},
+					{
+						"n": 2,
+						"code": "expect(titleText).toContain(\"Add files to clean\")",
+						"verdict": "deleted",
+						"story": "screens-app--empty",
+						"subject": "App",
+						"covers": "text",
+						"evidence": "Add files to clean",
+						"note": "English default; the IPC half stays in the kept French test"
+					}
+				]
+			},
+			{
+				"title": "switches language via IPC and updates UI text",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(title).toBeVisible()",
+						"verdict": "kept",
+						"reason": "ipc"
+					},
+					{
+						"n": 2,
+						"code": "expect(englishText).toContain(\"Add files to clean\")",
+						"verdict": "kept",
+						"reason": "ipc"
+					},
+					{
+						"n": 3,
+						"code": "expect(frenchText).toContain(\"Ajoutez des fichiers\")",
+						"verdict": "kept",
+						"reason": "ipc"
+					},
+					{
+						"n": 4,
+						"code": "expect(frenchText).not.toBe(englishText)",
+						"verdict": "kept",
+						"reason": "ipc"
+					}
+				]
+			},
+			{
+				"title": "switches to a non-Latin language",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(title).toBeVisible()",
+						"verdict": "kept",
+						"reason": "not-renderable"
+					},
+					{
+						"n": 2,
+						"code": "expect(japaneseText).toContain(\"ファイル\")",
+						"verdict": "kept",
+						"reason": "not-renderable"
+					},
+					{
+						"n": 3,
+						"code": "expect(japaneseText).not.toContain(\"Add files to clean\")",
+						"verdict": "kept",
+						"reason": "not-renderable"
+					}
+				]
+			},
+			{
+				"title": "switches to Romanian",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(title).toHaveText(\"Adaugă fișiere pentru curățare\")",
+						"verdict": "kept",
+						"reason": "not-renderable"
+					},
+					{
+						"n": 2,
+						"code": "expect(window.getByRole(\"button\", {name: \"Alege fișiere…\"})).toBeVisible()",
+						"verdict": "kept",
+						"reason": "not-renderable"
+					}
+				]
+			},
+			{
+				"title": "uses RTL direction, visual action order, and a localized count in Arabic",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(window.locator(\"html\")).toHaveAttribute(\"dir\", \"rtl\")",
+						"verdict": "deleted",
+						"story": "ui-emptystate--persian-empty",
+						"subject": "EmptyState",
+						"covers": "rtl",
+						"evidence": "dir: \"rtl\"",
+						"note": "fa stands in for ar, both right to left; expectLocale asserts documentElement.dir"
+					},
+					{
+						"n": 2,
+						"code": "expect(filesBox).not.toBeNull()",
+						"verdict": "deleted",
+						"story": "ui-emptystate--persian-empty",
+						"subject": "EmptyState",
+						"covers": "rtl",
+						"evidence": "getBoundingClientRect",
+						"note": "fa stands in for ar, both right to left; the play throws unless the first button renders"
+					},
+					{
+						"n": 3,
+						"code": "expect(folderBox).not.toBeNull()",
+						"verdict": "deleted",
+						"story": "ui-emptystate--persian-empty",
+						"subject": "EmptyState",
+						"covers": "rtl",
+						"evidence": "getBoundingClientRect",
+						"note": "fa stands in for ar, both right to left; the play throws unless the second button renders"
+					},
+					{
+						"n": 4,
+						"code": "expect(filesBox?.x).toBeGreaterThan(folderBox?.x ?? Number.POSITIVE_INFINITY)",
+						"verdict": "deleted",
+						"story": "ui-emptystate--persian-empty",
+						"subject": "EmptyState",
+						"covers": "rtl",
+						"evidence": "getBoundingClientRect",
+						"note": "fa stands in for ar, both right to left; first button sits right of the second"
+					},
+					{
+						"n": 5,
+						"code": "expect(window.locator(\".toast\")).toContainText(\"ملفات غير مدعومة تم تخطيها: 1\")",
+						"verdict": "kept",
+						"reason": "ipc"
+					}
+				],
+				"note": "Title kept per D-04 (never retitle a kept test; no journey pins it). It overclaims: visual action order moved to ui-emptystate--persian-empty."
+			}
+		],
+		"metadata-inspection": [
+			{
+				"title": "expands a processed file to show metadata details",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(fileRow).toBeVisible()",
+						"verdict": "deleted",
+						"story": "file-list-filerow--cleaned-expanded",
+						"subject": "FileRow",
+						"covers": "layout",
+						"evidence": "aria-expanded",
+						"note": "Row exposes aria-expanded true through expectRow; the e2e asserted the complete row visible"
+					},
+					{
+						"n": 2,
+						"code": "expect(expansion).toBeVisible()",
+						"verdict": "deleted",
+						"story": "file-list-filerow--cleaned-expanded",
+						"subject": "FileRow",
+						"covers": "layout",
+						"evidence": "metadata-expansion__summary",
+						"note": "Expansion summary element is present and its text asserted; the e2e asserted .metadata-expansion visible"
+					}
+				]
+			},
+			{
+				"title": "shows metadata groups with before/after diff",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(expansion).toBeVisible()",
+						"verdict": "kept",
+						"reason": "real-electron"
+					},
+					{
+						"n": 2,
+						"code": "expect(groupCount).toBeGreaterThan(0)",
+						"verdict": "deleted",
+						"story": "file-list-metadatagroup--one-field",
+						"subject": "MetadataGroup",
+						"covers": "layout",
+						"evidence": "metadata-group__header",
+						"note": "Group header found with its title, name and count; the e2e only counted headers"
+					},
+					{
+						"n": 3,
+						"code": "expect(fieldCount).toBeGreaterThan(0)",
+						"verdict": "kept",
+						"reason": "filesystem"
+					},
+					{
+						"n": 4,
+						"code": "expect(hasKnownTag, `Expected at least one of ${knownTags.join(\", \")} in metadata fields. Found: ${allNames.join(\", \")}`).toBe(true)",
+						"verdict": "kept",
+						"reason": "filesystem"
+					}
+				]
+			},
+			{
+				"title": "shows removed indicators for stripped metadata tags",
+				"items": [
+					{
+						"n": 1,
+						"code": "expect(expansion).toBeVisible()",
+						"verdict": "kept",
+						"reason": "real-electron"
+					},
+					{
+						"n": 2,
+						"code": "expect(removedCount).toBeGreaterThan(0)",
+						"verdict": "kept",
+						"reason": "filesystem"
+					},
+					{
+						"n": 3,
+						"code": "expect(iconText).toBe(\"\\u2212\")",
+						"verdict": "deleted",
+						"story": "file-list-metadatafield--removed",
+						"subject": "MetadataField",
+						"covers": "text",
+						"evidence": "−",
+						"note": "Raw U+2212 character in the story; the e2e wrote it as an escape"
+					},
+					{
+						"n": 4,
+						"code": "expect(preservedCount).toBeGreaterThan(0)",
+						"verdict": "kept",
+						"reason": "filesystem"
+					},
+					{
+						"n": 5,
+						"code": "expect(preservedIconText).toBe(\"\\u2713\")",
+						"verdict": "deleted",
+						"story": "file-list-metadatafield--preserved",
+						"subject": "MetadataField",
+						"covers": "text",
+						"evidence": "✓",
+						"note": "Raw U+2713 character in the story; the e2e wrote it as an escape"
+					}
+				]
+			}
+		]
+	}
+}

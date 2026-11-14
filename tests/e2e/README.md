@@ -49,16 +49,19 @@ npx playwright show-report
 
 | Spec | Tests | Coverage |
 |------|-------|----------|
-| `app-launch.spec.ts` | 4 | Window visible, title, empty state, DevTools closed |
+| `app-launch.spec.ts` | 4 | Window visible, title, 200% zoom, DevTools closed |
 | `file-processing.spec.ts` | 6 | Single file, batch, type pills, status bar, Clean more, drag-over |
 | `settings.spec.ts` | 6 | Drawer open/close, toggles (orientation, timestamps, xattr), orientation pipeline, save-as-copy |
-| `dark-mode.spec.ts` | 4 | Theme activate, dark render check, switch back, system theme |
-| `i18n.spec.ts` | 3 | English default, French switch, Japanese switch |
+| `dark-mode.spec.ts` | 3 | Theme activate, switch back, system theme |
+| `i18n.spec.ts` | 4 | French switch via IPC, Japanese, Romanian, Arabic skipped-files toast |
 | `folder-recursion.spec.ts` | 2 | Nested folder expansion, flat path verification |
-| `metadata-inspection.spec.ts` | 3 | Expansion panel, metadata groups/fields, removed indicators |
+| `metadata-inspection.spec.ts` | 2 | Metadata groups and fields, removed and preserved counts |
+| `file-size-display.spec.ts` | 4 | Real size, zero-byte, per-row sizes, tag count |
 | `error-handling.spec.ts` | 4 | Corrupted file, zero-byte, unsupported format, recovery |
 | `security.spec.ts` | 2 | CSP meta tag directives, navigation blocking |
-| `accessibility.spec.ts` | 4 | Tab navigation, focus indicator, ARIA roles, settings focus trap |
+| `accessibility.spec.ts` | 1 | Settings drawer focus trap |
+
+Rendering and accessibility checks for these specs (empty state, theme, focus order, ARIA names, RTL order, metadata field icons) live in the stories; `.storybook/catalog/TEST-SHIFT.md` lists every moved assertion and the story that holds it.
 
 ## Architecture
 

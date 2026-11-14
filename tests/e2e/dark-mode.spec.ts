@@ -49,39 +49,6 @@ test.describe("Dark Mode", () => {
 		expect(shouldUseDark).toBe(true);
 	});
 
-	test("renders all components correctly in dark mode", async () => {
-		// Ensure dark mode is set (may already be from previous test)
-		await app.evaluate(({ nativeTheme }) => {
-			nativeTheme.themeSource = "dark";
-		});
-		await page.waitForTimeout(300);
-
-		// Verify the drop zone is still visible
-		const dropZone = page.locator(".drop-zone");
-		await expect(dropZone).toBeVisible();
-
-		// Verify the gear button is still visible
-		const gearButton = page.locator(".gear-icon");
-		await expect(gearButton).toBeVisible();
-
-		// Verify the empty state section is still visible
-		const emptyState = page.locator("section.empty-state");
-		await expect(emptyState).toBeVisible();
-
-		// Verify no elements have zero opacity (rendering failure indicator)
-		const hasZeroOpacity = await page.evaluate(() => {
-			const elements = document.querySelectorAll("*");
-			for (const el of elements) {
-				const style = window.getComputedStyle(el);
-				if (style.opacity === "0" && el.children.length > 0) {
-					return true;
-				}
-			}
-			return false;
-		});
-		expect(hasZeroOpacity).toBe(false);
-	});
-
 	test("switches back to light mode", async () => {
 		// Ensure dark mode first
 		await app.evaluate(({ nativeTheme }) => {
