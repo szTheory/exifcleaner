@@ -21,6 +21,7 @@ const REQUIRED_PATHS = [
 	".resources/strings.json",
 	"tests/fakes/mock_window_api.ts",
 	"tests/types/**",
+	"tests/e2e/*.spec.ts",
 	"brand.pin.json",
 	"src/main/reveal_handlers.ts",
 	"src/main/exif_handlers.ts",
@@ -345,6 +346,15 @@ describe("storybook.yml policy (D-17, SBK-04)", () => {
 			"brand.pin.json dropped from push",
 			(t) => t.replace('      - "brand.pin.json"\n', ""),
 			"push paths must include brand.pin.json",
+		],
+		[
+			"tests/e2e glob dropped from pull_request",
+			(t) => {
+				const entry = '      - "tests/e2e/*.spec.ts"\n';
+				const at = t.lastIndexOf(entry);
+				return t.slice(0, at) + t.slice(at + entry.length);
+			},
+			"pull_request paths must include tests/e2e/*.spec.ts",
 		],
 		[
 			"reveal_handlers dropped from pull_request",
