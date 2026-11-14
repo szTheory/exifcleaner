@@ -22,7 +22,7 @@ Exempt: Sharing a cleaned file is an outcome the person judges away from the app
 
 | Step | Scenario | Action | Proof | e2e | Note |
 | --- | --- | --- | --- | --- | --- |
-| J-03.1 | file-row.cleaned | row "test.jpg. Metadata removed" | story+e2e | tests/e2e/metadata-inspection.spec.ts › expands a processed file to show metadata details |  |
+| J-03.1 | file-row.cleaned | row "test.jpg. Metadata removed" | story+e2e | tests/e2e/metadata-inspection.spec.ts › shows metadata groups with before/after diff |  |
 | J-03.2 | file-row.cleaned-expanded | gesture: read the groups of metadata that were found | e2e | tests/e2e/metadata-inspection.spec.ts › shows metadata groups with before/after diff |  |
 | J-03.3 | file-row.cleaned-expanded | gesture: read which fields were removed | e2e | tests/e2e/metadata-inspection.spec.ts › shows removed indicators for stripped metadata tags |  |
 | J-03.4 | file-row.cleaned-expanded | button "Copy all" | story |  |  |
