@@ -10,14 +10,25 @@
 //     somewhere in the file;
 //   - every catalog `brand` source `section` is exactly one heading;
 //   - the rules file `brandPin` and every catalog brand `pin` equal the
-//     commit in brand.pin.json.
+//     commit in brand.pin.json;
+//   - ui-spec.json (Phase 74, D-18, D-28): its `brandPin` equals that commit,
+//     every `brand.section` is exactly one heading and every `brand.quote`
+//     occurs verbatim inside that heading's own line range, and every
+//     `tokens.path` resolves in the cache tokens.json to a `$value.hex` equal,
+//     case-insensitively, to `tokens.value`.
+// A section written with a level prefix (`## In the product`) matches only the
+// heading of that level and text; BRAND.md repeats two heading texts (`Type`,
+// `In the product`) at two levels, and a bare citation of either stays
+// ambiguous. There is no flag for the spec checks: the default run is the
+// opt-in, fail-closed verification.
 // It is never imported by catalog.mjs and never runs in CI: the cache is
-// gitignored, so a missing cache fails with `run yarn brand:fetch` instead of
-// skipping.
+// gitignored, so a missing BRAND.md or tokens.json fails with
+// `run yarn brand:fetch` instead of skipping.
 import fs from "node:fs";
 import path from "node:path";
 import { isMainModule } from "../../scripts/is_main_module.mjs";
 import { compareCodeUnits, isPlainObject, readJson } from "./closed.mjs";
+import { UI_SPEC_SECTIONS } from "./vocab.mjs";
 
 export const BRAND_QUOTE_USAGE =
 	"usage: node .storybook/catalog/brand_quote_check.mjs [--cache <dir>]";
@@ -25,6 +36,7 @@ export const BRAND_QUOTE_USAGE =
 const DEFAULT_CACHE = ".brand-cache/unpacked/exifcleaner-brand";
 const RULES_PATH = ".storybook/catalog/copy_lint_rules.json";
 const CATALOG_PATH = ".storybook/catalog/catalog.json";
+const UI_SPEC_PATH = ".storybook/catalog/ui-spec.json";
 const PIN_PATH = "brand.pin.json";
 
 /**
@@ -101,17 +113,115 @@ function catalogBrandSources(catalogDoc) {
 }
 
 /**
- * Pure over text, so a test can call it without a spawn.
+ * The `$value.hex` of a dotted path in a parsed tokens.json, or null. Every step
+ * must be an own property of a plain object (`Object.hasOwn`, never `in` and
+ * never bracket access on an unchecked key), so `__proto__`, `constructor` and
+ * `prototype` can never be walked into.
  *
- * @param {{ brandText: string, rulesDoc: unknown, catalogDoc: unknown, pin: string }} input
+ * @param {unknown} tokensDoc
+ * @param {string} dottedPath
+ * @returns {string | null}
+ */
+export function resolveTokenPath(tokensDoc, dottedPath) {
+	if (typeof dottedPath !== "string" || dottedPath === "") return null;
+	/** @type {unknown} */
+	let current = tokensDoc;
+	for (const key of dottedPath.split(".")) {
+		if (!isPlainObject(current) || !Object.hasOwn(current, key)) return null;
+		current = current[key];
+	}
+	if (!isPlainObject(current) || !Object.hasOwn(current, "$value")) return null;
+	const value = current["$value"];
+	if (!isPlainObject(value) || !Object.hasOwn(value, "hex")) return null;
+	const hex = value["hex"];
+	return typeof hex === "string" ? hex : null;
+}
+
+// Every authored entry of ui-spec.json that can carry a source: the section
+// values (every section but states) and the states cells that hold a value.
+function specEntries(specDoc) {
+	if (!isPlainObject(specDoc)) return [];
+	const found = [];
+	for (const section of UI_SPEC_SECTIONS) {
+		if (section === "states") continue;
+		const values = specDoc[section];
+		if (!Array.isArray(values)) continue;
+		for (const value of values) {
+			if (isPlainObject(value))
+				found.push({ location: String(value["id"]), entry: value });
+		}
+	}
+	const states = specDoc["states"];
+	if (isPlainObject(states) && Array.isArray(states["cells"])) {
+		for (const cell of states["cells"]) {
+			if (!isPlainObject(cell)) continue;
+			found.push({
+				location: `states ${cell["component"]}/${cell["state"]}/${cell["theme"]}`,
+				entry: cell,
+			});
+		}
+	}
+	return found;
+}
+
+/**
+ * @param {unknown} specDoc
+ * @returns {Array<{ location: string, section: unknown, quote: unknown }>}
+ */
+export function specBrandSources(specDoc) {
+	return specEntries(specDoc).flatMap(({ location, entry }) => {
+		const source = entry["brand"];
+		return isPlainObject(source)
+			? [{ location, section: source["section"], quote: source["quote"] }]
+			: [];
+	});
+}
+
+/**
+ * @param {unknown} specDoc
+ * @returns {Array<{ location: string, path: unknown, value: unknown }>}
+ */
+export function specTokenSources(specDoc) {
+	return specEntries(specDoc).flatMap(({ location, entry }) => {
+		const source = entry["tokens"];
+		return isPlainObject(source)
+			? [{ location, path: source["path"], value: source["value"] }]
+			: [];
+	});
+}
+
+/**
+ * Pure over text, so a test can call it without a spawn. `specDoc` and
+ * `tokensDoc` are optional: without a `specDoc` only the rules and the catalog
+ * are checked.
+ *
+ * @param {{ brandText: string, rulesDoc: unknown, catalogDoc: unknown, pin: string, specDoc?: unknown, tokensDoc?: unknown }} input
  * @returns {Array<{ code: string, location: string, message: string }>}
  */
-export function checkBrandQuotes({ brandText, rulesDoc, catalogDoc, pin }) {
+export function checkBrandQuotes({
+	brandText,
+	rulesDoc,
+	catalogDoc,
+	pin,
+	specDoc,
+	tokensDoc,
+}) {
 	const problems = [];
 	const lines = brandText.split("\n");
 	const ranges = headingRanges(brandText);
-	const rangesOf = (section) =>
-		ranges.filter((range) => range.heading === section);
+	// A level-prefixed section (`## Type`, `### In the product`) matches the
+	// heading of that level and text only; a bare one matches the text at any
+	// level, which is how every rule and catalog citation resolves.
+	const rangesOf = (section) => {
+		const leveled = /^(#{1,6}) (.+)$/.exec(section);
+		if (leveled === null) {
+			return ranges.filter((range) => range.heading === section);
+		}
+		const level = (leveled[1] ?? "").length;
+		return ranges.filter(
+			(range) => range.level === level && range.heading === leveled[2],
+		);
+	};
 	const add = (code, location, message) =>
 		problems.push({ code, location, message });
 
@@ -137,6 +247,24 @@ export function checkBrandQuotes({ brandText, rulesDoc, catalogDoc, pin }) {
 		return matches[0] ?? null;
 	};
 
+	// The quote must sit inside its own section's line range, not merely
+	// somewhere in the file.
+	const checkQuote = (kind, location, section, quote) => {
+		const range = sectionRange(section, location, kind);
+		if (range === null) return;
+		const body = lines.slice(range.start - 1, range.end).join("\n");
+		if (typeof quote !== "string" || !body.includes(quote)) {
+			const inFile = brandText.includes(String(quote));
+			add(
+				inFile ? `${kind}-quote-not-in-section` : `${kind}-quote-absent`,
+				location,
+				inFile
+					? `quote not in section ${section}`
+					: `quote absent from BRAND.md (section ${section})`,
+			);
+		}
+	};
+
 	const rules =
 		isPlainObject(rulesDoc) && Array.isArray(rulesDoc["rules"])
 			? rulesDoc["rules"]
@@ -150,22 +278,8 @@ export function checkBrandQuotes({ brandText, rulesDoc, catalogDoc, pin }) {
 	}
 	for (const rule of rules) {
 		if (!isPlainObject(rule) || !isPlainObject(rule["source"])) continue;
-		const id = String(rule["id"]);
 		const { section, quote } = rule["source"];
-		const range = sectionRange(section, id, "rule");
-		if (range === null) continue;
-		const body = lines.slice(range.start - 1, range.end).join("\n");
-		if (typeof quote !== "string" || !body.includes(quote)) {
-			add(
-				brandText.includes(String(quote))
-					? "rule-quote-not-in-section"
-					: "rule-quote-absent",
-				id,
-				brandText.includes(String(quote))
-					? `quote not in section ${section}`
-					: `quote absent from BRAND.md (section ${section})`,
-			);
-		}
+		checkQuote("rule", String(rule["id"]), section, quote);
 	}
 
 	const sources = catalogBrandSources(catalogDoc);
@@ -178,6 +292,37 @@ export function checkBrandQuotes({ brandText, rulesDoc, catalogDoc, pin }) {
 			);
 		}
 		sectionRange(source.section, source.location, "catalog");
+	}
+
+	if (isPlainObject(specDoc)) {
+		if (specDoc["brandPin"] !== pin) {
+			add(
+				"spec-pin-mismatch",
+				"ui-spec.json",
+				"brandPin is not the commit in brand.pin.json",
+			);
+		}
+		for (const source of specBrandSources(specDoc)) {
+			checkQuote("spec", source.location, source.section, source.quote);
+		}
+		for (const source of specTokenSources(specDoc)) {
+			const cacheHex = resolveTokenPath(tokensDoc, String(source.path));
+			if (cacheHex === null) {
+				add(
+					"spec-token-path-missing",
+					source.location,
+					`tokens path ${source.path} is not a colour in tokens.json`,
+				);
+			} else if (
+				cacheHex.toUpperCase() !== String(source.value).toUpperCase()
+			) {
+				add(
+					"spec-token-hex-mismatch",
+					source.location,
+					`tokens path ${source.path} is ${cacheHex} in tokens.json but ${source.value} in ui-spec.json`,
+				);
+			}
+		}
 	}
 	return problems.sort(
 		(a, b) =>
@@ -207,9 +352,12 @@ export function main(argv = process.argv.slice(2)) {
 	}
 	const root = process.cwd();
 	const brandPath = path.resolve(root, parsed.cache, "BRAND.md");
+	const tokensPath = path.resolve(root, parsed.cache, "tokens.json");
 	let brandText;
+	let tokensText;
 	try {
 		brandText = fs.readFileSync(brandPath, "utf8");
+		tokensText = fs.readFileSync(tokensPath, "utf8");
 	} catch {
 		console.error(
 			`✗ BRAND QUOTE CHECK FAILED: no brand cache at ${path.resolve(root, parsed.cache)}; run yarn brand:fetch`,
@@ -219,9 +367,18 @@ export function main(argv = process.argv.slice(2)) {
 	try {
 		const rulesDoc = readJson(root, RULES_PATH);
 		const catalogDoc = readJson(root, CATALOG_PATH);
+		const specDoc = readJson(root, UI_SPEC_PATH);
+		const tokensDoc = JSON.parse(tokensText);
 		const pin = /** @type {{ commit: string }} */ (readJson(root, PIN_PATH))
 			.commit;
-		const problems = checkBrandQuotes({ brandText, rulesDoc, catalogDoc, pin });
+		const problems = checkBrandQuotes({
+			brandText,
+			rulesDoc,
+			catalogDoc,
+			pin,
+			specDoc,
+			tokensDoc,
+		});
 		if (problems.length > 0) {
 			const text = problems
 				.map((found) => `${found.location}: ${found.message}`)
@@ -233,8 +390,10 @@ export function main(argv = process.argv.slice(2)) {
 			? /** @type {any} */ (rulesDoc).rules.length
 			: 0;
 		const sections = catalogBrandSources(catalogDoc).length;
+		const quotes = specBrandSources(specDoc).length;
+		const tokens = specTokenSources(specDoc).length;
 		console.log(
-			`✓ BRAND QUOTE CHECK PASSED — ${rules} rules, ${sections} catalog sections`,
+			`✓ BRAND QUOTE CHECK PASSED — ${rules} rules, ${sections} catalog sections, ${quotes} spec quotes, ${tokens} spec tokens`,
 		);
 		console.log(`pin ${pin}`);
 		return 0;
