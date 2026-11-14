@@ -172,13 +172,36 @@ function bodyRows(canvasElement: HTMLElement): Element[] {
 // No file chosen: the empty screen the app opens on, with no row and no Clear button.
 export const Empty: Story = {
 	parameters: { a11y: knownA11y("screens-app--empty") },
-	play: async ({ canvasElement }) => {
+	play: async ({ canvasElement, globals }) => {
 		const canvas = within(canvasElement);
 		await expect(
 			await canvas.findByRole("heading", { name: "Add files to clean" }),
 		).toBeVisible();
 		await expect(canvas.queryAllByRole("row")).toHaveLength(0);
 		await expect(canvas.queryByRole("button", { name: "Clear" })).toBeNull();
+		await expect(canvas.getByRole("main")).toBeVisible();
+		// A dark story must really render dark: the real ThemeProvider writes data-theme.
+		await waitFor(() =>
+			expect(document.documentElement.getAttribute("data-theme")).toBe(
+				globals["theme"],
+			),
+		);
+		// Tab order: Choose files, Choose folder, then the settings gear.
+		if (document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
+		await userEvent.tab();
+		await expect(
+			canvas.getByRole("button", { name: "Choose files…" }),
+		).toHaveFocus();
+		await userEvent.tab();
+		await expect(
+			canvas.getByRole("button", { name: "Choose folder…" }),
+		).toHaveFocus();
+		await userEvent.tab();
+		await expect(
+			canvas.getByRole("button", { name: "Open settings" }),
+		).toHaveFocus();
 	},
 };
 
