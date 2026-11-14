@@ -357,9 +357,9 @@
 						"verdict": "deleted",
 						"story": "screens-app--empty",
 						"subject": "App",
-						"covers": "theme",
-						"evidence": "data-theme",
-						"note": "Dark: data-theme assertion, storybook-dark; gear present: Open settings toHaveFocus (D-02 Tab order)"
+						"covers": "layout",
+						"evidence": "Open settings",
+						"note": "Gear visible: Open settings toBeVisible in the Empty play (review WR-02); dark: data-theme assertion, storybook-dark"
 					},
 					{
 						"n": 3,
@@ -378,8 +378,8 @@
 						"story": "screens-app--empty",
 						"subject": "App",
 						"covers": "layout",
-						"evidence": "Add files to clean",
-						"note": "Reduced: whole-document zero-opacity scan -> h1 ancestor chain only (Pitfall 10, TEST-SHIFT.md Known limits); dark: data-theme"
+						"evidence": "opacity",
+						"note": "Whole-canvas zero-opacity scan restored in the Empty play (review WR-02); dark: data-theme, storybook-dark; scope in TEST-SHIFT.md Known limits"
 					}
 				]
 			},

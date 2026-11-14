@@ -771,7 +771,7 @@ export function renderTestShift(doc) {
 		"- Two `afterEach` console-error guards, one in app-launch and one in metadata-inspection, sit outside any test. They stay and guard every kept test.",
 		'- A story\'s simulated Tab is not a trusted browser Tab. The accessibility test "traps focus within settings drawer when open" stays as the real-Chromium backstop for focus handling.',
 		"- A `deleted` item's evidence literal is matched by presence in the story's export source plus the same-file helpers it calls. That does not prove the literal belongs to the statement making the claim.",
-		"- The dark-mode test \"renders all components correctly in dark mode\" scans the whole document for zero-opacity elements. The story side covers only the `screens-app--empty` level-1 heading's `toBeVisible`, which checks that element and its ancestor chain, plus the play's `data-theme` assertion. This is a named reduction, not equivalence.",
+		'- The dark-mode test "renders all components correctly in dark mode" ran a whole-document zero-opacity scan (elements with children whose computed opacity is 0) in the Electron window. The `screens-app--empty` play runs the same scan over the story canvas, so anything the Storybook harness renders outside the canvas is not scanned, and the play\'s `data-theme` assertion carries the dark half.',
 	);
 	return `${lines.join("\n")}\n`;
 }

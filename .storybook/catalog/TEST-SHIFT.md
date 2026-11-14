@@ -105,9 +105,9 @@ One row per `expect(`, `expect.soft(` or `expect.poll(` call inside a test callb
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | deleted | expect(dropZone).toBeVisible() | screens-app--empty | layout | Add files to clean | Visible: h1 toBeVisible checks section.empty-state and DropZone ancestors (App.tsx:82-86); dark: data-theme assertion, storybook-dark |
-| 2 | deleted | expect(gearButton).toBeVisible() | screens-app--empty | theme | data-theme | Dark: data-theme assertion, storybook-dark; gear present: Open settings toHaveFocus (D-02 Tab order) |
+| 2 | deleted | expect(gearButton).toBeVisible() | screens-app--empty | layout | Open settings | Gear visible: Open settings toBeVisible in the Empty play (review WR-02); dark: data-theme assertion, storybook-dark |
 | 3 | deleted | expect(emptyState).toBeVisible() | screens-app--empty | layout | Add files to clean | Visible: h1 toBeVisible checks the section.empty-state ancestor (App.tsx:82-86); dark: data-theme assertion, storybook-dark |
-| 4 | deleted | expect(hasZeroOpacity).toBe(false) | screens-app--empty | layout | Add files to clean | Reduced: whole-document zero-opacity scan -> h1 ancestor chain only (Pitfall 10, TEST-SHIFT.md Known limits); dark: data-theme |
+| 4 | deleted | expect(hasZeroOpacity).toBe(false) | screens-app--empty | layout | opacity | Whole-canvas zero-opacity scan restored in the Empty play (review WR-02); dark: data-theme, storybook-dark; scope in TEST-SHIFT.md Known limits |
 
 ### switches back to light mode
 
@@ -235,4 +235,4 @@ Title kept per D-04 (never retitle a kept test; no journey pins it). It overclai
 - Two `afterEach` console-error guards, one in app-launch and one in metadata-inspection, sit outside any test. They stay and guard every kept test.
 - A story's simulated Tab is not a trusted browser Tab. The accessibility test "traps focus within settings drawer when open" stays as the real-Chromium backstop for focus handling.
 - A `deleted` item's evidence literal is matched by presence in the story's export source plus the same-file helpers it calls. That does not prove the literal belongs to the statement making the claim.
-- The dark-mode test "renders all components correctly in dark mode" scans the whole document for zero-opacity elements. The story side covers only the `screens-app--empty` level-1 heading's `toBeVisible`, which checks that element and its ancestor chain, plus the play's `data-theme` assertion. This is a named reduction, not equivalence.
+- The dark-mode test "renders all components correctly in dark mode" ran a whole-document zero-opacity scan (elements with children whose computed opacity is 0) in the Electron window. The `screens-app--empty` play runs the same scan over the story canvas, so anything the Storybook harness renders outside the canvas is not scanned, and the play's `data-theme` assertion carries the dark half.

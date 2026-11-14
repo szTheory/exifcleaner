@@ -186,6 +186,20 @@ export const Empty: Story = {
 				globals["theme"],
 			),
 		);
+		// The deleted dark-mode e2e scanned the whole document for a rendering failure: an
+		// element with children whose computed opacity is 0. The heading's toBeVisible above
+		// checks only its own ancestor chain, so the actions row, the gear and the status
+		// bar are covered by this scan of the whole canvas. The Storybook browser projects
+		// run with reduced motion, so a mid-transition opacity cannot make it flaky.
+		const hidden = Array.from(canvasElement.querySelectorAll("*")).filter(
+			(element) =>
+				element.children.length > 0 &&
+				getComputedStyle(element).opacity === "0",
+		);
+		await expect(hidden).toEqual([]);
+		await expect(
+			canvas.getByRole("button", { name: "Open settings" }),
+		).toBeVisible();
 		// Tab order: Choose files, Choose folder, then the settings gear.
 		if (document.activeElement instanceof HTMLElement) {
 			document.activeElement.blur();
