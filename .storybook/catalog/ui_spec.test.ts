@@ -9,8 +9,11 @@ import {
 	loadUiSpecContext,
 	renderUiSpec,
 	validateUiSpec,
+	type UiSpecAppSource,
+	type UiSpecCell,
 	type UiSpecContext,
 	type UiSpecDocument,
+	type UiSpecSources,
 	type UiSpecValue,
 } from "./ui_spec.mjs";
 import { makeCatalogRepo, realScript, repoRoot, runNode } from "./temp_repo";
@@ -104,6 +107,68 @@ describe("the real ui-spec", () => {
 	});
 });
 
+// Helpers for the mutants. Each mutant starts from a fresh clone of the real
+// document and breaks exactly one rule.
+function sourceOf<K extends "tokens" | "brand" | "app">(
+	entry: UiSpecSources,
+	key: K,
+): NonNullable<UiSpecSources[K]> {
+	const found = entry[key];
+	if (found === undefined) throw new Error(`no ${key} source`);
+	return found as NonNullable<UiSpecSources[K]>;
+}
+
+function cellKey(cell: UiSpecCell): string {
+	return `${cell.component}|${cell.state}|${cell.theme}`;
+}
+
+function sortCells(doc: UiSpecDocument): UiSpecDocument {
+	doc.states.cells.sort((a, b) => {
+		const left = cellKey(a);
+		const right = cellKey(b);
+		return left < right ? -1 : left > right ? 1 : 0;
+	});
+	return doc;
+}
+
+function cellAt(doc: UiSpecDocument, state: string, theme: string): UiSpecCell {
+	const found = doc.states.cells.find(
+		(cell) => cell.state === state && cell.theme === theme,
+	);
+	if (found === undefined) throw new Error(`no ${state}/${theme} cell`);
+	return found;
+}
+
+// An extra value cell that breaks one field, put back in sorted position so the
+// only defect is the field.
+function withExtraCell(
+	doc: UiSpecDocument,
+	change: Partial<UiSpecCell>,
+): UiSpecDocument {
+	doc.states.cells.push({
+		...structuredClone(cellAt(doc, "hover", "light")),
+		...change,
+	});
+	return sortCells(doc);
+}
+
+// A second component with a full set of ten cells, so the matrix stays complete.
+function withComponent(doc: UiSpecDocument, name: string): UiSpecDocument {
+	const copies = doc.states.cells.map((cell) => ({
+		...structuredClone(cell),
+		component: name,
+	}));
+	doc.states.cells.push(...copies);
+	doc.states.components.push(name);
+	return sortCells(doc);
+}
+
+function renameComponent(doc: UiSpecDocument, name: string): UiSpecDocument {
+	doc.states.components = [name];
+	for (const cell of doc.states.cells) cell.component = name;
+	return sortCells(doc);
+}
+
 interface Mutant {
 	name: string;
 	code: string;
@@ -111,7 +176,24 @@ interface Mutant {
 }
 
 const MUTANTS: Mutant[] = [
+	// Top level and structure.
 	{ name: "a non-object document", code: "not-object", mutate: () => [] },
+	{
+		name: "a section value that is not an object",
+		code: "not-object",
+		mutate: (doc) => {
+			doc.type.push(5 as unknown as UiSpecValue);
+			return doc;
+		},
+	},
+	{
+		name: "a states cell that is not an object",
+		code: "not-object",
+		mutate: (doc) => {
+			doc.states.cells.push(5 as unknown as UiSpecCell);
+			return doc;
+		},
+	},
 	{
 		name: "schemaVersion 2",
 		code: "schema-version",
@@ -123,6 +205,16 @@ const MUTANTS: Mutant[] = [
 		mutate: (doc) => ({ ...doc, extra: [] }),
 	},
 	{
+		name: "an extra key on a value",
+		code: "unknown-field",
+		mutate: (doc) => ({ ...doc, type: [{ ...at(doc.type, 0), extra: 1 }] }),
+	},
+	{
+		name: "an extra key on the states section",
+		code: "unknown-field",
+		mutate: (doc) => ({ ...doc, states: { ...doc.states, extra: 1 } }),
+	},
+	{
 		name: "a deleted section",
 		code: "missing-field",
 		mutate: (doc) => {
@@ -132,10 +224,117 @@ const MUTANTS: Mutant[] = [
 		},
 	},
 	{
+		name: "a value without an id",
+		code: "missing-field",
+		mutate: (doc) => {
+			const value: Partial<UiSpecValue> = at(doc.type, 0);
+			delete value.id;
+			return doc;
+		},
+	},
+	{
+		name: "a section that is an object, not an array",
+		code: "bad-type",
+		mutate: (doc) => ({ ...doc, radii: {} }),
+	},
+	{
+		name: "states components that is a string, not an array",
+		code: "bad-type",
+		mutate: (doc) => ({
+			...doc,
+			states: { ...doc.states, components: "primary-button" },
+		}),
+	},
+	{
+		name: "a states cell whose component is a number",
+		code: "bad-type",
+		mutate: (doc) => {
+			doc.states.cells.push({
+				...structuredClone(cellAt(doc, "hover", "light")),
+				component: 5 as unknown as string,
+			});
+			return doc;
+		},
+	},
+	{
+		name: "a section emptied to []",
+		code: "empty-section",
+		mutate: (doc) => ({ ...doc, focus: [] }),
+	},
+	{
+		name: "states with no components and no cells",
+		code: "empty-section",
+		mutate: (doc) => ({ ...doc, states: { components: [], cells: [] } }),
+	},
+	{
 		name: "a brandPin that is not the brand.pin.json commit",
 		code: "pin-mismatch",
 		mutate: (doc) => ({ ...doc, brandPin: "0".repeat(40) }),
 	},
+
+	// Ids and order.
+	{
+		name: "an id with a capital",
+		code: "bad-id",
+		mutate: (doc) => {
+			at(doc.type, 0).id = "type.Label.weight";
+			return doc;
+		},
+	},
+	{
+		name: "an id with another section's prefix",
+		code: "bad-id",
+		mutate: (doc) => {
+			at(doc.radii, 0).id = "type.button";
+			return doc;
+		},
+	},
+	{
+		name: "a component name that is not a kebab slug",
+		code: "bad-id",
+		mutate: (doc) => renameComponent(doc, "Primary Button"),
+	},
+	{
+		name: "a value copied with the same id",
+		code: "duplicate-id",
+		mutate: (doc) => {
+			doc.spacing.splice(1, 0, structuredClone(at(doc.spacing, 0)));
+			return doc;
+		},
+	},
+	{
+		name: "a component listed twice",
+		code: "duplicate-id",
+		mutate: (doc) => {
+			doc.states.components.push("primary-button");
+			return doc;
+		},
+	},
+	{
+		name: "two values out of id order",
+		code: "unsorted",
+		mutate: (doc) => {
+			doc.type.push({ ...structuredClone(at(doc.type, 0)), id: "type.a" });
+			return doc;
+		},
+	},
+	{
+		name: "two states cells swapped",
+		code: "unsorted",
+		mutate: (doc) => {
+			const first = at(doc.states.cells, 0);
+			doc.states.cells[0] = at(doc.states.cells, 1);
+			doc.states.cells[1] = first;
+			return doc;
+		},
+	},
+	{
+		name: "two components out of order",
+		code: "unsorted",
+		mutate: (doc) => withComponent(doc, "a-button"),
+	},
+
+	// Sources.
 	{
 		name: "a value with no source key",
 		code: "source-count",
@@ -155,6 +354,172 @@ const MUTANTS: Mutant[] = [
 			return doc;
 		},
 	},
+	{
+		name: "a states cell with a value and no source",
+		code: "source-count",
+		mutate: (doc) => {
+			delete cellAt(doc, "hover", "light").app;
+			return doc;
+		},
+	},
+	{
+		name: "an app basis outside the closed four",
+		code: "bad-basis",
+		mutate: (doc) => {
+			sourceOf(at(doc.spacing, 0), "app").basis = "guess";
+			return doc;
+		},
+	},
+	{
+		name: "an empty brand quote",
+		code: "bad-source",
+		mutate: (doc) => {
+			sourceOf(at(doc.type, 0), "brand").quote = "";
+			return doc;
+		},
+	},
+	{
+		name: "an app source without its reason",
+		code: "bad-source",
+		mutate: (doc) => {
+			const app: Partial<UiSpecAppSource> = sourceOf(at(doc.spacing, 0), "app");
+			delete app.reason;
+			return doc;
+		},
+	},
+	{
+		name: "a tokens source with an extra key",
+		code: "bad-source",
+		mutate: (doc) => {
+			Object.assign(sourceOf(at(doc.darkRinse, 0), "tokens"), { extra: 1 });
+			return doc;
+		},
+	},
+	{
+		name: "a source that is not an object",
+		code: "bad-source",
+		mutate: (doc) => {
+			at(doc.spacing, 0).app = "guess" as unknown as UiSpecAppSource;
+			return doc;
+		},
+	},
+
+	// Values.
+	{
+		name: "an empty value",
+		code: "empty-value",
+		mutate: (doc) => {
+			at(doc.spacing, 0).value = "";
+			return doc;
+		},
+	},
+	{
+		name: "the value TBD",
+		code: "placeholder-value",
+		mutate: (doc) => {
+			at(doc.spacing, 0).value = "TBD";
+			return doc;
+		},
+	},
+	{
+		name: "a value with the word TODO in it",
+		code: "placeholder-value",
+		mutate: (doc) => {
+			at(doc.spacing, 0).value = "4px, todo";
+			return doc;
+		},
+	},
+	{
+		name: "a brand value whose text is not in its quote",
+		code: "quote-missing-value",
+		mutate: (doc) => {
+			at(doc.radii, 0).value = "9 px";
+			return doc;
+		},
+	},
+	{
+		name: "a tokens path that is not a colour",
+		code: "tokens-not-colour",
+		mutate: (doc) => {
+			sourceOf(at(doc.darkRinse, 0), "tokens").path = "font.mono";
+			return doc;
+		},
+	},
+	{
+		name: "a tokens value that is not an uppercase #RRGGBB",
+		code: "tokens-not-colour",
+		mutate: (doc) => {
+			const value = at(doc.darkRinse, 0);
+			value.value = "#12403c";
+			sourceOf(value, "tokens").value = "#12403c";
+			return doc;
+		},
+	},
+	{
+		name: "a tokens value that differs from the value",
+		code: "tokens-value-mismatch",
+		mutate: (doc) => {
+			sourceOf(at(doc.darkRinse, 0), "tokens").value = "#000000";
+			return doc;
+		},
+	},
+
+	// The states matrix.
+	{
+		name: "a cell removed from the matrix",
+		code: "missing-cell",
+		mutate: (doc) => {
+			doc.states.cells.pop();
+			return doc;
+		},
+	},
+	{
+		name: "a cell duplicated",
+		code: "duplicate-cell",
+		mutate: (doc) => {
+			doc.states.cells.splice(1, 0, structuredClone(at(doc.states.cells, 0)));
+			return doc;
+		},
+	},
+	{
+		name: "a cell with both a value and na",
+		code: "bad-cell",
+		mutate: (doc) => {
+			cellAt(doc, "hover", "light").na = "also not applicable";
+			return doc;
+		},
+	},
+	{
+		name: "a cell with an empty na reason",
+		code: "bad-cell",
+		mutate: (doc) => {
+			cellAt(doc, "selected", "light").na = "";
+			return doc;
+		},
+	},
+	{
+		name: "a cell with neither a value nor na",
+		code: "bad-cell",
+		mutate: (doc) => {
+			delete cellAt(doc, "selected", "light").na;
+			return doc;
+		},
+	},
+	{
+		name: "an extra cell with the state focus",
+		code: "bad-state",
+		mutate: (doc) => withExtraCell(doc, { state: "focus" }),
+	},
+	{
+		name: "an extra cell with the theme hc",
+		code: "bad-theme",
+		mutate: (doc) => withExtraCell(doc, { theme: "hc" }),
+	},
+	{
+		name: "an extra cell for a component that is not listed",
+		code: "unknown-component",
+		mutate: (doc) => withExtraCell(doc, { component: "ghost-button" }),
+	},
 ];
 
 describe("every rule code is shown red by its own mutant", () => {
@@ -168,19 +533,28 @@ describe("every rule code is shown red by its own mutant", () => {
 		]);
 	});
 
-	test("UI_SPEC_CODES is frozen and sorted by code unit", () => {
+	test("UI_SPEC_CODES is 24 frozen codes sorted by code unit", () => {
+		expect(UI_SPEC_CODES).toHaveLength(24);
 		expect(Object.isFrozen(UI_SPEC_CODES)).toBe(true);
 		expect([...UI_SPEC_CODES]).toEqual([...UI_SPEC_CODES].sort());
 	});
 });
 
 describe("catalog.mjs against a temp git repo", () => {
+	test("the default check passes in a temp repo that has no .brand-cache", () => {
+		withRepo((repo) => {
+			// makeCatalogRepo copies CHECK_INPUTS only, so a pass here proves the
+			// default check reads no brand cache (D-18).
+			expect(fs.existsSync(path.join(repo, ".brand-cache"))).toBe(false);
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status, result.stderr).toBe(0);
+			expect(result.stdout).toContain("CATALOG CHECK PASSED");
+			expect(result.stdout).toContain("7 generated files current");
+		});
+	});
+
 	test("shown red: one changed byte in UI-SPEC.md fails --check and changes nothing", () => {
 		withRepo((repo) => {
-			// The unmutated temp repo passes first, so the failure below is the byte.
-			const clean = run(repo, ["--check", "--base", "main"]);
-			expect(clean.status, clean.stderr).toBe(0);
-			expect(clean.stdout).toContain("7 generated files current");
 			const file = path.join(repo, UI_SPEC_MD_PATH);
 			fs.writeFileSync(file, `${fs.readFileSync(file, "utf8")}x`);
 			const before = snapshotDir(repo);
@@ -190,6 +564,28 @@ describe("catalog.mjs against a temp git repo", () => {
 			expect(result.stderr).toContain(
 				"UI-SPEC.md is stale; run yarn catalog:write",
 			);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: a brandPin that is not the brand.pin.json commit fails --check with pin-mismatch and changes nothing", () => {
+		withRepo((repo) => {
+			const file = path.join(repo, UI_SPEC_PATH);
+			const original = fs.readFileSync(file, "utf8");
+			fs.writeFileSync(
+				file,
+				original.replace(
+					/"brandPin": "[0-9a-f]{40}"/,
+					`"brandPin": "${"0".repeat(40)}"`,
+				),
+			);
+			// Anti-vacuity: the planted edit changed the temp file.
+			expect(fs.readFileSync(file, "utf8")).not.toBe(original);
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status).toBe(1);
+			expect(result.stderr).toContain("CATALOG CHECK FAILED");
+			expect(result.stderr).toContain("pin-mismatch");
 			assertDirEffect(before, snapshotDir(repo), {});
 		});
 	});
