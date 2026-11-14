@@ -23,11 +23,16 @@ import {
 } from "./closed.mjs";
 import {
 	customPropertyDeclarations,
+	dynamicCustomPropertyNames,
 	listTokenScanFiles,
 	usedCustomProperties,
 } from "./css_scan.mjs";
 import { UI_SPEC_PATH } from "./ui_spec.mjs";
-import { TOKEN_DISPOSITIONS, UI_SPEC_SECTIONS } from "./vocab.mjs";
+import {
+	THEME_INVARIANT_PREFIXES,
+	TOKEN_DISPOSITIONS,
+	UI_SPEC_SECTIONS,
+} from "./vocab.mjs";
 
 export const TOKEN_MAP_PATH = ".storybook/catalog/token_map.json";
 export const TOKEN_MAP_MD_PATH = ".storybook/catalog/TOKEN-MAP.md";
@@ -37,15 +42,38 @@ const KNOWN_FINDINGS_PATH = "docs/evidence/known-findings.json";
 // Every code validateTokenMap can return. token_map.test.ts keeps one mutant
 // per code, so a new rule needs a mutant.
 export const TOKEN_MAP_CODES = Object.freeze([
+	"alias-mismatch",
+	"bad-brand-ref",
+	"bad-disposition",
+	"bad-hex",
+	"bad-type",
+	"brand-hex-inconsistent",
+	"duplicate-entry",
+	"dynamic-token-name",
 	"missing-field",
 	"not-object",
 	"orphan-entry",
+	"pin-mismatch",
 	"schema-version",
+	"theme-parity",
+	"unknown-block",
 	"unknown-field",
+	"unknown-finding",
+	"unknown-spec-id",
 	"unmapped",
+	"unreferenced-finding",
+	"unsorted",
 ]);
 
 const TOP_REQUIRED = ["schemaVersion", "brandPin", "entries"];
+// The cache-free tier of the brand reference (D-18): the shape of a colour path
+// and of the uppercase #RRGGBB the pinned tokens.json holds. Whether the path
+// and the hex are really in that file is the on-demand brand_quote_check.mjs.
+const BRAND_COLOUR_PREFIX = "color.";
+const BRAND_HEX = /^#[0-9A-F]{6}$/;
+// A backward-compat alias: the same single `var(--x)` in both theme blocks.
+const ALIAS_VALUE = /^var\(\s*(--[A-Za-z0-9_-]+)\s*\)$/;
+const TOKEN_MAP_GAP_KIND = "token-map-gap";
 const ROOT_BLOCK = ":root";
 const DARK_BLOCK = '[data-theme="dark"]';
 
@@ -120,6 +148,200 @@ function firstDescent(items) {
 }
 
 /**
+ * One brand colour reference `{ token, hex }`. A defect in the reference's own
+ * shape is reported once and the reference is not compared any further.
+ *
+ * @param {unknown} ref
+ * @param {string} where
+ * @param {{ id: string }} mark
+ * @param {Array<{ code: string, message: string }>} problems
+ * @param {Map<string, Set<string>>} hexes brand path -> the hexes the map gives it
+ */
+function checkBrandRef(ref, where, mark, problems, hexes) {
+	if (!isPlainObject(ref)) {
+		problems.push(problem("bad-type", `${where} must be an object`, mark));
+		return;
+	}
+	const shape = closedKeys(ref, ["token", "hex"], [], where);
+	if (shape.length > 0) {
+		problems.push(...shape.map((found) => ({ ...found, ...mark })));
+		return;
+	}
+	const { token, hex } = ref;
+	if (!isNonEmptyString(token) || typeof hex !== "string") {
+		problems.push(
+			problem("bad-type", `${where} token and hex must be strings`, mark),
+		);
+		return;
+	}
+	if (!token.startsWith(BRAND_COLOUR_PREFIX)) {
+		problems.push(
+			problem(
+				"bad-brand-ref",
+				`${where} token ${token} must be a ${BRAND_COLOUR_PREFIX} path in tokens.json`,
+				mark,
+			),
+		);
+	}
+	if (!BRAND_HEX.test(hex)) {
+		problems.push(
+			problem(
+				"bad-hex",
+				`${where} hex ${hex} must be an uppercase #RRGGBB`,
+				mark,
+			),
+		);
+		return;
+	}
+	const seen = hexes.get(token) ?? new Set();
+	seen.add(hex);
+	hexes.set(token, seen);
+}
+
+/**
+ * The value rules of one entry whose key set is already valid (D-16): the
+ * per-disposition fields, the optional `spec` and `aliasOf`, and the alias rule.
+ *
+ * @param {Record<string, any>} entry
+ * @param {string} where
+ * @param {{ id: string }} mark
+ * @param {{ ctx: any, declared: ReturnType<typeof declaredTokens>, hexes: Map<string, Set<string>>, findingRefs: Map<string, number>, problems: Array<{ code: string, message: string }> }} state
+ */
+function checkEntryValues(entry, where, mark, state) {
+	const { ctx, declared, hexes, findingRefs, problems } = state;
+	/**
+	 * @param {string} key
+	 * @returns {boolean} whether the field is a non-empty string (reported once if not)
+	 */
+	const text = (key) => {
+		if (isNonEmptyString(entry[key])) return true;
+		problems.push(
+			problem("bad-type", `${where} ${key} must be a non-empty string`, mark),
+		);
+		return false;
+	};
+
+	text("name");
+	if (Object.hasOwn(entry, "spec") && text("spec")) {
+		if (!ctx.specIds.includes(entry["spec"])) {
+			problems.push(
+				problem(
+					"unknown-spec-id",
+					`${where} spec ${entry["spec"]} is not an id in ui-spec.json`,
+					mark,
+				),
+			);
+		}
+	}
+	const aliasGiven = Object.hasOwn(entry, "aliasOf")
+		? entry["aliasOf"]
+		: undefined;
+	const aliasShapeOk = !Object.hasOwn(entry, "aliasOf") || text("aliasOf");
+
+	switch (entry["disposition"]) {
+		case "adopt": {
+			const brand = entry["brand"];
+			if (!isPlainObject(brand)) {
+				problems.push(
+					problem("bad-type", `${where} brand must be an object`, mark),
+				);
+				break;
+			}
+			const shape = closedKeys(brand, ["light", "dark"], [], `${where} brand`);
+			if (shape.length > 0) {
+				problems.push(...shape.map((found) => ({ ...found, ...mark })));
+				break;
+			}
+			checkBrandRef(
+				brand["light"],
+				`${where} brand.light`,
+				mark,
+				problems,
+				hexes,
+			);
+			checkBrandRef(
+				brand["dark"],
+				`${where} brand.dark`,
+				mark,
+				problems,
+				hexes,
+			);
+			break;
+		}
+		case "derive": {
+			const from = entry["from"];
+			if (
+				!Array.isArray(from) ||
+				from.length === 0 ||
+				!from.every(isNonEmptyString)
+			) {
+				problems.push(
+					problem(
+						"bad-type",
+						`${where} from must be a non-empty list of brand colour paths`,
+						mark,
+					),
+				);
+			} else {
+				for (const path of from) {
+					if (!path.startsWith(BRAND_COLOUR_PREFIX)) {
+						problems.push(
+							problem(
+								"bad-brand-ref",
+								`${where} from ${path} must be a ${BRAND_COLOUR_PREFIX} path in tokens.json`,
+								mark,
+							),
+						);
+					}
+				}
+			}
+			text("rule");
+			break;
+		}
+		case "propose-upstream":
+			text("owner");
+			text("decision");
+			break;
+		case "retire":
+			text("reason");
+			if (Object.hasOwn(entry, "finding") && text("finding")) {
+				const fingerprint = entry["finding"];
+				findingRefs.set(fingerprint, (findingRefs.get(fingerprint) ?? 0) + 1);
+				if (!ctx.findings.some((found) => found.fingerprint === fingerprint)) {
+					problems.push(
+						problem(
+							"unknown-finding",
+							`${where} finding ${fingerprint} is not a fingerprint in docs/evidence/known-findings.json`,
+							mark,
+						),
+					);
+				}
+			}
+			break;
+		default:
+			text("reason");
+	}
+
+	// An alias carries `aliasOf` equal to the one `var(--x)` it holds in both
+	// theme blocks, and nothing else carries `aliasOf` (D-17).
+	const rootValue = declared.root.get(entry["name"]);
+	const sameInBoth =
+		rootValue !== undefined && rootValue === declared.dark.get(entry["name"]);
+	const expected = sameInBoth ? ALIAS_VALUE.exec(rootValue)?.[1] : undefined;
+	if (aliasShapeOk && aliasGiven !== expected) {
+		problems.push(
+			problem(
+				"alias-mismatch",
+				expected === undefined
+					? `${where} aliasOf ${aliasGiven} is set, but ${entry["name"]} is not the same var(--x) in both theme blocks`
+					: `${where} must carry aliasOf ${expected}: ${entry["name"]} is var(${expected}) in both theme blocks`,
+				mark,
+			),
+		);
+	}
+}
+
+/**
  * @param {unknown} doc
  * @param {{ brandPin: string, tokensCss: string, sources: Record<string, string>, findings: Array<{ fingerprint: string, kind: string }>, specIds: string[], specTokenHexes: Record<string, string> }} ctx
  */
@@ -132,13 +354,34 @@ export function validateTokenMap(doc, ctx) {
 		structural.push(problem("schema-version", "schemaVersion must be 1"));
 	}
 	if (Object.hasOwn(doc, "entries") && !Array.isArray(doc["entries"])) {
-		structural.push(problem("not-object", "entries must be an array"));
+		structural.push(problem("bad-type", "entries must be an array"));
 	}
 	if (structural.length > 0) {
 		return sortProblems(structural);
 	}
 
+	/** @type {Array<{ code: string, message: string }>} */
 	const problems = [];
+	if (doc["brandPin"] !== ctx.brandPin) {
+		problems.push(
+			problem(
+				"pin-mismatch",
+				`brandPin must equal the brand.pin.json commit ${ctx.brandPin}`,
+			),
+		);
+	}
+
+	const declared = declaredTokens(ctx.tokensCss);
+	const sources = { ...ctx.sources, [TOKENS_CSS_PATH]: ctx.tokensCss };
+	const used = usedTokens(sources);
+	const state = {
+		ctx,
+		declared,
+		hexes: /** @type {Map<string, Set<string>>} */ (new Map()),
+		findingRefs: /** @type {Map<string, number>} */ (new Map()),
+		problems,
+	};
+
 	/** @type {string[]} */
 	const names = [];
 	/** @type {unknown[]} */
@@ -157,6 +400,13 @@ export function validateTokenMap(doc, ctx) {
 			typeof disposition !== "string" ||
 			!TOKEN_DISPOSITIONS.includes(disposition)
 		) {
+			problems.push(
+				problem(
+					"bad-disposition",
+					`${where} disposition must be one of ${TOKEN_DISPOSITIONS.join(", ")}`,
+					mark,
+				),
+			);
 			return;
 		}
 		const keys =
@@ -169,13 +419,131 @@ export function validateTokenMap(doc, ctx) {
 			[...ENTRY_OPTIONAL, ...keys.optional],
 			`${where} ${name ?? "(no name)"} (${disposition})`,
 		);
-		problems.push(...keyProblems.map((found) => ({ ...found, ...mark })));
+		if (keyProblems.length > 0) {
+			problems.push(...keyProblems.map((found) => ({ ...found, ...mark })));
+			return;
+		}
+		checkEntryValues(entry, where, mark, state);
 	});
+
+	// Order and uniqueness (code-unit order, never locale collation).
+	if (firstDescent(names)) {
+		problems.push(
+			problem("unsorted", "entries must be sorted by name (code unit)"),
+		);
+	}
+	const counts = new Map();
+	for (const name of names) counts.set(name, (counts.get(name) ?? 0) + 1);
+	for (const [name, count] of [...counts].sort((a, b) =>
+		compareCodeUnits(a[0], b[0]),
+	)) {
+		if (count > 1) {
+			problems.push(
+				problem(
+					"duplicate-entry",
+					`${name} has ${count} entries; it needs exactly one`,
+					{
+						id: name,
+					},
+				),
+			);
+		}
+	}
+
+	// One brand path, one hex, across this map and ui-spec.json (D-18). A hex that
+	// is not an uppercase #RRGGBB was reported as bad-hex and is not compared.
+	for (const [token, hex] of Object.entries(ctx.specTokenHexes)) {
+		const upper = hex.toUpperCase();
+		if (!BRAND_HEX.test(upper)) continue;
+		const seen = state.hexes.get(token) ?? new Set();
+		seen.add(upper);
+		state.hexes.set(token, seen);
+	}
+	for (const [token, seen] of [...state.hexes].sort((a, b) =>
+		compareCodeUnits(a[0], b[0]),
+	)) {
+		if (seen.size > 1) {
+			problems.push(
+				problem(
+					"brand-hex-inconsistent",
+					`brand path ${token} has more than one hex across token_map.json and ui-spec.json: ${[...seen].sort(compareCodeUnits).join(", ")}`,
+					{ id: token },
+				),
+			);
+		}
+	}
+
+	// A sealed token-map-gap finding is referenced by exactly one entry, so a
+	// defect the baseline holds cannot be orphaned from the map (D-20, T-74-10).
+	for (const found of ctx.findings) {
+		if (found.kind !== TOKEN_MAP_GAP_KIND) continue;
+		const references = state.findingRefs.get(found.fingerprint) ?? 0;
+		if (references !== 1) {
+			problems.push(
+				problem(
+					"unreferenced-finding",
+					`finding ${found.fingerprint} is referenced by ${references} token_map.json entries; it needs exactly one`,
+					{ id: found.fingerprint },
+				),
+			);
+		}
+	}
+
+	// A custom-property declaration belongs in :root or in the dark block at top
+	// level, and in the dark block only if it is not theme-invariant (D-17).
+	for (const found of declared.other) {
+		problems.push(
+			problem(
+				"unknown-block",
+				`tokens.css line ${found.line} declares ${found.name} inside ${found.selectors.join(" > ") || "no block"}; only :root and [data-theme="dark"] at top level may declare custom properties`,
+				{ id: found.name },
+			),
+		);
+	}
+	for (const name of [...declared.dark.keys()].sort(compareCodeUnits)) {
+		if (!declared.root.has(name)) {
+			problems.push(
+				problem(
+					"theme-parity",
+					`${name} is declared in the dark block but not in :root`,
+					{ id: name },
+				),
+			);
+		}
+	}
+	for (const name of [...declared.root.keys()].sort(compareCodeUnits)) {
+		if (
+			!declared.dark.has(name) &&
+			!THEME_INVARIANT_PREFIXES.some((prefix) => name.startsWith(prefix))
+		) {
+			problems.push(
+				problem(
+					"theme-parity",
+					`${name} is declared only in :root; a property without a theme-invariant prefix (${THEME_INVARIANT_PREFIXES.join(", ")}) needs a value in the dark block too`,
+					{ id: name },
+				),
+			);
+		}
+	}
+
+	// A name built from a template cannot be listed, so none is allowed.
+	for (const file of Object.keys(sources).sort(compareCodeUnits)) {
+		for (const prefix of dynamicCustomPropertyNames(
+			file,
+			sources[file] ?? "",
+		)) {
+			problems.push(
+				problem(
+					"dynamic-token-name",
+					`${file} builds a custom-property name from a template (it starts ${prefix}); write the name out so token_map.json can list it`,
+					{ id: file },
+				),
+			);
+		}
+	}
 
 	// Every custom property declared in tokens.css or used under src/renderer has
 	// exactly one entry, and an entry names a property that is one or the other.
-	const declared = declaredTokens(ctx.tokensCss);
-	const used = usedTokens({ ...ctx.sources, [TOKENS_CSS_PATH]: ctx.tokensCss });
 	const known = new Set([
 		...declared.root.keys(),
 		...declared.dark.keys(),

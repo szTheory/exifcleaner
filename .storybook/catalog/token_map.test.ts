@@ -4,6 +4,7 @@ import { describe, expect, test } from "vitest";
 import { assertDirEffect, snapshotDir } from "../../tests/helpers/dir_effect";
 import { compareCodeUnits } from "./closed.mjs";
 import {
+	TOKEN_SCAN_ROOT,
 	cssDeclarations,
 	dynamicCustomPropertyNames,
 	listTokenScanFiles,
@@ -671,6 +672,15 @@ describe("the CSS and TypeScript scans", () => {
 		]) {
 			expect(files, expected).toContain(expected);
 		}
+	});
+
+	test("the scan root is inside both Storybook path lists, so an edit it reads starts the job (Pitfall 6)", () => {
+		const workflow = fs.readFileSync(
+			path.join(repoRoot, ".github/workflows/storybook.yml"),
+			"utf8",
+		);
+		expect(TOKEN_SCAN_ROOT).toBe("src/renderer");
+		expect(workflow.split('      - "src/renderer/**"\n')).toHaveLength(3);
 	});
 
 	test("shown red: a symbolic link under src/renderer is never followed", () => {
