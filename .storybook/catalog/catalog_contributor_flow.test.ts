@@ -43,6 +43,51 @@ function run(repo: string, args: string[]) {
 	return runNode(realScript(CATALOG), args, repo);
 }
 
+// The temp repo is a copy of the real tree, so a story a contributor has added but not
+// mapped yet is in it too, and --check reports it. These controls assert what their own plant
+// changes, so each first reads what the untouched copy reports. Only unmapped stories are
+// tolerated there (any other problem in the copy is a failure of its own), and the control
+// then asserts exactly the delta its plant causes. One live story therefore fails the tests
+// that are meant to say so (scenarios.test.ts and the real-tree guards), not these.
+const FAILED_PREFIX = "✗ CATALOG CHECK FAILED: ";
+// Problems are joined with "; " and the messages hold "; " themselves, so split only where
+// the next problem starts (a lowercase code and a colon).
+const PROBLEM_BOUNDARY = /; (?=[a-z]+(?:-[a-z]+)*: )/;
+
+type CheckState = {
+	status: number | null;
+	problems: string[];
+	stdout: string;
+	stderr: string;
+};
+
+function checkState(repo: string): CheckState {
+	const result = run(repo, ["--check", "--base", "main"]);
+	const text = result.stderr.replace(FAILED_PREFIX, "").replace(/\n$/, "");
+	return {
+		status: result.status,
+		problems: result.status === 0 ? [] : text.split(PROBLEM_BOUNDARY),
+		stdout: result.stdout,
+		stderr: result.stderr,
+	};
+}
+
+function pristineState(repo: string): CheckState {
+	const state = checkState(repo);
+	const foreign = state.problems.filter(
+		(problem) => !problem.startsWith("story-unmapped: "),
+	);
+	expect(foreign, state.stderr).toEqual([]);
+	expect(state.status, state.stderr).toBe(state.problems.length === 0 ? 0 : 1);
+	return state;
+}
+
+function expectSameState(repo: string, baseline: CheckState): void {
+	const state = checkState(repo);
+	expect(state.problems, state.stderr).toEqual(baseline.problems);
+	expect(state.status, state.stderr).toBe(baseline.status);
+}
+
 // One synthetic stale entry, committed to the temp repo's `main` together with a
 // FINDINGS.md rendered from that register: the merge-base equals the head, so
 // `added` cannot fire, and the view agrees with the register, so the entry itself is
@@ -119,14 +164,16 @@ function commandFromMessage(stderr: string): {
 }
 
 describe("fix a copy deviation (D2)", () => {
-	test("shown red: a planted stale entry fails --check with one line that names yarn catalog:write", () => {
+	test("shown red: a planted stale entry fails --check with one line of its own that names yarn catalog:write", () => {
 		withRepo((repo) => {
+			const baseline = pristineState(repo);
 			const { fingerprint } = plantStale(repo);
 			const before = snapshotDir(repo);
 			const result = run(repo, ["--check", "--base", "main"]);
 			expect(result.status, result.stdout).toBe(1);
+			const stale = `stale: entry ${fingerprint} no longer matches its detector or its source; run yarn catalog:write to remove it`;
 			expect(result.stderr).toBe(
-				`✗ CATALOG CHECK FAILED: stale: entry ${fingerprint} no longer matches its detector or its source; run yarn catalog:write to remove it\n`,
+				`${FAILED_PREFIX}${[...baseline.problems, stale].join("; ")}\n`,
 			);
 			assertDirEffect(before, snapshotDir(repo), {});
 		});
@@ -134,6 +181,7 @@ describe("fix a copy deviation (D2)", () => {
 
 	test("following the message verbatim turns --check green in one command and removes only the entry", () => {
 		withRepo((repo) => {
+			const baseline = pristineState(repo);
 			const { originalRegister, originalView } = plantStale(repo);
 			const red = run(repo, ["--check", "--base", "main"]);
 			expect(red.status).toBe(1);
@@ -153,8 +201,7 @@ describe("fix a copy deviation (D2)", () => {
 				originalView,
 			);
 
-			const green = run(repo, ["--check", "--base", "main"]);
-			expect(green.status, green.stderr).toBe(0);
+			expectSameState(repo, baseline);
 
 			const settled = snapshotDir(repo);
 			const again = runNode(script, args, repo);
