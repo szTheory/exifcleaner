@@ -9,6 +9,7 @@ import {
 	validateRegister,
 } from "./copy_findings_ratchet.mjs";
 import { renderFindings } from "./findings_view.mjs";
+import { enumerateStories } from "./story_index.mjs";
 import {
 	git,
 	makeCatalogRepo,
@@ -198,5 +199,162 @@ describe("fix a copy deviation (D2)", () => {
 		expect(packageScripts()["catalog:write"]).toBe(
 			"node .storybook/catalog/catalog.mjs --write",
 		);
+	});
+});
+
+const SCENARIOS = ".storybook/catalog/scenarios.json";
+const PLANTED_STORY_FILE = "src/renderer/components/ui/Zz.stories.tsx";
+const PLANTED_STORY_ID = "ui-zz--planted";
+const NEW_SCENARIO_ID = "type-pill.zz-planted";
+const UNMAPPED_LINE = `story-unmapped: story ${PLANTED_STORY_ID} (UI/Zz) is in no scenario; add it to scenarios.json`;
+
+async function withRepoAsync(
+	body: (repo: string) => Promise<void>,
+): Promise<void> {
+	const repo = makeCatalogRepo();
+	try {
+		await body(repo);
+	} finally {
+		fs.rmSync(repo, { recursive: true, force: true });
+	}
+}
+
+// One new story a contributor has not mapped yet: a real TypePill story file (explicit
+// title and component, the component imported unaliased from its real module), committed
+// to the temp repo's `main`, so the story is the only thing that is out of date.
+async function plantUnmappedStory(repo: string): Promise<void> {
+	fs.writeFileSync(
+		path.join(repo, PLANTED_STORY_FILE),
+		[
+			'import type { Meta, StoryObj } from "@storybook/react-vite";',
+			'import { TypePill } from "./TypePill";',
+			"",
+			"const meta = {",
+			'\ttitle: "UI/Zz",',
+			"\tcomponent: TypePill,",
+			'\targs: { extension: "JPG" },',
+			"} satisfies Meta<typeof TypePill>;",
+			"",
+			"// Framework-mandated default export (CSF: Storybook reads the default export).",
+			"export default meta;",
+			"",
+			"type Story = StoryObj<typeof meta>;",
+			"",
+			"export const Planted: Story = {};",
+			"",
+		].join("\n"),
+	);
+	const planted = (await enumerateStories(repo)).filter(
+		(story) => story.file === PLANTED_STORY_FILE,
+	);
+	expect(planted.map((story) => story.id)).toEqual([PLANTED_STORY_ID]);
+	expect(planted[0]?.title).toBe("UI/Zz");
+	git(repo, ["add", "-A"]);
+	git(repo, ["commit", "-q", "-m", "plant an unmapped story"]);
+}
+
+type ManifestDoc = {
+	scenarios: { id: string; stories: string[] }[];
+};
+
+function readScenarios(repo: string): ManifestDoc {
+	return JSON.parse(
+		fs.readFileSync(path.join(repo, SCENARIOS), "utf8"),
+	) as ManifestDoc;
+}
+
+function writeScenarios(repo: string, doc: ManifestDoc): void {
+	fs.writeFileSync(path.join(repo, SCENARIOS), canonicalJson(doc));
+}
+
+// The scenario that already lists a TypePill story (the lowest id among those).
+function typePillOwner(doc: ManifestDoc): ManifestDoc["scenarios"][number] {
+	const ownerId = doc.scenarios
+		.filter((scenario) =>
+			scenario.stories.some((id) => id.startsWith("ui-typepill--")),
+		)
+		.map((scenario) => scenario.id)
+		.sort(compareCodeUnits)[0];
+	const owner = doc.scenarios.find((scenario) => scenario.id === ownerId);
+	if (owner === undefined) {
+		throw new Error("no scenario lists a TypePill story");
+	}
+	return owner;
+}
+
+// Two ways a contributor maps a story. Adding it to the `stories` of an existing scenario
+// leaves the coverage grid as it was; a new scenario (here a copy of the TypePill owner
+// under its own id) adds a scenario to a cell, so the grid files go stale.
+function mapIntoExistingScenario(repo: string): string {
+	const doc = readScenarios(repo);
+	const owner = typePillOwner(doc);
+	owner.stories = [...owner.stories, PLANTED_STORY_ID].sort(compareCodeUnits);
+	writeScenarios(repo, doc);
+	return owner.id;
+}
+
+function mapAsNewScenario(repo: string): string {
+	const doc = readScenarios(repo);
+	const scenario = {
+		...typePillOwner(doc),
+		id: NEW_SCENARIO_ID,
+		stories: [PLANTED_STORY_ID],
+	};
+	doc.scenarios = [...doc.scenarios, scenario].sort((a, b) =>
+		compareCodeUnits(a.id, b.id),
+	);
+	writeScenarios(repo, doc);
+	return scenario.id;
+}
+
+describe("add a story (D1)", () => {
+	test("shown red: a planted unmapped story fails --check with one story-unmapped line and changes nothing", async () => {
+		await withRepoAsync(async (repo) => {
+			await plantUnmappedStory(repo);
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status, result.stdout).toBe(1);
+			expect(result.stderr).toBe(`✗ CATALOG CHECK FAILED: ${UNMAPPED_LINE}\n`);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("a write alone cannot hide an unmapped story; a new scenario for it and one write turns --check green", async () => {
+		await withRepoAsync(async (repo) => {
+			await plantUnmappedStory(repo);
+
+			// The manifest layer is not part of --write, so its exit code is not the point:
+			// whatever it does, --check must stay red on the unmapped story.
+			run(repo, ["--write"]);
+			const stillRed = run(repo, ["--check", "--base", "main"]);
+			expect(stillRed.status, stillRed.stdout).toBe(1);
+			expect(stillRed.stderr).toContain(UNMAPPED_LINE);
+
+			expect(mapAsNewScenario(repo)).toBe(NEW_SCENARIO_ID);
+			const stale = run(repo, ["--check", "--base", "main"]);
+			expect(stale.status, stale.stdout).toBe(1);
+			expect(stale.stderr).not.toContain("story-unmapped");
+			expect(stale.stderr).toMatch(
+				/^✗ CATALOG CHECK FAILED: stale: \S+ is stale; run yarn catalog:write(; stale: \S+ is stale; run yarn catalog:write)*\n$/,
+			);
+
+			const written = run(repo, ["--write"]);
+			expect(written.status, written.stderr).toBe(0);
+			const green = run(repo, ["--check", "--base", "main"]);
+			expect(green.status, green.stderr).toBe(0);
+		});
+	});
+
+	test("adding the story to an existing scenario needs no write: --check is green at once", async () => {
+		await withRepoAsync(async (repo) => {
+			await plantUnmappedStory(repo);
+			const red = run(repo, ["--check", "--base", "main"]);
+			expect(red.status, red.stdout).toBe(1);
+			expect(red.stderr).toContain(UNMAPPED_LINE);
+
+			expect(mapIntoExistingScenario(repo)).toBe("type-pill.heic");
+			const green = run(repo, ["--check", "--base", "main"]);
+			expect(green.status, green.stderr).toBe(0);
+		});
 	});
 });
