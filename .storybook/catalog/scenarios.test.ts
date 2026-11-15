@@ -74,6 +74,23 @@ const DEFAULT_STORY = "settings-languagedropdown--default";
 const ARABIC = "settings-languagedropdown--arabic";
 const PERSIAN = "settings-languagedropdown--persian";
 
+// The closed world every control below mutates: the two Phase 70 seed scenarios (kept in
+// manifest order, so `story-double-mapped` still names the same last owner) and exactly the
+// stories they list. Only the first describe reads the live manifest, on purpose. A control
+// that did would fail on every story a contributor adds, so one new story would fail one
+// test (the real-manifest one), not every control.
+const seedScenarios = real.scenarios.filter(
+	(scenario) => scenario.id === SYSTEM || scenario.id === RTL,
+);
+const seedStoryIds = new Set(
+	seedScenarios.flatMap((scenario) => scenario.stories),
+);
+const world: ManifestInputs = {
+	...inputs,
+	manifest: { schemaVersion: 1, scenarios: seedScenarios },
+	stories: inputs.stories.filter((story) => seedStoryIds.has(story.id)),
+};
+
 function seed(id: string): ManifestScenario {
 	const found = real.scenarios.find((scenario) => scenario.id === id);
 	if (found === undefined) throw new Error(`no seed scenario ${id}`);
@@ -81,13 +98,13 @@ function seed(id: string): ManifestScenario {
 }
 
 function withScenarios(scenarios: object[]): ManifestInputs {
-	return { ...inputs, manifest: { schemaVersion: 1, scenarios } };
+	return { ...world, manifest: { schemaVersion: 1, scenarios } };
 }
 
 // Replace one seed scenario's fields, keeping the other as it is.
 function patched(id: string, patch: object): ManifestInputs {
 	return withScenarios(
-		real.scenarios.map((scenario) =>
+		seedScenarios.map((scenario) =>
 			scenario.id === id ? { ...scenario, ...patch } : scenario,
 		),
 	);
@@ -95,7 +112,7 @@ function patched(id: string, patch: object): ManifestInputs {
 
 function withoutKey(id: string, key: string): ManifestInputs {
 	return withScenarios(
-		real.scenarios.map((scenario) => {
+		seedScenarios.map((scenario) => {
 			if (scenario.id !== id) return scenario;
 			const copy: Record<string, unknown> = { ...scenario };
 			delete copy[key];
@@ -109,8 +126,8 @@ function withStory(
 	patch: { title?: string | null; component?: string | null },
 ): ManifestInputs {
 	return {
-		...inputs,
-		stories: inputs.stories.map((story) =>
+		...world,
+		stories: world.stories.map((story) =>
 			story.id === storyId ? { ...story, ...patch } : story,
 		),
 	};
@@ -143,14 +160,13 @@ const UNIT_TEST = firstFile("tests/renderer", ".test.ts");
 // (persona, job, state class and tier), a missing situation, a story absent
 // from the manifest and a manifest entry with no story.
 const DEFECTS: ReadonlyArray<[string, () => ManifestInputs, Brief]> = [
-	[
-		"not an object",
-		() => ({ ...inputs, manifest: [] }),
-		{ code: "not-object" },
-	],
+	["not an object", () => ({ ...world, manifest: [] }), { code: "not-object" }],
 	[
 		"schema version 2",
-		() => ({ ...inputs, manifest: { ...real, schemaVersion: 2 } }),
+		() => ({
+			...world,
+			manifest: { schemaVersion: 2, scenarios: seedScenarios },
+		}),
 		{ code: "schema-version" },
 	],
 	[
@@ -165,7 +181,7 @@ const DEFECTS: ReadonlyArray<[string, () => ManifestInputs, Brief]> = [
 	],
 	[
 		"duplicate scenario id",
-		() => withScenarios([...real.scenarios, seed(SYSTEM)]),
+		() => withScenarios([...seedScenarios, seed(SYSTEM)]),
 		{ code: "duplicate-id", scenario: SYSTEM },
 	],
 	[
@@ -212,7 +228,7 @@ const DEFECTS: ReadonlyArray<[string, () => ManifestInputs, Brief]> = [
 		"manifest entry with no story",
 		() =>
 			withScenarios([
-				...real.scenarios,
+				...seedScenarios,
 				{ ...seed(SYSTEM), id: "language-dropdown.nothing", stories: [] },
 			]),
 		{ code: "missing-stories", scenario: "language-dropdown.nothing" },
@@ -231,7 +247,7 @@ const DEFECTS: ReadonlyArray<[string, () => ManifestInputs, Brief]> = [
 	],
 	[
 		"story absent from manifest",
-		() => withScenarios(real.scenarios.filter((s) => s.id !== SYSTEM)),
+		() => withScenarios(seedScenarios.filter((s) => s.id !== SYSTEM)),
 		{ code: "story-unmapped", story: DEFAULT_STORY },
 	],
 	[
@@ -307,13 +323,27 @@ describe("planted manifest defects", () => {
 		expect([...covered].sort()).toEqual([...MANIFEST_CODES].sort());
 	});
 
+	test("anti-vacuity: the closed world is clean and holds exactly the seed stories", () => {
+		// A clean world is what makes "exactly one problem" mean the planted defect.
+		expect(checkManifest(world)).toEqual([]);
+		expect(seedScenarios.map((scenario) => scenario.id)).toEqual([RTL, SYSTEM]);
+		const worldIds = world.stories.map((story) => story.id).sort();
+		expect(worldIds).toEqual([...seedStoryIds].sort());
+		expect(worldIds).toEqual([
+			ARABIC,
+			DEFAULT_STORY,
+			"settings-languagedropdown--open-arabic",
+			PERSIAN,
+		]);
+	});
+
 	test("shown red: planned status field", () => {
 		const planned = {
 			...seed(SYSTEM),
 			id: "language-dropdown.planned-thing",
 			status: "planned",
 		};
-		expect(brief(withScenarios([...real.scenarios, planned]))).toEqual([
+		expect(brief(withScenarios([...seedScenarios, planned]))).toEqual([
 			{ code: "unknown-field", scenario: "language-dropdown.planned-thing" },
 		]);
 	});
@@ -376,10 +406,10 @@ describe("situation boundaries", () => {
 });
 
 describe("manifest shape and order", () => {
-	test("a manifest with no scenarios yields one story-unmapped per real story and nothing else", () => {
+	test("a manifest with no scenarios yields one story-unmapped per world story and nothing else", () => {
 		const unmapped = brief(withScenarios([]));
 		expect(unmapped).toEqual(
-			inputs.stories
+			world.stories
 				.map((story) => ({ code: "story-unmapped", story: story.id }))
 				.sort((a, b) => (a.story < b.story ? -1 : 1)),
 		);
@@ -409,9 +439,9 @@ describe("manifest shape and order", () => {
 			{ code: "unknown-persona", scenario: SYSTEM },
 		]);
 		const unordered = {
-			...inputs,
+			...world,
 			manifest: { schemaVersion: 1, scenarios: [] },
-			stories: [...inputs.stories].reverse(),
+			stories: [...world.stories].reverse(),
 		};
 		const ids = brief(unordered).map((found) => found.story ?? "");
 		expect(ids).toEqual([...ids].sort());
@@ -437,8 +467,8 @@ describe("D-23 chain: the real enumerator feeds the real checker", () => {
 		const planted = await enumerateFile(file, "planted/Zz.stories.tsx");
 		expect(planted.map((story) => story.id)).toEqual(["scratch-zz--zz"]);
 		const run: ManifestInputs = {
-			...inputs,
-			stories: [...inputs.stories, ...planted],
+			...world,
+			stories: [...world.stories, ...planted],
 		};
 		expect(brief(run)).toEqual([
 			{ code: "story-unmapped", story: "scratch-zz--zz" },
