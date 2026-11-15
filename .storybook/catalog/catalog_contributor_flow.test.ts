@@ -354,54 +354,73 @@ function mapAsNewScenario(repo: string): string {
 	return scenario.id;
 }
 
+// What the pristine copy reports once the planted story is mapped: its own unmapped line
+// is gone, any other live unmapped story is still there.
+function without(baseline: CheckState, line: string): CheckState {
+	const problems = baseline.problems.filter((problem) => problem !== line);
+	return { ...baseline, status: problems.length === 0 ? 0 : 1, problems };
+}
+
 describe("add a story (D1)", () => {
-	test("shown red: a planted unmapped story fails --check with one story-unmapped line and changes nothing", async () => {
+	test("shown red: a planted unmapped story fails --check with its own story-unmapped line and changes nothing", async () => {
 		await withRepoAsync(async (repo) => {
+			const baseline = pristineState(repo);
 			await plantUnmappedStory(repo);
 			const before = snapshotDir(repo);
-			const result = run(repo, ["--check", "--base", "main"]);
+			const result = checkState(repo);
 			expect(result.status, result.stdout).toBe(1);
-			expect(result.stderr).toBe(`✗ CATALOG CHECK FAILED: ${UNMAPPED_LINE}\n`);
+			// Exactly the baseline plus the planted line (a tree with no other live unmapped
+			// story gives exactly the one line).
+			expect([...result.problems].sort()).toEqual(
+				[...new Set([...baseline.problems, UNMAPPED_LINE])].sort(),
+			);
 			assertDirEffect(before, snapshotDir(repo), {});
 		});
 	});
 
 	test("a write alone cannot hide an unmapped story; a new scenario for it and one write turns --check green", async () => {
 		await withRepoAsync(async (repo) => {
+			const baseline = pristineState(repo);
 			await plantUnmappedStory(repo);
 
 			// The manifest layer is not part of --write, so its exit code is not the point:
 			// whatever it does, --check must stay red on the unmapped story.
 			run(repo, ["--write"]);
-			const stillRed = run(repo, ["--check", "--base", "main"]);
+			const stillRed = checkState(repo);
 			expect(stillRed.status, stillRed.stdout).toBe(1);
-			expect(stillRed.stderr).toContain(UNMAPPED_LINE);
+			expect(stillRed.problems).toContain(UNMAPPED_LINE);
 
 			expect(mapAsNewScenario(repo)).toBe(NEW_SCENARIO_ID);
-			const stale = run(repo, ["--check", "--base", "main"]);
+			const stale = checkState(repo);
 			expect(stale.status, stale.stdout).toBe(1);
-			expect(stale.stderr).not.toContain("story-unmapped");
-			expect(stale.stderr).toMatch(
-				/^✗ CATALOG CHECK FAILED: stale: \S+ is stale; run yarn catalog:write(; stale: \S+ is stale; run yarn catalog:write)*\n$/,
+			expect(stale.problems).not.toContain(UNMAPPED_LINE);
+			const settledState = without(baseline, UNMAPPED_LINE);
+			const added = stale.problems.filter(
+				(problem) => !settledState.problems.includes(problem),
 			);
+			expect(added.length).toBeGreaterThan(0);
+			for (const problem of added) {
+				expect(problem).toMatch(
+					/^stale: \S+ is stale; run yarn catalog:write$/,
+				);
+			}
 
 			const written = run(repo, ["--write"]);
 			expect(written.status, written.stderr).toBe(0);
-			const green = run(repo, ["--check", "--base", "main"]);
-			expect(green.status, green.stderr).toBe(0);
+			expectSameState(repo, settledState);
 		});
 	});
 
-	test("adding the story to an existing scenario needs no write: --check is green at once", async () => {
+	test("adding the story to an existing scenario needs no write: --check is back to the baseline at once", async () => {
 		await withRepoAsync(async (repo) => {
+			const baseline = pristineState(repo);
 			await plantUnmappedStory(repo);
-			const red = run(repo, ["--check", "--base", "main"]);
+			const red = checkState(repo);
 			expect(red.status, red.stdout).toBe(1);
-			expect(red.stderr).toContain(UNMAPPED_LINE);
+			expect(red.problems).toContain(UNMAPPED_LINE);
 
 			expect(mapIntoExistingScenario(repo)).toBe("type-pill.heic");
-			const green = run(repo, ["--check", "--base", "main"]);
-			expect(green.status, green.stderr).toBe(0);
+			expectSameState(repo, without(baseline, UNMAPPED_LINE));
 		});
 	});
 });
