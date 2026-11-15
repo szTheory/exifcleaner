@@ -112,8 +112,9 @@ test.describe("Internationalization", () => {
 
 		// A barrier, not an assertion: dir="rtl" is written after the locale re-render, which
 		// also re-subscribes file-open-add-files with the Arabic dictionary, so the toast below
-		// renders in Arabic. The visual action order moved to ui-emptystate--persian-empty.
-		await window.locator('html[dir="rtl"]').waitFor();
+		// renders in Arabic. The visual action order moved to ui-emptystate--persian-empty. It waits
+		// for the attribute (state attached), not for a visible <html> box.
+		await window.locator('html[dir="rtl"]').waitFor({ state: "attached" });
 
 		const { dir, copyFixture, cleanup } = createFixtureDir();
 		try {
