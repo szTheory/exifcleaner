@@ -510,13 +510,14 @@ describe("the real ledger", () => {
 		const accessibility = specOf(doc, "accessibility");
 		// The drawer test is the one accessibility test that stays live after 75-02, so
 		// removing its entry leaves a live test with no ledger entry.
-		accessibility.splice(
-			accessibility.findIndex(
-				(entry) =>
-					entry.title === "traps focus within settings drawer when open",
-			),
-			1,
+		// entryOf throws when the title is gone, so a rename cannot turn the splice index into
+		// -1 and silently remove the last entry instead.
+		const drawer = entryOf(
+			doc,
+			"accessibility",
+			"traps focus within settings drawer when open",
 		);
+		accessibility.splice(accessibility.indexOf(drawer), 1);
 		// A kept item of a test that stays live: an edited code is drift, while the code of a
 		// deleted item is not compared with the spec.
 		const item = at(
@@ -931,14 +932,19 @@ describe("every rule code is shown red by its own mutant", () => {
 			...empty,
 			scope: empty.scope.replaceAll("toHaveFocus", "toBeEnabled"),
 		});
-		// The fixture item is red, and so is every real focus-order item, because they cite
-		// the same story and the same literal.
+		// The fixture item is red, and so is every real focus-order item that cites this
+		// story: the mutant strips toHaveFocus from this story's scope only, so an item citing
+		// another story must not be counted.
 		const realFocusOrder = Object.values(real.specs)
 			.flat()
 			.flatMap((entry) => entry.items)
 			.filter(
-				(item) => item.verdict === "deleted" && item.covers === "focus-order",
+				(item) =>
+					item.verdict === "deleted" &&
+					item.covers === "focus-order" &&
+					item.story === "screens-app--empty",
 			).length;
+		expect(realFocusOrder).toBeGreaterThan(0);
 		expect(check(fixture.doc, fixture.specTexts, scopes)).toEqual(
 			Array.from({ length: realFocusOrder + 1 }, () => "evidence-missing"),
 		);
