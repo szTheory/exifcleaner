@@ -615,12 +615,18 @@ export default {
 };
 `;
 	}
+	// The addon-vitest plugin's config hook otherwise points the nested run at the outer
+	// run's shared sb-vitest cache and a differing config hash makes Vite delete the
+	// deps the outer iframes are fetching; a trailing plugin is merged last, so its
+	// cacheDir wins and the nested run stays on its private one (75.1 D3).
 	return `import base from ${JSON.stringify(path.join(repoRoot, "vitest.storybook.config.ts"))};
 const project = base.test.projects.find((p) => p.test.name === "storybook-light");
 if (project === undefined) throw new Error("storybook-light project not found");
+const privateCache = { name: "fixture-control-private-cache", config: () => ({ cacheDir: ${JSON.stringify(path.join(tmp, "vite-cache"))} }) };
 export default {
 	...project,
 	${common}
+	plugins: [...(project.plugins ?? []), privateCache],
 	test: {
 		...project.test,
 		root: ${JSON.stringify(repoRoot)},
@@ -688,6 +694,14 @@ export function runCase({
 		if (!existsSync(reportPath)) {
 			throw new Error(
 				`no vitest report (status ${result.status}): ${result.stderr.slice(-2000)}`,
+			);
+		}
+		if (
+			side === "story" &&
+			!existsSync(path.join(tmp, "vite-cache", "deps", "_metadata.json"))
+		) {
+			throw new Error(
+				"the nested story run did not use its private Vite cache",
 			);
 		}
 		const report = JSON.parse(readFileSync(reportPath, "utf8")) as {
