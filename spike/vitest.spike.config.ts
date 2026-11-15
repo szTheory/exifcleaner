@@ -87,8 +87,7 @@ const commands = {
 		image: process.env["SPIKE_IMAGE"] ?? "host-no-container",
 		cpu: cpuModel(),
 		lane: process.env["SPIKE_LANE"] ?? "local",
-		runnerImage: process.env["ImageOS"] ?? "local",
-		runnerVersion: process.env["ImageVersion"] ?? "local",
+		runnerImage: process.env["SPIKE_RUNNER"] ?? "local",
 		arch: os.arch(),
 	}),
 	spikeWritePng: (_ctx: unknown, name: string, base64: string): string => {
@@ -104,9 +103,13 @@ const commands = {
 			`${JSON.stringify(value, null, "\t")}\n`,
 		);
 	},
-	spikeManifestAppend: (_ctx: unknown, row: Record<string, unknown>): number => {
+	spikeManifestAppend: (
+		_ctx: unknown,
+		row: Record<string, unknown>,
+		name = "manifest.json",
+	): number => {
 		ensureOut();
-		const file = path.join(OUT, "manifest.json");
+		const file = path.join(OUT, safeName(name));
 		const existing = readText(file);
 		const rows: unknown[] = existing === null ? [] : JSON.parse(existing);
 		rows.push(row);

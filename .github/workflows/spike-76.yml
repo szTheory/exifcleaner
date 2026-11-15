@@ -53,10 +53,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        lane: [a]
+        lane: [a, b]
     env:
       SPIKE_IMAGE: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
       SPIKE_LANE: ${{ matrix.lane }}
+      # The host image version is not visible from inside a container job, so each lane logs
+      # the runner it landed on (name, OS, arch, environment) plus its kernel and CPU below.
+      SPIKE_RUNNER: ${{ runner.name }} / ${{ runner.os }} ${{ runner.arch }} ${{ runner.environment }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -76,7 +79,7 @@ jobs:
           {
             echo "lane: $SPIKE_LANE"
             echo "image: $SPIKE_IMAGE"
-            echo "runner image: ${ImageOS:-unknown} ${ImageVersion:-unknown}"
+            echo "runner: $SPIKE_RUNNER"
             echo "uname: $(uname -a)"
             echo "cpu model: $(grep -m1 -E '^(model name|Model name|Hardware)' /proc/cpuinfo || echo 'no model name in /proc/cpuinfo')"
             echo "cpu cores: $(nproc)"
@@ -85,8 +88,16 @@ jobs:
             echo "node: $(node --version)"
           } | tee spike-out/env.txt
 
-      - name: Capture
+      # Both lanes run the capture (24 images, two plants, the glyph-coverage probe) and the
+      # S2 and S4 measurements: two runners per run (D-24).
+      - name: Capture and measure
         run: yarn vitest run --config spike/vitest.spike.config.ts
+
+      # Lane a builds the non-gating before contact sheet (D-20) with the chromium already
+      # installed in the image: no ImageMagick, no new dependency.
+      - name: Build the before contact sheet
+        if: matrix.lane == 'a'
+        run: node spike/contact_sheet.mjs
 
       - name: Upload capture
         if: always()
@@ -95,3 +106,17 @@ jobs:
           name: spike-capture-${{ matrix.lane }}
           path: spike-out/
           retention-days: 7
+
+      # D-20: the 24 story PNGs, the sheet and the manifest, kept 90 days (ci.yml uses 7).
+      # GitHub may clamp the value to the repository setting; the real expiry is read back from
+      # the artifact and recorded in 76-SPIKE.md. Never committed.
+      - name: Upload before sheet
+        if: matrix.lane == 'a'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: before-sheet
+          path: |
+            spike-out/screens-app--*.png
+            spike-out/contact-sheet.png
+            spike-out/manifest.json
+          retention-days: 90

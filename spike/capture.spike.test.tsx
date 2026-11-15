@@ -28,7 +28,7 @@ type SpikeCommands = {
 	}>;
 	spikeWritePng: (name: string, base64: string) => Promise<string>;
 	spikeWriteJson: (name: string, value: unknown) => Promise<void>;
-	spikeManifestAppend: (row: Record<string, unknown>) => Promise<number>;
+	spikeManifestAppend: (row: Record<string, unknown>, name?: string) => Promise<number>;
 };
 const node = commands as unknown as SpikeCommands;
 
@@ -52,10 +52,14 @@ const AT_960: readonly ScreenStory[] = [
 const THEMES: readonly Theme[] = ["light", "dark"];
 
 type Case = { name: ScreenStory; theme: Theme; width: Width };
-// Tracer (Task 1): one screen story, light, 580 px. Task 2 expands this to the 24 images.
-const CASES: Case[] = [{ name: "Empty", theme: "light", width: 580 }];
-void AT_960;
-void THEMES;
+const CASES: Case[] = [
+	...SCREEN_STORIES.flatMap((name) =>
+		THEMES.map((theme): Case => ({ name, theme, width: 580 })),
+	),
+	...AT_960.flatMap((name) =>
+		THEMES.map((theme): Case => ({ name, theme, width: 960 })),
+	),
+];
 
 const STORIES = composeStories(appStories);
 
@@ -94,6 +98,27 @@ async function stableShot(
 }
 
 type Mounted = { host: HTMLElement; frame: HTMLElement; style: HTMLStyleElement };
+
+// The status bar's elapsed-seconds segment keeps ticking in a story whose last file never
+// settles (MidBatch, LargeBatch), so two otherwise identical captures taken a second apart
+// differ by a few digits. The primary 24 captures are left as the story leaves them and the
+// segment text is recorded; the masked variant and the plants hide the segment (keeping its
+// width) so what they compare is the renderer, not the clock.
+const CLOCK = '[data-stat="elapsed"]';
+
+function elapsedText(frame: HTMLElement): string | null {
+	return frame.querySelector(CLOCK)?.textContent ?? null;
+}
+
+function maskClock(frame: HTMLElement): void {
+	for (const element of frame.querySelectorAll<HTMLElement>(CLOCK)) {
+		element.style.setProperty("display", "inline-block", "important");
+		element.style.setProperty("min-width", "12ch", "important");
+		element.style.setProperty("visibility", "hidden", "important");
+	}
+}
+
+const TICKING: readonly ScreenStory[] = ["MidBatch", "LargeBatch"];
 
 // Runs one App story in `theme` and sizes the WindowFrame to `width`. The 960 px frame is
 // applied at run time by a stylesheet override (never by editing App.stories.tsx: the base
@@ -298,14 +323,28 @@ async function recordTofu(row: TofuRow): Promise<void> {
 	await node.spikeWriteJson("tofu.json", { total, rows: tofuRows });
 }
 
-describe("PLN-01 capture: tracer", () => {
+describe("glyph-coverage probe controls (D-24: the probe must be able to go red)", () => {
+	test("an unassigned code point reads as tofu, a letter does not, and the reference is not blank", () => {
+		const font = "system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif";
+		const reference = drawHash(String.fromCodePoint(0x10ffff), font);
+		const otherUnassigned = drawHash(String.fromCodePoint(0x10fffe), font);
+		const letter = drawHash("A", font);
+		expect(reference.blank).toBe(false);
+		expect(otherUnassigned.hash).toBe(reference.hash);
+		expect(letter.hash).not.toBe(reference.hash);
+	});
+});
+
+describe("PLN-01 capture: 24 images", () => {
 	for (const item of CASES) {
 		test(`${item.name} ${item.theme} ${item.width}`, async () => {
 			const env = await node.spikeEnv();
 			const mounted = await mount(item);
 			try {
 				const story = STORIES[item.name];
+				const elapsedBefore = elapsedText(mounted.frame);
 				const { base64, attempts, stable } = await stableShot(mounted.frame);
+				const elapsedAfter = elapsedText(mounted.frame);
 				const file = `${story.id}.${item.theme}.${item.width}.png`;
 				const sha256 = await node.spikeWritePng(file, base64);
 				await node.spikeManifestAppend({
@@ -321,7 +360,32 @@ describe("PLN-01 capture: tracer", () => {
 					file,
 					attempts,
 					stable,
+					elapsedBefore,
+					elapsedAfter,
 				});
+				// Clock-masked variant of the two stories whose footer clock keeps running.
+				if (TICKING.includes(item.name) && elapsedBefore !== null) {
+					maskClock(mounted.frame);
+					const masked = await stableShot(mounted.frame);
+					const maskedFile = `masked.${file}`;
+					const maskedSha = await node.spikeWritePng(maskedFile, masked.base64);
+					await node.spikeManifestAppend(
+						{
+							story: story.id,
+							theme: item.theme,
+							width: item.width,
+							sha256: maskedSha,
+							commit: env.commit,
+							image: env.image,
+							cpu: env.cpu,
+							lane: env.lane,
+							file: maskedFile,
+							attempts: masked.attempts,
+							stable: masked.stable,
+						},
+						"manifest-masked.json",
+					);
+				}
 				await recordTofu(
 					tofuRow(mounted.frame, {
 						story: story.id,
@@ -337,11 +401,14 @@ describe("PLN-01 capture: tracer", () => {
 	}
 });
 
-describe.skip("PLN-01 plants (D-24: MidBatch, against the same job's control; Task 2)", () => {
+describe("PLN-01 plants (D-24: MidBatch, against the same job's control)", () => {
 	test("a 1 px padding change and a one-hex-step colour change against MidBatch light 580", async () => {
 		const env = await node.spikeEnv();
 		const mounted = await mount({ name: "MidBatch", theme: "light", width: 580 });
 		try {
+			// The footer clock keeps ticking in MidBatch: hide it so the control, the repeat and
+			// both plants differ only by what each plant changes.
+			maskClock(mounted.frame);
 			const control = await stableShot(mounted.frame);
 			const controlSha = await node.spikeWritePng(
 				"plant-control.png",
