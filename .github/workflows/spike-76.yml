@@ -1,0 +1,97 @@
+name: spike-76
+
+# PLN-01 measurement spike (Phase 76, plan 76-01). Throwaway: lives only on the unmerged
+# branch spike/76-pln-01, which is kept until Phase 80 closes and never merged. Triggered by a
+# push to that one branch (not workflow_dispatch, which needs the file on the default branch;
+# not pull_request, which would also start ci.yml). No secrets; read-only token; the actions
+# are the 40-hex SHAs ci.yml already pins.
+on:
+  push:
+    branches: ["spike/76-pln-01"]
+
+permissions:
+  contents: read
+
+env:
+  STORYBOOK_DISABLE_TELEMETRY: "true"
+
+jobs:
+  # D-20 "from that commit" gate: the branch may differ from the v5.0 close (electron b0b566b,
+  # equal to origin/master at the start) only under spike/ and in spike workflows, so a result
+  # can never come from a changed product tree.
+  base-gate:
+    name: base-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Branch differs from the v5.0 close only under spike/
+        run: |
+          set -euo pipefail
+          BASE=b0b566be89886e75929a3da3edeed1497a09a299
+          git cat-file -e "$BASE^{commit}"
+          CHANGED=$(git diff --name-only "$BASE" HEAD)
+          OFFENDING=$(printf '%s\n' "$CHANGED" | grep -v '^$' | grep -vE '^(spike/|\.github/workflows/spike-[^/]*\.yml$)' || true)
+          if [ -n "$OFFENDING" ]; then
+            echo "FATAL: paths changed outside spike/ and .github/workflows/spike-*.yml since $BASE:" >&2
+            printf '%s\n' "$OFFENDING" >&2
+            exit 1
+          fi
+          echo "base gate ok: $(printf '%s\n' "$CHANGED" | grep -c .) changed path(s), all under spike/ or the spike workflow"
+
+  capture:
+    name: capture (lane ${{ matrix.lane }})
+    needs: base-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # The Playwright image pinned by index digest (a tag can move). The same reference is in
+    # SPIKE_IMAGE so every manifest row records the digest it ran in.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [a]
+    env:
+      SPIKE_IMAGE: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+      SPIKE_LANE: ${{ matrix.lane }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
+
+      # D-24: log what could make two runners differ (kernel, CPU model, runner image, fonts).
+      - name: Log environment
+        run: |
+          mkdir -p spike-out
+          {
+            echo "lane: $SPIKE_LANE"
+            echo "image: $SPIKE_IMAGE"
+            echo "runner image: ${ImageOS:-unknown} ${ImageVersion:-unknown}"
+            echo "uname: $(uname -a)"
+            echo "cpu model: $(grep -m1 -E '^(model name|Model name|Hardware)' /proc/cpuinfo || echo 'no model name in /proc/cpuinfo')"
+            echo "cpu cores: $(nproc)"
+            echo "fc-match sans-serif: $(fc-match sans-serif)"
+            echo "fc-match monospace: $(fc-match monospace)"
+            echo "node: $(node --version)"
+          } | tee spike-out/env.txt
+
+      - name: Capture
+        run: yarn vitest run --config spike/vitest.spike.config.ts
+
+      - name: Upload capture
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: spike-capture-${{ matrix.lane }}
+          path: spike-out/
+          retention-days: 7
