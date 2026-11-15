@@ -11,7 +11,10 @@ export function parseArguments(argv: string[]): {
 	tiers: string[] | undefined;
 };
 
-export function generatedFiles(root: string): Promise<Array<[string, string]>>;
+export function generatedFiles(
+	root: string,
+	copyFindings?: unknown,
+): Promise<Array<[string, string]>>;
 
 export function checkCatalog(options: {
 	root: string;
@@ -26,6 +29,8 @@ export function checkCatalog(options: {
 	notes: string[];
 }>;
 
-export function writeCatalog(root: string): Promise<number>;
+export function writeCatalog(
+	root: string,
+): Promise<{ files: number; pruned: number }>;
 
 export function main(argv?: string[]): Promise<number>;

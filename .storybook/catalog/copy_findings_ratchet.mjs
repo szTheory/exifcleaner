@@ -9,11 +9,13 @@
 //   - a deviation the detectors observe but the register does not list is
 //     `unlisted`;
 //   - an entry whose detector no longer fires, or whose literal left its file,
-//     is `stale` and `--write` removes it (and only it).
-// There is no reseed path. This is a copy and adaptation of
-// scripts/findings_ratchet.mjs, which stays untouched and is not imported.
-// `--write` edits this authored register by design (D-13, the ratified D-03
-// scope note limits "never edits an authored JSON" to catalog.mjs).
+//     is `stale` and `--write` removes it (and only it). `yarn catalog:write` is
+//     the one-command path: it prunes through pruneWorkingTree below and then
+//     regenerates every generated file in the same run.
+// There is no reseed path. This module is an adaptation of the separate
+// scripts/findings_ratchet.mjs (the axe baseline ratchet) and does not import it.
+// D-13: this register is edited by `--write` here and by `yarn catalog:write`
+// (catalog.mjs, through pruneWorkingTree); no other authored JSON is rewritten.
 import fs from "node:fs";
 import path from "node:path";
 import { isMainModule } from "../../scripts/is_main_module.mjs";
@@ -389,7 +391,7 @@ export function check({ head, base, observation }) {
 			problems.push(
 				problem(
 					"stale",
-					`entry ${entry.fingerprint} no longer matches its detector or its source; run --write to remove it`,
+					`entry ${entry.fingerprint} no longer matches its detector or its source; run yarn catalog:write to remove it`,
 					{ id: entry.fingerprint },
 				),
 			);
@@ -426,6 +428,36 @@ export function prune({ head, base, observation }) {
 				(entry) => !stale.has(entry.fingerprint),
 			),
 		},
+	};
+}
+
+/**
+ * The pruned register of a working tree, computed and not written: what
+ * `yarn catalog:write` (catalog.mjs) writes back once every generated file has
+ * rendered. Refuses on `unlisted` and on any validation problem. It cannot refuse
+ * an addition: `added` needs a merge-base, which a base-less `check` skips, and
+ * `--check` still rejects it.
+ *
+ * @param {string} root
+ * @returns {{ ok: true, doc: any, pruned: number } | { ok: false, problems: Array<{ code: string, message: string, id?: string }> }}
+ */
+export function pruneWorkingTree(root) {
+	const head = readJson(root, COPY_FINDINGS_PATH);
+	// base is null on purpose: pruning only removes entries, so it needs no
+	// merge-base and cannot weaken the shrink-only rule. `added` cannot be judged
+	// without one, and `--check` (which resolves the merge-base) stays its judge.
+	const result = prune({
+		head,
+		base: null,
+		observation: loadObservation(root),
+	});
+	if (!result.ok) {
+		return { ok: false, problems: result.problems };
+	}
+	return {
+		ok: true,
+		doc: result.doc,
+		pruned: entryCount(head) - entryCount(result.doc),
 	};
 }
 

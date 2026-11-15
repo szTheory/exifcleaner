@@ -1,0 +1,565 @@
+import fs from "node:fs";
+import path from "node:path";
+import { describe, expect, test } from "vitest";
+import { assertDirEffect, snapshotDir } from "../../tests/helpers/dir_effect";
+import { generatedFiles } from "./catalog.mjs";
+import { canonicalJson, compareCodeUnits } from "./closed.mjs";
+import {
+	type CopyFindingsDocument,
+	fingerprintFor,
+	validateRegister,
+} from "./copy_findings_ratchet.mjs";
+import { renderFindings } from "./findings_view.mjs";
+import { enumerateStories } from "./story_index.mjs";
+import {
+	git,
+	makeCatalogRepo,
+	realScript,
+	repoRoot,
+	runNode,
+} from "./temp_repo";
+
+// The contributor flow for a fixed copy deviation (Phase 75.1, D2): the check names
+// one command, and running exactly that command turns the check green. Every control
+// plants its own deviation inside a temp repo, so none reads a live copy string and
+// the real register is never touched.
+const CATALOG = ".storybook/catalog/catalog.mjs";
+const REGISTER = ".storybook/catalog/copy-findings.json";
+const FINDINGS_MD = ".storybook/catalog/FINDINGS.md";
+const KNOWN_FINDINGS = "docs/evidence/known-findings.json";
+const EN_JSON = ".resources/locales/en.json";
+const UNLISTED_KEY = "zz.plantedUnlisted";
+const PLANTED_SLUG = "zz-planted-stale";
+
+function withRepo(body: (repo: string) => void): void {
+	const repo = makeCatalogRepo();
+	try {
+		body(repo);
+	} finally {
+		fs.rmSync(repo, { recursive: true, force: true });
+	}
+}
+
+function run(repo: string, args: string[]) {
+	return runNode(realScript(CATALOG), args, repo);
+}
+
+// The temp repo is a copy of the real tree, so a story a contributor has added but not
+// mapped yet is in it too, and --check reports it. These controls assert what their own plant
+// changes, so each first reads what the untouched copy reports. Only unmapped stories are
+// tolerated there (any other problem in the copy is a failure of its own), and the control
+// then asserts exactly the delta its plant causes. One live story therefore fails the tests
+// that are meant to say so (scenarios.test.ts and the real-tree guards), not these.
+const FAILED_PREFIX = "✗ CATALOG CHECK FAILED: ";
+// Problems are joined with "; " and the messages hold "; " themselves, so split only where
+// the next problem starts (a lowercase code and a colon).
+const PROBLEM_BOUNDARY = /; (?=[a-z]+(?:-[a-z]+)*: )/;
+
+type CheckState = {
+	status: number | null;
+	problems: string[];
+	stdout: string;
+	stderr: string;
+};
+
+function checkState(repo: string): CheckState {
+	const result = run(repo, ["--check", "--base", "main"]);
+	const text = result.stderr.replace(FAILED_PREFIX, "").replace(/\n$/, "");
+	return {
+		status: result.status,
+		problems: result.status === 0 ? [] : text.split(PROBLEM_BOUNDARY),
+		stdout: result.stdout,
+		stderr: result.stderr,
+	};
+}
+
+function pristineState(repo: string): CheckState {
+	const state = checkState(repo);
+	const foreign = state.problems.filter(
+		(problem) => !problem.startsWith("story-unmapped: "),
+	);
+	expect(foreign, state.stderr).toEqual([]);
+	expect(state.status, state.stderr).toBe(state.problems.length === 0 ? 0 : 1);
+	return state;
+}
+
+function expectSameState(repo: string, baseline: CheckState): void {
+	const state = checkState(repo);
+	expect(state.problems, state.stderr).toEqual(baseline.problems);
+	expect(state.status, state.stderr).toBe(baseline.status);
+}
+
+// One synthetic stale entry, committed to the temp repo's `main` together with a
+// FINDINGS.md rendered from that register: the merge-base equals the head, so
+// `added` cannot fire, and the view agrees with the register, so the entry itself is
+// the only thing out of date. A `manual` entry carries an `en:` ref the register's
+// own scheme accepts, and the key does not exist, so the detector never fires for it.
+function plantStale(repo: string): {
+	fingerprint: string;
+	originalRegister: string;
+	originalView: string;
+} {
+	const registerPath = path.join(repo, REGISTER);
+	const originalRegister = fs.readFileSync(registerPath, "utf8");
+	const originalView = fs.readFileSync(path.join(repo, FINDINGS_MD), "utf8");
+	const doc = JSON.parse(originalRegister) as CopyFindingsDocument;
+	const template = doc.entries.find((entry) => entry.kind === "manual");
+	if (template === undefined) {
+		throw new Error("the register has no manual entry to clone");
+	}
+	const fingerprint = fingerprintFor("manual", [PLANTED_SLUG]);
+	const entries = [...doc.entries];
+	const at = entries.findIndex(
+		(entry) => compareCodeUnits(entry.fingerprint, fingerprint) > 0,
+	);
+	entries.splice(at === -1 ? entries.length : at, 0, {
+		...template,
+		fingerprint,
+		ref: "en:no.such.key",
+		text: "planted stale entry",
+	});
+	const planted = { ...doc, entries };
+	expect(validateRegister(planted)).toEqual([]);
+	fs.writeFileSync(registerPath, canonicalJson(planted));
+	const baseline = JSON.parse(
+		fs.readFileSync(path.join(repo, KNOWN_FINDINGS), "utf8"),
+	);
+	fs.writeFileSync(
+		path.join(repo, FINDINGS_MD),
+		renderFindings({ baseline, copyFindings: planted }),
+	);
+	git(repo, ["add", "-A"]);
+	git(repo, ["commit", "-q", "-m", "plant a stale copy finding"]);
+	return { fingerprint, originalRegister, originalView };
+}
+
+function packageScripts(): Record<string, string> {
+	const manifest = JSON.parse(
+		fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
+	) as { scripts: Record<string, string> };
+	return manifest.scripts;
+}
+
+// What a contributor does with the message: read the `yarn <script>` it names and run
+// what the real package.json maps that script to. The script must be a plain `node`
+// command (no shell), so running it through runNode is the same thing yarn runs.
+function commandFromMessage(stderr: string): {
+	name: string;
+	script: string;
+	args: string[];
+} {
+	const named = /run yarn ([a-z0-9:_-]+) to remove it/.exec(stderr);
+	if (named === null) {
+		throw new Error(`the message names no yarn script to run: ${stderr}`);
+	}
+	const name = named[1] ?? "";
+	const command = packageScripts()[name];
+	if (command === undefined) {
+		throw new Error(`package.json has no script ${name}`);
+	}
+	const [program, script, ...args] = command.split(" ");
+	if (program !== "node" || script === undefined) {
+		throw new Error(`script ${name} is not a plain node command: ${command}`);
+	}
+	return { name, script: realScript(script), args };
+}
+
+describe("fix a copy deviation (D2)", () => {
+	test("shown red: a planted stale entry fails --check with one line of its own that names yarn catalog:write", () => {
+		withRepo((repo) => {
+			const baseline = pristineState(repo);
+			const { fingerprint } = plantStale(repo);
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--check", "--base", "main"]);
+			expect(result.status, result.stdout).toBe(1);
+			const stale = `stale: entry ${fingerprint} no longer matches its detector or its source; run yarn catalog:write to remove it`;
+			expect(result.stderr).toBe(
+				`${FAILED_PREFIX}${[...baseline.problems, stale].join("; ")}\n`,
+			);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("following the message verbatim turns --check green in one command and removes only the entry", () => {
+		withRepo((repo) => {
+			const baseline = pristineState(repo);
+			const { originalRegister, originalView } = plantStale(repo);
+			const red = run(repo, ["--check", "--base", "main"]);
+			expect(red.status).toBe(1);
+			const { script, args } = commandFromMessage(red.stderr);
+			const before = snapshotDir(repo);
+
+			const written = runNode(script, args, repo);
+			expect(written.status, written.stderr).toBe(0);
+			expect(written.stdout).toContain("pruned 1 stale copy findings");
+			assertDirEffect(before, snapshotDir(repo), {
+				modified: [REGISTER, FINDINGS_MD],
+			});
+			const register = fs.readFileSync(path.join(repo, REGISTER), "utf8");
+			expect(JSON.parse(register)).toEqual(JSON.parse(originalRegister));
+			expect(register).toBe(originalRegister);
+			expect(fs.readFileSync(path.join(repo, FINDINGS_MD), "utf8")).toBe(
+				originalView,
+			);
+
+			expectSameState(repo, baseline);
+
+			const settled = snapshotDir(repo);
+			const again = runNode(script, args, repo);
+			expect(again.status, again.stderr).toBe(0);
+			expect(again.stdout).not.toContain("pruned");
+			assertDirEffect(settled, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: --write refuses on an unlisted deviation next to a stale entry, names it and changes nothing", () => {
+		withRepo((repo) => {
+			const { fingerprint: stale } = plantStale(repo);
+			// An unlisted deviation: a new en string whose wording the brand lint bans.
+			const enPath = path.join(repo, EN_JSON);
+			const en = JSON.parse(fs.readFileSync(enPath, "utf8")) as Record<
+				string,
+				string
+			>;
+			en[UNLISTED_KEY] = "Just clean it";
+			fs.writeFileSync(enPath, `${JSON.stringify(en, null, "\t")}\n`);
+			git(repo, ["add", "-A"]);
+			git(repo, ["commit", "-q", "-m", "plant an unlisted deviation"]);
+			const unlisted = fingerprintFor("banned", [
+				"banned.just",
+				`en:${UNLISTED_KEY}`,
+			]);
+
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--write"]);
+			expect(result.status, result.stdout).toBe(1);
+			expect(result.stderr).toContain("refusing to write");
+			expect(result.stderr).toContain("unlisted");
+			expect(result.stderr).toContain(unlisted);
+			assertDirEffect(before, snapshotDir(repo), {});
+			expect(fs.readFileSync(path.join(repo, REGISTER), "utf8")).toContain(
+				stale,
+			);
+		});
+	});
+
+	test("the message names the script package.json maps to catalog.mjs --write, so the two cannot drift apart", () => {
+		expect(packageScripts()["catalog:write"]).toBe(
+			"node .storybook/catalog/catalog.mjs --write",
+		);
+	});
+});
+
+const SCENARIOS = ".storybook/catalog/scenarios.json";
+const PLANTED_STORY_FILE = "src/renderer/components/ui/Zz.stories.tsx";
+const PLANTED_STORY_ID = "ui-zz--planted";
+const NEW_SCENARIO_ID = "type-pill.zz-planted";
+const UNMAPPED_LINE = `story-unmapped: story ${PLANTED_STORY_ID} (UI/Zz) is in no scenario; add it to scenarios.json`;
+
+async function withRepoAsync(
+	body: (repo: string) => Promise<void>,
+): Promise<void> {
+	const repo = makeCatalogRepo();
+	try {
+		await body(repo);
+	} finally {
+		fs.rmSync(repo, { recursive: true, force: true });
+	}
+}
+
+// One new story a contributor has not mapped yet: a real TypePill story file (explicit
+// title and component, the component imported unaliased from its real module), committed
+// to the temp repo's `main`, so the story is the only thing that is out of date.
+async function plantUnmappedStory(repo: string): Promise<void> {
+	fs.writeFileSync(
+		path.join(repo, PLANTED_STORY_FILE),
+		[
+			'import type { Meta, StoryObj } from "@storybook/react-vite";',
+			'import { TypePill } from "./TypePill";',
+			"",
+			"const meta = {",
+			'\ttitle: "UI/Zz",',
+			"\tcomponent: TypePill,",
+			'\targs: { extension: "JPG" },',
+			"} satisfies Meta<typeof TypePill>;",
+			"",
+			"// Framework-mandated default export (CSF: Storybook reads the default export).",
+			"export default meta;",
+			"",
+			"type Story = StoryObj<typeof meta>;",
+			"",
+			"export const Planted: Story = {};",
+			"",
+		].join("\n"),
+	);
+	const planted = (await enumerateStories(repo)).filter(
+		(story) => story.file === PLANTED_STORY_FILE,
+	);
+	expect(planted.map((story) => story.id)).toEqual([PLANTED_STORY_ID]);
+	expect(planted[0]?.title).toBe("UI/Zz");
+	git(repo, ["add", "-A"]);
+	git(repo, ["commit", "-q", "-m", "plant an unmapped story"]);
+}
+
+type ManifestDoc = {
+	scenarios: { id: string; stories: string[] }[];
+};
+
+function readScenarios(repo: string): ManifestDoc {
+	return JSON.parse(
+		fs.readFileSync(path.join(repo, SCENARIOS), "utf8"),
+	) as ManifestDoc;
+}
+
+function writeScenarios(repo: string, doc: ManifestDoc): void {
+	fs.writeFileSync(path.join(repo, SCENARIOS), canonicalJson(doc));
+}
+
+// The scenario that already lists a TypePill story (the lowest id among those).
+function typePillOwner(doc: ManifestDoc): ManifestDoc["scenarios"][number] {
+	const ownerId = doc.scenarios
+		.filter((scenario) =>
+			scenario.stories.some((id) => id.startsWith("ui-typepill--")),
+		)
+		.map((scenario) => scenario.id)
+		.sort(compareCodeUnits)[0];
+	const owner = doc.scenarios.find((scenario) => scenario.id === ownerId);
+	if (owner === undefined) {
+		throw new Error("no scenario lists a TypePill story");
+	}
+	return owner;
+}
+
+// Two ways a contributor maps a story. Adding it to the `stories` of an existing scenario
+// leaves the coverage grid as it was; a new scenario (here a copy of the TypePill owner
+// under its own id) adds a scenario to a cell, so the grid files go stale.
+function mapIntoExistingScenario(repo: string): string {
+	const doc = readScenarios(repo);
+	const owner = typePillOwner(doc);
+	owner.stories = [...owner.stories, PLANTED_STORY_ID].sort(compareCodeUnits);
+	writeScenarios(repo, doc);
+	return owner.id;
+}
+
+function mapAsNewScenario(repo: string): string {
+	const doc = readScenarios(repo);
+	const scenario = {
+		...typePillOwner(doc),
+		id: NEW_SCENARIO_ID,
+		stories: [PLANTED_STORY_ID],
+	};
+	doc.scenarios = [...doc.scenarios, scenario].sort((a, b) =>
+		compareCodeUnits(a.id, b.id),
+	);
+	writeScenarios(repo, doc);
+	return scenario.id;
+}
+
+// What the pristine copy reports once the planted story is mapped: its own unmapped line
+// is gone, any other live unmapped story is still there.
+function without(baseline: CheckState, line: string): CheckState {
+	const problems = baseline.problems.filter((problem) => problem !== line);
+	return { ...baseline, status: problems.length === 0 ? 0 : 1, problems };
+}
+
+describe("add a story (D1)", () => {
+	test("shown red: a planted unmapped story fails --check with its own story-unmapped line and changes nothing", async () => {
+		await withRepoAsync(async (repo) => {
+			const baseline = pristineState(repo);
+			await plantUnmappedStory(repo);
+			const before = snapshotDir(repo);
+			const result = checkState(repo);
+			expect(result.status, result.stdout).toBe(1);
+			// Exactly the baseline plus the planted line (a tree with no other live unmapped
+			// story gives exactly the one line).
+			expect([...result.problems].sort()).toEqual(
+				[...new Set([...baseline.problems, UNMAPPED_LINE])].sort(),
+			);
+			assertDirEffect(before, snapshotDir(repo), {});
+		});
+	});
+
+	test("a write alone cannot hide an unmapped story; a new scenario for it and one write turns --check green", async () => {
+		await withRepoAsync(async (repo) => {
+			const baseline = pristineState(repo);
+			await plantUnmappedStory(repo);
+
+			// The manifest layer is not part of --write, so its exit code is not the point:
+			// whatever it does, --check must stay red on the unmapped story.
+			run(repo, ["--write"]);
+			const stillRed = checkState(repo);
+			expect(stillRed.status, stillRed.stdout).toBe(1);
+			expect(stillRed.problems).toContain(UNMAPPED_LINE);
+
+			expect(mapAsNewScenario(repo)).toBe(NEW_SCENARIO_ID);
+			const stale = checkState(repo);
+			expect(stale.status, stale.stdout).toBe(1);
+			expect(stale.problems).not.toContain(UNMAPPED_LINE);
+			const settledState = without(baseline, UNMAPPED_LINE);
+			const added = stale.problems.filter(
+				(problem) => !settledState.problems.includes(problem),
+			);
+			expect(added.length).toBeGreaterThan(0);
+			for (const problem of added) {
+				expect(problem).toMatch(
+					/^stale: \S+ is stale; run yarn catalog:write$/,
+				);
+			}
+
+			const written = run(repo, ["--write"]);
+			expect(written.status, written.stderr).toBe(0);
+			expectSameState(repo, settledState);
+		});
+	});
+
+	test("adding the story to an existing scenario needs no write: --check is back to the baseline at once", async () => {
+		await withRepoAsync(async (repo) => {
+			const baseline = pristineState(repo);
+			await plantUnmappedStory(repo);
+			const red = checkState(repo);
+			expect(red.status, red.stdout).toBe(1);
+			expect(red.problems).toContain(UNMAPPED_LINE);
+
+			// The owner is whatever scenario the helper picks (the lowest id that lists a
+			// TypePill story), so a new TypePill scenario cannot break this control. The
+			// story must really be listed by it afterwards.
+			const ownerId = mapIntoExistingScenario(repo);
+			const owner = readScenarios(repo).scenarios.find(
+				(scenario) => scenario.id === ownerId,
+			);
+			expect(owner?.stories).toContain(PLANTED_STORY_ID);
+			expectSameState(repo, without(baseline, UNMAPPED_LINE));
+		});
+	});
+});
+
+// CONTRIBUTING.md tells a contributor the commands and what each failure means (D1, D2).
+// The test couples that text to the catalog: every message the check can print, both scripts
+// and every generated file must appear in the section, so the doc cannot drift from the code.
+const CONTRIBUTING = "CONTRIBUTING.md";
+const SECTION_HEADING = "### Adding or changing a story";
+const CATALOG_SCRIPTS = ["catalog:write", "catalog:check"] as const;
+
+function sectionBounds(text: string): { start: number; end: number } | null {
+	const start = text.indexOf(`${SECTION_HEADING}\n`);
+	if (start === -1) return null;
+	const afterHeading = start + SECTION_HEADING.length;
+	// The section runs to the next heading of level 2 or 3.
+	const next = text.slice(afterHeading).search(/\n#{2,3} /);
+	return { start, end: next === -1 ? text.length : afterHeading + next + 1 };
+}
+
+function contributingProblems(
+	text: string,
+	terms: readonly string[],
+): string[] {
+	const bounds = sectionBounds(text);
+	const section = bounds === null ? "" : text.slice(bounds.start, bounds.end);
+	return terms.filter((term) => !section.includes(term));
+}
+
+function withoutSection(text: string): string {
+	const bounds = sectionBounds(text);
+	return bounds === null
+		? text
+		: text.slice(0, bounds.start) + text.slice(bounds.end);
+}
+
+function missingCatalogScripts(pkg: {
+	scripts?: Record<string, string>;
+}): string[] {
+	return CATALOG_SCRIPTS.filter((name) => pkg.scripts?.[name] === undefined);
+}
+
+// The code words are matched in backticks: "added" alone occurs in ordinary prose.
+const FIXED_TERMS = [
+	"yarn catalog:write",
+	"yarn catalog:check",
+	"story-unmapped",
+	"is stale; run yarn catalog:write",
+	"run yarn catalog:write to remove it",
+	"`unlisted`",
+	"`src:`",
+	"`added`",
+	"refusing to write",
+	"scenarios.json",
+	"mixed-subject",
+	"tier-subject-mismatch",
+	"`git fetch origin`",
+] as const;
+
+async function requiredTerms(): Promise<string[]> {
+	const basenames = (await generatedFiles(repoRoot)).map(([relPath]) =>
+		path.basename(relPath),
+	);
+	return [...FIXED_TERMS, ...basenames];
+}
+
+describe("contributor docs (D1, D2)", () => {
+	const real = fs.readFileSync(path.join(repoRoot, CONTRIBUTING), "utf8");
+	const realPackage = JSON.parse(
+		fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
+	) as { scripts: Record<string, string> };
+
+	test("the Adding or changing a story section names both scripts, every message and every generated file", async () => {
+		const terms = await requiredTerms();
+		// Anti-vacuity: the nine generated files the catalog writes are in the list.
+		expect(terms).toHaveLength(FIXED_TERMS.length + 9);
+		expect(contributingProblems(real, terms)).toEqual([]);
+		expect(real.split(`${SECTION_HEADING}\n`)).toHaveLength(2);
+	});
+
+	test("shown red: the same text without the section is missing every required term", async () => {
+		const terms = await requiredTerms();
+		const stripped = withoutSection(real);
+		expect(stripped).not.toContain(SECTION_HEADING);
+		expect(contributingProblems(stripped, terms)).toEqual(terms);
+	});
+
+	test("shown red: dropping any one term from the section is reported", async () => {
+		for (const term of await requiredTerms()) {
+			expect(contributingProblems(real.replaceAll(term, ""), [term])).toEqual([
+				term,
+			]);
+		}
+	});
+
+	test("a term after the section's next heading does not count, at either heading level", async () => {
+		const terms = await requiredTerms();
+		const body = terms.join("\n");
+		// Anti-vacuity: with the heading kept and the terms inside the section, the same
+		// shape of text reports nothing, so the failures below come from the terms' place.
+		expect(
+			contributingProblems(
+				`${SECTION_HEADING}\n\n${body}\n\n## Elsewhere\n`,
+				terms,
+			),
+		).toEqual([]);
+		// The heading stays and the terms follow the next heading. A section that ran to
+		// the end of the file (a wrong end, or only one heading level) would count them.
+		for (const next of ["## Elsewhere", "### Elsewhere"]) {
+			const moved = `${SECTION_HEADING}\n\nnothing here\n\n${next}\n\n${body}\n`;
+			expect(contributingProblems(moved, terms), next).toEqual(terms);
+		}
+	});
+
+	test("package.json has both catalog scripts", () => {
+		expect(missingCatalogScripts(realPackage)).toEqual([]);
+	});
+
+	test("shown red: a package.json copy without catalog:check, or without both, is reported", () => {
+		const { "catalog:check": _check, ...withoutCheck } = realPackage.scripts;
+		expect(missingCatalogScripts({ scripts: withoutCheck })).toEqual([
+			"catalog:check",
+		]);
+		const { "catalog:write": _write, ...withoutBoth } = withoutCheck;
+		expect(missingCatalogScripts({ scripts: withoutBoth })).toEqual([
+			"catalog:write",
+			"catalog:check",
+		]);
+		expect(missingCatalogScripts({})).toEqual([
+			"catalog:write",
+			"catalog:check",
+		]);
+	});
+});
