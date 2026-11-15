@@ -14,8 +14,8 @@
 //     regenerates every generated file in the same run.
 // There is no reseed path. This module is an adaptation of the separate
 // scripts/findings_ratchet.mjs (the axe baseline ratchet) and does not import it.
-// `--write` edits this authored register by design (D-13, the ratified D-03
-// scope note limits "never edits an authored JSON" to catalog.mjs).
+// D-13: this register is edited by `--write` here and by `yarn catalog:write`
+// (catalog.mjs, through pruneWorkingTree); no other authored JSON is rewritten.
 import fs from "node:fs";
 import path from "node:path";
 import { isMainModule } from "../../scripts/is_main_module.mjs";
@@ -434,7 +434,9 @@ export function prune({ head, base, observation }) {
 /**
  * The pruned register of a working tree, computed and not written: what
  * `yarn catalog:write` (catalog.mjs) writes back once every generated file has
- * rendered. Same refusals as `prune`: anything other than staleness blocks it.
+ * rendered. Refuses on `unlisted` and on any validation problem. It cannot refuse
+ * an addition: `added` needs a merge-base, which a base-less `check` skips, and
+ * `--check` still rejects it.
  *
  * @param {string} root
  * @returns {{ ok: true, doc: any, pruned: number } | { ok: false, problems: Array<{ code: string, message: string, id?: string }> }}

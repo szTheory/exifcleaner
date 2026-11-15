@@ -420,7 +420,14 @@ describe("add a story (D1)", () => {
 			expect(red.status, red.stdout).toBe(1);
 			expect(red.problems).toContain(UNMAPPED_LINE);
 
-			expect(mapIntoExistingScenario(repo)).toBe("type-pill.heic");
+			// The owner is whatever scenario the helper picks (the lowest id that lists a
+			// TypePill story), so a new TypePill scenario cannot break this control. The
+			// story must really be listed by it afterwards.
+			const ownerId = mapIntoExistingScenario(repo);
+			const owner = readScenarios(repo).scenarios.find(
+				(scenario) => scenario.id === ownerId,
+			);
+			expect(owner?.stories).toContain(PLANTED_STORY_ID);
 			expectSameState(repo, without(baseline, UNMAPPED_LINE));
 		});
 	});
@@ -472,9 +479,13 @@ const FIXED_TERMS = [
 	"is stale; run yarn catalog:write",
 	"run yarn catalog:write to remove it",
 	"`unlisted`",
+	"`src:`",
 	"`added`",
 	"refusing to write",
 	"scenarios.json",
+	"mixed-subject",
+	"tier-subject-mismatch",
+	"`git fetch origin`",
 ] as const;
 
 async function requiredTerms(): Promise<string[]> {
@@ -513,12 +524,23 @@ describe("contributor docs (D1, D2)", () => {
 		}
 	});
 
-	test("a term outside the section does not count", async () => {
+	test("a term after the section's next heading does not count, at either heading level", async () => {
 		const terms = await requiredTerms();
-		const bounds = sectionBounds(real);
-		expect(bounds).not.toBeNull();
-		const moved = `${withoutSection(real)}\n${terms.join("\n")}\n`;
-		expect(contributingProblems(moved, terms)).toEqual(terms);
+		const body = terms.join("\n");
+		// Anti-vacuity: with the heading kept and the terms inside the section, the same
+		// shape of text reports nothing, so the failures below come from the terms' place.
+		expect(
+			contributingProblems(
+				`${SECTION_HEADING}\n\n${body}\n\n## Elsewhere\n`,
+				terms,
+			),
+		).toEqual([]);
+		// The heading stays and the terms follow the next heading. A section that ran to
+		// the end of the file (a wrong end, or only one heading level) would count them.
+		for (const next of ["## Elsewhere", "### Elsewhere"]) {
+			const moved = `${SECTION_HEADING}\n\nnothing here\n\n${next}\n\n${body}\n`;
+			expect(contributingProblems(moved, terms), next).toEqual(terms);
+		}
 	});
 
 	test("package.json has both catalog scripts", () => {

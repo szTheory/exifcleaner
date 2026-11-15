@@ -50,8 +50,12 @@ component unaliased. Its story ids go into a scenario in
 
 ```bash
 yarn catalog:write   # regenerate the catalog files and prune stale copy findings
-yarn catalog:check   # what CI runs: fails on drift or invalid data
+yarn catalog:check   # fails on drift or invalid data (CI also compares a built index)
 ```
+
+`yarn catalog:check` compares the copy register with `origin/master`. Without that ref (a
+fork clone) it stops with `base ref origin/master not found`: run `git fetch origin`, or
+pass another ref with `node .storybook/catalog/catalog.mjs --check --base <ref>`.
 
 `yarn catalog:write` regenerates these files in `.storybook/catalog/`. Do not edit them by
 hand; edit the source named here and run it again.
@@ -60,8 +64,8 @@ hand; edit the source named here and run it again.
 - `PERSONAS.md`: from `catalog.json`.
 - `JOURNEYS.md`: from `journeys/*.json`.
 - `FINDINGS.md`: from `docs/evidence/known-findings.json` and `copy-findings.json`.
-- `coverage-grid.json` and `COVERAGE-GRID.md`: from `scenarios.json`, `subjects.json` and
-  `waivers.json`.
+- `coverage-grid.json` and `COVERAGE-GRID.md`: from `scenarios.json`, `subjects.json`,
+  `waivers.json` and each story's `meta.component`.
 - `UI-SPEC.md`: from `ui-spec.json`.
 - `TOKEN-MAP.md`: from `token_map.json`.
 - `TEST-SHIFT.md`: from `test-shift.json`.
@@ -69,7 +73,9 @@ hand; edit the source named here and run it again.
 When `yarn catalog:check` fails, the message names what to do:
 
 - `story-unmapped`: a story is in no scenario. Add its id to the `stories` of a scenario in
-  `scenarios.json`. A new scenario names a persona, a job, a state class, a tier, a
+  `scenarios.json` whose stories share its `meta.component` and whose tier is that
+  component's tier in `subjects.json` (otherwise the check reports `mixed-subject` or
+  `tier-subject-mismatch`). A new scenario names a persona, a job, a state class, a tier, a
   situation and a proof boundary. Adding the id to an existing scenario needs no further
   step; a new scenario changes the coverage grid, so then run `yarn catalog:write` and
   commit the regenerated files.
@@ -78,8 +84,11 @@ When `yarn catalog:check` fails, the message names what to do:
 - `stale: entry ... run yarn catalog:write to remove it`: you fixed a copy deviation. One
   `yarn catalog:write` removes the entry from `copy-findings.json` and regenerates
   `FINDINGS.md`; commit both.
-- `unlisted`: a user-facing string breaks the copy rules and has no register entry. Reword
-  the string; the register only shrinks.
+- `unlisted`: a user-facing string breaks the copy rules and has no register entry. The
+  register only shrinks, so do not add one. On an `en:` ref, reword the string in
+  `.resources/locales/en.json`. On a `src:` ref (a hardcoded string in a component under
+  `src/renderer`), rewording only makes another literal: move the text into the locale
+  resources and render it with the i18n lookup, `t("key")`.
 - `added`: a register entry that was not in the merge-base's register is rejected. Remove
   the entry and reword the string instead.
 - `refusing to write`: `yarn catalog:write` stops and changes nothing while an `unlisted`

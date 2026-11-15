@@ -76,9 +76,13 @@ const PERSIAN = "settings-languagedropdown--persian";
 
 // The closed world every control below mutates: the two Phase 70 seed scenarios (kept in
 // manifest order, so `story-double-mapped` still names the same last owner) and exactly the
-// stories they list. Only the first describe reads the live manifest, on purpose. A control
-// that did would fail on every story a contributor adds, so one new story would fail one
-// test (the real-manifest one), not every control.
+// stories they list. It is derived from the live data by design, not frozen: the two
+// scenarios come from scenarios.json, their stories from the live story enumeration, and
+// the personas, jobs, subjects and ruleset are the live registries. What it closes is every
+// other scenario and story: a story a contributor adds or maps elsewhere cannot reach a
+// control, so one new story fails one test (the real-manifest one), not every control. An
+// edit to the two seed scenarios, their stories or those registries can still move these
+// controls.
 const seedScenarios = real.scenarios.filter(
 	(scenario) => scenario.id === SYSTEM || scenario.id === RTL,
 );
