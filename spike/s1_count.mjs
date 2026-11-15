@@ -127,7 +127,14 @@ const compared = compareBaseline(
 	failingFingerprints(evaluate(pairsDoc, scratchCss)),
 	baseline.entries,
 );
-const parsedGap = clearedGap.size;
+// A parsed message line can carry the assertion's own suffix ("...: expected [ ...(22) ] to
+// deeply equal []"), so only well-formed fingerprints are kept from the parse, and the
+// comparison functions' lists are the authority for the two sets.
+const FINGERPRINT = /^contrast-gap\|[a-z0-9-]+\|[a-z0-9-]+$/;
+const parsedGap = [...clearedGap].filter((fingerprint) => FINGERPRINT.test(fingerprint)).length;
+const parsedNew = [...newGapFailures].filter((fingerprint) => FINGERPRINT.test(fingerprint)).length;
+clearedGap.clear();
+newGapFailures.clear();
 for (const fingerprint of compared.fixedStillListed) clearedGap.add(fingerprint);
 for (const fingerprint of compared.newFailures) newGapFailures.add(fingerprint);
 // Vacuity guard: the unmodified tokens.css at HEAD must compare clean (today's baseline).
@@ -239,6 +246,7 @@ const result = {
 	mismatches,
 	carrier_failures: carrierFailures.map((failure) => failure.name),
 	contrast_gap_cleared_parsed_from_test_output: parsedGap,
+	new_pair_failures_parsed_from_test_output: parsedNew,
 	harness_control_head_tokens_compare: control,
 	runs: {
 		contrast: { exit: contrast.status, failed_tests: contrastFailures.length },
