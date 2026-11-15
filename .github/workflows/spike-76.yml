@@ -2,9 +2,9 @@ name: spike-76
 
 # PLN-01 measurement spike (Phase 76, plan 76-01). Throwaway: lives only on the unmerged
 # branch spike/76-pln-01, which is kept until Phase 80 closes and never merged. Triggered by a
-# push to that one branch (not workflow_dispatch, which needs the file on the default branch;
-# not pull_request, which would also start ci.yml). No secrets; read-only token; the actions
-# are the 40-hex SHAs ci.yml already pins.
+# push to that one branch (a manual-dispatch trigger would need this file on the default
+# branch, and a pull-request trigger would also start ci.yml, so neither is used). No secrets;
+# read-only token; the actions are the 40-hex SHAs ci.yml already pins.
 on:
   push:
     branches: ["spike/76-pln-01"]
