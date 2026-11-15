@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { assertDirEffect, snapshotDir } from "../../tests/helpers/dir_effect";
+import { generatedFiles } from "./catalog.mjs";
 import { canonicalJson, compareCodeUnits } from "./closed.mjs";
 import {
 	type CopyFindingsDocument,
@@ -422,5 +423,121 @@ describe("add a story (D1)", () => {
 			expect(mapIntoExistingScenario(repo)).toBe("type-pill.heic");
 			expectSameState(repo, without(baseline, UNMAPPED_LINE));
 		});
+	});
+});
+
+// CONTRIBUTING.md tells a contributor the commands and what each failure means (D1, D2).
+// The test couples that text to the catalog: every message the check can print, both scripts
+// and every generated file must appear in the section, so the doc cannot drift from the code.
+const CONTRIBUTING = "CONTRIBUTING.md";
+const SECTION_HEADING = "### Adding or changing a story";
+const CATALOG_SCRIPTS = ["catalog:write", "catalog:check"] as const;
+
+function sectionBounds(text: string): { start: number; end: number } | null {
+	const start = text.indexOf(`${SECTION_HEADING}\n`);
+	if (start === -1) return null;
+	const afterHeading = start + SECTION_HEADING.length;
+	// The section runs to the next heading of level 2 or 3.
+	const next = text.slice(afterHeading).search(/\n#{2,3} /);
+	return { start, end: next === -1 ? text.length : afterHeading + next + 1 };
+}
+
+function contributingProblems(
+	text: string,
+	terms: readonly string[],
+): string[] {
+	const bounds = sectionBounds(text);
+	const section = bounds === null ? "" : text.slice(bounds.start, bounds.end);
+	return terms.filter((term) => !section.includes(term));
+}
+
+function withoutSection(text: string): string {
+	const bounds = sectionBounds(text);
+	return bounds === null
+		? text
+		: text.slice(0, bounds.start) + text.slice(bounds.end);
+}
+
+function missingCatalogScripts(pkg: {
+	scripts?: Record<string, string>;
+}): string[] {
+	return CATALOG_SCRIPTS.filter((name) => pkg.scripts?.[name] === undefined);
+}
+
+// The code words are matched in backticks: "added" alone occurs in ordinary prose.
+const FIXED_TERMS = [
+	"yarn catalog:write",
+	"yarn catalog:check",
+	"story-unmapped",
+	"is stale; run yarn catalog:write",
+	"run yarn catalog:write to remove it",
+	"`unlisted`",
+	"`added`",
+	"refusing to write",
+	"scenarios.json",
+] as const;
+
+async function requiredTerms(): Promise<string[]> {
+	const basenames = (await generatedFiles(repoRoot)).map(([relPath]) =>
+		path.basename(relPath),
+	);
+	return [...FIXED_TERMS, ...basenames];
+}
+
+describe("contributor docs (D1, D2)", () => {
+	const real = fs.readFileSync(path.join(repoRoot, CONTRIBUTING), "utf8");
+	const realPackage = JSON.parse(
+		fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
+	) as { scripts: Record<string, string> };
+
+	test("the Adding or changing a story section names both scripts, every message and every generated file", async () => {
+		const terms = await requiredTerms();
+		// Anti-vacuity: the nine generated files the catalog writes are in the list.
+		expect(terms).toHaveLength(FIXED_TERMS.length + 9);
+		expect(contributingProblems(real, terms)).toEqual([]);
+		expect(real.split(`${SECTION_HEADING}\n`)).toHaveLength(2);
+	});
+
+	test("shown red: the same text without the section is missing every required term", async () => {
+		const terms = await requiredTerms();
+		const stripped = withoutSection(real);
+		expect(stripped).not.toContain(SECTION_HEADING);
+		expect(contributingProblems(stripped, terms)).toEqual(terms);
+	});
+
+	test("shown red: dropping any one term from the section is reported", async () => {
+		for (const term of await requiredTerms()) {
+			expect(contributingProblems(real.replaceAll(term, ""), [term])).toEqual([
+				term,
+			]);
+		}
+	});
+
+	test("a term outside the section does not count", async () => {
+		const terms = await requiredTerms();
+		const bounds = sectionBounds(real);
+		expect(bounds).not.toBeNull();
+		const moved = `${withoutSection(real)}\n${terms.join("\n")}\n`;
+		expect(contributingProblems(moved, terms)).toEqual(terms);
+	});
+
+	test("package.json has both catalog scripts", () => {
+		expect(missingCatalogScripts(realPackage)).toEqual([]);
+	});
+
+	test("shown red: a package.json copy without catalog:check, or without both, is reported", () => {
+		const { "catalog:check": _check, ...withoutCheck } = realPackage.scripts;
+		expect(missingCatalogScripts({ scripts: withoutCheck })).toEqual([
+			"catalog:check",
+		]);
+		const { "catalog:write": _write, ...withoutBoth } = withoutCheck;
+		expect(missingCatalogScripts({ scripts: withoutBoth })).toEqual([
+			"catalog:write",
+			"catalog:check",
+		]);
+		expect(missingCatalogScripts({})).toEqual([
+			"catalog:write",
+			"catalog:check",
+		]);
 	});
 });
