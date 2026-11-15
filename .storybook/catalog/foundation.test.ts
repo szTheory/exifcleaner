@@ -5,7 +5,7 @@ import { describe, expect, test } from "vitest";
 import { assertDirEffect, snapshotDir } from "../../tests/helpers/dir_effect";
 import { compareCodeUnits, isCalendarDate, resolveInRoot } from "./closed.mjs";
 import { readMergeBase, resolveBaseRef } from "./merge_base.mjs";
-import { git, repoRoot } from "./temp_repo";
+import { disableBackgroundMaintenance, git, repoRoot } from "./temp_repo";
 import {
 	FILTERED_TREES,
 	STATE_CLASSES,
@@ -150,6 +150,7 @@ describe("merge_base.mjs", () => {
 		git(repo, ["config", "user.name", "Merge Base Test"]);
 		git(repo, ["config", "user.email", "merge-base@example.invalid"]);
 		git(repo, ["config", "commit.gpgsign", "false"]);
+		disableBackgroundMaintenance(repo);
 		return repo;
 	}
 

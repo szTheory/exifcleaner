@@ -24,6 +24,7 @@ import {
 	type Verdict,
 } from "../scripts/findings_ratchet.mjs";
 import { assertDirEffect, snapshotDir } from "../tests/helpers/dir_effect";
+import { disableBackgroundMaintenance } from "./catalog/temp_repo";
 import { DISPOSITIONS as VOCAB_DISPOSITIONS } from "./catalog/vocab.mjs";
 
 const repoRoot = path.resolve(import.meta.dirname, "..");
@@ -737,6 +738,7 @@ function makeRepo(committed: BaselineDocument | null): string {
 	git(repo, ["config", "user.name", "Ratchet Test"]);
 	git(repo, ["config", "user.email", "ratchet@example.invalid"]);
 	git(repo, ["config", "commit.gpgsign", "false"]);
+	disableBackgroundMaintenance(repo);
 	if (committed === null) {
 		writeFileSync(path.join(repo, "README.md"), "x\n");
 		git(repo, ["add", "README.md"]);
