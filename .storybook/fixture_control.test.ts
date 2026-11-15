@@ -701,7 +701,7 @@ export function runCase({
 			!existsSync(path.join(tmp, "vite-cache", "deps", "_metadata.json"))
 		) {
 			throw new Error(
-				"the nested story run did not use its private Vite cache",
+				`the nested story run did not use its private Vite cache (status ${result.status}): ${result.stderr.slice(-1500)}`,
 			);
 		}
 		const report = JSON.parse(readFileSync(reportPath, "utf8")) as {
