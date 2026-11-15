@@ -804,7 +804,7 @@ document.addEventListener('click', (e) => {
 - Don't trap focus (Escape should close modals)
 - Respect `prefers-reduced-motion` for animations
 
-**ExifCleaner status**: ✅ Semantic HTML plus ARIA throughout the renderer, covered by `tests/e2e/accessibility.spec.ts`.
+**ExifCleaner status**: ✅ Semantic HTML plus ARIA throughout the renderer, covered by stories (focus order, ARIA names, axe in light and dark) plus the drawer focus-trap canary in `tests/e2e/accessibility.spec.ts`.
 
 ---
 
@@ -1088,7 +1088,7 @@ fi
 | `ready-to-show` | ✅ Implemented | `src/main/window/window_setup.ts` | |
 | Window state persistence | ✅ Implemented | `src/main/window/window_state.ts` | |
 | External link handling | ✅ Implemented | `src/main/security/navigation.ts` | setWindowOpenHandler + shell.openExternal |
-| Keyboard accessibility | ✅ Implemented | `src/renderer/` | ARIA + `tests/e2e/accessibility.spec.ts` |
+| Keyboard accessibility | ✅ Implemented | `src/renderer/` | ARIA, covered by stories (focus order, ARIA names, axe in light and dark) plus the drawer focus-trap canary in `tests/e2e/accessibility.spec.ts` |
 
 ### Performance
 

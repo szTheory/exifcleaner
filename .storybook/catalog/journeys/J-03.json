@@ -12,7 +12,7 @@
 			"proof": "story+e2e",
 			"e2e": {
 				"spec": "tests/e2e/metadata-inspection.spec.ts",
-				"test": "expands a processed file to show metadata details"
+				"test": "shows metadata groups with before/after diff"
 			}
 		},
 		{

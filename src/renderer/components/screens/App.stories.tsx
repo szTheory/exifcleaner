@@ -172,13 +172,72 @@ function bodyRows(canvasElement: HTMLElement): Element[] {
 // No file chosen: the empty screen the app opens on, with no row and no Clear button.
 export const Empty: Story = {
 	parameters: { a11y: knownA11y("screens-app--empty") },
-	play: async ({ canvasElement }) => {
+	play: async ({ canvasElement, globals }) => {
 		const canvas = within(canvasElement);
 		await expect(
 			await canvas.findByRole("heading", { name: "Add files to clean" }),
 		).toBeVisible();
 		await expect(canvas.queryAllByRole("row")).toHaveLength(0);
 		await expect(canvas.queryByRole("button", { name: "Clear" })).toBeNull();
+		await expect(canvas.getByRole("main")).toBeVisible();
+		// A dark story must really render dark: the real ThemeProvider writes data-theme.
+		await waitFor(() =>
+			expect(document.documentElement.getAttribute("data-theme")).toBe(
+				globals["theme"],
+			),
+		);
+		// The deleted dark-mode e2e scanned the whole document for a rendering failure: an
+		// element with children whose computed opacity is 0. The heading's toBeVisible above
+		// checks only its own ancestor chain, so the actions row, the gear and the status
+		// bar are covered by this scan of the whole canvas. The Storybook browser projects
+		// run with reduced motion, so a mid-transition opacity cannot make it flaky.
+		const hidden = Array.from(canvasElement.querySelectorAll("*")).filter(
+			(element) =>
+				element.children.length > 0 &&
+				getComputedStyle(element).opacity === "0",
+		);
+		await expect(hidden).toEqual([]);
+		await expect(
+			canvas.getByRole("button", { name: "Open settings" }),
+		).toBeVisible();
+		// Tab order: Choose files, Choose folder, then the settings gear.
+		if (document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
+		await userEvent.tab();
+		await expect(
+			canvas.getByRole("button", { name: "Choose files…" }),
+		).toHaveFocus();
+		await userEvent.tab();
+		await expect(
+			canvas.getByRole("button", { name: "Choose folder…" }),
+		).toHaveFocus();
+		await userEvent.tab();
+		await expect(
+			canvas.getByRole("button", { name: "Open settings" }),
+		).toHaveFocus();
+	},
+};
+
+// The settings.get -> DropZone effect -> output-mode line chain, through the real App. The
+// EmptyState stories hand `saveAsCopy` in as a prop and never run that effect, so this is
+// the one story that fails when DropZone stops applying what `window.api.settings.get`
+// returns (the line then stays hidden, aria-hidden with a non-breaking space). It seeds the
+// mock through `parameters.mockApi.settings`, the same field the preview forwards to
+// `createMockApi`, and waits on the rendered line, so the effect's timing never matters.
+// The deleted app-launch e2e matched either output-mode sentence; the in-place one is
+// asserted by ui-emptystate--copy-mode-off, which also takes the prop.
+export const EmptyCopyMode: Story = {
+	parameters: {
+		a11y: knownA11y("screens-app--empty-copy-mode"),
+		mockApi: { settings: { saveAsCopy: true } },
+	},
+	play: async ({ canvasElement }) => {
+		await waitFor(() =>
+			expect(
+				canvasElement.querySelector(".empty-state__output-mode")?.textContent,
+			).toBe("Cleaned copies will be created — originals stay untouched."),
+		);
 	},
 };
 

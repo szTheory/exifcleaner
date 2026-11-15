@@ -28,6 +28,7 @@ constraints and seams; it does not reteach Electron, React, or TypeScript.
 | Understand why a file was not changed | the outcome model in file processing |
 | Check user-facing words, personas, scenarios and story coverage | `.storybook/catalog/` (GLOSSARY.md, PERSONAS.md, COVERAGE-GRID.md; `yarn catalog:check`) |
 | Look up a UI-SPEC decision (type, radii, spacing, focus, states, dark Rinse, motion, platform-owned surfaces) | `.storybook/catalog/` (UI-SPEC.md, generated from ui-spec.json; `yarn catalog:check`) |
+| Check which rendering and accessibility assertions moved from e2e to stories | `.storybook/catalog/` (TEST-SHIFT.md, generated from test-shift.json; `yarn catalog:check`) |
 
 Historical release proofs live in `docs/evidence/`. They are evidence, not onboarding
 material, and are intentionally outside this reading path.
