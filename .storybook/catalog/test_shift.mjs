@@ -800,6 +800,16 @@ export function renderTestShift(doc) {
 		"- A `deleted` item's evidence literal (at least four characters) is matched by presence in the story's play function plus the same-file helpers the play calls, one level deep, with comments removed. `args`, `parameters` and comments do not count, and a story with no play is rejected. Presence does not prove the literal belongs to the statement making the claim, and `covers` is author-attested apart from the focus-order rule (it needs `toHaveFocus` in the play).",
 		'- The dark-mode test "renders all components correctly in dark mode" ran a whole-document zero-opacity scan (elements with children whose computed opacity is 0) in the Electron window. The `screens-app--empty` play runs the same scan over the story canvas, so anything the Storybook harness renders outside the canvas is not scanned, and the play\'s `data-theme` assertion carries the dark half.',
 	);
+	lines.push(
+		"",
+		"## How to change a kept assertion",
+		"",
+		"The ledger is frozen against the baseline commit above: the `(title, code)` pairs of every expect call that existed there, less the entries marked `addedAfterBaseline`, must equal the ledger's.",
+		"",
+		'- A new test: add a ledger entry with `"addedAfterBaseline": true` and kept items only. `kept-drift` then keeps it in step with the spec.',
+		"- Editing, retitling or adding an expect inside a test that existed at the baseline is `baseline-drift` by design, even when the spec and the ledger agree. The problem message names the `(title, code)` pairs that differ.",
+		"- There is no supported edit path for that case yet. Advancing `baselineCommit` drops the `deleted` history, and a one-directional freeze or a `supersedes` field is a maintainer decision. Until then, put a changed or extra assertion in a new test and leave the baseline test untouched.",
+	);
 	return `${lines.join("\n")}\n`;
 }
 
@@ -1030,6 +1040,48 @@ function gitText(args, cwd) {
 }
 
 /**
+ * The lines of `from` that `taken` does not cover, a line counted as many times as it
+ * exceeds. Both lists are `title\0code` lines.
+ *
+ * @param {string[]} from
+ * @param {string[]} taken
+ * @returns {string[]}
+ */
+function multisetMinus(from, taken) {
+	/** @type {Map<string, number>} */
+	const counts = new Map();
+	for (const line of taken) counts.set(line, (counts.get(line) ?? 0) + 1);
+	/** @type {string[]} */
+	const left = [];
+	for (const line of from) {
+		const remaining = counts.get(line) ?? 0;
+		if (remaining > 0) counts.set(line, remaining - 1);
+		else left.push(line);
+	}
+	return left;
+}
+
+// The first five `(title, code)` pairs, each code cut at 100 code units, then a count.
+const PAIR_LIMIT = 5;
+const CODE_LIMIT = 100;
+
+/**
+ * @param {string[]} lines `title\0code` lines
+ * @returns {string}
+ */
+function pairList(lines) {
+	if (lines.length === 0) return "none";
+	const shown = lines.slice(0, PAIR_LIMIT).map((line) => {
+		const [title = "", code = ""] = line.split("\0");
+		const cut =
+			code.length > CODE_LIMIT ? `${code.slice(0, CODE_LIMIT)}…` : code;
+		return `"${title}" ${cut}`;
+	});
+	const more = lines.length - shown.length;
+	return `${shown.join(", ")}${more > 0 ? ` and ${more} more` : ""}`;
+}
+
+/**
  * The ledger against git. `baselineCommit` must be a full sha, a commit in this clone and an
  * ancestor of HEAD (the Storybook job checks out with fetch-depth: 0), and the (title, code)
  * multiset the ledger holds for each spec, less entries marked addedAfterBaseline, must equal
@@ -1094,7 +1146,7 @@ export function checkTestShiftBaseline(root, doc, options = {}) {
 			found.push(
 				problem(
 					"baseline-drift",
-					`${spec}: the ledger (${ledger.length} items) differs from the baseline commit (${baseline.length} expect calls)`,
+					`${spec}: the ledger (${ledger.length} items) differs from the baseline commit (${baseline.length} expect calls). In the baseline only: ${pairList(multisetMinus(baseline, ledger))}. In the ledger only: ${pairList(multisetMinus(ledger, baseline))}.`,
 					{ id: spec },
 				),
 			);

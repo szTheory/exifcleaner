@@ -236,3 +236,11 @@ Title kept per D-04 (never retitle a kept test; no journey pins it). It overclai
 - A story's simulated Tab is not a trusted browser Tab. The accessibility test "traps focus within settings drawer when open" stays as the real-Chromium backstop for focus handling.
 - A `deleted` item's evidence literal (at least four characters) is matched by presence in the story's play function plus the same-file helpers the play calls, one level deep, with comments removed. `args`, `parameters` and comments do not count, and a story with no play is rejected. Presence does not prove the literal belongs to the statement making the claim, and `covers` is author-attested apart from the focus-order rule (it needs `toHaveFocus` in the play).
 - The dark-mode test "renders all components correctly in dark mode" ran a whole-document zero-opacity scan (elements with children whose computed opacity is 0) in the Electron window. The `screens-app--empty` play runs the same scan over the story canvas, so anything the Storybook harness renders outside the canvas is not scanned, and the play's `data-theme` assertion carries the dark half.
+
+## How to change a kept assertion
+
+The ledger is frozen against the baseline commit above: the `(title, code)` pairs of every expect call that existed there, less the entries marked `addedAfterBaseline`, must equal the ledger's.
+
+- A new test: add a ledger entry with `"addedAfterBaseline": true` and kept items only. `kept-drift` then keeps it in step with the spec.
+- Editing, retitling or adding an expect inside a test that existed at the baseline is `baseline-drift` by design, even when the spec and the ledger agree. The problem message names the `(title, code)` pairs that differ.
+- There is no supported edit path for that case yet. Advancing `baselineCommit` drops the `deleted` history, and a one-directional freeze or a `supersedes` field is a maintainer decision. Until then, put a changed or extra assertion in a new test and leave the baseline test untouched.

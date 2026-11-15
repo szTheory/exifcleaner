@@ -478,10 +478,25 @@ describe("the real ledger", () => {
 		expect(first.endsWith("\n")).toBe(true);
 		expect(first.endsWith("\n\n")).toBe(false);
 		const headings = [...first.matchAll(/^## (.+)$/gm)].map((m) => m[1]);
-		expect(headings).toEqual([...LEDGER_SPECS, "Known limits"]);
+		expect(headings).toEqual([
+			...LEDGER_SPECS,
+			"Known limits",
+			"How to change a kept assertion",
+		]);
 		expect(first.split("\n")[0]).toBe(
 			"<!-- Generated from test-shift.json by .storybook/catalog/catalog.mjs. Do not edit: edit test-shift.json and run yarn catalog:write. -->",
 		);
+	});
+
+	test("the view tells an author how to change a kept assertion", () => {
+		const view = renderTestShift(real);
+		const section = view.slice(
+			view.indexOf("## How to change a kept assertion"),
+		);
+		expect(section).toContain("addedAfterBaseline");
+		expect(section).toContain("baseline-drift");
+		expect(section).toContain("kept-drift");
+		expect(section).toContain("maintainer decision");
 	});
 
 	test("the committed TEST-SHIFT.md equals the regenerated text", () => {
@@ -993,6 +1008,70 @@ describe("the baseline commit is read from git and fails closed", () => {
 			expects += walk.tests.reduce((sum, t) => sum + t.expects.length, 0);
 		}
 		expect({ tests, expects }).toEqual({ tests: 26, expects: 78 });
+	});
+
+	test("baseline-drift names the differing (title, code) pairs on each side", () => {
+		// One baseline item left out of the ledger: it is in the baseline only.
+		const missing = clone();
+		const dropped = entryOf(missing, SIZE_SPEC, SIZE_TITLE).items.pop();
+		if (dropped === undefined) throw new Error("no item to drop");
+		const [onlyBaseline] = checkTestShiftBaseline(repoRoot, missing);
+		expect(onlyBaseline?.code).toBe("baseline-drift");
+		expect(onlyBaseline?.message).toContain(
+			`In the baseline only: "${SIZE_TITLE}" ${dropped.code}.`,
+		);
+		expect(onlyBaseline?.message).toContain("In the ledger only: none.");
+		// An edited code with an unchanged count ("16 vs 16" reads as a bug otherwise): the
+		// message names the old pair as baseline only and the new pair as ledger only.
+		const edited = clone();
+		const item = at(entryOf(edited, SIZE_SPEC, SIZE_TITLE).items, 0);
+		const original = item.code;
+		item.code = `${original} && true`;
+		const [both] = checkTestShiftBaseline(repoRoot, edited);
+		expect(both?.message).toContain(`"${SIZE_TITLE}" ${original}.`);
+		expect(both?.message).toContain(
+			`In the ledger only: "${SIZE_TITLE}" ${original} && true.`,
+		);
+		// A new test marked addedAfterBaseline is outside the comparison, so it is not drift.
+		const added = clone();
+		specOf(added, SIZE_SPEC).push({
+			title: "a test added after the baseline",
+			addedAfterBaseline: true,
+			items: [
+				{
+					n: 1,
+					code: "expect(1).toBe(1)",
+					verdict: "kept",
+					reason: "real-electron",
+				},
+			],
+		});
+		expect(baselineCodes(added)).toEqual([]);
+	});
+
+	test("baseline-drift caps the pair list at five and counts the rest", () => {
+		const doc = clone();
+		const total = specOf(doc, "i18n").flatMap((entry) => entry.items).length;
+		expect(total).toBeGreaterThan(5);
+		doc.specs["i18n"] = [];
+		const [found] = checkTestShiftBaseline(repoRoot, doc);
+		expect(found?.code).toBe("baseline-drift");
+		const only =
+			/In the baseline only: (.*)\. In the ledger only: none\.$/.exec(
+				found?.message ?? "",
+			)?.[1];
+		expect(only).toBeDefined();
+		expect(only).toContain(`and ${total - 5} more`);
+		expect((only?.match(/"[^"]+" expect/g) ?? []).length).toBe(5);
+	});
+
+	test("a long code is cut in the drift message", () => {
+		const doc = clone();
+		const item = at(entryOf(doc, SIZE_SPEC, SIZE_TITLE).items, 0);
+		item.code = `expect(${"x".repeat(300)}).toBe(1)`;
+		const [found] = checkTestShiftBaseline(repoRoot, doc);
+		expect(found?.message).toContain(`expect(${"x".repeat(93)}…`);
+		expect(found?.message).not.toContain("x".repeat(101));
 	});
 
 	test("a malformed baselineCommit is bad-baseline before any git call", () => {
