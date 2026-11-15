@@ -48,6 +48,16 @@ export function childEnv(
 	return { ...GIT_ENV, HOME: process.env["HOME"] ?? "", ...extra };
 }
 
+// `git commit` otherwise starts a detached `git maintenance run --auto`
+// that creates and removes .git/objects/maintenance.lock while a test is
+// walking the directory (an ENOENT in snapshotDir on a loaded runner; commit
+// 836701f fixed it for makeCatalogRepo). Every temp repo a test snapshots calls
+// this before its first commit.
+export function disableBackgroundMaintenance(repo: string): void {
+	git(repo, ["config", "maintenance.auto", "false"]);
+	git(repo, ["config", "gc.auto", "0"]);
+}
+
 // A fresh git repository whose `main` holds a copy of every CHECK_INPUTS entry.
 export function makeCatalogRepo(root: string = repoRoot): string {
 	const repo = fs.realpathSync(
@@ -66,11 +76,7 @@ export function makeCatalogRepo(root: string = repoRoot): string {
 	git(repo, ["config", "user.name", "Catalog Test"]);
 	git(repo, ["config", "user.email", "catalog@example.invalid"]);
 	git(repo, ["config", "commit.gpgsign", "false"]);
-	// `git commit` otherwise starts a detached `git maintenance run --auto`
-	// that creates and removes .git/objects/maintenance.lock while a test is
-	// walking the directory (an ENOENT in snapshotDir on a loaded runner).
-	git(repo, ["config", "maintenance.auto", "false"]);
-	git(repo, ["config", "gc.auto", "0"]);
+	disableBackgroundMaintenance(repo);
 	git(repo, ["add", "-A"]);
 	git(repo, ["commit", "-q", "-m", "base"]);
 	return repo;
