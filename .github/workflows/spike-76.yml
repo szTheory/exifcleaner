@@ -57,9 +57,6 @@ jobs:
     env:
       SPIKE_IMAGE: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
       SPIKE_LANE: ${{ matrix.lane }}
-      # The host image version is not visible from inside a container job, so each lane logs
-      # the runner it landed on (name, OS, arch, environment) plus its kernel and CPU below.
-      SPIKE_RUNNER: ${{ runner.name }} / ${{ runner.os }} ${{ runner.arch }} ${{ runner.environment }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -72,8 +69,13 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --ignore-scripts
 
-      # D-24: log what could make two runners differ (kernel, CPU model, runner image, fonts).
+      # D-24: log what could make two runners differ (kernel, CPU model, runner, fonts). The
+      # host image version is not visible from inside a container job, so each lane logs the
+      # runner it landed on (name, OS, arch, environment) plus its kernel and CPU. The runner
+      # context exists only at step level, so SPIKE_RUNNER is set on the steps that read it.
       - name: Log environment
+        env:
+          SPIKE_RUNNER: ${{ runner.name }} / ${{ runner.os }} ${{ runner.arch }} ${{ runner.environment }}
         run: |
           mkdir -p spike-out
           {
@@ -91,6 +93,8 @@ jobs:
       # Both lanes run the capture (24 images, two plants, the glyph-coverage probe) and the
       # S2 and S4 measurements: two runners per run (D-24).
       - name: Capture and measure
+        env:
+          SPIKE_RUNNER: ${{ runner.name }} / ${{ runner.os }} ${{ runner.arch }} ${{ runner.environment }}
         run: yarn vitest run --config spike/vitest.spike.config.ts
 
       # Lane a builds the non-gating before contact sheet (D-20) with the chromium already
