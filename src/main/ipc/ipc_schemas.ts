@@ -1,3 +1,4 @@
+import path from "node:path";
 import { z } from "zod";
 
 const filePathSchema = z
@@ -5,6 +6,11 @@ const filePathSchema = z
 	.min(1)
 	.refine((filePath) => !/[\r\n]/u.test(filePath), {
 		message: "Paths containing line breaks are not supported",
+	})
+	// Every legitimate path (dialog, drag-and-drop, folder expansion) is absolute. Requiring
+	// it also means a path can never start with "-" and be read by ExifTool as an option.
+	.refine((filePath) => path.isAbsolute(filePath), {
+		message: "Only absolute paths are supported",
 	});
 
 // invoke channels (renderer -> main, request-response)

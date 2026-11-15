@@ -32,10 +32,27 @@ import { createContainer, initContainer } from "./container";
 import type { Container } from "./container";
 import { hardenNavigation } from "./security/navigation";
 import { installPermissionGate } from "./security/permissions";
-import { registerAllowedSender, unregisterSender } from "./ipc/ipc_validation";
+import {
+	registerAllowedSender,
+	setTrustedSenderUrlPolicy,
+	unregisterSender,
+} from "./ipc/ipc_validation";
+import {
+	isAppUrl,
+	rendererEntryUrl,
+	type AppUrlPolicy,
+} from "./security/app_url";
 
 function setupUserModelId(): void {
 	app.setAppUserModelId(packageJson.build.appId);
+}
+
+function appUrlPolicy(): AppUrlPolicy {
+	return {
+		isPackaged: app.isPackaged,
+		rendererEntryUrl: rendererEntryUrl(),
+		devServerUrl: process.env["ELECTRON_RENDERER_URL"],
+	};
 }
 
 let activeBrowserWindow: BrowserWindow | null = null;
@@ -50,7 +67,9 @@ function getActiveBrowserWindow(): BrowserWindow | null {
 
 /** Attach security and sender state that belongs to one window lifetime. */
 export function attachWindow(browserWindow: BrowserWindow): void {
+	const policy = appUrlPolicy();
 	activeBrowserWindow = browserWindow;
+	setTrustedSenderUrlPolicy((url) => isAppUrl(url, policy));
 	registerAllowedSender(browserWindow.webContents.id);
 	browserWindow.webContents.once("destroyed", () => {
 		unregisterSender(browserWindow.webContents.id);
@@ -58,7 +77,7 @@ export function attachWindow(browserWindow: BrowserWindow): void {
 			activeBrowserWindow = null;
 		}
 	});
-	hardenNavigation(browserWindow);
+	hardenNavigation(browserWindow, policy);
 }
 
 async function initializeProcess(): Promise<Container> {

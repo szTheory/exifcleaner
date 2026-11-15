@@ -2,6 +2,7 @@ import { BrowserWindow, app, nativeTheme } from "electron";
 import path from "path";
 import { isMac, isWindows } from "../../common";
 import { iconPath } from "../../infrastructure";
+import { rendererEntryPath } from "../security/app_url";
 import { loadWindowState, setupWindowStatePersistence } from "./window_state";
 
 const DEFAULT_WINDOW_WIDTH = 580;
@@ -45,7 +46,7 @@ function mainWindowLoadUrl(browserWindow: BrowserWindow) {
 	if (!app.isPackaged && process.env["ELECTRON_RENDERER_URL"]) {
 		browserWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
 	} else {
-		browserWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
+		browserWindow.loadFile(rendererEntryPath());
 	}
 }
 

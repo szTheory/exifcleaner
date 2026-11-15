@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { installDocumentDropGuard } from "./drop_guard";
 import "./styles/reset.css";
 import "./styles/tokens.css";
 import "./styles/app.css";
@@ -14,6 +15,8 @@ import "./styles/status_bar.css";
 import "./styles/status_icon.css";
 import "./styles/toast.css";
 import "./styles/type_pill.css";
+
+installDocumentDropGuard(document);
 
 const rootEl = document.getElementById("root");
 if (!rootEl) {
