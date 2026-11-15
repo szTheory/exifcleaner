@@ -1,20 +1,25 @@
 // One CLI for the generated catalog files (Phase 71, D-03).
 //
 //   node .storybook/catalog/catalog.mjs --check   fail on drift or invalid data
-//   node .storybook/catalog/catalog.mjs --write   regenerate generated files
+//   node .storybook/catalog/catalog.mjs --write   regenerate generated files and
+//                                                 prune stale copy findings
 //
-// JSON is the authored source and is never rewritten; only generated Markdown
-// is. Every data path resolves from the current working directory, so a test
-// can point the real script at a temporary copy of CHECK_INPUTS.
+// JSON is the authored source and is never rewritten, with one exception:
+// --write removes the copy findings register entries that went stale (a fixed
+// deviation) and refuses when the register has any other problem. Everything
+// else it writes is generated. Every data path resolves from the current
+// working directory, so a test can point the real script at a temporary copy of
+// CHECK_INPUTS.
 import "./cache_dir.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import { isMainModule } from "../../scripts/is_main_module.mjs";
-import { compareCodeUnits, readJson } from "./closed.mjs";
+import { canonicalJson, compareCodeUnits, readJson } from "./closed.mjs";
 import {
 	COPY_FINDINGS_PATH,
 	check as checkRegister,
 	loadObservation,
+	pruneWorkingTree,
 } from "./copy_findings_ratchet.mjs";
 import { renderFindings } from "./findings_view.mjs";
 import {
@@ -174,11 +179,17 @@ function firstProblem(problems) {
  * (scripts/findings_ratchet.mjs); this only renders what the files hold.
  *
  * @param {string} root
+ * @param {unknown} [copyFindings] the register to cross-reference; read from disk when
+ *   absent (--write passes the pruned register so the view matches what it writes)
  */
-function findingsView(root) {
+function findingsView(root, copyFindings) {
 	return renderFindings({
 		baseline: /** @type {any} */ (readJson(root, KNOWN_FINDINGS_PATH)),
-		copyFindings: /** @type {any} */ (readJson(root, COPY_FINDINGS_PATH)),
+		copyFindings: /** @type {any} */ (
+			copyFindings === undefined
+				? readJson(root, COPY_FINDINGS_PATH)
+				: copyFindings
+		),
 	});
 }
 
@@ -283,9 +294,11 @@ function indexProblems(root, indexPath, stories) {
  * Every generated file as `[relPath, expectedText]`.
  *
  * @param {string} root
+ * @param {unknown} [copyFindings] the register FINDINGS.md cross-references; read from
+ *   disk when absent
  * @returns {Promise<Array<[string, string]>>}
  */
-export async function generatedFiles(root) {
+export async function generatedFiles(root, copyFindings) {
 	const { doc, problems } = glossaryProblems(root);
 	if (problems.length > 0) {
 		const first = problems[0];
@@ -319,7 +332,7 @@ export async function generatedFiles(root) {
 		[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))],
 		[PERSONAS_MD_PATH, renderPersonas(/** @type {any} */ (catalog.doc))],
 		[JOURNEYS_MD_PATH, renderJourneys(/** @type {any} */ (journeys.journeys))],
-		[FINDINGS_MD_PATH, findingsView(root)],
+		[FINDINGS_MD_PATH, findingsView(root, copyFindings)],
 		[GRID_JSON_PATH, renderGridJson(grid.model)],
 		[GRID_MD_PATH, renderGridMarkdown(grid.model)],
 		[UI_SPEC_MD_PATH, renderUiSpec(/** @type {any} */ (uiSpec.doc))],
@@ -431,11 +444,26 @@ export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 }
 
 /**
+ * Prunes the stale copy findings and regenerates every generated file in one run.
+ * Everything is computed before the first write, so a refusal (any register problem
+ * other than staleness) or an invalid source changes nothing, and the register is
+ * written once, whole, with canonicalJson.
+ *
  * @param {string} root
- * @returns {Promise<number>} files written
+ * @returns {Promise<{ files: number, pruned: number }>} generated files checked, stale entries removed
  */
 export async function writeCatalog(root) {
-	const files = await generatedFiles(root);
+	const register = pruneWorkingTree(root);
+	if (!register.ok) {
+		throw new Error(`refusing to write: ${describe(register.problems)}`);
+	}
+	const files = await generatedFiles(root, register.doc);
+	if (register.pruned > 0) {
+		fs.writeFileSync(
+			path.join(root, COPY_FINDINGS_PATH),
+			canonicalJson(register.doc),
+		);
+	}
 	for (const [relPath, expected] of files) {
 		const absolute = path.join(root, relPath);
 		let actual = null;
@@ -448,7 +476,7 @@ export async function writeCatalog(root) {
 			fs.writeFileSync(absolute, expected);
 		}
 	}
-	return files.length;
+	return { files: files.length, pruned: register.pruned };
 }
 
 function describe(problems) {
@@ -472,8 +500,10 @@ export async function main(argv = process.argv.slice(2)) {
 		}
 		const root = process.cwd();
 		if (writing) {
-			const count = await writeCatalog(root);
-			console.log(`✓ CATALOG WRITE — ${count} files`);
+			const { files, pruned } = await writeCatalog(root);
+			console.log(
+				`✓ CATALOG WRITE — ${files} files${pruned > 0 ? `, pruned ${pruned} stale copy findings` : ""}`,
+			);
 			return 0;
 		}
 		const result = await checkCatalog({

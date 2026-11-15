@@ -72,4 +72,10 @@ export function prune(subject: {
 	| { ok: true; doc: CopyFindingsDocument }
 	| { ok: false; problems: RatchetProblem[] };
 
+export function pruneWorkingTree(
+	root: string,
+):
+	| { ok: true; doc: CopyFindingsDocument; pruned: number }
+	| { ok: false; problems: RatchetProblem[] };
+
 export function main(argv?: string[]): number;
