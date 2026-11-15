@@ -43,6 +43,7 @@ import {
 	loadJourneyInputs,
 	renderJourneys,
 } from "./journeys.mjs";
+import { checkManifest, loadManifestInputs } from "./manifest.mjs";
 import { readMergeBase, resolveBaseRef } from "./merge_base.mjs";
 import {
 	CATALOG_PATH,
@@ -342,8 +343,10 @@ export async function generatedFiles(root, copyFindings) {
 }
 
 /**
- * The drift layer (generated files), the copy findings register layer and
- * the coverage grid gap ratchet.
+ * The scenario manifest layer (a story no scenario lists, Phase 75.1 D1), the
+ * drift layer (generated files), the copy findings register layer and the
+ * coverage grid gap ratchet. The manifest problems are appended to the final
+ * list, never returned early, so an unmapped story cannot hide the other layers.
  *
  * @param {{ root: string, base?: string | undefined, index?: string | undefined, zeroGaps?: boolean | undefined, tiers?: readonly string[] | undefined }} options
  * @returns {Promise<{ ok: boolean, problems: Array<{ code: string, message: string }>, files: number, notes: string[] }>}
@@ -377,6 +380,9 @@ export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 	if (testShift.problems.length > 0) {
 		return { ok: false, problems: testShift.problems, files: 0, notes: [] };
 	}
+	const manifest = checkManifest(await loadManifestInputs(root)).map(
+		(found) => ({ code: found.code, message: found.message }),
+	);
 	const stale = [];
 	const files = [
 		[GLOSSARY_MD_PATH, renderGlossary(/** @type {any} */ (doc))],
@@ -425,6 +431,7 @@ export async function checkCatalog({ root, base, index, zeroGaps, tiers }) {
 		head: JSON.parse(renderGridJson(grid.model)),
 	});
 	const all = [
+		...manifest,
 		...stale,
 		...register.problems,
 		...ratchet.problems,
