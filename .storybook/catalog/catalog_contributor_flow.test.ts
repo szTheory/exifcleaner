@@ -25,6 +25,8 @@ const CATALOG = ".storybook/catalog/catalog.mjs";
 const REGISTER = ".storybook/catalog/copy-findings.json";
 const FINDINGS_MD = ".storybook/catalog/FINDINGS.md";
 const KNOWN_FINDINGS = "docs/evidence/known-findings.json";
+const EN_JSON = ".resources/locales/en.json";
+const UNLISTED_KEY = "zz.plantedUnlisted";
 const PLANTED_SLUG = "zz-planted-stale";
 
 function withRepo(body: (repo: string) => void): void {
@@ -158,6 +160,37 @@ describe("fix a copy deviation (D2)", () => {
 			expect(again.status, again.stderr).toBe(0);
 			expect(again.stdout).not.toContain("pruned");
 			assertDirEffect(settled, snapshotDir(repo), {});
+		});
+	});
+
+	test("shown red: --write refuses on an unlisted deviation next to a stale entry, names it and changes nothing", () => {
+		withRepo((repo) => {
+			const { fingerprint: stale } = plantStale(repo);
+			// An unlisted deviation: a new en string whose wording the brand lint bans.
+			const enPath = path.join(repo, EN_JSON);
+			const en = JSON.parse(fs.readFileSync(enPath, "utf8")) as Record<
+				string,
+				string
+			>;
+			en[UNLISTED_KEY] = "Just clean it";
+			fs.writeFileSync(enPath, `${JSON.stringify(en, null, "\t")}\n`);
+			git(repo, ["add", "-A"]);
+			git(repo, ["commit", "-q", "-m", "plant an unlisted deviation"]);
+			const unlisted = fingerprintFor("banned", [
+				"banned.just",
+				`en:${UNLISTED_KEY}`,
+			]);
+
+			const before = snapshotDir(repo);
+			const result = run(repo, ["--write"]);
+			expect(result.status, result.stdout).toBe(1);
+			expect(result.stderr).toContain("refusing to write");
+			expect(result.stderr).toContain("unlisted");
+			expect(result.stderr).toContain(unlisted);
+			assertDirEffect(before, snapshotDir(repo), {});
+			expect(fs.readFileSync(path.join(repo, REGISTER), "utf8")).toContain(
+				stale,
+			);
 		});
 	});
 
