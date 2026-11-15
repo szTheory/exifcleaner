@@ -120,3 +120,48 @@ jobs:
             spike-out/contact-sheet.png
             spike-out/manifest.json
           retention-days: 90
+
+  # S1 runs bare on ubuntu-24.04, not in the container: a11y_p72_recheck names entries that
+  # reproduce only on Linux CI (LINUX_ONLY_ENTRIES), and the storybook job is the authority
+  # the baseline was measured on (D-19). The scratch palette edit to tokens.css lives only in
+  # this job's working tree; nothing is committed back.
+  s1:
+    name: s1
+    needs: base-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
+
+      # The pinned brand zip (brand.pin.json, size and sha256 verified, fail closed).
+      - name: Fetch the pinned brand
+        run: yarn brand:fetch
+
+      - name: Disable AppArmor restriction (Ubuntu 24.04)
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Apply the scratch palette from the pinned brand
+        run: node spike/s1_palette.mjs
+
+      - name: Count the cleared colour fingerprints
+        run: node spike/s1_count.mjs
+
+      - name: Upload S1 result
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: spike-s1
+          path: spike-out/
+          retention-days: 7
