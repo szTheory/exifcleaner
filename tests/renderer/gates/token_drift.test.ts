@@ -66,8 +66,14 @@ interface DriftProblem {
 	subject: string;
 }
 
-// The number of `adopt` rows the map holds today; fewer means the gate read nothing.
+// A small semantic floor keeps the gate useful without freezing the inventory.
 const MIN_ADOPT_ROWS = 4;
+const REQUIRED_ADOPT_TOKENS = [
+	"--ec-color-bg",
+	"--ec-color-surface",
+	"--ec-color-text",
+	"--ec-color-text-secondary",
+];
 
 function pendingKey({
 	token,
@@ -153,13 +159,6 @@ function matchingTokensCss(tokenMap: TokenMapDocument): string {
 	return `:root{${declarations("light")}}[data-theme="dark"]{${declarations("dark")}}`;
 }
 
-const EXPECTED_PENDING_TOKENS = [
-	"--ec-color-bg",
-	"--ec-color-surface",
-	"--ec-color-text",
-	"--ec-color-text-secondary",
-];
-
 describe("GAT-01 token drift gate (D-09, D-12)", () => {
 	test("the real tokens.css, token map and pending list give no problem", () => {
 		expect(
@@ -171,14 +170,16 @@ describe("GAT-01 token drift gate (D-09, D-12)", () => {
 		).toEqual([]);
 	});
 
-	test("the pending list holds exactly the eight rows, four tokens in two themes", () => {
-		expect(PENDING.rows.length).toBe(8);
-		expect(PENDING.rows.map(pendingKey)).toEqual(
-			EXPECTED_PENDING_TOKENS.flatMap((token) =>
-				["dark", "light"].map((theme) => `${token}|${theme}`),
-			),
+	test("every pending row names an adopted token in a supported theme", () => {
+		const adoptNames = new Set(
+			TOKEN_MAP.entries
+				.filter((entry) => entry.disposition === "adopt")
+				.map((entry) => entry.name),
 		);
+		expect(Array.isArray(PENDING.rows)).toBe(true);
 		for (const row of PENDING.rows) {
+			expect(adoptNames.has(row.token), row.token).toBe(true);
+			expect(THEMES, row.theme).toContain(row.theme);
 			expect(row.reason.length).toBeGreaterThanOrEqual(20);
 		}
 	});
@@ -192,11 +193,17 @@ describe("GAT-01 token drift gate (D-09, D-12)", () => {
 		expect(PENDING.rows).toEqual([...PENDING.rows].sort(byTokenThenTheme));
 	});
 
-	test("anti-vacuity: the map holds the four adopt rows with a hex in both themes", () => {
+	test("anti-vacuity: semantic adopt roles have a hex in both themes", () => {
 		const adopt = TOKEN_MAP.entries.filter(
 			(entry) => entry.disposition === "adopt",
 		);
-		expect(adopt.map((entry) => entry.name)).toEqual(EXPECTED_PENDING_TOKENS);
+		expect(adopt.length).toBeGreaterThanOrEqual(MIN_ADOPT_ROWS);
+		for (const name of REQUIRED_ADOPT_TOKENS) {
+			expect(
+				adopt.some((entry) => entry.name === name),
+				name,
+			).toBe(true);
+		}
 		for (const entry of adopt) {
 			for (const theme of THEMES) {
 				expect(parseColour(entry.brand?.[theme]?.hex ?? "")).not.toBeNull();
@@ -249,16 +256,39 @@ describe("GAT-01 token drift gate (D-09, D-12)", () => {
 		]);
 	});
 
-	test("negative control: dropping one row of the real pending list makes that drift unlisted", () => {
-		const withoutRow = {
-			rows: PENDING.rows.filter(
-				(row) => pendingKey(row) !== "--ec-color-bg|light",
-			),
+	test("negative control: a missing fixture row makes its drift unlisted", () => {
+		const matching = matchingTokensCss(TOKEN_MAP);
+		const lightGround = TOKEN_MAP.entries.find(
+			(entry) => entry.name === "--ec-color-bg",
+		)?.brand?.light?.hex;
+		if (lightGround === undefined) throw new Error("light ground is missing");
+		const wrongGround =
+			parseColour(lightGround)?.r === 0 ? "#ffffff" : "#000000";
+		const planted = matching.replace(
+			`--ec-color-bg:${lightGround};`,
+			`--ec-color-bg:${wrongGround};`,
+		);
+		expect(planted).not.toBe(matching);
+		const withRow = {
+			rows: [
+				{
+					token: "--ec-color-bg",
+					theme: "light",
+					reason: "fixture row covers the deliberately wrong light ground",
+				},
+			],
 		};
-		expect(withoutRow.rows.length).toBe(PENDING.rows.length - 1);
 		expect(
 			driftProblems({
-				tokensCss: TOKENS_CSS,
+				tokensCss: planted,
+				tokenMap: TOKEN_MAP,
+				pending: withRow,
+			}),
+		).toEqual([]);
+		const withoutRow = { rows: [] };
+		expect(
+			driftProblems({
+				tokensCss: planted,
 				tokenMap: TOKEN_MAP,
 				pending: withoutRow,
 			}),

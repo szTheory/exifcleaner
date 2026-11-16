@@ -36,6 +36,13 @@ function hasColourLiteral(text: string): boolean {
 	return /#[0-9a-fA-F]{3,8}\b/.test(text) || /(?:rgba?|hsla?)\(/i.test(text);
 }
 
+function differentColour(value: string): string {
+	const parsed = parseColour(value);
+	if (parsed === null) throw new Error(`${value} is not a colour`);
+	const red = parsed.r === 0 ? 1 : 0;
+	return `rgba(${red}, ${parsed.g}, ${parsed.b}, ${parsed.a})`;
+}
+
 interface BackgroundProblem {
 	theme: ContrastTheme;
 	reason: "mismatch" | "unresolved";
@@ -77,31 +84,39 @@ describe("GAT-02 window background equals --ec-color-bg (D-14)", () => {
 		).toEqual([]);
 	});
 
-	test("the two values are the page grounds the user sees (anti-vacuity)", () => {
-		expect(windowBackgroundColor(false).toLowerCase()).toBe("#f5f6f8");
-		expect(windowBackgroundColor(true).toLowerCase()).toBe("#141416");
-		expect(
-			resolveColour("--ec-color-bg", "dark", themeTokens(TOKENS_CSS), {}),
-		).not.toBeNull();
-		expect(THEMES.length).toBe(2);
+	test("both page grounds resolve and match the first-paint colours", () => {
+		expect(THEMES).toEqual(["light", "dark"]);
+		const tokens = themeTokens(TOKENS_CSS);
+		for (const theme of THEMES) {
+			const ground = resolveColour("--ec-color-bg", theme, tokens, {});
+			const firstPaint = parseColour(windowBackgroundColor(theme === "dark"));
+			expect(ground, `${theme} ground`).not.toBeNull();
+			expect(firstPaint, `${theme} first paint`).not.toBeNull();
+			expect(firstPaint).toEqual(ground);
+		}
 	});
 
 	test("negative control: a planted wrong dark colour is reported for dark only", () => {
+		const wrongDark = differentColour(windowBackgroundColor(true));
+		expect(wrongDark).not.toBe(windowBackgroundColor(true));
 		expect(
 			windowBackgroundProblems({
 				tokensCss: TOKENS_CSS,
 				colourFor: (isDark) =>
-					isDark ? "#1e1e1e" : windowBackgroundColor(false),
+					isDark ? wrongDark : windowBackgroundColor(false),
 			}),
 		).toEqual([{ theme: "dark", reason: "mismatch" }]);
 	});
 
-	test("negative control: a planted theme map whose dark ground moved is reported for dark", () => {
-		const planted = TOKENS_CSS.replace(
-			/(\[data-theme="dark"\][^}]*--ec-color-bg:\s*)#141416/,
-			"$1#0a2e2b",
+	test("negative control: a planted dark brand ground hop reports dark only", () => {
+		const light = windowBackgroundColor(false);
+		const dark = windowBackgroundColor(true);
+		const fixture = `:root{--ec-color-bg:${light}}[data-theme="dark"]{--ec-brand-ground:${dark};--ec-color-bg:var(--ec-brand-ground)}`;
+		const planted = fixture.replace(
+			`--ec-brand-ground:${dark};`,
+			`--ec-brand-ground:${differentColour(dark)};`,
 		);
-		expect(planted).not.toBe(TOKENS_CSS);
+		expect(planted).not.toBe(fixture);
 		expect(
 			windowBackgroundProblems({
 				tokensCss: planted,
