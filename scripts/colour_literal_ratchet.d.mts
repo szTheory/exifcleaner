@@ -37,5 +37,13 @@ export function ratchetProblems(subject: {
 
 export function main(
 	argv?: string[],
-	options?: { root?: string | undefined },
+	options?: {
+		root?: string | undefined;
+		readBase?:
+			| ((
+					relPath: string,
+					options: { ref: string; cwd: string },
+			  ) => { mergeBase: string; base: unknown })
+			| undefined;
+	},
 ): number;

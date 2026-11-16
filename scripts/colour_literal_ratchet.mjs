@@ -1,6 +1,6 @@
 // Colour-literal ratchet over src/ (Phase 76, GAT-03, D-15).
 //
-//   node scripts/colour_literal_ratchet.mjs --check
+//   node scripts/colour_literal_ratchet.mjs --check [--base <ref>]
 //   node scripts/colour_literal_ratchet.mjs --write
 //
 // Every colour literal under src/ outside src/renderer/styles/tokens.css is keyed in
@@ -25,7 +25,9 @@
 // as "#add" in a selector string) is read as one; rename the id. The scan is linear: one pass
 // with sticky patterns and a parenthesis depth counter, no nested quantifiers (T-76-18).
 //
-// The merge-base check (the baseline may only shrink, D-10) is scripts/shrink_only_check.mjs.
+// `--check` also runs the merge-base comparison (the baseline may only shrink, D-10) through
+// the registry row of scripts/shrink_only_check.mjs, which the ci.yml brand step runs for both
+// gate data files; a missing base ref fails closed.
 import fs from "node:fs";
 import path from "node:path";
 import { isMainModule } from "./is_main_module.mjs";
@@ -33,6 +35,14 @@ import {
 	cssDeclarations,
 	stripScriptComments,
 } from "../.storybook/catalog/css_scan.mjs";
+import {
+	readMergeBase,
+	resolveBaseRef,
+} from "../.storybook/catalog/merge_base.mjs";
+import {
+	SHRINK_ONLY_REGISTRY,
+	shrinkOnlyProblems,
+} from "./shrink_only_check.mjs";
 import {
 	colourLiterals,
 	compareCodeUnits,
@@ -411,23 +421,43 @@ export function ratchetProblems({ scan, baseline }) {
 
 /**
  * @param {string[]} argv
- * @param {{ root?: string | undefined }} [options]
+ * @returns {{ writing: boolean, base: string | undefined }}
+ */
+function parseArguments(argv) {
+	let check = false;
+	let writing = false;
+	/** @type {string | undefined} */
+	let base;
+	for (let index = 0; index < argv.length; index += 1) {
+		const argument = argv[index];
+		if (argument === "--check") check = true;
+		else if (argument === "--write") writing = true;
+		else if (argument === "--base") {
+			base = argv[index + 1];
+			if (base === undefined || base === "" || base.startsWith("--")) {
+				throw new Error("--base needs a ref");
+			}
+			index += 1;
+		} else {
+			throw new Error(`unknown argument: ${argument}`);
+		}
+	}
+	if (writing === check) {
+		throw new Error("pass exactly one of --check or --write");
+	}
+	return { writing, base };
+}
+
+/**
+ * @param {string[]} argv
+ * @param {{ root?: string | undefined, readBase?: typeof readMergeBase | undefined }} [options]
  * @returns {number} exit code
  */
 export function main(argv = process.argv.slice(2), options = {}) {
 	try {
 		const root = options.root ?? process.cwd();
-		const flags = new Set(argv);
-		const unknown = argv.filter(
-			(argument) => argument !== "--check" && argument !== "--write",
-		);
-		if (unknown.length > 0) {
-			throw new Error(`unknown argument: ${unknown.join(" ")}`);
-		}
-		const writing = flags.has("--write");
-		if (writing === flags.has("--check")) {
-			throw new Error("pass exactly one of --check or --write");
-		}
+		const readBase = options.readBase ?? readMergeBase;
+		const { writing, base: explicitBase } = parseArguments(argv);
 		const scan = scanColourLiterals({ root });
 		if (writing) {
 			const target = path.join(root, BASELINE_PATH);
@@ -453,6 +483,19 @@ export function main(argv = process.argv.slice(2), options = {}) {
 			);
 		}
 		const problems = ratchetProblems({ scan, baseline });
+		const entry = SHRINK_ONLY_REGISTRY.find(
+			(registered) => registered.path === BASELINE_PATH,
+		);
+		if (entry === undefined) {
+			throw new Error(
+				`${BASELINE_PATH} is missing from the shrink-only registry`,
+			);
+		}
+		const ref = resolveBaseRef(explicitBase, process.env);
+		const { base } = readBase(BASELINE_PATH, { ref, cwd: root });
+		for (const problem of shrinkOnlyProblems({ entry, head: baseline, base })) {
+			problems.push({ code: problem.code, message: problem.message });
+		}
 		if (problems.length > 0) {
 			console.error(
 				`✗ COLOUR LITERAL RATCHET FAILED:\n${problems.map((problem) => `  ${problem.code}: ${problem.message}`).join("\n")}`,
@@ -460,7 +503,7 @@ export function main(argv = process.argv.slice(2), options = {}) {
 			return 1;
 		}
 		console.log(
-			`✓ COLOUR LITERAL RATCHET PASSED — ${scan.rows.length} rows in ${new Set(scan.rows.map((row) => row.file)).size} files`,
+			`✓ COLOUR LITERAL RATCHET PASSED — ${scan.rows.length} rows in ${new Set(scan.rows.map((row) => row.file)).size} files${base === null ? " (bootstrap)" : ""}`,
 		);
 		return 0;
 	} catch (error) {

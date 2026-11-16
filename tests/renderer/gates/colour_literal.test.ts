@@ -274,12 +274,17 @@ describe("GAT-03 scan behaviour on temp trees", () => {
 		}
 	});
 
+	// The merge-base read is injected: these trees are not git repositories, and the real
+	// read is tested against a temp repository in shrink_only.test.ts.
+	const bootstrap = (): { mergeBase: string; base: unknown } => ({
+		mergeBase: "0000000",
+		base: null,
+	});
+
 	test("the CLI writes the baseline, passes on it, and is red on a planted literal", () => {
 		const root = makeTree({
 			"src/renderer/styles/a.css": ".a { color: #ffffff; }\n",
-			[TOKENS_CSS]:
-				':root { --a: #007AFF; } [data-theme="dark"] { --a: #007AFF; }\n',
-			[ACCENT_TS]: 'export const ACCENT = "#007AFF";\n',
+			...ACCENT_FILES,
 		});
 		const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
 		const error = vi
@@ -289,16 +294,69 @@ describe("GAT-03 scan behaviour on temp trees", () => {
 		const written = fs.readFileSync(path.join(root, BASELINE_PATH), "utf8");
 		expect(written.endsWith("\n")).toBe(true);
 		expect(written).toContain('\t"schemaVersion": 1');
-		expect(main(["--check"], { root })).toBe(0);
+		expect(main(["--check"], { root, readBase: bootstrap })).toBe(0);
 		fs.writeFileSync(
 			path.join(root, "src/renderer/styles/planted.css"),
 			".planted { color: #123456; }\n",
 		);
-		expect(main(["--check"], { root })).toBe(1);
+		expect(main(["--check"], { root, readBase: bootstrap })).toBe(1);
 		expect(error.mock.calls.flat().join("\n")).toContain("#123456");
 		expect(log).toHaveBeenCalled();
 		expect(main([], { root })).toBe(1);
 		expect(main(["--write", "--check"], { root })).toBe(1);
+		expect(main(["--check", "--nope"], { root })).toBe(1);
+		expect(main(["--check", "--base"], { root })).toBe(1);
+	});
+
+	test("--check runs the merge-base comparison: a row the base lacks is added, even when the scan matches", () => {
+		const root = makeTree({
+			"src/renderer/styles/a.css":
+				".a { color: #ffffff; background: #eeeeee; }\n",
+			...ACCENT_FILES,
+		});
+		const error = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+		vi.spyOn(console, "log").mockImplementation(() => undefined);
+		expect(main(["--write"], { root })).toBe(0);
+		const base = {
+			schemaVersion: 1,
+			rows: [
+				{ file: "src/renderer/styles/a.css", literal: "#ffffff", count: 1 },
+			],
+		};
+		const readBase = (
+			relPath: string,
+			options: { ref: string; cwd: string },
+		): { mergeBase: string; base: unknown } => {
+			expect(relPath).toBe(BASELINE_PATH);
+			expect(options.ref).toBe("origin/other");
+			expect(options.cwd).toBe(root);
+			return { mergeBase: "1111111", base };
+		};
+		expect(
+			main(["--check", "--base", "origin/other"], { root, readBase }),
+		).toBe(1);
+		expect(error.mock.calls.flat().join("\n")).toContain(
+			"added: GAT-03 baseline: src/renderer/styles/a.css|#eeeeee is new against the merge-base",
+		);
+	});
+
+	test("--check fails closed when the base ref cannot be read", () => {
+		const root = makeTree({
+			"src/renderer/styles/a.css": ".a { color: #ffffff; }\n",
+			...ACCENT_FILES,
+		});
+		const error = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+		vi.spyOn(console, "log").mockImplementation(() => undefined);
+		expect(main(["--write"], { root })).toBe(0);
+		const readBase = (): { mergeBase: string; base: unknown } => {
+			throw new Error("base ref origin/master not found; run git fetch origin");
+		};
+		expect(main(["--check"], { root, readBase })).toBe(1);
+		expect(error.mock.calls.flat().join("\n")).toContain("not found");
 	});
 });
 

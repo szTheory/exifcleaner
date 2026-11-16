@@ -24,6 +24,7 @@ export const EXPECTED_BRAND_STEP_COMMANDS: readonly string[] = [
 	"set -euo pipefail",
 	"yarn brand:fetch",
 	"node .storybook/catalog/brand_quote_check.mjs",
+	"node scripts/shrink_only_check.mjs",
 ];
 
 function workflowJob(source: string, name: string): string | undefined {
@@ -227,6 +228,11 @@ describe("ci.yml policy: Brand pin, quote and drift gates (GAT-01, D-13)", () =>
 			"a command dropped",
 			(t) => t.replace("          yarn brand:fetch\n", ""),
 			"is missing the command: yarn brand:fetch",
+		],
+		[
+			"the shrink-only command dropped",
+			(t) => t.replace("          node scripts/shrink_only_check.mjs\n", ""),
+			"is missing the command: node scripts/shrink_only_check.mjs",
 		],
 		[
 			"two commands swapped",

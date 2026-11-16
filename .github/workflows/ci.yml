@@ -88,16 +88,19 @@ jobs:
         run: yarn docs:verify
 
       # Phase 76 (GAT-01, D-13): the pinned brand cache is fetched and sha256-verified here
-      # (the `precompile` fetch later becomes a cache hit) and the catalog's brand quotes
-      # and token hexes are checked against it. It must stay after the install and the
-      # native-dependency seal, which sit next to each other by policy;
-      # tests/scripts/ci_workflow_policy.test.ts pins the position, the commands and the
-      # absence of `if:` and `continue-on-error`.
+      # (the `precompile` fetch later becomes a cache hit), the catalog's brand quotes and
+      # token hexes are checked against it, and the two gate data files (the token drift
+      # pending list and the colour-literal baseline) may only shrink against the merge-base
+      # (the job's `fetch-depth: 0` supplies it; a missing origin/master fails closed). It
+      # must stay after the install and the native-dependency seal, which sit next to each
+      # other by policy; tests/scripts/ci_workflow_policy.test.ts pins the position, the
+      # commands and the absence of `if:` and `continue-on-error`.
       - name: Brand pin, quote and drift gates
         run: |
           set -euo pipefail
           yarn brand:fetch
           node .storybook/catalog/brand_quote_check.mjs
+          node scripts/shrink_only_check.mjs
 
       - name: Lint (Prettier)
         run: yarn lint
