@@ -7,7 +7,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	cursor: pointer;
+	cursor: default;
 	color: var(--ec-color-text-secondary);
 	border-radius: 4px;
 	-webkit-app-region: no-drag;
@@ -79,7 +79,7 @@
 	background: none;
 	border: none;
 	padding: var(--ec-space-2);
-	cursor: pointer;
+	cursor: default;
 	color: var(--ec-color-text-secondary);
 	border-radius: 4px;
 	display: flex;

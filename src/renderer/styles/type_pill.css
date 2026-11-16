@@ -9,34 +9,34 @@
 	text-transform: uppercase;
 	letter-spacing: 0.02em;
 	line-height: 1;
-	background: rgba(157, 167, 182, 0.1);
-	color: var(--ec-color-muted);
+	background: var(--ec-color-pill-bg);
+	color: var(--ec-color-pill-text);
 }
 
 /* Image — JPG/JPEG */
 .type-pill--jpg,
 .type-pill--jpeg {
-	background: var(--ec-pill-jpg-bg);
-	color: var(--ec-pill-jpg-text);
+	background: var(--ec-color-pill-bg);
+	color: var(--ec-color-pill-text);
 }
 
 /* Image — HEIC/HEIF */
 .type-pill--heic,
 .type-pill--heif {
-	background: var(--ec-pill-heic-bg);
-	color: var(--ec-pill-heic-text);
+	background: var(--ec-color-pill-bg);
+	color: var(--ec-color-pill-text);
 }
 
 /* Image — PNG */
 .type-pill--png {
-	background: var(--ec-pill-png-bg);
-	color: var(--ec-pill-png-text);
+	background: var(--ec-color-pill-bg);
+	color: var(--ec-color-pill-text);
 }
 
 /* Document — PDF */
 .type-pill--pdf {
-	background: var(--ec-pill-pdf-bg);
-	color: var(--ec-pill-pdf-text);
+	background: var(--ec-color-pill-bg);
+	color: var(--ec-color-pill-text);
 }
 
 /* Media — MOV, MP4, M4A, M4V, AVI, 3GP, WMV */
@@ -47,8 +47,8 @@
 .type-pill--avi,
 .type-pill--3gp,
 .type-pill--wmv {
-	background: var(--ec-pill-mov-bg);
-	color: var(--ec-pill-mov-text);
+	background: var(--ec-color-pill-bg);
+	color: var(--ec-color-pill-text);
 }
 
 /* RAW — DNG, CR2, CR3, NEF, ARW, ORF, RW2, RAF, PEF, SRW */
@@ -62,6 +62,6 @@
 .type-pill--raf,
 .type-pill--pef,
 .type-pill--srw {
-	background: var(--ec-pill-dng-bg);
-	color: var(--ec-pill-dng-text);
+	background: var(--ec-color-pill-bg);
+	color: var(--ec-color-pill-text);
 }
