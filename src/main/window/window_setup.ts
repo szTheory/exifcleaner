@@ -2,14 +2,11 @@ import { BrowserWindow, app, nativeTheme } from "electron";
 import path from "path";
 import { isMac, isWindows } from "../../common";
 import { iconPath } from "../../infrastructure";
+import { windowBackgroundColor } from "./window_background";
 import { loadWindowState, setupWindowStatePersistence } from "./window_state";
 
 const DEFAULT_WINDOW_WIDTH = 580;
 const DEFAULT_WINDOW_HEIGHT = 312;
-
-// Match CSS --color-bg tokens from the React ThemeProvider
-const LIGHT_BACKGROUND_COLOR = "#F5F6F8";
-const DARK_BACKGROUND_COLOR = "#1e1e1e";
 
 function setupMainWindowClose(browserWindow: BrowserWindow) {
 	browserWindow.on("closed", () => {
@@ -54,9 +51,9 @@ export function createMainWindow(): BrowserWindow {
 
 	// Dynamic background color based on system theme at creation time
 	// eliminates white flash in dark mode (SEC-04)
-	const backgroundColor = nativeTheme.shouldUseDarkColors
-		? DARK_BACKGROUND_COLOR
-		: LIGHT_BACKGROUND_COLOR;
+	const backgroundColor = windowBackgroundColor(
+		nativeTheme.shouldUseDarkColors,
+	);
 
 	const options: Electron.BrowserWindowConstructorOptions = {
 		title: app.name,
