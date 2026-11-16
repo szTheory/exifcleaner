@@ -29,9 +29,10 @@
 // `In the product`) at two levels, and a bare citation of either stays
 // ambiguous. There is no flag for the spec checks: the default run is the
 // opt-in, fail-closed verification.
-// It is never imported by catalog.mjs and never runs in CI: the cache is
-// gitignored, so a missing BRAND.md or tokens.json fails with
-// `run yarn brand:fetch` instead of skipping.
+// It runs in the ci.yml `test` job step `Brand pin, quote and drift gates`
+// (Phase 76, GAT-01) after `yarn brand:fetch`, and it is still not imported by
+// catalog.mjs: the cache is gitignored, so a missing BRAND.md or tokens.json
+// fails with `run yarn brand:fetch` instead of skipping.
 import fs from "node:fs";
 import path from "node:path";
 import { isMainModule } from "../../scripts/is_main_module.mjs";

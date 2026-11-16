@@ -358,6 +358,11 @@
 			"spec": "platform-owned.brand.pill-per-type"
 		},
 		{
+			"name": "--ec-segment-index",
+			"disposition": "local",
+			"reason": "Set inline per control at SegmentedControl.tsx from the active option index; a runtime value tokens.css never declares (RTL-01)."
+		},
+		{
 			"name": "--ec-shadow-drawer",
 			"disposition": "keep-platform",
 			"reason": "No brand equivalent (D-04): the book separates surfaces by colour and gives no UI shadow value. The platform values are kept, and 74-04 exempts this token from the contrast test with a written reason, so it carries no sealed entry.",

@@ -4,7 +4,7 @@
 
 Brand pin: `7629b8fcd5794df708000e49abd9a2a9402d4c7b`
 
-Dispositions: adopt 4, derive 1, keep-platform 9, propose-upstream 16, retire 37, local 1. Each custom property declared in tokens.css or used under src/renderer has exactly one entry.
+Dispositions: adopt 4, derive 1, keep-platform 9, propose-upstream 16, retire 37, local 2. Each custom property declared in tokens.css or used under src/renderer has exactly one entry.
 
 | Name | Disposition | Brand (light / dark) or target | Spec | Reason, rule or decision | Finding |
 | --- | --- | --- | --- | --- | --- |
@@ -60,6 +60,7 @@ Dispositions: adopt 4, derive 1, keep-platform 9, propose-upstream 16, retire 37
 | --ec-pill-pdf-text | retire |  | platform-owned.brand.pill-per-type | Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens. |  |
 | --ec-pill-png-bg | retire |  | platform-owned.brand.pill-per-type | Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens. |  |
 | --ec-pill-png-text | retire |  | platform-owned.brand.pill-per-type | Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens. |  |
+| --ec-segment-index | local |  |  | Set inline per control at SegmentedControl.tsx from the active option index; a runtime value tokens.css never declares (RTL-01). |  |
 | --ec-shadow-drawer | keep-platform |  | platform-owned.platform.shadow | No brand equivalent (D-04): the book separates surfaces by colour and gives no UI shadow value. The platform values are kept, and 74-04 exempts this token from the contrast test with a written reason, so it carries no sealed entry. |  |
 | --ec-space-1 | propose-upstream | exifcleaner-brand, decided at the v5.1 discuss-phase | spacing.space-1 | The brand book sets no app spacing (BRAND.md Layout leaves the scale to the platform); the app keeps 4px on its 4 px-base scale, and the v5.1 discuss-phase decides whether the book adopts the scale. |  |
 | --ec-space-12 | propose-upstream | exifcleaner-brand, decided at the v5.1 discuss-phase | spacing.space-12 | The brand book sets no app spacing (BRAND.md Layout leaves the scale to the platform); the app keeps 48px on its 4 px-base scale, and the v5.1 discuss-phase decides whether the book adopts the scale. |  |

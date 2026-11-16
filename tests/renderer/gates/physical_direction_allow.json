@@ -1,0 +1,49 @@
+{
+	"schemaVersion": 1,
+	"entries": [
+		{
+			"key": "src/renderer/styles/language_dropdown.css|.language-dropdown__list|left|0",
+			"reason": "Both insets are set (left: 0 and right: 0), so the list stretches the full width of its trigger; the stretch is the same in both directions and direction-neutral."
+		},
+		{
+			"key": "src/renderer/styles/language_dropdown.css|.language-dropdown__list|right|0",
+			"reason": "Both insets are set (left: 0 and right: 0), so the list stretches the full width of its trigger; the stretch is the same in both directions and direction-neutral."
+		},
+		{
+			"key": "src/renderer/styles/segmented_control.css|.segmented-control__indicator|transform|translateX(calc(var(--ec-segment-index, 0) * 100%))",
+			"reason": "The sign of the indicator slide is the direction: positive in ltr, negative under :dir(rtl). The segmented indicator rect assertions (SegmentedControl Arabic and .storybook/segmented_rtl_gate.test.tsx) are the guard for the sign."
+		},
+		{
+			"key": "src/renderer/styles/segmented_control.css|:dir(rtl) .segmented-control__indicator|transform|translateX(calc(var(--ec-segment-index, 0) * -100%))",
+			"reason": "The sign of the indicator slide is the direction: positive in ltr, negative under :dir(rtl). The segmented indicator rect assertions (SegmentedControl Arabic and .storybook/segmented_rtl_gate.test.tsx) are the guard for the sign."
+		},
+		{
+			"key": "src/renderer/styles/settings_drawer.css|.settings-drawer--open|transform|translateX(0)",
+			"reason": "The drawer docks at the physical right edge and slides in by translateX; which edge it docks to under rtl belongs to the v5.2 settings drawer-versus-window decision (ROADMAP v5.2), not to RTL-01."
+		},
+		{
+			"key": "src/renderer/styles/settings_drawer.css|.settings-drawer|right|0",
+			"reason": "The drawer docks at the physical right edge and slides in by translateX; which edge it docks to under rtl belongs to the v5.2 settings drawer-versus-window decision (ROADMAP v5.2), not to RTL-01."
+		},
+		{
+			"key": "src/renderer/styles/settings_drawer.css|.settings-drawer|transform|translateX(100%)",
+			"reason": "The drawer docks at the physical right edge and slides in by translateX; which edge it docks to under rtl belongs to the v5.2 settings drawer-versus-window decision (ROADMAP v5.2), not to RTL-01."
+		},
+		{
+			"key": "src/renderer/styles/toast.css|.toast|left|50%",
+			"reason": "Centring with left: 50% and translateX(-50%) is symmetric, so it lands in the same place in both directions."
+		},
+		{
+			"key": "src/renderer/styles/toast.css|.toast|transform|translateX(-50%)",
+			"reason": "Centring with left: 50% and translateX(-50%) is symmetric, so it lands in the same place in both directions."
+		},
+		{
+			"key": "src/renderer/styles/toggle_switch.css|.toggle-switch__thumb|left|2px",
+			"reason": "Thumb travel is the existing transition: left, which the same-layout rule freezes (SUR-04 asserts the toggle transition stays); mirroring the thumb is a v5.2 motion decision."
+		},
+		{
+			"key": "src/renderer/styles/toggle_switch.css|.toggle-switch__track--on .toggle-switch__thumb|left|22px",
+			"reason": "Thumb travel is the existing transition: left, which the same-layout rule freezes (SUR-04 asserts the toggle transition stays); mirroring the thumb is a v5.2 motion decision."
+		}
+	]
+}

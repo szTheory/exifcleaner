@@ -1,0 +1,44 @@
+{
+	"rows": [
+		{
+			"token": "--ec-color-bg",
+			"theme": "dark",
+			"reason": "tokens.css still holds the pre-Fresh-Sweep value; PAL-01 (Phase 77) removes this row with its token change."
+		},
+		{
+			"token": "--ec-color-bg",
+			"theme": "light",
+			"reason": "tokens.css still holds the pre-Fresh-Sweep value; PAL-01 (Phase 77) removes this row with its token change."
+		},
+		{
+			"token": "--ec-color-surface",
+			"theme": "dark",
+			"reason": "tokens.css still holds the pre-Fresh-Sweep value; PAL-01 (Phase 77) removes this row with its token change."
+		},
+		{
+			"token": "--ec-color-surface",
+			"theme": "light",
+			"reason": "tokens.css still holds the pre-Fresh-Sweep value; PAL-01 (Phase 77) removes this row with its token change."
+		},
+		{
+			"token": "--ec-color-text",
+			"theme": "dark",
+			"reason": "tokens.css still holds the pre-Fresh-Sweep value; PAL-01 (Phase 77) removes this row with its token change."
+		},
+		{
+			"token": "--ec-color-text",
+			"theme": "light",
+			"reason": "tokens.css still holds the pre-Fresh-Sweep value; PAL-01 (Phase 77) removes this row with its token change."
+		},
+		{
+			"token": "--ec-color-text-secondary",
+			"theme": "dark",
+			"reason": "tokens.css still holds the pre-Fresh-Sweep value; PAL-01 (Phase 77) removes this row with its token change."
+		},
+		{
+			"token": "--ec-color-text-secondary",
+			"theme": "light",
+			"reason": "tokens.css still holds the pre-Fresh-Sweep value; PAL-01 (Phase 77) removes this row with its token change."
+		}
+	]
+}

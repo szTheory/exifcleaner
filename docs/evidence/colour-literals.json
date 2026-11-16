@@ -1,0 +1,125 @@
+{
+	"schemaVersion": 1,
+	"rows": [
+		{
+			"file": "src/domain/accent_color.ts",
+			"literal": "#007aff",
+			"count": 1
+		},
+		{
+			"file": "src/main/window/window_background.ts",
+			"literal": "#141416",
+			"count": 1
+		},
+		{
+			"file": "src/main/window/window_background.ts",
+			"literal": "#f5f6f8",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/drop_zone.css",
+			"literal": "transparent",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/empty_state.css",
+			"literal": "#005ab8",
+			"count": 2
+		},
+		{
+			"file": "src/renderer/styles/empty_state.css",
+			"literal": "#006bd6",
+			"count": 2
+		},
+		{
+			"file": "src/renderer/styles/empty_state.css",
+			"literal": "#59677b",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/empty_state.css",
+			"literal": "#94949b",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/empty_state.css",
+			"literal": "#fff",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/error_boundary.css",
+			"literal": "transparent",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/file_table.css",
+			"literal": "transparent",
+			"count": 2
+		},
+		{
+			"file": "src/renderer/styles/language_dropdown.css",
+			"literal": "rgba(0, 0, 0, 0.04)",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/language_dropdown.css",
+			"literal": "rgba(0, 0, 0, 0.08)",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/language_dropdown.css",
+			"literal": "rgba(0, 0, 0, 0.3)",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/metadata_expansion.css",
+			"literal": "transparent",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/segmented_control.css",
+			"literal": "rgba(0, 0, 0, 0.1)",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/segmented_control.css",
+			"literal": "transparent",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/settings_drawer.css",
+			"literal": "rgba(0, 0, 0, 0)",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/settings_drawer.css",
+			"literal": "rgba(0, 0, 0, var(--ec-backdrop-opacity))",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/status_icon.css",
+			"literal": "transparent",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/toggle_switch.css",
+			"literal": "#ffffff",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/toggle_switch.css",
+			"literal": "rgba(0, 0, 0, 0.15)",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/toggle_switch.css",
+			"literal": "rgba(0, 0, 0, 0.3)",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/styles/type_pill.css",
+			"literal": "rgba(157, 167, 182, 0.1)",
+			"count": 1
+		}
+	]
+}

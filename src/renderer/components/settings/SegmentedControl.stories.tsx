@@ -115,6 +115,46 @@ async function expectActive(
 	}
 }
 
+// RTL-01 / D-32: the indicator must sit on the active segment, measured as its left edge
+// and width against the active radio, within 1 px. Under a right-to-left layout index 1
+// is correct by coincidence (the indicator sits in the middle either way), so a scene
+// that holds a right-to-left claim must measure index 0 and index 2 too. The same
+// relation is held for the Persian locale by .storybook/segmented_rtl_gate.test.tsx.
+function indicatorViolation(group: HTMLElement, scene: string): string | null {
+	const radios = within(group).getAllByRole("radio");
+	const index = radios.findIndex(
+		(radio) => radio.getAttribute("aria-checked") === "true",
+	);
+	const active = radios[index];
+	const indicator = group.querySelector(".segmented-control__indicator");
+	if (active === undefined || indicator === null) {
+		throw new Error(`${scene}: no active segment or no indicator`);
+	}
+	const segment = active.getBoundingClientRect();
+	const box = indicator.getBoundingClientRect();
+	const leftDelta = box.left - segment.left;
+	const widthDelta = box.width - segment.width;
+	if (Math.abs(leftDelta) <= 1 && Math.abs(widthDelta) <= 1) return null;
+	return `${scene}: index ${index}, indicator minus active segment: left ${leftDelta.toFixed(2)} px, width ${widthDelta.toFixed(2)} px`;
+}
+
+// Every violation in one assertion, so a red run names all three indexes at once.
+async function expectIndicatorsOnActive(
+	groups: Array<{ group: HTMLElement; scene: string }>,
+): Promise<void> {
+	const violations = groups.flatMap(({ group, scene }) => {
+		const violation = indicatorViolation(group, scene);
+		return violation === null ? [] : [violation];
+	});
+	await expect(violations).toEqual([]);
+}
+
+function radiogroup(canvasElement: HTMLElement): HTMLElement {
+	const group = canvasElement.querySelector<HTMLElement>('[role="radiogroup"]');
+	if (group === null) throw new Error("no segmented control in the canvas");
+	return group;
+}
+
 export const LightActive: Story = {
 	parameters: { a11y: knownA11y("settings-segmentedcontrol--light-active") },
 	args: { value: "light" },
@@ -122,6 +162,10 @@ export const LightActive: Story = {
 		await expectActive(canvasElement, "light");
 		// Vacuity guard for the right-to-left story below.
 		await expect(document.documentElement.dir).toBe("ltr");
+		// The left-to-right control for the Arabic story: index 0.
+		await expectIndicatorsOnActive([
+			{ group: radiogroup(canvasElement), scene: "ltr light" },
+		]);
 	},
 };
 
@@ -138,6 +182,10 @@ export const DarkActive: Story = {
 	args: { value: "dark" },
 	play: async ({ canvasElement }) => {
 		await expectActive(canvasElement, "dark");
+		// The left-to-right control for the Arabic story: index 2.
+		await expectIndicatorsOnActive([
+			{ group: radiogroup(canvasElement), scene: "ltr dark" },
+		]);
 	},
 };
 
@@ -187,17 +235,40 @@ export const LongLabels: Story = {
 	},
 };
 
-// D-15 / D-24: the indicator position in a right-to-left layout is a known defect
-// recorded for Phase 73 (the indicator slides by translateX from the left edge), so
-// this story asserts the labels and the radio state only, never the indicator.
+// RTL-01 / D-32: three controls with the active value at index 0, 1 and 2 (light, system,
+// dark), because the indicator is correct by coincidence at index 1 under a
+// right-to-left layout. The play waits for dir=rtl first so the measurement cannot run
+// against a left-to-right document, then holds the indicator on the active segment.
 export const Arabic: Story = {
 	parameters: { a11y: knownA11y("settings-segmentedcontrol--arabic") },
 	globals: { locale: "ar" },
 	args: { options: optionsFor(ar), label: ar.appearance },
+	render: (args) => (
+		<div style={{ display: "grid", gap: "8px", width: "300px" }}>
+			<SegmentedControl {...args} value="light" />
+			<SegmentedControl {...args} value="system" />
+			<SegmentedControl {...args} value="dark" />
+		</div>
+	),
 	play: async ({ canvasElement }) => {
 		await waitFor(() => expect(document.documentElement.dir).toBe("rtl"));
 		await expect(document.documentElement.lang).toBe("ar");
-		await within(canvasElement).findByRole("radio", { name: ar.themeAuto });
-		await expectActive(canvasElement, "system");
+		await within(canvasElement).findAllByRole("radio", { name: ar.themeAuto });
+		const groups = Array.from(
+			canvasElement.querySelectorAll<HTMLElement>('[role="radiogroup"]'),
+		);
+		await expect(groups).toHaveLength(3);
+		const order: ThemeMode[] = ["light", "system", "dark"];
+		for (const [index, group] of groups.entries()) {
+			const active = order[index];
+			if (active === undefined) throw new Error("no active value");
+			await expectActive(group, active);
+		}
+		await expectIndicatorsOnActive(
+			groups.map((group, index) => ({
+				group,
+				scene: `rtl ar ${order[index] ?? "?"}`,
+			})),
+		);
 	},
 };

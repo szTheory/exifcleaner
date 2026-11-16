@@ -21,13 +21,13 @@
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	color: var(--ec-color-text-secondary);
-	text-align: left;
+	text-align: start;
 	z-index: 10;
 }
 
 .file-table__header-cell {
 	padding: var(--ec-space-1) var(--ec-space-2);
-	text-align: left;
+	text-align: start;
 }
 
 .file-table__sort-button {
@@ -40,7 +40,7 @@
 	font-weight: inherit;
 	letter-spacing: inherit;
 	padding: 0;
-	text-align: left;
+	text-align: start;
 	text-transform: inherit;
 }
 
@@ -133,6 +133,13 @@
 	white-space: nowrap;
 }
 
+.file-table__bidi-escape {
+	font-family: var(--ec-font-family-mono);
+	font-size: inherit;
+	font-weight: inherit;
+	color: inherit;
+}
+
 .file-table__copy-disclosure {
 	color: var(--ec-color-text-secondary);
 	font-size: var(--ec-font-size-small);
@@ -147,7 +154,7 @@
 	width: 24px;
 	height: 24px;
 	padding: 0;
-	margin-left: var(--ec-space-1);
+	margin-inline-start: var(--ec-space-1);
 	border: none;
 	background: transparent;
 	color: var(--ec-color-text-secondary);

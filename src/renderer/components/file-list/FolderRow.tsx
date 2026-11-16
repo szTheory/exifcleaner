@@ -1,9 +1,10 @@
 // Folder grouping row with collapsible chevron toggle and discovery status.
 
 import type { FolderDiscoveryStatus } from "../../contexts/AppContext";
-import { middleTruncatePath } from "../../../domain";
+import { displayName, middleTruncatePath } from "../../../domain";
 import { assertNever } from "../../../common/types";
 import { ChevronIcon } from "../icons/ChevronIcon";
+import { EscapedName } from "../../utils/escaped_name";
 import { useI18n } from "../../hooks/use_i18n";
 
 export function FolderRow({
@@ -20,8 +21,12 @@ export function FolderRow({
 	discoveryStatus: FolderDiscoveryStatus;
 }): React.JSX.Element {
 	const { t } = useI18n();
+	// Display only: the folder key, grouping and collapse state keep the raw `folder`.
+	// The escape runs BEFORE truncation: middleTruncatePath cuts only at path separators
+	// and a token holds none, so a token is never split.
+	const shownFolder = displayName({ name: folder });
 	const displayLabel = middleTruncatePath({
-		folderPath: folder,
+		folderPath: shownFolder,
 		maxLength: 40,
 	});
 
@@ -33,7 +38,7 @@ export function FolderRow({
 					onClick={onToggle}
 					aria-label={t(
 						isCollapsed ? "folder.expand" : "folder.collapse",
-					).replace("{folder}", folder)}
+					).replace("{folder}", () => shownFolder)}
 				>
 					<ChevronIcon expanded={!isCollapsed} />
 				</button>
@@ -47,8 +52,8 @@ export function FolderRow({
 				>
 					<path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H7.707L6.354 3.146A.5.5 0 0 0 6 3H1.5z" />
 				</svg>
-				<bdi className="folder-row__label" title={folder} dir="auto">
-					{displayLabel}
+				<bdi className="folder-row__label" title={shownFolder} dir="auto">
+					<EscapedName text={displayLabel} />
 				</bdi>
 				<span
 					className={`folder-row__count${discoveryStatus === "scanning" ? " folder-row__count--scanning" : ""}`}

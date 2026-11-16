@@ -473,12 +473,83 @@ async function expectBatchFrame({
 	).not.toBe("");
 }
 
+// RTL-01 / D-32: the header label text sits at the START edge of its cell: the right content
+// edge under rtl and the left content edge under ltr, within 1 px. The label is measured
+// with a Range over its text node (the button is shrink-to-fit, so its own rect would also
+// move, but the text is what a reader sees). The Name cell is the `1fr` column with room to
+// spare, so start and end alignment cannot be confused there; the Type cell is a fixed
+// column checked the same way. The caller has already waited for the expected dir.
+const HEADER_CELLS = [
+	{ index: 1, name: "name" },
+	{ index: 2, name: "type" },
+] as const;
+
+async function expectHeaderLabelsAtStart({
+	canvasElement,
+	dir,
+}: {
+	canvasElement: HTMLElement;
+	dir: "ltr" | "rtl";
+}): Promise<void> {
+	await expect(document.documentElement.dir).toBe(dir);
+	const cells = Array.from(
+		canvasElement.querySelectorAll(
+			".file-table__header .file-table__header-cell",
+		),
+	);
+	const violations = HEADER_CELLS.flatMap(({ index, name }) => {
+		const cell = cells[index];
+		const text = cell?.querySelector(".file-table__sort-button")?.firstChild;
+		if (cell === undefined || !(text instanceof Text)) {
+			throw new Error(`no ${name} header label to measure`);
+		}
+		const range = document.createRange();
+		range.selectNodeContents(text);
+		const label = range.getBoundingClientRect();
+		const box = cell.getBoundingClientRect();
+		const style = getComputedStyle(cell);
+		const delta =
+			dir === "rtl"
+				? label.right - (box.right - parseFloat(style.paddingRight))
+				: label.left - (box.left + parseFloat(style.paddingLeft));
+		return Math.abs(delta) <= 1
+			? []
+			: [
+					`${dir} ${name} header: label ${dir === "rtl" ? "right" : "left"} edge is ${delta.toFixed(2)} px from the cell's ${dir === "rtl" ? "right" : "left"} content edge`,
+				];
+	});
+	await expect(violations).toEqual([]);
+}
+
+// RTL-01 / D-32: the apex of the chevron polyline, (1, 0), mapped through the computed
+// transform. A rect cannot show the mirror (the polyline is symmetric about the box
+// centre), so the mapped vector is what is asserted: (-1, 0) when collapsed under rtl.
+async function expectCollapsedChevronMirrored(
+	canvasElement: HTMLElement,
+): Promise<void> {
+	await waitFor(() => expect(document.getAnimations()).toHaveLength(0));
+	const svg = canvasElement.querySelector(
+		".file-table__body .chevron-icon:not(.chevron-icon--expanded)",
+	);
+	if (!(svg instanceof SVGElement)) throw new Error("no collapsed row chevron");
+	const apex = new DOMMatrix(getComputedStyle(svg).transform).transformPoint({
+		x: 1,
+		y: 0,
+	});
+	// `+ 0` turns a rounded -0 into 0.
+	const mapped = [apex.x, apex.y].map(
+		(value) => Math.round(value * 1000) / 1000 + 0,
+	);
+	await expect(mapped).toEqual([-1, 0]);
+}
+
 export const GermanBatch: Story = {
 	globals: { locale: "de" },
 	render: () => <Scene files={batch(6)} withStatusBar />,
 	parameters: { a11y: knownA11y("file-list-filetable--german-batch") },
 	play: async ({ canvasElement }) => {
 		await expectBatchFrame({ canvasElement, lang: "de", dir: "ltr" });
+		await expectHeaderLabelsAtStart({ canvasElement, dir: "ltr" });
 	},
 };
 
@@ -497,6 +568,7 @@ export const ArabicBatch: Story = {
 	parameters: { a11y: knownA11y("file-list-filetable--arabic-batch") },
 	play: async ({ canvasElement }) => {
 		await expectBatchFrame({ canvasElement, lang: "ar", dir: "rtl" });
+		await expectHeaderLabelsAtStart({ canvasElement, dir: "rtl" });
 	},
 };
 
@@ -506,6 +578,8 @@ export const PersianBatch: Story = {
 	parameters: { a11y: knownA11y("file-list-filetable--persian-batch") },
 	play: async ({ canvasElement }) => {
 		await expectBatchFrame({ canvasElement, lang: "fa", dir: "rtl" });
+		await expectHeaderLabelsAtStart({ canvasElement, dir: "rtl" });
+		await expectCollapsedChevronMirrored(canvasElement);
 	},
 };
 

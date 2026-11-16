@@ -1,0 +1,44 @@
+{
+	"rows": [
+		{
+			"file": "src/renderer/components/file-list/FileRow.tsx",
+			"kind": "svg",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/components/file-list/FolderRow.tsx",
+			"kind": "svg",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/components/icons/ChevronIcon.tsx",
+			"kind": "svg",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/components/icons/GearIcon.tsx",
+			"kind": "svg",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/components/settings/LanguageDropdown.tsx",
+			"kind": "svg",
+			"count": 2
+		},
+		{
+			"file": "src/renderer/components/settings/SettingsDrawer.tsx",
+			"kind": "svg",
+			"count": 4
+		},
+		{
+			"file": "src/renderer/components/ui/EmptyState.tsx",
+			"kind": "svg",
+			"count": 1
+		},
+		{
+			"file": "src/renderer/components/ui/StatusIcon.tsx",
+			"kind": "svg",
+			"count": 3
+		}
+	]
+}

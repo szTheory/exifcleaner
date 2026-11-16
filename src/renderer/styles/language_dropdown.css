@@ -97,7 +97,7 @@
 
 .language-dropdown__english {
 	color: var(--ec-color-text-secondary);
-	margin-left: var(--ec-space-1, 4px);
+	margin-inline-start: var(--ec-space-1, 4px);
 }
 
 .language-dropdown__separator {

@@ -50,13 +50,20 @@
 .segmented-control__indicator {
 	position: absolute;
 	top: 2px;
-	left: 2px;
+	inset-inline-start: 2px;
 	width: calc(100% / 3 - 1.33px);
 	height: calc(100% - 4px);
 	background: var(--ec-color-bg);
 	border-radius: 6px;
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 	z-index: 0;
+	/* --ec-segment-index is the active option index, set per control by SegmentedControl.tsx. */
+	transform: translateX(calc(var(--ec-segment-index, 0) * 100%));
+}
+
+/* The segments reverse under rtl, so the sign of the slide is the direction (RTL-01). */
+:dir(rtl) .segmented-control__indicator {
+	transform: translateX(calc(var(--ec-segment-index, 0) * -100%));
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -1,4 +1,10 @@
 // Expandable error detail with click-to-copy functionality.
+// Display and copy are split (TRU-01): the pre shows the detail with bidirectional
+// controls escaped, while the clipboard receives the raw string so a copied path stays
+// usable.
+
+import { displayName } from "../../../domain";
+import { EscapedName } from "../../utils/escaped_name";
 
 export function ErrorExpansion({
 	error,
@@ -20,7 +26,7 @@ export function ErrorExpansion({
 				onClick={handleCopy}
 				style={{ cursor: "copy" }}
 			>
-				{error}
+				<EscapedName text={displayName({ name: error })} />
 			</pre>
 			<span
 				className="file-table__copy-hint"

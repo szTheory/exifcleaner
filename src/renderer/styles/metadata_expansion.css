@@ -71,7 +71,7 @@
 	font-size: var(--ec-font-size-small);
 	font-weight: var(--ec-font-weight-semibold);
 	padding: var(--ec-space-1) 0;
-	text-align: left;
+	text-align: start;
 }
 
 .metadata-group__count {
@@ -165,4 +165,15 @@
 
 .chevron-icon--expanded {
 	transform: rotate(90deg);
+}
+
+/* Under rtl the collapsed chevron points left and the expanded one still points down (RTL-01).
+   Two functions each, so the transform transition interpolates pairwise and does not spin.
+   Equal specificity: the expanded rule must stay last. */
+:dir(rtl) .chevron-icon {
+	transform: scaleX(-1) rotate(0deg);
+}
+
+:dir(rtl) .chevron-icon--expanded {
+	transform: scaleX(-1) rotate(90deg);
 }

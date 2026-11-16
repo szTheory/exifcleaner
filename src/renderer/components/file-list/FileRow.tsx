@@ -3,13 +3,14 @@
 
 import { useRef } from "react";
 import type { FileEntry } from "../../contexts/AppContext";
-import { FileProcessingStatus } from "../../../domain";
+import { FileProcessingStatus, displayName } from "../../../domain";
 import { assertNever } from "../../../common/types";
 import { TypePill } from "../ui/TypePill";
 import { StatusIcon } from "../ui/StatusIcon";
 import { ChevronIcon } from "../icons/ChevronIcon";
 import { ErrorExpansion } from "./ErrorExpansion";
 import { MetadataExpansion } from "./MetadataExpansion";
+import { EscapedName } from "../../utils/escaped_name";
 import { formatFileSize } from "../../utils/format_file_size";
 import { resolveRevealTargets } from "../../utils/reveal_paths";
 import { useI18n } from "../../hooks/use_i18n";
@@ -34,6 +35,13 @@ export function FileRow({
 	const enteringRef = useRef(true);
 	const { t, locale } = useI18n();
 	const revealTargets = resolveRevealTargets(file);
+	// Display only: file.name stays raw in state, sorting, paths and IPC.
+	const shownName = displayName({ name: file.name });
+	// file.error can embed an output path built from the name (an xattr failure carries the
+	// execFile message), so the error-row title and the aria-label tail show it escaped.
+	// errorDetail and file.error themselves stay raw.
+	const shownError =
+		file.error === null ? undefined : displayName({ name: file.error });
 
 	const isComplete =
 		file.status === FileProcessingStatus.Complete ||
@@ -127,7 +135,7 @@ export function FileRow({
 
 	return (
 		<div
-			title={isError ? (file.error ?? undefined) : undefined}
+			title={isError ? (shownError ?? undefined) : undefined}
 			onAnimationEnd={handleAnimationEnd}
 		>
 			<div
@@ -135,12 +143,12 @@ export function FileRow({
 				style={progressStyle}
 				tabIndex={0}
 				role="row"
-				aria-label={`${file.name}. ${
+				aria-label={`${shownName}. ${
 					isForcedCopy
 						? `${outcomeSummary ?? t("complete")}. ${t("writtenToCopy")}.`
 						: (outcomeSummary ??
 							(isError
-								? (file.error ?? t("status.error"))
+								? (shownError ?? t("status.error"))
 								: t("status.pending")))
 				}`}
 				{...(isExpandable ? { "aria-expanded": isExpanded } : {})}
@@ -168,7 +176,7 @@ export function FileRow({
 				<div className="file-table__cell file-table__cell--name" role="cell">
 					<div className="file-table__name-stack">
 						<bdi className="file-table__name-text" dir="auto">
-							{file.name}
+							<EscapedName text={shownName} />
 						</bdi>
 						{isForcedCopy && (
 							<span className="file-table__copy-disclosure">
