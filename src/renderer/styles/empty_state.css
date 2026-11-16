@@ -76,6 +76,7 @@
 }
 
 .empty-state__button--primary {
+	--empty-state-button-pressed-surface: var(--ec-color-action-pressed);
 	background: var(--ec-color-action);
 	border: 1px solid var(--ec-color-action);
 	color: var(--ec-color-action-label);
@@ -87,6 +88,7 @@
 }
 
 .empty-state__button--secondary {
+	--empty-state-button-pressed-surface: var(--ec-color-surface-pressed);
 	background: var(--ec-color-surface);
 	border: 1px solid var(--ec-color-border);
 	color: var(--ec-color-text);
@@ -98,6 +100,8 @@
 }
 
 .empty-state__button:active {
+	background: var(--empty-state-button-pressed-surface);
+	border-color: var(--empty-state-button-pressed-surface);
 	transform: scale(0.96);
 }
 
