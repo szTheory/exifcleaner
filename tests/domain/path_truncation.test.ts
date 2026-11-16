@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { middleTruncatePath } from "../../src/domain/path_truncation";
+import {
+	middleTruncatePath,
+	middleTruncatePathSegments,
+} from "../../src/domain/path_truncation";
 
 describe("middleTruncatePath", () => {
 	it("returns short paths unchanged", () => {
@@ -64,5 +67,35 @@ describe("middleTruncatePath", () => {
 		expect(middleTruncatePath({ folderPath: "folder/", maxLength: 50 })).toBe(
 			"folder/",
 		);
+	});
+});
+
+describe("middleTruncatePathSegments", () => {
+	it("keeps escape origin through truncation without reclassifying literal token text", () => {
+		const segments = [
+			{
+				kind: "text" as const,
+				text: "root<U+202E>text/long-one/long-two/holiday",
+			},
+			{ kind: "escape" as const, text: "<U+202E>" },
+			{ kind: "text" as const, text: "gnp.jpg" },
+		];
+		const truncated = middleTruncatePathSegments({
+			segments,
+			maxLength: 40,
+		});
+		const text = truncated.map((segment) => segment.text).join("");
+
+		expect(text).toBe(
+			middleTruncatePath({
+				folderPath: segments.map((segment) => segment.text).join(""),
+				maxLength: 40,
+			}),
+		);
+		expect(truncated).toContainEqual({
+			kind: "text",
+			text: "root<U+202E>text",
+		});
+		expect(truncated).toContainEqual({ kind: "escape", text: "<U+202E>" });
 	});
 });

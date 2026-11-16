@@ -3,7 +3,11 @@
 
 import { useRef } from "react";
 import type { FileEntry } from "../../contexts/AppContext";
-import { FileProcessingStatus, displayName } from "../../../domain";
+import {
+	FileProcessingStatus,
+	displayName,
+	displayNameSegments,
+} from "../../../domain";
 import { assertNever } from "../../../common/types";
 import { TypePill } from "../ui/TypePill";
 import { StatusIcon } from "../ui/StatusIcon";
@@ -37,6 +41,7 @@ export function FileRow({
 	const revealTargets = resolveRevealTargets(file);
 	// Display only: file.name stays raw in state, sorting, paths and IPC.
 	const shownName = displayName({ name: file.name });
+	const shownNameSegments = displayNameSegments({ name: file.name });
 	// file.error can embed an output path built from the name (an xattr failure carries the
 	// execFile message), so the error-row title and the aria-label tail show it escaped.
 	// errorDetail and file.error themselves stay raw.
@@ -176,7 +181,7 @@ export function FileRow({
 				<div className="file-table__cell file-table__cell--name" role="cell">
 					<div className="file-table__name-stack">
 						<bdi className="file-table__name-text" dir="auto">
-							<EscapedName text={shownName} />
+							<EscapedName segments={shownNameSegments} />
 						</bdi>
 						{isForcedCopy && (
 							<span className="file-table__copy-disclosure">

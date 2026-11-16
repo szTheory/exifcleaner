@@ -155,6 +155,17 @@ describe("GAT-03 scan behaviour on temp trees", () => {
 		expect(problems[0]?.message).toContain("#123456");
 	});
 
+	test("a quoted comment opener cannot hide a later CSS color literal", () => {
+		const root = makeTree({
+			"src/renderer/styles/a.css":
+				'.x::before { content: "/*"; color: #123456; }\n',
+			...ACCENT_FILES,
+		});
+		expect(keys(scanColourLiterals({ root }).rows)).toContain(
+			"src/renderer/styles/a.css|#123456|1",
+		);
+	});
+
 	test("a literal that left the tree is a stale baseline row", () => {
 		const root = makeTree({
 			"src/renderer/styles/a.css":

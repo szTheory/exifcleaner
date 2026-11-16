@@ -12,36 +12,45 @@
 
 // Non-global: `.test` on a global regex is stateful through `lastIndex`.
 const BIDI_CONTROL = /[\u{202A}-\u{202E}\u{2066}-\u{2069}]/u;
-// Global: used only through `.replace`, which resets `lastIndex` itself.
-const BIDI_CONTROLS = /[\u{202A}-\u{202E}\u{2066}-\u{2069}]/gu;
-// The exact token grammar `displayName` emits, so `splitEscapedName` cannot match any
-// other angle-bracket text in a name.
-const ESCAPE_TOKEN = /<U\+(?:202[A-E]|206[6-9])>/g;
-
 function tokenFor(control: string): string {
 	const codePoint = control.codePointAt(0) ?? 0;
 	return `<U+${codePoint.toString(16).toUpperCase().padStart(4, "0")}>`;
 }
 
 export function displayName({ name }: { name: string }): string {
-	if (!BIDI_CONTROL.test(name)) return name;
-	return name.replace(BIDI_CONTROLS, tokenFor);
+	return displayNameSegments({ name })
+		.map((segment) => segment.text)
+		.join("");
 }
 
 export type EscapedSegment = { kind: "text" | "escape"; text: string };
 
-// Splits escaped text into plain runs and escape tokens so the view can isolate each
-// token. Joining the segment texts always gives back the input.
-export function splitEscapedName({ text }: { text: string }): EscapedSegment[] {
+// Segments raw names so only generated escapes are isolated in the view. Literal text that
+// happens to look like an escape token remains ordinary text.
+export function displayNameSegments({
+	name,
+}: {
+	name: string;
+}): EscapedSegment[] {
 	const segments: EscapedSegment[] = [];
-	let last = 0;
-	for (const match of text.matchAll(ESCAPE_TOKEN)) {
-		const at = match.index ?? 0;
-		if (at > last) segments.push({ kind: "text", text: text.slice(last, at) });
-		segments.push({ kind: "escape", text: match[0] });
-		last = at + match[0].length;
+	let textStart = 0;
+	for (let index = 0; index < name.length;) {
+		const codePoint = name.codePointAt(index);
+		if (codePoint === undefined) break;
+		const character = String.fromCodePoint(codePoint);
+		if (BIDI_CONTROL.test(character)) {
+			if (index > textStart) {
+				segments.push({ kind: "text", text: name.slice(textStart, index) });
+			}
+			segments.push({ kind: "escape", text: tokenFor(character) });
+			index += character.length;
+			textStart = index;
+		} else {
+			index += character.length;
+		}
 	}
-	if (last < text.length)
-		segments.push({ kind: "text", text: text.slice(last) });
+	if (textStart < name.length) {
+		segments.push({ kind: "text", text: name.slice(textStart) });
+	}
 	return segments;
 }

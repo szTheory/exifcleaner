@@ -152,6 +152,15 @@ describe("FileRow name sinks (all nine controls, all six statuses)", () => {
 		);
 	});
 
+	it("does not style literal escape-token text as a control", () => {
+		const markup = renderRow(fileEntry({ name: "holiday<U+202E>gnp.jpg" }));
+
+		expect(markup).not.toContain("file-table__bidi-escape");
+		expect(markup).toMatch(
+			/<bdi class="file-table__name-text" dir="auto">holiday&lt;U\+202E&gt;gnp\.jpg<\/bdi>/,
+		);
+	});
+
 	it("keeps the raw name in the entry: only the markup is escaped", () => {
 		const name = `holiday${RLO}gnp.jpg`;
 		const file = fileEntry({ name });
@@ -238,10 +247,29 @@ describe("FolderRow sinks", () => {
 		expect(markup).not.toContain("file-table__bidi-escape");
 		expect(markup).toContain('title="/photos/2024"');
 	});
+
+	it("does not style literal escape-token text as a folder control", () => {
+		const markup = renderFolder("/photos/holiday<U+202E>gnp.jpg");
+
+		expect(markup).not.toContain("file-table__bidi-escape");
+		expect(markup).toContain("holiday&lt;U+202E&gt;gnp.jpg</bdi>");
+	});
 });
 
 describe("ErrorExpansion display and copy split", () => {
 	const ERROR_TEXT = `write failed: /tmp/holiday${RLO}gnp.jpg`;
+
+	it("does not style literal escape-token text as a control", () => {
+		const markup = renderToStaticMarkup(
+			React.createElement(ErrorExpansion, {
+				error: "write failed: holiday<U+202E>gnp.jpg",
+				onCopy: () => undefined,
+			}),
+		);
+
+		expect(markup).not.toContain("file-table__bidi-escape");
+		expect(markup).toContain("holiday&lt;U+202E&gt;gnp.jpg</pre>");
+	});
 
 	it("shows the token in the pre and no raw control", () => {
 		const markup = renderToStaticMarkup(
