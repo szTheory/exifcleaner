@@ -2862,15 +2862,6 @@
 			"severity": "minor"
 		},
 		{
-			"fingerprint": "i18n-gap|file-list-filerow--rlo-name|rtl-override-reorders-name",
-			"kind": "i18n-gap",
-			"story": "file-list-filerow--rlo-name",
-			"rule": "rtl-override-reorders-name",
-			"reason": "By measured glyph positions the name 'holiday' U+202E 'gnp.jpg' draws as 'holiday' then 'gpj.png', so a JPG file reads as a PNG while the type pill says JPG; the bdi dir=auto isolate does not contain the override's reordering, which lets a crafted name misstate the file type.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
 			"fingerprint": "i18n-gap|file-list-filetable--persian-batch|header-text-align-left-under-rtl",
 			"kind": "i18n-gap",
 			"story": "file-list-filetable--persian-batch",

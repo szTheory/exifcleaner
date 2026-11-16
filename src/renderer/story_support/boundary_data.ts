@@ -27,6 +27,16 @@ export const RLO_NAME = "holiday\u202Egnp.jpg";
 // A left-to-right override and a right-to-left override, each closed by a pop (U+202C).
 export const LRO_PDF_NAME = "scan-\u202Dabc\u202C-\u202Edef\u202C.png";
 
+// A Hebrew word (U+05E9 U+05DC U+05D5 U+05DD) then a right-to-left embedding (U+202B) then
+// "x.jpg": a right-to-left host paragraph, so the escape token must stay contiguous
+// (TRU-01). Written in the brace form like every escape in this file.
+export const RTL_HOST_NAME = "\u{5E9}\u{5DC}\u{5D5}\u{5DD}\u{202B}x.jpg";
+
+// The control-free companion of RLO_NAME: the same length as the raw RLO name, no control,
+// so a twin row shows what an unescaped row of the same status measures (TRU-01 row height
+// and overflow checks).
+export const CONTROL_FREE_TWIN_NAME = "holiday-gnp.jpg";
+
 // 180 UTF-16 code units in total, extension included (String.length counts code units,
 // not graphemes); the stories assert the length so a builder change cannot shorten it.
 export const LONG_UNBROKEN_NAME = "a".repeat(180 - ".jpg".length) + ".jpg";

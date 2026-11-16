@@ -5,6 +5,7 @@ import type { FileEntry } from "../../contexts/AppContext";
 import { useI18n } from "../../hooks/use_i18n";
 import {
 	ARABIC_DIGITS_NAME,
+	CONTROL_FREE_TWIN_NAME,
 	GERMAN_COMPOUND_NAME,
 	HEBREW_LATIN_NAME,
 	JAPANESE_LONG_NAME,
@@ -12,6 +13,7 @@ import {
 	LRO_PDF_NAME,
 	MANY_DOTS_NAME,
 	RLO_NAME,
+	RTL_HOST_NAME,
 	ZERO_BYTE_NAME,
 	ZWJ_FAMILY_NAME,
 } from "../../story_support/boundary_data";
@@ -433,6 +435,59 @@ function visualOrder(host: Element): {
 	return { logical, visual, direction: getComputedStyle(host).direction };
 }
 
+// A FileRow in a table of several rows, each with a fresh animatedCheckRef (D-08): the
+// TRU-01 twin stories add a control-free twin and a right-to-left-host row to the existing
+// story ids (a new FileRow story id would fail the sealed a11y kinds), so the single-row
+// helpers above (findByRole("row")) are not used for them.
+function renderRows(
+	args: React.ComponentProps<typeof FileRow>,
+	files: FileEntry[],
+): React.JSX.Element {
+	return (
+		<WindowFrame>
+			<TableFrame>
+				{files.map((file) => (
+					<FileRow
+						key={file.id}
+						{...args}
+						file={file}
+						animatedCheckRef={{ current: new Set<string>() }}
+					/>
+				))}
+			</TableFrame>
+		</WindowFrame>
+	);
+}
+
+function rowAt(rows: HTMLElement[], index: number): HTMLElement {
+	const row = rows[index];
+	if (row === undefined) throw new Error(`no row at index ${index}`);
+	return row;
+}
+
+function nameTextOf(row: Element): Element {
+	const name = row.querySelector("bdi.file-table__name-text");
+	if (name === null) throw new Error("the row has no name text");
+	return name;
+}
+
+// UI-SPEC checks 3 and 6: a row whose name holds tokens gets the height of a control-free
+// twin row of the same status (the name stays on one line, the 44 px minimum governs both)
+// and does not scroll sideways.
+async function expectTwinLayout(
+	controlRow: HTMLElement,
+	twinRow: HTMLElement,
+): Promise<void> {
+	const heightDelta = Math.abs(
+		controlRow.getBoundingClientRect().height -
+			twinRow.getBoundingClientRect().height,
+	);
+	await expect(heightDelta).toBeLessThanOrEqual(0.5);
+	await expect(controlRow.scrollWidth).toBeLessThanOrEqual(
+		controlRow.clientWidth,
+	);
+}
+
 // Size and count magnitudes (D-21 item 2 and 3): the rendered text is a finding, so the
 // plays assert presence only.
 async function expectCells(canvasElement: HTMLElement): Promise<void> {
@@ -651,54 +706,107 @@ export const ArabicDigitsName: Story = {
 	},
 };
 
+// TRU-01 twins. The ids RloName and LroPdfName are keyed in knownA11y, FINDINGS.md and
+// known-findings.json, so they stay; each renders extra rows (a control-free twin, and for
+// RloName a right-to-left-host row) instead of adding a story id.
+const RTL_HOST_ESCAPED = "\u{5E9}\u{5DC}\u{5D5}\u{5DD}<U+202B>x.jpg";
+
 export const RloName: Story = {
-	args: { file: cleanedInPlace({ name: RLO_NAME }) },
+	args: { file: cleanedInPlace({ id: "rlo-row", name: RLO_NAME }) },
 	parameters: {
 		a11y: knownA11y("file-list-filerow--rlo-name"),
 		copyLint: {
-			fixtureText: rowLabelFixture(
-				displayName({ name: RLO_NAME }),
-				"outcome.cleaned",
-			),
+			fixtureText: [
+				...rowLabelFixture(displayName({ name: RLO_NAME }), "outcome.cleaned"),
+				...rowLabelFixture(CONTROL_FREE_TWIN_NAME, "outcome.cleaned"),
+				...rowLabelFixture(
+					displayName({ name: RTL_HOST_NAME }),
+					"outcome.cleaned",
+				),
+			],
 		},
 	},
+	render: (args) =>
+		renderRows(args, [
+			args.file,
+			cleanedInPlace({ id: "twin-row", name: CONTROL_FREE_TWIN_NAME }),
+			cleanedInPlace({ id: "rtl-host-row", name: RTL_HOST_NAME }),
+		]),
 	play: async ({ canvasElement }) => {
-		// TRU-01: the override is shown as its token, so the name is drawn in the order it
-		// is written and its real extension is the one displayed.
-		await expectNameText(canvasElement, "holiday<U+202E>gnp.jpg");
-		const name = canvasElement.querySelector("bdi.file-table__name-text");
-		await expect(name).not.toBeNull();
-		if (name === null) return;
+		const rows = await within(canvasElement).findAllByRole("row");
+		await expect(rows).toHaveLength(3);
+		const controlRow = rowAt(rows, 0);
+		const twinRow = rowAt(rows, 1);
+		const rtlRow = rowAt(rows, 2);
+
+		// The override is shown as its token, so the name is drawn in the order it is
+		// written and its real extension is the one displayed.
+		await expect(controlRow).toHaveAccessibleName(
+			"holiday<U+202E>gnp.jpg. Metadata removed",
+		);
+		const name = nameTextOf(controlRow);
+		await expect(name.textContent).toBe("holiday<U+202E>gnp.jpg");
 		const measured = visualOrder(name);
 		await expect(measured.visual).toBe(measured.logical);
 		await expect(measured.logical.toLowerCase().endsWith(".jpg")).toBe(true);
+
+		// The control-free twin is the layout reference.
+		await expect(nameTextOf(twinRow).textContent).toBe(CONTROL_FREE_TWIN_NAME);
+		await expectTwinLayout(controlRow, twinRow);
+
+		// Right-to-left host: visual order cannot equal logical order by construction, so
+		// the eight characters of the token must stay together in the drawn order, and the
+		// host direction is right-to-left (RESEARCH R4). Red without the bdi wrapper.
+		const rtlName = nameTextOf(rtlRow);
+		await expect(rtlName.textContent).toBe(RTL_HOST_ESCAPED);
+		const rtl = visualOrder(rtlName);
+		await expect(rtl.direction).toBe("rtl");
+		await expect(rtl.visual).toContain("<U+202B>");
 	},
 };
 
 export const LroPdfName: Story = {
-	args: { file: cleanedInPlace({ name: LRO_PDF_NAME, extension: "PNG" }) },
+	args: {
+		file: cleanedInPlace({
+			id: "lro-row",
+			name: LRO_PDF_NAME,
+			extension: "PNG",
+		}),
+	},
 	parameters: {
 		a11y: knownA11y("file-list-filerow--lro-pdf-name"),
 		copyLint: {
-			fixtureText: rowLabelFixture(
-				displayName({ name: LRO_PDF_NAME }),
-				"outcome.cleaned",
-			),
+			fixtureText: [
+				...rowLabelFixture(
+					displayName({ name: LRO_PDF_NAME }),
+					"outcome.cleaned",
+				),
+				...rowLabelFixture(CONTROL_FREE_TWIN_NAME, "outcome.cleaned"),
+			],
 		},
 	},
+	render: (args) =>
+		renderRows(args, [
+			args.file,
+			cleanedInPlace({ id: "twin-row", name: CONTROL_FREE_TWIN_NAME }),
+		]),
 	play: async ({ canvasElement }) => {
-		// TRU-01: every override and pop is shown as its token, and the displayed text
-		// ends with the real extension.
-		await expectNameText(
-			canvasElement,
+		const rows = await within(canvasElement).findAllByRole("row");
+		await expect(rows).toHaveLength(2);
+		const controlRow = rowAt(rows, 0);
+		const twinRow = rowAt(rows, 1);
+
+		// Every override and pop is shown as its token, and the displayed text ends with
+		// the real extension.
+		const name = nameTextOf(controlRow);
+		await expect(name.textContent).toBe(
 			"scan-<U+202D>abc<U+202C>-<U+202E>def<U+202C>.png",
 		);
-		const name = canvasElement.querySelector("bdi.file-table__name-text");
-		await expect(name).not.toBeNull();
-		if (name === null) return;
 		const measured = visualOrder(name);
 		await expect(measured.visual).toBe(measured.logical);
 		await expect(measured.logical.toLowerCase().endsWith(".png")).toBe(true);
+
+		await expectTwinLayout(controlRow, twinRow);
 	},
 };
 
