@@ -6,8 +6,8 @@
 // tests/renderer/gates/window_background.test.ts (GAT-02) compares both with the stylesheet.
 // The dark value was #1e1e1e (an old, unrelated grey) until Phase 76.
 
-const LIGHT_BACKGROUND_COLOR = "#F5F6F8";
-const DARK_BACKGROUND_COLOR = "#141416";
+const LIGHT_BACKGROUND_COLOR = "#FFFFFF";
+const DARK_BACKGROUND_COLOR = "#0A2E2B";
 
 export function windowBackgroundColor(isDark: boolean): string {
 	return isDark ? DARK_BACKGROUND_COLOR : LIGHT_BACKGROUND_COLOR;
