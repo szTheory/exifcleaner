@@ -2,16 +2,22 @@ import react from "@vitejs/plugin-react";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
+import type { BrowserCommandContext } from "vitest/node";
 
 // Storybook's own vitest config (the root vitest.config.ts stays untouched so
 // `yarn test` is unchanged). Every browser project must get its browser config
 // from this factory: sharing one object across projects makes vitest fail with
 // "Cannot define a nested project for a chromium browser". Reduced motion plus
 // a fixed viewport keep scans and screenshots deterministic.
-const browser = () => ({
+const browser = (forcedColors?: "active") => ({
 	enabled: true,
 	headless: true,
-	provider: playwright({ contextOptions: { reducedMotion: "reduce" } }),
+	provider: playwright({
+		contextOptions: {
+			reducedMotion: "reduce",
+			...(forcedColors === undefined ? {} : { forcedColors }),
+		},
+	}),
 	viewport: { width: 1280, height: 800 },
 	instances: [{ browser: "chromium" as const }],
 });
@@ -45,6 +51,34 @@ export default defineConfig({
 				},
 			})),
 			{
+				plugins: [react()],
+				test: {
+					name: "storybook-forced-colors",
+					include: [".storybook/forced_colors.test.tsx"],
+					browser: {
+						...browser("active"),
+						commands: {
+							setPaletteMedia: async (
+								{ page }: BrowserCommandContext,
+								theme: "light" | "dark",
+								forcedColors: "none" | "active",
+							) => {
+								if (
+									(theme !== "light" && theme !== "dark") ||
+									(forcedColors !== "none" && forcedColors !== "active")
+								) {
+									throw new Error("unsupported palette media request");
+								}
+								await page.emulateMedia({
+									colorScheme: theme,
+									forcedColors,
+								});
+							},
+						},
+					},
+				},
+			},
+			{
 				// addon-a11y only throws on a violation when VITEST_STORYBOOK is
 				// "false" (the plugin projects above set it themselves); this plain
 				// browser project sets it so the gate test can see a rejection.
@@ -54,6 +88,7 @@ export default defineConfig({
 					include: [".storybook/**/*.test.tsx"],
 					env: { VITEST_STORYBOOK: "false" },
 					browser: browser(),
+					exclude: [".storybook/forced_colors.test.tsx"],
 				},
 			},
 			{

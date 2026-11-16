@@ -1,0 +1,53 @@
+@media (forced-colors: active) {
+	.toggle-switch__label,
+	.toggle-switch__description {
+		color: CanvasText;
+	}
+
+	.toggle-switch__track {
+		background: Canvas;
+		outline: 1px solid ButtonText;
+	}
+
+	.toggle-switch__track--on {
+		background: Highlight;
+		outline-color: Highlight;
+	}
+
+	.toggle-switch__thumb {
+		background: Canvas;
+		outline: 1px solid ButtonText;
+	}
+
+	.segmented-control {
+		background: Canvas;
+		outline: 1px solid CanvasText;
+	}
+
+	.segmented-control__segment {
+		color: ButtonText;
+	}
+
+	.segmented-control__segment--active {
+		background: Highlight;
+		color: HighlightText;
+		outline: 1px solid Highlight;
+	}
+
+	.segmented-control__indicator {
+		background: Highlight;
+	}
+
+	.type-pill {
+		background: Canvas;
+		color: CanvasText;
+		outline: 1px solid CanvasText;
+	}
+
+	.file-table__row[aria-expanded="true"] {
+		background: Highlight;
+		color: HighlightText;
+		outline: 1px solid Highlight;
+		outline-offset: -1px;
+	}
+}

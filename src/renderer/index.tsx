@@ -14,6 +14,7 @@ import "./styles/status_bar.css";
 import "./styles/status_icon.css";
 import "./styles/toast.css";
 import "./styles/type_pill.css";
+import "./styles/forced_colors.css";
 
 const rootEl = document.getElementById("root");
 if (!rootEl) {
