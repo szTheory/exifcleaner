@@ -19,7 +19,7 @@
 
 .status-bar__summary {
 	flex: 1;
-	text-align: right;
+	text-align: end;
 	font-size: 12px;
 	color: var(--ec-color-text-secondary);
 	font-weight: var(--ec-font-weight-regular);

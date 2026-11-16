@@ -71,7 +71,7 @@
 	font-size: var(--ec-font-size-small);
 	font-weight: var(--ec-font-weight-semibold);
 	padding: var(--ec-space-1) 0;
-	text-align: left;
+	text-align: start;
 }
 
 .metadata-group__count {
