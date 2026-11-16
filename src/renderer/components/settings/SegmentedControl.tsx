@@ -56,7 +56,7 @@ export function SegmentedControl<const T extends string>({
 			))}
 			<div
 				className="segmented-control__indicator"
-				style={{ transform: `translateX(${activeIndex * 100}%)` }}
+				style={{ "--ec-segment-index": activeIndex }}
 			/>
 		</div>
 	);

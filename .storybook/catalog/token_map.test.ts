@@ -483,8 +483,8 @@ describe("the real token map", () => {
 		expect(declared.other).toEqual([]);
 		expect(
 			usedTokens({ ...ctx.sources, [TOKENS_CSS_PATH]: ctx.tokensCss }),
-		).toHaveLength(65);
-		expect(real.entries).toHaveLength(68);
+		).toHaveLength(66);
+		expect(real.entries).toHaveLength(69);
 		expect(Object.keys(real)).toEqual(["schemaVersion", "brandPin", "entries"]);
 	});
 

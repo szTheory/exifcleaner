@@ -2898,15 +2898,6 @@
 			"severity": "minor"
 		},
 		{
-			"fingerprint": "i18n-gap|settings-segmentedcontrol--arabic|indicator-ignores-rtl",
-			"kind": "i18n-gap",
-			"story": "settings-segmentedcontrol--arabic",
-			"rule": "indicator-ignores-rtl",
-			"reason": "segmented_control.css:50-54 places the indicator at left: 2px at a third of the width and moves it by index, and no stylesheet under src/renderer/styles has an rtl or :dir() rule, while the flex row of segments reverses in a right-to-left layout, so as read from the source the highlight sits on the wrong segment for every choice but the middle one; not measured in a story.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
 			"fingerprint": "i18n-gap|ui-statusbar--single-file|tags-count-no-singular",
 			"kind": "i18n-gap",
 			"story": "ui-statusbar--single-file",
