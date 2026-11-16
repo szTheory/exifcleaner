@@ -37,6 +37,11 @@ export function FileRow({
 	const revealTargets = resolveRevealTargets(file);
 	// Display only: file.name stays raw in state, sorting, paths and IPC.
 	const shownName = displayName({ name: file.name });
+	// file.error can embed an output path built from the name (an xattr failure carries the
+	// execFile message), so the error-row title and the aria-label tail show it escaped.
+	// errorDetail and file.error themselves stay raw.
+	const shownError =
+		file.error === null ? undefined : displayName({ name: file.error });
 
 	const isComplete =
 		file.status === FileProcessingStatus.Complete ||
@@ -130,7 +135,7 @@ export function FileRow({
 
 	return (
 		<div
-			title={isError ? (file.error ?? undefined) : undefined}
+			title={isError ? (shownError ?? undefined) : undefined}
 			onAnimationEnd={handleAnimationEnd}
 		>
 			<div
@@ -143,7 +148,7 @@ export function FileRow({
 						? `${outcomeSummary ?? t("complete")}. ${t("writtenToCopy")}.`
 						: (outcomeSummary ??
 							(isError
-								? (file.error ?? t("status.error"))
+								? (shownError ?? t("status.error"))
 								: t("status.pending")))
 				}`}
 				{...(isExpandable ? { "aria-expanded": isExpanded } : {})}
