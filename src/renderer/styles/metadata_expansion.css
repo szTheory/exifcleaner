@@ -31,7 +31,7 @@
 	font-family: var(--ec-font-family);
 	font-size: var(--ec-font-size-small);
 	padding: var(--ec-space-1) var(--ec-space-2);
-	cursor: pointer;
+	cursor: default;
 	-webkit-app-region: no-drag;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .metadata-expansion__empty {
-	color: var(--ec-color-muted);
+	color: var(--ec-color-text-secondary);
 	font-size: var(--ec-font-size-small);
 	font-style: italic;
 	display: block;
@@ -92,7 +92,7 @@
 }
 
 .metadata-expansion__present summary {
-	cursor: pointer;
+	cursor: default;
 	padding: var(--ec-space-2) 0;
 }
 
@@ -114,11 +114,11 @@
 }
 
 .metadata-field--removed {
-	background: var(--ec-color-removed-bg);
+	background: transparent;
 }
 
 .metadata-field--preserved {
-	background: var(--ec-color-preserved-bg);
+	background: transparent;
 }
 
 .metadata-field__icon {
@@ -129,11 +129,11 @@
 }
 
 .metadata-field--removed .metadata-field__icon {
-	color: var(--ec-color-error);
+	color: var(--ec-color-text-secondary);
 }
 
 .metadata-field--preserved .metadata-field__icon {
-	color: var(--ec-color-success);
+	color: var(--ec-color-text-secondary);
 }
 
 .metadata-field__name {
