@@ -348,8 +348,8 @@
 			"kind": "a11y-p72",
 			"story": "settings-languagedropdown--item-hover",
 			"rule": "scrollable-region-focusable",
-			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.2 (LDG-01, listbox-focus; register counterpart no-aria-activedescendant; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p72|settings-languagedropdown--keyboard-end|color-contrast",
@@ -364,8 +364,8 @@
 			"kind": "a11y-p72",
 			"story": "settings-languagedropdown--keyboard-end",
 			"rule": "scrollable-region-focusable",
-			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.2 (LDG-01, listbox-focus; register counterpart no-aria-activedescendant; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p72|settings-languagedropdown--open|color-contrast",
@@ -380,8 +380,8 @@
 			"kind": "a11y-p72",
 			"story": "settings-languagedropdown--open",
 			"rule": "scrollable-region-focusable",
-			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.2 (LDG-01, listbox-focus; register counterpart no-aria-activedescendant; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p72|settings-languagedropdown--open-arabic|color-contrast",
@@ -396,8 +396,8 @@
 			"kind": "a11y-p72",
 			"story": "settings-languagedropdown--open-arabic",
 			"rule": "scrollable-region-focusable",
-			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.2 (LDG-01, listbox-focus; register counterpart no-aria-activedescendant; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p72|settings-languagedropdown--open-selected|color-contrast",
@@ -412,8 +412,8 @@
 			"kind": "a11y-p72",
 			"story": "settings-languagedropdown--open-selected",
 			"rule": "scrollable-region-focusable",
-			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.2 (LDG-01, listbox-focus; register counterpart no-aria-activedescendant; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p72|settings-segmentedcontrol--arabic|color-contrast",
@@ -652,8 +652,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--already-clean",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--already-clean|color-contrast",
@@ -668,8 +668,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--already-clean-expanded",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--already-clean-expanded|color-contrast",
@@ -684,8 +684,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--arabic-digits-name",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--arabic-digits-name|color-contrast",
@@ -700,8 +700,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--cleaned",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--cleaned|color-contrast",
@@ -716,16 +716,16 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--cleaned-expanded",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--cleaned-expanded|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--cleaned-expanded",
 			"rule": "aria-required-children",
-			"reason": "Selector div[role=\"rowgroup\"] fails in both themes: axe reports children that a role=rowgroup must not contain (button, details, div[aria-label]), because FileRow puts its expansion region (a button, a details element and a labelled div) beside the row inside the table's rowgroup, as FileTable renders it; a component structure defect in FileRow and FileTable, not the story frame; Selector div[role=\"table\"] fails in both themes: axe reports children that a role=table must not contain (button, details, div[aria-label]), because FileRow puts its expansion region (a button, a details element and a labelled div) beside the row inside the table's rowgroup, as FileTable renders it; a component structure defect in FileRow and FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector div[role=\"rowgroup\"] fails in both themes: axe reports children that a role=rowgroup must not contain (button, details, div[aria-label]), because FileRow puts its expansion region (a button, a details element and a labelled div) beside the row inside the table's rowgroup, as FileTable renders it; a component structure defect in FileRow and FileTable, not the story frame; Selector div[role=\"table\"] fails in both themes: axe reports children that a role=table must not contain (button, details, div[aria-label]), because FileRow puts its expansion region (a button, a details element and a labelled div) beside the row inside the table's rowgroup, as FileTable renders it; a component structure defect in FileRow and FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart rowgroup-holds-non-row-children; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--cleaned-expanded|color-contrast",
@@ -740,8 +740,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--cleanup",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--cleanup|color-contrast",
@@ -756,8 +756,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--cleanup-without-residual",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--cleanup-without-residual|color-contrast",
@@ -772,8 +772,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--commit",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--commit|color-contrast",
@@ -788,8 +788,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--copy-mode-disclosure",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--copy-mode-disclosure|color-contrast",
@@ -804,8 +804,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--error-collapsed",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--error-collapsed|color-contrast",
@@ -820,8 +820,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--generic-failure",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--generic-failure|color-contrast",
@@ -836,8 +836,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--german-compound-name",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--german-compound-name|color-contrast",
@@ -852,8 +852,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--hebrew-latin-name",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--hebrew-latin-name|color-contrast",
@@ -868,8 +868,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--huge-size",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--huge-size|color-contrast",
@@ -884,8 +884,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--huge-tag-counts",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--huge-tag-counts|color-contrast",
@@ -900,8 +900,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--japanese-long-name",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--japanese-long-name|color-contrast",
@@ -916,8 +916,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--just-under-megabyte",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--just-under-megabyte|color-contrast",
@@ -932,8 +932,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--long-unbroken-name",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--long-unbroken-name|color-contrast",
@@ -948,8 +948,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--lro-pdf-name",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--lro-pdf-name|color-contrast",
@@ -964,8 +964,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--many-dots-name",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--many-dots-name|color-contrast",
@@ -1004,8 +1004,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--refused",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--refused|color-contrast",
@@ -1020,8 +1020,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--rlo-name",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--rlo-name|color-contrast",
@@ -1036,8 +1036,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--row-hover",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--row-hover|color-contrast",
@@ -1052,8 +1052,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--row-keyboard-focus",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--row-keyboard-focus|color-contrast",
@@ -1068,8 +1068,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--unchanged",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--unchanged|color-contrast",
@@ -1084,8 +1084,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--verification",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--verification|color-contrast",
@@ -1100,8 +1100,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--write",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--write|color-contrast",
@@ -1116,8 +1116,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--write-without-residual",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--write-without-residual|color-contrast",
@@ -1132,8 +1132,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--xattr",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--xattr|color-contrast",
@@ -1148,8 +1148,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--xattr-without-residual",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--xattr-without-residual|color-contrast",
@@ -1164,8 +1164,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--zero-byte-error",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-error|color-contrast",
@@ -1180,8 +1180,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--zero-byte-no-metadata",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-no-metadata|color-contrast",
@@ -1196,8 +1196,8 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--zwj-family-name",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--zwj-family-name|color-contrast",
@@ -1212,24 +1212,24 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--arabic-batch",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--arabic-batch|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--arabic-batch",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--arabic-batch|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--arabic-batch",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--arabic-batch|color-contrast",
@@ -1244,32 +1244,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--arabic-batch",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-complete|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--folder-complete",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-complete|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--folder-complete",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-complete|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--folder-complete",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-complete|color-contrast",
@@ -1284,24 +1284,24 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--folder-complete",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-empty|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--folder-empty",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-empty|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--folder-empty",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-empty|color-contrast",
@@ -1316,24 +1316,24 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--folder-empty",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-scanning|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--folder-scanning",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-scanning|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--folder-scanning",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-scanning|color-contrast",
@@ -1348,32 +1348,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--folder-scanning",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--german-batch|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--german-batch",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--german-batch|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--german-batch",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--german-batch|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--german-batch",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--german-batch|color-contrast",
@@ -1388,32 +1388,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--german-batch",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--header-hover|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--header-hover",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--header-hover|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--header-hover",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--header-hover|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--header-hover",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--header-hover|color-contrast",
@@ -1428,32 +1428,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--header-hover",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--hungarian-batch|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--hungarian-batch",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--hungarian-batch|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--hungarian-batch",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--hungarian-batch|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--hungarian-batch",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--hungarian-batch|color-contrast",
@@ -1468,32 +1468,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--hungarian-batch",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--japanese-batch|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--japanese-batch",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--japanese-batch|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--japanese-batch",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--japanese-batch|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--japanese-batch",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--japanese-batch|color-contrast",
@@ -1508,32 +1508,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--japanese-batch",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--mixed-statuses|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--mixed-statuses",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--mixed-statuses|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--mixed-statuses",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--mixed-statuses|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--mixed-statuses",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--mixed-statuses|color-contrast",
@@ -1548,32 +1548,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--mixed-statuses",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--persian-batch|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--persian-batch",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--persian-batch|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--persian-batch",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--persian-batch|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--persian-batch",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--persian-batch|color-contrast",
@@ -1588,32 +1588,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--persian-batch",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-button-keyboard-focus|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-button-keyboard-focus",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-button-keyboard-focus|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-button-keyboard-focus",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-button-keyboard-focus|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-button-keyboard-focus",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-button-keyboard-focus|color-contrast",
@@ -1628,32 +1628,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-button-keyboard-focus",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-ascending|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-name-ascending",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-ascending|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-name-ascending",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-ascending|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-name-ascending",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-ascending|color-contrast",
@@ -1668,32 +1668,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-name-ascending",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-descending|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-name-descending",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-descending|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-name-descending",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-descending|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-name-descending",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-descending|color-contrast",
@@ -1708,32 +1708,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-name-descending",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-size-with-tie|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-size-with-tie",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-size-with-tie|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-size-with-tie",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-size-with-tie|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-size-with-tie",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-size-with-tie|color-contrast",
@@ -1748,32 +1748,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-size-with-tie",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-twice-keeps-rank|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-twice-keeps-rank",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-twice-keeps-rank|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-twice-keeps-rank",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-twice-keeps-rank|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-twice-keeps-rank",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-twice-keeps-rank|color-contrast",
@@ -1788,32 +1788,32 @@
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-twice-keeps-rank",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--all-done|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "screens-app--all-done",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--all-done|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "screens-app--all-done",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--all-done|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "screens-app--all-done",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--all-done|color-contrast",
@@ -1828,32 +1828,32 @@
 			"kind": "a11y-p73",
 			"story": "screens-app--all-done",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--all-error|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "screens-app--all-error",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--all-error|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "screens-app--all-error",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--all-error|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "screens-app--all-error",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--all-error|color-contrast",
@@ -1868,8 +1868,8 @@
 			"kind": "a11y-p73",
 			"story": "screens-app--all-error",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--drawer-open|color-contrast",
@@ -1892,24 +1892,24 @@
 			"kind": "a11y-p73",
 			"story": "screens-app--large-batch",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--large-batch|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "screens-app--large-batch",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--large-batch|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "screens-app--large-batch",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--large-batch|color-contrast",
@@ -1924,32 +1924,32 @@
 			"kind": "a11y-p73",
 			"story": "screens-app--large-batch",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--mid-batch|aria-allowed-role",
 			"kind": "a11y-p73",
 			"story": "screens-app--mid-batch",
 			"rule": "aria-allowed-role",
-			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section (role=table) fails in both themes: axe reports that ARIA role table is not allowed on a section element, which is what FileTable renders; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart table-section-role-not-allowed; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--mid-batch|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "screens-app--mid-batch",
 			"rule": "aria-conditional-attr",
-			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--mid-batch|aria-required-children",
 			"kind": "a11y-p73",
 			"story": "screens-app--mid-batch",
 			"rule": "aria-required-children",
-			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--mid-batch|color-contrast",
@@ -1964,8 +1964,8 @@
 			"kind": "a11y-p73",
 			"story": "screens-app--mid-batch",
 			"rule": "empty-table-header",
-			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|settings-settingsdrawer--all-toggles-off|color-contrast",
@@ -2036,8 +2036,8 @@
 			"kind": "a11y-p73",
 			"story": "settings-settingsdrawer--language-list-open",
 			"rule": "scrollable-region-focusable",
-			"reason": "The open list .language-dropdown__list inside the drawer (max-height 280px, overflow-y auto, one option per language plus System) is a scrollable region with no focusable content and no tabindex of its own, so axe reports that the element should have focusable content and should be focusable in both themes; the options are role option divs that never take focus, the same defect as settings-languagedropdown--open, and the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
+			"reason": "The open list .language-dropdown__list inside the drawer (max-height 280px, overflow-y auto, one option per language plus System) is a scrollable region with no focusable content and no tabindex of its own, so axe reports that the element should have focusable content and should be focusable in both themes; the options are role option divs that never take focus, the same defect as settings-languagedropdown--open, and the fix belongs to v5.2 (LDG-01, listbox-focus; register counterpart no-aria-activedescendant; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
+			"disposition": "fix-v5.2"
 		},
 		{
 			"fingerprint": "a11y-p73|settings-settingsdrawer--non-mac-platform|color-contrast",
