@@ -3,13 +3,8 @@ import { expect, within } from "storybook/test";
 import { FileProcessingStatus } from "../../../domain";
 import { StatusIcon } from "./StatusIcon";
 
-// Reasoned omissions and proofs (D-12, D-16): Reading renders the same spinner as
-// Processing and NoMetadataFound the same check as Complete, so the Processing and
-// Complete stories show both statuses side by side and assert their markup is
-// identical (the proofs behind the duplicate waivers). The check animation is
-// suppressed under reduced motion, so CompleteAnimated asserts only the prop-to-class
-// wiring and the motion itself is not a story. The first-column icon receives Error
-// or a non-expandable state, never an expanded one.
+// These stories keep independent accessible name and glyph checks for statuses that
+// currently share an icon. They deliberately leave markup and styling free to change.
 const meta = {
 	title: "UI/StatusIcon",
 	component: StatusIcon,
@@ -36,23 +31,30 @@ function SideBySide({
 	);
 }
 
-async function expectIdenticalPair(
+async function expectIcons(
 	canvasElement: HTMLElement,
 	label: string,
+	glyphSelectors: readonly string[],
+	count: number,
 ): Promise<void> {
-	const icons = canvasElement.querySelectorAll(".status-icon");
-	await expect(icons).toHaveLength(2);
-	await expect(icons[0]?.outerHTML).toBe(icons[1]?.outerHTML);
-	await expect(
-		await within(canvasElement).findAllByRole("img", { name: label }),
-	).toHaveLength(2);
+	const icons = await within(canvasElement).findAllByRole("img", {
+		name: label,
+	});
+	await expect(icons).toHaveLength(count);
+	for (const icon of icons) {
+		await expect(icon).toHaveAttribute("aria-label", label);
+		for (const glyphSelector of glyphSelectors) {
+			const glyph = icon.matches(glyphSelector)
+				? icon
+				: icon.querySelector(glyphSelector);
+			await expect(glyph).not.toBeNull();
+		}
+	}
 }
 
 export const Pending: Story = {
 	play: async ({ canvasElement }) => {
-		await expect(
-			await within(canvasElement).findByRole("img", { name: "Pending" }),
-		).toBeInTheDocument();
+		await expectIcons(canvasElement, "Pending", ["circle"], 1);
 	},
 };
 
@@ -64,7 +66,12 @@ export const Processing: Story = {
 		/>
 	),
 	play: async ({ canvasElement }) => {
-		await expectIdenticalPair(canvasElement, "Processing");
+		await expectIcons(
+			canvasElement,
+			"Processing",
+			[".status-icon__spinner"],
+			2,
+		);
 	},
 };
 
@@ -76,13 +83,19 @@ export const Complete: Story = {
 		/>
 	),
 	play: async ({ canvasElement }) => {
-		await expectIdenticalPair(canvasElement, "Complete");
+		await expectIcons(canvasElement, "Complete", ["path"], 2);
+		for (const icon of await within(canvasElement).findAllByRole("img", {
+			name: "Complete",
+		})) {
+			await expect(icon).not.toHaveClass("status-icon__check--animate");
+		}
 	},
 };
 
 export const CompleteAnimated: Story = {
 	args: { status: FileProcessingStatus.Complete, shouldAnimate: true },
 	play: async ({ canvasElement }) => {
+		await expectIcons(canvasElement, "Complete", ["path"], 1);
 		const check = await within(canvasElement).findByRole("img", {
 			name: "Complete",
 		});
@@ -93,9 +106,7 @@ export const CompleteAnimated: Story = {
 export const Failed: Story = {
 	args: { status: FileProcessingStatus.Error },
 	play: async ({ canvasElement }) => {
-		await expect(
-			await within(canvasElement).findByRole("img", { name: "Error" }),
-		).toBeInTheDocument();
+		await expectIcons(canvasElement, "Error", ["circle", "path"], 1);
 	},
 };
 
@@ -108,10 +119,11 @@ export const FailedLabelled: Story = {
 			"Metadata was removed, but macOS extended attributes could not be cleared.",
 	},
 	play: async ({ canvasElement }) => {
-		await expect(
-			await within(canvasElement).findByRole("img", {
-				name: "Metadata was removed, but macOS extended attributes could not be cleared.",
-			}),
-		).toBeInTheDocument();
+		await expectIcons(
+			canvasElement,
+			"Metadata was removed, but macOS extended attributes could not be cleared.",
+			["circle", "path"],
+			1,
+		);
 	},
 };
