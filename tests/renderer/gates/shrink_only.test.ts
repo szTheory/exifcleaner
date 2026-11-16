@@ -10,6 +10,7 @@ import {
 	shrinkOnlyProblems,
 	type ShrinkOnlyEntry,
 } from "../../../scripts/shrink_only_check.mjs";
+import { assertDirEffect, snapshotDir } from "../../helpers/dir_effect";
 
 // GAT-01, GAT-03 / D-10, RESEARCH R8: the GAT-01 pending list and the GAT-03 colour baseline
 // may only shrink. A pull request that adds a pending row or a baseline row in the same
@@ -299,8 +300,13 @@ describe("the CLI against a temp repository", () => {
 		vi.spyOn(console, "error").mockImplementation((...args: unknown[]) => {
 			lines.push(args.join(" "));
 		});
+		const before = snapshotDir(root);
 		const code = main(argv, { root });
 		vi.restoreAllMocks();
+		// Whole-directory effect, every case: the check only reads the working tree and git
+		// objects, so a run (green or red, bootstrap or fail-closed) adds, changes and
+		// removes nothing in the repository, .git included.
+		assertDirEffect(before, snapshotDir(root), {});
 		return { code, out: lines.join("\n") };
 	}
 

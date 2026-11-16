@@ -20,6 +20,7 @@ import {
 	main,
 	vendoredProblems,
 } from "../../../scripts/brand_vendored_check.mjs";
+import { assertDirEffect, snapshotDir } from "../../helpers/dir_effect";
 import { BRAND_FIXTURE_ENTRIES, buildZip } from "../../helpers/zip_fixture";
 
 // GAT-04 / D-17, D-18: a vendored brand asset must equal its pinned source byte for byte.
@@ -120,6 +121,53 @@ describe("vendoredProblems: the manifest and the cache", () => {
 	test("a valid cache and the empty manifest give no problem", async () => {
 		expect(await problemsFor({ manifest: manifestWith([]) })).toEqual([]);
 		expect(fetchTrap).not.toHaveBeenCalled();
+	});
+
+	test("whole-directory effect: the check only unpacks into the cache and never touches the manifest, the zip or a vendored file", async () => {
+		const layout = arrange({ vendored: { [TARGET]: SOURCE_BYTES } });
+		const before = snapshotDir(layout.root);
+		const problems = await vendoredProblems({
+			...layout,
+			pin: PIN,
+			manifest: manifestWith([GOOD_ROW]),
+		});
+		expect(problems).toEqual([]);
+		assertDirEffect(before, snapshotDir(layout.root), {
+			added: [
+				`${CACHE_DIR_NAME}/unpacked`,
+				`${CACHE_DIR_NAME}/unpacked/.pin-sha256`,
+				`${CACHE_DIR_NAME}/unpacked/exifcleaner-brand`,
+				`${CACHE_DIR_NAME}/unpacked/exifcleaner-brand/BRAND.md`,
+				`${CACHE_DIR_NAME}/unpacked/exifcleaner-brand/assets`,
+				`${CACHE_DIR_NAME}/unpacked/exifcleaner-brand/assets/fonts`,
+				`${CACHE_DIR_NAME}/unpacked/exifcleaner-brand/assets/fonts/OFL-Alpha.txt`,
+				`${CACHE_DIR_NAME}/unpacked/exifcleaner-brand/assets/fonts/OFL-Beta.txt`,
+				`${CACHE_DIR_NAME}/unpacked/exifcleaner-brand/assets/fonts/static`,
+				`${CACHE_DIR_NAME}/unpacked/exifcleaner-brand/assets/fonts/static/Alpha-Regular.ttf`,
+				`${CACHE_DIR_NAME}/unpacked/exifcleaner-brand/assets/logo`,
+				`${CACHE_DIR_NAME}/unpacked/exifcleaner-brand/assets/logo/mark.svg`,
+			],
+			unchanged: [`${CACHE_DIR_NAME}/${ZIP_FILE_NAME}`, TARGET],
+		});
+	});
+
+	test("whole-directory effect: an invalid cache adds, changes and removes nothing", async () => {
+		const flipped = Buffer.from(goodZip);
+		flipped[0] = (flipped[0] ?? 0) ^ 0xff;
+		const layout = arrange({
+			cache: flipped,
+			vendored: { [TARGET]: SOURCE_BYTES },
+		});
+		const before = snapshotDir(layout.root);
+		const problems = await vendoredProblems({
+			...layout,
+			pin: PIN,
+			manifest: manifestWith([GOOD_ROW]),
+		});
+		expect(codes(problems)).toEqual(["cache"]);
+		assertDirEffect(before, snapshotDir(layout.root), {
+			unchanged: [`${CACHE_DIR_NAME}/${ZIP_FILE_NAME}`, TARGET],
+		});
 	});
 
 	test("a manifest brandPin that differs from the pin commit is a problem", async () => {
@@ -337,6 +385,7 @@ describe("brand_vendored_check main (the strict CLI body)", () => {
 			manifestText: `${JSON.stringify(manifestWith([]), null, "\t")}\n`,
 		});
 		const { out, err } = lines();
+		const before = snapshotDir(root);
 		const code = await main({
 			root,
 			log: (line) => out.push(line),
@@ -344,6 +393,11 @@ describe("brand_vendored_check main (the strict CLI body)", () => {
 		});
 		expect(code).toBe(1);
 		expect(out).toEqual([]);
+		// Whole-directory effect: a failed strict run creates nothing (no cache is fetched
+		// or half-written) and leaves the pin and the manifest as they were.
+		assertDirEffect(before, snapshotDir(root), {
+			unchanged: [PIN_FILE_NAME, MANIFEST_FILE_NAME],
+		});
 		expect(err.join("\n")).toContain("cache");
 		expect(err.join("\n")).toContain("BRAND VENDORED CHECK FAILED");
 		expect(fetchTrap).not.toHaveBeenCalled();

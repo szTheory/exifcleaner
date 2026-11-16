@@ -13,6 +13,7 @@ import {
 	type ColourLiteralRow,
 	type ColourLiteralScan,
 } from "../../../scripts/colour_literal_ratchet.mjs";
+import { assertDirEffect, snapshotDir } from "../../helpers/dir_effect";
 
 // GAT-03 / D-15: every colour literal under src/ outside tokens.css is keyed in a committed
 // baseline (docs/evidence/colour-literals.json) by (file, normalised literal) with a count,
@@ -290,16 +291,38 @@ describe("GAT-03 scan behaviour on temp trees", () => {
 		const error = vi
 			.spyOn(console, "error")
 			.mockImplementation(() => undefined);
+		const untouched = ["src/renderer/styles/a.css", TOKENS_CSS, ACCENT_TS];
+		const beforeWrite = snapshotDir(root);
 		expect(main(["--write"], { root })).toBe(0);
+		// Whole-directory effect: --write adds the baseline file (and the directories it
+		// needed) and changes nothing else in the tree.
+		assertDirEffect(beforeWrite, snapshotDir(root), {
+			added: ["docs", "docs/evidence", BASELINE_PATH],
+			unchanged: untouched,
+		});
 		const written = fs.readFileSync(path.join(root, BASELINE_PATH), "utf8");
 		expect(written.endsWith("\n")).toBe(true);
 		expect(written).toContain('\t"schemaVersion": 1');
+		const beforeCheck = snapshotDir(root);
 		expect(main(["--check"], { root, readBase: bootstrap })).toBe(0);
+		// --check only reads: it adds, changes and removes nothing.
+		assertDirEffect(beforeCheck, snapshotDir(root), {
+			unchanged: [...untouched, BASELINE_PATH],
+		});
 		fs.writeFileSync(
 			path.join(root, "src/renderer/styles/planted.css"),
 			".planted { color: #123456; }\n",
 		);
+		const beforeRed = snapshotDir(root);
 		expect(main(["--check"], { root, readBase: bootstrap })).toBe(1);
+		// A red check does not repair the baseline to make itself pass.
+		assertDirEffect(beforeRed, snapshotDir(root), {
+			unchanged: [
+				...untouched,
+				BASELINE_PATH,
+				"src/renderer/styles/planted.css",
+			],
+		});
 		expect(error.mock.calls.flat().join("\n")).toContain("#123456");
 		expect(log).toHaveBeenCalled();
 		expect(main([], { root })).toBe(1);
