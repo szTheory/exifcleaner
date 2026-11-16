@@ -117,26 +117,97 @@ function tagNameOf(node: ts.Node): string {
 	return "?";
 }
 
-// TSX style objects, read from the AST (never a regex over the text, so a comparator whose
-// parameters are named `left` and `right` is not a hit): the object literal of a JSX
-// `style` attribute, and an object literal assigned to a variable typed `...CSSProperties`
-// (FileRow's `progressStyle` is passed as `style={progressStyle}`).
-function physicalStyleHits({
-	file,
-	tsx,
-}: {
-	file: string;
-	tsx: string;
-}): string[] {
-	const source = ts.createSourceFile(
-		file,
-		tsx,
-		ts.ScriptTarget.Latest,
-		true,
-		ts.ScriptKind.TSX,
-	);
+// TS/TSX style objects, read from the AST (never a regex over the text, so comparator
+// parameters named left and right are not hits). The checker follows a JSX style reference
+// to its object initializer, including an imported initializer in a shared .ts style module;
+// CSSProperties-typed objects remain scanned without a JSX reference.
+type StyleSource = { file: string; text: string };
+
+function physicalStyleHitsInSources(sources: StyleSource[]): string[] {
+	const sourceByPath = new Map<string, ts.SourceFile>();
+	for (const { file, text } of sources) {
+		const absolute = path.resolve(REPO, file);
+		const scriptKind = file.endsWith(".tsx")
+			? ts.ScriptKind.TSX
+			: ts.ScriptKind.TS;
+		sourceByPath.set(
+			absolute,
+			ts.createSourceFile(
+				absolute,
+				text,
+				ts.ScriptTarget.Latest,
+				true,
+				scriptKind,
+			),
+		);
+	}
+
+	const options: ts.CompilerOptions = {
+		jsx: ts.JsxEmit.Preserve,
+		module: ts.ModuleKind.ESNext,
+		moduleResolution: ts.ModuleResolutionKind.NodeJs,
+		target: ts.ScriptTarget.Latest,
+		noEmit: true,
+		noLib: true,
+		types: [],
+	};
+	const host = ts.createCompilerHost(options);
+	const originalGetSourceFile = host.getSourceFile.bind(host);
+	const originalFileExists = host.fileExists.bind(host);
+	const originalReadFile = host.readFile.bind(host);
+	host.getSourceFile = (
+		fileName,
+		languageVersion,
+		onError,
+		shouldCreateNewSourceFile,
+	) =>
+		sourceByPath.get(path.resolve(fileName)) ??
+		originalGetSourceFile(
+			fileName,
+			languageVersion,
+			onError,
+			shouldCreateNewSourceFile,
+		);
+	host.fileExists = (fileName) =>
+		sourceByPath.has(path.resolve(fileName)) || originalFileExists(fileName);
+	host.readFile = (fileName) =>
+		sourceByPath.get(path.resolve(fileName))?.text ??
+		originalReadFile(fileName);
+	host.resolveModuleNames = (moduleNames, containingFile) =>
+		moduleNames.map((moduleName) => {
+			const base = moduleName.startsWith(".")
+				? path.resolve(path.dirname(containingFile), moduleName)
+				: path.resolve(REPO, "src/renderer", moduleName);
+			const candidates = [
+				base,
+				base + ".ts",
+				base + ".tsx",
+				base + ".d.ts",
+				path.join(base, "index.ts"),
+				path.join(base, "index.tsx"),
+			];
+			const resolved = candidates.find((candidate) =>
+				sourceByPath.has(candidate),
+			);
+			if (resolved === undefined) return undefined;
+			const extension = resolved.endsWith(".tsx")
+				? ts.Extension.Tsx
+				: resolved.endsWith(".d.ts")
+					? ts.Extension.Dts
+					: ts.Extension.Ts;
+			return { resolvedFileName: resolved, extension };
+		});
+
+	const program = ts.createProgram({
+		rootNames: [...sourceByPath.keys()],
+		options,
+		host,
+	});
+	const checker = program.getTypeChecker();
 	const keys: string[] = [];
 	const collect = (object: ts.ObjectLiteralExpression, owner: string): void => {
+		const source = object.getSourceFile();
+		const file = path.relative(REPO, source.fileName).split(path.sep).join("/");
 		for (const member of object.properties) {
 			if (ts.isSpreadAssignment(member)) continue;
 			const raw = propertyKey(member.name);
@@ -154,36 +225,103 @@ function physicalStyleHits({
 				continue;
 			}
 			if (isPhysical(property, value)) {
-				keys.push(`${file}|${owner}|${property}|${value}`);
+				keys.push(file + "|" + owner + "|" + property + "|" + value);
 			}
 		}
 	};
-	const visit = (node: ts.Node): void => {
+	const unwrap = (expression: ts.Expression): ts.Expression => {
+		while (
+			ts.isParenthesizedExpression(expression) ||
+			ts.isAsExpression(expression) ||
+			ts.isTypeAssertionExpression(expression) ||
+			ts.isNonNullExpression(expression) ||
+			ts.isSatisfiesExpression(expression)
+		) {
+			expression = expression.expression;
+		}
+		return expression;
+	};
+	const referencedStyleObject = (
+		expression: ts.Expression,
+	): { object: ts.ObjectLiteralExpression; owner: string } | null => {
+		const target = unwrap(expression);
+		const symbolNode = ts.isPropertyAccessExpression(target)
+			? target.name
+			: target;
+		let symbol = checker.getSymbolAtLocation(symbolNode);
+		if (symbol && (symbol.flags & ts.SymbolFlags.Alias) !== 0) {
+			symbol = checker.getAliasedSymbol(symbol);
+		}
+		for (const declaration of symbol?.declarations ?? []) {
+			if (
+				ts.isVariableDeclaration(declaration) &&
+				declaration.initializer !== undefined
+			) {
+				const initializer = unwrap(declaration.initializer);
+				if (ts.isObjectLiteralExpression(initializer)) {
+					return {
+						object: initializer,
+						owner:
+							"css:" + declaration.name.getText(declaration.getSourceFile()),
+					};
+				}
+			}
+			if (ts.isPropertyAssignment(declaration)) {
+				const initializer = unwrap(declaration.initializer);
+				if (ts.isObjectLiteralExpression(initializer)) {
+					return {
+						object: initializer,
+						owner:
+							"css:" + declaration.name.getText(declaration.getSourceFile()),
+					};
+				}
+			}
+		}
+		return null;
+	};
+
+	const visit = (node: ts.Node, source: ts.SourceFile): void => {
 		if (
 			ts.isJsxAttribute(node) &&
 			node.name.getText(source) === "style" &&
 			node.initializer !== undefined &&
 			ts.isJsxExpression(node.initializer) &&
-			node.initializer.expression !== undefined &&
-			ts.isObjectLiteralExpression(node.initializer.expression)
+			node.initializer.expression !== undefined
 		) {
-			collect(node.initializer.expression, `jsx:${tagNameOf(node)}`);
+			const expression = unwrap(node.initializer.expression);
+			if (ts.isObjectLiteralExpression(expression)) {
+				collect(expression, "jsx:" + tagNameOf(node));
+			} else {
+				const referenced = referencedStyleObject(expression);
+				if (referenced !== null) collect(referenced.object, referenced.owner);
+			}
 		}
 		if (
 			ts.isVariableDeclaration(node) &&
 			node.type !== undefined &&
 			/CSSProperties$/.test(node.type.getText(source)) &&
-			node.initializer !== undefined &&
-			ts.isObjectLiteralExpression(node.initializer)
+			node.initializer !== undefined
 		) {
-			collect(node.initializer, `css:${node.name.getText(source)}`);
+			const initializer = unwrap(node.initializer);
+			if (ts.isObjectLiteralExpression(initializer)) {
+				collect(initializer, "css:" + node.name.getText(source));
+			}
 		}
-		ts.forEachChild(node, visit);
+		ts.forEachChild(node, (child) => visit(child, source));
 	};
-	visit(source);
-	return keys;
+	for (const source of sourceByPath.values()) visit(source, source);
+	return [...new Set(keys)];
 }
 
+function physicalStyleHits({
+	file,
+	tsx,
+}: {
+	file: string;
+	tsx: string;
+}): string[] {
+	return physicalStyleHitsInSources([{ file, text: tsx }]);
+}
 function walk(directory: string, extension: string): string[] {
 	const found: string[] = [];
 	for (const entry of fs.readdirSync(path.join(REPO, directory), {
@@ -198,6 +336,7 @@ function walk(directory: string, extension: string): string[] {
 
 function scanTree(): {
 	cssFiles: string[];
+	tsFiles: string[];
 	tsxFiles: string[];
 	keys: string[];
 } {
@@ -206,7 +345,12 @@ function scanTree(): {
 		.filter((name) => name.endsWith(".css"))
 		.map((name) => `${STYLES_DIR}/${name}`)
 		.sort();
+	const tsFiles = walk(RENDERER_DIR, ".ts");
 	const tsxFiles = walk(RENDERER_DIR, ".tsx");
+	const styleSources = [...tsFiles, ...tsxFiles].map((file) => ({
+		file,
+		text: fs.readFileSync(path.join(REPO, file), "utf8"),
+	}));
 	const keys = [
 		...cssFiles.flatMap((file) =>
 			physicalHits({
@@ -214,14 +358,9 @@ function scanTree(): {
 				css: fs.readFileSync(path.join(REPO, file), "utf8"),
 			}),
 		),
-		...tsxFiles.flatMap((file) =>
-			physicalStyleHits({
-				file,
-				tsx: fs.readFileSync(path.join(REPO, file), "utf8"),
-			}),
-		),
+		...physicalStyleHitsInSources(styleSources),
 	];
-	return { cssFiles, tsxFiles, keys: [...new Set(keys)].sort() };
+	return { cssFiles, tsFiles, tsxFiles, keys: [...new Set(keys)].sort() };
 }
 
 type AllowEntry = { key: string; reason: string };
@@ -241,7 +380,7 @@ function unlisted(keys: string[], allowed: Set<string>): string[] {
 }
 
 describe("RTL-02 physical-direction scan: the real tree", () => {
-	const { cssFiles, tsxFiles, keys } = scanTree();
+	const { cssFiles, tsFiles, tsxFiles, keys } = scanTree();
 	const entries = readAllowList();
 	const allowed = new Set(entries.map((entry) => entry.key));
 
@@ -274,7 +413,7 @@ describe("RTL-02 physical-direction scan: the real tree", () => {
 		expect(entries).toHaveLength(11);
 	});
 
-	test("anti-vacuity: the scan read every stylesheet and every TSX file", () => {
+	test("anti-vacuity: the scan read every stylesheet and every TS/TSX file", () => {
 		const styleListing = fs
 			.readdirSync(path.join(REPO, STYLES_DIR))
 			.filter((name) => name.endsWith(".css"))
@@ -283,6 +422,16 @@ describe("RTL-02 physical-direction scan: the real tree", () => {
 		expect(cssFiles).toEqual(styleListing);
 		expect(cssFiles.length).toBeGreaterThan(0);
 		// A second, independent listing: Node's own recursive readdir.
+		const tsListing = (
+			fs.readdirSync(path.join(REPO, RENDERER_DIR), {
+				recursive: true,
+			}) as string[]
+		)
+			.filter((name) => name.endsWith(".ts"))
+			.map((name) => `${RENDERER_DIR}/${name}`)
+			.sort();
+		expect(tsFiles).toEqual(tsListing);
+		expect(tsFiles.length).toBeGreaterThan(0);
 		const tsxListing = (
 			fs.readdirSync(path.join(REPO, RENDERER_DIR), {
 				recursive: true,
@@ -301,6 +450,14 @@ describe("RTL-02 physical-direction scan: planted controls", () => {
 		const hits = physicalHits({ file: "planted.css", css: ".x { left: 0; }" });
 		expect(hits).toEqual(["planted.css|.x|left|0"]);
 		expect(unlisted(hits, new Set())).toEqual(hits);
+	});
+
+	test("a quoted comment opener cannot hide a later physical declaration", () => {
+		const hits = physicalHits({
+			file: "planted.css",
+			css: '.x::before { content: "/*"; left: 0; }',
+		});
+		expect(hits).toEqual(["planted.css|.x::before|left|0"]);
 	});
 
 	test.each([
@@ -352,6 +509,30 @@ describe("RTL-02 physical-direction scan: planted controls", () => {
 				tsx: "export const A = () => <div style={{ left: 0 }} />;",
 			}),
 		).toEqual(["planted.tsx|jsx:div|left|0"]);
+	});
+
+	test("an inferred shared style object referenced by JSX is scanned", () => {
+		expect(
+			physicalStyleHits({
+				file: "planted.tsx",
+				tsx: "const styles = { marginLeft: 4 }; export const A = () => <div style={styles} />;",
+			}),
+		).toEqual(["planted.tsx|css:styles|margin-left|4"]);
+	});
+
+	test("an inferred style object imported from a shared .ts module is scanned", () => {
+		expect(
+			physicalStyleHitsInSources([
+				{
+					file: "planted/Component.tsx",
+					text: 'import { styles } from "./styles"; export const A = () => <div style={styles} />;',
+				},
+				{
+					file: "planted/styles.ts",
+					text: "export const styles = { marginLeft: 4 };",
+				},
+			]),
+		).toEqual(["planted/styles.ts|css:styles|margin-left|4"]);
 	});
 
 	test.each([

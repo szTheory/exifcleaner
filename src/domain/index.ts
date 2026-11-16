@@ -43,8 +43,11 @@ export {
 	parseGroupedKey,
 	computeMetadataDiff,
 } from "./exif/metadata_groups";
-export { middleTruncatePath } from "./path_truncation";
-export { displayName, splitEscapedName } from "./bidi_display_name";
+export {
+	middleTruncatePath,
+	middleTruncatePathSegments,
+} from "./path_truncation";
+export { displayName, displayNameSegments } from "./bidi_display_name";
 export type { ExifError } from "./exif/exif_errors";
 export { formatExifError } from "./exif/exif_errors";
 export type { SettingsError } from "./settings_errors";

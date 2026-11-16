@@ -35,27 +35,35 @@ function blank(text) {
 }
 
 /**
- * Replaces every `/* ... *\/` comment with spaces of equal length, keeping the
- * newlines, so line numbers survive. An unterminated comment runs to the end.
+ * Replaces every `/* ... *\/` comment outside a quoted CSS string with spaces of
+ * equal length, keeping the newlines, so line numbers survive. An unterminated
+ * comment runs to the end.
  *
  * @param {string} text
  * @returns {string}
  */
 export function stripCssComments(text) {
 	let out = "";
+	let copied = 0;
 	let index = 0;
 	while (index < text.length) {
-		const start = text.indexOf("/*", index);
-		if (start === -1) {
-			out += text.slice(index);
-			break;
+		const char = text[index];
+		if (char === '"' || char === "'") {
+			index = skipString(text, index, char);
+			continue;
 		}
-		const end = text.indexOf("*/", start + 2);
-		const stop = end === -1 ? text.length : end + 2;
-		out += text.slice(index, start) + blank(text.slice(start, stop));
-		index = stop;
+		if (char === "/" && text[index + 1] === "*") {
+			out += text.slice(copied, index);
+			const end = text.indexOf("*/", index + 2);
+			const stop = end === -1 ? text.length : end + 2;
+			out += blank(text.slice(index, stop));
+			copied = stop;
+			index = stop;
+			continue;
+		}
+		index += 1;
 	}
-	return out;
+	return out + text.slice(copied);
 }
 
 /**

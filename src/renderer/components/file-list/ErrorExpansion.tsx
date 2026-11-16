@@ -3,7 +3,7 @@
 // controls escaped, while the clipboard receives the raw string so a copied path stays
 // usable.
 
-import { displayName } from "../../../domain";
+import { displayNameSegments } from "../../../domain";
 import { EscapedName } from "../../utils/escaped_name";
 
 export function ErrorExpansion({
@@ -26,7 +26,7 @@ export function ErrorExpansion({
 				onClick={handleCopy}
 				style={{ cursor: "copy" }}
 			>
-				<EscapedName text={displayName({ name: error })} />
+				<EscapedName segments={displayNameSegments({ name: error })} />
 			</pre>
 			<span
 				className="file-table__copy-hint"

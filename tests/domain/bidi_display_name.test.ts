@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
 	displayName,
-	splitEscapedName,
+	displayNameSegments,
 } from "../../src/domain/bidi_display_name";
 
 // Every control is built from its code point, never typed as a raw character: a raw
@@ -95,40 +95,42 @@ describe("displayName", () => {
 	});
 });
 
-describe("splitEscapedName", () => {
-	it("round-trips: joining the segment texts gives back the input", () => {
-		const text = displayName({
-			name: `scan-${control(0x202d)}abc${control(0x202c)}-${control(0x202e)}def${control(0x202c)}.png`,
-		});
-		const segments = splitEscapedName({ text });
-		expect(segments.map((segment) => segment.text).join("")).toBe(text);
-	});
-
-	it("separates a token from the text next to it", () => {
-		expect(splitEscapedName({ text: "holiday<U+202E>gnp.jpg" })).toEqual([
-			{ kind: "text", text: "holiday" },
-			{ kind: "escape", text: "<U+202E>" },
-			{ kind: "text", text: "gnp.jpg" },
+describe("displayNameSegments", () => {
+	it("keeps literal escape-token text as text", () => {
+		expect(displayNameSegments({ name: "holiday<U+202E>gnp.jpg" })).toEqual([
+			{ kind: "text", text: "holiday<U+202E>gnp.jpg" },
 		]);
 	});
 
-	it("yields adjacent tokens as separate escape segments", () => {
-		expect(splitEscapedName({ text: "<U+2066><U+2069>" })).toEqual([
+	it("marks only real controls as escapes and leaves adjacent literal tokens alone", () => {
+		expect(
+			displayNameSegments({
+				name: `literal<U+202E>${control(0x2066)}${control(0x2069)}tail`,
+			}),
+		).toEqual([
+			{ kind: "text", text: "literal<U+202E>" },
 			{ kind: "escape", text: "<U+2066>" },
 			{ kind: "escape", text: "<U+2069>" },
+			{ kind: "text", text: "tail" },
 		]);
 	});
 
-	it("returns one text segment for a name without a token and none for the empty string", () => {
-		expect(splitEscapedName({ text: "sample.jpg" })).toEqual([
+	it("joins to the display name and preserves a control-free name byte-identically", () => {
+		const name = `scan-${control(0x202d)}abc${control(0x202c)}.png`;
+		const segments = displayNameSegments({ name });
+		expect(segments.map((segment) => segment.text).join("")).toBe(
+			displayName({ name }),
+		);
+		expect(displayNameSegments({ name: "sample.jpg" })).toEqual([
 			{ kind: "text", text: "sample.jpg" },
 		]);
-		expect(splitEscapedName({ text: "" })).toEqual([]);
+		expect(displayNameSegments({ name: "" })).toEqual([]);
 	});
 
-	it("matches only the exact token grammar", () => {
-		expect(splitEscapedName({ text: "a<U+202F>b<U+2065>c<U+202e>" })).toEqual([
-			{ kind: "text", text: "a<U+202F>b<U+2065>c<U+202e>" },
+	it("does not mark non-target controls or non-token angle-bracket text", () => {
+		const name = `a<U+202F>${control(0x200f)}b<U+2065>`;
+		expect(displayNameSegments({ name })).toEqual([
+			{ kind: "text", text: name },
 		]);
 	});
 });

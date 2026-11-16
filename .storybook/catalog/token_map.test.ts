@@ -611,6 +611,18 @@ describe("the CSS and TypeScript scans", () => {
 		expect(stripped).not.toContain("open");
 	});
 
+	test("a comment opener inside a quoted CSS string is not a comment", () => {
+		const css = '.x::before { content: "/*"; color: #123456; left: 0; }';
+		expect(stripCssComments(css)).toBe(css);
+		expect(
+			cssDeclarations(css).map(({ property, value }) => [property, value]),
+		).toEqual([
+			["content", '"/*"'],
+			["color", "#123456"],
+			["left", "0"],
+		]);
+	});
+
 	test("cssDeclarations returns each declaration with its block chain, joined values and first line", () => {
 		const css = [
 			":root {",
