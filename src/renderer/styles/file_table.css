@@ -21,13 +21,13 @@
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	color: var(--ec-color-text-secondary);
-	text-align: left;
+	text-align: start;
 	z-index: 10;
 }
 
 .file-table__header-cell {
 	padding: var(--ec-space-1) var(--ec-space-2);
-	text-align: left;
+	text-align: start;
 }
 
 .file-table__sort-button {
@@ -40,7 +40,7 @@
 	font-weight: inherit;
 	letter-spacing: inherit;
 	padding: 0;
-	text-align: left;
+	text-align: start;
 	text-transform: inherit;
 }
 

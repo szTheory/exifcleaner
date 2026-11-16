@@ -24,6 +24,16 @@ function chevronIn(canvasElement: HTMLElement): SVGElement {
 	return svg;
 }
 
+// The apex of the chevron polyline, (1, 0), mapped through the computed transform and
+// rounded to three decimals (`+ 0` turns a rounded -0 into 0).
+function apexOf(svg: SVGElement): number[] {
+	const point = new DOMMatrix(getComputedStyle(svg).transform).transformPoint({
+		x: 1,
+		y: 0,
+	});
+	return [point.x, point.y].map((value) => Math.round(value * 1000) / 1000 + 0);
+}
+
 export const Collapsed: Story = {
 	play: async ({ canvasElement }) => {
 		const svg = chevronIn(canvasElement);
@@ -45,19 +55,38 @@ export const Expanded: Story = {
 		await expect(matrix.b).toBeCloseTo(1, 5);
 		await expect(matrix.c).toBeCloseTo(-1, 5);
 		await expect(matrix.d).toBeCloseTo(0, 5);
+		// The left-to-right control for the Arabic story: expanded points down.
+		await expect(apexOf(svg)).toEqual([0, 1]);
 	},
 };
 
-// The glyph is not mirrored in a right-to-left layout (a recorded Phase 73 finding),
-// so this story shows the locale takes effect and does not assert the direction.
+// RTL-01 / D-32: under a right-to-left layout the collapsed chevron points left and the
+// expanded one still points down. The apex of the polyline, (1, 0), is mapped through the
+// computed transform because a rect cannot show a mirror (the polyline is symmetric
+// about the box centre). The play waits for dir=rtl first.
 export const Arabic: Story = {
 	globals: { locale: "ar" },
+	render: () => (
+		<>
+			<ChevronIcon expanded={false} />
+			<ChevronIcon expanded={true} />
+		</>
+	),
 	play: async ({ canvasElement }) => {
 		await waitFor(() => expect(document.documentElement.dir).toBe("rtl"));
 		await expect(document.documentElement.lang).toBe("ar");
-		await expect(chevronIn(canvasElement)).toHaveAttribute(
-			"aria-hidden",
-			"true",
+		const [collapsed, expanded] = Array.from(
+			canvasElement.querySelectorAll("svg.chevron-icon"),
 		);
+		if (
+			!(collapsed instanceof SVGElement) ||
+			!(expanded instanceof SVGElement)
+		) {
+			throw new Error("expected a collapsed and an expanded chevron");
+		}
+		await expect(collapsed).toHaveAttribute("aria-hidden", "true");
+		await waitFor(() => expect(document.getAnimations()).toHaveLength(0));
+		await expect(apexOf(collapsed)).toEqual([-1, 0]);
+		await expect(apexOf(expanded)).toEqual([0, 1]);
 	},
 };

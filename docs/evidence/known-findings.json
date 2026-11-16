@@ -2862,15 +2862,6 @@
 			"severity": "minor"
 		},
 		{
-			"fingerprint": "i18n-gap|file-list-filetable--persian-batch|header-text-align-left-under-rtl",
-			"kind": "i18n-gap",
-			"story": "file-list-filetable--persian-batch",
-			"rule": "header-text-align-left-under-rtl",
-			"reason": "Under dir rtl (ar and fa) all six header cells keep a computed text-align of left because file_table.css:24 and :30 hard-code it, so labels sit at the left edge of each cell in a mirrored table; the fa header row is 30 px like en, so the wrap guess was not confirmed.",
-			"disposition": "fix-v5.1",
-			"severity": "minor"
-		},
-		{
 			"fingerprint": "i18n-gap|file-list-folderrow--single-file|folder-count-no-singular",
 			"kind": "i18n-gap",
 			"story": "file-list-folderrow--single-file",
@@ -2886,15 +2877,6 @@
 			"rule": "ar-lacks-dual-category",
 			"reason": "ar.json carries only metadata.removed.one and metadata.removed.other (no two category) although Arabic distinguishes the count 2, so two removed fields read through the general wording; the code supports a dedicated category and the fix is translator content that needs the maintainer's approval.",
 			"disposition": "fix-v5.2",
-			"severity": "minor"
-		},
-		{
-			"fingerprint": "i18n-gap|icons-chevronicon--arabic|chevron-not-mirrored",
-			"kind": "i18n-gap",
-			"story": "icons-chevronicon--arabic",
-			"rule": "chevron-not-mirrored",
-			"reason": "The chevron always points right and the expanded rule is rotate(90deg) at metadata_expansion.css:167; no stylesheet under src/renderer/styles has an rtl or :dir() rule, so the glyph is not mirrored in a right-to-left layout (read from source).",
-			"disposition": "fix-v5.1",
 			"severity": "minor"
 		},
 		{

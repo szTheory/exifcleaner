@@ -166,3 +166,14 @@
 .chevron-icon--expanded {
 	transform: rotate(90deg);
 }
+
+/* Under rtl the collapsed chevron points left and the expanded one still points down (RTL-01).
+   Two functions each, so the transform transition interpolates pairwise and does not spin.
+   Equal specificity: the expanded rule must stay last. */
+:dir(rtl) .chevron-icon {
+	transform: scaleX(-1) rotate(0deg);
+}
+
+:dir(rtl) .chevron-icon--expanded {
+	transform: scaleX(-1) rotate(90deg);
+}
