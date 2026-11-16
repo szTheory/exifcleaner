@@ -4,10 +4,10 @@
 // catalog.mjs. The validator is pure and cache-free: everything it reads from
 // disk comes in through `ctx` (the brand pin commit), and nothing here reads
 // .brand-cache. Resolving a brand quote or a token path against the pinned
-// brand belongs to the on-demand brand_quote_check.mjs, which is never imported
-// by catalog.mjs and never runs in CI (Phase 71 D-09). Structure is checked
-// before values, so one defect yields one code; the problem list is sorted by
-// code, id, message.
+// brand belongs to brand_quote_check.mjs, which runs in the ci.yml `test` job step
+// `Brand pin, quote and drift gates` (Phase 76, GAT-01) and is still not imported
+// by catalog.mjs (Phase 71 D-09). Structure is checked before values, so one
+// defect yields one code; the problem list is sorted by code, id, message.
 import {
 	closedKeys,
 	isNonEmptyString,

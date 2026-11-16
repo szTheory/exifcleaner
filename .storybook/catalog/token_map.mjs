@@ -6,10 +6,11 @@
 // is pure and cache-free: the stylesheet text, the scanned sources, the brand
 // pin, the known-findings fingerprints and the UI-SPEC ids all come in through
 // `ctx`, and nothing here reads .brand-cache. A brand hex is verified against
-// the pinned tokens.json only by the on-demand brand_quote_check.mjs, which is
-// never imported by catalog.mjs and never runs in CI (Phase 71 D-09, D-18).
-// Structure is checked before values, so one defect yields one code; the
-// problem list is sorted by code, id, message.
+// the pinned tokens.json only by brand_quote_check.mjs, which runs in the ci.yml
+// `test` job step `Brand pin, quote and drift gates` (Phase 76, GAT-01) and is
+// still not imported by catalog.mjs (Phase 71 D-09, D-18). Structure is checked
+// before values, so one defect yields one code; the problem list is sorted by
+// code, id, message.
 import fs from "node:fs";
 import {
 	closedKeys,
