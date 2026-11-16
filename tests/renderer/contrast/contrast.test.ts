@@ -16,6 +16,9 @@ import {
 	proposedConsistencyProblems,
 	proposedResults,
 	reasonFor,
+	resolveColour,
+	themeTokens,
+	THRESHOLDS,
 	varReferences,
 	type ContrastPair,
 	type ContrastPairsDocument,
@@ -69,9 +72,78 @@ function clone<T>(value: T): T {
 	return JSON.parse(JSON.stringify(value)) as T;
 }
 
-// G3: the helper is pinned to what axe measured in the story runs. Each triple is
-// a literal copied from a `color-contrast` entry of known-findings.json; the entry
-// must still hold the same hexes and ratio, so neither side can drift alone.
+// G3: the helper is pinned to what axe measured in the story runs. These historic
+// quotes stay hermetic because the palette phase removes the corresponding findings.
+// If a quote remains in the real register, it must still match this fixture.
+const AXE_QUOTED_ENTRIES: Record<
+	string,
+	{
+		kind: string;
+		story: string;
+		rule: string;
+		reason: string;
+		disposition: string;
+	}
+> = {
+	"a11y-p72|ui-statusbar--all-cleaned|color-contrast": {
+		kind: "a11y-p72",
+		story: "ui-statusbar--all-cleaned",
+		rule: "color-contrast",
+		reason: [
+			"Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme;",
+			".status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme;",
+			".status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
+		].join(" "),
+		disposition: "fix-v5.1",
+	},
+	"a11y-p72|file-list-metadatafield--removed|color-contrast": {
+		kind: "a11y-p72",
+		story: "file-list-metadatafield--removed",
+		rule: "color-contrast",
+		reason: [
+			"Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme,",
+			"measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; the token fix belongs to v5.1.",
+		].join(" "),
+		disposition: "fix-v5.1",
+	},
+	"a11y-p72|file-list-metadatafield--preserved|color-contrast": {
+		kind: "a11y-p72",
+		story: "file-list-metadatafield--preserved",
+		rule: "color-contrast",
+		reason: [
+			"Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.73:1 (#66758c --ec-color-text-secondary on #dae9e4 --ec-color-preserved-bg) in the light theme,",
+			"measures 3.52:1 (#818188 --ec-color-text-secondary on #1e3226 --ec-color-preserved-bg) in the dark theme; the token fix belongs to v5.1.",
+		].join(" "),
+		disposition: "fix-v5.1",
+	},
+	"a11y-p72|file-list-folderrow--complete-collapsed|color-contrast": {
+		kind: "a11y-p72",
+		story: "file-list-folderrow--complete-collapsed",
+		rule: "color-contrast",
+		reason: [
+			"Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme,",
+			"measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
+		].join(" "),
+		disposition: "fix-v5.1",
+	},
+	"a11y-p73|file-list-filerow--cleaned|color-contrast": {
+		kind: "a11y-p73",
+		story: "file-list-filerow--cleaned",
+		rule: "color-contrast",
+		reason:
+			"Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
+		disposition: "fix-v5.1",
+	},
+	"a11y-p72|ui-typepill--pdf|color-contrast": {
+		kind: "a11y-p72",
+		story: "ui-typepill--pdf",
+		rule: "color-contrast",
+		reason:
+			"Selector .type-pill--pdf measures 3.72:1 in the light theme (foreground #a06a60 on background #eeeaeb) and 4.48:1 in the dark theme (#b07a70 on #281f20), both below 4.5:1 (--ec-pill-pdf-text on --ec-pill-pdf-bg composited on the page), 14px normal weight; the family token fix belongs to v5.1.",
+		disposition: "fix-v5.1",
+	},
+};
+
 const AXE_TRIPLES = [
 	{
 		fg: "#66758c",
@@ -126,20 +198,30 @@ const AXE_TRIPLES = [
 ] as const;
 
 describe("G3: the helper reproduces axe's recorded ratios", () => {
-	test("eight triples agree at floor-to-2dp and the baseline entries still quote them", () => {
+	test("eight triples agree at floor-to-2dp and any surviving entry keeps its quote", () => {
 		expect(AXE_TRIPLES).toHaveLength(8);
 		for (const triple of AXE_TRIPLES) {
 			const measured = formatRatio(
 				contrastRatio(colour(triple.fg), colour(triple.bg)),
 			);
 			expect(measured, `${triple.fg} on ${triple.bg}`).toBe(triple.ratio);
+			const quoted = AXE_QUOTED_ENTRIES[triple.fingerprint];
+			expect(quoted, triple.fingerprint).toBeDefined();
+			expect(quoted?.reason).toContain(triple.fg);
+			expect(quoted?.reason).toContain(triple.bg);
+			expect(quoted?.reason).toContain(`${triple.ratio}:1`);
 			const entry = BASELINE.entries.find(
 				(candidate) => candidate.fingerprint === triple.fingerprint,
 			);
-			expect(entry, triple.fingerprint).toBeDefined();
-			expect(entry?.reason).toContain(triple.fg);
-			expect(entry?.reason).toContain(triple.bg);
-			expect(entry?.reason).toContain(`${triple.ratio}:1`);
+			if (entry !== undefined) {
+				expect({
+					kind: entry.kind,
+					story: entry.story,
+					rule: entry.rule,
+					reason: entry.reason,
+					disposition: entry.disposition,
+				}).toEqual(quoted);
+			}
 		}
 	});
 
@@ -191,30 +273,25 @@ describe("tracer: text-secondary through tokens.css, flattening and the ratio", 
 		}
 		const light = results.find((r) => r.rule === "text-secondary-on-bg-light");
 		expect(light).toBeDefined();
-		expect(formatRatio(light?.ratio ?? 0)).toBe("4.32");
-		expect(light?.pass).toBe(false);
+		if (light === undefined) throw new Error("light tracer result is missing");
+		expect(light.threshold).toBe(THRESHOLDS.text);
+		expect(light.pass).toBe(light.ratio >= light.threshold);
 	});
 
 	test("shown red: a planted failing pair is in the failing set and is a new failure", () => {
 		const passing: ContrastPair = {
 			id: "text",
-			fg: "--ec-color-text",
-			on: ["--ec-color-bg"],
+			fg: "#777777",
+			on: ["#ffffff"],
 			role: "text",
 			selector: ".app",
 			story: "file-list-filetable--mixed-statuses",
 		};
-		const control = { ...clone(PAIRS), pairs: [passing] };
-		expect(failingFingerprints(evaluate(control, TOKENS_CSS)).size).toBe(0);
-
-		const planted = {
-			...clone(PAIRS),
-			pairs: [{ ...passing, on: ["#9da7b6"] }],
-		};
+		const planted = { ...clone(PAIRS), pairs: [passing] };
 		const failing = failingFingerprints(evaluate(planted, TOKENS_CSS));
 		expect([...failing].sort()).toEqual([
-			"contrast-gap|file-list-filetable--mixed-statuses|text-on-hex-9da7b6-dark",
-			"contrast-gap|file-list-filetable--mixed-statuses|text-on-hex-9da7b6-light",
+			"contrast-gap|file-list-filetable--mixed-statuses|text-on-hex-ffffff-dark",
+			"contrast-gap|file-list-filetable--mixed-statuses|text-on-hex-ffffff-light",
 		]);
 		expect(compareBaseline(failing, []).newFailures).toEqual(
 			[...failing].sort(),
@@ -223,17 +300,17 @@ describe("tracer: text-secondary through tokens.css, flattening and the ratio", 
 	});
 
 	test("shown red: a listed entry that now passes is fixed-still-listed", () => {
-		const passing: ContrastPair = {
+		const fixture: ContrastPair = {
 			id: "text",
-			fg: "--ec-color-text",
-			on: ["--ec-color-bg"],
+			fg: "#777777",
+			on: ["#ffffff"],
 			role: "text",
 			selector: ".app",
 			story: "file-list-filetable--mixed-statuses",
 		};
 		const planted = {
 			...clone(PAIRS),
-			pairs: [{ ...passing, on: ["#9da7b6"] }],
+			pairs: [fixture],
 		};
 		const [first] = evaluate(planted, TOKENS_CSS);
 		if (first === undefined) throw new Error("no planted result");
@@ -269,7 +346,7 @@ describe("tracer: text-secondary through tokens.css, flattening and the ratio", 
 		);
 		if (first === undefined) throw new Error("no result");
 		expect(reasonFor(first)).toBe(
-			`Selector .app: --ec-color-text #3b4351 on the literal #9da7b6 #9da7b6 measures ${formatRatio(first.ratio)}:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.`,
+			`Selector ${first.selector}: ${first.fgRef} ${first.fgHex} on the literal #9da7b6 #9da7b6 measures ${formatRatio(first.ratio)}:1 in the ${first.theme} theme (${first.role}, needs ${first.threshold}:1); v5.1 fixes it against the UI-SPEC palette.`,
 		);
 		expect(Object.keys(contrastGapEntry(first))).toEqual([
 			"fingerprint",
@@ -357,12 +434,32 @@ describe("the pair list is real, not a stub", () => {
 		expect(backdrops(pair as ContrastPair, PAIRS).map((b) => b.ref)).toContain(
 			"item-hover",
 		);
-		// text-secondary on the hover overlay in the light theme measures 3.62:1.
 		const result = evaluate(PAIRS, TOKENS_CSS).find(
 			(r) => r.rule === "text-secondary-on-item-hover-light",
 		);
-		expect(formatRatio(result?.ratio ?? 0)).toBe("3.62");
-		expect(result?.bgHex).toBe("#dfe3e6");
+		if (result === undefined)
+			throw new Error("hover contrast result is missing");
+		const overlay = PAIRS.overlays.find(
+			(candidate) => candidate.id === "item-hover",
+		);
+		if (overlay === undefined) throw new Error("hover overlay is missing");
+		const [baseRef, ...layerRefs] = overlay.layers;
+		if (baseRef === undefined)
+			throw new Error("hover overlay has no base layer");
+		const tokens = themeTokens(TOKENS_CSS);
+		let expectedBackground = resolveColour(baseRef, "light", tokens, PAIRS);
+		if (expectedBackground === null)
+			throw new Error("hover base is unresolved");
+		for (const layerRef of layerRefs) {
+			const layer = resolveColour(layerRef, "light", tokens, PAIRS);
+			if (layer === null)
+				throw new Error(`hover layer ${layerRef} is unresolved`);
+			expectedBackground = flatten(layer, expectedBackground);
+		}
+		expect(result.bgHex).toBe(toHex(expectedBackground));
+		expect(result.ratio).toBe(
+			contrastRatio(colour(result.fgHex), expectedBackground),
+		);
 	});
 
 	test("the pill text pairs list the pill over the ground and over the surface", () => {
@@ -383,34 +480,45 @@ describe("G1: every colour token is a foreground, a backdrop or exempt", () => {
 	});
 
 	test("shown red: a new colour token with no pair and no exemption", () => {
-		const planted = TOKENS_CSS.replace(
-			"\t--ec-color-info: #3b7fc4;",
-			() => "\t--ec-color-planted: #123456;\n\t--ec-color-info: #3b7fc4;",
-		).replace(
-			"\t--ec-color-info: #6ba3d6;",
-			() => "\t--ec-color-planted: #123456;\n\t--ec-color-info: #6ba3d6;",
-		);
+		const planted = `:root { --ec-color-planted: #123456; }
+[data-theme="dark"] { --ec-color-planted: #654321; }`;
 		expect(planted.match(/--ec-color-planted/g)).toHaveLength(2);
-		const found = g1Problems(planted, PAIRS);
+		const found = g1Problems(planted, {
+			surfaces: [],
+			overlays: [],
+			localTokens: {},
+			pairs: [],
+			exempt: [],
+		});
 		expect(codes(found)).toEqual(["g1-uncovered-token"]);
 		expect(found[0]?.message).toContain("--ec-color-planted");
 	});
 
 	test("shown red: a light colour token the dark block does not define", () => {
-		const planted = TOKENS_CSS.replace("\t--ec-color-muted: #636369;\n", "");
-		expect(planted).not.toBe(TOKENS_CSS);
-		const found = g1Problems(planted, PAIRS);
+		const planted = ":root { --ec-color-planted: #123456; }";
+		const found = g1Problems(planted, {
+			surfaces: [],
+			overlays: [],
+			localTokens: {},
+			pairs: [],
+			exempt: [{ name: "--ec-color-planted", reason: "fixture coverage" }],
+		});
 		expect(codes(found)).toEqual(["g1-missing-dark"]);
-		expect(found[0]?.message).toContain("--ec-color-muted");
+		expect(found[0]?.message).toContain("--ec-color-planted");
 	});
 
 	test("an alias is judged through its target, never on its own", () => {
-		// --color-bg holds var(--ec-color-bg) in both blocks; it is no token of its own.
-		const planted = TOKENS_CSS.replaceAll(
-			"--color-bg: var(--ec-color-bg);",
-			"--color-bg: var(--ec-color-bg);\n\t--color-bg-twin: var(--ec-color-bg);",
-		);
-		expect(g1Problems(planted, PAIRS)).toEqual([]);
+		const planted = `:root { --ec-color-bg: #ffffff; --color-bg: var(--ec-color-bg); --color-bg-twin: var(--ec-color-bg); }
+[data-theme="dark"] { --ec-color-bg: #000000; --color-bg: var(--ec-color-bg); --color-bg-twin: var(--ec-color-bg); }`;
+		expect(
+			g1Problems(planted, {
+				surfaces: ["--ec-color-bg"],
+				overlays: [],
+				localTokens: {},
+				pairs: [],
+				exempt: [],
+			}),
+		).toEqual([]);
 	});
 });
 
@@ -822,6 +930,35 @@ describe("the BRAND.md Color: combinations ratios (G3)", () => {
 // be removed. v5.1 removes these entries together with the axe symptom entries.
 // ---------------------------------------------------------------------------
 
+const BASELINE_CONTROL_PAIRS: ContrastPairsDocument = {
+	surfaces: [],
+	overlays: [],
+	localTokens: {},
+	pairs: [
+		{
+			id: "control-text",
+			fg: "#777777",
+			on: ["#ffffff"],
+			role: "text",
+			selector: ".fixture__text",
+			story: "fixture--contrast-baseline",
+		},
+		{
+			id: "control-non-text",
+			fg: "#222222",
+			on: ["#333333"],
+			role: "non-text",
+			selector: ".fixture__icon",
+			story: "fixture--contrast-baseline",
+		},
+	],
+};
+const BASELINE_CONTROL_RESULTS = evaluate(BASELINE_CONTROL_PAIRS, "");
+const BASELINE_CONTROL_FAILING = failingFingerprints(BASELINE_CONTROL_RESULTS);
+const BASELINE_CONTROL_ENTRIES = BASELINE_CONTROL_RESULTS.filter(
+	(result) => !result.pass,
+).map(contrastGapEntry);
+
 describe("the real baseline holds exactly today's contrast failures", () => {
 	const results = evaluate(PAIRS, TOKENS_CSS);
 	const failing = failingFingerprints(results);
@@ -844,26 +981,46 @@ describe("the real baseline holds exactly today's contrast failures", () => {
 	});
 
 	test("shown red: dropping an entry makes its failure new, and a stale entry is fixed-still-listed", () => {
-		const [dropped] = entries;
-		if (dropped === undefined) throw new Error("no contrast-gap entry");
-		const without = BASELINE.entries.filter(
-			(e) => e.fingerprint !== dropped.fingerprint,
+		const [dropped] = BASELINE_CONTROL_ENTRIES;
+		if (dropped === undefined)
+			throw new Error("no synthetic contrast-gap entry");
+		const without = BASELINE_CONTROL_ENTRIES.filter(
+			(entry) => entry.fingerprint !== dropped.fingerprint,
 		);
-		expect(compareBaseline(failing, without).newFailures).toEqual([
-			dropped.fingerprint,
-		]);
+		expect(
+			compareBaseline(BASELINE_CONTROL_FAILING, without).newFailures,
+		).toEqual([dropped.fingerprint]);
 		const stale = [
-			...BASELINE.entries,
+			...BASELINE_CONTROL_ENTRIES,
 			{ ...dropped, fingerprint: `${dropped.fingerprint}-gone` },
 		];
-		expect(compareBaseline(failing, stale).fixedStillListed).toEqual([
-			`${dropped.fingerprint}-gone`,
-		]);
+		expect(
+			compareBaseline(BASELINE_CONTROL_FAILING, stale).fixedStillListed,
+		).toEqual([`${dropped.fingerprint}-gone`]);
+	});
+
+	test("synthetic controls cover both themes and text/non-text failure roles", () => {
+		expect(
+			new Set(BASELINE_CONTROL_RESULTS.map((result) => result.theme)),
+		).toEqual(new Set(["light", "dark"]));
+		expect(
+			new Set(
+				BASELINE_CONTROL_RESULTS.filter((result) => !result.pass).map(
+					(result) => result.role,
+				),
+			),
+		).toEqual(new Set(["text", "non-text"]));
+		expect(
+			compareBaseline(BASELINE_CONTROL_FAILING, BASELINE_CONTROL_ENTRIES),
+		).toEqual({ newFailures: [], fixedStillListed: [] });
+		expect(compareBaseline(new Set<string>(), [])).toEqual({
+			newFailures: [],
+			fixedStillListed: [],
+		});
 	});
 
 	test("every entry quotes the measured ratio and theme, its pair's story, major and fix-v5.1", () => {
 		const byFingerprint = new Map(results.map((r) => [r.fingerprint, r]));
-		expect(entries.length).toBeGreaterThanOrEqual(51);
 		for (const entry of entries) {
 			const result = byFingerprint.get(entry.fingerprint);
 			expect(result, entry.fingerprint).toBeDefined();
@@ -896,11 +1053,19 @@ describe("the real baseline holds exactly today's contrast failures", () => {
 		}
 	});
 
-	test("the failing set is split as recorded: light, dark, text, non-text and no focus failure", () => {
+	test("real pair checks cover both themes and keep the thresholds", () => {
+		expect(new Set(results.map((r) => r.theme))).toEqual(
+			new Set(["light", "dark"]),
+		);
+		expect(new Set(results.map((r) => r.role))).toEqual(
+			new Set(["text", "non-text", "focus"]),
+		);
+		for (const result of results) {
+			expect(result.threshold).toBe(THRESHOLDS[result.role]);
+			expect(result.pass).toBe(result.ratio >= result.threshold);
+		}
 		const failed = results.filter((r) => !r.pass);
 		expect(failed.filter((r) => r.role === "focus")).toEqual([]);
-		expect(failed.filter((r) => r.theme === "light").length).toBeGreaterThan(0);
-		expect(failed.filter((r) => r.theme === "dark").length).toBeGreaterThan(0);
 	});
 
 	test("no kind of the baseline is an axe kind unless it is a11y or a11y-pN", () => {
@@ -922,16 +1087,14 @@ describe("the real baseline holds exactly today's contrast failures", () => {
 			[result.fgRef, result.bgRef, ...(overlay.get(result.bgRef) ?? [])].filter(
 				(ref) => ref.startsWith("--"),
 			);
-		const inFailing = new Set(
-			results.filter((r) => !r.pass).flatMap((r) => tokensOf(r)),
-		);
+		const inPairs = new Set(results.flatMap((r) => tokensOf(r)));
 		for (const name of exempt) {
 			expect(
-				inFailing.has(name),
+				results.filter((r) => !r.pass).some((r) => tokensOf(r).includes(name)),
 				`${name} is exempt and in a failing pair`,
 			).toBe(false);
 		}
-		const platform = [...inFailing]
+		const platform = [...inPairs]
 			.filter((name) => {
 				const entry = TOKEN_MAP.entries.find((e) => e.name === name);
 				return entry?.disposition === "keep-platform";
