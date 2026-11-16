@@ -1111,18 +1111,190 @@ describe("the real baseline holds exactly today's contrast failures", () => {
 		}
 	});
 
-	test("the two token-map-gap entries are sealed and each is referenced by exactly one map entry", () => {
-		const gaps = BASELINE.entries.filter((e) => e.kind === "token-map-gap");
-		expect(gaps.map((e) => e.fingerprint).sort()).toEqual([
-			"token-map-gap|file-list-filerow--copy-mode-disclosure|line-height-token-undefined",
-			"token-map-gap|ui-emptystate--copy-mode-on|empty-state-secondary-hardcoded",
-		]);
-		for (const gap of gaps) {
-			expect(gap.severity).toBe("minor");
-			expect(gap.disposition).toBe("fix-v5.1");
-			expect(
-				TOKEN_MAP.entries.filter((e) => e.finding === gap.fingerprint),
-			).toHaveLength(1);
-		}
+	test("token-map gaps follow their source and each remaining gap has one map entry", () => {
+		const source = readText("src/renderer/styles/empty_state.css");
+		expect(
+			tokenMapGapProblems(BASELINE.entries, TOKEN_MAP.entries, source),
+		).toEqual([]);
+	});
+
+	test("gap contract fixtures retain unresolved gaps and allow a fixed semantic empty-state role", () => {
+		const lineHeight = tokenMapGapFixture("line-height");
+		const emptyState = tokenMapGapFixture("empty-state");
+		const hardcodedSource = [
+			".empty-state { --empty-state-secondary: #59677b; }",
+			".empty-state__icon { color: var(--empty-state-secondary); }",
+			'[data-theme="dark"] .empty-state { --empty-state-secondary: #94949b; }',
+		].join("\n");
+		const semanticSource =
+			".empty-state__icon { color: var(--ec-color-text-secondary); }";
+		const currentMap = [
+			{ name: "--ec-line-height-normal", finding: lineHeight.fingerprint },
+			{ name: "--empty-state-secondary", finding: emptyState.fingerprint },
+		];
+
+		expect(
+			tokenMapGapProblems(
+				[lineHeight, emptyState],
+				currentMap,
+				hardcodedSource,
+			),
+		).toEqual([]);
+		expect(
+			tokenMapGapProblems([lineHeight], [currentMap[0]!], semanticSource),
+		).toEqual([]);
+	});
+
+	test("gap contract fixtures reject a missing required unresolved line-height finding", () => {
+		const lineHeight = tokenMapGapFixture("line-height");
+		const problems = tokenMapGapProblems(
+			[],
+			[],
+			".empty-state__icon { color: var(--ec-color-text-secondary); }",
+		);
+		expect(problems).toContain(
+			`missing required gap ${lineHeight.fingerprint}`,
+		);
+	});
+
+	test("gap contract fixtures reject a stale fixed empty-state finding", () => {
+		const lineHeight = tokenMapGapFixture("line-height");
+		const emptyState = tokenMapGapFixture("empty-state");
+		const problems = tokenMapGapProblems(
+			[lineHeight, emptyState],
+			[
+				{ name: "--ec-line-height-normal", finding: lineHeight.fingerprint },
+				{ name: "--empty-state-secondary", finding: emptyState.fingerprint },
+			],
+			".empty-state__icon { color: var(--ec-color-text-secondary); }",
+		);
+		expect(problems).toContain(`unexpected gap ${emptyState.fingerprint}`);
+	});
+
+	test("gap contract fixtures reject orphan and duplicate map links", () => {
+		const lineHeight = tokenMapGapFixture("line-height");
+		const emptyState = tokenMapGapFixture("empty-state");
+		const source = [
+			".empty-state { --empty-state-secondary: #59677b; }",
+			".empty-state__icon { color: var(--empty-state-secondary); }",
+		].join("\n");
+		const orphan = tokenMapGapProblems(
+			[lineHeight],
+			[
+				{ name: "--ec-line-height-normal", finding: lineHeight.fingerprint },
+				{ name: "--orphan", finding: "token-map-gap|orphan|source-missing" },
+			],
+			source,
+		);
+		expect(orphan).toContain(
+			"orphan map link token-map-gap|orphan|source-missing",
+		);
+
+		const duplicate = tokenMapGapProblems(
+			[lineHeight, emptyState],
+			[
+				{ name: "--ec-line-height-normal", finding: lineHeight.fingerprint },
+				{ name: "--empty-state-secondary", finding: emptyState.fingerprint },
+				{ name: "--duplicate-empty-state", finding: emptyState.fingerprint },
+			],
+			source,
+		);
+		expect(duplicate).toContain(
+			`gap ${emptyState.fingerprint} has 2 map links`,
+		);
 	});
 });
+
+type TokenMapGapEntry = {
+	fingerprint: string;
+	kind: string;
+	story: string;
+	rule: string;
+	disposition: string;
+	severity?: string;
+};
+
+type TokenMapGapLink = { name: string; finding?: string };
+
+const LINE_HEIGHT_GAP = {
+	fingerprint:
+		"token-map-gap|file-list-filerow--copy-mode-disclosure|line-height-token-undefined",
+	story: "file-list-filerow--copy-mode-disclosure",
+	rule: "line-height-token-undefined",
+};
+const EMPTY_STATE_GAP = {
+	fingerprint:
+		"token-map-gap|ui-emptystate--copy-mode-on|empty-state-secondary-hardcoded",
+	story: "ui-emptystate--copy-mode-on",
+	rule: "empty-state-secondary-hardcoded",
+};
+
+function tokenMapGapFixture(
+	which: "line-height" | "empty-state",
+): TokenMapGapEntry {
+	const gap = which === "line-height" ? LINE_HEIGHT_GAP : EMPTY_STATE_GAP;
+	return {
+		...gap,
+		kind: "token-map-gap",
+		disposition: "fix-v5.1",
+		severity: "minor",
+	};
+}
+
+function tokenMapGapProblems(
+	baselineEntries: TokenMapGapEntry[],
+	tokenMapEntries: TokenMapGapLink[],
+	emptyStateCss: string,
+): string[] {
+	const gaps = baselineEntries.filter(
+		(entry) => entry.kind === "token-map-gap",
+	);
+	const hardcodedSecondary =
+		/--empty-state-secondary\s*:\s*#[\da-f]{3,8}\b/i.test(emptyStateCss) &&
+		/var\(\s*--empty-state-secondary\s*\)/i.test(emptyStateCss);
+	const expected = [
+		LINE_HEIGHT_GAP,
+		...(hardcodedSecondary ? [EMPTY_STATE_GAP] : []),
+	];
+	const expectedFingerprints = new Set(expected.map((gap) => gap.fingerprint));
+	const problems: string[] = [];
+
+	for (const gap of expected) {
+		const matches = gaps.filter(
+			(entry) => entry.fingerprint === gap.fingerprint,
+		);
+		if (matches.length === 0)
+			problems.push(`missing required gap ${gap.fingerprint}`);
+		if (matches.length > 1) problems.push(`duplicate gap ${gap.fingerprint}`);
+		for (const entry of matches) {
+			if (
+				entry.story !== gap.story ||
+				entry.rule !== gap.rule ||
+				entry.disposition !== "fix-v5.1" ||
+				entry.severity !== "minor"
+			) {
+				problems.push(`gap metadata changed ${gap.fingerprint}`);
+			}
+		}
+	}
+
+	for (const gap of gaps) {
+		if (!expectedFingerprints.has(gap.fingerprint)) {
+			problems.push(`unexpected gap ${gap.fingerprint}`);
+		}
+	}
+
+	const links = tokenMapEntries.filter((entry) =>
+		entry.finding?.startsWith("token-map-gap|"),
+	);
+	for (const fingerprint of expectedFingerprints) {
+		const count = links.filter((entry) => entry.finding === fingerprint).length;
+		if (count !== 1) problems.push(`gap ${fingerprint} has ${count} map links`);
+	}
+	for (const link of links) {
+		if (link.finding !== undefined && !expectedFingerprints.has(link.finding)) {
+			problems.push(`orphan map link ${link.finding}`);
+		}
+	}
+	return problems;
+}
