@@ -133,6 +133,13 @@
 	white-space: nowrap;
 }
 
+.file-table__bidi-escape {
+	font-family: var(--ec-font-family-mono);
+	font-size: inherit;
+	font-weight: inherit;
+	color: inherit;
+}
+
 .file-table__copy-disclosure {
 	color: var(--ec-color-text-secondary);
 	font-size: var(--ec-font-size-small);

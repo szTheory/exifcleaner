@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
-import { FileProcessingStatus } from "../../../domain";
+import { FileProcessingStatus, displayName } from "../../../domain";
 import type { FileEntry } from "../../contexts/AppContext";
 import { useI18n } from "../../hooks/use_i18n";
 import {
@@ -399,6 +399,40 @@ async function expectNameText(
 	await expect(name?.textContent).toBe(literal);
 }
 
+// TRU-01 glyph-order measurement: per-character Range rects of every text node under the
+// host, sorted left to right. `logical` is the text in DOM order, `visual` the same
+// characters in the order they are drawn, so a name that a bidirectional control
+// reorders has visual !== logical. In a left-to-right host with no right-to-left text the
+// two must be equal; in a right-to-left host they cannot be, so that row asserts the
+// token stays contiguous instead (RESEARCH R4).
+function visualOrder(host: Element): {
+	logical: string;
+	visual: string;
+	direction: string;
+} {
+	const glyphs: { ch: string; x: number }[] = [];
+	let logical = "";
+	const walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+	for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+		if (!(node instanceof Text)) continue;
+		for (let i = 0; i < node.data.length; i += 1) {
+			const range = document.createRange();
+			range.setStart(node, i);
+			range.setEnd(node, i + 1);
+			glyphs.push({
+				ch: node.data.charAt(i),
+				x: range.getBoundingClientRect().left,
+			});
+			logical += node.data.charAt(i);
+		}
+	}
+	const visual = [...glyphs]
+		.sort((a, b) => a.x - b.x)
+		.map((glyph) => glyph.ch)
+		.join("");
+	return { logical, visual, direction: getComputedStyle(host).direction };
+}
+
 // Size and count magnitudes (D-21 item 2 and 3): the rendered text is a finding, so the
 // plays assert presence only.
 async function expectCells(canvasElement: HTMLElement): Promise<void> {
@@ -619,20 +653,52 @@ export const ArabicDigitsName: Story = {
 
 export const RloName: Story = {
 	args: { file: cleanedInPlace({ name: RLO_NAME }) },
-	parameters: { a11y: knownA11y("file-list-filerow--rlo-name") },
+	parameters: {
+		a11y: knownA11y("file-list-filerow--rlo-name"),
+		copyLint: {
+			fixtureText: rowLabelFixture(
+				displayName({ name: RLO_NAME }),
+				"outcome.cleaned",
+			),
+		},
+	},
 	play: async ({ canvasElement }) => {
-		await expectNameText(canvasElement, "holiday\u202Egnp.jpg");
+		// TRU-01: the override is shown as its token, so the name is drawn in the order it
+		// is written and its real extension is the one displayed.
+		await expectNameText(canvasElement, "holiday<U+202E>gnp.jpg");
+		const name = canvasElement.querySelector("bdi.file-table__name-text");
+		await expect(name).not.toBeNull();
+		if (name === null) return;
+		const measured = visualOrder(name);
+		await expect(measured.visual).toBe(measured.logical);
+		await expect(measured.logical.toLowerCase().endsWith(".jpg")).toBe(true);
 	},
 };
 
 export const LroPdfName: Story = {
 	args: { file: cleanedInPlace({ name: LRO_PDF_NAME, extension: "PNG" }) },
-	parameters: { a11y: knownA11y("file-list-filerow--lro-pdf-name") },
+	parameters: {
+		a11y: knownA11y("file-list-filerow--lro-pdf-name"),
+		copyLint: {
+			fixtureText: rowLabelFixture(
+				displayName({ name: LRO_PDF_NAME }),
+				"outcome.cleaned",
+			),
+		},
+	},
 	play: async ({ canvasElement }) => {
+		// TRU-01: every override and pop is shown as its token, and the displayed text
+		// ends with the real extension.
 		await expectNameText(
 			canvasElement,
-			"scan-\u202Dabc\u202C-\u202Edef\u202C.png",
+			"scan-<U+202D>abc<U+202C>-<U+202E>def<U+202C>.png",
 		);
+		const name = canvasElement.querySelector("bdi.file-table__name-text");
+		await expect(name).not.toBeNull();
+		if (name === null) return;
+		const measured = visualOrder(name);
+		await expect(measured.visual).toBe(measured.logical);
+		await expect(measured.logical.toLowerCase().endsWith(".png")).toBe(true);
 	},
 };
 
