@@ -389,6 +389,60 @@ describe("GAT-01 token drift gate (D-09, D-12)", () => {
 		]);
 	});
 
+	test("the vacuity fixture stays below the floor when adopt inventory grows", () => {
+		const growthInventory: TokenMapDocument = {
+			entries: [
+				...TOKEN_MAP.entries,
+				{
+					name: "--ec-color-growth-fixture",
+					disposition: "adopt",
+					brand: {
+						light: { token: "--ec-brand-growth-fixture", hex: "#123456" },
+						dark: { token: "--ec-brand-growth-fixture-dark", hex: "#654321" },
+					},
+				},
+			],
+		};
+		const originalAdoptCount = TOKEN_MAP.entries.filter(
+			(entry) => entry.disposition === "adopt",
+		).length;
+		expect(
+			growthInventory.entries.filter((entry) => entry.disposition === "adopt"),
+		).toHaveLength(originalAdoptCount + 1);
+		const belowFloorAdoptNames = new Set(
+			growthInventory.entries
+				.filter((entry) => entry.disposition === "adopt")
+				.slice(0, MIN_ADOPT_ROWS - 1)
+				.map((entry) => entry.name),
+		);
+		const reduced: TokenMapDocument = {
+			entries: growthInventory.entries.filter(
+				(entry) =>
+					entry.disposition !== "adopt" || belowFloorAdoptNames.has(entry.name),
+			),
+		};
+		expect(
+			reduced.entries.filter((entry) => entry.disposition === "adopt"),
+		).toHaveLength(MIN_ADOPT_ROWS - 1);
+		expect(
+			reduced.entries.filter((entry) => entry.disposition !== "adopt"),
+		).toEqual(
+			growthInventory.entries.filter((entry) => entry.disposition !== "adopt"),
+		);
+		expect(
+			driftProblems({
+				tokensCss: matchingTokensCss(reduced),
+				tokenMap: reduced,
+				pending: { rows: [] },
+			}),
+		).toEqual([
+			{
+				code: "vacuous",
+				subject: `adopt rows seen: ${MIN_ADOPT_ROWS - 1}`,
+			},
+		]);
+	});
+
 	test("a pending row naming no adopt token or theme is unknown", () => {
 		const problems = driftProblems({
 			tokensCss: matchingTokensCss(TOKEN_MAP),
