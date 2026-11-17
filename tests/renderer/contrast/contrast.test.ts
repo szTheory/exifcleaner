@@ -73,6 +73,116 @@ function clone<T>(value: T): T {
 	return JSON.parse(JSON.stringify(value)) as T;
 }
 
+type EvaluatedContrast = ReturnType<typeof evaluate>[number];
+
+function declaredTextTraceProblems(
+	pair: ContrastPair | undefined,
+	doc: ContrastPairsDocument,
+	results: EvaluatedContrast[],
+	requirePassing = false,
+): string[] {
+	if (pair === undefined) return ["text-secondary pair is missing"];
+
+	const expected = new Map<string, { rule: string; fingerprint: string }>();
+	for (const backdrop of backdrops(pair, doc)) {
+		for (const theme of THEMES) {
+			const rule = `${pair.id}-on-${backdrop.short}-${theme}`;
+			expected.set(`${theme}|${backdrop.ref}`, {
+				rule,
+				fingerprint: `contrast-gap|${pair.story}|${rule}`,
+			});
+		}
+	}
+
+	const problems: string[] = [];
+	const seenResults = new Set<string>();
+	const seenFingerprints = new Set<string>();
+	for (const result of results.filter(
+		(candidate) => candidate.pair === pair.id,
+	)) {
+		const key = `${result.theme}|${result.bgRef}`;
+		const expectedResult = expected.get(key);
+		if (expectedResult === undefined) {
+			problems.push(`unexpected declared backdrop/theme ${key}`);
+		} else if (seenResults.has(key)) {
+			problems.push(`duplicate declared result ${key}`);
+		} else {
+			seenResults.add(key);
+		}
+
+		if (seenFingerprints.has(result.fingerprint)) {
+			problems.push(`duplicate result fingerprint ${result.fingerprint}`);
+		}
+		seenFingerprints.add(result.fingerprint);
+		if (
+			expectedResult !== undefined &&
+			(result.rule !== expectedResult.rule ||
+				result.fingerprint !== expectedResult.fingerprint)
+		) {
+			problems.push(`unexpected rule or fingerprint for ${key}`);
+		}
+		if (
+			!Number.isFinite(result.ratio) ||
+			result.threshold !== THRESHOLDS[pair.role] ||
+			result.pass !== result.ratio >= result.threshold
+		) {
+			problems.push(`invalid text threshold result for ${key}`);
+		}
+		if (requirePassing && !result.pass) {
+			problems.push(`text threshold failed for ${key}`);
+		}
+	}
+
+	for (const key of expected.keys()) {
+		if (!seenResults.has(key)) problems.push(`missing declared result ${key}`);
+	}
+	return problems;
+}
+
+function declaredBackdropTracerFixture(
+	englishOn: string | string[],
+): ContrastPairsDocument {
+	return {
+		surfaces: ["--ec-color-bg", "--ec-color-surface"],
+		overlays: [
+			{
+				id: ITEM_HOVER_OVERLAY_ID,
+				layers: [ITEM_HOVER_BASE, "rgba(0, 0, 0, 0.04)"],
+			},
+		],
+		localTokens: {},
+		pairs: [
+			{
+				id: "text-secondary",
+				fg: ITEM_HOVER_ENGLISH_ROLE,
+				on: englishOn,
+				role: "text",
+				selector: ".language-dropdown__english",
+				story: "settings-languagedropdown--item-hover",
+			},
+			{
+				id: "text-secondary-file-table-header",
+				fg: ITEM_HOVER_ENGLISH_ROLE,
+				on: [ITEM_HOVER_BASE],
+				role: "text",
+				selector: ".file-table__header",
+				story: "file-list-filetable--mixed-statuses",
+			},
+		],
+	};
+}
+
+const DECLARED_BACKDROP_FIXTURE_TOKENS = `:root {
+	--ec-color-bg: #ffffff;
+	--ec-color-surface: #ffffff;
+	--ec-color-text-secondary: #000000;
+}
+[data-theme="dark"] {
+	--ec-color-bg: #000000;
+	--ec-color-surface: #000000;
+	--ec-color-text-secondary: #ffffff;
+}`;
+
 const PLATFORM_INDICATOR_ROLE = "--ec-color-platform-indicator";
 const ITEM_HOVER_OVERLAY_ID = "item-hover";
 const ITEM_HOVER_BASE = "--ec-color-surface";
@@ -496,23 +606,164 @@ describe("G3: the helper reproduces axe's recorded ratios", () => {
 describe("tracer: text-secondary through tokens.css, flattening and the ratio", () => {
 	const tracer = PAIRS.pairs.find((pair) => pair.id === "text-secondary");
 
-	test("the real pair is evaluated on every surface in both themes", () => {
+	test("the real pair is evaluated on exactly its declared backdrops in both themes", () => {
 		expect(tracer).toBeDefined();
-		const results = evaluate(PAIRS, TOKENS_CSS).filter(
-			(result) => result.pair === "text-secondary",
+		if (tracer === undefined) throw new Error("text-secondary pair is missing");
+		const allResults = evaluate(PAIRS, TOKENS_CSS);
+		const results = allResults.filter((result) => result.pair === tracer.id);
+		const expected = backdrops(tracer, PAIRS).flatMap(({ ref }) =>
+			THEMES.map((theme) => `${theme}|${ref}`),
 		);
-		expect(results).toHaveLength(PAIRS.surfaces.length * 2);
+		expect(results.map((result) => `${result.theme}|${result.bgRef}`)).toEqual(
+			expected,
+		);
+		expect(declaredTextTraceProblems(tracer, PAIRS, allResults)).toEqual([]);
 		for (const result of results) {
 			expect(Number.isFinite(result.ratio), result.rule).toBe(true);
 			expect(result.fingerprint).toBe(
 				`contrast-gap|${result.story}|${result.rule}`,
 			);
 		}
-		const light = results.find((r) => r.rule === "text-secondary-on-bg-light");
+		const light = results.find((result) => result.theme === "light");
 		expect(light).toBeDefined();
 		if (light === undefined) throw new Error("light tracer result is missing");
 		expect(light.threshold).toBe(THRESHOLDS.text);
 		expect(light.pass).toBe(light.ratio >= light.threshold);
+	});
+
+	test("legacy global surfaces and palette English/header declarations have truthful fixtures", () => {
+		const fixtures = [
+			{
+				name: "legacy global surfaces",
+				doc: declaredBackdropTracerFixture("surfaces"),
+				englishBackdrops: ["--ec-color-bg", "--ec-color-surface"],
+			},
+			{
+				name: "palette English surface and item-hover",
+				doc: declaredBackdropTracerFixture([
+					ITEM_HOVER_BASE,
+					ITEM_HOVER_OVERLAY_ID,
+				]),
+				englishBackdrops: [ITEM_HOVER_BASE, ITEM_HOVER_OVERLAY_ID],
+			},
+		];
+
+		for (const fixture of fixtures) {
+			const englishPair = fixture.doc.pairs.find(
+				(pair) => pair.id === "text-secondary",
+			);
+			const headerPair = fixture.doc.pairs.find(
+				(pair) => pair.id === "text-secondary-file-table-header",
+			);
+			expect(englishPair, fixture.name).toBeDefined();
+			expect(headerPair, fixture.name).toBeDefined();
+			if (englishPair === undefined || headerPair === undefined)
+				throw new Error(
+					`${fixture.name} is missing its English or header pair`,
+				);
+			expect(
+				backdrops(englishPair, fixture.doc).map((backdrop) => backdrop.ref),
+				fixture.name,
+			).toEqual(fixture.englishBackdrops);
+			expect(
+				backdrops(headerPair, fixture.doc).map((backdrop) => backdrop.ref),
+				fixture.name,
+			).toEqual([ITEM_HOVER_BASE]);
+
+			const results = evaluate(fixture.doc, DECLARED_BACKDROP_FIXTURE_TOKENS);
+			expect(
+				declaredTextTraceProblems(englishPair, fixture.doc, results, true),
+				fixture.name,
+			).toEqual([]);
+			expect(
+				declaredTextTraceProblems(headerPair, fixture.doc, results, true),
+				fixture.name,
+			).toEqual([]);
+			expect(
+				results.filter((result) => result.pair === headerPair.id),
+			).toHaveLength(2);
+		}
+	});
+
+	test("declared-backdrop tracer rejects missing, extra, duplicate, and failing results", () => {
+		const fixture = declaredBackdropTracerFixture([
+			ITEM_HOVER_BASE,
+			ITEM_HOVER_OVERLAY_ID,
+		]);
+		const englishPair = fixture.pairs.find(
+			(pair) => pair.id === "text-secondary",
+		);
+		if (englishPair === undefined)
+			throw new Error("English fixture pair is missing");
+		const results = evaluate(fixture, DECLARED_BACKDROP_FIXTURE_TOKENS);
+		const englishResults = results.filter(
+			(result) => result.pair === englishPair.id,
+		);
+		const first = englishResults[0];
+		const second = englishResults[1];
+		if (first === undefined || second === undefined)
+			throw new Error("English fixture results are missing");
+
+		const missingBackdrop = results.filter(
+			(result) =>
+				result.pair !== englishPair.id ||
+				!(result.bgRef === ITEM_HOVER_OVERLAY_ID && result.theme === "dark"),
+		);
+		expect(
+			declaredTextTraceProblems(englishPair, fixture, missingBackdrop),
+		).toContain(`missing declared result dark|${ITEM_HOVER_OVERLAY_ID}`);
+
+		const missingTheme = results.filter(
+			(result) => result.pair !== englishPair.id || result.theme !== "dark",
+		);
+		expect(
+			declaredTextTraceProblems(englishPair, fixture, missingTheme).filter(
+				(problem) => problem.startsWith("missing declared result dark|"),
+			),
+		).toHaveLength(2);
+
+		const unexpected = {
+			...first,
+			backdrop: "bg",
+			bgRef: "--ec-color-bg",
+			rule: `text-secondary-on-bg-${first.theme}`,
+			fingerprint: `contrast-gap|${first.story}|text-secondary-on-bg-${first.theme}`,
+		};
+		expect(
+			declaredTextTraceProblems(englishPair, fixture, [...results, unexpected]),
+		).toContain(
+			`unexpected declared backdrop/theme ${first.theme}|--ec-color-bg`,
+		);
+
+		const duplicated = [...results, first];
+		expect(
+			declaredTextTraceProblems(englishPair, fixture, duplicated),
+		).toContain(`duplicate declared result ${first.theme}|${first.bgRef}`);
+		expect(
+			declaredTextTraceProblems(englishPair, fixture, duplicated),
+		).toContain(`duplicate result fingerprint ${first.fingerprint}`);
+
+		const duplicateFingerprint = results.map((result) =>
+			result.fingerprint === first.fingerprint
+				? { ...result, fingerprint: second.fingerprint }
+				: result,
+		);
+		expect(
+			declaredTextTraceProblems(englishPair, fixture, duplicateFingerprint),
+		).toContain(`duplicate result fingerprint ${second.fingerprint}`);
+
+		const failingThreshold = results.map((result) =>
+			result.fingerprint === first.fingerprint
+				? {
+						...result,
+						ratio: result.threshold - 0.01,
+						pass: false,
+					}
+				: result,
+		);
+		expect(
+			declaredTextTraceProblems(englishPair, fixture, failingThreshold, true),
+		).toContain(`text threshold failed for ${first.theme}|${first.bgRef}`);
 	});
 
 	test("shown red: a planted failing pair is in the failing set and is a new failure", () => {
