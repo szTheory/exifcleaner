@@ -10,8 +10,8 @@
 }
 
 .drop-zone--active {
-	border: 2px dashed var(--ec-color-gold);
-	background-color: var(--ec-color-gold-bg);
+	border: 2px dashed var(--ec-color-platform-indicator);
+	background-color: var(--ec-color-surface);
 }
 
 @media (prefers-reduced-motion: no-preference) {

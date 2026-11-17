@@ -3,52 +3,16 @@
 	"brandPin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
 	"entries": [
 		{
-			"name": "--color-accent",
-			"disposition": "retire",
-			"reason": "backward-compat alias with live consumers error_boundary.css:29, error_boundary.css:32, error_boundary.css:43; v5.1 rewrites these call sites to var(--ec-color-accent), except error_boundary.css:32, a text use, which moves to the action colour (D-04: the accent is never text) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
-			"aliasOf": "--ec-color-accent"
-		},
-		{
 			"name": "--color-bg",
 			"disposition": "retire",
 			"reason": "backward-compat alias with live consumers app.css:5; v5.1 rewrites this call site to var(--ec-color-bg) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
 			"aliasOf": "--ec-color-bg"
 		},
 		{
-			"name": "--color-border",
-			"disposition": "retire",
-			"reason": "backward-compat alias with live consumers file_list.css:15; v5.1 rewrites this call site to var(--ec-color-border) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
-			"aliasOf": "--ec-color-border"
-		},
-		{
-			"name": "--color-drop-active",
-			"disposition": "retire",
-			"reason": "backward-compat alias with live consumers error_boundary.css:39; v5.1 rewrites this call site to the drop-target highlight on the platform accent instead of var(--ec-color-gold-bg), which is retired (D-05) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
-			"aliasOf": "--ec-color-gold-bg"
-		},
-		{
-			"name": "--color-error-bg",
-			"disposition": "retire",
-			"reason": "backward-compat alias with live consumers error_boundary.css:8; v5.1 rewrites this call site to var(--ec-color-error-bg) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
-			"aliasOf": "--ec-color-error-bg"
-		},
-		{
-			"name": "--color-error-text",
-			"disposition": "retire",
-			"reason": "backward-compat alias with live consumers error_boundary.css:15; v5.1 rewrites this call site to the primary text colour, var(--ec-color-text), instead of var(--ec-color-error): error text is never platform red (D-04) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
-			"aliasOf": "--ec-color-error"
-		},
-		{
 			"name": "--color-text",
 			"disposition": "retire",
 			"reason": "backward-compat alias with live consumers app.css:6, empty_state.css:32, file_list.css:24; v5.1 rewrites these call sites to var(--ec-color-text) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
 			"aliasOf": "--ec-color-text"
-		},
-		{
-			"name": "--color-text-secondary",
-			"disposition": "retire",
-			"reason": "backward-compat alias with live consumers error_boundary.css:21, file_list.css:29; v5.1 rewrites these call sites to var(--ec-color-text-secondary) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
-			"aliasOf": "--ec-color-text-secondary"
 		},
 		{
 			"name": "--ec-backdrop-opacity",
@@ -62,10 +26,170 @@
 			"spec": "platform-owned.platform.border"
 		},
 		{
+			"name": "--ec-brand-clean-white",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.light.clean-white",
+					"hex": "#FFFFFF"
+				},
+				"dark": {
+					"token": "color.dark.clean-white",
+					"hex": "#FFFFFF"
+				}
+			}
+		},
+		{
+			"name": "--ec-brand-deep-teal",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.light.deep-teal",
+					"hex": "#0A2E2B"
+				},
+				"dark": {
+					"token": "color.dark.deep-teal",
+					"hex": "#0A2E2B"
+				}
+			}
+		},
+		{
+			"name": "--ec-brand-fog",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.secondary.fog",
+					"hex": "#A9C9C4"
+				},
+				"dark": {
+					"token": "color.secondary.fog",
+					"hex": "#A9C9C4"
+				}
+			}
+		},
+		{
+			"name": "--ec-brand-pewter",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.secondary.pewter",
+					"hex": "#4A625F"
+				},
+				"dark": {
+					"token": "color.secondary.pewter",
+					"hex": "#4A625F"
+				}
+			}
+		},
+		{
+			"name": "--ec-brand-rinse",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.light.rinse",
+					"hex": "#EEF6F5"
+				},
+				"dark": {
+					"token": "color.light.rinse",
+					"hex": "#EEF6F5"
+				}
+			}
+		},
+		{
+			"name": "--ec-brand-seafoam",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.dark.seafoam",
+					"hex": "#5EEAD4"
+				},
+				"dark": {
+					"token": "color.dark.seafoam",
+					"hex": "#5EEAD4"
+				}
+			}
+		},
+		{
+			"name": "--ec-brand-steady-teal",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.light.steady-teal",
+					"hex": "#0F766E"
+				},
+				"dark": {
+					"token": "color.light.steady-teal",
+					"hex": "#0F766E"
+				}
+			}
+		},
+		{
+			"name": "--ec-brand-tide",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.dark.tide",
+					"hex": "#12403C"
+				},
+				"dark": {
+					"token": "color.dark.tide",
+					"hex": "#12403C"
+				}
+			}
+		},
+		{
 			"name": "--ec-color-accent",
 			"disposition": "keep-platform",
-			"reason": "Set at runtime from the system accent: ThemeContext.tsx:54 and ThemeContext.tsx:73 call document.documentElement.style.setProperty(\"--ec-color-accent\", ...) with the value of getAccentColor(), and the fallback is ACCENT_COLOR_FALLBACK #007AFF at src/domain/accent_color.ts:4, so the value stays platform-owned (D-04). v5.1 changes the uses, not the value: the accent is never text (accent-as-text moves to the action colour) and ::selection changes its text or fill treatment (white on #007AFF measures 4.01:1), which clears the accent entries 74-04 seals.",
+			"reason": "Set at runtime from the system accent: ThemeContext.tsx calls getAccentColor(), with ACCENT_COLOR_FALLBACK #007AFF at src/domain/accent_color.ts, so the accent remains platform-owned. v5.1 keeps raw accent for the toggle-on track, the light focus/drop indicators and other existing platform uses; only the dark segmented-focus outline and active drop-zone border use the separately mapped platform-indicator mix. Accent is never text. The custom ::selection rule is removed so the operating system owns selection colors.",
 			"spec": "platform-owned.platform.accent-fallback"
+		},
+		{
+			"name": "--ec-color-action",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.light.steady-teal",
+					"hex": "#0F766E"
+				},
+				"dark": {
+					"token": "color.dark.seafoam",
+					"hex": "#5EEAD4"
+				}
+			},
+			"spec": "platform-owned.brand.action-light"
+		},
+		{
+			"name": "--ec-color-action-hover",
+			"disposition": "derive",
+			"from": [
+				"color.light.steady-teal",
+				"color.dark.seafoam"
+			],
+			"rule": "Filled-action hover state overlay: light Steady Teal #0F766E under Deep Teal at alpha 0.08 gives #0F7069; dark Seafoam #5EEAD4 under Clean White at alpha 0.12 gives #71EDD9."
+		},
+		{
+			"name": "--ec-color-action-label",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.light.clean-white",
+					"hex": "#FFFFFF"
+				},
+				"dark": {
+					"token": "color.dark.deep-teal",
+					"hex": "#0A2E2B"
+				}
+			},
+			"spec": "platform-owned.brand.action-text-light"
+		},
+		{
+			"name": "--ec-color-action-pressed",
+			"disposition": "derive",
+			"from": [
+				"color.light.steady-teal",
+				"color.dark.seafoam"
+			],
+			"rule": "Pressed filled-action state applies the existing theme overlay twice: light Steady Teal resolves to #0F6B64; dark Seafoam resolves to #82EFDE."
 		},
 		{
 			"name": "--ec-color-bg",
@@ -89,6 +213,21 @@
 			"spec": "platform-owned.platform.border"
 		},
 		{
+			"name": "--ec-color-cleaned",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.light.steady-teal",
+					"hex": "#0F766E"
+				},
+				"dark": {
+					"token": "color.dark.seafoam",
+					"hex": "#5EEAD4"
+				}
+			},
+			"spec": "platform-owned.brand.cleaned-light"
+		},
+		{
 			"name": "--ec-color-error",
 			"disposition": "keep-platform",
 			"reason": "Platform red on icons only (D-04). v5.1 changes the app value #c44536 (the same in both theme blocks, tokens.css:14 and tokens.css:92) to the platform reds per theme and moves error text to the primary text colour, which clears the error-as-text entries 74-04 seals. 74-04 seals no error-icon entry: #c44536 measures 4.56:1 on the light ground #f5f6f8, 4.16:1 on the light surface #e8ecf0, 3.72:1 on the dark ground #141416 and 3.44:1 on the dark surface #1c1c1f (floored), so the icon passes 3:1 on today's grounds in both themes.",
@@ -97,6 +236,7 @@
 		{
 			"name": "--ec-color-error-bg",
 			"disposition": "derive",
+			"aliasOf": "--ec-color-surface",
 			"from": [
 				"color.light.rinse",
 				"color.dark.tide"
@@ -104,49 +244,40 @@
 			"rule": "error rows sit on the raised surface step; the error is carried by the platform-red icon and primary-text message (D-04, D-13)"
 		},
 		{
-			"name": "--ec-color-gold",
-			"disposition": "retire",
-			"reason": "Retired (D-05): Bristle Yellow is mark-only and the drop-zone active state uses the platform accent.",
+			"name": "--ec-color-pill-bg",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.light.rinse",
+					"hex": "#EEF6F5"
+				},
+				"dark": {
+					"token": "color.dark.tide",
+					"hex": "#12403C"
+				}
+			},
+			"spec": "platform-owned.brand.pill-bg-light"
+		},
+		{
+			"name": "--ec-color-pill-text",
+			"disposition": "adopt",
+			"brand": {
+				"light": {
+					"token": "color.light.deep-teal",
+					"hex": "#0A2E2B"
+				},
+				"dark": {
+					"token": "color.secondary.fog",
+					"hex": "#A9C9C4"
+				}
+			},
+			"spec": "platform-owned.brand.pill-text-light"
+		},
+		{
+			"name": "--ec-color-platform-indicator",
+			"disposition": "keep-platform",
+			"reason": "The v5.1 platform-owned indicator role has no brand equivalent. Light resolves to the raw runtime --ec-color-accent. Dark resolves only to exactly color-mix(in srgb, var(--ec-color-accent) 90%, CanvasText 10%). The role has exactly two consumers: .segmented-control__segment:focus-visible outline and .drop-zone--active border; toggle-on, all other accents and every light indicator stay raw accent. Fresh real Storybook boundary probes pass at 3:1 or greater on both sides of drop and focus boundaries in both themes.",
 			"spec": "platform-owned.platform.accent-uses"
-		},
-		{
-			"name": "--ec-color-gold-bg",
-			"disposition": "retire",
-			"reason": "Retired with --ec-color-gold (D-05): the drop-zone active state uses the platform accent, so the gold tint has no role.",
-			"spec": "platform-owned.platform.accent-uses"
-		},
-		{
-			"name": "--ec-color-hover",
-			"disposition": "retire",
-			"reason": "Declared in no stylesheet: language_dropdown.css:82 reads var(--ec-color-hover, rgba(0, 0, 0, 0.04)) and always takes the fallback. Hover becomes the surface step (D-06), so v5.1 declares no hover token.",
-			"spec": "dark-rinse.hover-light",
-			"finding": "token-gap|settings-languagedropdown--item-hover|hover-token-undefined"
-		},
-		{
-			"name": "--ec-color-info",
-			"disposition": "retire",
-			"reason": "Declared (#3b7fc4 light, #6ba3d6 dark) and used by no stylesheet or component under src/renderer; no brand token replaces it."
-		},
-		{
-			"name": "--ec-color-muted",
-			"disposition": "retire",
-			"reason": "Fails the 4.5:1 text bar on every ground it sits on (2.04:1 to 3.08:1 in 74-RESEARCH); v5.1 merges it into the secondary text colour, --ec-color-text-secondary."
-		},
-		{
-			"name": "--ec-color-preserved-bg",
-			"disposition": "retire",
-			"reason": "v5.1 replaces the green tint on preserved-field rows (rgba(52, 199, 89, 0.08) light, rgba(48, 209, 88, 0.12) dark, tokens.css:21 and tokens.css:99): the preserved field is not cleaned, so it goes neutral (D-02)."
-		},
-		{
-			"name": "--ec-color-removed-bg",
-			"disposition": "retire",
-			"reason": "v5.1 replaces the red tint on removed-field rows (rgba(255, 59, 48, 0.08) light, rgba(255, 69, 58, 0.12) dark, tokens.css:20 and tokens.css:98): colour inside list rows means status (D-02) and no brand token replaces the tint."
-		},
-		{
-			"name": "--ec-color-success",
-			"disposition": "retire",
-			"reason": "Replaced by the cleaned colour, Steady Teal in light and Seafoam in dark (D-02); the app green #34c759 / #30d158 is not a brand colour, and 74-RESEARCH R-05 measures the light check icon at 2.05:1.",
-			"spec": "platform-owned.brand.cleaned-light"
 		},
 		{
 			"name": "--ec-color-surface",
@@ -162,6 +293,24 @@
 				}
 			},
 			"spec": "platform-owned.brand.surface-light"
+		},
+		{
+			"name": "--ec-color-surface-hover",
+			"disposition": "derive",
+			"from": [
+				"color.light.rinse",
+				"color.dark.tide"
+			],
+			"rule": "The token values are the existing one-pass state overlay on each raised surface: Rinse under Deep Teal at alpha 0.08 gives #DCE6E5; Tide under Clean White at alpha 0.12 gives #2E5753."
+		},
+		{
+			"name": "--ec-color-surface-pressed",
+			"disposition": "derive",
+			"from": [
+				"color.light.rinse",
+				"color.dark.tide"
+			],
+			"rule": "The token values are the existing two-pass state overlay on each raised surface: Rinse under Deep Teal at alpha 0.08 gives #CBD7D6; Tide under Clean White at alpha 0.12 gives #476B68."
 		},
 		{
 			"name": "--ec-color-text",
@@ -286,78 +435,6 @@
 			"finding": "token-map-gap|file-list-filerow--copy-mode-disclosure|line-height-token-undefined"
 		},
 		{
-			"name": "--ec-pill-dng-bg",
-			"disposition": "retire",
-			"reason": "Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
-			"spec": "platform-owned.brand.pill-per-type"
-		},
-		{
-			"name": "--ec-pill-dng-text",
-			"disposition": "retire",
-			"reason": "Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
-			"spec": "platform-owned.brand.pill-per-type"
-		},
-		{
-			"name": "--ec-pill-heic-bg",
-			"disposition": "retire",
-			"reason": "Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
-			"spec": "platform-owned.brand.pill-per-type"
-		},
-		{
-			"name": "--ec-pill-heic-text",
-			"disposition": "retire",
-			"reason": "Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
-			"spec": "platform-owned.brand.pill-per-type"
-		},
-		{
-			"name": "--ec-pill-jpg-bg",
-			"disposition": "retire",
-			"reason": "Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
-			"spec": "platform-owned.brand.pill-per-type"
-		},
-		{
-			"name": "--ec-pill-jpg-text",
-			"disposition": "retire",
-			"reason": "Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
-			"spec": "platform-owned.brand.pill-per-type"
-		},
-		{
-			"name": "--ec-pill-mov-bg",
-			"disposition": "retire",
-			"reason": "Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
-			"spec": "platform-owned.brand.pill-per-type"
-		},
-		{
-			"name": "--ec-pill-mov-text",
-			"disposition": "retire",
-			"reason": "Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
-			"spec": "platform-owned.brand.pill-per-type"
-		},
-		{
-			"name": "--ec-pill-pdf-bg",
-			"disposition": "retire",
-			"reason": "Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
-			"spec": "platform-owned.brand.pill-per-type"
-		},
-		{
-			"name": "--ec-pill-pdf-text",
-			"disposition": "retire",
-			"reason": "Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
-			"spec": "platform-owned.brand.pill-per-type"
-		},
-		{
-			"name": "--ec-pill-png-bg",
-			"disposition": "retire",
-			"reason": "Collapses into --ec-pill-bg (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
-			"spec": "platform-owned.brand.pill-per-type"
-		},
-		{
-			"name": "--ec-pill-png-text",
-			"disposition": "retire",
-			"reason": "Collapses into --ec-pill-text (D-05): the book puts no colour per file type, so one pill pair (Rinse and Deep Teal in light, Tide and Fog in dark) replaces the twelve per-type tokens.",
-			"spec": "platform-owned.brand.pill-per-type"
-		},
-		{
 			"name": "--ec-segment-index",
 			"disposition": "local",
 			"reason": "Set inline per control at SegmentedControl.tsx from the active option index; a runtime value tokens.css never declares (RTL-01)."
@@ -426,14 +503,13 @@
 		{
 			"name": "--ec-toggle-off-track",
 			"disposition": "keep-platform",
-			"reason": "Platform-owned role with no brand equivalent (D-04). v5.1 changes the app value #d1d1d6 (light) and #3a3a3e (dark) to a platform system colour meeting 3:1 against the bg and the surface, which clears the off-track and thumb entries 74-04 seals (D-25).",
+			"reason": "Platform-owned role with no brand equivalent (D-04). Both theme blocks use exactly color-mix(in srgb, GrayText 90%, CanvasText 10%). Fresh real ToggleSwitch Off observations match independent GrayText, CanvasText and mix probes; track-to-ground, track-to-raised-surface and white-thumb ratios are all at least 3:1 in light and dark. The real opaque thumb is pinned Clean White #FFFFFF; the near-white identity mutation is rejected even when contrast still passes.",
 			"spec": "platform-owned.platform.toggle-off-track"
 		},
 		{
-			"name": "--empty-state-secondary",
-			"disposition": "retire",
-			"reason": "Declared locally outside tokens.css: empty_state.css:2 sets #59677b (light) and empty_state.css:118 sets #94949b (dark), and it is read at empty_state.css:25, empty_state.css:46 and empty_state.css:110; v5.1 reads --ec-color-text-secondary (Pewter in light, Fog in dark) instead.",
-			"finding": "token-map-gap|ui-emptystate--copy-mode-on|empty-state-secondary-hardcoded"
+			"name": "--empty-state-button-pressed-surface",
+			"disposition": "local",
+			"reason": "Component-scoped alias used by the existing EmptyState primary action: it selects --ec-color-action-pressed for the primary variant and --ec-color-surface-pressed for the secondary variant; both values remain mapped semantic roles."
 		},
 		{
 			"name": "--spacing-lg",

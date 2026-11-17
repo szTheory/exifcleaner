@@ -27,6 +27,7 @@ import "../src/renderer/styles/status_bar.css";
 import "../src/renderer/styles/status_icon.css";
 import "../src/renderer/styles/toast.css";
 import "../src/renderer/styles/type_pill.css";
+import "../src/renderer/styles/forced_colors.css";
 import "./harness.css";
 import copyLintRules from "./catalog/copy_lint_rules.json";
 import copyFindings from "./catalog/copy-findings.json";

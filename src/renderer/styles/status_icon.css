@@ -12,12 +12,12 @@
 	width: 16px;
 	height: 16px;
 	border: 2px solid transparent;
-	border-top-color: var(--ec-color-muted);
+	border-top-color: var(--ec-color-text-secondary);
 	border-radius: 50%;
 }
 
 .status-icon__check {
-	color: var(--ec-color-success);
+	color: var(--ec-color-cleaned);
 }
 
 .status-icon__error {

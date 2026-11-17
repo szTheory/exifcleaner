@@ -24,7 +24,7 @@ export function StatusIcon({
 						role="img"
 						aria-label="Pending"
 					>
-						<circle cx="8" cy="8" r="4" fill="var(--ec-color-muted)" />
+						<circle cx="8" cy="8" r="4" fill="var(--ec-color-text-secondary)" />
 					</svg>
 				</span>
 			);

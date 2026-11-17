@@ -3,7 +3,7 @@
 	align-items: center;
 	justify-content: space-between;
 	padding: var(--ec-space-4) 0;
-	cursor: pointer;
+	cursor: default;
 }
 
 .toggle-switch__text {
@@ -60,7 +60,7 @@
 	width: 20px;
 	height: 20px;
 	border-radius: 50%;
-	background: #ffffff;
+	background: var(--ec-brand-clean-white);
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 	position: absolute;
 	top: 2px;

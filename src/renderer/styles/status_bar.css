@@ -35,8 +35,8 @@
 	border: none;
 	font-size: 12px;
 	font-weight: var(--ec-font-weight-semibold);
-	color: var(--ec-color-accent);
-	cursor: pointer;
+	color: var(--ec-color-action);
+	cursor: default;
 	padding: var(--ec-space-1) var(--ec-space-2);
 	text-decoration: none;
 	font-family: var(--ec-font-family);

@@ -18,7 +18,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	cursor: pointer;
+	cursor: default;
 	transition: border-color 150ms var(--ec-ease-out, ease-out);
 }
 
@@ -70,7 +70,7 @@
 .language-dropdown__item {
 	padding: var(--ec-space-2, 8px) var(--ec-space-4, 16px);
 	font-size: var(--ec-font-size-small, 13px);
-	cursor: pointer;
+	cursor: default;
 	display: flex;
 	align-items: center;
 	gap: var(--ec-space-2, 8px);
@@ -79,11 +79,12 @@
 
 .language-dropdown__item:hover,
 .language-dropdown__item--focused {
-	background: var(--ec-color-hover, rgba(0, 0, 0, 0.04));
+	background: var(--ec-color-surface-hover);
 }
 
 .language-dropdown__item--selected {
-	color: var(--ec-color-accent);
+	background: var(--ec-color-surface-hover);
+	color: var(--ec-color-text);
 }
 
 .language-dropdown__check {
