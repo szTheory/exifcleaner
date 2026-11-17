@@ -372,29 +372,23 @@ function languageHoverContractProblems({
 	return problems;
 }
 
-function languageHoverPairFixture(hoverLayer: string): ContrastPairsDocument {
-	const fixture = clone(PAIRS);
-	fixture.surfaces = [
-		...new Set([...fixture.surfaces, ITEM_HOVER_BASE, ITEM_HOVER_OVERLAY_ID]),
-	];
+function languageHoverPairFixture(
+	hoverLayer: string,
+	ambientDoc: ContrastPairsDocument = PAIRS,
+): ContrastPairsDocument {
+	const fixture = clone(ambientDoc);
+	fixture.surfaces = [ITEM_HOVER_BASE];
 	fixture.overlays = [
-		...fixture.overlays.filter((entry) => entry.id !== ITEM_HOVER_OVERLAY_ID),
 		{
 			id: ITEM_HOVER_OVERLAY_ID,
 			layers: [ITEM_HOVER_BASE, hoverLayer],
 		},
 	];
-	if (hoverLayer === "--ec-color-surface-hover") {
-		fixture.localTokens[hoverLayer] = { ...PALETTE_HOVER_TEST_COLORS };
-	} else {
-		delete fixture.localTokens["--ec-color-surface-hover"];
-	}
-	fixture.pairs = fixture.pairs.filter(
-		(pair) =>
-			pair.id !== "text-secondary" &&
-			pair.id !== "text-secondary-file-table-header",
-	);
-	fixture.pairs.push(
+	fixture.localTokens =
+		hoverLayer === SURFACE_HOVER_TOKEN
+			? { [hoverLayer]: { ...PALETTE_HOVER_TEST_COLORS } }
+			: {};
+	fixture.pairs = [
 		{
 			id: "text-secondary",
 			fg: ITEM_HOVER_ENGLISH_ROLE,
@@ -411,7 +405,25 @@ function languageHoverPairFixture(hoverLayer: string): ContrastPairsDocument {
 			selector: ".file-table__header",
 			story: "file-list-filetable--mixed-statuses",
 		},
-	);
+	];
+	fixture.literals =
+		hoverLayer === LEGACY_HOVER_FALLBACK
+			? [
+					{
+						value: LEGACY_HOVER_FALLBACK,
+						files: ["language_dropdown.css"],
+						pair: "text-secondary",
+					},
+					{
+						value: "#ffffff",
+						files: ["language_dropdown.css"],
+						pair: "text-secondary",
+					},
+				]
+			: [];
+	fixture.exempt = [];
+	fixture.proposed = [];
+	fixture.brandRatios = [];
 	return fixture;
 }
 
@@ -1127,7 +1139,10 @@ function withoutPaletteHoverTokenDeclarations(tokensCss: string): string {
 		);
 }
 
-function hoverContractFixture(state: HoverContractState): HoverContractFixture {
+function hoverContractFixture(
+	state: HoverContractState,
+	ambientDoc: ContrastPairsDocument = PAIRS,
+): HoverContractFixture {
 	const sourceFile = SHEETS["language_dropdown.css"] ?? "";
 	const englishRule = sourceFile.match(
 		/\.language-dropdown__english\s*\{[^}]*\}/s,
@@ -1137,7 +1152,7 @@ function hoverContractFixture(state: HoverContractState): HoverContractFixture {
 	const languageCss = `${englishRule}\n.language-dropdown__item:hover,\n.language-dropdown__item--focused { background: ${state === "legacy" ? LEGACY_HOVER_PAINT : SURFACE_HOVER_PAINT}; }`;
 	const layer =
 		state === "legacy" ? LEGACY_HOVER_FALLBACK : SURFACE_HOVER_TOKEN;
-	const doc = languageHoverPairFixture(layer);
+	const doc = languageHoverPairFixture(layer, ambientDoc);
 	const tokensCss =
 		state === "legacy"
 			? withoutPaletteHoverTokenDeclarations(TOKENS_CSS)
@@ -1173,6 +1188,33 @@ function hoverContractFixture(state: HoverContractState): HoverContractFixture {
 		tokenMap,
 		tokensCss,
 	};
+}
+
+function paletteLikeAmbientHoverPairs(): ContrastPairsDocument {
+	const fixture = clone(PAIRS);
+	fixture.surfaces = [...new Set([...fixture.surfaces, ITEM_HOVER_BASE])];
+	fixture.overlays = [
+		...fixture.overlays.filter((entry) => entry.id !== ITEM_HOVER_OVERLAY_ID),
+		{
+			id: ITEM_HOVER_OVERLAY_ID,
+			layers: [ITEM_HOVER_BASE, SURFACE_HOVER_TOKEN],
+		},
+	];
+	fixture.localTokens[SURFACE_HOVER_TOKEN] = {
+		...PALETTE_HOVER_TEST_COLORS,
+	};
+	fixture.pairs = fixture.pairs.filter(
+		(pair) => pair.id !== "primary-text-on-surface-hover",
+	);
+	fixture.pairs.push({
+		id: "primary-text-on-surface-hover",
+		fg: "--ec-color-text-primary",
+		on: [SURFACE_HOVER_TOKEN],
+		role: "text",
+		selector: ".primary-text-on-surface-hover",
+		story: "fixture-palette-hover",
+	});
+	return fixture;
 }
 
 function fixtureState(
@@ -1665,7 +1707,7 @@ describe("G2: every stylesheet colour use is classified", () => {
 		});
 	}
 
-	test("the real hover source and token map select one coherent G2-clean state", () => {
+	test("the real hover source and token map select one coherent scoped G2-clean state", () => {
 		const languageCss = SHEETS["language_dropdown.css"] ?? "";
 		const actualLayer = itemHoverLayerFromCss(languageCss, TOKENS_CSS, PAIRS);
 		expect(actualLayer).not.toBeNull();
@@ -1681,7 +1723,134 @@ describe("G2: every stylesheet colour use is classified", () => {
 			tokensCss: TOKENS_CSS,
 		});
 		expect(state).not.toBeNull();
-		expect(g2().problems).toEqual([]);
+		if (state === null)
+			throw new Error("actual hover source/map state is invalid");
+		const actualItemHover = PAIRS.overlays.find(
+			(overlay) => overlay.id === ITEM_HOVER_OVERLAY_ID,
+		);
+		if (actualItemHover === undefined)
+			throw new Error("actual item-hover overlay is missing from PAIRS");
+		const actualEnglishPair = PAIRS.pairs.find(
+			(pair) => pair.selector === ".language-dropdown__english",
+		);
+		const actualHeaderPair = PAIRS.pairs.find(
+			(pair) => pair.selector === ".file-table__header",
+		);
+		if (state === "legacy") {
+			// Master carries the registered fallback in the item-hover overlay; its
+			// sole text-secondary pair is still the header row on global surfaces.
+			expect(actualLayer).toBe(LEGACY_HOVER_FALLBACK);
+			expect(PAIRS.surfaces).toContain(ITEM_HOVER_OVERLAY_ID);
+			expect(actualItemHover.layers).toEqual([
+				ITEM_HOVER_BASE,
+				LEGACY_HOVER_FALLBACK,
+			]);
+			expect(actualEnglishPair).toBeUndefined();
+			expect(actualHeaderPair).toMatchObject({
+				id: "text-secondary",
+				fg: ITEM_HOVER_ENGLISH_ROLE,
+				on: "surfaces",
+				role: "text",
+				story: "file-list-filetable--mixed-statuses",
+			});
+			expect(PAIRS.literals).toContainEqual(
+				expect.objectContaining({
+					value: LEGACY_HOVER_FALLBACK,
+					files: expect.arrayContaining(["language_dropdown.css"]),
+					pair: "text-secondary",
+				}),
+			);
+		} else {
+			if (actualEnglishPair === undefined || actualHeaderPair === undefined) {
+				throw new Error("actual English/header pairs are missing from PAIRS");
+			}
+			expect(actualLayer).toBe(SURFACE_HOVER_TOKEN);
+			expect(actualEnglishPair).toMatchObject({
+				id: "text-secondary",
+				fg: ITEM_HOVER_ENGLISH_ROLE,
+				on: [ITEM_HOVER_BASE, ITEM_HOVER_OVERLAY_ID],
+				role: "text",
+				story: "settings-languagedropdown--item-hover",
+			});
+			expect(backdrops(actualEnglishPair, PAIRS).map(({ ref }) => ref)).toEqual(
+				[ITEM_HOVER_BASE, ITEM_HOVER_OVERLAY_ID],
+			);
+			expect(actualHeaderPair).toMatchObject({
+				id: "text-secondary-file-table-header",
+				fg: ITEM_HOVER_ENGLISH_ROLE,
+				on: [ITEM_HOVER_BASE],
+				role: "text",
+				story: "file-list-filetable--mixed-statuses",
+			});
+			expect(actualItemHover.layers).toEqual([
+				ITEM_HOVER_BASE,
+				SURFACE_HOVER_TOKEN,
+			]);
+		}
+		const scopedReport = g2Report(
+			{ "language_dropdown.css": languageCss },
+			PAIRS,
+			TOKENS_CSS,
+			TOKEN_MAP,
+		);
+		expect(scopedReport.problems).toEqual([]);
+		expect(scopedReport.classified).toBeGreaterThan(0);
+
+		const actualPaint = itemHoverPaintFromCss(languageCss);
+		expect(actualPaint).not.toBeNull();
+		const invalidHoverToken = "--ec-color-g2-hover-scope-invalid";
+		const invalidLanguageCss = languageCss.replace(
+			actualPaint as string,
+			`var(${invalidHoverToken})`,
+		);
+		expect(invalidLanguageCss).not.toBe(languageCss);
+		const invalidScopedReport = g2Report(
+			{ "language_dropdown.css": invalidLanguageCss },
+			PAIRS,
+			TOKENS_CSS,
+			TOKEN_MAP,
+		);
+		expect(invalidScopedReport.problems).toHaveLength(
+			scopedReport.problems.length + 1,
+		);
+		const invalidHoverProblem = invalidScopedReport.problems.find((problem) =>
+			problem.message.includes(invalidHoverToken),
+		);
+		expect(invalidHoverProblem).toMatchObject({
+			code: "g2-unclassified-token",
+			file: "language_dropdown.css",
+		});
+		expect(
+			sourceMapHoverState({
+				languageComponent: readText(
+					"src/renderer/components/settings/LanguageDropdown.tsx",
+				),
+				languageCss: invalidLanguageCss,
+				sheets: { ...SHEETS, "language_dropdown.css": invalidLanguageCss },
+				doc: sourceBackedPairs,
+				tokenMap: TOKEN_MAP,
+				tokensCss: TOKENS_CSS,
+			}),
+		).toBeNull();
+
+		const unrelatedToken = "--ec-color-g2-sensitivity-unrelated";
+		const wholeTreeBefore = g2().problems;
+		const wholeTreeWithUnrelatedError = g2(
+			withRule(
+				"settings_drawer.css",
+				`.g2-sensitivity { background: var(${unrelatedToken}); }`,
+			),
+		).problems;
+		expect(wholeTreeWithUnrelatedError).toHaveLength(
+			wholeTreeBefore.length + 1,
+		);
+		const unrelatedProblem = wholeTreeWithUnrelatedError.find((problem) =>
+			problem.message.includes(unrelatedToken),
+		);
+		expect(unrelatedProblem).toMatchObject({
+			code: "g2-unclassified-token",
+			file: "settings_drawer.css",
+		});
 	});
 
 	test.each(["legacy", "palette"] as const)(
@@ -1821,7 +1990,73 @@ describe("G2: every stylesheet colour use is classified", () => {
 	});
 
 	test("route: dropping the active legacy hover finding reds exactly that name", () => {
-		const fixture = hoverContractFixture("legacy");
+		const paletteAmbient = paletteLikeAmbientHoverPairs();
+		expect(
+			paletteAmbient.pairs.some(
+				(pair) =>
+					pair.id === "primary-text-on-surface-hover" &&
+					pair.on.includes(SURFACE_HOVER_TOKEN),
+			),
+		).toBe(true);
+		expect(
+			paletteAmbient.overlays.some((overlay) =>
+				overlay.layers.includes(SURFACE_HOVER_TOKEN),
+			),
+		).toBe(true);
+
+		const inheritedLegacyDoc = clone(paletteAmbient);
+		delete inheritedLegacyDoc.localTokens[SURFACE_HOVER_TOKEN];
+		expect(
+			inheritedLegacyDoc.overlays.find(
+				(overlay) => overlay.id === ITEM_HOVER_OVERLAY_ID,
+			)?.layers,
+		).toEqual([ITEM_HOVER_BASE, SURFACE_HOVER_TOKEN]);
+		const replacementLegacyPairs = languageHoverPairFixture(
+			LEGACY_HOVER_FALLBACK,
+		).pairs;
+		inheritedLegacyDoc.pairs = [
+			...inheritedLegacyDoc.pairs.filter(
+				(pair) =>
+					pair.id !== "text-secondary" &&
+					pair.id !== "text-secondary-file-table-header" &&
+					pair.id !== "primary-text-on-surface-hover",
+			),
+			...replacementLegacyPairs,
+		];
+		const paletteTokensWithoutHover = withoutPaletteHoverTokenDeclarations(
+			paletteHoverTokensCss(TOKENS_CSS),
+		);
+		expect(() =>
+			evaluate(inheritedLegacyDoc, paletteTokensWithoutHover),
+		).toThrow(
+			/backdrop item-hover: layer --ec-color-surface-hover is not a colour in the light theme/,
+		);
+
+		const fixture = hoverContractFixture("legacy", paletteAmbient);
+		expect(fixture.doc.overlays).toEqual([
+			{
+				id: ITEM_HOVER_OVERLAY_ID,
+				layers: [ITEM_HOVER_BASE, LEGACY_HOVER_FALLBACK],
+			},
+		]);
+		expect(fixture.doc.localTokens).toEqual({});
+		expect(JSON.stringify(fixture.doc)).not.toContain(SURFACE_HOVER_TOKEN);
+		const fixtureTokens = themeTokens(fixture.tokensCss);
+		expect(
+			THEMES.every((theme) => !fixtureTokens[theme].has(SURFACE_HOVER_TOKEN)),
+		).toBe(true);
+		for (const theme of THEMES) {
+			for (const backdrop of [
+				...fixture.doc.surfaces,
+				...fixture.doc.overlays.flatMap((overlay) => overlay.layers),
+			]) {
+				expect(
+					resolveColour(backdrop, theme, fixtureTokens, fixture.doc),
+				).not.toBeNull();
+			}
+		}
+		expect(pairsShapeProblems(fixture.doc)).toEqual([]);
+		expect(evaluate(fixture.doc, fixture.tokensCss)).toHaveLength(6);
 		expect(fixtureState(fixture)).toBe("legacy");
 		expect(fixtureG2Problems(fixture)).toEqual([]);
 		const map = clone(fixture.tokenMap);
@@ -1829,6 +2064,8 @@ describe("G2: every stylesheet colour use is classified", () => {
 			(candidate) => candidate.name === LEGACY_HOVER_TOKEN,
 		);
 		if (entry === undefined) throw new Error("no active legacy hover entry");
+		expect(map.entries).toHaveLength(1);
+		expect(entry.disposition).toBe("retire");
 		expect(entry.finding).toBe(LEGACY_HOVER_FINDING);
 		delete entry.finding;
 		const found = g2Report(
@@ -1838,7 +2075,12 @@ describe("G2: every stylesheet colour use is classified", () => {
 			map,
 		).problems;
 		expect(codes(found)).toEqual(["g2-unclassified-token"]);
+		expect(found).toHaveLength(1);
 		expect(found[0]?.message).toContain(LEGACY_HOVER_TOKEN);
+		entry.finding = LEGACY_HOVER_FINDING;
+		expect(
+			g2Report(fixture.sheets, fixture.doc, fixture.tokensCss, map).problems,
+		).toEqual([]);
 	});
 
 	test("route: dropping the selection and the on-track thumb pairs reds both accent backdrops", () => {
