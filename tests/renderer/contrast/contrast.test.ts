@@ -392,6 +392,88 @@ function records<T>(value: unknown): Array<Record<string, T>> {
 	return value as Array<Record<string, T>>;
 }
 
+const ORIGINAL_REQUIRED_PLATFORM_ROLES = [
+	"--ec-color-accent",
+	"--ec-color-error",
+	"--ec-toggle-off-track",
+];
+const PLATFORM_INDICATOR_ROLE = "--ec-color-platform-indicator";
+
+function platformDispositionProblems(
+	tokenMap: typeof TOKEN_MAP,
+	doc: ContrastPairsDocument,
+): string[] {
+	const evaluated = evaluate(doc, TOKENS_CSS);
+	const overlay = new Map(
+		doc.overlays.map((entry) => [entry.id, entry.layers]),
+	);
+	const references = new Set(
+		evaluated.flatMap((result) =>
+			[result.fgRef, result.bgRef, ...(overlay.get(result.bgRef) ?? [])].filter(
+				(ref) => ref.startsWith("--"),
+			),
+		),
+	);
+	const problems: string[] = [];
+	for (const name of ORIGINAL_REQUIRED_PLATFORM_ROLES) {
+		if (!references.has(name))
+			problems.push(`missing original role pair ${name}`);
+	}
+
+	const indicator = tokenMap.entries.find(
+		(entry) => entry.name === PLATFORM_INDICATOR_ROLE,
+	);
+	const indicatorPaired = evaluated.some(
+		(result) => result.fgRef === PLATFORM_INDICATOR_ROLE,
+	);
+	const exempt = new Set((doc.exempt ?? []).map((entry) => entry.name));
+	const expectedKeepPlatform = [
+		...ORIGINAL_REQUIRED_PLATFORM_ROLES,
+		...(indicator === undefined ? [] : [PLATFORM_INDICATOR_ROLE]),
+	].sort();
+	const actualKeepPlatform = [...references]
+		.filter(
+			(name) =>
+				tokenMap.entries.find((entry) => entry.name === name)?.disposition ===
+				"keep-platform",
+		)
+		.sort();
+	if (
+		JSON.stringify(actualKeepPlatform) !== JSON.stringify(expectedKeepPlatform)
+	) {
+		problems.push(
+			`keep-platform pairs ${JSON.stringify(actualKeepPlatform)} do not match ${JSON.stringify(expectedKeepPlatform)}`,
+		);
+	}
+
+	if (indicator === undefined) {
+		if (references.has(PLATFORM_INDICATOR_ROLE)) {
+			problems.push("indicator is paired before its token-map declaration");
+		}
+		return problems;
+	}
+	if (indicator.disposition !== "keep-platform") {
+		problems.push("declared indicator is not keep-platform");
+	}
+	if (exempt.has(PLATFORM_INDICATOR_ROLE)) {
+		problems.push("declared indicator is exempt");
+	}
+	if (!indicatorPaired) {
+		problems.push("declared indicator has no evaluated foreground pair");
+	}
+	const reason = indicator.reason ?? "";
+	if (
+		!/v5\.1/i.test(reason) ||
+		!/focus-visible/i.test(reason) ||
+		!/drop-zone/i.test(reason)
+	) {
+		problems.push(
+			"declared indicator reason does not explain the v5.1 focus and drop-zone change",
+		);
+	}
+	return problems;
+}
+
 function g2(
 	sheets: Record<string, string> = SHEETS,
 	doc: ContrastPairsDocument = PAIRS,
@@ -425,41 +507,127 @@ describe("the pair list is real, not a stub", () => {
 		expect(new Set(fingerprints).size).toBe(fingerprints.length);
 	});
 
-	test("the hover overlay is a surface the text pairs are measured on (D-06)", () => {
-		expect(PAIRS.surfaces).toContain("item-hover");
-		const pair = PAIRS.pairs.find(
-			(candidate) => candidate.id === "text-secondary",
+	test("source-backed English hover and file-table header pairs stay distinct", () => {
+		const languageCss = SHEETS["language_dropdown.css"] ?? "";
+		const languageComponent = readText(
+			"src/renderer/components/settings/LanguageDropdown.tsx",
 		);
-		expect(pair).toBeDefined();
-		expect(backdrops(pair as ContrastPair, PAIRS).map((b) => b.ref)).toContain(
-			"item-hover",
+		const headerCss = SHEETS["file_table.css"] ?? "";
+		expect(languageComponent).toMatch(
+			/<span className="language-dropdown__english">\s*\(\{lang\.englishName\}\)/,
 		);
-		const result = evaluate(PAIRS, TOKENS_CSS).find(
-			(r) => r.rule === "text-secondary-on-item-hover-light",
+		expect(languageCss).toMatch(
+			/\.language-dropdown__english\s*\{[^}]*color:\s*var\(--ec-color-text-secondary\)/s,
 		);
-		if (result === undefined)
-			throw new Error("hover contrast result is missing");
-		const overlay = PAIRS.overlays.find(
-			(candidate) => candidate.id === "item-hover",
+		expect(languageCss).toMatch(
+			/\.language-dropdown__item:hover,\s*\.language-dropdown__item--focused\s*\{[^}]*background:\s*var\(--ec-color-hover,\s*rgba\(0,\s*0,\s*0,\s*0\.04\)\)/s,
 		);
+		expect(headerCss).toMatch(
+			/\.file-table__header\s*\{[^}]*background:\s*var\(--ec-color-surface\)[^}]*color:\s*var\(--ec-color-text-secondary\)/s,
+		);
+
+		const fixture = clone(PAIRS);
+		fixture.surfaces = [
+			...new Set([...fixture.surfaces, "--ec-color-surface", "item-hover"]),
+		];
+		fixture.overlays = [
+			...fixture.overlays.filter((entry) => entry.id !== "item-hover"),
+			{
+				id: "item-hover",
+				layers: ["--ec-color-surface", "rgba(0, 0, 0, 0.04)"],
+			},
+		];
+		fixture.pairs = fixture.pairs.filter(
+			(pair) =>
+				pair.id !== "text-secondary" &&
+				pair.id !== "text-secondary-file-table-header",
+		);
+		fixture.pairs.push(
+			{
+				id: "text-secondary",
+				fg: "--ec-color-text-secondary",
+				on: ["--ec-color-surface", "item-hover"],
+				role: "text",
+				selector: ".language-dropdown__english",
+				story: "settings-languagedropdown--item-hover",
+			},
+			{
+				id: "text-secondary-file-table-header",
+				fg: "--ec-color-text-secondary",
+				on: ["--ec-color-surface"],
+				role: "text",
+				selector: ".file-table__header",
+				story: "file-list-filetable--mixed-statuses",
+			},
+		);
+		expect(pairsShapeProblems(fixture)).toEqual([]);
+
+		const englishPair = fixture.pairs.find(
+			(pair) => pair.id === "text-secondary",
+		);
+		const headerPair = fixture.pairs.find(
+			(pair) => pair.id === "text-secondary-file-table-header",
+		);
+		if (englishPair === undefined || headerPair === undefined)
+			throw new Error("English or file-table fixture pair is missing");
+		expect(
+			backdrops(englishPair, fixture).map((backdrop) => backdrop.ref),
+		).toEqual(["--ec-color-surface", "item-hover"]);
+		expect(
+			backdrops(headerPair, fixture).map((backdrop) => backdrop.ref),
+		).toEqual(["--ec-color-surface"]);
+
+		const evaluated = evaluate(fixture, TOKENS_CSS);
+		const englishResults = evaluated.filter(
+			(result) => result.pair === "text-secondary",
+		);
+		expect(englishResults).toHaveLength(4);
+		const hoverResult = englishResults.find(
+			(result) => result.rule === "text-secondary-on-item-hover-light",
+		);
+		if (hoverResult === undefined)
+			throw new Error("English item-hover contrast result is missing");
+		expect(hoverResult.selector).toBe(".language-dropdown__english");
+		const overlay = fixture.overlays.find((entry) => entry.id === "item-hover");
 		if (overlay === undefined) throw new Error("hover overlay is missing");
 		const [baseRef, ...layerRefs] = overlay.layers;
 		if (baseRef === undefined)
 			throw new Error("hover overlay has no base layer");
 		const tokens = themeTokens(TOKENS_CSS);
-		let expectedBackground = resolveColour(baseRef, "light", tokens, PAIRS);
+		let expectedBackground = resolveColour(baseRef, "light", tokens, fixture);
 		if (expectedBackground === null)
 			throw new Error("hover base is unresolved");
 		for (const layerRef of layerRefs) {
-			const layer = resolveColour(layerRef, "light", tokens, PAIRS);
+			const layer = resolveColour(layerRef, "light", tokens, fixture);
 			if (layer === null)
 				throw new Error(`hover layer ${layerRef} is unresolved`);
 			expectedBackground = flatten(layer, expectedBackground);
 		}
-		expect(result.bgHex).toBe(toHex(expectedBackground));
-		expect(result.ratio).toBe(
-			contrastRatio(colour(result.fgHex), expectedBackground),
+		expect(hoverResult.bgHex).toBe(toHex(expectedBackground));
+		expect(hoverResult.ratio).toBe(
+			contrastRatio(colour(hoverResult.fgHex), expectedBackground),
 		);
+
+		if (
+			TOKEN_MAP.entries.some((entry) => entry.name === PLATFORM_INDICATOR_ROLE)
+		) {
+			const realEnglishPair = PAIRS.pairs.find(
+				(pair) => pair.id === "text-secondary",
+			);
+			const realHeaderPair = PAIRS.pairs.find(
+				(pair) => pair.id === "text-secondary-file-table-header",
+			);
+			expect(realEnglishPair).toMatchObject({
+				selector: ".language-dropdown__english",
+				on: ["--ec-color-surface", "item-hover"],
+				story: "settings-languagedropdown--item-hover",
+			});
+			expect(realHeaderPair).toMatchObject({
+				selector: ".file-table__header",
+				on: ["--ec-color-surface"],
+				story: "file-list-filetable--mixed-statuses",
+			});
+		}
 	});
 
 	test("the pill text pairs list the pill over the ground and over the surface", () => {
@@ -1080,7 +1248,7 @@ describe("the real baseline holds exactly today's contrast failures", () => {
 		expect(kinds).toEqual([...kinds].sort());
 	});
 
-	test("disposition coherence: no exempt token is in a failing pair and every keep-platform token that is says what v5.1 changes", () => {
+	test("the real-tree platform roles keep the original required set", () => {
 		const exempt = new Set((PAIRS.exempt ?? []).map((entry) => entry.name));
 		const overlay = new Map(PAIRS.overlays.map((o) => [o.id, o.layers]));
 		const tokensOf = (result: (typeof results)[number]) =>
@@ -1094,21 +1262,88 @@ describe("the real baseline holds exactly today's contrast failures", () => {
 				`${name} is exempt and in a failing pair`,
 			).toBe(false);
 		}
-		const platform = [...inPairs]
-			.filter((name) => {
-				const entry = TOKEN_MAP.entries.find((e) => e.name === name);
-				return entry?.disposition === "keep-platform";
-			})
-			.sort();
-		expect(platform).toEqual([
-			"--ec-color-accent",
-			"--ec-color-error",
-			"--ec-toggle-off-track",
-		]);
-		for (const name of platform) {
-			const entry = TOKEN_MAP.entries.find((e) => e.name === name);
-			expect(entry?.reason, name).toContain("v5.1");
-		}
+		expect(platformDispositionProblems(TOKEN_MAP, PAIRS)).toEqual([]);
+	});
+
+	test("platform indicator declaration has paired, documented and non-exempt controls in both states", () => {
+		const absentMap = clone(TOKEN_MAP);
+		absentMap.entries = absentMap.entries.filter(
+			(entry) => entry.name !== PLATFORM_INDICATOR_ROLE,
+		);
+		expect(platformDispositionProblems(absentMap, PAIRS)).toEqual([]);
+
+		const validReason =
+			"v5.1 keeps the platform-owned indicator for focus-visible and drop-zone boundaries.";
+		const presentMap = clone(absentMap);
+		presentMap.entries.push({
+			name: PLATFORM_INDICATOR_ROLE,
+			disposition: "keep-platform",
+			reason: validReason,
+		});
+		const presentPairs = clone(PAIRS);
+		presentPairs.localTokens[PLATFORM_INDICATOR_ROLE] = {
+			light: "#007AFF",
+			dark: "#1A87FF",
+		};
+		presentPairs.pairs.push({
+			id: "platform-indicator-contract",
+			fg: PLATFORM_INDICATOR_ROLE,
+			on: ["--ec-color-surface"],
+			role: "focus",
+			selector: ".segmented-control__segment:focus-visible",
+			story: "controls-segmentedcontrol--keyboard-focus",
+		});
+		const fixtureResults = evaluate(presentPairs, TOKENS_CSS);
+		expect(
+			fixtureResults.some((result) => result.fgRef === PLATFORM_INDICATOR_ROLE),
+		).toBe(true);
+		expect(platformDispositionProblems(presentMap, presentPairs)).toEqual([]);
+
+		const unpairedProblems = platformDispositionProblems(presentMap, PAIRS);
+		expect(unpairedProblems).toContain(
+			"declared indicator has no evaluated foreground pair",
+		);
+
+		const misclassifiedMap = clone(presentMap);
+		const misclassified = misclassifiedMap.entries.find(
+			(entry) => entry.name === PLATFORM_INDICATOR_ROLE,
+		);
+		if (misclassified === undefined)
+			throw new Error("indicator fixture is missing");
+		misclassified.disposition = "adopt";
+		expect(
+			platformDispositionProblems(misclassifiedMap, presentPairs),
+		).toContain("declared indicator is not keep-platform");
+
+		const unexplainedMap = clone(presentMap);
+		const unexplained = unexplainedMap.entries.find(
+			(entry) => entry.name === PLATFORM_INDICATOR_ROLE,
+		);
+		if (unexplained === undefined)
+			throw new Error("indicator fixture is missing");
+		unexplained.reason = "Platform-owned indicator role.";
+		expect(platformDispositionProblems(unexplainedMap, presentPairs)).toContain(
+			"declared indicator reason does not explain the v5.1 focus and drop-zone change",
+		);
+
+		const exemptPairs = clone(presentPairs);
+		exemptPairs.exempt = [
+			...(exemptPairs.exempt ?? []),
+			{ name: PLATFORM_INDICATOR_ROLE, reason: "fixture exemption" },
+		];
+		expect(platformDispositionProblems(presentMap, exemptPairs)).toContain(
+			"declared indicator is exempt",
+		);
+
+		const lostOriginalRoleMap = clone(absentMap);
+		lostOriginalRoleMap.entries = lostOriginalRoleMap.entries.filter(
+			(entry) => entry.name !== "--ec-color-accent",
+		);
+		expect(
+			platformDispositionProblems(lostOriginalRoleMap, PAIRS).some((problem) =>
+				problem.includes("--ec-color-accent"),
+			),
+		).toBe(true);
 	});
 
 	test("token-map gaps follow their source and each remaining gap has one map entry", () => {
