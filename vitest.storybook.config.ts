@@ -79,6 +79,35 @@ export default defineConfig({
 				},
 			},
 			{
+				plugins: [react()],
+				test: {
+					name: "storybook-platform-indicators",
+					include: [".storybook/platform_indicators.test.tsx"],
+					browser: {
+						...browser(),
+						commands: {
+							setPaletteMedia: async (
+								{ page }: BrowserCommandContext,
+								theme: "light" | "dark",
+								forcedColors: "none" | "active",
+							) => {
+								if (
+									(theme !== "light" && theme !== "dark") ||
+									(forcedColors !== "none" && forcedColors !== "active")
+								) {
+									throw new Error("unsupported palette media request");
+								}
+								await page.emulateMedia({
+									colorScheme: theme,
+									forcedColors,
+								});
+							},
+						},
+					},
+					testTimeout: STORY_TEST_TIMEOUT_MS,
+				},
+			},
+			{
 				// addon-a11y only throws on a violation when VITEST_STORYBOOK is
 				// "false" (the plugin projects above set it themselves); this plain
 				// browser project sets it so the gate test can see a rejection.
@@ -88,7 +117,10 @@ export default defineConfig({
 					include: [".storybook/**/*.test.tsx"],
 					env: { VITEST_STORYBOOK: "false" },
 					browser: browser(),
-					exclude: [".storybook/forced_colors.test.tsx"],
+					exclude: [
+						".storybook/forced_colors.test.tsx",
+						".storybook/platform_indicators.test.tsx",
+					],
 				},
 			},
 			{

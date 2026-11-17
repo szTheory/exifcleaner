@@ -34,7 +34,7 @@
 }
 
 .segmented-control__segment:focus-visible {
-	outline: 2px solid var(--ec-color-accent);
+	outline: 2px solid var(--ec-color-platform-indicator);
 	outline-offset: 2px;
 }
 
