@@ -82,6 +82,10 @@ const PALETTE_HOVER_TEST_COLORS = {
 	dark: "#2E5753",
 };
 
+function paletteHoverTokensCss(tokensCss: string): string {
+	return `${tokensCss}\n:root { --ec-color-surface-hover: ${PALETTE_HOVER_TEST_COLORS.light}; }\n[data-theme="dark"] { --ec-color-surface-hover: ${PALETTE_HOVER_TEST_COLORS.dark}; }`;
+}
+
 function itemHoverLayerFromCss(
 	languageCss: string,
 	tokensCss: string,
@@ -882,18 +886,50 @@ describe("the pair list is real, not a stub", () => {
 				tokensCss: TOKENS_CSS,
 			}),
 		).toContain("English item-hover overlay is missing");
-		const unresolvedSemantic = languageHoverPairFixture(
-			"--ec-color-surface-hover",
+		const semanticRole = "--ec-color-surface-hover";
+		const paletteSemanticCss = paletteHoverTokensCss(TOKENS_CSS);
+		const paletteSemanticTokens = themeTokens(paletteSemanticCss);
+		const unresolvedSemantic = languageHoverPairFixture(semanticRole);
+		expect(unresolvedSemantic.localTokens[semanticRole]).toEqual(
+			PALETTE_HOVER_TEST_COLORS,
 		);
-		delete unresolvedSemantic.localTokens["--ec-color-surface-hover"];
+		delete unresolvedSemantic.localTokens[semanticRole];
+		const unresolvedSemanticCss = paletteSemanticCss.replace(
+			/--ec-color-surface-hover\s*:\s*[^;}]+;?/g,
+			"",
+		);
+		const unresolvedSemanticTokens = themeTokens(unresolvedSemanticCss);
+		expect(unresolvedSemantic.localTokens[semanticRole]).toBeUndefined();
+		expect(unresolvedSemanticCss).not.toMatch(/--ec-color-surface-hover\s*:/);
+		for (const theme of THEMES) {
+			expect(paletteSemanticTokens[theme].has(semanticRole)).toBe(true);
+			expect(unresolvedSemanticTokens[theme].has(semanticRole)).toBe(false);
+			expect(
+				resolveColour(
+					semanticRole,
+					theme,
+					unresolvedSemanticTokens,
+					unresolvedSemantic,
+				),
+			).toBeNull();
+		}
 		expect(
 			languageHoverContractProblems({
 				languageComponent,
 				languageCss: paletteSource,
 				doc: unresolvedSemantic,
-				tokensCss: TOKENS_CSS,
+				tokensCss: unresolvedSemanticCss,
 			}),
 		).toContain("English item hover background is unsupported or unresolved");
+		const restoredSemantic = languageHoverPairFixture(semanticRole);
+		expect(
+			languageHoverContractProblems({
+				languageComponent,
+				languageCss: paletteSource,
+				doc: restoredSemantic,
+				tokensCss: paletteSemanticCss,
+			}),
+		).toEqual([]);
 		const unsupportedSemanticCss = paletteSource.replace(
 			"var(--ec-color-surface-hover)",
 			"var(--ec-color-surface-hover-alt)",
