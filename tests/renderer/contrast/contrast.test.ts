@@ -372,11 +372,258 @@ function languageHoverContractProblems({
 	return problems;
 }
 
+type FixtureSchemaState = "legacy" | "source-owned";
+
+type FixtureSourceUse = {
+	file: string;
+	selector: string;
+	property: string;
+};
+
+type FixtureLiteral = {
+	value: string;
+	files: string[];
+	pair?: string;
+	exempt?: string;
+	uses?: FixtureSourceUse[];
+};
+
+type FixtureExemption = {
+	name: string;
+	reason: string;
+	fill?: string;
+	classification?: "no-information";
+	sourceUses?: FixtureSourceUse[];
+};
+
+type HoverFixtureDocument = Omit<
+	ContrastPairsDocument,
+	"exempt" | "literals"
+> & {
+	exempt?: FixtureExemption[];
+	literals?: FixtureLiteral[];
+};
+
+function hasOwnKey(value: object, key: PropertyKey): boolean {
+	return Object.prototype.hasOwnProperty.call(value, key);
+}
+
+const HOVER_FIXTURE_SOURCE_USE: FixtureSourceUse = {
+	file: "language_dropdown.css",
+	selector: ".language-dropdown__item:hover, .language-dropdown__item--focused",
+	property: "background",
+};
+
+const NO_INFORMATION_FIXTURE_SOURCES: Record<string, FixtureSourceUse> = {
+	"--ec-border-status-bar": {
+		file: "status_bar.css",
+		selector: ".status-bar",
+		property: "border-top",
+	},
+	"--ec-shadow-drawer": {
+		file: "settings_drawer.css",
+		selector: ".settings-drawer",
+		property: "box-shadow",
+	},
+};
+
+function fixtureSchemaProblems(
+	doc: ContrastPairsDocument,
+	state: FixtureSchemaState,
+): string[] {
+	const sourceDoc = doc as HoverFixtureDocument;
+	const problems: string[] = [];
+	const expectedNoInformationNames = Object.keys(
+		NO_INFORMATION_FIXTURE_SOURCES,
+	).sort();
+	const noInformation = (sourceDoc.exempt ?? []).filter((entry) =>
+		expectedNoInformationNames.includes(entry.name),
+	);
+	const actualNoInformationNames = noInformation
+		.map((entry) => entry.name)
+		.sort();
+	if (
+		JSON.stringify(actualNoInformationNames) !==
+		JSON.stringify(expectedNoInformationNames)
+	) {
+		problems.push("the exact no-information exemption identities are missing");
+	}
+
+	for (const entry of noInformation) {
+		if (!/carries no information/i.test(entry.reason)) {
+			problems.push(`${entry.name} lost its no-information reason`);
+		}
+		if (state === "source-owned") {
+			const expected = NO_INFORMATION_FIXTURE_SOURCES[entry.name];
+			if (entry.classification !== "no-information") {
+				problems.push(`${entry.name} lacks its source-owned classification`);
+			}
+			if (
+				JSON.stringify(entry.sourceUses) !==
+				JSON.stringify(expected ? [expected] : [])
+			) {
+				problems.push(`${entry.name} has incomplete source ownership`);
+			}
+		} else if (
+			hasOwnKey(entry, "classification") ||
+			hasOwnKey(entry, "sourceUses")
+		) {
+			problems.push(`${entry.name} adds metadata to the closed legacy shape`);
+		}
+	}
+
+	for (const entry of sourceDoc.exempt ?? []) {
+		if (
+			!expectedNoInformationNames.includes(entry.name) &&
+			(hasOwnKey(entry, "classification") || hasOwnKey(entry, "sourceUses"))
+		) {
+			problems.push(`${entry.name} has unsupported no-information metadata`);
+		}
+	}
+
+	for (const literal of sourceDoc.literals ?? []) {
+		if (state === "legacy") {
+			if (hasOwnKey(literal, "uses")) {
+				problems.push(`${literal.value} adds uses to the closed legacy shape`);
+			}
+			continue;
+		}
+		const uses = literal.uses;
+		if (!Array.isArray(uses) || uses.length === 0) {
+			problems.push(`${literal.value} lacks source-owned uses`);
+			continue;
+		}
+		const seen = new Set<string>();
+		for (const use of uses) {
+			if (
+				!use.file.endsWith(".css") ||
+				use.selector.trim() === "" ||
+				use.property.trim() === "" ||
+				use.property !== use.property.toLowerCase()
+			) {
+				problems.push(`${literal.value} has an incomplete source-use record`);
+				continue;
+			}
+			const key = JSON.stringify([use.file, use.selector, use.property]);
+			if (seen.has(key))
+				problems.push(`${literal.value} duplicates a source use`);
+			seen.add(key);
+		}
+		const files = [...new Set(uses.map((use) => use.file))].sort();
+		if (JSON.stringify([...literal.files].sort()) !== JSON.stringify(files)) {
+			problems.push(`${literal.value} files do not match its source uses`);
+		}
+	}
+	return problems;
+}
+
+function fixtureSchemaState(
+	doc: ContrastPairsDocument,
+): FixtureSchemaState | null {
+	const validStates = (["legacy", "source-owned"] as const).filter(
+		(state) => fixtureSchemaProblems(doc, state).length === 0,
+	);
+	return validStates.length === 1 ? (validStates[0] ?? null) : null;
+}
+
+function hoverFixtureMetadataProblems(
+	doc: ContrastPairsDocument,
+	state: FixtureSchemaState,
+): string[] {
+	const problems = fixtureSchemaProblems(doc, state);
+	const sourceDoc = doc as HoverFixtureDocument;
+	for (const literal of sourceDoc.literals ?? []) {
+		if (
+			literal.value !== LEGACY_HOVER_FALLBACK &&
+			literal.value !== "#ffffff"
+		) {
+			problems.push(`${literal.value} is not a declared hover-fixture literal`);
+			continue;
+		}
+		if (literal.pair !== "text-secondary") {
+			problems.push(`${literal.value} is not owned by the English pair`);
+		}
+		if (
+			state === "source-owned" &&
+			JSON.stringify(literal.uses) !==
+				JSON.stringify([HOVER_FIXTURE_SOURCE_USE])
+		) {
+			problems.push(`${literal.value} does not name its exact CSS declaration`);
+		}
+		if (
+			state === "legacy" &&
+			JSON.stringify(literal.files) !==
+				JSON.stringify([HOVER_FIXTURE_SOURCE_USE.file])
+		) {
+			problems.push(`${literal.value} does not name its legacy CSS file`);
+		}
+	}
+	return problems;
+}
+
+function hoverFixtureLiteral(
+	value: string,
+	state: FixtureSchemaState,
+): FixtureLiteral {
+	return state === "source-owned"
+		? {
+				value,
+				files: [HOVER_FIXTURE_SOURCE_USE.file],
+				uses: [{ ...HOVER_FIXTURE_SOURCE_USE }],
+				pair: "text-secondary",
+			}
+		: {
+				value,
+				files: [HOVER_FIXTURE_SOURCE_USE.file],
+				pair: "text-secondary",
+			};
+}
+
+function noInformationFixtureExemptions(
+	exemptions: FixtureExemption[],
+	state: FixtureSchemaState,
+): FixtureExemption[] {
+	const expectedNames = new Set(Object.keys(NO_INFORMATION_FIXTURE_SOURCES));
+	const actualNames = exemptions
+		.filter((entry) => expectedNames.has(entry.name))
+		.map((entry) => entry.name)
+		.sort();
+	if (
+		JSON.stringify(actualNames) !== JSON.stringify([...expectedNames].sort())
+	) {
+		throw new Error(
+			"ambient pairs document lacks its exact no-information entries",
+		);
+	}
+	return exemptions.map((entry) => {
+		if (!expectedNames.has(entry.name)) return entry;
+		if (state === "legacy") {
+			const legacyEntry = { ...entry };
+			delete legacyEntry.classification;
+			delete legacyEntry.sourceUses;
+			return legacyEntry;
+		}
+		const sourceUse = NO_INFORMATION_FIXTURE_SOURCES[entry.name];
+		if (sourceUse === undefined)
+			throw new Error(`missing source use for ${entry.name}`);
+		return {
+			...entry,
+			classification: "no-information",
+			sourceUses: [{ ...sourceUse }],
+		};
+	});
+}
+
 function languageHoverPairFixture(
 	hoverLayer: string,
 	ambientDoc: ContrastPairsDocument = PAIRS,
+	requestedState: FixtureSchemaState | undefined = undefined,
 ): ContrastPairsDocument {
-	const fixture = clone(ambientDoc);
+	const state = requestedState ?? fixtureSchemaState(ambientDoc);
+	if (state === null || state === undefined) {
+		throw new Error("ambient pairs document has mixed or incomplete metadata");
+	}
+	const fixture = clone(ambientDoc) as HoverFixtureDocument;
 	fixture.surfaces = [ITEM_HOVER_BASE];
 	fixture.overlays = [
 		{
@@ -408,23 +655,12 @@ function languageHoverPairFixture(
 	];
 	fixture.literals =
 		hoverLayer === LEGACY_HOVER_FALLBACK
-			? [
-					{
-						value: LEGACY_HOVER_FALLBACK,
-						files: ["language_dropdown.css"],
-						pair: "text-secondary",
-					},
-					{
-						value: "#ffffff",
-						files: ["language_dropdown.css"],
-						pair: "text-secondary",
-					},
-				]
+			? [hoverFixtureLiteral(LEGACY_HOVER_FALLBACK, state)]
 			: [];
-	fixture.exempt = [];
+	fixture.exempt = noInformationFixtureExemptions(fixture.exempt ?? [], state);
 	fixture.proposed = [];
 	fixture.brandRatios = [];
-	return fixture;
+	return fixture as ContrastPairsDocument;
 }
 
 function withoutPlatformIndicatorReferences(
@@ -1143,6 +1379,10 @@ function hoverContractFixture(
 	state: HoverContractState,
 	ambientDoc: ContrastPairsDocument = PAIRS,
 ): HoverContractFixture {
+	const schemaState = fixtureSchemaState(ambientDoc);
+	if (schemaState === null) {
+		throw new Error("ambient pairs document has mixed or incomplete metadata");
+	}
 	const sourceFile = SHEETS["language_dropdown.css"] ?? "";
 	const englishRule = sourceFile.match(
 		/\.language-dropdown__english\s*\{[^}]*\}/s,
@@ -1152,34 +1392,30 @@ function hoverContractFixture(
 	const languageCss = `${englishRule}\n.language-dropdown__item:hover,\n.language-dropdown__item--focused { background: ${state === "legacy" ? LEGACY_HOVER_PAINT : SURFACE_HOVER_PAINT}; }`;
 	const layer =
 		state === "legacy" ? LEGACY_HOVER_FALLBACK : SURFACE_HOVER_TOKEN;
-	const doc = languageHoverPairFixture(layer, ambientDoc);
+	const doc = languageHoverPairFixture(layer, ambientDoc, schemaState);
 	const tokensCss =
 		state === "legacy"
 			? withoutPaletteHoverTokenDeclarations(TOKENS_CSS)
 			: paletteHoverTokensCss(TOKENS_CSS);
-	const tokenMap =
+	const platformEntries = TOKEN_MAP.entries
+		.filter((entry) => hasOwnKey(NO_INFORMATION_FIXTURE_SOURCES, entry.name))
+		.map((entry) => clone(entry));
+	const hoverEntry =
 		state === "legacy"
 			? {
-					entries: [
-						{
-							name: LEGACY_HOVER_TOKEN,
-							disposition: "retire",
-							finding: LEGACY_HOVER_FINDING,
-							reason:
-								"The registered legacy hover name uses its declared overlay fallback.",
-						},
-					],
+					name: LEGACY_HOVER_TOKEN,
+					disposition: "retire",
+					finding: LEGACY_HOVER_FINDING,
+					reason:
+						"The registered legacy hover name uses its declared overlay fallback.",
 				}
 			: {
-					entries: [
-						{
-							name: SURFACE_HOVER_TOKEN,
-							disposition: "derive",
-							from: [...PALETTE_HOVER_SOURCES],
-							rule: "The semantic item-hover surface is declared in both themes.",
-						},
-					],
+					name: SURFACE_HOVER_TOKEN,
+					disposition: "derive",
+					from: [...PALETTE_HOVER_SOURCES],
+					rule: "The semantic item-hover surface is declared in both themes.",
 				};
+	const tokenMap = { entries: [...platformEntries, hoverEntry] };
 	return {
 		state,
 		languageCss,
@@ -1859,9 +2095,126 @@ describe("G2: every stylesheet colour use is classified", () => {
 			const fixture = hoverContractFixture(state);
 			expect(fixtureState(fixture)).toBe(state);
 			expect(pairsShapeProblems(fixture.doc)).toEqual([]);
+			const metadataState = fixtureSchemaState(fixture.doc);
+			expect(metadataState).not.toBeNull();
+			if (metadataState === null)
+				throw new Error("hover fixture metadata state is incomplete");
+			expect(hoverFixtureMetadataProblems(fixture.doc, metadataState)).toEqual(
+				[],
+			);
+			expect(
+				fixture.tokenMap.entries.filter((entry) =>
+					hasOwnKey(NO_INFORMATION_FIXTURE_SOURCES, entry.name),
+				),
+			).toHaveLength(Object.keys(NO_INFORMATION_FIXTURE_SOURCES).length);
+			for (const entry of fixture.tokenMap.entries.filter((candidate) =>
+				hasOwnKey(NO_INFORMATION_FIXTURE_SOURCES, candidate.name),
+			)) {
+				expect(entry.disposition).toBe("keep-platform");
+				expect(entry.reason).toMatch(/no brand equivalent/i);
+				expect(entry.reason).toMatch(/with a written reason/i);
+			}
 			expect(fixtureG2Problems(fixture)).toEqual([]);
 		},
 	);
+
+	test("hover fixture metadata keeps both exact schemas and rejects malformed ownership", () => {
+		const legacy = languageHoverPairFixture(
+			LEGACY_HOVER_FALLBACK,
+			PAIRS,
+			"legacy",
+		);
+		const sourceOwned = languageHoverPairFixture(
+			LEGACY_HOVER_FALLBACK,
+			PAIRS,
+			"source-owned",
+		);
+		expect(fixtureSchemaProblems(legacy, "legacy")).toEqual([]);
+		expect(fixtureSchemaProblems(sourceOwned, "source-owned")).toEqual([]);
+		expect(fixtureSchemaState(legacy)).toBe("legacy");
+		expect(fixtureSchemaState(sourceOwned)).toBe("source-owned");
+		for (const name of Object.keys(NO_INFORMATION_FIXTURE_SOURCES)) {
+			const ambient = (PAIRS as HoverFixtureDocument).exempt?.find(
+				(entry) => entry.name === name,
+			);
+			for (const fixture of [legacy, sourceOwned]) {
+				const entry = (fixture as HoverFixtureDocument).exempt?.find(
+					(candidate) => candidate.name === name,
+				);
+				expect(entry?.reason).toBe(ambient?.reason);
+			}
+		}
+
+		const sourceDoc = sourceOwned as HoverFixtureDocument;
+		const sourceLiteral = sourceDoc.literals?.[0];
+		if (sourceLiteral === undefined)
+			throw new Error("source-owned hover literal is missing");
+		const malformed: Array<{
+			name: string;
+			mutate: (doc: HoverFixtureDocument) => void;
+		}> = [
+			{
+				name: "missing uses",
+				mutate: (doc) => {
+					delete doc.literals?.[0]?.uses;
+				},
+			},
+			{
+				name: "wrong file",
+				mutate: (doc) => {
+					const literal = doc.literals?.[0];
+					if (literal === undefined || literal.uses?.[0] === undefined) return;
+					literal.files = ["settings_drawer.css"];
+					literal.uses[0].file = "settings_drawer.css";
+				},
+			},
+			{
+				name: "wrong selector",
+				mutate: (doc) => {
+					const use = doc.literals?.[0]?.uses?.[0];
+					if (use !== undefined) use.selector = ".language-dropdown__english";
+				},
+			},
+			{
+				name: "wrong property",
+				mutate: (doc) => {
+					const use = doc.literals?.[0]?.uses?.[0];
+					if (use !== undefined) use.property = "color";
+				},
+			},
+			{
+				name: "duplicate source use",
+				mutate: (doc) => {
+					const literal = doc.literals?.[0];
+					if (literal?.uses?.[0] !== undefined)
+						literal.uses.push({ ...literal.uses[0] });
+				},
+			},
+			{
+				name: "incomplete no-information record",
+				mutate: (doc) => {
+					const entry = doc.exempt?.find(
+						(candidate) => candidate.name === "--ec-shadow-drawer",
+					);
+					if (entry !== undefined) delete entry.sourceUses;
+				},
+			},
+		];
+		for (const item of malformed) {
+			const candidate = clone(sourceOwned) as HoverFixtureDocument;
+			item.mutate(candidate);
+			expect(
+				hoverFixtureMetadataProblems(
+					candidate as ContrastPairsDocument,
+					"source-owned",
+				),
+				item.name,
+			).not.toEqual([]);
+		}
+		expect(hoverFixtureMetadataProblems(sourceOwned, "source-owned")).toEqual(
+			[],
+		);
+	});
 
 	test("palette fixtures reject retired-token restoration and incoherent states", () => {
 		const palette = hoverContractFixture("palette");
@@ -1947,14 +2300,29 @@ describe("G2: every stylesheet colour use is classified", () => {
 		const fixture = hoverContractFixture("legacy");
 		expect(fixtureState(fixture)).toBe("legacy");
 		expect(fixtureG2Problems(fixture)).toEqual([]);
+		const schemaState = fixtureSchemaState(fixture.doc);
+		if (schemaState === null)
+			throw new Error("legacy hover fixture metadata is incomplete");
 		const invalidLanguageCss = fixture.languageCss.replace(
 			LEGACY_HOVER_PAINT,
 			"var(--ec-color-hover, #ffffff)",
 		);
+		const invalidDoc = clone(fixture.doc) as HoverFixtureDocument;
+		invalidDoc.literals = [
+			...(invalidDoc.literals ?? []),
+			hoverFixtureLiteral("#ffffff", schemaState),
+		];
+		expect(
+			hoverFixtureMetadataProblems(
+				invalidDoc as ContrastPairsDocument,
+				schemaState,
+			),
+		).toEqual([]);
 		const invalidFixture = {
 			...fixture,
 			languageCss: invalidLanguageCss,
 			sheets: { "language_dropdown.css": invalidLanguageCss },
+			doc: invalidDoc as ContrastPairsDocument,
 		};
 		expect(codes(fixtureG2Problems(invalidFixture))).toEqual([
 			"g2-unknown-surface",
@@ -2064,7 +2432,20 @@ describe("G2: every stylesheet colour use is classified", () => {
 			(candidate) => candidate.name === LEGACY_HOVER_TOKEN,
 		);
 		if (entry === undefined) throw new Error("no active legacy hover entry");
-		expect(map.entries).toHaveLength(1);
+		expect(
+			map.entries
+				.filter((candidate) =>
+					hasOwnKey(NO_INFORMATION_FIXTURE_SOURCES, candidate.name),
+				)
+				.map((candidate) => candidate.name)
+				.sort(),
+		).toEqual(Object.keys(NO_INFORMATION_FIXTURE_SOURCES).sort());
+		expect(
+			map.entries.filter((candidate) => candidate.name === LEGACY_HOVER_TOKEN),
+		).toHaveLength(1);
+		expect(map.entries).toHaveLength(
+			Object.keys(NO_INFORMATION_FIXTURE_SOURCES).length + 1,
+		);
 		expect(entry.disposition).toBe("retire");
 		expect(entry.finding).toBe(LEGACY_HOVER_FINDING);
 		delete entry.finding;
