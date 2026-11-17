@@ -18,6 +18,7 @@ import {
 	reasonFor,
 	resolveColour,
 	themeTokens,
+	THEMES,
 	THRESHOLDS,
 	varReferences,
 	type ContrastPair,
@@ -70,6 +71,238 @@ function colour(text: string) {
 
 function clone<T>(value: T): T {
 	return JSON.parse(JSON.stringify(value)) as T;
+}
+
+const PLATFORM_INDICATOR_ROLE = "--ec-color-platform-indicator";
+const ITEM_HOVER_OVERLAY_ID = "item-hover";
+const ITEM_HOVER_BASE = "--ec-color-surface";
+const ITEM_HOVER_ENGLISH_ROLE = "--ec-color-text-secondary";
+const PALETTE_HOVER_TEST_COLORS = {
+	light: "#DCE6E5",
+	dark: "#2E5753",
+};
+
+function itemHoverLayerFromCss(
+	languageCss: string,
+	tokensCss: string,
+	doc: ContrastPairsDocument,
+): string | null {
+	const parentRule = languageCss.match(
+		/\.language-dropdown__item:hover,\s*\.language-dropdown__item--focused\s*\{([^}]*)\}/s,
+	);
+	if (parentRule === null) return null;
+	const declarations = [
+		...(parentRule[1] ?? "").matchAll(
+			/(?:^|;)\s*background\s*:\s*([^;]+)\s*;?/g,
+		),
+	];
+	if (declarations.length !== 1) return null;
+	const value = declarations[0]?.[1]?.trim().replace(/\s+/g, " ");
+	const tokens = themeTokens(tokensCss);
+	if (value === "var(--ec-color-hover, rgba(0, 0, 0, 0.04))") {
+		const fallbackTokenResolves = THEMES.some(
+			(theme) => resolveColour("--ec-color-hover", theme, tokens, doc) !== null,
+		);
+		return fallbackTokenResolves ? null : "rgba(0, 0, 0, 0.04)";
+	}
+	if (value === "var(--ec-color-surface-hover)") {
+		const semanticTokenResolves = THEMES.every(
+			(theme) =>
+				resolveColour("--ec-color-surface-hover", theme, tokens, doc) !== null,
+		);
+		return semanticTokenResolves ? "--ec-color-surface-hover" : null;
+	}
+	return null;
+}
+
+function languageHoverContractProblems({
+	languageComponent,
+	languageCss,
+	doc,
+	tokensCss,
+}: {
+	languageComponent: string;
+	languageCss: string;
+	doc: ContrastPairsDocument;
+	tokensCss: string;
+}): string[] {
+	const problems: string[] = [];
+	if (
+		!/<span className="language-dropdown__english">\s*\(\{lang\.englishName\}\)/.test(
+			languageComponent,
+		)
+	) {
+		problems.push("English label is not the language-dropdown__english child");
+	}
+	const englishRule = languageCss.match(
+		/\.language-dropdown__english\s*\{([^}]*)\}/s,
+	);
+	const englishColor = (englishRule?.[1] ?? "")
+		.match(/\bcolor\s*:\s*([^;]+)\s*;/)?.[1]
+		?.trim();
+	if (englishColor !== `var(${ITEM_HOVER_ENGLISH_ROLE})`) {
+		problems.push("English child is not colored with text-secondary");
+	}
+	if (
+		!languageCss.match(
+			/\.language-dropdown__item:hover,\s*\.language-dropdown__item--focused\s*\{[^}]*\}/s,
+		)
+	) {
+		problems.push("English item hover parent selector is missing");
+	}
+	const hoverLayer = itemHoverLayerFromCss(languageCss, tokensCss, doc);
+	if (hoverLayer === null) {
+		problems.push("English item hover background is unsupported or unresolved");
+	}
+	const pair = doc.pairs.find((entry) => entry.id === "text-secondary");
+	if (pair?.fg !== ITEM_HOVER_ENGLISH_ROLE) {
+		problems.push("English pair foreground is not text-secondary");
+	}
+	if (pair?.selector !== ".language-dropdown__english") {
+		problems.push("English pair selector does not identify its source child");
+	}
+	const pairBackdrops =
+		pair === undefined ? [] : typeof pair.on === "string" ? [pair.on] : pair.on;
+	if (
+		JSON.stringify(pairBackdrops) !==
+		JSON.stringify([ITEM_HOVER_BASE, ITEM_HOVER_OVERLAY_ID])
+	) {
+		problems.push("English pair does not cover default surface and item-hover");
+	}
+	const overlay = doc.overlays.find(
+		(entry) => entry.id === ITEM_HOVER_OVERLAY_ID,
+	);
+	if (overlay === undefined) {
+		problems.push("English item-hover overlay is missing");
+	}
+	if (
+		hoverLayer !== null &&
+		overlay !== undefined &&
+		JSON.stringify(overlay.layers) !==
+			JSON.stringify([ITEM_HOVER_BASE, hoverLayer])
+	) {
+		problems.push("English item-hover overlay does not match its parent paint");
+	}
+	if (pair === undefined || overlay === undefined || hoverLayer === null) {
+		return problems;
+	}
+
+	const tokens = themeTokens(tokensCss);
+	for (const theme of THEMES) {
+		const base = resolveColour(ITEM_HOVER_BASE, theme, tokens, doc);
+		const paint = resolveColour(hoverLayer, theme, tokens, doc);
+		const layers = overlay.layers.map((layer) =>
+			resolveColour(layer, theme, tokens, doc),
+		);
+		if (
+			base === null ||
+			paint === null ||
+			layers.some((layer) => layer === null)
+		) {
+			problems.push(`English item-hover backdrop is unresolved in ${theme}`);
+			continue;
+		}
+		const expectedBackground = flatten(paint, base);
+		const resolvedLayers = layers.filter(
+			(layer): layer is NonNullable<typeof layer> => layer !== null,
+		);
+		let actualBackground = resolvedLayers[0];
+		if (actualBackground === undefined) {
+			problems.push(`English item-hover overlay is empty in ${theme}`);
+			continue;
+		}
+		for (const layer of resolvedLayers.slice(1)) {
+			actualBackground = flatten(layer, actualBackground);
+		}
+		if (toHex(actualBackground) !== toHex(expectedBackground)) {
+			problems.push(
+				`English item-hover backdrop mismatches source in ${theme}`,
+			);
+		}
+		const result = evaluate(doc, tokensCss).find(
+			(entry) =>
+				entry.pair === pair.id &&
+				entry.backdrop === ITEM_HOVER_OVERLAY_ID &&
+				entry.theme === theme,
+		);
+		if (result?.bgHex !== toHex(expectedBackground)) {
+			problems.push(`English evaluated backdrop mismatches source in ${theme}`);
+		}
+	}
+	return problems;
+}
+
+function languageHoverPairFixture(hoverLayer: string): ContrastPairsDocument {
+	const fixture = clone(PAIRS);
+	fixture.surfaces = [
+		...new Set([...fixture.surfaces, ITEM_HOVER_BASE, ITEM_HOVER_OVERLAY_ID]),
+	];
+	fixture.overlays = [
+		...fixture.overlays.filter((entry) => entry.id !== ITEM_HOVER_OVERLAY_ID),
+		{
+			id: ITEM_HOVER_OVERLAY_ID,
+			layers: [ITEM_HOVER_BASE, hoverLayer],
+		},
+	];
+	if (hoverLayer === "--ec-color-surface-hover") {
+		fixture.localTokens[hoverLayer] = { ...PALETTE_HOVER_TEST_COLORS };
+	}
+	fixture.pairs = fixture.pairs.filter(
+		(pair) =>
+			pair.id !== "text-secondary" &&
+			pair.id !== "text-secondary-file-table-header",
+	);
+	fixture.pairs.push(
+		{
+			id: "text-secondary",
+			fg: ITEM_HOVER_ENGLISH_ROLE,
+			on: [ITEM_HOVER_BASE, ITEM_HOVER_OVERLAY_ID],
+			role: "text",
+			selector: ".language-dropdown__english",
+			story: "settings-languagedropdown--item-hover",
+		},
+		{
+			id: "text-secondary-file-table-header",
+			fg: ITEM_HOVER_ENGLISH_ROLE,
+			on: [ITEM_HOVER_BASE],
+			role: "text",
+			selector: ".file-table__header",
+			story: "file-list-filetable--mixed-statuses",
+		},
+	);
+	return fixture;
+}
+
+function withoutPlatformIndicatorReferences(
+	doc: ContrastPairsDocument,
+): ContrastPairsDocument {
+	const fixture = clone(doc);
+	const indicatorOverlays = new Set(
+		fixture.overlays
+			.filter((entry) => entry.layers.includes(PLATFORM_INDICATOR_ROLE))
+			.map((entry) => entry.id),
+	);
+	fixture.overlays = fixture.overlays.filter(
+		(entry) => !indicatorOverlays.has(entry.id),
+	);
+	fixture.pairs = fixture.pairs.filter((pair) => {
+		const backdrops = typeof pair.on === "string" ? [pair.on] : pair.on;
+		return (
+			pair.fg !== PLATFORM_INDICATOR_ROLE &&
+			!backdrops.includes(PLATFORM_INDICATOR_ROLE) &&
+			!backdrops.some((ref) => indicatorOverlays.has(ref))
+		);
+	});
+	fixture.surfaces = fixture.surfaces.filter(
+		(ref) => ref !== PLATFORM_INDICATOR_ROLE && !indicatorOverlays.has(ref),
+	);
+	const localTokens = { ...fixture.localTokens };
+	delete localTokens[PLATFORM_INDICATOR_ROLE];
+	fixture.localTokens = localTokens;
+	fixture.exempt = (fixture.exempt ?? []).filter(
+		(entry) => entry.name !== PLATFORM_INDICATOR_ROLE,
+	);
+	return fixture;
 }
 
 // G3: the helper is pinned to what axe measured in the story runs. These historic
@@ -397,7 +630,6 @@ const ORIGINAL_REQUIRED_PLATFORM_ROLES = [
 	"--ec-color-error",
 	"--ec-toggle-off-track",
 ];
-const PLATFORM_INDICATOR_ROLE = "--ec-color-platform-indicator";
 
 function platformDispositionProblems(
 	tokenMap: typeof TOKEN_MAP,
@@ -513,100 +745,179 @@ describe("the pair list is real, not a stub", () => {
 			"src/renderer/components/settings/LanguageDropdown.tsx",
 		);
 		const headerCss = SHEETS["file_table.css"] ?? "";
-		expect(languageComponent).toMatch(
-			/<span className="language-dropdown__english">\s*\(\{lang\.englishName\}\)/,
-		);
-		expect(languageCss).toMatch(
-			/\.language-dropdown__english\s*\{[^}]*color:\s*var\(--ec-color-text-secondary\)/s,
-		);
-		expect(languageCss).toMatch(
-			/\.language-dropdown__item:hover,\s*\.language-dropdown__item--focused\s*\{[^}]*background:\s*var\(--ec-color-hover,\s*rgba\(0,\s*0,\s*0,\s*0\.04\)\)/s,
-		);
 		expect(headerCss).toMatch(
 			/\.file-table__header\s*\{[^}]*background:\s*var\(--ec-color-surface\)[^}]*color:\s*var\(--ec-color-text-secondary\)/s,
 		);
-
-		const fixture = clone(PAIRS);
-		fixture.surfaces = [
-			...new Set([...fixture.surfaces, "--ec-color-surface", "item-hover"]),
-		];
-		fixture.overlays = [
-			...fixture.overlays.filter((entry) => entry.id !== "item-hover"),
+		const englishChild = languageCss.match(
+			/\.language-dropdown__english\s*\{[^}]*\}/s,
+		)?.[0];
+		if (englishChild === undefined)
+			throw new Error("source English child rule is missing");
+		const masterSource = `${englishChild}\n.language-dropdown__item:hover,\n.language-dropdown__item--focused { background: var(--ec-color-hover, rgba(0, 0, 0, 0.04)); }`;
+		const paletteSource = `${englishChild}\n.language-dropdown__item:hover,\n.language-dropdown__item--focused { background: var(--ec-color-surface-hover); }`;
+		const actualLayer = itemHoverLayerFromCss(languageCss, TOKENS_CSS, PAIRS);
+		expect(actualLayer).not.toBeNull();
+		const variants = [
 			{
-				id: "item-hover",
-				layers: ["--ec-color-surface", "rgba(0, 0, 0, 0.04)"],
+				languageCss,
+				layer: actualLayer as string,
+			},
+			{
+				languageCss: masterSource,
+				layer: "rgba(0, 0, 0, 0.04)",
+			},
+			{
+				languageCss: paletteSource,
+				layer: "--ec-color-surface-hover",
 			},
 		];
-		fixture.pairs = fixture.pairs.filter(
-			(pair) =>
-				pair.id !== "text-secondary" &&
-				pair.id !== "text-secondary-file-table-header",
-		);
-		fixture.pairs.push(
-			{
-				id: "text-secondary",
-				fg: "--ec-color-text-secondary",
-				on: ["--ec-color-surface", "item-hover"],
-				role: "text",
-				selector: ".language-dropdown__english",
-				story: "settings-languagedropdown--item-hover",
-			},
-			{
-				id: "text-secondary-file-table-header",
-				fg: "--ec-color-text-secondary",
-				on: ["--ec-color-surface"],
-				role: "text",
-				selector: ".file-table__header",
-				story: "file-list-filetable--mixed-statuses",
-			},
-		);
-		expect(pairsShapeProblems(fixture)).toEqual([]);
+		for (const variant of variants) {
+			const fixture = languageHoverPairFixture(variant.layer);
+			expect(pairsShapeProblems(fixture)).toEqual([]);
+			expect(
+				languageHoverContractProblems({
+					languageComponent,
+					languageCss: variant.languageCss,
+					doc: fixture,
+					tokensCss: TOKENS_CSS,
+				}),
+			).toEqual([]);
+			const englishPair = fixture.pairs.find(
+				(pair) => pair.id === "text-secondary",
+			);
+			const headerPair = fixture.pairs.find(
+				(pair) => pair.id === "text-secondary-file-table-header",
+			);
+			if (englishPair === undefined || headerPair === undefined)
+				throw new Error("English or file-table fixture pair is missing");
+			expect(
+				backdrops(englishPair, fixture).map((backdrop) => backdrop.ref),
+			).toEqual([ITEM_HOVER_BASE, ITEM_HOVER_OVERLAY_ID]);
+			expect(
+				backdrops(headerPair, fixture).map((backdrop) => backdrop.ref),
+			).toEqual([ITEM_HOVER_BASE]);
 
-		const englishPair = fixture.pairs.find(
-			(pair) => pair.id === "text-secondary",
-		);
-		const headerPair = fixture.pairs.find(
-			(pair) => pair.id === "text-secondary-file-table-header",
-		);
-		if (englishPair === undefined || headerPair === undefined)
-			throw new Error("English or file-table fixture pair is missing");
-		expect(
-			backdrops(englishPair, fixture).map((backdrop) => backdrop.ref),
-		).toEqual(["--ec-color-surface", "item-hover"]);
-		expect(
-			backdrops(headerPair, fixture).map((backdrop) => backdrop.ref),
-		).toEqual(["--ec-color-surface"]);
-
-		const evaluated = evaluate(fixture, TOKENS_CSS);
-		const englishResults = evaluated.filter(
-			(result) => result.pair === "text-secondary",
-		);
-		expect(englishResults).toHaveLength(4);
-		const hoverResult = englishResults.find(
-			(result) => result.rule === "text-secondary-on-item-hover-light",
-		);
-		if (hoverResult === undefined)
-			throw new Error("English item-hover contrast result is missing");
-		expect(hoverResult.selector).toBe(".language-dropdown__english");
-		const overlay = fixture.overlays.find((entry) => entry.id === "item-hover");
-		if (overlay === undefined) throw new Error("hover overlay is missing");
-		const [baseRef, ...layerRefs] = overlay.layers;
-		if (baseRef === undefined)
-			throw new Error("hover overlay has no base layer");
-		const tokens = themeTokens(TOKENS_CSS);
-		let expectedBackground = resolveColour(baseRef, "light", tokens, fixture);
-		if (expectedBackground === null)
-			throw new Error("hover base is unresolved");
-		for (const layerRef of layerRefs) {
-			const layer = resolveColour(layerRef, "light", tokens, fixture);
-			if (layer === null)
-				throw new Error(`hover layer ${layerRef} is unresolved`);
-			expectedBackground = flatten(layer, expectedBackground);
+			const englishResults = evaluate(fixture, TOKENS_CSS).filter(
+				(result) => result.pair === "text-secondary",
+			);
+			expect(englishResults).toHaveLength(4);
+			for (const theme of THEMES) {
+				const hoverResult = englishResults.find(
+					(result) =>
+						result.backdrop === ITEM_HOVER_OVERLAY_ID && result.theme === theme,
+				);
+				if (hoverResult === undefined)
+					throw new Error(`English ${theme} item-hover result is missing`);
+				const tokens = themeTokens(TOKENS_CSS);
+				const base = resolveColour(ITEM_HOVER_BASE, theme, tokens, fixture);
+				const layer = resolveColour(variant.layer, theme, tokens, fixture);
+				if (base === null || layer === null)
+					throw new Error(`English ${theme} item-hover source is unresolved`);
+				const expectedBackground = flatten(layer, base);
+				expect(hoverResult.selector).toBe(".language-dropdown__english");
+				expect(hoverResult.bgHex).toBe(toHex(expectedBackground));
+				expect(hoverResult.ratio).toBe(
+					contrastRatio(colour(hoverResult.fgHex), expectedBackground),
+				);
+			}
 		}
-		expect(hoverResult.bgHex).toBe(toHex(expectedBackground));
-		expect(hoverResult.ratio).toBe(
-			contrastRatio(colour(hoverResult.fgHex), expectedBackground),
+
+		const masterFixture = languageHoverPairFixture("rgba(0, 0, 0, 0.04)");
+		const wrongEnglishCss = masterSource.replace(
+			"color: var(--ec-color-text-secondary)",
+			"color: var(--ec-color-text)",
 		);
+		expect(
+			languageHoverContractProblems({
+				languageComponent,
+				languageCss: wrongEnglishCss,
+				doc: masterFixture,
+				tokensCss: TOKENS_CSS,
+			}),
+		).toContain("English child is not colored with text-secondary");
+		const wrongForegroundPair = clone(masterFixture);
+		wrongForegroundPair.pairs.find((pair) => pair.id === "text-secondary")!.fg =
+			"--ec-color-text";
+		expect(
+			languageHoverContractProblems({
+				languageComponent,
+				languageCss: masterSource,
+				doc: wrongForegroundPair,
+				tokensCss: TOKENS_CSS,
+			}),
+		).toContain("English pair foreground is not text-secondary");
+		const wrongParentCss = masterSource.replace(
+			".language-dropdown__item:hover,",
+			".language-dropdown__trigger:hover,",
+		);
+		expect(
+			languageHoverContractProblems({
+				languageComponent,
+				languageCss: wrongParentCss,
+				doc: masterFixture,
+				tokensCss: TOKENS_CSS,
+			}),
+		).toContain("English item hover parent selector is missing");
+		const wrongPairSelector = clone(masterFixture);
+		wrongPairSelector.pairs.find(
+			(pair) => pair.id === "text-secondary",
+		)!.selector = ".language-dropdown__trigger";
+		expect(
+			languageHoverContractProblems({
+				languageComponent,
+				languageCss: masterSource,
+				doc: wrongPairSelector,
+				tokensCss: TOKENS_CSS,
+			}),
+		).toContain("English pair selector does not identify its source child");
+		const missingOverlay = clone(masterFixture);
+		missingOverlay.overlays = missingOverlay.overlays.filter(
+			(entry) => entry.id !== ITEM_HOVER_OVERLAY_ID,
+		);
+		expect(
+			languageHoverContractProblems({
+				languageComponent,
+				languageCss: masterSource,
+				doc: missingOverlay,
+				tokensCss: TOKENS_CSS,
+			}),
+		).toContain("English item-hover overlay is missing");
+		const unresolvedSemantic = languageHoverPairFixture(
+			"--ec-color-surface-hover",
+		);
+		delete unresolvedSemantic.localTokens["--ec-color-surface-hover"];
+		expect(
+			languageHoverContractProblems({
+				languageComponent,
+				languageCss: paletteSource,
+				doc: unresolvedSemantic,
+				tokensCss: TOKENS_CSS,
+			}),
+		).toContain("English item hover background is unsupported or unresolved");
+		const unsupportedSemanticCss = paletteSource.replace(
+			"var(--ec-color-surface-hover)",
+			"var(--ec-color-surface-hover-alt)",
+		);
+		expect(
+			languageHoverContractProblems({
+				languageComponent,
+				languageCss: unsupportedSemanticCss,
+				doc: languageHoverPairFixture("--ec-color-surface-hover"),
+				tokensCss: TOKENS_CSS,
+			}),
+		).toContain("English item hover background is unsupported or unresolved");
+		const mismatchedBackdrop = clone(masterFixture);
+		mismatchedBackdrop.overlays.find(
+			(entry) => entry.id === ITEM_HOVER_OVERLAY_ID,
+		)!.layers[1] = "rgba(0, 0, 0, 0.08)";
+		expect(
+			languageHoverContractProblems({
+				languageComponent,
+				languageCss: masterSource,
+				doc: mismatchedBackdrop,
+				tokensCss: TOKENS_CSS,
+			}),
+		).toContain("English item-hover overlay does not match its parent paint");
 
 		if (
 			TOKEN_MAP.entries.some((entry) => entry.name === PLATFORM_INDICATOR_ROLE)
@@ -1270,7 +1581,25 @@ describe("the real baseline holds exactly today's contrast failures", () => {
 		absentMap.entries = absentMap.entries.filter(
 			(entry) => entry.name !== PLATFORM_INDICATOR_ROLE,
 		);
-		expect(platformDispositionProblems(absentMap, PAIRS)).toEqual([]);
+
+		const paletteLikePairs = withoutPlatformIndicatorReferences(PAIRS);
+		paletteLikePairs.localTokens[PLATFORM_INDICATOR_ROLE] = {
+			light: "#007AFF",
+			dark: "#1A87FF",
+		};
+		paletteLikePairs.pairs.push({
+			id: "platform-indicator-contract",
+			fg: PLATFORM_INDICATOR_ROLE,
+			on: ["--ec-color-surface"],
+			role: "focus",
+			selector: ".segmented-control__segment:focus-visible",
+			story: "controls-segmentedcontrol--keyboard-focus",
+		});
+		const absentPairs = withoutPlatformIndicatorReferences(paletteLikePairs);
+		expect(platformDispositionProblems(absentMap, absentPairs)).toEqual([]);
+		expect(platformDispositionProblems(absentMap, paletteLikePairs)).toContain(
+			"indicator is paired before its token-map declaration",
+		);
 
 		const validReason =
 			"v5.1 keeps the platform-owned indicator for focus-visible and drop-zone boundaries.";
@@ -1280,26 +1609,17 @@ describe("the real baseline holds exactly today's contrast failures", () => {
 			disposition: "keep-platform",
 			reason: validReason,
 		});
-		const presentPairs = clone(PAIRS);
-		presentPairs.localTokens[PLATFORM_INDICATOR_ROLE] = {
-			light: "#007AFF",
-			dark: "#1A87FF",
-		};
-		presentPairs.pairs.push({
-			id: "platform-indicator-contract",
-			fg: PLATFORM_INDICATOR_ROLE,
-			on: ["--ec-color-surface"],
-			role: "focus",
-			selector: ".segmented-control__segment:focus-visible",
-			story: "controls-segmentedcontrol--keyboard-focus",
-		});
+		const presentPairs = clone(paletteLikePairs);
 		const fixtureResults = evaluate(presentPairs, TOKENS_CSS);
 		expect(
 			fixtureResults.some((result) => result.fgRef === PLATFORM_INDICATOR_ROLE),
 		).toBe(true);
 		expect(platformDispositionProblems(presentMap, presentPairs)).toEqual([]);
 
-		const unpairedProblems = platformDispositionProblems(presentMap, PAIRS);
+		const unpairedProblems = platformDispositionProblems(
+			presentMap,
+			absentPairs,
+		);
 		expect(unpairedProblems).toContain(
 			"declared indicator has no evaluated foreground pair",
 		);
@@ -1340,8 +1660,8 @@ describe("the real baseline holds exactly today's contrast failures", () => {
 			(entry) => entry.name !== "--ec-color-accent",
 		);
 		expect(
-			platformDispositionProblems(lostOriginalRoleMap, PAIRS).some((problem) =>
-				problem.includes("--ec-color-accent"),
+			platformDispositionProblems(lostOriginalRoleMap, absentPairs).some(
+				(problem) => problem.includes("--ec-color-accent"),
 			),
 		).toBe(true);
 	});
