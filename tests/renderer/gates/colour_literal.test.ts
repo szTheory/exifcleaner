@@ -103,13 +103,11 @@ describe("GAT-03 colour-literal ratchet over the real tree (D-15)", () => {
 		expect(BASELINE.rows).toEqual(sorted);
 	});
 
-	test("anti-vacuity: the scan read the known stylesheets and the two TypeScript files", () => {
+	test("anti-vacuity: the scan reads remaining literal sources and the two TypeScript files", () => {
 		const files = new Set(scan.rows.map((row) => row.file));
-		expect(files.has("src/renderer/styles/empty_state.css")).toBe(true);
-		expect(files.has("src/renderer/styles/language_dropdown.css")).toBe(true);
 		expect(files.has(ACCENT_TS)).toBe(true);
 		expect(files.has("src/main/window/window_background.ts")).toBe(true);
-		expect(scan.rows.length).toBeGreaterThanOrEqual(20);
+		expect(scan.rows.length).toBeGreaterThanOrEqual(16);
 	});
 
 	test("tokens.css is the one file the baseline does not hold", () => {

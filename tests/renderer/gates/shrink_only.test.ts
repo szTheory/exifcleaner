@@ -229,7 +229,8 @@ describe("GAT-03 colour baseline against a planted base", () => {
 
 describe("the real data files against themselves (anti-vacuity)", () => {
 	test("each registry file exists, holds rows, and shrinks against itself", () => {
-		const expectedMinimum = [8, 20];
+		// Phase 77 may retire every pending role, so the first list may legitimately be empty.
+		const expectedMinimum = [0, 20];
 		SHRINK_ONLY_REGISTRY.forEach((entry, index) => {
 			const doc: unknown = JSON.parse(
 				fs.readFileSync(path.join(REPO, entry.path), "utf8"),
