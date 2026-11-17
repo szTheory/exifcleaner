@@ -220,10 +220,73 @@ describe("GAT-01 token drift gate (D-09, D-12)", () => {
 
 	test("a hop to the brand value is equal, so Phase 77 needs no change here", () => {
 		const hopped = `:root{--ec-brand-bg:#FFFFFF;--ec-brand-ink:#0A2E2B;--ec-color-bg:var(--ec-brand-bg);--ec-color-surface:#EEF6F5;--ec-color-text:var(--ec-brand-ink);--ec-color-text-secondary:#4A625F}[data-theme="dark"]{--ec-brand-dark:#0A2E2B;--ec-color-bg:var(--ec-brand-dark);--ec-color-surface:#12403C;--ec-color-text:#FFFFFF;--ec-color-text-secondary:#A9C9C4}`;
+		const requiredNames = [...REQUIRED_ADOPT_TOKENS].sort(compareCodeUnits);
+		const requiredSet = new Set(REQUIRED_ADOPT_TOKENS);
+		expect(REQUIRED_ADOPT_TOKENS).toHaveLength(MIN_ADOPT_ROWS);
+		expect(requiredSet.size).toBe(MIN_ADOPT_ROWS);
+
+		const requiredRows = TOKEN_MAP.entries.filter((entry) =>
+			requiredSet.has(entry.name),
+		);
+		expect(requiredRows).toHaveLength(MIN_ADOPT_ROWS);
+		expect(
+			requiredRows.map((entry) => entry.name).sort(compareCodeUnits),
+		).toEqual(requiredNames);
+		expect(requiredRows.every((entry) => entry.disposition === "adopt")).toBe(
+			true,
+		);
+		for (const entry of requiredRows) {
+			for (const theme of THEMES) {
+				expect(parseColour(entry.brand?.[theme]?.hex ?? "")).not.toBeNull();
+			}
+		}
+
+		const expandedFixtureMap: TokenMapDocument = {
+			entries: [
+				...TOKEN_MAP.entries,
+				{
+					name: "--ec-color-fixture-growth",
+					disposition: "adopt",
+					brand: {
+						light: {
+							token: "--ec-brand-fixture-growth",
+							hex: "#123456",
+						},
+						dark: {
+							token: "--ec-brand-fixture-growth-dark",
+							hex: "#654321",
+						},
+					},
+				},
+			],
+		};
+		const fixtureMap: TokenMapDocument = {
+			entries: expandedFixtureMap.entries.filter((entry) =>
+				requiredSet.has(entry.name),
+			),
+		};
+		expect(fixtureMap.entries).toHaveLength(MIN_ADOPT_ROWS);
+		expect(
+			fixtureMap.entries.map((entry) => entry.name).sort(compareCodeUnits),
+		).toEqual(requiredNames);
+		expect(fixtureMap.entries).toEqual(requiredRows);
+
+		const semanticNamesByTheme = hopped
+			.split('[data-theme="dark"]')
+			.map((block) =>
+				[...block.matchAll(/(--ec-color-[a-z0-9-]+)\s*:/g)]
+					.flatMap((match) => (match[1] === undefined ? [] : [match[1]]))
+					.sort(compareCodeUnits),
+			);
+		expect(semanticNamesByTheme).toHaveLength(THEMES.length);
+		for (const semanticNames of semanticNamesByTheme) {
+			expect(semanticNames).toEqual(requiredNames);
+		}
+
 		expect(
 			driftProblems({
 				tokensCss: hopped,
-				tokenMap: TOKEN_MAP,
+				tokenMap: fixtureMap,
 				pending: { rows: [] },
 			}),
 		).toEqual([]);
