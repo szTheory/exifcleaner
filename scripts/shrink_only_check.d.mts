@@ -5,6 +5,7 @@ export interface ShrinkOnlyEntry {
 	rows(doc: unknown): unknown[] | null;
 	keyOf(row: Record<string, unknown>): string;
 	valueOf(row: Record<string, unknown>): number;
+	approvedAdditions?: Readonly<Record<string, number>>;
 }
 
 export interface ShrinkOnlyProblem {

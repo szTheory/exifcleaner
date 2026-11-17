@@ -417,10 +417,17 @@ describe("brand_quote_check against a planted cache", () => {
 			expect(result.stderr).toContain("color.secondary.pewter");
 			expect(result.stderr).toContain("#000000");
 			assertDirEffect(before, snapshotDir(repo), {});
-			// The map alone: exactly one problem, with its own code.
-			expect(mapProblems(repo, cacheDir).map((found) => found.code)).toEqual([
-				"map-token-hex-mismatch",
-			]);
+			// Every map reference to this shared path reports its own mismatch.
+			const references = mapBrandRefs(
+				readJsonFile<unknown>(repo, TOKEN_MAP),
+			).filter((ref) => ref.token === "color.secondary.pewter");
+			const found = mapProblems(repo, cacheDir);
+			expect(found.map((problem) => problem.code)).toEqual(
+				references.map(() => "map-token-hex-mismatch"),
+			);
+			expect(found.map((problem) => problem.location)).toEqual(
+				references.map((ref) => ref.location).sort(),
+			);
 		});
 	});
 
@@ -436,16 +443,17 @@ describe("brand_quote_check against a planted cache", () => {
 			expect(result.stderr).toContain("color.dark.tide");
 			expect(result.stderr).toContain("is not a colour in tokens.json");
 			assertDirEffect(before, snapshotDir(repo), {});
-			// The adopt ref and the derive source that name the path, each its own entry.
+			// Every adopt ref and derive source naming the path reports its own error.
+			const references = mapBrandRefs(
+				readJsonFile<unknown>(repo, TOKEN_MAP),
+			).filter((ref) => ref.token === "color.dark.tide");
 			const found = mapProblems(repo, cacheDir);
-			expect(found.map((problem) => problem.code)).toEqual([
-				"map-token-path-missing",
-				"map-token-path-missing",
-			]);
-			expect(found.map((problem) => problem.location)).toEqual([
-				"--ec-color-error-bg from",
-				"--ec-color-surface brand.dark",
-			]);
+			expect(found.map((problem) => problem.code)).toEqual(
+				references.map(() => "map-token-path-missing"),
+			);
+			expect(found.map((problem) => problem.location)).toEqual(
+				references.map((ref) => ref.location).sort(),
+			);
 		});
 	});
 
@@ -560,12 +568,33 @@ describe("brand_quote_check against a planted cache", () => {
 	});
 
 	test("mapBrandRefs lists every adopt ref and derive source, and skips malformed entries", () => {
-		const refs = mapBrandRefs(
-			JSON.parse(fs.readFileSync(path.join(repoRoot, TOKEN_MAP), "utf8")),
+		const map = readJsonFile<{
+			entries: Array<{
+				disposition: string;
+				brand?: { light?: unknown; dark?: unknown };
+				from?: unknown[];
+			}>;
+		}>(repoRoot, TOKEN_MAP);
+		const expectedAdoptRefs = map.entries.reduce(
+			(count, entry) =>
+				count +
+				(entry.disposition === "adopt"
+					? Number(entry.brand?.light !== undefined) +
+						Number(entry.brand?.dark !== undefined)
+					: 0),
+			0,
 		);
-		// Four adopt entries with a light and a dark ref, and one derive with two sources.
-		expect(refs).toHaveLength(10);
-		expect(refs.filter((ref) => ref.hex === undefined)).toHaveLength(2);
+		const expectedDeriveRefs = map.entries.reduce(
+			(count, entry) =>
+				count +
+				(entry.disposition === "derive" ? (entry.from?.length ?? 0) : 0),
+			0,
+		);
+		const refs = mapBrandRefs(map);
+		expect(refs).toHaveLength(expectedAdoptRefs + expectedDeriveRefs);
+		expect(refs.filter((ref) => ref.hex === undefined)).toHaveLength(
+			expectedDeriveRefs,
+		);
 		expect(mapBrandRefs(null)).toEqual([]);
 		expect(mapBrandRefs({ entries: "x" })).toEqual([]);
 		expect(

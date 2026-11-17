@@ -314,7 +314,7 @@ const MUTANTS: Mutant[] = [
 		code: "unknown-finding",
 		doc: () => {
 			const doc = clone();
-			entryNamed(doc, "--ec-color-hover")["finding"] = "token-gap|x|y";
+			entryNamed(doc, "--spacing-lg")["finding"] = "token-gap|x|y";
 			return doc;
 		},
 	},
@@ -323,7 +323,7 @@ const MUTANTS: Mutant[] = [
 		code: "bad-type",
 		doc: () => {
 			const doc = clone();
-			entryNamed(doc, "--ec-color-hover")["finding"] = "";
+			entryNamed(doc, "--spacing-lg")["finding"] = "";
 			return doc;
 		},
 	},
@@ -332,7 +332,7 @@ const MUTANTS: Mutant[] = [
 		code: "bad-type",
 		doc: () => {
 			const doc = clone();
-			entryNamed(doc, "--ec-color-info")["reason"] = "";
+			entryNamed(doc, "--spacing-md")["reason"] = "";
 			return doc;
 		},
 	},
@@ -452,22 +452,12 @@ const MUTANTS: Mutant[] = [
 		code: "unreferenced-finding",
 		doc: () => {
 			const doc = clone();
-			entryNamed(doc, "--ec-color-info")["finding"] =
-				"token-map-gap|planted--story|planted";
-			entryNamed(doc, "--ec-color-muted")["finding"] =
-				"token-map-gap|planted--story|planted";
+			entryNamed(doc, "--spacing-lg")["finding"] = entryNamed(
+				doc,
+				"--ec-line-height-normal",
+			)["finding"];
 			return doc;
 		},
-		context: () => ({
-			...ctx,
-			findings: [
-				...ctx.findings,
-				{
-					fingerprint: "token-map-gap|planted--story|planted",
-					kind: "token-map-gap",
-				},
-			],
-		}),
 	},
 ];
 
@@ -478,13 +468,13 @@ describe("the real token map", () => {
 
 	test("anti-vacuity: the scan sees the measured sets and the map holds one entry per name", () => {
 		const declared = declaredTokens(ctx.tokensCss);
-		expect(declared.root.size).toBe(59);
-		expect(declared.dark.size).toBe(39);
+		expect(declared.root.size).toBe(52);
+		expect(declared.dark.size).toBe(32);
 		expect(declared.other).toEqual([]);
 		expect(
 			usedTokens({ ...ctx.sources, [TOKENS_CSS_PATH]: ctx.tokensCss }),
-		).toHaveLength(66);
-		expect(real.entries).toHaveLength(69);
+		).toHaveLength(57);
+		expect(real.entries).toHaveLength(61);
 		expect(Object.keys(real)).toEqual(["schemaVersion", "brandPin", "entries"]);
 	});
 
@@ -502,12 +492,14 @@ describe("the real token map", () => {
 		}
 	});
 
-	test("entries are in code-unit order: --color-* < --ec-* < --empty-* < --spacing-*", () => {
+	test("entries are in code-unit order around the retained EmptyState local token", () => {
 		const names = real.entries.map((entry) => entry.name);
 		expect(names).toEqual([...names].sort(compareCodeUnits));
 		expect(names[0]?.startsWith("--color-")).toBe(true);
 		expect(names.at(-1)?.startsWith("--spacing-")).toBe(true);
-		const empty = names.indexOf("--empty-state-secondary");
+		const emptyNames = names.filter((name) => name.startsWith("--empty-"));
+		expect(emptyNames).toEqual(["--empty-state-button-pressed-surface"]);
+		const empty = names.indexOf("--empty-state-button-pressed-surface");
 		expect(names[empty - 1]?.startsWith("--ec-")).toBe(true);
 		expect(names[empty + 1]?.startsWith("--spacing-")).toBe(true);
 	});

@@ -206,6 +206,47 @@ describe("GAT-03 colour baseline against a planted base", () => {
 		]);
 	});
 
+	test("only the two one-count BrowserWindow ground rows are approved additions", () => {
+		const oldWindowGrounds = baseline(
+			["src/main/window/window_background.ts", "#f5f6f8", 1],
+			["src/main/window/window_background.ts", "#141416", 1],
+		);
+		const approvedWindowGrounds = baseline(
+			["src/main/window/window_background.ts", "#0a2e2b", 1],
+			["src/main/window/window_background.ts", "#ffffff", 1],
+		);
+		expect(
+			shrinkOnlyProblems({
+				entry: BASELINE,
+				head: approvedWindowGrounds,
+				base: oldWindowGrounds,
+			}),
+		).toEqual([]);
+
+		for (const invalid of [
+			baseline(
+				["src/main/window/window_background.ts", "#0a2e2c", 1],
+				["src/main/window/window_background.ts", "#ffffff", 1],
+			),
+			baseline(
+				["src/main/window/window_background.ts", "#0a2e2b", 2],
+				["src/main/window/window_background.ts", "#ffffff", 1],
+			),
+			baseline(
+				["src/main/window/window_background.ts", "#0a2e2b", 1],
+				["src/main/window/window_background.ts", "#ffffff", 1],
+				["src/renderer/styles/other.css", "#ffffff", 1],
+			),
+		]) {
+			const problems = shrinkOnlyProblems({
+				entry: BASELINE,
+				head: invalid,
+				base: oldWindowGrounds,
+			});
+			expect(codes(problems)).toContain("added");
+		}
+	});
+
 	test("a deleted head file is deleted and an absent base bootstraps", () => {
 		expect(
 			codes(shrinkOnlyProblems({ entry: BASELINE, head: null, base })),
@@ -229,8 +270,8 @@ describe("GAT-03 colour baseline against a planted base", () => {
 
 describe("the real data files against themselves (anti-vacuity)", () => {
 	test("each registry file exists, holds rows, and shrinks against itself", () => {
-		// Phase 77 may retire every pending role, so the first list may legitimately be empty.
-		const expectedMinimum = [0, 20];
+		// Phase 77 may retire every pending role and four obsolete colour rows.
+		const expectedMinimum = [0, 16];
 		SHRINK_ONLY_REGISTRY.forEach((entry, index) => {
 			const doc: unknown = JSON.parse(
 				fs.readFileSync(path.join(REPO, entry.path), "utf8"),

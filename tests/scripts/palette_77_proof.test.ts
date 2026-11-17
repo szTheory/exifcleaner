@@ -349,7 +349,7 @@ describe("Phase 77 proof fixtures", () => {
 		).toMatch(/incomplete/i);
 	});
 
-	test("requires all twelve unique prerequisite branches with matching evidence", () => {
+	test("requires all thirteen unique prerequisite branches with matching evidence", () => {
 		const branches = [
 			"gsd/77-test-contracts",
 			"gsd/77-test-twins",
@@ -363,6 +363,7 @@ describe("Phase 77 proof fixtures", () => {
 			"gsd/77-drift-hop-fixture",
 			"gsd/77-source-fixture-metadata",
 			"gsd/77-selection-route-contract",
+			"gsd/77-literal-ratchet-contract",
 		];
 		const entries = branches.map((branch) => ({
 			branch,
@@ -376,7 +377,7 @@ describe("Phase 77 proof fixtures", () => {
 			/duplicate/i,
 		);
 		expect(validatePrerequisites(entries.slice(0, -1)).join("\n")).toMatch(
-			/missing|exactly twelve/i,
+			/missing|exactly thirteen/i,
 		);
 	});
 

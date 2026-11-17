@@ -114,11 +114,11 @@
 }
 
 .metadata-field--removed {
-	background: transparent;
+	background: none;
 }
 
 .metadata-field--preserved {
-	background: transparent;
+	background: none;
 }
 
 .metadata-field__icon {

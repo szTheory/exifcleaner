@@ -286,9 +286,9 @@ describe("preview stylesheet drift", () => {
 	const fromApp = stylesheetImports(appEntry, "./styles/");
 	const fromPreview = stylesheetImports(preview, "../src/renderer/styles/");
 
-	test("the preview imports the app entry's 13 stylesheets in the same order", () => {
+	test("the preview imports the app entry's 14 stylesheets in the same order", () => {
 		// Anti-vacuity: both extractions found the full list.
-		expect(fromApp).toHaveLength(13);
+		expect(fromApp).toHaveLength(14);
 		expect(fromApp.slice(0, 2)).toEqual(["reset", "tokens"]);
 		expect(fromPreview).toEqual(fromApp);
 	});

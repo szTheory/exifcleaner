@@ -8,42 +8,17 @@
 		},
 		{
 			"file": "src/main/window/window_background.ts",
-			"literal": "#141416",
+			"literal": "#0a2e2b",
 			"count": 1
 		},
 		{
 			"file": "src/main/window/window_background.ts",
-			"literal": "#f5f6f8",
+			"literal": "#ffffff",
 			"count": 1
 		},
 		{
 			"file": "src/renderer/styles/drop_zone.css",
 			"literal": "transparent",
-			"count": 1
-		},
-		{
-			"file": "src/renderer/styles/empty_state.css",
-			"literal": "#005ab8",
-			"count": 2
-		},
-		{
-			"file": "src/renderer/styles/empty_state.css",
-			"literal": "#006bd6",
-			"count": 2
-		},
-		{
-			"file": "src/renderer/styles/empty_state.css",
-			"literal": "#59677b",
-			"count": 1
-		},
-		{
-			"file": "src/renderer/styles/empty_state.css",
-			"literal": "#94949b",
-			"count": 1
-		},
-		{
-			"file": "src/renderer/styles/empty_state.css",
-			"literal": "#fff",
 			"count": 1
 		},
 		{
@@ -55,11 +30,6 @@
 			"file": "src/renderer/styles/file_table.css",
 			"literal": "transparent",
 			"count": 2
-		},
-		{
-			"file": "src/renderer/styles/language_dropdown.css",
-			"literal": "rgba(0, 0, 0, 0.04)",
-			"count": 1
 		},
 		{
 			"file": "src/renderer/styles/language_dropdown.css",
@@ -103,22 +73,12 @@
 		},
 		{
 			"file": "src/renderer/styles/toggle_switch.css",
-			"literal": "#ffffff",
-			"count": 1
-		},
-		{
-			"file": "src/renderer/styles/toggle_switch.css",
 			"literal": "rgba(0, 0, 0, 0.15)",
 			"count": 1
 		},
 		{
 			"file": "src/renderer/styles/toggle_switch.css",
 			"literal": "rgba(0, 0, 0, 0.3)",
-			"count": 1
-		},
-		{
-			"file": "src/renderer/styles/type_pill.css",
-			"literal": "rgba(157, 167, 182, 0.1)",
 			"count": 1
 		}
 	]

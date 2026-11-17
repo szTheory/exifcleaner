@@ -118,9 +118,6 @@
 	text-wrap: pretty;
 }
 
-[data-theme="dark"] .empty-state {
-}
-
 @media (prefers-reduced-motion: no-preference) {
 	.empty-state__inner {
 		animation: empty-state-fade-in 0.3s ease-out;

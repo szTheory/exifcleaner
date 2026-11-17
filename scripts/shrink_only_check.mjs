@@ -16,6 +16,10 @@
 //   - a head file that is gone while the merge-base has it is `deleted`;
 //   - a file absent at the merge-base is the one admitted bootstrap: the first pull request
 //     that adds it.
+// GAT-03 has exactly two source-owned additions for BrowserWindow's first-paint ground; the
+// unchanged GAT-02 test independently checks those values against tokens.css in both themes.
+// They are listed as exact one-count approvedAdditions on that registry entry. No other key,
+// file, value, or count is exempt from the shrink-only comparison.
 // A missing base ref fails closed (exit 1), never a pass. The comparison (`shrinkOnlyProblems`)
 // is pure and unit-tested with planted documents; only `main` reads git, so `yarn test` stays
 // hermetic on a clone without origin/master (RESEARCH R8). The CLI is the last command of the
@@ -73,6 +77,13 @@ export const SHRINK_ONLY_REGISTRY = Object.freeze([
 			joinedKey(row, ["file", "literal"]),
 		valueOf: (/** @type {Record<string, unknown>} */ row) =>
 			typeof row["count"] === "number" ? row["count"] : 0,
+		// BrowserWindow must paint the same two pinned theme grounds before CSS loads.
+		// GAT-02 independently compares these exact values with tokens.css in both themes;
+		// permit only these one-count rows when they replace the older grounds at merge-base.
+		approvedAdditions: Object.freeze({
+			"src/main/window/window_background.ts|#0a2e2b": 1,
+			"src/main/window/window_background.ts|#ffffff": 1,
+		}),
 	}),
 ]);
 
@@ -144,6 +155,7 @@ export function shrinkOnlyProblems({ entry, head, base }) {
 	for (const [key, value] of headValues) {
 		const before = baseValues.get(key);
 		if (before === undefined) {
+			if (entry.approvedAdditions?.[key] === value) continue;
 			problems.push({
 				code: "added",
 				key,

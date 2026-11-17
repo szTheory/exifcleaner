@@ -29,6 +29,10 @@ import {
 	ratchetProblems,
 } from "./colour_literal_ratchet.mjs";
 import { readMergeBase } from "../.storybook/catalog/merge_base.mjs";
+import {
+	SHRINK_ONLY_REGISTRY,
+	shrinkOnlyProblems,
+} from "./shrink_only_check.mjs";
 
 export const APPROVED_OFF_TRACK_MIX =
 	"color-mix(in srgb, GrayText 90%, CanvasText 10%)";
@@ -58,6 +62,7 @@ export const PREREQUISITE_BRANCHES = Object.freeze([
 	"gsd/77-drift-hop-fixture",
 	"gsd/77-source-fixture-metadata",
 	"gsd/77-selection-route-contract",
+	"gsd/77-literal-ratchet-contract",
 ]);
 
 export const INDICATOR_EVIDENCE_INPUTS = Object.freeze([
@@ -344,7 +349,7 @@ export function validatePrerequisites(prerequisites) {
 		byBranch.set(item.branch, item);
 	}
 	if (prerequisites.length !== PREREQUISITE_BRANCHES.length)
-		problems.push("exactly twelve prerequisites are required");
+		problems.push("exactly thirteen prerequisites are required");
 	for (const branch of PREREQUISITE_BRANCHES) {
 		const item = byBranch.get(branch);
 		if (item === undefined) {
@@ -1594,6 +1599,16 @@ function currentMeasurementInputs(root, reconciliation) {
 		"tests/scripts/palette_77_proof.test.ts",
 		"scripts/colour_literal_ratchet.mjs",
 		"scripts/shrink_only_check.mjs",
+		"scripts/shrink_only_check.d.mts",
+		"tests/renderer/gates/shrink_only.test.ts",
+		"tests/renderer/gates/colour_literal.test.ts",
+		"tests/renderer/gates/window_background.test.ts",
+		"src/main/window/window_background.ts",
+		"src/renderer/styles/metadata_expansion.css",
+		".storybook/config.test.ts",
+		".storybook/catalog/brand_quote_check.test.ts",
+		".storybook/catalog/token_map.test.ts",
+		".storybook/a11y_p72_recheck.test.tsx",
 		".storybook/catalog/css_scan.mjs",
 		".storybook/catalog/merge_base.mjs",
 		".storybook/catalog/TOKEN-MAP.md",
@@ -1726,20 +1741,16 @@ function literalProof(root, baseRef) {
 			cwd: root,
 		});
 		if (base?.rows) {
-			const currentByKey = new Map(
-				(baseline.rows ?? []).map((row) => [
-					`${row.file}|${row.literal}`,
-					row.count,
-				]),
+			const entry = SHRINK_ONLY_REGISTRY.find(
+				(candidate) => candidate.id === "GAT-03 baseline",
 			);
-			const baseByKey = new Map(
-				base.rows.map((row) => [`${row.file}|${row.literal}`, row.count]),
-			);
-			for (const [key, count] of currentByKey) {
-				const old = baseByKey.get(key);
-				if (old === undefined || count > old)
-					shrinkProblems.push(`literal baseline grew: ${key}`);
-			}
+			if (!entry)
+				throw new Error("GAT-03 shrink-only registry entry is missing");
+			shrinkProblems = shrinkOnlyProblems({
+				entry,
+				head: baseline,
+				base,
+			}).map((problem) => problem.message);
 		}
 	} catch (error) {
 		shrinkProblems.push(String(error));
@@ -2201,7 +2212,7 @@ export function main(argv = process.argv.slice(2), dependencies = {}) {
 		if (!literal.ok || !fullEvidencePresent) {
 			freshMeasurement.sourceProof.pendingReason = !literal.ok
 				? "The final source literal baseline is not yet current."
-				: "The final workspace evidence for all twelve prerequisite merges is not yet complete.";
+				: "The final workspace evidence for all thirteen prerequisite merges is not yet complete.";
 			fs.writeFileSync(
 				path.join(root, MEASUREMENT_PATH),
 				`${JSON.stringify(freshMeasurement, null, 2)}\n`,

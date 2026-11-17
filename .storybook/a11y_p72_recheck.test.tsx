@@ -496,19 +496,19 @@ describe("a11y-p72 re-check controls (planted, never red on disk)", () => {
 	);
 
 	test(
-		"the real ToggleSwitch light-only entry stays green: it fails in light and passes in dark (theme-union)",
+		"the cleared ToggleSwitch entry is clean in both themes (theme-union)",
 		async () => {
 			const story = "settings-toggleswitch--on";
 			const light = await realRunner(story, "color-contrast", "light");
 			const dark = await realRunner(story, "color-contrast", "dark");
-			expect(light).toContain("color-contrast");
+			expect(light).toBeNull();
 			expect(dark).toBeNull();
 			expect(
 				await recheckProblems(
 					[plantedEntry(story, "color-contrast")],
 					realRunner,
 				),
-			).toEqual([]);
+			).toEqual([`fixed, remove the entry a11y-p72|${story}|color-contrast`]);
 		},
 		CONTROL_TIMEOUT_MS,
 	);
