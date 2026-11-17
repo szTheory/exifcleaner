@@ -2,14 +2,16 @@
   "schemaVersion": 1,
   "phase": "77",
   "plan": "05",
-  "recordedAt": "2026-11-17T20:02:08.089Z",
+  "recordedAt": "2026-11-17T21:19:52.271Z",
   "implementation": {
     "v50Close": "b0b566be89886e75929a3da3edeed1497a09a299",
     "initialImplementationBase": "1d8f4219d3d35d401532273ea50f6250c27cb6e4",
-    "effectiveImplementationBase": "3c714217358c1bf8feae26440d14b5fa13438930",
+    "effectiveImplementationBase": "b873ca53368906df34da464d97a705b634034bdc",
     "savedPaletteTip": "8f8635cbbeccd749a98b759fc5da2d4f025e7045",
-    "measurementHead": "14dc64dda65e3ac659f6d6f982bc3e0472377469",
-    "originalFingerprintDenominator": 208
+    "measurementHead": "6f186ef0f20247d57868cc43c511c07ad2e12bf8",
+    "originalFingerprintDenominator": 208,
+    "priorEffectiveImplementationBase": "8d0e33f97823ff18c7a1d140dfee02b1868b18ac",
+    "latestPaletteIntegration": "bb4e8d9bdc85a34643349bb779ba16dab992ce01"
   },
   "originalSet": {
     "count": 208,
@@ -11549,7 +11551,7 @@
       ],
       "proposedCount": 27,
       "proposedPassing": 27,
-      "indicatorGateSha256": "b3c143337ef5fc37a73b30c8281974290a95fe2574a4e1d1a68b70804d980c35"
+      "indicatorGateSha256": "a2e56cb007bb7eb061559ff8d46639f7b83169110fbe11e00d25dfc1cd2b9a5e"
     },
     "residuals": []
   },
@@ -16206,7 +16208,7 @@
       "duplicateSourceRejected": true,
       "allVisualPlantsRestored": true
     },
-    "recordSha256": "b3c143337ef5fc37a73b30c8281974290a95fe2574a4e1d1a68b70804d980c35"
+    "recordSha256": "a2e56cb007bb7eb061559ff8d46639f7b83169110fbe11e00d25dfc1cd2b9a5e"
   },
   "forcedColors": {
     "mediaActive": true,
@@ -16595,26 +16597,31 @@
     "../.planning/phases/77-palette-and-tokens/77-CONTEXT.md": "4704acf7f04d4a178f03bc90c8ab93817b863ea88afed5581048b467af3d89a6",
     "../.planning/phases/77-palette-and-tokens/77-UI-SPEC.md": "ab7551a2b824eadae95906ca0fd696781c3f83c6e8d1d2bc439db7c66fa4f71f",
     ".brand-cache/unpacked/exifcleaner-brand/tokens.json": "071dadba329fa19b23b183f9a07fa138b409f13dc09c7483c83e50710f305110",
-    ".storybook/a11y_p72_recheck.test.tsx": "887f96c0aef3e34ab49916586d38db32ee02397757f8044e98fbcb7561917832",
+    ".storybook/a11y_p72_recheck.test.tsx": "88a5529dc004b13e82a67733438c1b6e84a94bc53076d504da32921ffbbac69a",
     ".storybook/catalog/FINDINGS.md": "a643c789c733df72bb8d05c1951c4816a79ff1b3165fbc196f890c2afee554e6",
     ".storybook/catalog/TOKEN-MAP.md": "140d3af64b41ea9a7ff733654507c72b7c4740c7ba100c1f0d0c567395e721b6",
+    ".storybook/catalog/brand_quote_check.test.ts": "ca7be7ba4ae3d7093e327ae91b63e4a9004cac70eca94ce7a8a7dc109b1cbb0f",
     ".storybook/catalog/css_scan.mjs": "733987946510ef716eb346262a0e308357b4ddd5c637b122c5a03755ab3be245",
     ".storybook/catalog/merge_base.mjs": "af3a1eeb8faa05fda260264cc81e0decbb2d54286c32c2bdd5af01a48824277f",
     ".storybook/catalog/story_index.mjs": "b778ae17504258ab44aa1f9b94a7805ea3776bc3e2360d284f31d66225f15bc9",
     ".storybook/catalog/token_map.json": "911396d8da45774e64460819545443419245c2c4d7dcc21e655673b3db8cabf7",
+    ".storybook/catalog/token_map.test.ts": "e079ee8e87e47a5afa206a4712a4b92f21b64d2a1be12a3b691361b1afd6f69f",
     ".storybook/catalog/ui-spec.json": "b48f08780f9ff397baed7fdaebca1151cd667dc8559f2d4b00dcf588e2c64aef",
+    ".storybook/config.test.ts": "208b613c5c7e856efb4dd9ba115b76b0f0ce55e6c4c46bb79bc8b6818181d3de",
     ".storybook/forced_colors.test.tsx": "b64b84f703bcb206f8a34120de79941fe5dd91fc459d2fcf498b3108d90fa6a4",
     ".storybook/platform_indicators.test.tsx": "e69452df7d1f1b7d8cec7ca3418ff302fadb76db75e5512fc39f46448821e962",
     ".storybook/preview.tsx": "9563b1c43e25df8d23d215a4cb61ac589b3323a2829864b08b1afb28f7031e6a",
     "brand.pin.json": "b992decfbff8276c69e03b85f018b243dc0e41ea1fb0afe2cca1da914a9a3761",
-    "docs/evidence/colour-literals.json": "5cc12ba6775c5287c0f134a5da3b91e7737eb89cb82c2a3fbcb940504d62e557",
+    "docs/evidence/colour-literals.json": "b7dac499560ce8aa2d46d0be4d7d0a69895926362389d6e25217888dc0886825",
     "docs/evidence/known-findings.json": "00fb23d0d79923cf910e9ea1b452f158849d8a5b340f93d975895fb574b403eb",
-    "node_modules/.cache/palette77-reconciliation.json": "87d267d30a40a37fab09b473d0adea3f92649a68e9bde787f08683b267b3aac4",
+    "node_modules/.cache/palette77-reconciliation.json": "33bc327c03a9f012213139c9a473bd6af8f15c9ce7f69782dfa4d1c69a194b13",
     "package.json": "3db378e4738c4b7b416272a0d8d56da924da1e0572a0720c6e39bff66b61ff9b",
     "scripts/colour_literal_ratchet.mjs": "13dfb7f3523b862af9ec377cae49b1499f228ce44cfdc01e3662a26648566afb",
-    "scripts/palette_77_proof.mjs": "0e97f00bf005d935174a0d6c8a1c4f29921fda6649673322a52c507b50b12c2f",
-    "scripts/shrink_only_check.mjs": "f9220aa923baee4d2342b68708b2ec9d7cb5e5bdafb6b81163429b3eff0ffa45",
+    "scripts/palette_77_proof.mjs": "18ee96a3719889653e46ec5c971e29a1b0967e7710366d5c4143df7f91a750c4",
+    "scripts/shrink_only_check.d.mts": "1b79fca975063f94c47e6357836d9f40594f65d463c0fd8d3db7f8fa4962eade",
+    "scripts/shrink_only_check.mjs": "d432b2cc8592e0b5a0919397fa56d8a5b865e628e5376a9e44fc4741a9afc054",
     "src/domain/accent_color.ts": "04fcdeffb01fdda13128de3a698ed7f39df801a5e0ebedafd5202207b19a8a4b",
+    "src/main/window/window_background.ts": "49636caff5380be8d504a27a30626aaea9591abdb61c51a3eb7d00d7f6e117fd",
     "src/renderer/components/file-list/ErrorExpansion.stories.tsx": "b62961ea1566cf5477068bca2f48d3b8dc5f86606d48600cf04aaf21d2c3ed2a",
     "src/renderer/components/file-list/FileRow.stories.tsx": "9274ea5fe75b39598f8f5b01a48e320bfb26645319ffbd7fec91d49a1a27beb0",
     "src/renderer/components/file-list/FileTable.stories.tsx": "7c401a2db6226ebbf30eff2711f679c12cae5b31b7f05db2ac85b421d8ddd721",
@@ -16638,14 +16645,14 @@
     "src/renderer/index.tsx": "6ddfd5a8822eafdb66a1242a3fe1d813cf55a0b650fdd34a17dbfb0d967ab8c9",
     "src/renderer/styles/app.css": "8f19929753788717119add662deec11f6463a69b6c9c1fa2cb348931cd7e88f1",
     "src/renderer/styles/drop_zone.css": "74701132cddc277a361da1d928b857dbddc0515d0edc1a1caf1a6651d788fdd0",
-    "src/renderer/styles/empty_state.css": "88368504830d6a609547e4334cc638b2d0a884d43fb0d88147bd3534e2fa27fa",
+    "src/renderer/styles/empty_state.css": "9cdc3a0b970b9fd31c13bd5911fa21c1ac62da806a1f069d798b8116a68ea562",
     "src/renderer/styles/error_boundary.css": "559454ee2304aded717999c44feb8cc9ba9b7147cf22841075705ee23cfd5183",
     "src/renderer/styles/file_list.css": "5b40f8ca7e378664d2750f23fa348d1b0255b7c57241a6a7a1af94feff33e90c",
     "src/renderer/styles/file_table.css": "688569c7bd6dc3405e0559b60c2f8af11ed6040905b0add06f8d0f3c86b8cd0f",
     "src/renderer/styles/folder_row.css": "20e509100fdbc1b7f36e728e08ce32e556f2a80e501e8a424b78573b2950250d",
     "src/renderer/styles/forced_colors.css": "4650c8ce4a9d7a0a99b9bdee07c102cf561b2031c67fa7ef24044fe02e4f5f9e",
     "src/renderer/styles/language_dropdown.css": "04e6a4996609069048da28115c00f1fa44639413aa38b1ff86b1126e9cc8871f",
-    "src/renderer/styles/metadata_expansion.css": "35b8ba5227793d69478816a5217f7983910e2b5d13736eecbef21e053c61c5ca",
+    "src/renderer/styles/metadata_expansion.css": "47b222e523b51bfe538126c717cdcd385fecc96f7435dd57b1f2b22b0a91eca8",
     "src/renderer/styles/reset.css": "bebbba48b77d7aea67ca48fa7e4f402357ca5fe5ee15d0c9fb1c42fc22ce6f9a",
     "src/renderer/styles/segmented_control.css": "30c7e85c347fc9fa93b82c7ac9a5881bf5971bb0e2a6d659d8123dfc3702e3cb",
     "src/renderer/styles/settings_drawer.css": "205c57f700c8a95a4553465ec239f1ccac90fde76de4ca8d8a358f979a7cb008",
@@ -16659,7 +16666,10 @@
     "tests/renderer/contrast/contrast_model.mjs": "1e5a7345dcf8b19a94a9ffd19ea75e69c9c9704232119e4defa8a5bdef9fd318",
     "tests/renderer/contrast/contrast_pairs.json": "321ef02971332a3c95db8b3575bc83f6360333af14b4187d65f3239602d45720",
     "tests/renderer/contrast/wcag.mjs": "870671e24c99097b6078e233abb4b4e858b7ab871ccca2ad52f080f11fc3bb3d",
-    "tests/scripts/palette_77_proof.test.ts": "b50c36bcd192dc4d5ceb0dbd9568b9b0d5e950c62839711b48ec08c4a821052d",
+    "tests/renderer/gates/colour_literal.test.ts": "6b9b1455fc92ba55adf51276d64003202e7d5687783297b6fb57a3bf8eed9d41",
+    "tests/renderer/gates/shrink_only.test.ts": "20c0877213a98808b273660c4d7af563cd1e26ae24fe48630d9d91ed641f3075",
+    "tests/renderer/gates/window_background.test.ts": "adef4e497d2471ad03c4a27a09349c3a5148f488e6042cd59394f6d3d093a36c",
+    "tests/scripts/palette_77_proof.test.ts": "13fce37263bb1d636728af710e7fd170c54b8ca63d2345279d875c0b77915d4d",
     "vitest.storybook.config.ts": "770e9bdc938d178d9fd76357cda320c8232738f4f488c5c4fe5feb3993a284ff"
   },
   "registerReconciliation": {
@@ -16933,7 +16943,7 @@
     "knownFindingsSha256After": "00fb23d0d79923cf910e9ea1b452f158849d8a5b340f93d975895fb574b403eb",
     "reconciliationReport": {
       "path": "node_modules/.cache/palette77-reconciliation.json",
-      "sha256": "87d267d30a40a37fab09b473d0adea3f92649a68e9bde787f08683b267b3aac4",
+      "sha256": "33bc327c03a9f012213139c9a473bd6af8f15c9ce7f69782dfa4d1c69a194b13",
       "task2SourceDigestRefresh": [
         {
           "path": "tests/renderer/contrast/contrast_model.mjs",
@@ -16946,6 +16956,24 @@
           "previousSha256": "732df042ef161649abacf3668169cd5b58cfba7c94e4491783bbac21f4383893",
           "currentSha256": "140d3af64b41ea9a7ff733654507c72b7c4740c7ba100c1f0d0c567395e721b6",
           "reason": "Task 77-05-02 regenerated the canonical view from token_map.json."
+        },
+        {
+          "path": "src/renderer/styles/metadata_expansion.css",
+          "previousSha256": "35b8ba5227793d69478816a5217f7983910e2b5d13736eecbef21e053c61c5ca",
+          "currentSha256": "47b222e523b51bfe538126c717cdcd385fecc96f7435dd57b1f2b22b0a91eca8",
+          "reason": "Task 77-05-03 replaces two redundant transparent background declarations with the equivalent no-image background value to keep the literal inventory shrink-only; current rendered evidence is replayed by the final source proof."
+        },
+        {
+          "path": ".storybook/a11y_p72_recheck.test.tsx",
+          "previousSha256": "887f96c0aef3e34ab49916586d38db32ee02397757f8044e98fbcb7561917832",
+          "currentSha256": "88a5529dc004b13e82a67733438c1b6e84a94bc53076d504da32921ffbbac69a",
+          "reason": "Phase 77 final Storybook update now asserts the corrected ToggleSwitch contrast row is clear in both themes; full Storybook and current contrast reconciliation are replayed in source proof."
+        },
+        {
+          "path": "src/renderer/styles/empty_state.css",
+          "previousSha256": "88368504830d6a609547e4334cc638b2d0a884d43fb0d88147bd3534e2fa27fa",
+          "currentSha256": "9cdc3a0b970b9fd31c13bd5911fa21c1ac62da806a1f069d798b8116a68ea562",
+          "reason": "Final review removed an empty dark-theme selector left after its local token was retired; no rendered styles or geometry changed."
         }
       ]
     }
@@ -17240,11 +17268,12 @@
     ]
   },
   "sourceProof": {
-    "status": "pending-final-literal-baseline",
-    "sealed": false,
-    "base": "3c714217358c1bf8feae26440d14b5fa13438930",
+    "status": "passed",
+    "sealed": true,
+    "base": "b873ca53368906df34da464d97a705b634034bdc",
     "v50Close": "b0b566be89886e75929a3da3edeed1497a09a299",
-    "measurementDigest": "pending",
+    "measurementDigest": "5ec1ab7961641b19d2a099c814352bf49f151703933a84ccc8d56eefcbc2fde8",
+    "literalBaselineSha256": "b7dac499560ce8aa2d46d0be4d7d0a69895926362389d6e25217888dc0886825",
     "inputs": [
       {
         "path": "../.planning/phases/77-palette-and-tokens/77-CONTEXT.md",
@@ -17260,7 +17289,7 @@
       },
       {
         "path": ".storybook/a11y_p72_recheck.test.tsx",
-        "sha256": "887f96c0aef3e34ab49916586d38db32ee02397757f8044e98fbcb7561917832"
+        "sha256": "88a5529dc004b13e82a67733438c1b6e84a94bc53076d504da32921ffbbac69a"
       },
       {
         "path": ".storybook/catalog/FINDINGS.md",
@@ -17269,6 +17298,10 @@
       {
         "path": ".storybook/catalog/TOKEN-MAP.md",
         "sha256": "140d3af64b41ea9a7ff733654507c72b7c4740c7ba100c1f0d0c567395e721b6"
+      },
+      {
+        "path": ".storybook/catalog/brand_quote_check.test.ts",
+        "sha256": "ca7be7ba4ae3d7093e327ae91b63e4a9004cac70eca94ce7a8a7dc109b1cbb0f"
       },
       {
         "path": ".storybook/catalog/css_scan.mjs",
@@ -17287,8 +17320,16 @@
         "sha256": "911396d8da45774e64460819545443419245c2c4d7dcc21e655673b3db8cabf7"
       },
       {
+        "path": ".storybook/catalog/token_map.test.ts",
+        "sha256": "e079ee8e87e47a5afa206a4712a4b92f21b64d2a1be12a3b691361b1afd6f69f"
+      },
+      {
         "path": ".storybook/catalog/ui-spec.json",
         "sha256": "b48f08780f9ff397baed7fdaebca1151cd667dc8559f2d4b00dcf588e2c64aef"
+      },
+      {
+        "path": ".storybook/config.test.ts",
+        "sha256": "208b613c5c7e856efb4dd9ba115b76b0f0ce55e6c4c46bb79bc8b6818181d3de"
       },
       {
         "path": ".storybook/forced_colors.test.tsx",
@@ -17308,7 +17349,7 @@
       },
       {
         "path": "docs/evidence/colour-literals.json",
-        "sha256": "5cc12ba6775c5287c0f134a5da3b91e7737eb89cb82c2a3fbcb940504d62e557"
+        "sha256": "b7dac499560ce8aa2d46d0be4d7d0a69895926362389d6e25217888dc0886825"
       },
       {
         "path": "docs/evidence/known-findings.json",
@@ -17316,7 +17357,7 @@
       },
       {
         "path": "node_modules/.cache/palette77-reconciliation.json",
-        "sha256": "87d267d30a40a37fab09b473d0adea3f92649a68e9bde787f08683b267b3aac4"
+        "sha256": "33bc327c03a9f012213139c9a473bd6af8f15c9ce7f69782dfa4d1c69a194b13"
       },
       {
         "path": "package.json",
@@ -17328,15 +17369,23 @@
       },
       {
         "path": "scripts/palette_77_proof.mjs",
-        "sha256": "0e97f00bf005d935174a0d6c8a1c4f29921fda6649673322a52c507b50b12c2f"
+        "sha256": "18ee96a3719889653e46ec5c971e29a1b0967e7710366d5c4143df7f91a750c4"
+      },
+      {
+        "path": "scripts/shrink_only_check.d.mts",
+        "sha256": "1b79fca975063f94c47e6357836d9f40594f65d463c0fd8d3db7f8fa4962eade"
       },
       {
         "path": "scripts/shrink_only_check.mjs",
-        "sha256": "f9220aa923baee4d2342b68708b2ec9d7cb5e5bdafb6b81163429b3eff0ffa45"
+        "sha256": "d432b2cc8592e0b5a0919397fa56d8a5b865e628e5376a9e44fc4741a9afc054"
       },
       {
         "path": "src/domain/accent_color.ts",
         "sha256": "04fcdeffb01fdda13128de3a698ed7f39df801a5e0ebedafd5202207b19a8a4b"
+      },
+      {
+        "path": "src/main/window/window_background.ts",
+        "sha256": "49636caff5380be8d504a27a30626aaea9591abdb61c51a3eb7d00d7f6e117fd"
       },
       {
         "path": "src/renderer/components/file-list/ErrorExpansion.stories.tsx",
@@ -17432,7 +17481,7 @@
       },
       {
         "path": "src/renderer/styles/empty_state.css",
-        "sha256": "88368504830d6a609547e4334cc638b2d0a884d43fb0d88147bd3534e2fa27fa"
+        "sha256": "9cdc3a0b970b9fd31c13bd5911fa21c1ac62da806a1f069d798b8116a68ea562"
       },
       {
         "path": "src/renderer/styles/error_boundary.css",
@@ -17460,7 +17509,7 @@
       },
       {
         "path": "src/renderer/styles/metadata_expansion.css",
-        "sha256": "35b8ba5227793d69478816a5217f7983910e2b5d13736eecbef21e053c61c5ca"
+        "sha256": "47b222e523b51bfe538126c717cdcd385fecc96f7435dd57b1f2b22b0a91eca8"
       },
       {
         "path": "src/renderer/styles/reset.css",
@@ -17515,16 +17564,402 @@
         "sha256": "870671e24c99097b6078e233abb4b4e858b7ab871ccca2ad52f080f11fc3bb3d"
       },
       {
+        "path": "tests/renderer/gates/colour_literal.test.ts",
+        "sha256": "6b9b1455fc92ba55adf51276d64003202e7d5687783297b6fb57a3bf8eed9d41"
+      },
+      {
+        "path": "tests/renderer/gates/shrink_only.test.ts",
+        "sha256": "20c0877213a98808b273660c4d7af563cd1e26ae24fe48630d9d91ed641f3075"
+      },
+      {
+        "path": "tests/renderer/gates/window_background.test.ts",
+        "sha256": "adef4e497d2471ad03c4a27a09349c3a5148f488e6042cd59394f6d3d093a36c"
+      },
+      {
         "path": "tests/scripts/palette_77_proof.test.ts",
-        "sha256": "b50c36bcd192dc4d5ceb0dbd9568b9b0d5e950c62839711b48ec08c4a821052d"
+        "sha256": "13fce37263bb1d636728af710e7fd170c54b8ca63d2345279d875c0b77915d4d"
       },
       {
         "path": "vitest.storybook.config.ts",
         "sha256": "770e9bdc938d178d9fd76357cda320c8232738f4f488c5c4fe5feb3993a284ff"
       }
     ],
-    "invariants": [],
-    "prerequisites": [],
-    "pendingReason": "The final source literal baseline is not yet current."
+    "prerequisites": [
+      {
+        "branch": "gsd/77-test-contracts",
+        "pr": 425,
+        "base": "b2035c28ea07cca5e891ffa21099a4b8f35da048",
+        "head": "4d6ac3b7148fc6a3c91be8c6ec89656b64eb8fb2",
+        "merge": "126356626c471aed4fe2f393823682f4310b215e",
+        "ci": {
+          "runId": 43947469907,
+          "attempt": 2,
+          "head": "4d6ac3b7148fc6a3c91be8c6ec89656b64eb8fb2",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 43947626537,
+          "head": "4d6ac3b7148fc6a3c91be8c6ec89656b64eb8fb2",
+          "conclusion": "success",
+          "seconds": 330,
+          "startedAt": "2026-11-16T20:14:06Z",
+          "completedAt": "2026-11-16T20:19:36Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      },
+      {
+        "branch": "gsd/77-test-twins",
+        "pr": 426,
+        "base": "126356626c471aed4fe2f393823682f4310b215e",
+        "head": "6bef92b71bbf80f62b8f14b1f3faa30e98b90fbb",
+        "merge": "1d8f4219d3d35d401532273ea50f6250c27cb6e4",
+        "ci": {
+          "runId": 43952935070,
+          "attempt": 1,
+          "head": "6bef92b71bbf80f62b8f14b1f3faa30e98b90fbb",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 43952934989,
+          "head": "6bef92b71bbf80f62b8f14b1f3faa30e98b90fbb",
+          "conclusion": "success",
+          "seconds": 300,
+          "startedAt": "2026-11-16T20:44:50Z",
+          "completedAt": "2026-11-16T20:49:50Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      },
+      {
+        "branch": "gsd/77-gap-contract",
+        "pr": 427,
+        "base": "1d8f4219d3d35d401532273ea50f6250c27cb6e4",
+        "head": "84ac73a38f006703c0132fad92e892dd379fd808",
+        "merge": "3c714217358c1bf8feae26440d14b5fa13438930",
+        "ci": {
+          "runId": 43971789370,
+          "attempt": 1,
+          "head": "84ac73a38f006703c0132fad92e892dd379fd808",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 43971842587,
+          "head": "84ac73a38f006703c0132fad92e892dd379fd808",
+          "conclusion": "success",
+          "seconds": 329,
+          "startedAt": "2026-11-16T22:37:31Z",
+          "completedAt": "2026-11-16T22:43:00Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      },
+      {
+        "branch": "gsd/77-final-contracts",
+        "pr": 428,
+        "base": "3c714217358c1bf8feae26440d14b5fa13438930",
+        "head": "1b49c95ae24614d4d77daae55394e0438dd87b64",
+        "merge": "e03c024677e6f5664b9065c6e8a636dc4357196b",
+        "ci": {
+          "runId": 44020948667,
+          "attempt": 2,
+          "head": "1b49c95ae24614d4d77daae55394e0438dd87b64",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 44021037630,
+          "head": "1b49c95ae24614d4d77daae55394e0438dd87b64",
+          "conclusion": "success",
+          "seconds": 347,
+          "startedAt": "2026-11-17T05:00:38Z",
+          "completedAt": "2026-11-17T05:06:25Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      },
+      {
+        "branch": "gsd/77-contract-fixture-fix",
+        "pr": 429,
+        "base": "e03c024677e6f5664b9065c6e8a636dc4357196b",
+        "head": "1b4ba06835b50b8c158a207ca260771c54424414",
+        "merge": "ce799a455ee22aa9530f9cc8730f77a3a2300ba5",
+        "ci": {
+          "runId": 44029072161,
+          "attempt": 1,
+          "head": "1b4ba06835b50b8c158a207ca260771c54424414",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 44029186617,
+          "head": "1b4ba06835b50b8c158a207ca260771c54424414",
+          "conclusion": "success",
+          "seconds": 290,
+          "startedAt": "2026-11-17T06:10:03Z",
+          "completedAt": "2026-11-17T06:14:53Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      },
+      {
+        "branch": "gsd/77-semantic-fixture-fix",
+        "pr": 430,
+        "base": "ce799a455ee22aa9530f9cc8730f77a3a2300ba5",
+        "head": "be4c2881c7efa2494a0371d1fef2d9b946db9746",
+        "merge": "14da08a1349f969c203db839f98b7aabaa9b9f62",
+        "ci": {
+          "runId": 44038326395,
+          "attempt": 2,
+          "head": "be4c2881c7efa2494a0371d1fef2d9b946db9746",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 44038405468,
+          "head": "be4c2881c7efa2494a0371d1fef2d9b946db9746",
+          "conclusion": "success",
+          "seconds": 358,
+          "startedAt": "2026-11-17T07:24:06Z",
+          "completedAt": "2026-11-17T07:30:04Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      },
+      {
+        "branch": "gsd/77-declared-backdrops",
+        "pr": 431,
+        "base": "14da08a1349f969c203db839f98b7aabaa9b9f62",
+        "head": "7af4a82774e5a349a613df16da9278c0e934685d",
+        "merge": "ccae4eee13b855c3fb8d9daa873002bd1d167f4d",
+        "ci": {
+          "runId": 44052570630,
+          "attempt": 2,
+          "head": "7af4a82774e5a349a613df16da9278c0e934685d",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 44052594549,
+          "head": "7af4a82774e5a349a613df16da9278c0e934685d",
+          "conclusion": "success",
+          "seconds": 378,
+          "startedAt": "2026-11-17T09:07:08Z",
+          "completedAt": "2026-11-17T09:13:26Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      },
+      {
+        "branch": "gsd/77-hover-contract-states",
+        "pr": 432,
+        "base": "ccae4eee13b855c3fb8d9daa873002bd1d167f4d",
+        "head": "ec81f37273bbd5c10a72e5e1da8f5020d360e597",
+        "merge": "1e13a68a945810e6ce4f6f3871d0115f0db6bdce",
+        "ci": {
+          "runId": 44074009963,
+          "attempt": 1,
+          "head": "ec81f37273bbd5c10a72e5e1da8f5020d360e597",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 44074094650,
+          "head": "ec81f37273bbd5c10a72e5e1da8f5020d360e597",
+          "conclusion": "success",
+          "seconds": 393,
+          "startedAt": "2026-11-17T11:26:56Z",
+          "completedAt": "2026-11-17T11:33:29Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      },
+      {
+        "branch": "gsd/77-hover-fixture-isolation",
+        "pr": 433,
+        "base": "1e13a68a945810e6ce4f6f3871d0115f0db6bdce",
+        "head": "ed72bc1e47f60d8131027ad73c4acfa4434fd731",
+        "merge": "7bc30d79bf613d9e8ee3246bf576c576176ff780",
+        "ci": {
+          "runId": 44086988654,
+          "attempt": 1,
+          "head": "ed72bc1e47f60d8131027ad73c4acfa4434fd731",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 44087078772,
+          "head": "ed72bc1e47f60d8131027ad73c4acfa4434fd731",
+          "conclusion": "success",
+          "seconds": 321,
+          "startedAt": "2026-11-17T12:51:34Z",
+          "completedAt": "2026-11-17T12:56:55Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      },
+      {
+        "branch": "gsd/77-drift-hop-fixture",
+        "pr": 434,
+        "base": "7bc30d79bf613d9e8ee3246bf576c576176ff780",
+        "head": "63fea728893d63e3e925cad632ef719088f5199c",
+        "merge": "bdc41a81a1f066477e4491157f2ad23c3b70caa5",
+        "ci": {
+          "runId": 44100580010,
+          "attempt": 1,
+          "head": "63fea728893d63e3e925cad632ef719088f5199c",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 44100710709,
+          "head": "63fea728893d63e3e925cad632ef719088f5199c",
+          "conclusion": "success",
+          "seconds": 349,
+          "startedAt": "2026-11-17T14:13:17Z",
+          "completedAt": "2026-11-17T14:19:06Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      },
+      {
+        "branch": "gsd/77-source-fixture-metadata",
+        "pr": 435,
+        "base": "bdc41a81a1f066477e4491157f2ad23c3b70caa5",
+        "head": "8adde6aae28728bf5a68a91b784884650d732fb2",
+        "merge": "01f71d15265ac3d7efc0864c489926f271901592",
+        "ci": {
+          "runId": 44124765023,
+          "attempt": 1,
+          "head": "8adde6aae28728bf5a68a91b784884650d732fb2",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 44124891598,
+          "head": "8adde6aae28728bf5a68a91b784884650d732fb2",
+          "conclusion": "success",
+          "seconds": 374,
+          "startedAt": "2026-11-17T16:21:52Z",
+          "completedAt": "2026-11-17T16:28:06Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      },
+      {
+        "branch": "gsd/77-selection-route-contract",
+        "pr": 436,
+        "base": "01f71d15265ac3d7efc0864c489926f271901592",
+        "head": "457a84c2adb344eb8757b2044aa5ba5ba13efbe9",
+        "merge": "8d0e33f97823ff18c7a1d140dfee02b1868b18ac",
+        "ci": {
+          "runId": 44143139661,
+          "attempt": 2,
+          "head": "457a84c2adb344eb8757b2044aa5ba5ba13efbe9",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 44144909603,
+          "head": "457a84c2adb344eb8757b2044aa5ba5ba13efbe9",
+          "conclusion": "success",
+          "seconds": 369,
+          "startedAt": "2026-11-17T18:10:14Z",
+          "completedAt": "2026-11-17T18:16:23Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      },
+      {
+        "branch": "gsd/77-literal-ratchet-contract",
+        "pr": 437,
+        "base": "8d0e33f97823ff18c7a1d140dfee02b1868b18ac",
+        "head": "110678cf7f0d6d8964c06ab0f8a7fe7d8cc55048",
+        "merge": "b873ca53368906df34da464d97a705b634034bdc",
+        "ci": {
+          "runId": 44169031294,
+          "attempt": 1,
+          "head": "110678cf7f0d6d8964c06ab0f8a7fe7d8cc55048",
+          "conclusion": "success"
+        },
+        "storybook": {
+          "runId": 44169080428,
+          "head": "110678cf7f0d6d8964c06ab0f8a7fe7d8cc55048",
+          "conclusion": "success",
+          "seconds": 361,
+          "startedAt": "2026-11-17T20:25:09Z",
+          "completedAt": "2026-11-17T20:31:10Z"
+        },
+        "review": {
+          "verdict": "clean-or-not-required",
+          "unresolvedThreads": 0
+        }
+      }
+    ],
+    "protectedBlobs": {
+      "problems": [],
+      "master": "b873ca53368906df34da464d97a705b634034bdc",
+      "paths": [
+        "tests/renderer/gates/token_drift.test.ts",
+        "tests/renderer/gates/window_background.test.ts",
+        "tests/renderer/contrast/contrast.test.ts",
+        ".storybook/type_pill_contract.test.tsx",
+        "src/renderer/components/ui/StatusIcon.stories.tsx",
+        "src/renderer/components/ui/TypePill.stories.tsx"
+      ]
+    },
+    "invariants": [
+      {
+        "name": "original-color-fingerprints-and-exact-residuals",
+        "passed": true
+      },
+      {
+        "name": "source-backed-100-row-contrast-matrix-and-g1-g2",
+        "passed": true
+      },
+      {
+        "name": "actual-source-axe-color-observations-in-both-themes",
+        "passed": true
+      },
+      {
+        "name": "fresh-system-mix-platform-observations-and-exact-white-thumb",
+        "passed": true
+      },
+      {
+        "name": "fresh-segmented-focus-and-drop-indicator-observations",
+        "passed": true
+      },
+      {
+        "name": "forced-colors-removal-and-restoration-controls",
+        "passed": true
+      },
+      {
+        "name": "brand-token-and-accent-site-ownership",
+        "passed": true
+      },
+      {
+        "name": "protected-prerequisite-blobs-and-merge-ancestry",
+        "passed": true
+      },
+      {
+        "name": "literal-baseline-and-shrink-only-ratchet",
+        "passed": true
+      }
+    ]
   }
 }
