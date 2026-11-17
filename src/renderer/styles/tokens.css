@@ -27,35 +27,15 @@
 	--ec-color-surface-hover: #DCE6E5;
 	--ec-color-surface-pressed: #CBD7D6;
 	--ec-color-accent: #007AFF;
-	--ec-color-success: #34c759;
+	--ec-color-platform-indicator: var(--ec-color-accent);
 	--ec-color-error: #FF3B30;
 	--ec-color-error-bg: var(--ec-color-surface);
-	--ec-color-info: #3b7fc4;
-	--ec-color-gold: #f8d057;
-	--ec-color-gold-bg: rgba(248, 208, 87, 0.05);
-	--ec-color-muted: #9da7b6;
-	--ec-color-removed-bg: rgba(255, 59, 48, 0.08);
-	--ec-color-preserved-bg: rgba(52, 199, 89, 0.08);
 
 	/* Adaptive tokens -- Light Mode */
 	--ec-shadow-drawer: rgba(0, 0, 0, 0.12);
 	--ec-backdrop-opacity: 0.4;
-	--ec-toggle-off-track: #d1d1d6;
+	--ec-toggle-off-track: color-mix(in srgb, GrayText 90%, CanvasText 10%);
 	--ec-border-status-bar: transparent;
-
-	/* Type pill colors -- Light Mode (muted, ~40% reduced saturation) */
-	--ec-pill-jpg-bg: rgba(100, 140, 170, 0.08);
-	--ec-pill-jpg-text: #6a8fa8;
-	--ec-pill-heic-bg: rgba(120, 100, 140, 0.08);
-	--ec-pill-heic-text: #8a7aa0;
-	--ec-pill-png-bg: rgba(80, 130, 100, 0.08);
-	--ec-pill-png-text: #5a9070;
-	--ec-pill-pdf-bg: rgba(160, 100, 90, 0.08);
-	--ec-pill-pdf-text: #a06a60;
-	--ec-pill-mov-bg: rgba(160, 140, 80, 0.08);
-	--ec-pill-mov-text: #a09060;
-	--ec-pill-dng-bg: rgba(180, 120, 80, 0.08);
-	--ec-pill-dng-text: #b08060;
 
 	/* Spacing -- 8px grid */
 	--ec-space-1: 4px;
@@ -85,15 +65,9 @@
 	--ec-duration-normal: 200ms;
 	--ec-duration-slow: 300ms;
 
-	/* Backward-compat aliases for existing consumers (app.css, empty_state.css, error_boundary.css) */
+	/* Backward-compat aliases still used by the Storybook harness. */
 	--color-bg: var(--ec-color-bg);
 	--color-text: var(--ec-color-text);
-	--color-text-secondary: var(--ec-color-text-secondary);
-	--color-border: var(--ec-color-border);
-	--color-accent: var(--ec-color-accent);
-	--color-drop-active: var(--ec-color-gold-bg);
-	--color-error-bg: var(--ec-color-error-bg);
-	--color-error-text: var(--ec-color-error);
 }
 
 [data-theme="dark"] {
@@ -122,51 +96,19 @@
 	--ec-color-surface-hover: #2E5753;
 	--ec-color-surface-pressed: #476B68;
 	--ec-color-accent: #007AFF;
-	--ec-color-success: #30d158;
+	--ec-color-platform-indicator: color-mix(in srgb, var(--ec-color-accent) 90%, CanvasText 10%);
 	--ec-color-error: #FF453A;
 	--ec-color-error-bg: var(--ec-color-surface);
-	--ec-color-info: #6ba3d6;
-	--ec-color-gold: #f8d057;
-	--ec-color-gold-bg: rgba(248, 208, 87, 0.08);
-	--ec-color-muted: #636369;
-	--ec-color-removed-bg: rgba(255, 69, 58, 0.12);
-	--ec-color-preserved-bg: rgba(48, 209, 88, 0.12);
 
 	/* Adaptive tokens -- Dark Mode */
 	--ec-shadow-drawer: rgba(0, 0, 0, 0.3);
 	--ec-backdrop-opacity: 0.6;
-	--ec-toggle-off-track: #3a3a3e;
+	--ec-toggle-off-track: color-mix(in srgb, GrayText 90%, CanvasText 10%);
 	--ec-border-status-bar: var(--ec-color-border);
 
-	/* Type pill colors -- Dark Mode (muted) */
-	--ec-pill-jpg-bg: rgba(100, 140, 170, 0.14);
-	--ec-pill-jpg-text: #7a9ab0;
-	--ec-pill-heic-bg: rgba(120, 100, 140, 0.14);
-	--ec-pill-heic-text: #9a8ab0;
-	--ec-pill-png-bg: rgba(80, 130, 100, 0.14);
-	--ec-pill-png-text: #6aa080;
-	--ec-pill-pdf-bg: rgba(160, 100, 90, 0.14);
-	--ec-pill-pdf-text: #b07a70;
-	--ec-pill-mov-bg: rgba(160, 140, 80, 0.14);
-	--ec-pill-mov-text: #b0a070;
-	--ec-pill-dng-bg: rgba(180, 120, 80, 0.14);
-	--ec-pill-dng-text: #c09070;
-
-	/* Backward-compat aliases */
+	/* Backward-compat aliases still used by the Storybook harness. */
 	--color-bg: var(--ec-color-bg);
 	--color-text: var(--ec-color-text);
-	--color-text-secondary: var(--ec-color-text-secondary);
-	--color-border: var(--ec-color-border);
-	--color-accent: var(--ec-color-accent);
-	--color-drop-active: var(--ec-color-gold-bg);
-	--color-error-bg: var(--ec-color-error-bg);
-	--color-error-text: var(--ec-color-error);
-}
-
-/* Text selection uses accent color */
-::selection {
-	background-color: var(--ec-color-accent);
-	color: white;
 }
 
 /* Theme crossfade -- only applied during manual theme switch (D-22, D-23) */

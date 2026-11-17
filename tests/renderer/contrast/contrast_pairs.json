@@ -3,142 +3,116 @@
 	"brandPin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
 	"surfaces": [
 		"--ec-color-bg",
-		"--ec-color-surface",
-		"--ec-color-error-bg",
-		"item-hover"
+		"--ec-color-surface"
 	],
 	"overlays": [
-		{
-			"id": "gold-bg",
-			"layers": [
-				"--ec-color-bg",
-				"--ec-color-gold-bg"
-			]
-		},
-		{
-			"id": "item-hover",
-			"layers": [
-				"--ec-color-surface",
-				"rgba(0, 0, 0, 0.04)"
-			]
-		},
 		{
 			"id": "neutral-pill-over-bg",
 			"layers": [
 				"--ec-color-bg",
-				"rgba(157, 167, 182, 0.1)"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "neutral-pill-over-surface",
 			"layers": [
 				"--ec-color-surface",
-				"rgba(157, 167, 182, 0.1)"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "pill-dng-bg-over-bg",
 			"layers": [
 				"--ec-color-bg",
-				"--ec-pill-dng-bg"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "pill-dng-bg-over-surface",
 			"layers": [
 				"--ec-color-surface",
-				"--ec-pill-dng-bg"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "pill-heic-bg-over-bg",
 			"layers": [
 				"--ec-color-bg",
-				"--ec-pill-heic-bg"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "pill-heic-bg-over-surface",
 			"layers": [
 				"--ec-color-surface",
-				"--ec-pill-heic-bg"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "pill-jpg-bg-over-bg",
 			"layers": [
 				"--ec-color-bg",
-				"--ec-pill-jpg-bg"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "pill-jpg-bg-over-surface",
 			"layers": [
 				"--ec-color-surface",
-				"--ec-pill-jpg-bg"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "pill-mov-bg-over-bg",
 			"layers": [
 				"--ec-color-bg",
-				"--ec-pill-mov-bg"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "pill-mov-bg-over-surface",
 			"layers": [
 				"--ec-color-surface",
-				"--ec-pill-mov-bg"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "pill-pdf-bg-over-bg",
 			"layers": [
 				"--ec-color-bg",
-				"--ec-pill-pdf-bg"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "pill-pdf-bg-over-surface",
 			"layers": [
 				"--ec-color-surface",
-				"--ec-pill-pdf-bg"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "pill-png-bg-over-bg",
 			"layers": [
 				"--ec-color-bg",
-				"--ec-pill-png-bg"
+				"--ec-color-pill-bg"
 			]
 		},
 		{
 			"id": "pill-png-bg-over-surface",
 			"layers": [
 				"--ec-color-surface",
-				"--ec-pill-png-bg"
-			]
-		},
-		{
-			"id": "preserved-bg",
-			"layers": [
-				"--ec-color-surface",
-				"--ec-color-preserved-bg"
-			]
-		},
-		{
-			"id": "removed-bg",
-			"layers": [
-				"--ec-color-surface",
-				"--ec-color-removed-bg"
+				"--ec-color-pill-bg"
 			]
 		}
 	],
 	"localTokens": {
-		"--empty-state-secondary": {
-			"light": "#59677b",
-			"dark": "#94949b"
+		"--ec-system-toggle-off-track": {
+			"light": "rgb(115, 115, 115)",
+			"dark": "rgb(141, 141, 141)"
+		},
+		"--ec-system-platform-indicator": {
+			"light": "rgb(0, 122, 255)",
+			"dark": "rgb(26, 135, 255)"
 		}
 	},
 	"pairs": [
@@ -160,7 +134,7 @@
 		},
 		{
 			"id": "muted",
-			"fg": "--ec-color-muted",
+			"fg": "--ec-color-text-secondary",
 			"on": "surfaces",
 			"role": "text",
 			"selector": ".file-table__cell--muted, .folder-row__count",
@@ -168,24 +142,30 @@
 		},
 		{
 			"id": "accent-text",
-			"fg": "--ec-color-accent",
-			"on": "surfaces",
+			"fg": "--ec-color-action",
+			"on": [
+				"--ec-color-bg"
+			],
 			"role": "text",
-			"selector": ".status-bar__button, .language-dropdown__item--selected, .error-boundary__button",
+			"selector": ".status-bar__button",
 			"story": "ui-statusbar--all-cleaned"
 		},
 		{
 			"id": "error-text",
-			"fg": "--ec-color-error",
-			"on": "surfaces",
+			"fg": "--ec-color-text",
+			"on": [
+				"--ec-color-error-bg"
+			],
 			"role": "text",
 			"selector": ".error-boundary__message",
 			"story": "ui-errorboundary--fallback"
 		},
 		{
 			"id": "empty-state-secondary",
-			"fg": "--empty-state-secondary",
-			"on": "surfaces",
+			"fg": "--ec-color-text-secondary",
+			"on": [
+				"--ec-color-bg"
+			],
 			"role": "text",
 			"selector": ".empty-state__instruction, .empty-state__output-mode",
 			"story": "ui-emptystate--copy-mode-on"
@@ -194,7 +174,7 @@
 			"id": "text-removed",
 			"fg": "--ec-color-text",
 			"on": [
-				"removed-bg"
+				"--ec-color-surface"
 			],
 			"role": "text",
 			"selector": ".metadata-field--removed .metadata-field__name",
@@ -204,7 +184,7 @@
 			"id": "text-preserved",
 			"fg": "--ec-color-text",
 			"on": [
-				"preserved-bg"
+				"--ec-color-surface"
 			],
 			"role": "text",
 			"selector": ".metadata-field--preserved .metadata-field__name",
@@ -214,7 +194,7 @@
 			"id": "text-secondary-removed",
 			"fg": "--ec-color-text-secondary",
 			"on": [
-				"removed-bg"
+				"--ec-color-surface"
 			],
 			"role": "text",
 			"selector": ".metadata-field--removed .metadata-field__value",
@@ -224,7 +204,7 @@
 			"id": "text-secondary-preserved",
 			"fg": "--ec-color-text-secondary",
 			"on": [
-				"preserved-bg"
+				"--ec-color-surface"
 			],
 			"role": "text",
 			"selector": ".metadata-field--preserved .metadata-field__value",
@@ -232,7 +212,7 @@
 		},
 		{
 			"id": "pill-jpg",
-			"fg": "--ec-pill-jpg-text",
+			"fg": "--ec-color-pill-text",
 			"on": [
 				"pill-jpg-bg-over-bg",
 				"pill-jpg-bg-over-surface"
@@ -243,7 +223,7 @@
 		},
 		{
 			"id": "pill-heic",
-			"fg": "--ec-pill-heic-text",
+			"fg": "--ec-color-pill-text",
 			"on": [
 				"pill-heic-bg-over-bg",
 				"pill-heic-bg-over-surface"
@@ -254,7 +234,7 @@
 		},
 		{
 			"id": "pill-png",
-			"fg": "--ec-pill-png-text",
+			"fg": "--ec-color-pill-text",
 			"on": [
 				"pill-png-bg-over-bg",
 				"pill-png-bg-over-surface"
@@ -265,7 +245,7 @@
 		},
 		{
 			"id": "pill-pdf",
-			"fg": "--ec-pill-pdf-text",
+			"fg": "--ec-color-pill-text",
 			"on": [
 				"pill-pdf-bg-over-bg",
 				"pill-pdf-bg-over-surface"
@@ -276,7 +256,7 @@
 		},
 		{
 			"id": "pill-mov",
-			"fg": "--ec-pill-mov-text",
+			"fg": "--ec-color-pill-text",
 			"on": [
 				"pill-mov-bg-over-bg",
 				"pill-mov-bg-over-surface"
@@ -287,7 +267,7 @@
 		},
 		{
 			"id": "pill-dng",
-			"fg": "--ec-pill-dng-text",
+			"fg": "--ec-color-pill-text",
 			"on": [
 				"pill-dng-bg-over-bg",
 				"pill-dng-bg-over-surface"
@@ -298,7 +278,7 @@
 		},
 		{
 			"id": "neutral-pill",
-			"fg": "--ec-color-muted",
+			"fg": "--ec-color-pill-text",
 			"on": [
 				"neutral-pill-over-bg",
 				"neutral-pill-over-surface"
@@ -309,9 +289,9 @@
 		},
 		{
 			"id": "button-primary",
-			"fg": "#fff",
+			"fg": "--ec-color-action-label",
 			"on": [
-				"#006bd6"
+				"--ec-color-action"
 			],
 			"role": "text",
 			"selector": ".empty-state__button--primary",
@@ -319,23 +299,13 @@
 		},
 		{
 			"id": "button-primary-hover",
-			"fg": "#fff",
+			"fg": "--ec-color-action-label",
 			"on": [
-				"#005ab8"
+				"--ec-color-action-hover"
 			],
 			"role": "text",
 			"selector": ".empty-state__button--primary:hover",
 			"story": "ui-emptystate--copy-mode-on"
-		},
-		{
-			"id": "selection",
-			"fg": "white",
-			"on": [
-				"--ec-color-accent"
-			],
-			"role": "text",
-			"selector": "::selection",
-			"story": "file-list-filetable--mixed-statuses"
 		},
 		{
 			"id": "toast-text",
@@ -349,17 +319,19 @@
 		},
 		{
 			"id": "success-icon",
-			"fg": "--ec-color-success",
-			"on": "surfaces",
+			"fg": "--ec-color-cleaned",
+			"on": [
+				"--ec-color-bg"
+			],
 			"role": "non-text",
 			"selector": ".status-icon__check",
 			"story": "ui-statusicon--complete"
 		},
 		{
-			"id": "success-icon-preserved",
-			"fg": "--ec-color-success",
+			"id": "metadata-icon-preserved",
+			"fg": "--ec-color-text-secondary",
 			"on": [
-				"preserved-bg"
+				"--ec-color-surface"
 			],
 			"role": "non-text",
 			"selector": ".metadata-field--preserved .metadata-field__icon",
@@ -367,7 +339,7 @@
 		},
 		{
 			"id": "spinner",
-			"fg": "--ec-color-muted",
+			"fg": "--ec-color-text-secondary",
 			"on": [
 				"--ec-color-bg"
 			],
@@ -377,9 +349,10 @@
 		},
 		{
 			"id": "drop-zone-border",
-			"fg": "--ec-color-gold",
+			"fg": "--ec-color-platform-indicator",
 			"on": [
-				"gold-bg"
+				"--ec-color-bg",
+				"--ec-color-surface"
 			],
 			"role": "non-text",
 			"selector": ".drop-zone--active",
@@ -398,7 +371,7 @@
 		},
 		{
 			"id": "toggle-thumb-off",
-			"fg": "#ffffff",
+			"fg": "--ec-brand-clean-white",
 			"on": [
 				"--ec-toggle-off-track"
 			],
@@ -408,7 +381,7 @@
 		},
 		{
 			"id": "toggle-thumb-on",
-			"fg": "#ffffff",
+			"fg": "--ec-brand-clean-white",
 			"on": [
 				"--ec-color-accent"
 			],
@@ -419,16 +392,18 @@
 		{
 			"id": "error-icon",
 			"fg": "--ec-color-error",
-			"on": "surfaces",
+			"on": [
+				"--ec-color-bg"
+			],
 			"role": "non-text",
 			"selector": ".status-icon__error",
 			"story": "ui-statusicon--failed"
 		},
 		{
-			"id": "error-icon-removed",
-			"fg": "--ec-color-error",
+			"id": "metadata-icon-removed",
+			"fg": "--ec-color-text-secondary",
 			"on": [
-				"removed-bg"
+				"--ec-color-surface"
 			],
 			"role": "non-text",
 			"selector": ".metadata-field--removed .metadata-field__icon",
@@ -437,54 +412,62 @@
 		{
 			"id": "focus-ring",
 			"fg": "--ec-color-accent",
-			"on": "surfaces",
+			"on": [
+				"--ec-color-bg"
+			],
 			"role": "focus",
-			"selector": ":focus-visible",
+			"selector": ".toggle-switch__input:focus-visible + .toggle-switch__track",
+			"story": "settings-toggleswitch--keyboard-focus"
+		},
+		{
+			"id": "folder-row-action",
+			"fg": "--ec-color-action",
+			"on": [
+				"--ec-color-surface"
+			],
+			"role": "text",
+			"selector": ".folder-row__toggle:hover",
+			"story": "file-list-folderrow--complete-collapsed"
+		},
+		{
+			"id": "primary-text-on-surface-hover",
+			"fg": "--ec-color-text",
+			"on": [
+				"--ec-color-surface-hover"
+			],
+			"role": "text",
+			"selector": ".language-dropdown__item--selected",
+			"story": "settings-languagedropdown--open-selected"
+		},
+		{
+			"id": "error-row-icon",
+			"fg": "--ec-color-error",
+			"on": [
+				"--ec-color-error-bg"
+			],
+			"role": "non-text",
+			"selector": ".file-table__row--error .status-icon__error",
+			"story": "file-list-filetable--mixed-statuses"
+		},
+		{
+			"id": "segmented-focus",
+			"fg": "--ec-color-platform-indicator",
+			"on": [
+				"--ec-color-bg",
+				"--ec-color-surface"
+			],
+			"role": "focus",
+			"selector": ".segmented-control__segment:focus-visible",
 			"story": "settings-segmentedcontrol--keyboard-focus"
 		}
 	],
 	"literals": [
-		{
-			"value": "#005ab8",
-			"files": [
-				"empty_state.css"
-			],
-			"pair": "button-primary-hover"
-		},
-		{
-			"value": "#006bd6",
-			"files": [
-				"empty_state.css"
-			],
-			"pair": "button-primary"
-		},
-		{
-			"value": "#59677b",
-			"files": [
-				"empty_state.css"
-			],
-			"pair": "empty-state-secondary"
-		},
-		{
-			"value": "#94949b",
-			"files": [
-				"empty_state.css"
-			],
-			"pair": "empty-state-secondary"
-		},
 		{
 			"value": "#fff",
 			"files": [
 				"empty_state.css"
 			],
 			"pair": "button-primary"
-		},
-		{
-			"value": "#ffffff",
-			"files": [
-				"toggle_switch.css"
-			],
-			"pair": "toggle-thumb-off"
 		},
 		{
 			"value": "rgba(0, 0, 0, 0)",
@@ -537,13 +520,6 @@
 			"exempt": "The settings drawer scrim: its alpha is the exempt --ec-backdrop-opacity, a non-text dimming layer that carries no information."
 		},
 		{
-			"value": "rgba(157, 167, 182, 0.1)",
-			"files": [
-				"type_pill.css"
-			],
-			"pair": "neutral-pill"
-		},
-		{
 			"value": "transparent",
 			"files": [
 				"drop_zone.css",
@@ -554,13 +530,6 @@
 				"status_icon.css"
 			],
 			"exempt": "Paints nothing, so there is no colour to measure."
-		},
-		{
-			"value": "white",
-			"files": [
-				"tokens.css"
-			],
-			"pair": "selection"
 		}
 	],
 	"exempt": [

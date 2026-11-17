@@ -31,6 +31,9 @@ export const THRESHOLDS = Object.freeze({
 const LIGHT_BLOCK = ":root";
 const DARK_BLOCK = '[data-theme="dark"]';
 const ALIAS_DEPTH = 16;
+const PLATFORM_TOGGLE_MIX = "color-mix(insrgb,graytext90%,canvastext10%)";
+const PLATFORM_INDICATOR_MIX =
+	"color-mix(insrgb,var(--ec-color-accent)90%,canvastext10%)";
 
 const VAR_CALL = /^var\(\s*(--[A-Za-z0-9_-]+)\s*(?:,\s*([\s\S]*))?\)$/;
 
@@ -104,6 +107,30 @@ function resolveText(text, theme, tokens, doc, depth) {
 		return call[2] === undefined
 			? null
 			: resolveText(call[2], theme, tokens, doc, depth + 1);
+	}
+	const normalized = source.toLowerCase().replace(/\s+/g, "");
+	const measuredToken =
+		normalized === PLATFORM_TOGGLE_MIX
+			? "--ec-system-toggle-off-track"
+			: normalized === PLATFORM_INDICATOR_MIX
+				? "--ec-system-platform-indicator"
+				: undefined;
+	if (measuredToken !== undefined) {
+		const sample = doc.localTokens?.[measuredToken]?.[theme];
+		if (typeof sample !== "string") {
+			return null;
+		}
+		const channels = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i.exec(
+			sample,
+		);
+		if (
+			channels === null ||
+			channels.slice(1).some((channel) => Number(channel) > 255)
+		) {
+			return null;
+		}
+		const measured = parseColour(sample);
+		return measured?.a === 1 ? measured : null;
 	}
 	return parseColour(source);
 }

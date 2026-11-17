@@ -21,7 +21,7 @@
 	appearance: none;
 	background: none;
 	border: none;
-	cursor: pointer;
+	cursor: default;
 	display: inline-flex;
 	align-items: center;
 	justify-content: flex-start;
@@ -32,7 +32,7 @@
 }
 
 .folder-row__toggle:hover {
-	color: var(--ec-color-accent);
+	color: var(--ec-color-action);
 }
 
 .folder-row__toggle:focus-visible {
@@ -56,7 +56,7 @@
 
 .folder-row__count {
 	font-size: var(--ec-font-size-small);
-	color: var(--ec-color-muted);
+	color: var(--ec-color-text-secondary);
 	font-weight: var(--ec-font-weight-regular);
 	white-space: nowrap;
 }
