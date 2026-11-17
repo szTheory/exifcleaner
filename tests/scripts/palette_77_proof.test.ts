@@ -287,27 +287,26 @@ describe("Phase 77 proof fixtures", () => {
 		).toMatch(/removal\/restoration/i);
 	});
 
-	test("requires the exact original fingerprint set and preserved residual", () => {
+	test("requires complete clearance of the exact original fingerprint set", () => {
 		const original = Array.from(
 			{ length: 208 },
 			(_, index) => `candidate-${index}`,
 		);
 		original[207] = RESIDUAL;
-		const cleared = original.slice(0, 207);
 		expect(
 			validateReconciliationSet({
 				originalFingerprints: original,
-				clearedFingerprints: cleared,
+				clearedFingerprints: original.slice(0, 207),
 				residualFingerprints: [RESIDUAL],
 			}),
-		).toEqual([]);
+		).not.toEqual([]);
 		expect(
 			validateReconciliationSet({
 				originalFingerprints: original,
 				clearedFingerprints: original,
 				residualFingerprints: [],
 			}),
-		).not.toEqual([]);
+		).toEqual([]);
 	});
 
 	test("rejects missing, duplicate, or stale source digest inputs", () => {

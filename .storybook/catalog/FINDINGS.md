@@ -67,7 +67,6 @@ Axe findings from the stories, summarised by kind, rule and disposition; the ent
 | a11y-p73 | aria-allowed-role | fix-v5.2 | major | 19 |
 | a11y-p73 | aria-conditional-attr | fix-v5.2 | major | 50 |
 | a11y-p73 | aria-required-children | fix-v5.2 | major | 20 |
-| a11y-p73 | color-contrast | fix-v5.1 | major | 1 |
 | a11y-p73 | empty-table-header | fix-v5.2 | major | 19 |
 | a11y-p73 | scrollable-region-focusable | fix-v5.2 | major | 1 |
 

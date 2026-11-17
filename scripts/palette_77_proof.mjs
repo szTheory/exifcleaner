@@ -111,8 +111,6 @@ export const INDICATOR_BOUNDARY_POSITIONS = Object.freeze([
 	"right-outer",
 ]);
 
-const EXPECTED_RESIDUAL =
-	"a11y-p73|file-list-filetable--arabic-batch|color-contrast";
 const THEMES_SET = new Set(THEMES);
 const HASH = /^[0-9a-f]{64}$/;
 const STYLE_DIR = "src/renderer/styles";
@@ -232,13 +230,12 @@ export function validateReconciliationSet({
 		if (new Set(items).size !== items.length)
 			problems.push(`${label} fingerprints contain duplicates`);
 	}
-	if (cleared.length !== 207)
-		problems.push("expected exactly 207 cleared color fingerprints");
-	if (residual.length !== 1 || residual[0] !== EXPECTED_RESIDUAL) {
+	if (cleared.length !== 208)
+		problems.push("expected all 208 original color fingerprints to be cleared");
+	if (residual.length !== 0)
 		problems.push(
-			"the exact Linux-only Arabic batch fingerprint must remain residual",
+			"no residual color fingerprints are supported by current evidence",
 		);
-	}
 	const originalSet = new Set(original);
 	const clearedSet = new Set(cleared);
 	for (const fingerprint of cleared) {
@@ -1426,19 +1423,15 @@ function validateMeasurementAndReconciliation(
 	);
 	const findings = readJson(root, "docs/evidence/known-findings.json");
 	const currentFp = findings.entries.map((entry) => entry.fingerprint);
-	if (!currentFp.includes(EXPECTED_RESIDUAL))
-		problems.push(
-			"the exact cross-platform residual is missing from the findings register",
-		);
 	if (
 		currentFp.includes(
 			"token-map-gap|ui-emptystate--copy-mode-on|empty-state-secondary-hardcoded",
 		)
 	)
 		problems.push("the fixed EmptyState token-map gap remains listed");
-	if (findings.entries.length !== 158)
+	if (findings.entries.length !== 157)
 		problems.push(
-			"the final findings register does not contain the 158 expected current entries",
+			"the final findings register does not contain the 157 expected current entries",
 		);
 	for (const fingerprint of cleared)
 		if (currentFp.includes(fingerprint))
@@ -1574,9 +1567,7 @@ function validateAxeColorObservations({
 		storyFiles.size !== reconciliation.axeColor?.storyFiles
 	)
 		problems.push("axe report does not cover the recorded fifteen story files");
-	const expectedCleared = expected.filter(
-		(fingerprint) => fingerprint !== EXPECTED_RESIDUAL,
-	);
+	const expectedCleared = expected;
 	const recordedCleared = reconciliation.axeColor?.clearedFingerprints;
 	if (
 		!Array.isArray(recordedCleared) ||
@@ -1584,7 +1575,7 @@ function validateAxeColorObservations({
 			JSON.stringify([...expectedCleared].sort())
 	)
 		problems.push(
-			"axe deletion list is not exactly the 141 proven non-residual rows",
+			"axe deletion list is not exactly all 142 proven passing rows",
 		);
 	return problems;
 }
@@ -1881,21 +1872,22 @@ function buildCanonicalMeasurement({
 	copy.spikeComparison = {
 		spikeCleared: 67,
 		denominator: 208,
-		actualClearedAfterEvidence: 207,
+		actualClearedAfterEvidence: 208,
 		actualFloorPercent: 99,
-		actualPercent: 99.52,
+		actualPercent: 100,
 		cutDecisionPhase: 78,
 		residualFingerprints: reconciliation.residualFingerprints,
 	};
 	copy.evidenceSourceDigestsAtCollection = inputs.digests;
 	copy.registerReconciliation = {
-		status: "proven-color-rows-removed-with-cross-platform-residual",
+		status:
+			"proven-all-original-color-rows-removed-with-cross-platform-axe-evidence",
 		removedFingerprintCount: reconciliation.removedFingerprints.length,
-		removedColorFindingCount: 207,
+		removedColorFindingCount: 208,
 		removedSeparateTokenMapGapCount: 1,
 		removedFingerprints: reconciliation.removedFingerprints,
 		remainingFindingEntryCount: reconciliation.currentRegister.entries,
-		remainingColorFindingCount: 1,
+		remainingColorFindingCount: 0,
 		remainingColorFingerprints: reconciliation.residualFingerprints,
 		remainingTokenMapGapFingerprints: readJson(
 			root,
@@ -2223,7 +2215,7 @@ export function main(argv = process.argv.slice(2), dependencies = {}) {
 			return 0;
 		}
 		const invariants = [
-			"original-color-fingerprints-and-exact-residuals",
+			"all-original-color-fingerprints-have-source-backed-passing-dispositions",
 			"source-backed-100-row-contrast-matrix-and-g1-g2",
 			"actual-source-axe-color-observations-in-both-themes",
 			"fresh-system-mix-platform-observations-and-exact-white-thumb",
