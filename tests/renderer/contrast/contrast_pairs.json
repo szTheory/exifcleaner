@@ -103,6 +103,13 @@
 				"--ec-color-surface",
 				"--ec-color-pill-bg"
 			]
+		},
+		{
+			"id": "item-hover",
+			"layers": [
+				"--ec-color-surface",
+				"--ec-color-surface-hover"
+			]
 		}
 	],
 	"localTokens": {
@@ -127,7 +134,20 @@
 		{
 			"id": "text-secondary",
 			"fg": "--ec-color-text-secondary",
-			"on": "surfaces",
+			"on": [
+				"--ec-color-surface",
+				"item-hover"
+			],
+			"role": "text",
+			"selector": ".language-dropdown__english",
+			"story": "settings-languagedropdown--item-hover"
+		},
+		{
+			"id": "text-secondary-file-table-header",
+			"fg": "--ec-color-text-secondary",
+			"on": [
+				"--ec-color-surface"
+			],
 			"role": "text",
 			"selector": ".file-table__header",
 			"story": "file-list-filetable--mixed-statuses"
@@ -308,6 +328,26 @@
 			"story": "ui-emptystate--copy-mode-on"
 		},
 		{
+			"id": "button-primary-pressed",
+			"fg": "--ec-color-action-label",
+			"on": [
+				"--ec-color-action-pressed"
+			],
+			"role": "text",
+			"selector": ".empty-state__button--primary:active",
+			"story": "ui-emptystate--copy-mode-on"
+		},
+		{
+			"id": "button-secondary-pressed",
+			"fg": "--ec-color-text",
+			"on": [
+				"--ec-color-surface-pressed"
+			],
+			"role": "text",
+			"selector": ".empty-state__button--secondary:active",
+			"story": "ui-emptystate--copy-mode-on"
+		},
+		{
 			"id": "toast-text",
 			"fg": "--ec-color-bg",
 			"on": [
@@ -463,9 +503,21 @@
 	],
 	"literals": [
 		{
-			"value": "#fff",
+			"value": "#ffffff",
 			"files": [
-				"empty_state.css"
+				"tokens.css"
+			],
+			"uses": [
+				{
+					"file": "tokens.css",
+					"selector": ":root",
+					"property": "--ec-brand-clean-white"
+				},
+				{
+					"file": "tokens.css",
+					"selector": "[data-theme=\"dark\"]",
+					"property": "--ec-brand-clean-white"
+				}
 			],
 			"pair": "button-primary"
 		},
@@ -474,19 +526,26 @@
 			"files": [
 				"settings_drawer.css"
 			],
-			"exempt": "The drawer scrim before it fades in: fully transparent, it paints nothing."
-		},
-		{
-			"value": "rgba(0, 0, 0, 0.04)",
-			"files": [
-				"language_dropdown.css"
+			"uses": [
+				{
+					"file": "settings_drawer.css",
+					"selector": ".settings-drawer__backdrop",
+					"property": "background"
+				}
 			],
-			"pair": "text-secondary"
+			"exempt": "The drawer scrim before it fades in: fully transparent, it paints nothing."
 		},
 		{
 			"value": "rgba(0, 0, 0, 0.08)",
 			"files": [
 				"language_dropdown.css"
+			],
+			"uses": [
+				{
+					"file": "language_dropdown.css",
+					"selector": ".language-dropdown__list",
+					"property": "box-shadow"
+				}
 			],
 			"exempt": "A box-shadow colour: it adds depth only and carries no information."
 		},
@@ -495,12 +554,40 @@
 			"files": [
 				"segmented_control.css"
 			],
+			"uses": [
+				{
+					"file": "segmented_control.css",
+					"selector": ".segmented-control__indicator",
+					"property": "box-shadow"
+				}
+			],
 			"exempt": "A box-shadow colour: it adds depth only and carries no information."
+		},
+		{
+			"value": "rgba(0, 0, 0, 0.12)",
+			"files": [
+				"tokens.css"
+			],
+			"uses": [
+				{
+					"file": "tokens.css",
+					"selector": ":root",
+					"property": "--ec-shadow-drawer"
+				}
+			],
+			"exempt": "The light-theme drawer shadow is a platform depth effect and carries no information."
 		},
 		{
 			"value": "rgba(0, 0, 0, 0.15)",
 			"files": [
 				"toggle_switch.css"
+			],
+			"uses": [
+				{
+					"file": "toggle_switch.css",
+					"selector": ".toggle-switch__thumb",
+					"property": "box-shadow"
+				}
 			],
 			"exempt": "A box-shadow colour: it adds depth only and carries no information."
 		},
@@ -508,7 +595,25 @@
 			"value": "rgba(0, 0, 0, 0.3)",
 			"files": [
 				"language_dropdown.css",
-				"toggle_switch.css"
+				"toggle_switch.css",
+				"tokens.css"
+			],
+			"uses": [
+				{
+					"file": "language_dropdown.css",
+					"selector": "@media (prefers-color-scheme: dark) .language-dropdown__list",
+					"property": "box-shadow"
+				},
+				{
+					"file": "toggle_switch.css",
+					"selector": "[data-theme=\"dark\"] .toggle-switch__thumb",
+					"property": "box-shadow"
+				},
+				{
+					"file": "tokens.css",
+					"selector": "[data-theme=\"dark\"]",
+					"property": "--ec-shadow-drawer"
+				}
 			],
 			"exempt": "A box-shadow colour: it adds depth only and carries no information."
 		},
@@ -516,6 +621,13 @@
 			"value": "rgba(0, 0, 0, var(--ec-backdrop-opacity))",
 			"files": [
 				"settings_drawer.css"
+			],
+			"uses": [
+				{
+					"file": "settings_drawer.css",
+					"selector": ".settings-drawer__backdrop--visible",
+					"property": "background"
+				}
 			],
 			"exempt": "The settings drawer scrim: its alpha is the exempt --ec-backdrop-opacity, a non-text dimming layer that carries no information."
 		},
@@ -527,9 +639,81 @@
 				"file_table.css",
 				"metadata_expansion.css",
 				"segmented_control.css",
-				"status_icon.css"
+				"status_icon.css",
+				"tokens.css"
+			],
+			"uses": [
+				{
+					"file": "drop_zone.css",
+					"selector": ".drop-zone",
+					"property": "border"
+				},
+				{
+					"file": "error_boundary.css",
+					"selector": ".error-boundary__button",
+					"property": "background"
+				},
+				{
+					"file": "file_table.css",
+					"selector": ".file-table__sort-button",
+					"property": "background"
+				},
+				{
+					"file": "file_table.css",
+					"selector": ".file-table__reveal",
+					"property": "background"
+				},
+				{
+					"file": "metadata_expansion.css",
+					"selector": ".metadata-expansion__copy-btn",
+					"property": "background"
+				},
+				{
+					"file": "metadata_expansion.css",
+					"selector": ".metadata-field--removed",
+					"property": "background"
+				},
+				{
+					"file": "metadata_expansion.css",
+					"selector": ".metadata-field--preserved",
+					"property": "background"
+				},
+				{
+					"file": "segmented_control.css",
+					"selector": ".segmented-control__segment",
+					"property": "background"
+				},
+				{
+					"file": "status_icon.css",
+					"selector": ".status-icon__spinner",
+					"property": "border"
+				},
+				{
+					"file": "tokens.css",
+					"selector": ":root",
+					"property": "--ec-border-status-bar"
+				}
 			],
 			"exempt": "Paints nothing, so there is no colour to measure."
+		},
+		{
+			"value": "#0a2e2b",
+			"files": [
+				"tokens.css"
+			],
+			"uses": [
+				{
+					"file": "tokens.css",
+					"selector": ":root",
+					"property": "--ec-brand-deep-teal"
+				},
+				{
+					"file": "tokens.css",
+					"selector": "[data-theme=\"dark\"]",
+					"property": "--ec-brand-deep-teal"
+				}
+			],
+			"pair": "text"
 		}
 	],
 	"exempt": [
@@ -540,7 +724,15 @@
 		},
 		{
 			"name": "--ec-border-status-bar",
-			"reason": "The status bar's top border (transparent in the light theme, the border colour in the dark theme) separates two regions that are each labelled; it carries no information."
+			"reason": "The status bar's top border (transparent in the light theme, the border colour in the dark theme) separates two regions that are each labelled; it carries no information.",
+			"classification": "no-information",
+			"sourceUses": [
+				{
+					"file": "status_bar.css",
+					"selector": ".status-bar",
+					"property": "border-top"
+				}
+			]
 		},
 		{
 			"name": "--ec-color-border",
@@ -553,7 +745,15 @@
 		},
 		{
 			"name": "--ec-shadow-drawer",
-			"reason": "A shadow colour, not a foreground or a backdrop: the settings drawer's drop shadow adds depth only and carries no information."
+			"reason": "A shadow colour, not a foreground or a backdrop: the settings drawer's drop shadow adds depth only and carries no information.",
+			"classification": "no-information",
+			"sourceUses": [
+				{
+					"file": "settings_drawer.css",
+					"selector": ".settings-drawer",
+					"property": "box-shadow"
+				}
+			]
 		}
 	],
 	"proposed": [

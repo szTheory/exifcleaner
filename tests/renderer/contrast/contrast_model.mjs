@@ -530,6 +530,23 @@ const FILL_NAMES = Object.freeze([
 	"--ec-backdrop-opacity",
 	"--ec-color-border",
 ]);
+const SOURCE_USE_KEYS = Object.freeze(["file", "selector", "property"]);
+const NO_INFORMATION_SOURCES = Object.freeze({
+	"--ec-border-status-bar": Object.freeze([
+		Object.freeze({
+			file: "status_bar.css",
+			selector: ".status-bar",
+			property: "border-top",
+		}),
+	]),
+	"--ec-shadow-drawer": Object.freeze([
+		Object.freeze({
+			file: "settings_drawer.css",
+			selector: ".settings-drawer",
+			property: "box-shadow",
+		}),
+	]),
+});
 
 /**
  * @param {unknown} value
@@ -545,6 +562,28 @@ function isRecord(value) {
  */
 function isText(value) {
 	return typeof value === "string" && value.trim() !== "";
+}
+
+/**
+ * @param {{ file: string, selector: string, property: string }} use
+ * @returns {string}
+ */
+function sourceUseKey(use) {
+	return JSON.stringify([use.file, use.selector, use.property]);
+}
+
+/**
+ * @param {string} value
+ * @param {{ file: string, selector: string, property: string }} use
+ * @returns {string}
+ */
+function literalUseKey(value, use) {
+	return JSON.stringify([
+		normaliseLiteral(value),
+		use.file,
+		use.selector,
+		use.property.toLowerCase(),
+	]);
 }
 
 /**
@@ -728,7 +767,7 @@ export function pairsShapeProblems(doc) {
 		const hasExempt = Object.hasOwn(literal, "exempt");
 		for (const message of keyProblems(
 			literal,
-			["value", "files"],
+			["value", "files", "uses"],
 			["pair", "exempt"],
 		)) {
 			add(`${where}: ${message}`);
@@ -751,6 +790,50 @@ export function pairsShapeProblems(doc) {
 		) {
 			add(`${where}: files is not a non-empty list of .css names`);
 		}
+		const uses = literal["uses"];
+		const seenUses = new Set();
+		if (!Array.isArray(uses) || uses.length === 0) {
+			add(`${where}: uses is not a non-empty list of source declarations`);
+		} else if (Array.isArray(uses)) {
+			for (const [useIndex, use] of uses.entries()) {
+				if (!isRecord(use)) {
+					add(`${where}: uses[${useIndex}] is not an object`);
+					continue;
+				}
+				for (const message of keyProblems(use, SOURCE_USE_KEYS)) {
+					add(`${where}: uses[${useIndex}]: ${message}`);
+				}
+				if (
+					!isText(use["file"]) ||
+					!String(use["file"]).endsWith(".css") ||
+					!isText(use["selector"]) ||
+					!isText(use["property"]) ||
+					String(use["property"]) !== String(use["property"]).toLowerCase()
+				) {
+					add(
+						`${where}: uses[${useIndex}] is not a CSS file, selector and lower-case property`,
+					);
+					continue;
+				}
+				const key = sourceUseKey(use);
+				if (seenUses.has(key))
+					add(`${where}: duplicate source declaration use`);
+				else seenUses.add(key);
+			}
+		}
+		if (Array.isArray(files) && Array.isArray(uses)) {
+			const declaredFiles = [...new Set(files)].sort(compareCodeUnits);
+			const sourceFiles = [
+				...new Set(
+					uses
+						.filter((use) => isRecord(use) && isText(use["file"]))
+						.map((use) => String(use["file"])),
+				),
+			].sort(compareCodeUnits);
+			if (JSON.stringify(declaredFiles) !== JSON.stringify(sourceFiles)) {
+				add(`${where}: files does not match the unique files in uses`);
+			}
+		}
 		if (hasPair && !pairIds.has(String(literal["pair"]))) {
 			add(`${where}: pair ${String(literal["pair"])} is not a pair id`);
 		}
@@ -765,7 +848,11 @@ export function pairsShapeProblems(doc) {
 			continue;
 		}
 		const where = `exempt[${index}] ${String(entry["name"])}`;
-		for (const message of keyProblems(entry, ["name", "reason"], ["fill"])) {
+		for (const message of keyProblems(
+			entry,
+			["name", "reason"],
+			["fill", "classification", "sourceUses"],
+		)) {
 			add(`${where}: ${message}`);
 		}
 		if (Object.hasOwn(entry, "name")) {
@@ -784,6 +871,75 @@ export function pairsShapeProblems(doc) {
 					`${where}: only ${FILL_NAMES.join(" and ")} may carry a fill reason`,
 				);
 			}
+		}
+		if (Object.hasOwn(entry, "classification")) {
+			if (
+				entry["classification"] !== "no-information" ||
+				!Object.hasOwn(NO_INFORMATION_SOURCES, String(entry["name"]))
+			) {
+				add(
+					`${where}: classification is not an approved no-information disposition`,
+				);
+			}
+			if (
+				!isText(entry["reason"]) ||
+				!/carries no information/i.test(String(entry["reason"]))
+			) {
+				add(
+					`${where}: no-information disposition lacks its no-information reason`,
+				);
+			}
+			const sourceUses = entry["sourceUses"];
+			if (!Array.isArray(sourceUses) || sourceUses.length === 0) {
+				add(`${where}: sourceUses is not a non-empty list`);
+			} else {
+				for (const [useIndex, use] of sourceUses.entries()) {
+					if (!isRecord(use)) {
+						add(`${where}: sourceUses[${useIndex}] is not an object`);
+						continue;
+					}
+					for (const message of keyProblems(use, SOURCE_USE_KEYS)) {
+						add(`${where}: sourceUses[${useIndex}]: ${message}`);
+					}
+				}
+			}
+		} else if (Object.hasOwn(entry, "sourceUses")) {
+			add(`${where}: sourceUses requires classification no-information`);
+		}
+	}
+	const noInformationEntries = (list("exempt") ?? []).filter(
+		(entry) => isRecord(entry) && entry["classification"] === "no-information",
+	);
+	const expectedNoInformationNames = Object.keys(NO_INFORMATION_SOURCES).sort(
+		compareCodeUnits,
+	);
+	const actualNoInformationNames = noInformationEntries
+		.map((entry) => String(entry["name"]))
+		.sort(compareCodeUnits);
+	if (
+		JSON.stringify(actualNoInformationNames) !==
+		JSON.stringify(expectedNoInformationNames)
+	) {
+		add(
+			"exempt: no-information dispositions do not match the exact source-backed set",
+		);
+	}
+	for (const [name, expectedUses] of Object.entries(NO_INFORMATION_SOURCES)) {
+		const entry = noInformationEntries.find(
+			(candidate) => candidate["name"] === name,
+		);
+		const actualUses = Array.isArray(entry?.["sourceUses"])
+			? entry["sourceUses"]
+					.filter(
+						(use) =>
+							isRecord(use) && SOURCE_USE_KEYS.every((key) => isText(use[key])),
+					)
+					.map((use) => sourceUseKey(use))
+					.sort(compareCodeUnits)
+			: [];
+		const expectedKeys = expectedUses.map(sourceUseKey).sort(compareCodeUnits);
+		if (JSON.stringify(actualUses) !== JSON.stringify(expectedKeys)) {
+			add(`exempt ${name}: sourceUses does not match the exact painted source`);
 		}
 	}
 
@@ -861,8 +1017,79 @@ function refShapeProblem(side, where, add) {
  * @param {string | undefined} raw
  * @returns {boolean} the value is exactly one `var(--x)`, an alias
  */
-function isAlias(raw) {
-	return raw !== undefined && PURE_VAR.test(raw);
+/**
+ * Follow a bounded chain of declared custom-property aliases for one theme.
+ * Unresolved targets and cycles stop the path; an equal literal is never treated
+ * as an alias relationship.
+ *
+ * @param {string} name
+ * @param {"light" | "dark"} theme
+ * @param {{ light: Map<string, string>, dark: Map<string, string> }} tokens
+ * @param {object} doc
+ * @returns {Set<string>}
+ */
+function aliasPathNames(name, theme, tokens, doc) {
+	const names = new Set([name]);
+	const visited = new Set([name]);
+	let current = name;
+	for (let step = 0; step < ALIAS_DEPTH; step += 1) {
+		const raw = rawValue(current, theme, tokens, doc);
+		const match = raw === undefined ? null : PURE_VAR.exec(raw);
+		const target = match?.[1];
+		if (
+			target === undefined ||
+			visited.has(target) ||
+			resolveColour(target, theme, tokens, doc) === null
+		) {
+			break;
+		}
+		names.add(target);
+		visited.add(target);
+		current = target;
+	}
+	return names;
+}
+
+/**
+ * A semantic role reaches only names connected by a real `var(--name)` chain.
+ * `requireBothThemes` is used by G2, where a stylesheet reference must retain
+ * the same role in light and dark. G1 also counts primitives used by a genuine
+ * role in either theme, since a palette primitive can intentionally be dark-only.
+ *
+ * @param {Iterable<string>} roots
+ * @param {{ light: Map<string, string>, dark: Map<string, string> }} tokens
+ * @param {object} doc
+ * @param {Iterable<string>} candidates
+ * @param {boolean} requireBothThemes
+ * @returns {Set<string>}
+ */
+function roleAliasNames(roots, tokens, doc, candidates, requireBothThemes) {
+	const rootNames = new Set(
+		[...roots].filter(
+			(name) => typeof name === "string" && name.startsWith("--"),
+		),
+	);
+	const related = new Set();
+	for (const name of new Set([...rootNames, ...candidates])) {
+		const connected = THEMES.map((theme) => {
+			const candidatePath = aliasPathNames(name, theme, tokens, doc);
+			for (const root of rootNames) {
+				const rootPath = aliasPathNames(root, theme, tokens, doc);
+				// A role flows along a real chain from its semantic root to its
+				// primitives, or from a source alias into that semantic root. Two
+				// sibling semantic tokens that happen to share a primitive do not
+				// inherit one another's foreground, backdrop, or focus role.
+				if (rootPath.has(name) || candidatePath.has(root)) return true;
+			}
+			return false;
+		});
+		if (
+			requireBothThemes ? connected.every(Boolean) : connected.some(Boolean)
+		) {
+			related.add(name);
+		}
+	}
+	return related;
 }
 
 /**
@@ -910,11 +1137,13 @@ function backdropTokenSet(overlays, pairs, surfaces) {
 export function g1Problems(tokensCss, doc) {
 	const tokens = themeTokens(tokensCss);
 	const pairs = doc.pairs ?? [];
-	const covered = new Set([
+	const roleRoots = new Set([
 		...pairs.map((pair) => pair.fg),
 		...(doc.exempt ?? []).map((entry) => entry.name),
 		...backdropTokenSet(doc.overlays, pairs, doc.surfaces),
 	]);
+	const colourNames = colourTokenNames(tokens, doc);
+	const covered = roleAliasNames(roleRoots, tokens, doc, colourNames, false);
 	/** @type {Set<string>} */
 	const darkDeclared = new Set();
 	for (const found of customPropertyDeclarations(tokensCss)) {
@@ -927,8 +1156,7 @@ export function g1Problems(tokensCss, doc) {
 		compareCodeUnits,
 	)) {
 		const lightRaw = tokens.light.get(name);
-		const alias = isAlias(lightRaw) && isAlias(tokens.dark.get(name));
-		if (!alias && !covered.has(name)) {
+		if (!covered.has(name)) {
 			problems.push({
 				code: "g1-uncovered-token",
 				message: `${name} is a colour token that is no pair foreground, surface, overlay layer, pair backdrop or exempt entry`,
@@ -971,6 +1199,8 @@ const OTHER_COLOUR_PROPERTIES = new Set([
 	"column-rule-color",
 ]);
 
+const EMPTY_STATE_PRESSED_SURFACE = "--empty-state-button-pressed-surface";
+
 /**
  * @param {string} property
  * @returns {"foreground" | "background" | "outline" | "other-colour" | "other"}
@@ -984,11 +1214,77 @@ function propertyClass(property) {
 }
 
 /**
+ * The EmptyState pressed-surface alias is intentional only with these two
+ * variant-local bindings and these active-state consumers. This narrow source
+ * check keeps the local alias from becoming a blanket colour exemption.
+ *
+ * @param {Record<string, string>} stylesheets
+ * @param {{ entries?: Array<{ name: string, disposition: string, reason?: string }> } | undefined} tokenMap
+ * @param {Set<string>} backdrops
+ * @returns {boolean}
+ */
+function hasSourceBackedPressedSurfaceAlias(stylesheets, tokenMap, backdrops) {
+	const entry = tokenMap?.entries?.find(
+		(candidate) => candidate.name === EMPTY_STATE_PRESSED_SURFACE,
+	);
+	if (
+		entry?.disposition !== "local" ||
+		!isText(entry.reason) ||
+		!entry.reason.includes("--ec-color-action-pressed") ||
+		!entry.reason.includes("--ec-color-surface-pressed") ||
+		!backdrops.has("--ec-color-action-pressed") ||
+		!backdrops.has("--ec-color-surface-pressed")
+	) {
+		return false;
+	}
+	const declarations = cssDeclarations(stylesheets["empty_state.css"] ?? "");
+	const definitions = declarations
+		.filter(
+			(declaration) => declaration.property === EMPTY_STATE_PRESSED_SURFACE,
+		)
+		.map(({ selectors, value }) => ({ selectors, value }));
+	const expectedDefinitions = [
+		{
+			selectors: [".empty-state__button--primary"],
+			value: "var(--ec-color-action-pressed)",
+		},
+		{
+			selectors: [".empty-state__button--secondary"],
+			value: "var(--ec-color-surface-pressed)",
+		},
+	];
+	if (JSON.stringify(definitions) !== JSON.stringify(expectedDefinitions)) {
+		return false;
+	}
+	const consumers = declarations
+		.filter((declaration) =>
+			varReferences(declaration.value).some(
+				(reference) => reference.name === EMPTY_STATE_PRESSED_SURFACE,
+			),
+		)
+		.map(({ selectors, property, value }) => ({ selectors, property, value }));
+	const expectedConsumers = [
+		{
+			selectors: [".empty-state__button:active"],
+			property: "background",
+			value: `var(${EMPTY_STATE_PRESSED_SURFACE})`,
+		},
+		{
+			selectors: [".empty-state__button:active"],
+			property: "border-color",
+			value: `var(${EMPTY_STATE_PRESSED_SURFACE})`,
+		},
+	];
+	return JSON.stringify(consumers) === JSON.stringify(expectedConsumers);
+}
+
+/**
  * @param {object} doc
  * @param {{ light: Map<string, string>, dark: Map<string, string> }} tokens
  * @param {{ entries?: Array<{ name: string, disposition: string, finding?: string }> } | undefined} tokenMap
+ * @param {Record<string, string>} stylesheets
  */
-function guardContext(doc, tokens, tokenMap) {
+function guardContext(doc, tokens, tokenMap, stylesheets) {
 	const pairs = doc.pairs ?? [];
 	const isToken = (ref) => typeof ref === "string" && ref.startsWith("--");
 	const literalOf = (ref) =>
@@ -1004,16 +1300,76 @@ function guardContext(doc, tokens, tokenMap) {
 	for (const pair of pairs)
 		if (Array.isArray(pair.on)) pair.on.forEach(addLiteral);
 	const literals = doc.literals ?? [];
+	const candidates = new Set([
+		...colourTokenNames(tokens, doc),
+		...Object.keys(doc.localTokens ?? {}),
+		...pairs.map((pair) => pair.fg),
+		...backdropTokenSet(doc.overlays, pairs, doc.surfaces),
+	]);
+	const backdropRoots = [
+		...backdropTokenSet(doc.overlays, pairs, doc.surfaces),
+	].filter(isToken);
+	const pairRoots = pairs
+		.filter((pair) => pair.role === "text" || pair.role === "non-text")
+		.map((pair) => pair.fg)
+		.filter(isToken);
+	const nonTextRoots = pairs
+		.filter((pair) => pair.role === "non-text")
+		.map((pair) => pair.fg)
+		.filter(isToken);
+	const focusRoots = pairs
+		.filter((pair) => pair.role === "focus")
+		.map((pair) => pair.fg)
+		.filter(isToken);
+	const pairFg = roleAliasNames(pairRoots, tokens, doc, candidates, true);
+	const nonTextFg = roleAliasNames(nonTextRoots, tokens, doc, candidates, true);
+	const focusFg = roleAliasNames(focusRoots, tokens, doc, candidates, true);
+	const backdropTokens = roleAliasNames(
+		backdropRoots,
+		tokens,
+		doc,
+		candidates,
+		true,
+	);
+	const localAliases = new Set();
+	if (
+		hasSourceBackedPressedSurfaceAlias(stylesheets, tokenMap, backdropTokens)
+	) {
+		backdropTokens.add(EMPTY_STATE_PRESSED_SURFACE);
+		localAliases.add(EMPTY_STATE_PRESSED_SURFACE);
+	}
+	const roleTokens = new Set([
+		...pairFg,
+		...nonTextFg,
+		...focusFg,
+		...backdropTokens,
+	]);
+	const sourcePairRoleTokens = new Map();
+	for (const pair of pairs) {
+		if (pair.role !== "non-text" || !isText(pair.selector) || !isToken(pair.fg)) {
+			continue;
+		}
+		const themePaths = THEMES.map((theme) =>
+			aliasPathNames(pair.fg, theme, tokens, doc),
+		);
+		const bothThemeNames = new Set(
+			[...themePaths[0]].filter((name) => themePaths[1].has(name)),
+		);
+		let bySelector = sourcePairRoleTokens.get(pair.selector);
+		if (bySelector === undefined) {
+			bySelector = new Set();
+			sourcePairRoleTokens.set(pair.selector, bySelector);
+		}
+		for (const name of bothThemeNames) bySelector.add(name);
+	}
 	return {
 		tokens,
 		doc,
-		pairFg: new Set(pairs.map((pair) => pair.fg).filter(isToken)),
-		focusFg: new Set(
-			pairs
-				.filter((pair) => pair.role === "focus")
-				.map((pair) => pair.fg)
-				.filter(isToken),
-		),
+		pairFg,
+		nonTextFg,
+		focusFg,
+		roleTokens,
+		sourcePairRoleTokens,
 		pairFgLiterals: new Set(
 			pairs.map((pair) => literalOf(pair.fg)).filter((l) => l !== null),
 		),
@@ -1023,7 +1379,7 @@ function guardContext(doc, tokens, tokenMap) {
 				.map((pair) => literalOf(pair.fg))
 				.filter((l) => l !== null),
 		),
-		backdropTokens: backdropTokenSet(doc.overlays, pairs, doc.surfaces),
+		backdropTokens,
 		backdropLiterals,
 		exempt: new Map((doc.exempt ?? []).map((entry) => [entry.name, entry])),
 		exemptLiterals: new Set(
@@ -1031,15 +1387,59 @@ function guardContext(doc, tokens, tokenMap) {
 				.filter((entry) => Object.hasOwn(entry, "exempt"))
 				.map((entry) => normaliseLiteral(entry.value)),
 		),
-		declaredLiterals: new Set(
-			literals.map((entry) => normaliseLiteral(entry.value)),
+		declaredLiteralUses: new Set(
+			literals.flatMap((entry) =>
+				(entry.uses ?? []).map((use) => literalUseKey(entry.value, use)),
+			),
 		),
 		colourTokens: colourTokenNames(tokens, doc),
-		local: new Set(Object.keys(doc.localTokens ?? {})),
+		local: new Set([...Object.keys(doc.localTokens ?? {}), ...localAliases]),
 		retire: new Map(
 			(tokenMap?.entries ?? []).map((entry) => [entry.name, entry]),
 		),
 	};
+}
+
+/**
+ * The same non-text token may be used in several painted states. A pair only
+ * classifies its own source selector, so deleting one state pair cannot borrow
+ * a sibling state's role through a shared primitive.
+ * @param {string} name
+ * @param {{ selector: string }} source
+ * @param {ReturnType<typeof guardContext>} context
+ * @returns {boolean}
+ */
+function hasSourceBackedNonTextForeground(name, source, context) {
+	// A platform-owned colour must not silently promote its foreground pair to
+	// a painted surface. The toggle off-track mix is a background only while the
+	// thumb pair declares it as a backdrop. Adopted non-text colours may still be
+	// verified as fills at their exact paired selector.
+	const target = aliasTarget(name, context);
+	if (
+		context.local.has(name) ||
+		context.local.has(target) ||
+		context.retire.get(target)?.disposition === "keep-platform"
+	) {
+		return false;
+	}
+	return context.sourcePairRoleTokens.get(source.selector)?.has(name) ?? false;
+}
+
+/**
+ * A retired colour token can lose its source-map row after its pair is migrated,
+ * while the pair id remains as the stable measured state. Preserve the useful
+ * background diagnostic for that exact former foreground identity.
+ * @param {string} name
+ * @param {object} doc
+ * @returns {boolean}
+ */
+function isRetiredPairForeground(name, doc) {
+	const prefix = "--ec-color-";
+	if (!name.startsWith(prefix)) return false;
+	const id = name.slice(prefix.length);
+	return (doc.pairs ?? []).some(
+		(pair) => pair.id === id && pair.fg !== name,
+	);
 }
 
 /**
@@ -1059,24 +1459,95 @@ function aliasTarget(name, context) {
 }
 
 /**
+ * A no-information exception applies only to its two documented platform roles,
+ * exact source declaration, explicit pairs reason and keep-platform token-map record.
+ * @param {string} name
+ * @param {{ file: string, selector: string, property: string }} source
+ * @param {ReturnType<typeof guardContext>} context
+ * @returns {boolean}
+ */
+function hasSourceBackedNoInformationDisposition(name, source, context) {
+	const expectedUses = NO_INFORMATION_SOURCES[name];
+	if (
+		!expectedUses?.some((use) => sourceUseKey(use) === sourceUseKey(source))
+	) {
+		return false;
+	}
+	const pairEntry = context.exempt.get(name);
+	const mapEntry = context.retire.get(name);
+	return (
+		pairEntry?.classification === "no-information" &&
+		isText(pairEntry.reason) &&
+		/carries no information/i.test(pairEntry.reason) &&
+		Array.isArray(pairEntry.sourceUses) &&
+		pairEntry.sourceUses.some(
+			(use) =>
+				isRecord(use) &&
+				SOURCE_USE_KEYS.every((key) => isText(use[key])) &&
+				sourceUseKey(use) === sourceUseKey(source),
+		) &&
+		mapEntry?.disposition === "keep-platform" &&
+		isText(mapEntry.reason) &&
+		/no brand equivalent/i.test(mapEntry.reason) &&
+		/with a written reason/i.test(mapEntry.reason)
+	);
+}
+
+/**
+ * A written, non-no-information border role plus its keep-platform map record
+ * covers decorative border properties. The separate `fill` note is only the
+ * source-backed permission to paint the token as a background fill.
+ * @param {string} property
+ * @param {Record<string, unknown> | undefined} exemptEntry
+ * @param {ReturnType<typeof guardContext>} context
+ * @returns {boolean}
+ */
+function hasDocumentedBorderRole(property, exemptEntry, context) {
+	if (
+		!/^border(?:-|$)/.test(property) ||
+		exemptEntry === undefined ||
+		exemptEntry.classification === "no-information" ||
+		!isText(exemptEntry.reason)
+	) {
+		return false;
+	}
+	const mapEntry = context.retire.get(String(exemptEntry.name ?? ""));
+	return (
+		mapEntry?.disposition === "keep-platform" && isText(mapEntry.reason)
+	);
+}
+
+/**
  * @param {string} property
  * @param {string} name
  * @param {string | undefined} fallback
  * @param {ReturnType<typeof guardContext>} context
+ * @param {{ file: string, selector: string, property: string }} source
  * @returns {{ code: string, message: string } | "ok" | null} null when the reference is not classified
  */
-function classifyReference(property, name, fallback, context) {
+function classifyReference(property, name, fallback, context, source) {
 	const target = aliasTarget(name, context);
 	const via = target === name ? name : `${name} (an alias of ${target})`;
 	const kind = propertyClass(property);
 	const exemptEntry = context.exempt.get(target);
 	const known =
+		context.roleTokens.has(name) ||
 		context.colourTokens.has(target) ||
-		context.local.has(target) ||
+		context.local.has(name) ||
 		exemptEntry !== undefined;
 
 	if (!known) {
 		if (kind === "other") return null;
+		if (
+			kind === "background" &&
+			fallback === undefined &&
+			isRetiredPairForeground(target, context.doc)
+		) {
+			return {
+				code: "g2-unknown-surface",
+				message: `${via} under ${property} is a retired pair foreground with no declared surface, overlay layer, pair backdrop or declared fill`,
+			};
+		}
 		const entry = context.retire.get(target);
 		const routed =
 			entry !== undefined &&
@@ -1125,7 +1596,7 @@ function classifyReference(property, name, fallback, context) {
 	}
 
 	if (kind === "foreground") {
-		return context.pairFg.has(target)
+		return context.pairFg.has(name)
 			? "ok"
 			: {
 					code: "g2-unpaired-foreground",
@@ -1134,7 +1605,9 @@ function classifyReference(property, name, fallback, context) {
 	}
 	if (kind === "background") {
 		const fill = exemptEntry !== undefined && isText(exemptEntry.fill);
-		return context.backdropTokens.has(target) || fill
+		return context.backdropTokens.has(name) ||
+			fill
+			|| hasSourceBackedNonTextForeground(name, source, context)
 			? "ok"
 			: {
 					code: "g2-unknown-surface",
@@ -1142,14 +1615,33 @@ function classifyReference(property, name, fallback, context) {
 				};
 	}
 	if (kind === "outline") {
-		return context.focusFg.has(target)
+		return context.focusFg.has(name)
 			? "ok"
 			: {
 					code: "g2-unpaired-focus",
 					message: `${via} is used as an outline under ${property} but is no focus pair foreground`,
 				};
 	}
-	return context.pairFg.has(target) || exemptEntry !== undefined
+	if (kind === "other-colour") {
+		return context.pairFg.has(name) ||
+			context.focusFg.has(name) ||
+			context.backdropTokens.has(name) ||
+			hasDocumentedBorderRole(property, exemptEntry, context) ||
+			hasSourceBackedNoInformationDisposition(target, source, context)
+			? "ok"
+			: {
+					code: "g2-unclassified-token",
+					message: `${via} under ${property} has no paired foreground, focus, backdrop or declared fill role`,
+				};
+	}
+	if (
+		property === EMPTY_STATE_PRESSED_SURFACE &&
+		context.local.has(property) &&
+		context.backdropTokens.has(name)
+	) {
+		return "ok";
+	}
+	return context.pairFg.has(name) || exemptEntry !== undefined
 		? "ok"
 		: {
 				code: "g2-unclassified-token",
@@ -1171,7 +1663,12 @@ function classifyReference(property, name, fallback, context) {
  * @returns {{ problems: ContrastProblem[], classified: number, background: number }}
  */
 export function g2Report(stylesheets, doc, tokensCss, tokenMap) {
-	const context = guardContext(doc, themeTokens(tokensCss), tokenMap);
+	const context = guardContext(
+		doc,
+		themeTokens(tokensCss),
+		tokenMap,
+		stylesheets,
+	);
 	/** @type {ContrastProblem[]} */
 	const problems = [];
 	let classified = 0;
@@ -1197,8 +1694,49 @@ export function g2Report(stylesheets, doc, tokensCss, tokenMap) {
 				});
 				continue;
 			}
+			const source = { file, selector: block, property };
+			const references = varReferences(found.value);
+			const outcomes = references.map((reference) =>
+				classifyReference(
+					property,
+					reference.name,
+					reference.fallback,
+					context,
+					source,
+				),
+			);
+			const unclassifiedFallbacks = new Map();
+			for (const [index, reference] of references.entries()) {
+				const outcome = outcomes[index];
+				if (
+					outcome !== null &&
+					outcome !== "ok" &&
+					outcome.code === "g2-unclassified-token" &&
+					reference.fallback !== undefined &&
+					parseColour(reference.fallback) !== null
+				) {
+					const literal = normaliseLiteral(reference.fallback);
+					unclassifiedFallbacks.set(
+						literal,
+						(unclassifiedFallbacks.get(literal) ?? 0) + 1,
+					);
+				}
+			}
 			for (const literal of colourLiterals(found.value)) {
-				if (!context.declaredLiterals.has(literal.normalised)) {
+				const fallbackCount = unclassifiedFallbacks.get(literal.normalised) ?? 0;
+				if (fallbackCount > 0) {
+					unclassifiedFallbacks.set(literal.normalised, fallbackCount - 1);
+					continue;
+				}
+				if (
+					!context.declaredLiteralUses.has(
+						literalUseKey(literal.normalised, {
+							file,
+							selector: block,
+							property,
+						}),
+					)
+				) {
 					problems.push({
 						code: "g2-undeclared-literal",
 						message: `${property}: the colour literal ${literal.text} is not declared in contrast_pairs.json literals`,
@@ -1206,13 +1744,7 @@ export function g2Report(stylesheets, doc, tokensCss, tokenMap) {
 					});
 				}
 			}
-			for (const reference of varReferences(found.value)) {
-				const outcome = classifyReference(
-					property,
-					reference.name,
-					reference.fallback,
-					context,
-				);
+			for (const outcome of outcomes) {
 				if (outcome === null) continue;
 				classified += 1;
 				if (propertyClass(property) === "background") background += 1;

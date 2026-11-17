@@ -40,324 +40,12 @@
 	},
 	"entries": [
 		{
-			"fingerprint": "a11y-p72|file-list-errorexpansion--cleanup|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-errorexpansion--cleanup",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-errorexpansion--commit|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-errorexpansion--commit",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-errorexpansion--generic-failure|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-errorexpansion--generic-failure",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-errorexpansion--long-detail|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-errorexpansion--long-detail",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-errorexpansion--refused|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-errorexpansion--refused",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-errorexpansion--verification|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-errorexpansion--verification",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-errorexpansion--write|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-errorexpansion--write",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-errorexpansion--xattr|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-errorexpansion--xattr",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 16px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-folderrow--bidi-name|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-folderrow--bidi-name",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-folderrow--complete-collapsed|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-folderrow--complete-collapsed",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-folderrow--complete-expanded|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-folderrow--complete-expanded",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-folderrow--empty-collapsed|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-folderrow--empty-collapsed",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-folderrow--empty-expanded|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-folderrow--empty-expanded",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-folderrow--keyboard-focus|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-folderrow--keyboard-focus",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-folderrow--long-path|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-folderrow--long-path",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-folderrow--scanning|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-folderrow--scanning",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count--scanning (the Scanning text, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-folderrow--single-file|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-folderrow--single-file",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-folderrow--toggle-hover|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-folderrow--toggle-hover",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .folder-row__count (the file count, --ec-color-muted) measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadataexpansion--all-removed|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadataexpansion--all-removed",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadataexpansion--arabic-plural|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadataexpansion--arabic-plural",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadataexpansion--copy-hover|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadataexpansion--copy-hover",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadataexpansion--keyboard-focus|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadataexpansion--keyboard-focus",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadataexpansion--mixed|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadataexpansion--mixed",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadataexpansion--no-metadata|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadataexpansion--no-metadata",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__empty measures 2.04:1 (#9da7b6 --ec-color-muted on #e8ecf0 --ec-color-surface) in the light theme, measures 2.84:1 (#636369 --ec-color-muted on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadataexpansion--one-removed|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadataexpansion--one-removed",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadataexpansion--present-details-open|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadataexpansion--present-details-open",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) and 3.73:1 (#66758c --ec-color-text-secondary on #dae9e4 --ec-color-preserved-bg) in the light theme, measures 3.52:1 (#818188 --ec-color-text-secondary on #1e3226 --ec-color-preserved-bg) and 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadataexpansion--scrolls-at-max-height|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadataexpansion--scrolls-at-max-height",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadataexpansion--unchanged|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadataexpansion--unchanged",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-expansion__present summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__copy-btn (Copy all) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; .metadata-expansion__summary measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadatafield--bidi-value|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadatafield--bidi-value",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadatafield--cut-at-limit|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadatafield--cut-at-limit",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadatafield--exactly-at-limit|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadatafield--exactly-at-limit",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadatafield--preserved|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadatafield--preserved",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.73:1 (#66758c --ec-color-text-secondary on #dae9e4 --ec-color-preserved-bg) in the light theme, measures 3.52:1 (#818188 --ec-color-text-secondary on #1e3226 --ec-color-preserved-bg) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadatafield--removed|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadatafield--removed",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadatafield--structured-value|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadatafield--structured-value",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadatagroup--many-fields|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadatagroup--many-fields",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadatagroup--one-field|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadatagroup--one-field",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|file-list-metadatagroup--unmapped-group|color-contrast",
-			"kind": "a11y-p72",
-			"story": "file-list-metadatagroup--unmapped-group",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: .metadata-field__value measures 3.57:1 (#66758c --ec-color-text-secondary on #eadee1 --ec-color-removed-bg) in the light theme, measures 3.86:1 (#818188 --ec-color-text-secondary on #372122 --ec-color-removed-bg) in the dark theme; .metadata-group__count measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-languagedropdown--item-hover|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-languagedropdown--item-hover",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: the label of the selected or highlighted item (--ec-color-accent text) measures 3.38:1 (#007aff --ec-color-accent on #e8ecf0 --ec-color-surface) in the light theme, measures 4.23:1 (#007aff --ec-color-accent on #1c1c1f --ec-color-surface) in the dark theme; the English name in brackets (.language-dropdown__english) measures 3.62:1 (#66758c --ec-color-text-secondary on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) and 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) and 4.44:1 (#818188 --ec-color-text-secondary on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p72|settings-languagedropdown--item-hover|scrollable-region-focusable",
 			"kind": "a11y-p72",
 			"story": "settings-languagedropdown--item-hover",
 			"rule": "scrollable-region-focusable",
 			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.2 (LDG-01, listbox-focus; register counterpart no-aria-activedescendant; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-languagedropdown--keyboard-end|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-languagedropdown--keyboard-end",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: the English name in brackets (.language-dropdown__english) measures 3.62:1 (#66758c --ec-color-text-secondary on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) and 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) and 4.44:1 (#818188 --ec-color-text-secondary on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p72|settings-languagedropdown--keyboard-end|scrollable-region-focusable",
@@ -368,28 +56,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p72|settings-languagedropdown--open|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-languagedropdown--open",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: the label of the selected or highlighted item (--ec-color-accent text) measures 3.11:1 (#007aff --ec-color-accent on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) in the light theme, measures 4.27:1 (#007aff --ec-color-accent on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the English name in brackets (.language-dropdown__english) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p72|settings-languagedropdown--open|scrollable-region-focusable",
 			"kind": "a11y-p72",
 			"story": "settings-languagedropdown--open",
 			"rule": "scrollable-region-focusable",
 			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.2 (LDG-01, listbox-focus; register counterpart no-aria-activedescendant; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-languagedropdown--open-arabic|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-languagedropdown--open-arabic",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: the English name in brackets (.language-dropdown__english) measures 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p72|settings-languagedropdown--open-arabic|scrollable-region-focusable",
@@ -400,252 +72,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p72|settings-languagedropdown--open-selected|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-languagedropdown--open-selected",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at 14px normal weight: the label of the selected or highlighted item (--ec-color-accent text) measures 3.11:1 (#007aff --ec-color-accent on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) in the light theme, measures 4.27:1 (#007aff --ec-color-accent on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the English name in brackets (.language-dropdown__english) measures 3.62:1 (#66758c --ec-color-text-secondary on #dfe3e6 --ec-color-surface under the --ec-color-hover fallback) and 3.94:1 (#66758c --ec-color-text-secondary on #e8ecf0 --ec-color-surface) in the light theme, measures 4.39:1 (#818188 --ec-color-text-secondary on #1c1c1f --ec-color-surface) and 4.44:1 (#818188 --ec-color-text-secondary on #1b1b1e --ec-color-surface under the --ec-color-hover fallback) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p72|settings-languagedropdown--open-selected|scrollable-region-focusable",
 			"kind": "a11y-p72",
 			"story": "settings-languagedropdown--open-selected",
 			"rule": "scrollable-region-focusable",
 			"reason": "The open list .language-dropdown__list (max-height 280px, overflow-y auto, 27 options) is a scrollable region with no focusable content and no tabindex of its own, so axe reports \"Element should have focusable content\" and \"Element should be focusable\" in both themes; the options are role option divs that never take focus, and the fix belongs to v5.2 (LDG-01, listbox-focus; register counterpart no-aria-activedescendant; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-segmentedcontrol--arabic|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-segmentedcontrol--arabic",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-segmentedcontrol--dark-active|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-segmentedcontrol--dark-active",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-segmentedcontrol--keyboard-focus|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-segmentedcontrol--keyboard-focus",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-segmentedcontrol--keyboard-wrap|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-segmentedcontrol--keyboard-wrap",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-segmentedcontrol--light-active|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-segmentedcontrol--light-active",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-segmentedcontrol--long-labels|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-segmentedcontrol--long-labels",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-segmentedcontrol--system-active|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-segmentedcontrol--system-active",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label of an inactive segment measures 3.94:1 in the light theme (foreground #66758c --ec-color-text-secondary on background #e8ecf0 --ec-color-surface) and 4.39:1 in the dark theme (#818188 on #1c1c1f), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-toggleswitch--keyboard-focus|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-toggleswitch--keyboard-focus",
-			"rule": "color-contrast",
-			"reason": "Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 14px normal weight; the dark theme passes; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-toggleswitch--long-labels|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-toggleswitch--long-labels",
-			"rule": "color-contrast",
-			"reason": "Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 14px normal weight; the dark theme passes; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-toggleswitch--off|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-toggleswitch--off",
-			"rule": "color-contrast",
-			"reason": "Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 14px normal weight; the dark theme passes; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|settings-toggleswitch--on|color-contrast",
-			"kind": "a11y-p72",
-			"story": "settings-toggleswitch--on",
-			"rule": "color-contrast",
-			"reason": "Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c (--ec-color-text-secondary) on background #f5f6f8 (--ec-color-bg), 14px normal weight; the dark theme passes; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-errorboundary--button-hover|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-errorboundary--button-hover",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at normal weight (font size after each selector): .error-boundary__button (Try again), 14px measures 3.62:1 (#007aff --ec-color-accent on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.85:1 (#007aff --ec-color-accent on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__detail, 14px measures 4.22:1 (#66758c --ec-color-text-secondary on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.99:1 (#818188 --ec-color-text-secondary on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__message, 20px measures 4.46:1 (#c44536 --ec-color-error on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.13:1 (#c44536 --ec-color-error on #3d1a16 --ec-color-error-bg) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-errorboundary--fallback|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-errorboundary--fallback",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at normal weight (font size after each selector): .error-boundary__button (Try again), 14px measures 3.62:1 (#007aff --ec-color-accent on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.85:1 (#007aff --ec-color-accent on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__detail, 14px measures 4.22:1 (#66758c --ec-color-text-secondary on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.99:1 (#818188 --ec-color-text-secondary on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__message, 20px measures 4.46:1 (#c44536 --ec-color-error on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.13:1 (#c44536 --ec-color-error on #3d1a16 --ec-color-error-bg) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-errorboundary--fallback-long-message|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-errorboundary--fallback-long-message",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at normal weight (font size after each selector): .error-boundary__button (Try again), 14px measures 3.62:1 (#007aff --ec-color-accent on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.85:1 (#007aff --ec-color-accent on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__detail, 14px measures 4.22:1 (#66758c --ec-color-text-secondary on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.99:1 (#818188 --ec-color-text-secondary on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__message, 20px measures 4.46:1 (#c44536 --ec-color-error on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.13:1 (#c44536 --ec-color-error on #3d1a16 --ec-color-error-bg) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-errorboundary--keyboard-focus|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-errorboundary--keyboard-focus",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at normal weight (font size after each selector): .error-boundary__button (Try again), 14px measures 3.62:1 (#007aff --ec-color-accent on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.85:1 (#007aff --ec-color-accent on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__detail, 14px measures 4.22:1 (#66758c --ec-color-text-secondary on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.99:1 (#818188 --ec-color-text-secondary on #3d1a16 --ec-color-error-bg) in the dark theme; .error-boundary__message, 20px measures 4.46:1 (#c44536 --ec-color-error on #fff0f0 --ec-color-error-bg) in the light theme, measures 3.13:1 (#c44536 --ec-color-error on #3d1a16 --ec-color-error-bg) in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-statusbar--all-cleaned|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-statusbar--all-cleaned",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-statusbar--arabic|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-statusbar--arabic",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-statusbar--keyboard-focus|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-statusbar--keyboard-focus",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-statusbar--mid-batch|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-statusbar--mid-batch",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-statusbar--nothing-removed|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-statusbar--nothing-removed",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-statusbar--running|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-statusbar--running",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-statusbar--single-file|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-statusbar--single-file",
-			"rule": "color-contrast",
-			"reason": "Below 4.5:1 at normal weight (font size after each selector): the .status-bar__summary data-stat segments, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__button (Clear), 12px measures 3.71:1 (#007aff --ec-color-accent on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; .status-bar__summary, 12px measures 4.32:1 (#66758c --ec-color-text-secondary on #f5f6f8 --ec-color-bg) in the light theme, passes in the dark theme; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-typepill--heic|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-typepill--heic",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill--heic (the HEIC and HEIF pills) measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 (--ec-pill-heic-text) on background #ebeaef (--ec-pill-heic-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-typepill--jpeg|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-typepill--jpeg",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill--jpg (the JPG and JPEG pills) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 (--ec-pill-jpg-text) on background #e9eef2 (--ec-pill-jpg-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-typepill--media|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-typepill--media",
-			"rule": "color-contrast",
-			"reason": "Selectors .type-pill--mov and .type-pill--mp4 (the media family pills) measure 2.71:1 in the light theme only, below 4.5:1: foreground #a09060 (--ec-pill-mov-text) on background #eeeeeb (--ec-pill-mov-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-typepill--neutral|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-typepill--neutral",
-			"rule": "color-contrast",
-			"reason": "Selectors .type-pill--gif, --tiff, --tif and --webp (the neutral pills, base .type-pill rule) measure 2.09:1 in the light theme (foreground #9da7b6 --ec-color-muted on background #eceef1) and 2.63:1 in the dark theme (#636369 on #222326), both below 4.5:1, 14px normal weight; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-typepill--pdf|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-typepill--pdf",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill--pdf measures 3.72:1 in the light theme (foreground #a06a60 on background #eeeaeb) and 4.48:1 in the dark theme (#b07a70 on #281f20), both below 4.5:1 (--ec-pill-pdf-text on --ec-pill-pdf-bg composited on the page), 14px normal weight; the family token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-typepill--png|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-typepill--png",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 (--ec-pill-png-text) on background #e8edec (--ec-pill-png-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p72|ui-typepill--raw|color-contrast",
-			"kind": "a11y-p72",
-			"story": "ui-typepill--raw",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill--dng (the RAW family pills) measures 2.93:1 in the light theme only, below 4.5:1: foreground #b08060 (--ec-pill-dng-text) on background #f0eceb (--ec-pill-dng-bg composited on the page), 14px normal weight; the dark theme passes; the family token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--already-clean|aria-conditional-attr",
@@ -656,28 +88,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--already-clean|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--already-clean",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--already-clean-expanded|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--already-clean-expanded",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--already-clean-expanded|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--already-clean-expanded",
-			"rule": "color-contrast",
-			"reason": "Selector .metadata-expansion__empty (the empty expansion text) measures 2.24:1 in the light theme and 3.08:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #f5f6f8 light and #636369 on #141416 dark (foreground --ec-color-muted), 14px; Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--arabic-digits-name|aria-conditional-attr",
@@ -688,28 +104,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--arabic-digits-name|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--arabic-digits-name",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the PNG pill) measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec (--ec-pill-png-text on --ec-pill-png-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--cleaned|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--cleaned",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--cleaned|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--cleaned",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--cleaned-expanded|aria-conditional-attr",
@@ -728,28 +128,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--cleaned-expanded|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--cleaned-expanded",
-			"rule": "color-contrast",
-			"reason": "Selector .metadata-expansion__content > .metadata-group > .metadata-group__header[title=\"Other\"] > .metadata-group__count (the group field count) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (foreground --ec-color-text-secondary), 14px; Selector .metadata-expansion__copy-btn (the Copy all button) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (foreground --ec-color-text-secondary), 14px; Selector .metadata-expansion__summary (the removed and still present summary) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (foreground --ec-color-text-secondary), 14px; Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; Selector summary (the still present toggle) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited text colour, no colour rule of its own), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--cleanup|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--cleanup",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--cleanup|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--cleanup",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--cleanup-without-residual|aria-conditional-attr",
@@ -760,28 +144,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--cleanup-without-residual|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--cleanup-without-residual",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--commit|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--commit",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--commit|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--commit",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--copy-mode-disclosure|aria-conditional-attr",
@@ -792,28 +160,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--copy-mode-disclosure|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--copy-mode-disclosure",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--error-collapsed|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--error-collapsed",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--error-collapsed|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--error-collapsed",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--generic-failure|aria-conditional-attr",
@@ -824,28 +176,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--generic-failure|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--generic-failure",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--german-compound-name|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--german-compound-name",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--german-compound-name|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--german-compound-name",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--hebrew-latin-name|aria-conditional-attr",
@@ -856,28 +192,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--hebrew-latin-name|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--hebrew-latin-name",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--huge-size|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--huge-size",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--huge-size|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--huge-size",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--huge-tag-counts|aria-conditional-attr",
@@ -888,28 +208,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--huge-tag-counts|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--huge-tag-counts",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--japanese-long-name|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--japanese-long-name",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--japanese-long-name|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--japanese-long-name",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--just-under-megabyte|aria-conditional-attr",
@@ -920,28 +224,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--just-under-megabyte|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--just-under-megabyte",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--long-unbroken-name|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--long-unbroken-name",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--long-unbroken-name|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--long-unbroken-name",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--lro-pdf-name|aria-conditional-attr",
@@ -952,52 +240,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--lro-pdf-name|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--lro-pdf-name",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the PNG pill) measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec (--ec-pill-png-text on --ec-pill-png-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--many-dots-name|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--many-dots-name",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--many-dots-name|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--many-dots-name",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--pending|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--pending",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--processing|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--processing",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--reading|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--reading",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--refused|aria-conditional-attr",
@@ -1008,28 +256,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--refused|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--refused",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--rlo-name|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--rlo-name",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--rlo-name|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--rlo-name",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--row-hover|aria-conditional-attr",
@@ -1040,28 +272,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--row-hover|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--row-hover",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--row-keyboard-focus|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--row-keyboard-focus",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--row-keyboard-focus|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--row-keyboard-focus",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--unchanged|aria-conditional-attr",
@@ -1072,28 +288,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--unchanged|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--unchanged",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--verification|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--verification",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--verification|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--verification",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg over the error row), 14px; selector .file-table__copy-hint measures 4.32:1 in the light theme only: #66758c (--ec-color-text-secondary) on #f5f6f8 (--ec-color-bg), 16px; the token fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--write|aria-conditional-attr",
@@ -1104,28 +304,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--write|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--write",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--write-without-residual|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--write-without-residual",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--write-without-residual|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--write-without-residual",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--xattr|aria-conditional-attr",
@@ -1136,28 +320,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--xattr|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--xattr",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--xattr-without-residual|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--xattr-without-residual",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=true) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--xattr-without-residual|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--xattr-without-residual",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-error|aria-conditional-attr",
@@ -1168,14 +336,6 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-error|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--zero-byte-error",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-hint (the Click to copy hint) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 16px; Selector .type-pill (the JPG pill) measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-no-metadata|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--zero-byte-no-metadata",
@@ -1184,28 +344,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filerow--zero-byte-no-metadata|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--zero-byte-no-metadata",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the JPG pill) measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2 (--ec-pill-jpg-text on --ec-pill-jpg-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filerow--zwj-family-name|aria-conditional-attr",
 			"kind": "a11y-p73",
 			"story": "file-list-filerow--zwj-family-name",
 			"rule": "aria-conditional-attr",
 			"reason": "Selector .file-table__row (role=row, aria-expanded=false) fails in both themes: axe reports that aria-expanded is supported on treegrid rows but not on rows of a role=table, which is what FileTable renders; a component defect in FileRow, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart row-aria-expanded-unsupported-in-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filerow--zwj-family-name|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filerow--zwj-family-name",
-			"rule": "color-contrast",
-			"reason": "Selector .type-pill (the PNG pill) measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec (--ec-pill-png-text on --ec-pill-png-bg), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--arabic-batch|aria-allowed-role",
@@ -1272,14 +416,6 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filetable--folder-complete|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--folder-complete",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .folder-row__count (the folder file count) measures 2.04:1 in the light theme and 2.84:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #e8ecf0 light and #636369 on #1c1c1f dark (foreground --ec-color-muted), 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-complete|empty-table-header",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--folder-complete",
@@ -1304,14 +440,6 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filetable--folder-empty|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--folder-empty",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .folder-row__count (the folder file count) measures 2.04:1 in the light theme and 2.84:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #e8ecf0 light and #636369 on #1c1c1f dark (foreground --ec-color-muted), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-empty|empty-table-header",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--folder-empty",
@@ -1334,14 +462,6 @@
 			"rule": "aria-required-children",
 			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filetable--folder-scanning|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--folder-scanning",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .folder-row__count (the folder file count) measures 2.04:1 in the light theme and 2.84:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #e8ecf0 light and #636369 on #1c1c1f dark (foreground --ec-color-muted), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--folder-scanning|empty-table-header",
@@ -1376,14 +496,6 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filetable--german-batch|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--german-batch",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8, 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--heic measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 on #ebeaef, 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filetable--german-batch|empty-table-header",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--german-batch",
@@ -1414,14 +526,6 @@
 			"rule": "aria-required-children",
 			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filetable--header-hover|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--header-hover",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--header-hover|empty-table-header",
@@ -1456,14 +560,6 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filetable--hungarian-batch|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--hungarian-batch",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8, 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--heic measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 on #ebeaef, 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filetable--hungarian-batch|empty-table-header",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--hungarian-batch",
@@ -1494,14 +590,6 @@
 			"rule": "aria-required-children",
 			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filetable--japanese-batch|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--japanese-batch",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8, 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--heic measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 on #ebeaef, 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--japanese-batch|empty-table-header",
@@ -1536,14 +624,6 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filetable--mixed-statuses|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--mixed-statuses",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filetable--mixed-statuses|empty-table-header",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--mixed-statuses",
@@ -1574,14 +654,6 @@
 			"rule": "aria-required-children",
 			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filetable--persian-batch|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--persian-batch",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__summary measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8, 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--heic measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 on #ebeaef, 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--persian-batch|empty-table-header",
@@ -1616,14 +688,6 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filetable--sort-button-keyboard-focus|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--sort-button-keyboard-focus",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-button-keyboard-focus|empty-table-header",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-button-keyboard-focus",
@@ -1654,14 +718,6 @@
 			"rule": "aria-required-children",
 			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-ascending|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--sort-by-name-ascending",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-ascending|empty-table-header",
@@ -1696,14 +752,6 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-descending|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--sort-by-name-descending",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-name-descending|empty-table-header",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-by-name-descending",
@@ -1734,14 +782,6 @@
 			"rule": "aria-required-children",
 			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|file-list-filetable--sort-by-size-with-tie|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--sort-by-size-with-tie",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-by-size-with-tie|empty-table-header",
@@ -1776,14 +816,6 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|file-list-filetable--sort-twice-keeps-rank|color-contrast",
-			"kind": "a11y-p73",
-			"story": "file-list-filetable--sort-twice-keeps-rank",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .type-pill--jpg measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|file-list-filetable--sort-twice-keeps-rank|empty-table-header",
 			"kind": "a11y-p73",
 			"story": "file-list-filetable--sort-twice-keeps-rank",
@@ -1814,14 +846,6 @@
 			"rule": "aria-required-children",
 			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|screens-app--all-done|color-contrast",
-			"kind": "a11y-p73",
-			"story": "screens-app--all-done",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--all-done|empty-table-header",
@@ -1856,36 +880,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|screens-app--all-error|color-contrast",
-			"kind": "a11y-p73",
-			"story": "screens-app--all-error",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--jpg measures 2.87:1 in the light theme and 4.42:1 in the dark theme, below 4.5:1: foreground #6a8fa8 on #f3e8ea light and #7a9ab0 on #422a2b dark, 14px; Selector .type-pill--png measures 3.05:1 in the light theme and 4.46:1 in the dark theme, below 4.5:1: foreground #5a9070 on #f1e7e5 light and #6aa080 on #402921 dark, 14px; Selector .type-pill--webp measures 2.05:1 in the light theme and 2.2:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #f5e9ea light and #636369 on #472826 dark, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|screens-app--all-error|empty-table-header",
 			"kind": "a11y-p73",
 			"story": "screens-app--all-error",
 			"rule": "empty-table-header",
 			"reason": "Selector .file-table__header-cell[role=columnheader] fails in both themes: the first column header (the status column) has no text visible to screen readers; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, accessible-names; register counterpart status-column-header-empty; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|screens-app--drawer-open|color-contrast",
-			"kind": "a11y-p73",
-			"story": "screens-app--drawer-open",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|screens-app--error-boundary-failure|color-contrast",
-			"kind": "a11y-p73",
-			"story": "screens-app--error-boundary-failure",
-			"rule": "color-contrast",
-			"reason": "Selector .error-boundary__button (Try again) measures 3.62:1 in the light theme and 3.85:1 in the dark theme, below 4.5:1: foreground #007aff on #fff0f0 light and #007aff on #3d1a16 dark (--ec-color-accent on --ec-color-error-bg), 14px; Selector .error-boundary__detail (the error detail) measures 4.22:1 in the light theme and 3.99:1 in the dark theme, below 4.5:1: foreground #66758c on #fff0f0 light and #818188 on #3d1a16 dark (--ec-color-text-secondary on --ec-color-error-bg), 14px; Selector .error-boundary__message (Something went wrong.) measures 4.46:1 in the light theme and 3.13:1 in the dark theme, below 4.5:1: foreground #c44536 on #fff0f0 light and #c44536 on #3d1a16 dark (--ec-color-error on --ec-color-error-bg), 20px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--large-batch|aria-allowed-role",
@@ -1910,14 +910,6 @@
 			"rule": "aria-required-children",
 			"reason": "Selector section fails in both themes: axe reports children that a table must not contain ([role=status]), because FileTable renders its Toast live region inside the table element; a component structure defect in FileTable, not the story frame; the fix belongs to v5.2 (LDG-01, table-structure; register counterpart toast-live-region-inside-table; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|screens-app--large-batch|color-contrast",
-			"kind": "a11y-p73",
-			"story": "screens-app--large-batch",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--heic measures 3.26:1 in the light theme only, below 4.5:1: foreground #8a7aa0 on #ebeaef, 14px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "a11y-p73|screens-app--large-batch|empty-table-header",
@@ -1952,14 +944,6 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|screens-app--mid-batch|color-contrast",
-			"kind": "a11y-p73",
-			"story": "screens-app--mid-batch",
-			"rule": "color-contrast",
-			"reason": "Selector .file-table__copy-disclosure (the Written to a copy line) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 14px; Selector .file-table__sort-button (the column header sort buttons) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (inherited --ec-color-text-secondary on --ec-color-surface), 11px; Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .type-pill--jpg measures 2.94:1 in the light theme only, below 4.5:1: foreground #6a8fa8 on #e9eef2, 14px; Selector .type-pill--png measures 3.13:1 in the light theme only, below 4.5:1: foreground #5a9070 on #e8edec, 14px; Selector .type-pill--webp measures 2.09:1 in the light theme and 2.63:1 in the dark theme, below 4.5:1: foreground #9da7b6 on #eceef1 light and #636369 on #222326 dark, 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|screens-app--mid-batch|empty-table-header",
 			"kind": "a11y-p73",
 			"story": "screens-app--mid-batch",
@@ -1968,124 +952,12 @@
 			"disposition": "fix-v5.2"
 		},
 		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--all-toggles-off|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--all-toggles-off",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--all-toggles-on|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--all-toggles-on",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--arabic-drawer|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--arabic-drawer",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--close-button-hover|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--close-button-hover",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--close-button-keyboard-focus|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--close-button-keyboard-focus",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--german-drawer|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--german-drawer",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--hungarian-drawer|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--hungarian-drawer",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--language-list-open|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--language-list-open",
-			"rule": "color-contrast",
-			"reason": "Selector .language-dropdown__english (the English name in brackets) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; Selector span (the label of the highlighted item) measures 3.11:1 in the light theme and 4.27:1 in the dark theme, below 4.5:1: foreground #007aff on #dfe3e6 light and #007aff on #1b1b1e dark (--ec-color-accent on --ec-color-surface under the --ec-color-hover fallback), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
 			"fingerprint": "a11y-p73|settings-settingsdrawer--language-list-open|scrollable-region-focusable",
 			"kind": "a11y-p73",
 			"story": "settings-settingsdrawer--language-list-open",
 			"rule": "scrollable-region-focusable",
 			"reason": "The open list .language-dropdown__list inside the drawer (max-height 280px, overflow-y auto, one option per language plus System) is a scrollable region with no focusable content and no tabindex of its own, so axe reports that the element should have focusable content and should be focusable in both themes; the options are role option divs that never take focus, the same defect as settings-languagedropdown--open, and the fix belongs to v5.2 (LDG-01, listbox-focus; register counterpart no-aria-activedescendant; approved 2026-11-15, .planning/research/v5.1-fresh-sweep-refresh.md section 7a).",
 			"disposition": "fix-v5.2"
-		},
-		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--non-mac-platform|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--non-mac-platform",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--persian-drawer|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--persian-drawer",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--theme-mode-dark-selected|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--theme-mode-dark-selected",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--theme-mode-light-selected|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--theme-mode-light-selected",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|settings-settingsdrawer--theme-mode-system-selected|color-contrast",
-			"kind": "a11y-p73",
-			"story": "settings-settingsdrawer--theme-mode-system-selected",
-			"rule": "color-contrast",
-			"reason": "Selector .segmented-control__label (an inactive theme-mode segment label) measures 3.94:1 in the light theme and 4.39:1 in the dark theme, below 4.5:1: foreground #66758c on #e8ecf0 light and #818188 on #1c1c1f dark (--ec-color-text-secondary on --ec-color-surface), 14px; Selector .toggle-switch__description (the setting description) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg), 14px; Selector h3 (the Appearance and Language section labels) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (--ec-color-text-secondary on --ec-color-bg, .settings-drawer__section-label), 14px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
-		},
-		{
-			"fingerprint": "a11y-p73|ui-statusbar--turkish-long-status|color-contrast",
-			"kind": "a11y-p73",
-			"story": "ui-statusbar--turkish-long-status",
-			"rule": "color-contrast",
-			"reason": "Selector .status-bar__button (the status bar Clear button) measures 3.71:1 in the light theme only, below 4.5:1: foreground #007aff on #f5f6f8 (foreground --ec-color-accent), 12px; Selector .status-bar__summary (the separators between the status bar segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; Selector .status-bar__summary span[data-stat] (the status bar summary segments) measures 4.32:1 in the light theme only, below 4.5:1: foreground #66758c on #f5f6f8 (foreground --ec-color-text-secondary), 12px; the fix belongs to v5.1.",
-			"disposition": "fix-v5.1"
 		},
 		{
 			"fingerprint": "access-gap|file-list-filerow--cleaned-expanded|rowgroup-holds-non-row-children",
@@ -2229,600 +1101,6 @@
 			"rule": "reading-and-no-metadata-share-labels",
 			"reason": "StatusIcon.tsx:32-40 gives the Reading and Processing statuses the same role img with the label Processing and NoMetadataFound shares Complete (outerHTML equality plays in the 72-02 stories), so assistive tech cannot tell a file being read from one being written or a clean file from a cleaned one.",
 			"disposition": "fix-v5.2",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|selection-on-accent-dark",
-			"kind": "contrast-gap",
-			"story": "file-list-filetable--mixed-statuses",
-			"rule": "selection-on-accent-dark",
-			"reason": "Selector ::selection: the literal white #ffffff on --ec-color-accent #007aff measures 4.01:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|selection-on-accent-light",
-			"kind": "contrast-gap",
-			"story": "file-list-filetable--mixed-statuses",
-			"rule": "selection-on-accent-light",
-			"reason": "Selector ::selection: the literal white #ffffff on --ec-color-accent #007aff measures 4.01:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-bg-light",
-			"kind": "contrast-gap",
-			"story": "file-list-filetable--mixed-statuses",
-			"rule": "text-secondary-on-bg-light",
-			"reason": "Selector .file-table__header: --ec-color-text-secondary #66758c on --ec-color-bg #f5f6f8 measures 4.32:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-error-bg-dark",
-			"kind": "contrast-gap",
-			"story": "file-list-filetable--mixed-statuses",
-			"rule": "text-secondary-on-error-bg-dark",
-			"reason": "Selector .file-table__header: --ec-color-text-secondary #818188 on --ec-color-error-bg #3d1a16 measures 3.99:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-error-bg-light",
-			"kind": "contrast-gap",
-			"story": "file-list-filetable--mixed-statuses",
-			"rule": "text-secondary-on-error-bg-light",
-			"reason": "Selector .file-table__header: --ec-color-text-secondary #66758c on --ec-color-error-bg #fff0f0 measures 4.22:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-item-hover-dark",
-			"kind": "contrast-gap",
-			"story": "file-list-filetable--mixed-statuses",
-			"rule": "text-secondary-on-item-hover-dark",
-			"reason": "Selector .file-table__header: --ec-color-text-secondary #818188 on overlay item-hover #1b1b1e measures 4.44:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-item-hover-light",
-			"kind": "contrast-gap",
-			"story": "file-list-filetable--mixed-statuses",
-			"rule": "text-secondary-on-item-hover-light",
-			"reason": "Selector .file-table__header: --ec-color-text-secondary #66758c on overlay item-hover #dfe3e6 measures 3.62:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-surface-dark",
-			"kind": "contrast-gap",
-			"story": "file-list-filetable--mixed-statuses",
-			"rule": "text-secondary-on-surface-dark",
-			"reason": "Selector .file-table__header: --ec-color-text-secondary #818188 on --ec-color-surface #1c1c1f measures 4.39:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-filetable--mixed-statuses|text-secondary-on-surface-light",
-			"kind": "contrast-gap",
-			"story": "file-list-filetable--mixed-statuses",
-			"rule": "text-secondary-on-surface-light",
-			"reason": "Selector .file-table__header: --ec-color-text-secondary #66758c on --ec-color-surface #e8ecf0 measures 3.94:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-bg-dark",
-			"kind": "contrast-gap",
-			"story": "file-list-folderrow--complete-collapsed",
-			"rule": "muted-on-bg-dark",
-			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #636369 on --ec-color-bg #141416 measures 3.08:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-bg-light",
-			"kind": "contrast-gap",
-			"story": "file-list-folderrow--complete-collapsed",
-			"rule": "muted-on-bg-light",
-			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #9da7b6 on --ec-color-bg #f5f6f8 measures 2.24:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-error-bg-dark",
-			"kind": "contrast-gap",
-			"story": "file-list-folderrow--complete-collapsed",
-			"rule": "muted-on-error-bg-dark",
-			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #636369 on --ec-color-error-bg #3d1a16 measures 2.59:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-error-bg-light",
-			"kind": "contrast-gap",
-			"story": "file-list-folderrow--complete-collapsed",
-			"rule": "muted-on-error-bg-light",
-			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #9da7b6 on --ec-color-error-bg #fff0f0 measures 2.19:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-item-hover-dark",
-			"kind": "contrast-gap",
-			"story": "file-list-folderrow--complete-collapsed",
-			"rule": "muted-on-item-hover-dark",
-			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #636369 on overlay item-hover #1b1b1e measures 2.87:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-item-hover-light",
-			"kind": "contrast-gap",
-			"story": "file-list-folderrow--complete-collapsed",
-			"rule": "muted-on-item-hover-light",
-			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #9da7b6 on overlay item-hover #dfe3e6 measures 1.88:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-surface-dark",
-			"kind": "contrast-gap",
-			"story": "file-list-folderrow--complete-collapsed",
-			"rule": "muted-on-surface-dark",
-			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #636369 on --ec-color-surface #1c1c1f measures 2.84:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-folderrow--complete-collapsed|muted-on-surface-light",
-			"kind": "contrast-gap",
-			"story": "file-list-folderrow--complete-collapsed",
-			"rule": "muted-on-surface-light",
-			"reason": "Selector .file-table__cell--muted, .folder-row__count: --ec-color-muted #9da7b6 on --ec-color-surface #e8ecf0 measures 2.04:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-metadataexpansion--mixed|success-icon-preserved-on-preserved-bg-light",
-			"kind": "contrast-gap",
-			"story": "file-list-metadataexpansion--mixed",
-			"rule": "success-icon-preserved-on-preserved-bg-light",
-			"reason": "Selector .metadata-field--preserved .metadata-field__icon: --ec-color-success #34c759 on overlay preserved-bg #dae9e4 measures 1.77:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-metadataexpansion--mixed|text-secondary-preserved-on-preserved-bg-dark",
-			"kind": "contrast-gap",
-			"story": "file-list-metadataexpansion--mixed",
-			"rule": "text-secondary-preserved-on-preserved-bg-dark",
-			"reason": "Selector .metadata-field--preserved .metadata-field__value: --ec-color-text-secondary #818188 on overlay preserved-bg #1e3226 measures 3.52:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-metadataexpansion--mixed|text-secondary-preserved-on-preserved-bg-light",
-			"kind": "contrast-gap",
-			"story": "file-list-metadataexpansion--mixed",
-			"rule": "text-secondary-preserved-on-preserved-bg-light",
-			"reason": "Selector .metadata-field--preserved .metadata-field__value: --ec-color-text-secondary #66758c on overlay preserved-bg #dae9e4 measures 3.73:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-metadataexpansion--mixed|text-secondary-removed-on-removed-bg-dark",
-			"kind": "contrast-gap",
-			"story": "file-list-metadataexpansion--mixed",
-			"rule": "text-secondary-removed-on-removed-bg-dark",
-			"reason": "Selector .metadata-field--removed .metadata-field__value: --ec-color-text-secondary #818188 on overlay removed-bg #372122 measures 3.86:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|file-list-metadataexpansion--mixed|text-secondary-removed-on-removed-bg-light",
-			"kind": "contrast-gap",
-			"story": "file-list-metadataexpansion--mixed",
-			"rule": "text-secondary-removed-on-removed-bg-light",
-			"reason": "Selector .metadata-field--removed .metadata-field__value: --ec-color-text-secondary #66758c on overlay removed-bg #eadee1 measures 3.57:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|settings-toggleswitch--off|toggle-off-track-on-bg-dark",
-			"kind": "contrast-gap",
-			"story": "settings-toggleswitch--off",
-			"rule": "toggle-off-track-on-bg-dark",
-			"reason": "Selector .toggle-switch__track: --ec-toggle-off-track #3a3a3e on --ec-color-bg #141416 measures 1.62:1 in the dark theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|settings-toggleswitch--off|toggle-off-track-on-bg-light",
-			"kind": "contrast-gap",
-			"story": "settings-toggleswitch--off",
-			"rule": "toggle-off-track-on-bg-light",
-			"reason": "Selector .toggle-switch__track: --ec-toggle-off-track #d1d1d6 on --ec-color-bg #f5f6f8 measures 1.40:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|settings-toggleswitch--off|toggle-off-track-on-surface-dark",
-			"kind": "contrast-gap",
-			"story": "settings-toggleswitch--off",
-			"rule": "toggle-off-track-on-surface-dark",
-			"reason": "Selector .toggle-switch__track: --ec-toggle-off-track #3a3a3e on --ec-color-surface #1c1c1f measures 1.50:1 in the dark theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|settings-toggleswitch--off|toggle-off-track-on-surface-light",
-			"kind": "contrast-gap",
-			"story": "settings-toggleswitch--off",
-			"rule": "toggle-off-track-on-surface-light",
-			"reason": "Selector .toggle-switch__track: --ec-toggle-off-track #d1d1d6 on --ec-color-surface #e8ecf0 measures 1.28:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|settings-toggleswitch--off|toggle-thumb-off-on-ec-toggle-off-track-light",
-			"kind": "contrast-gap",
-			"story": "settings-toggleswitch--off",
-			"rule": "toggle-thumb-off-on-ec-toggle-off-track-light",
-			"reason": "Selector .toggle-switch__thumb: the literal #ffffff #ffffff on --ec-toggle-off-track #d1d1d6 measures 1.52:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-dropzone--drag-over|drop-zone-border-on-gold-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-dropzone--drag-over",
-			"rule": "drop-zone-border-on-gold-bg-light",
-			"reason": "Selector .drop-zone--active: --ec-color-gold #f8d057 on overlay gold-bg #f5f4f0 measures 1.34:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-emptystate--copy-mode-on|empty-state-secondary-on-item-hover-light",
-			"kind": "contrast-gap",
-			"story": "ui-emptystate--copy-mode-on",
-			"rule": "empty-state-secondary-on-item-hover-light",
-			"reason": "Selector .empty-state__instruction, .empty-state__output-mode: --empty-state-secondary #59677b on overlay item-hover #dfe3e6 measures 4.45:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-bg-dark",
-			"kind": "contrast-gap",
-			"story": "ui-errorboundary--fallback",
-			"rule": "error-text-on-bg-dark",
-			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on --ec-color-bg #141416 measures 3.72:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-error-bg-dark",
-			"kind": "contrast-gap",
-			"story": "ui-errorboundary--fallback",
-			"rule": "error-text-on-error-bg-dark",
-			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on --ec-color-error-bg #3d1a16 measures 3.13:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-error-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-errorboundary--fallback",
-			"rule": "error-text-on-error-bg-light",
-			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on --ec-color-error-bg #fff0f0 measures 4.46:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-item-hover-dark",
-			"kind": "contrast-gap",
-			"story": "ui-errorboundary--fallback",
-			"rule": "error-text-on-item-hover-dark",
-			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on overlay item-hover #1b1b1e measures 3.47:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-item-hover-light",
-			"kind": "contrast-gap",
-			"story": "ui-errorboundary--fallback",
-			"rule": "error-text-on-item-hover-light",
-			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on overlay item-hover #dfe3e6 measures 3.82:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-surface-dark",
-			"kind": "contrast-gap",
-			"story": "ui-errorboundary--fallback",
-			"rule": "error-text-on-surface-dark",
-			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on --ec-color-surface #1c1c1f measures 3.44:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-errorboundary--fallback|error-text-on-surface-light",
-			"kind": "contrast-gap",
-			"story": "ui-errorboundary--fallback",
-			"rule": "error-text-on-surface-light",
-			"reason": "Selector .error-boundary__message: --ec-color-error #c44536 on --ec-color-surface #e8ecf0 measures 4.16:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-statusbar--all-cleaned",
-			"rule": "accent-text-on-bg-light",
-			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on --ec-color-bg #f5f6f8 measures 3.71:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-error-bg-dark",
-			"kind": "contrast-gap",
-			"story": "ui-statusbar--all-cleaned",
-			"rule": "accent-text-on-error-bg-dark",
-			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on --ec-color-error-bg #3d1a16 measures 3.85:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-error-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-statusbar--all-cleaned",
-			"rule": "accent-text-on-error-bg-light",
-			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on --ec-color-error-bg #fff0f0 measures 3.62:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-item-hover-dark",
-			"kind": "contrast-gap",
-			"story": "ui-statusbar--all-cleaned",
-			"rule": "accent-text-on-item-hover-dark",
-			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on overlay item-hover #1b1b1e measures 4.27:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-item-hover-light",
-			"kind": "contrast-gap",
-			"story": "ui-statusbar--all-cleaned",
-			"rule": "accent-text-on-item-hover-light",
-			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on overlay item-hover #dfe3e6 measures 3.11:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-surface-dark",
-			"kind": "contrast-gap",
-			"story": "ui-statusbar--all-cleaned",
-			"rule": "accent-text-on-surface-dark",
-			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on --ec-color-surface #1c1c1f measures 4.23:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-statusbar--all-cleaned|accent-text-on-surface-light",
-			"kind": "contrast-gap",
-			"story": "ui-statusbar--all-cleaned",
-			"rule": "accent-text-on-surface-light",
-			"reason": "Selector .status-bar__button, .language-dropdown__item--selected, .error-boundary__button: --ec-color-accent #007aff on --ec-color-surface #e8ecf0 measures 3.38:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-statusicon--complete|success-icon-on-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-statusicon--complete",
-			"rule": "success-icon-on-bg-light",
-			"reason": "Selector .status-icon__check: --ec-color-success #34c759 on --ec-color-bg #f5f6f8 measures 2.05:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-statusicon--complete|success-icon-on-error-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-statusicon--complete",
-			"rule": "success-icon-on-error-bg-light",
-			"reason": "Selector .status-icon__check: --ec-color-success #34c759 on --ec-color-error-bg #fff0f0 measures 2.00:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-statusicon--complete|success-icon-on-item-hover-light",
-			"kind": "contrast-gap",
-			"story": "ui-statusicon--complete",
-			"rule": "success-icon-on-item-hover-light",
-			"reason": "Selector .status-icon__check: --ec-color-success #34c759 on overlay item-hover #dfe3e6 measures 1.71:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-statusicon--complete|success-icon-on-surface-light",
-			"kind": "contrast-gap",
-			"story": "ui-statusicon--complete",
-			"rule": "success-icon-on-surface-light",
-			"reason": "Selector .status-icon__check: --ec-color-success #34c759 on --ec-color-surface #e8ecf0 measures 1.86:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-statusicon--processing|spinner-on-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-statusicon--processing",
-			"rule": "spinner-on-bg-light",
-			"reason": "Selector .status-icon__spinner: --ec-color-muted #9da7b6 on --ec-color-bg #f5f6f8 measures 2.24:1 in the light theme (non-text, needs 3:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--heic|pill-heic-on-pill-heic-bg-over-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--heic",
-			"rule": "pill-heic-on-pill-heic-bg-over-bg-light",
-			"reason": "Selector .type-pill--heic, .type-pill--heif: --ec-pill-heic-text #8a7aa0 on overlay pill-heic-bg-over-bg #ebeaef measures 3.26:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--heic|pill-heic-on-pill-heic-bg-over-surface-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--heic",
-			"rule": "pill-heic-on-pill-heic-bg-over-surface-light",
-			"reason": "Selector .type-pill--heic, .type-pill--heif: --ec-pill-heic-text #8a7aa0 on overlay pill-heic-bg-over-surface #dfe1e8 measures 2.99:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--jpeg|pill-jpg-on-pill-jpg-bg-over-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--jpeg",
-			"rule": "pill-jpg-on-pill-jpg-bg-over-bg-light",
-			"reason": "Selector .type-pill--jpg, .type-pill--jpeg: --ec-pill-jpg-text #6a8fa8 on overlay pill-jpg-bg-over-bg #e9eef2 measures 2.94:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--jpeg|pill-jpg-on-pill-jpg-bg-over-surface-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--jpeg",
-			"rule": "pill-jpg-on-pill-jpg-bg-over-surface-light",
-			"reason": "Selector .type-pill--jpg, .type-pill--jpeg: --ec-pill-jpg-text #6a8fa8 on overlay pill-jpg-bg-over-surface #dde4ea measures 2.67:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--media|pill-mov-on-pill-mov-bg-over-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--media",
-			"rule": "pill-mov-on-pill-mov-bg-over-bg-light",
-			"reason": "Selector .type-pill--mov, .type-pill--mp4: --ec-pill-mov-text #a09060 on overlay pill-mov-bg-over-bg #eeeeeb measures 2.71:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--media|pill-mov-on-pill-mov-bg-over-surface-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--media",
-			"rule": "pill-mov-on-pill-mov-bg-over-surface-light",
-			"reason": "Selector .type-pill--mov, .type-pill--mp4: --ec-pill-mov-text #a09060 on overlay pill-mov-bg-over-surface #e2e4e3 measures 2.47:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--neutral|neutral-pill-on-neutral-pill-over-bg-dark",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--neutral",
-			"rule": "neutral-pill-on-neutral-pill-over-bg-dark",
-			"reason": "Selector .type-pill: --ec-color-muted #636369 on overlay neutral-pill-over-bg #222326 measures 2.63:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--neutral|neutral-pill-on-neutral-pill-over-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--neutral",
-			"rule": "neutral-pill-on-neutral-pill-over-bg-light",
-			"reason": "Selector .type-pill: --ec-color-muted #9da7b6 on overlay neutral-pill-over-bg #eceef1 measures 2.09:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--neutral|neutral-pill-on-neutral-pill-over-surface-dark",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--neutral",
-			"rule": "neutral-pill-on-neutral-pill-over-surface-dark",
-			"reason": "Selector .type-pill: --ec-color-muted #636369 on overlay neutral-pill-over-surface #292a2e measures 2.40:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--neutral|neutral-pill-on-neutral-pill-over-surface-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--neutral",
-			"rule": "neutral-pill-on-neutral-pill-over-surface-light",
-			"reason": "Selector .type-pill: --ec-color-muted #9da7b6 on overlay neutral-pill-over-surface #e1e5ea measures 1.92:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--pdf|pill-pdf-on-pill-pdf-bg-over-bg-dark",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--pdf",
-			"rule": "pill-pdf-on-pill-pdf-bg-over-bg-dark",
-			"reason": "Selector .type-pill--pdf: --ec-pill-pdf-text #b07a70 on overlay pill-pdf-bg-over-bg #281f20 measures 4.48:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--pdf|pill-pdf-on-pill-pdf-bg-over-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--pdf",
-			"rule": "pill-pdf-on-pill-pdf-bg-over-bg-light",
-			"reason": "Selector .type-pill--pdf: --ec-pill-pdf-text #a06a60 on overlay pill-pdf-bg-over-bg #eeeaeb measures 3.72:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--pdf|pill-pdf-on-pill-pdf-bg-over-surface-dark",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--pdf",
-			"rule": "pill-pdf-on-pill-pdf-bg-over-surface-dark",
-			"reason": "Selector .type-pill--pdf: --ec-pill-pdf-text #b07a70 on overlay pill-pdf-bg-over-surface #2e2627 measures 4.12:1 in the dark theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--pdf|pill-pdf-on-pill-pdf-bg-over-surface-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--pdf",
-			"rule": "pill-pdf-on-pill-pdf-bg-over-surface-light",
-			"reason": "Selector .type-pill--pdf: --ec-pill-pdf-text #a06a60 on overlay pill-pdf-bg-over-surface #e2e1e4 measures 3.41:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--png|pill-png-on-pill-png-bg-over-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--png",
-			"rule": "pill-png-on-pill-png-bg-over-bg-light",
-			"reason": "Selector .type-pill--png: --ec-pill-png-text #5a9070 on overlay pill-png-bg-over-bg #e8edec measures 3.13:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--png|pill-png-on-pill-png-bg-over-surface-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--png",
-			"rule": "pill-png-on-pill-png-bg-over-surface-light",
-			"reason": "Selector .type-pill--png: --ec-pill-png-text #5a9070 on overlay pill-png-bg-over-surface #dce4e5 measures 2.87:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--raw|pill-dng-on-pill-dng-bg-over-bg-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--raw",
-			"rule": "pill-dng-on-pill-dng-bg-over-bg-light",
-			"reason": "Selector .type-pill--dng, .type-pill--cr2: --ec-pill-dng-text #b08060 on overlay pill-dng-bg-over-bg #f0eceb measures 2.93:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
-			"severity": "major"
-		},
-		{
-			"fingerprint": "contrast-gap|ui-typepill--raw|pill-dng-on-pill-dng-bg-over-surface-light",
-			"kind": "contrast-gap",
-			"story": "ui-typepill--raw",
-			"rule": "pill-dng-on-pill-dng-bg-over-surface-light",
-			"reason": "Selector .type-pill--dng, .type-pill--cr2: --ec-pill-dng-text #b08060 on overlay pill-dng-bg-over-surface #e4e3e3 measures 2.68:1 in the light theme (text, needs 4.5:1); v5.1 fixes it against the UI-SPEC palette.",
-			"disposition": "fix-v5.1",
 			"severity": "major"
 		},
 		{
@@ -3047,15 +1325,6 @@
 			"story": "file-list-filerow--copy-mode-disclosure",
 			"rule": "line-height-token-undefined",
 			"reason": "file_table.css:139 sets line-height: var(--ec-line-height-normal) on .file-table__copy-disclosure, and --ec-line-height-normal is declared in no stylesheet (tokens.css holds no --ec-line-height-* token), so the declaration is invalid at computed-value time; v5.1 declares the unitless --ec-line-height-* tokens of the UI-SPEC scale (D-09) and points the rule at one of them.",
-			"disposition": "fix-v5.1",
-			"severity": "minor"
-		},
-		{
-			"fingerprint": "token-map-gap|ui-emptystate--copy-mode-on|empty-state-secondary-hardcoded",
-			"kind": "token-map-gap",
-			"story": "ui-emptystate--copy-mode-on",
-			"rule": "empty-state-secondary-hardcoded",
-			"reason": "empty_state.css:2 declares --empty-state-secondary as #59677b on .empty-state and empty_state.css:118 as #94949b on [data-theme=\"dark\"] .empty-state, outside tokens.css, so the empty state's secondary text colour is two literals that no token reaches (the contrast pairs list it as a local token); v5.1 reads --ec-color-text-secondary instead (Pewter in light, Fog in dark).",
 			"disposition": "fix-v5.1",
 			"severity": "minor"
 		},
