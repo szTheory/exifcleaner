@@ -39,6 +39,7 @@ type Observation = {
 	selector: string;
 	theme: Theme;
 	locale?: string;
+	platform?: string;
 	actual: string;
 	expected: string;
 };
@@ -62,20 +63,18 @@ afterEach(() => {
 test("pending exceptions are exact story and selector observations", () => {
 	expect(pendingData.schemaVersion).toBe(1);
 	for (const row of pending) {
-		expect(Object.keys(row).sort()).toEqual(
-			row.locale === undefined
-				? ["actual", "case", "expected", "reason", "selector", "story", "theme"]
-				: [
-						"actual",
-						"case",
-						"expected",
-						"locale",
-						"reason",
-						"selector",
-						"story",
-						"theme",
-					],
-		);
+		const keys = [
+			"actual",
+			"case",
+			"expected",
+			...(row.locale === undefined ? [] : ["locale"]),
+			...(row.platform === undefined ? [] : ["platform"]),
+			"reason",
+			"selector",
+			"story",
+			"theme",
+		].sort();
+		expect(Object.keys(row).sort()).toEqual(keys);
 		for (const value of [
 			row.case,
 			row.story,
@@ -88,8 +87,10 @@ test("pending exceptions are exact story and selector observations", () => {
 			expect(value.trim()).not.toBe("");
 		}
 		expect(["light", "dark"]).toContain(row.theme);
-		if (row.case !== "outcome-color")
+		if (row.case !== "outcome-color") {
 			expect(["de", "hu", "ar"]).toContain(row.locale);
+			expect(row.platform).not.toBeUndefined();
+		}
 	}
 });
 
@@ -132,6 +133,7 @@ function exactPendingMatch(
 			row.selector === observation.selector &&
 			row.theme === observation.theme &&
 			row.locale === observation.locale &&
+			row.platform === observation.platform &&
 			row.actual === observation.actual &&
 			row.expected === observation.expected,
 	);
@@ -351,7 +353,10 @@ test("the four named clipping contracts hold across locales and themes", async (
 			selector: ".empty-state",
 		},
 	] as const;
-	const clipPending = pending.filter((row) => row.case !== "outcome-color");
+	const platform = navigator.platform;
+	const clipPending = pending.filter(
+		(row) => row.case !== "outcome-color" && row.platform === platform,
+	);
 	const consumedPending = new Set<PendingObservation>();
 	const unpended: Observation[] = [];
 
@@ -369,6 +374,7 @@ test("the four named clipping contracts hold across locales and themes", async (
 					selector: current.selector,
 					theme,
 					locale: scene.locale,
+					platform,
 					actual: fits(target) ? OVERFLOW_EXPECTED : clippingInput(measured),
 					expected: OVERFLOW_EXPECTED,
 				};
@@ -385,6 +391,7 @@ test("the four named clipping contracts hold across locales and themes", async (
 					selector: `[data-phase78-negative="${current.name}"]`,
 					theme,
 					locale: scene.locale,
+					platform,
 					actual: clippingInput(plantedMeasurement),
 					expected: OVERFLOW_EXPECTED,
 				};
