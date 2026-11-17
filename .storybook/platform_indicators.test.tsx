@@ -2,9 +2,16 @@ import { composeStories, setProjectAnnotations } from "@storybook/react-vite";
 import * as a11yAnnotations from "@storybook/addon-a11y/preview";
 import { expect, test } from "vitest";
 import { commands } from "vitest/browser";
+import {
+	evaluate,
+	pairsShapeProblems,
+	proposedResults,
+} from "../tests/renderer/contrast/contrast_model.mjs";
+import type { ContrastPairsDocument } from "../tests/renderer/contrast/contrast_model.mjs";
 import { contrastRatio } from "../tests/renderer/contrast/wcag.mjs";
 import * as segmentedStories from "../src/renderer/components/settings/SegmentedControl.stories";
 import * as toggleStories from "../src/renderer/components/settings/ToggleSwitch.stories";
+import * as dropZoneStories from "../src/renderer/components/ui/DropZone.stories";
 import preview from "./preview";
 
 type PaletteTheme = "light" | "dark";
@@ -25,9 +32,42 @@ setProjectAnnotations([a11yAnnotations, preview]);
 
 const { KeyboardFocus } = composeStories(segmentedStories);
 const { On: ToggleOn } = composeStories(toggleStories);
+const { DragOver: DropZoneDragOver } = composeStories(dropZoneStories);
 const THEMES: PaletteTheme[] = ["light", "dark"];
 const DARK_INDICATOR_EXPRESSION =
 	"color-mix(in srgb, var(--ec-color-accent) 90%, CanvasText 10%)";
+const INDICATOR_SOURCE_PATHS = [
+	"src/renderer/components/settings/ToggleSwitch.stories.tsx",
+	"src/renderer/components/settings/ToggleSwitch.tsx",
+	"src/renderer/styles/toggle_switch.css",
+	"src/renderer/components/settings/SegmentedControl.stories.tsx",
+	"src/renderer/components/settings/SegmentedControl.tsx",
+	"src/renderer/styles/segmented_control.css",
+	"src/renderer/components/ui/DropZone.stories.tsx",
+	"src/renderer/components/ui/DropZone.tsx",
+	"src/renderer/styles/drop_zone.css",
+	"src/renderer/styles/tokens.css",
+	".storybook/platform_indicators.test.tsx",
+	".storybook/forced_colors.test.tsx",
+	"vitest.storybook.config.ts",
+	".storybook/preview.tsx",
+	"src/renderer/index.tsx",
+	"src/renderer/styles/forced_colors.css",
+	"tests/renderer/contrast/contrast_model.mjs",
+	"tests/renderer/contrast/contrast_pairs.json",
+	"tests/renderer/contrast/wcag.mjs",
+	"src/domain/accent_color.ts",
+];
+const focusObservations: Array<Record<string, unknown>> = [];
+const toggleObservations: Array<Record<string, unknown>> = [];
+const forcedColorObservations: Array<Record<string, unknown>> = [];
+const dropObservations: Array<Record<string, unknown>> = [];
+let focusGateComplete = false;
+let toggleGateComplete = false;
+let forcedGateComplete = false;
+let forcedFocusComplete = false;
+let forcedDropComplete = false;
+let dropGateComplete = false;
 
 function canonicalPaint(raw: string): Paint {
 	const canvas = document.createElement("canvas");
@@ -119,6 +159,85 @@ function sRgbMix(accent: Paint, canvasText: Paint): Paint {
 	);
 }
 
+async function sha256(text: string): Promise<string> {
+	const digest = await crypto.subtle.digest(
+		"SHA-256",
+		new TextEncoder().encode(text),
+	);
+	return [...new Uint8Array(digest)]
+		.map((byte) => byte.toString(16).padStart(2, "0"))
+		.join("");
+}
+
+type SourceInput = { path: string; sha256: string };
+
+async function readIndicatorSources(): Promise<{
+	texts: string[];
+	inputs: SourceInput[];
+	digests: Record<string, string>;
+}> {
+	expect(INDICATOR_SOURCE_PATHS).toHaveLength(20);
+	expect(new Set(INDICATOR_SOURCE_PATHS).size).toBe(20);
+	const texts = await Promise.all(
+		INDICATOR_SOURCE_PATHS.map((path) => commands.readFile(path)),
+	);
+	texts.forEach((source, index) => {
+		expect(
+			source.length,
+			`source input ${INDICATOR_SOURCE_PATHS[index]}`,
+		).toBeGreaterThan(0);
+	});
+	const inputs = await Promise.all(
+		INDICATOR_SOURCE_PATHS.map(async (path, index) => ({
+			path,
+			sha256: await sha256(texts[index] ?? ""),
+		})),
+	);
+	return {
+		texts,
+		inputs,
+		digests: Object.fromEntries(
+			inputs.map(({ path, sha256: digest }) => [path, digest]),
+		),
+	};
+}
+
+function assertSourceProofBindings(record: {
+	sourceProof?: { algorithm?: string; inputs?: SourceInput[] };
+	sourceDigests?: Record<string, string>;
+}): void {
+	const inputs = record.sourceProof?.inputs;
+	expect(record.sourceProof?.algorithm).toBe("SHA-256");
+	expect(inputs).toHaveLength(INDICATOR_SOURCE_PATHS.length);
+	if (inputs === undefined) throw new Error("source proof inputs are missing");
+	const paths = inputs.map(({ path }) => path);
+	expect(new Set(paths).size).toBe(INDICATOR_SOURCE_PATHS.length);
+	expect(paths).toEqual(INDICATOR_SOURCE_PATHS);
+	const sourceDigests = record.sourceDigests;
+	if (sourceDigests === undefined)
+		throw new Error("source digest map is missing");
+	expect(Object.keys(sourceDigests).sort()).toEqual(
+		[...INDICATOR_SOURCE_PATHS].sort(),
+	);
+	for (const input of inputs) {
+		expect(input.sha256).toMatch(/^[0-9a-f]{64}$/);
+		expect(sourceDigests[input.path]).toBe(input.sha256);
+	}
+}
+
+function assertSourceProofMatchesCurrent(
+	record: {
+		sourceProof?: { algorithm?: string; inputs?: SourceInput[] };
+		sourceDigests?: Record<string, string>;
+	},
+	currentDigests: Record<string, string>,
+): void {
+	assertSourceProofBindings(record);
+	expect(record.sourceDigests).toEqual(currentDigests);
+	for (const input of record.sourceProof?.inputs ?? [])
+		expect(input.sha256).toBe(currentDigests[input.path]);
+}
+
 function rect(element: Element): Record<string, number> {
 	const bounds = element.getBoundingClientRect();
 	return {
@@ -189,6 +308,103 @@ function focusBoundaries(radio: HTMLElement): AdjacentPaint[] {
 		paintAt(bounds.right + 1, middleY, "right-inner"),
 		paintAt(bounds.right + offset + width + 1, middleY, "right-outer"),
 	];
+}
+
+const DROP_BOUNDARY_POSITIONS = [
+	"top-inner",
+	"top-outer",
+	"bottom-inner",
+	"bottom-outer",
+	"left-inner",
+	"left-outer",
+	"right-inner",
+	"right-outer",
+];
+
+function dropBoundaries(zone: HTMLElement): AdjacentPaint[] {
+	const bounds = zone.getBoundingClientRect();
+	const style = getComputedStyle(zone);
+	const borderTop = Number.parseFloat(style.borderTopWidth);
+	const borderRight = Number.parseFloat(style.borderRightWidth);
+	const borderBottom = Number.parseFloat(style.borderBottomWidth);
+	const borderLeft = Number.parseFloat(style.borderLeftWidth);
+	const middleX = bounds.left + bounds.width / 2;
+	const middleY = bounds.top + bounds.height / 2;
+	return [
+		paintAt(middleX, bounds.top + borderTop + 1, "top-inner"),
+		paintAt(middleX, bounds.top - 1, "top-outer"),
+		paintAt(middleX, bounds.bottom - borderBottom - 1, "bottom-inner"),
+		paintAt(middleX, bounds.bottom + 1, "bottom-outer"),
+		paintAt(bounds.left + borderLeft + 1, middleY, "left-inner"),
+		paintAt(bounds.left - 1, middleY, "left-outer"),
+		paintAt(bounds.right - borderRight - 1, middleY, "right-inner"),
+		paintAt(bounds.right + 1, middleY, "right-outer"),
+	];
+}
+
+function dropSnapshot(zone: HTMLElement) {
+	const style = getComputedStyle(zone);
+	return {
+		bounds: rect(zone),
+		borderWidths: [
+			style.borderTopWidth,
+			style.borderRightWidth,
+			style.borderBottomWidth,
+			style.borderLeftWidth,
+		],
+		borderStyles: [
+			style.borderTopStyle,
+			style.borderRightStyle,
+			style.borderBottomStyle,
+			style.borderLeftStyle,
+		],
+		backgroundColor: style.backgroundColor,
+		overflowX: style.overflowX,
+		overflowY: style.overflowY,
+		role: zone.getAttribute("role"),
+		label: zone.getAttribute("aria-label"),
+		active: zone.classList.contains("drop-zone--active"),
+	};
+}
+
+function assertDropBoundaryRatios(
+	boundaries: AdjacentPaint[],
+	indicator: Paint,
+	ground: Paint,
+	surface: Paint,
+	theme: PaletteTheme,
+): Record<string, number> {
+	expect(boundaries.map(({ position }) => position).sort()).toEqual(
+		[...DROP_BOUNDARY_POSITIONS].sort(),
+	);
+	const ratios: Record<string, number> = {};
+	for (const boundary of boundaries) {
+		expectOpaque(boundary.paint, `${theme} drop ${boundary.position} backdrop`);
+		const inner = boundary.position.endsWith("-inner");
+		const expected = inner ? surface : ground;
+		expect(
+			sameRgb(boundary.paint.rgb, expected.rgb),
+			`${theme} drop ${boundary.position} is actual ${inner ? "raised surface" : "renderer ground"} at ${boundary.source}`,
+		).toBe(true);
+		const ratio = contrastRatio(indicator.rgb, boundary.paint.rgb);
+		expect(
+			ratio,
+			`${theme} drop ${boundary.position} contrast against ${boundary.paint.raw}`,
+		).toBeGreaterThanOrEqual(3);
+		ratios[boundary.position] = ratio;
+	}
+	return ratios;
+}
+
+function expectDropPaint(input: {
+	theme: PaletteTheme;
+	productionExpression: string;
+	actual: Paint;
+	accent: Paint;
+	canvasText: Paint;
+	mixProbe: Paint;
+}): void {
+	expectFocusPaint(input);
 }
 
 function normalStyleSnapshot(host: HTMLElement, radio: HTMLElement) {
@@ -592,11 +808,25 @@ test("real segmented focus boundaries and toggle-on keep the platform indicator 
 					).toBeGreaterThanOrEqual(3);
 					expect(index).toBeGreaterThanOrEqual(0);
 				}
+				focusObservations.push({
+					theme,
+					dataTheme: root.getAttribute("data-theme"),
+					colorScheme: getComputedStyle(root).colorScheme,
+					forcedColors: window.matchMedia("(forced-colors: active)").matches,
+					productionExpression,
+					accent,
+					canvasText,
+					mixProbe,
+					roleProbe,
+					segments: focusedMeasurements,
+				});
 			} finally {
 				host.remove();
 				await commands.setPaletteMedia(theme, "active");
 			}
 		}
+		focusGateComplete = focusObservations.length === THEMES.length;
+		expect(focusGateComplete).toBe(true);
 	} finally {
 		await commands.setPaletteMedia(originalTheme, "active");
 		document.documentElement.style.backgroundColor = rootBg;
@@ -638,9 +868,10 @@ test("toggle-on remains raw platform accent in both themes", async () => {
 				const trackBounds = rect(track);
 				expect(trackBounds.width).toBe(44);
 				expect(trackBounds.height).toBe(24);
-				expect(
-					canonicalPaint(getComputedStyle(track).backgroundColor).rgb,
-				).toEqual(accent.rgb);
+				const trackPaint = canonicalPaint(
+					getComputedStyle(track).backgroundColor,
+				);
+				expect(trackPaint.rgb).toEqual(accent.rgb);
 				if (theme === "dark") {
 					const priorColor = track.style.backgroundColor;
 					let roleMutationRejected = false;
@@ -662,11 +893,23 @@ test("toggle-on remains raw platform accent in both themes", async () => {
 					).toEqual(accent.rgb);
 				}
 				expect(rect(track)).toEqual(trackBounds);
+				toggleObservations.push({
+					theme,
+					dataTheme: root.getAttribute("data-theme"),
+					colorScheme: getComputedStyle(root).colorScheme,
+					forcedColors: window.matchMedia("(forced-colors: active)").matches,
+					checked: toggle.getAttribute("aria-checked"),
+					accent,
+					track: trackPaint,
+					geometry: trackBounds,
+				});
 			} finally {
 				host.remove();
 				await commands.setPaletteMedia(theme, "active");
 			}
 		}
+		toggleGateComplete = toggleObservations.length === THEMES.length;
+		expect(toggleGateComplete).toBe(true);
 	} finally {
 		await commands.setPaletteMedia(originalTheme, "active");
 		if (originalDataTheme === null)
@@ -705,6 +948,18 @@ test("forced-colors keeps the focused segmented control system-adjusted", async 
 					expect(
 						canonicalPaint(getComputedStyle(radio).outlineColor).rgb,
 					).toEqual(highlight.rgb);
+					forcedColorObservations.push({
+						theme,
+						kind: "segmented-focus",
+						colorScheme: getComputedStyle(document.documentElement).colorScheme,
+						forcedColors: window.matchMedia("(forced-colors: active)").matches,
+						selector: ".segmented-control__segment:focus-visible",
+						role: radio.getAttribute("role"),
+						checked: radio.getAttribute("aria-checked"),
+						paint: canonicalPaint(getComputedStyle(radio).outlineColor),
+						platformHighlight: highlight,
+						geometry: rect(radio),
+					});
 				} finally {
 					radio.style.outlineColor = originalOutlineColor;
 				}
@@ -716,10 +971,611 @@ test("forced-colors keeps the focused segmented control system-adjusted", async 
 				await commands.setPaletteMedia(theme, "none");
 			}
 		}
+		forcedFocusComplete =
+			forcedColorObservations.filter(
+				(observation) => observation["kind"] === "segmented-focus",
+			).length === THEMES.length;
+		expect(forcedFocusComplete).toBe(true);
 	} finally {
 		await commands.setPaletteMedia(originalTheme, "active");
 		if (originalDataTheme === null)
 			document.documentElement.removeAttribute("data-theme");
 		else document.documentElement.setAttribute("data-theme", originalDataTheme);
 	}
+});
+
+test("forced-colors keeps the active drop border system-adjusted", async () => {
+	const originalTheme = window.matchMedia("(prefers-color-scheme: dark)")
+		.matches
+		? "dark"
+		: "light";
+	const originalDataTheme = document.documentElement.getAttribute("data-theme");
+	try {
+		for (const theme of THEMES) {
+			await commands.setPaletteMedia(theme, "active");
+			const host = await renderStory(DropZoneDragOver, theme);
+			try {
+				const root = document.documentElement;
+				expect(window.matchMedia("(forced-colors: active)").matches).toBe(true);
+				expect(root.getAttribute("data-theme")).toBe(theme);
+				const effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)")
+					.matches
+					? "dark"
+					: "light";
+				expect(effectiveTheme).toBe(theme);
+				const zone = required<HTMLElement>(host, '.drop-zone[role="region"]');
+				expect(zone.classList.contains("drop-zone--active")).toBe(true);
+				const before = dropSnapshot(zone);
+				expect(before.borderWidths).toEqual(["2px", "2px", "2px", "2px"]);
+				expect(before.borderStyles).toEqual([
+					"dashed",
+					"dashed",
+					"dashed",
+					"dashed",
+				]);
+				const beforePaint = canonicalPaint(
+					getComputedStyle(zone).borderTopColor,
+				);
+				const canvasText = colorProbe("CanvasText", host);
+				const systemColors = [
+					["CanvasText", canvasText],
+					["ButtonText", colorProbe("ButtonText", host)],
+					["ButtonBorder", colorProbe("ButtonBorder", host)],
+					["Highlight", colorProbe("Highlight", host)],
+				] as const;
+				expect(
+					systemColors.some(([, sample]) =>
+						sameRgb(sample.rgb, beforePaint.rgb),
+					),
+					"forced drop border resolves to a platform system color",
+				).toBe(true);
+				const priorBorderColor = zone.style.borderColor;
+				try {
+					zone.style.borderColor = "var(--ec-color-accent)";
+					expect(
+						canonicalPaint(getComputedStyle(zone).borderTopColor).rgb,
+					).toEqual(beforePaint.rgb);
+					expect(dropSnapshot(zone)).toEqual(before);
+				} finally {
+					zone.style.borderColor = priorBorderColor;
+				}
+				expect(
+					canonicalPaint(getComputedStyle(zone).borderTopColor).rgb,
+				).toEqual(beforePaint.rgb);
+				forcedColorObservations.push({
+					theme,
+					kind: "active-drop-border",
+					effectiveTheme,
+					colorScheme: getComputedStyle(root).colorScheme,
+					forcedColors: window.matchMedia("(forced-colors: active)").matches,
+					selector: ".drop-zone--active",
+					active: zone.classList.contains("drop-zone--active"),
+					paint: beforePaint,
+					systemColors: Object.fromEntries(systemColors),
+					geometry: before,
+					rawAccentPlant: { rejectedBySystemAdjustment: true, restored: true },
+				});
+			} finally {
+				host.remove();
+				await commands.setPaletteMedia(theme, "none");
+			}
+		}
+		forcedDropComplete =
+			forcedColorObservations.filter(
+				(observation) => observation["kind"] === "active-drop-border",
+			).length === THEMES.length;
+		expect(forcedDropComplete).toBe(true);
+		forcedGateComplete = forcedFocusComplete && forcedDropComplete;
+		expect(forcedGateComplete).toBe(true);
+	} finally {
+		await commands.setPaletteMedia(originalTheme, "active");
+		if (originalDataTheme === null)
+			document.documentElement.removeAttribute("data-theme");
+		else document.documentElement.setAttribute("data-theme", originalDataTheme);
+	}
+});
+
+test("real active drop borders pass both painted sides in both themes", async () => {
+	expect(focusGateComplete && toggleGateComplete && forcedGateComplete).toBe(
+		true,
+	);
+	const originalTheme = window.matchMedia("(prefers-color-scheme: dark)")
+		.matches
+		? "dark"
+		: "light";
+	const originalDataTheme = document.documentElement.getAttribute("data-theme");
+	const rootBg = document.documentElement.style.backgroundColor;
+	const bodyBg = document.body.style.backgroundColor;
+	const sourceTokens = await commands.readFile(
+		"src/renderer/styles/tokens.css",
+	);
+	const sourceDropZone = await commands.readFile(
+		"src/renderer/styles/drop_zone.css",
+	);
+	expect(sourceTokens).toContain(
+		"--ec-color-platform-indicator: var(--ec-color-accent);",
+	);
+	expect(sourceTokens).toContain(
+		"--ec-color-platform-indicator: color-mix(in srgb, var(--ec-color-accent) 90%, CanvasText 10%);",
+	);
+	expect(sourceDropZone).toMatch(
+		/\.drop-zone--active\s*\{\s*border: 2px dashed var\(--ec-color-platform-indicator\);\s*background-color: var\(--ec-color-surface\);\s*\}/,
+	);
+	try {
+		for (const theme of THEMES) {
+			await commands.setPaletteMedia(theme, "none");
+			document.documentElement.style.backgroundColor = "var(--ec-color-bg)";
+			document.body.style.backgroundColor = "var(--ec-color-bg)";
+			const host = await renderStory(DropZoneDragOver, theme);
+			try {
+				const root = document.documentElement;
+				expect(root.getAttribute("data-theme")).toBe(theme);
+				expect(getComputedStyle(root).colorScheme).toBe(theme);
+				expect(window.matchMedia("(forced-colors: active)").matches).toBe(
+					false,
+				);
+				const zone = required<HTMLElement>(host, '.drop-zone[role="region"]');
+				expect(zone.classList.contains("drop-zone--active")).toBe(true);
+				expect(zone.getAttribute("aria-label")).toBeTruthy();
+				const productionExpression =
+					theme === "dark"
+						? DARK_INDICATOR_EXPRESSION
+						: "var(--ec-color-accent)";
+				expectExactRoleExpression(productionExpression, theme);
+				const accent = colorProbe("var(--ec-color-accent)", host);
+				const canvasText = colorProbe("CanvasText", host);
+				const mixProbe = colorProbe(DARK_INDICATOR_EXPRESSION, host);
+				const roleProbe = colorProbe(
+					"var(--ec-color-platform-indicator)",
+					host,
+				);
+				const ground = surfaceRgb(root, "--ec-color-bg");
+				const surface = surfaceRgb(root, "--ec-color-surface");
+				[accent, canvasText, mixProbe, roleProbe, ground, surface].forEach(
+					(color) => expectOpaque(color, `${theme} drop independent probe`),
+				);
+				expect(
+					sameRgb(roleProbe.rgb, theme === "dark" ? mixProbe.rgb : accent.rgb),
+				).toBe(true);
+
+				const style = getComputedStyle(zone);
+				expect(style.borderTopWidth).toBe("2px");
+				expect(style.borderRightWidth).toBe("2px");
+				expect(style.borderBottomWidth).toBe("2px");
+				expect(style.borderLeftWidth).toBe("2px");
+				expect(style.borderTopStyle).toBe("dashed");
+				expect(style.borderRightStyle).toBe("dashed");
+				expect(style.borderBottomStyle).toBe("dashed");
+				expect(style.borderLeftStyle).toBe("dashed");
+				expect(canonicalPaint(style.backgroundColor).rgb).toEqual(surface.rgb);
+				const actual = canonicalPaint(style.borderTopColor);
+				for (const side of [
+					style.borderRightColor,
+					style.borderBottomColor,
+					style.borderLeftColor,
+				])
+					expect(canonicalPaint(side).rgb).toEqual(actual.rgb);
+				expectDropPaint({
+					theme,
+					productionExpression,
+					actual,
+					accent,
+					canvasText,
+					mixProbe,
+				});
+				const before = dropSnapshot(zone);
+				const boundaries = dropBoundaries(zone);
+				const ratios = assertDropBoundaryRatios(
+					boundaries,
+					actual,
+					ground,
+					surface,
+					theme,
+				);
+				const priorBorderColor = zone.style.borderColor;
+				zone.style.borderColor = "var(--ec-color-accent)";
+				try {
+					expect(dropSnapshot(zone)).toEqual(before);
+				} finally {
+					zone.style.borderColor = priorBorderColor;
+				}
+				expect(dropSnapshot(zone)).toEqual(before);
+				expectDropPaint({
+					theme,
+					productionExpression,
+					actual: canonicalPaint(getComputedStyle(zone).borderTopColor),
+					accent,
+					canvasText,
+					mixProbe,
+				});
+				assertDropBoundaryRatios(
+					dropBoundaries(zone),
+					canonicalPaint(getComputedStyle(zone).borderTopColor),
+					ground,
+					surface,
+					theme,
+				);
+
+				let omittedSideRejected = false;
+				try {
+					expect(() =>
+						assertDropBoundaryRatios(
+							boundaries.filter(
+								(boundary) => boundary.position !== "left-inner",
+							),
+							actual,
+							ground,
+							surface,
+							theme,
+						),
+					).toThrow();
+					omittedSideRejected = true;
+				} finally {
+					assertDropBoundaryRatios(
+						dropBoundaries(zone),
+						canonicalPaint(getComputedStyle(zone).borderTopColor),
+						ground,
+						surface,
+						theme,
+					);
+				}
+				expect(omittedSideRejected).toBe(true);
+
+				let geometryMutationRejected = false;
+				const originalWidth = zone.style.borderWidth;
+				try {
+					zone.style.borderWidth = "4px";
+					expect(() => expect(dropSnapshot(zone)).toEqual(before)).toThrow();
+					geometryMutationRejected = true;
+				} finally {
+					zone.style.borderWidth = originalWidth;
+				}
+				expect(geometryMutationRejected).toBe(true);
+				expect(dropSnapshot(zone)).toEqual(before);
+
+				let surfaceMutationRejected = false;
+				const originalBackground = zone.style.backgroundColor;
+				try {
+					zone.style.backgroundColor = "var(--ec-color-bg)";
+					expect(() =>
+						assertDropBoundaryRatios(
+							dropBoundaries(zone),
+							actual,
+							ground,
+							surface,
+							theme,
+						),
+					).toThrow();
+					surfaceMutationRejected = true;
+				} finally {
+					zone.style.backgroundColor = originalBackground;
+				}
+				expect(surfaceMutationRejected).toBe(true);
+				expect(dropSnapshot(zone)).toEqual(before);
+				assertDropBoundaryRatios(
+					dropBoundaries(zone),
+					canonicalPaint(getComputedStyle(zone).borderTopColor),
+					ground,
+					surface,
+					theme,
+				);
+
+				let rawDarkAccentRejected = false;
+				let wrongWeightRejected = false;
+				let unrelatedRoleRejected = false;
+				if (theme === "dark") {
+					const tide = boundaries.find(
+						(boundary) =>
+							boundary.position.endsWith("-inner") &&
+							sameRgb(boundary.paint.rgb, surface.rgb),
+					);
+					if (tide === undefined)
+						throw new Error("drop border has no real inner Tide boundary");
+					const priorColor = zone.style.borderColor;
+					try {
+						zone.style.borderColor = "var(--ec-color-accent)";
+						const rawAccent = canonicalPaint(
+							getComputedStyle(zone).borderTopColor,
+						);
+						expect(contrastRatio(rawAccent.rgb, tide.paint.rgb)).toBeLessThan(
+							3,
+						);
+						expect(() =>
+							expectDropPaint({
+								theme,
+								productionExpression,
+								actual: rawAccent,
+								accent,
+								canvasText,
+								mixProbe,
+							}),
+						).toThrow();
+						rawDarkAccentRejected = true;
+					} finally {
+						zone.style.borderColor = priorColor;
+					}
+					expectDropPaint({
+						theme,
+						productionExpression,
+						actual: canonicalPaint(getComputedStyle(zone).borderTopColor),
+						accent,
+						canvasText,
+						mixProbe,
+					});
+
+					const priorToken = root.style.getPropertyValue(
+						"--ec-color-platform-indicator",
+					);
+					try {
+						root.style.setProperty(
+							"--ec-color-platform-indicator",
+							"color-mix(in srgb, var(--ec-color-accent) 80%, CanvasText 20%)",
+						);
+						expect(() =>
+							expectDropPaint({
+								theme,
+								productionExpression:
+									"color-mix(in srgb, var(--ec-color-accent) 80%, CanvasText 20%)",
+								actual: canonicalPaint(getComputedStyle(zone).borderTopColor),
+								accent,
+								canvasText,
+								mixProbe,
+							}),
+						).toThrow();
+						wrongWeightRejected = true;
+					} finally {
+						if (priorToken === "")
+							root.style.removeProperty("--ec-color-platform-indicator");
+						else
+							root.style.setProperty(
+								"--ec-color-platform-indicator",
+								priorToken,
+							);
+					}
+					expectDropPaint({
+						theme,
+						productionExpression,
+						actual: canonicalPaint(getComputedStyle(zone).borderTopColor),
+						accent,
+						canvasText,
+						mixProbe,
+					});
+
+					const priorRoleColor = zone.style.borderColor;
+					try {
+						zone.style.borderColor = "var(--ec-color-action)";
+						expect(() =>
+							expectDropPaint({
+								theme,
+								productionExpression,
+								actual: canonicalPaint(getComputedStyle(zone).borderTopColor),
+								accent,
+								canvasText,
+								mixProbe,
+							}),
+						).toThrow();
+						unrelatedRoleRejected = true;
+					} finally {
+						zone.style.borderColor = priorRoleColor;
+					}
+					expectDropPaint({
+						theme,
+						productionExpression,
+						actual: canonicalPaint(getComputedStyle(zone).borderTopColor),
+						accent,
+						canvasText,
+						mixProbe,
+					});
+				}
+				expect(
+					!theme ||
+						theme !== "dark" ||
+						(rawDarkAccentRejected &&
+							wrongWeightRejected &&
+							unrelatedRoleRejected),
+				).toBe(true);
+				dropObservations.push({
+					theme,
+					dataTheme: root.getAttribute("data-theme"),
+					colorScheme: getComputedStyle(root).colorScheme,
+					forcedColors: window.matchMedia("(forced-colors: active)").matches,
+					selector: ".drop-zone--active",
+					active: zone.classList.contains("drop-zone--active"),
+					productionExpression,
+					accent,
+					canvasText,
+					mixProbe,
+					roleProbe,
+					actual,
+					boundaries,
+					ratios,
+					geometry: before,
+					negativeControls: {
+						rawDarkAccentRejected,
+						omittedSideRejected,
+						wrongWeightRejected,
+						unrelatedRoleRejected,
+						geometryMutationRejected,
+						surfaceMutationRejected,
+						restoredGreen: true,
+					},
+				});
+			} finally {
+				host.remove();
+				await commands.setPaletteMedia(theme, "active");
+			}
+		}
+		dropGateComplete = dropObservations.length === THEMES.length;
+		expect(dropGateComplete).toBe(true);
+	} finally {
+		await commands.setPaletteMedia(originalTheme, "active");
+		document.documentElement.style.backgroundColor = rootBg;
+		document.body.style.backgroundColor = bodyBg;
+		if (originalDataTheme === null)
+			document.documentElement.removeAttribute("data-theme");
+		else document.documentElement.setAttribute("data-theme", originalDataTheme);
+	}
+});
+
+test("writes only a complete current-source indicator proof", async () => {
+	expect(focusGateComplete).toBe(true);
+	expect(toggleGateComplete).toBe(true);
+	expect(forcedGateComplete).toBe(true);
+	expect(dropGateComplete).toBe(true);
+	expect(focusObservations).toHaveLength(2);
+	expect(toggleObservations).toHaveLength(2);
+	expect(forcedColorObservations).toHaveLength(4);
+	expect(dropObservations).toHaveLength(2);
+
+	const sourceSnapshot = await readIndicatorSources();
+	const tokenIndex = INDICATOR_SOURCE_PATHS.indexOf(
+		"src/renderer/styles/tokens.css",
+	);
+	const pairsIndex = INDICATOR_SOURCE_PATHS.indexOf(
+		"tests/renderer/contrast/contrast_pairs.json",
+	);
+	const tokenSource = sourceSnapshot.texts[tokenIndex];
+	const pairsSource = sourceSnapshot.texts[pairsIndex];
+	if (tokenSource === undefined || pairsSource === undefined)
+		throw new Error("source-bound static contrast inputs are missing");
+	const pairDoc = JSON.parse(pairsSource) as ContrastPairsDocument;
+	expect(pairsShapeProblems(pairDoc)).toEqual([]);
+	const staticResults = evaluate(pairDoc, tokenSource);
+	expect(staticResults).toHaveLength(94);
+	expect(staticResults.length).toBeGreaterThan(0);
+	expect(staticResults.every((result) => result.pass)).toBe(true);
+	const proposed = proposedResults(pairDoc);
+	expect(proposed).toHaveLength(27);
+	expect(proposed.every((result) => result.pass)).toBe(true);
+	const proposedCounterparts = proposed.map((candidate) => {
+		const theme = candidate.id.startsWith("dark-")
+			? "dark"
+			: candidate.id.startsWith("light-")
+				? "light"
+				: null;
+		expect(
+			theme,
+			`theme is explicit in proposed pair ${candidate.id}`,
+		).not.toBeNull();
+		const matches = staticResults.filter(
+			(result) =>
+				result.theme === theme &&
+				result.role === candidate.role &&
+				result.fgHex.toLowerCase() === candidate.fgHex.toLowerCase() &&
+				result.bgHex.toLowerCase() === candidate.bgHex.toLowerCase() &&
+				result.threshold === candidate.threshold,
+		);
+		expect(
+			matches.length,
+			`actual static counterparts for ${candidate.id}`,
+		).toBeGreaterThan(0);
+		expect(matches.every((result) => result.pass)).toBe(true);
+		return {
+			id: candidate.id,
+			theme,
+			role: candidate.role,
+			fgHex: candidate.fgHex,
+			bgHex: candidate.bgHex,
+			ratio: candidate.ratio,
+			threshold: candidate.threshold,
+			fingerprints: matches.map((result) => result.fingerprint),
+		};
+	});
+
+	const record = {
+		schemaVersion: 1,
+		createdAt: new Date().toISOString(),
+		browser: { userAgent: navigator.userAgent, platform: navigator.platform },
+		sourceProof: { algorithm: "SHA-256", inputs: sourceSnapshot.inputs },
+		sourceDigests: sourceSnapshot.digests,
+		gates: {
+			focus: focusObservations,
+			toggleOn: toggleObservations,
+			forcedColors: forcedColorObservations,
+			drop: dropObservations,
+		},
+		staticContrast: {
+			count: staticResults.length,
+			passing: staticResults.filter((result) => result.pass).length,
+			unresolved: staticResults.filter((result) => !result.pass).length,
+			results: staticResults.map((result) => ({
+				pair: result.pair,
+				backdrop: result.backdrop,
+				theme: result.theme,
+				role: result.role,
+				fgHex: result.fgHex,
+				bgHex: result.bgHex,
+				ratio: result.ratio,
+				threshold: result.threshold,
+				pass: result.pass,
+				fingerprint: result.fingerprint,
+			})),
+			proposedCount: proposed.length,
+			proposedPassing: proposed.filter((result) => result.pass).length,
+			proposedCounterparts,
+		},
+		negativeControls: {
+			focusRawDarkAccentOnTideRejected: true,
+			focusWrongMixWeightRejected: true,
+			focusLightMixRejected: true,
+			toggleOnRoleMutationRejected: true,
+			focusGeometryMutationRejected: true,
+			dropRawDarkAccentOnTideRejected: true,
+			dropOmittedBoundaryRejected: true,
+			dropWrongMixWeightRejected: true,
+			dropUnrelatedRoleRejected: true,
+			dropGeometryMutationRejected: true,
+			dropSurfaceMutationRejected: true,
+			sourceDigestMutationRejected: true,
+			missingSourceRejected: true,
+			duplicateSourceRejected: true,
+			allVisualPlantsRestored: true,
+		},
+		separateOffTrackEvidence: {
+			record: "node_modules/.cache/palette77-platform.json",
+			rolesMerged: false,
+			mutated: false,
+		},
+	};
+	assertSourceProofMatchesCurrent(record, sourceSnapshot.digests);
+
+	const stale = structuredClone(record);
+	const staleInput = stale.sourceProof.inputs[0];
+	if (staleInput === undefined)
+		throw new Error("first source digest is missing");
+	const wrongDigest = `${staleInput.sha256.startsWith("0") ? "1" : "0"}${staleInput.sha256.slice(1)}`;
+	stale.sourceProof.inputs[0] = { ...staleInput, sha256: wrongDigest };
+	stale.sourceDigests[staleInput.path] = wrongDigest;
+	expect(() =>
+		assertSourceProofMatchesCurrent(stale, sourceSnapshot.digests),
+	).toThrow();
+	const missing = structuredClone(record);
+	const removed = missing.sourceProof.inputs.pop();
+	if (removed === undefined) throw new Error("source digest cannot be removed");
+	delete missing.sourceDigests[removed.path];
+	expect(() =>
+		assertSourceProofMatchesCurrent(missing, sourceSnapshot.digests),
+	).toThrow();
+	const duplicate = structuredClone(record);
+	const first = duplicate.sourceProof.inputs[0];
+	if (first === undefined) throw new Error("first source digest is missing");
+	const second = duplicate.sourceProof.inputs[1];
+	if (second === undefined) throw new Error("second source digest is missing");
+	duplicate.sourceProof.inputs[1] = {
+		...second,
+		path: first.path,
+	};
+	expect(() =>
+		assertSourceProofMatchesCurrent(duplicate, sourceSnapshot.digests),
+	).toThrow();
+
+	const evidencePath = "node_modules/.cache/palette77-indicators.json";
+	await commands.writeFile(evidencePath, JSON.stringify(record, null, 2));
+	const written = JSON.parse(
+		await commands.readFile(evidencePath),
+	) as typeof record;
+	assertSourceProofBindings(written);
+	const independentlyRead = await readIndicatorSources();
+	assertSourceProofMatchesCurrent(written, independentlyRead.digests);
+	expect(written.sourceProof.inputs).toEqual(independentlyRead.inputs);
 });
