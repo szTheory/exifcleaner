@@ -315,43 +315,68 @@ describe("GAT-01 token drift gate (D-09, D-12)", () => {
 	});
 
 	test("a token that resolves to nothing is unresolved, never equal", () => {
-		const missing = matchingTokensCss(TOKEN_MAP).replace(
-			"--ec-color-text-secondary:#4A625F;",
-			"",
-		);
-		expect(missing).not.toBe(matchingTokensCss(TOKEN_MAP));
+		const semanticToken = "--ec-color-text-secondary";
+		const matching = matchingTokensCss(TOKEN_MAP);
+		const declaration = /--ec-color-text-secondary\s*:\s*[^;}]+;?/g;
+		expect([...matching.matchAll(declaration)]).toHaveLength(THEMES.length);
+		const missing = matching.replace(declaration, "");
+		expect(missing).not.toBe(matching);
+		expect(missing).not.toMatch(/--ec-color-text-secondary\s*:/);
+		const tokens = themeTokens(missing);
+		for (const theme of THEMES) {
+			expect(tokens[theme].has(semanticToken)).toBe(false);
+			expect(resolveColour(semanticToken, theme, tokens, {})).toBeNull();
+		}
 		expect(
 			driftProblems({
 				tokensCss: missing,
 				tokenMap: TOKEN_MAP,
 				pending: { rows: [] },
 			}),
-		).toEqual([
-			{ code: "unresolved", subject: "--ec-color-text-secondary|light" },
-		]);
+		).toEqual(
+			THEMES.map((theme) => ({
+				code: "unresolved",
+				subject: `${semanticToken}|${theme}`,
+			})),
+		);
+		expect(
+			driftProblems({
+				tokensCss: matching,
+				tokenMap: TOKEN_MAP,
+				pending: { rows: [] },
+			}),
+		).toEqual([]);
 	});
 
 	test("an unresolved row stays red even when it is listed as pending", () => {
-		const missing = matchingTokensCss(TOKEN_MAP).replace(
-			"--ec-color-text-secondary:#4A625F;",
-			"",
-		);
+		const semanticToken = "--ec-color-text-secondary";
+		const matching = matchingTokensCss(TOKEN_MAP);
+		const declaration = /--ec-color-text-secondary\s*:\s*[^;}]+;?/g;
+		expect([...matching.matchAll(declaration)]).toHaveLength(THEMES.length);
+		const missing = matching.replace(declaration, "");
+		expect(missing).not.toMatch(/--ec-color-text-secondary\s*:/);
+		const tokens = themeTokens(missing);
+		for (const theme of THEMES) {
+			expect(tokens[theme].has(semanticToken)).toBe(false);
+			expect(resolveColour(semanticToken, theme, tokens, {})).toBeNull();
+		}
 		const problems = driftProblems({
 			tokensCss: missing,
 			tokenMap: TOKEN_MAP,
 			pending: {
-				rows: [
-					{
-						token: "--ec-color-text-secondary",
-						theme: "light",
-						reason: "planted pending row for a token that resolves to nothing",
-					},
-				],
+				rows: THEMES.map((theme) => ({
+					token: semanticToken,
+					theme,
+					reason: `planted pending row for unresolved ${theme} semantic token`,
+				})),
 			},
 		});
-		expect(problems).toEqual([
-			{ code: "unresolved", subject: "--ec-color-text-secondary|light" },
-		]);
+		expect(problems).toEqual(
+			THEMES.map((theme) => ({
+				code: "unresolved",
+				subject: `${semanticToken}|${theme}`,
+			})),
+		);
 	});
 
 	test("exactly MIN_ADOPT_ROWS minus one adopt rows is vacuous", () => {
