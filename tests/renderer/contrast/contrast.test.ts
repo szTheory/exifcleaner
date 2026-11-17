@@ -1723,6 +1723,70 @@ describe("G2: every stylesheet colour use is classified", () => {
 			tokensCss: TOKENS_CSS,
 		});
 		expect(state).not.toBeNull();
+		if (state === null)
+			throw new Error("actual hover source/map state is invalid");
+		const actualItemHover = PAIRS.overlays.find(
+			(overlay) => overlay.id === ITEM_HOVER_OVERLAY_ID,
+		);
+		if (actualItemHover === undefined)
+			throw new Error("actual item-hover overlay is missing from PAIRS");
+		const actualEnglishPair = PAIRS.pairs.find(
+			(pair) => pair.selector === ".language-dropdown__english",
+		);
+		const actualHeaderPair = PAIRS.pairs.find(
+			(pair) => pair.selector === ".file-table__header",
+		);
+		if (state === "legacy") {
+			// Master carries the registered fallback in the item-hover overlay; its
+			// sole text-secondary pair is still the header row on global surfaces.
+			expect(actualLayer).toBe(LEGACY_HOVER_FALLBACK);
+			expect(PAIRS.surfaces).toContain(ITEM_HOVER_OVERLAY_ID);
+			expect(actualItemHover.layers).toEqual([
+				ITEM_HOVER_BASE,
+				LEGACY_HOVER_FALLBACK,
+			]);
+			expect(actualEnglishPair).toBeUndefined();
+			expect(actualHeaderPair).toMatchObject({
+				id: "text-secondary",
+				fg: ITEM_HOVER_ENGLISH_ROLE,
+				on: "surfaces",
+				role: "text",
+				story: "file-list-filetable--mixed-statuses",
+			});
+			expect(PAIRS.literals).toContainEqual(
+				expect.objectContaining({
+					value: LEGACY_HOVER_FALLBACK,
+					files: expect.arrayContaining(["language_dropdown.css"]),
+					pair: "text-secondary",
+				}),
+			);
+		} else {
+			if (actualEnglishPair === undefined || actualHeaderPair === undefined) {
+				throw new Error("actual English/header pairs are missing from PAIRS");
+			}
+			expect(actualLayer).toBe(SURFACE_HOVER_TOKEN);
+			expect(actualEnglishPair).toMatchObject({
+				id: "text-secondary",
+				fg: ITEM_HOVER_ENGLISH_ROLE,
+				on: [ITEM_HOVER_BASE, ITEM_HOVER_OVERLAY_ID],
+				role: "text",
+				story: "settings-languagedropdown--item-hover",
+			});
+			expect(backdrops(actualEnglishPair, PAIRS).map(({ ref }) => ref)).toEqual(
+				[ITEM_HOVER_BASE, ITEM_HOVER_OVERLAY_ID],
+			);
+			expect(actualHeaderPair).toMatchObject({
+				id: "text-secondary-file-table-header",
+				fg: ITEM_HOVER_ENGLISH_ROLE,
+				on: [ITEM_HOVER_BASE],
+				role: "text",
+				story: "file-list-filetable--mixed-statuses",
+			});
+			expect(actualItemHover.layers).toEqual([
+				ITEM_HOVER_BASE,
+				SURFACE_HOVER_TOKEN,
+			]);
+		}
 		const scopedReport = g2Report(
 			{ "language_dropdown.css": languageCss },
 			PAIRS,
@@ -1942,15 +2006,11 @@ describe("G2: every stylesheet colour use is classified", () => {
 
 		const inheritedLegacyDoc = clone(paletteAmbient);
 		delete inheritedLegacyDoc.localTokens[SURFACE_HOVER_TOKEN];
-		inheritedLegacyDoc.overlays = [
-			...inheritedLegacyDoc.overlays.filter(
-				(overlay) => overlay.id !== ITEM_HOVER_OVERLAY_ID,
-			),
-			{
-				id: ITEM_HOVER_OVERLAY_ID,
-				layers: [ITEM_HOVER_BASE, LEGACY_HOVER_FALLBACK],
-			},
-		];
+		expect(
+			inheritedLegacyDoc.overlays.find(
+				(overlay) => overlay.id === ITEM_HOVER_OVERLAY_ID,
+			)?.layers,
+		).toEqual([ITEM_HOVER_BASE, SURFACE_HOVER_TOKEN]);
 		const replacementLegacyPairs = languageHoverPairFixture(
 			LEGACY_HOVER_FALLBACK,
 		).pairs;
@@ -1958,7 +2018,8 @@ describe("G2: every stylesheet colour use is classified", () => {
 			...inheritedLegacyDoc.pairs.filter(
 				(pair) =>
 					pair.id !== "text-secondary" &&
-					pair.id !== "text-secondary-file-table-header",
+					pair.id !== "text-secondary-file-table-header" &&
+					pair.id !== "primary-text-on-surface-hover",
 			),
 			...replacementLegacyPairs,
 		];
@@ -1968,7 +2029,7 @@ describe("G2: every stylesheet colour use is classified", () => {
 		expect(() =>
 			evaluate(inheritedLegacyDoc, paletteTokensWithoutHover),
 		).toThrow(
-			/backdrop --ec-color-surface-hover: layer --ec-color-surface-hover is not a colour in the light theme/,
+			/backdrop item-hover: layer --ec-color-surface-hover is not a colour in the light theme/,
 		);
 
 		const fixture = hoverContractFixture("legacy", paletteAmbient);
