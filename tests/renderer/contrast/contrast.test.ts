@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
+import { cssDeclarations } from "../../../.storybook/catalog/css_scan.mjs";
 import {
 	backdrops,
 	brandRatioProblems,
@@ -1481,6 +1482,216 @@ function withRule(file: string, rule: string): Record<string, string> {
 	return { ...SHEETS, [file]: `${SHEETS[file] ?? ""}\n${rule}\n` };
 }
 
+const LEGACY_SELECTION_PAIR: ContrastPair = {
+	id: "selection",
+	fg: "white",
+	on: ["--ec-color-accent"],
+	role: "text",
+	selector: "::selection",
+	story: "file-list-filetable--mixed-statuses",
+};
+const LEGACY_SELECTION_RULE = `::selection {
+	background-color: var(--ec-color-accent);
+	color: white;
+}`;
+const LEGACY_SELECTION_SOURCE_USE: FixtureSourceUse = {
+	file: "tokens.css",
+	selector: "::selection",
+	property: "color",
+};
+
+type SelectionFixture = {
+	sheets: Record<string, string>;
+	doc: ContrastPairsDocument;
+	tokensCss: string;
+};
+
+function selectionDeclarations(tokensCss: string) {
+	return cssDeclarations(tokensCss)
+		.filter(
+			(declaration) =>
+				declaration.selectors.length === 1 &&
+				declaration.selectors[0] === "::selection",
+		)
+		.map(({ selectors, property, value }) => ({ selectors, property, value }));
+}
+
+function selectionSourcePairState(
+	tokensCss: string,
+	doc: ContrastPairsDocument,
+): "legacy" | "absent" {
+	const pair = doc.pairs.find((candidate) => candidate.id === "selection");
+	const declarations = selectionDeclarations(tokensCss);
+	const sourceDoc = doc as HoverFixtureDocument;
+	const selectionLiterals = (sourceDoc.literals ?? []).filter(
+		(literal) => literal.pair === "selection",
+	);
+	if (pair === undefined && declarations.length === 0) {
+		if (selectionLiterals.length !== 0) {
+			throw new Error("absent selection source retains a selection literal");
+		}
+		return "absent";
+	}
+	if (
+		pair === undefined ||
+		declarations.length !== 2 ||
+		selectionLiterals.length !== 1
+	) {
+		throw new Error("selection source and pair are incomplete or inconsistent");
+	}
+	if (
+		JSON.stringify({
+			id: pair.id,
+			fg: pair.fg,
+			on: pair.on,
+			role: pair.role,
+			selector: pair.selector,
+			story: pair.story,
+		}) !== JSON.stringify(LEGACY_SELECTION_PAIR)
+	) {
+		throw new Error(
+			"legacy selection pair no longer matches its source identity",
+		);
+	}
+	if (
+		JSON.stringify(declarations) !==
+		JSON.stringify([
+			{
+				selectors: ["::selection"],
+				property: "background-color",
+				value: "var(--ec-color-accent)",
+			},
+			{
+				selectors: ["::selection"],
+				property: "color",
+				value: "white",
+			},
+		])
+	) {
+		throw new Error(
+			"legacy selection declarations no longer match the source fixture",
+		);
+	}
+	const schemaState = fixtureSchemaState(doc);
+	const literal = selectionLiterals[0];
+	if (schemaState === null || literal === undefined) {
+		throw new Error("selection pair metadata has a mixed or incomplete schema");
+	}
+	if (
+		literal.value !== "white" ||
+		JSON.stringify(literal.files) !== JSON.stringify(["tokens.css"]) ||
+		(schemaState === "source-owned" &&
+			JSON.stringify(literal.uses) !==
+				JSON.stringify([LEGACY_SELECTION_SOURCE_USE])) ||
+		(schemaState === "legacy" && hasOwnKey(literal, "uses"))
+	) {
+		throw new Error("selection literal does not match its CSS source/schema");
+	}
+	return "legacy";
+}
+
+function selectionFixtureLiteral(state: FixtureSchemaState): FixtureLiteral {
+	return state === "source-owned"
+		? {
+				value: "white",
+				files: ["tokens.css"],
+				uses: [{ ...LEGACY_SELECTION_SOURCE_USE }],
+				pair: "selection",
+			}
+		: { value: "white", files: ["tokens.css"], pair: "selection" };
+}
+
+function legacySelectionFixture(
+	ambientSheets: Record<string, string> = SHEETS,
+	ambientDoc: ContrastPairsDocument = PAIRS,
+): SelectionFixture {
+	const sheets = { ...ambientSheets };
+	const doc = clone(ambientDoc) as HoverFixtureDocument;
+	const state = selectionSourcePairState(sheets["tokens.css"] ?? "", doc);
+	if (state === "absent") {
+		const schemaState = fixtureSchemaState(doc);
+		if (schemaState === null) {
+			throw new Error(
+				"selection fixture has a mixed or incomplete literal schema",
+			);
+		}
+		if (doc.literals?.some((literal) => literal.value === "white")) {
+			throw new Error("selection fixture would duplicate the white literal");
+		}
+		doc.pairs.push({
+			...LEGACY_SELECTION_PAIR,
+			on: [...LEGACY_SELECTION_PAIR.on],
+		});
+		doc.literals = [
+			...(doc.literals ?? []),
+			selectionFixtureLiteral(schemaState),
+		];
+		sheets["tokens.css"] =
+			`${sheets["tokens.css"] ?? ""}\n${LEGACY_SELECTION_RULE}\n`;
+	}
+	const tokensCss = sheets["tokens.css"] ?? "";
+	if (selectionSourcePairState(tokensCss, doc) !== "legacy") {
+		throw new Error(
+			"legacy selection fixture did not retain its source and pair",
+		);
+	}
+	return { sheets, doc: doc as ContrastPairsDocument, tokensCss };
+}
+
+function removeSelectionRule(tokensCss: string): string {
+	const selectorAt = tokensCss.indexOf("::selection");
+	if (selectorAt === -1) return tokensCss;
+	const openAt = tokensCss.indexOf("{", selectorAt);
+	if (openAt === -1) throw new Error("selection rule has no opening brace");
+	let depth = 0;
+	let closeAt = -1;
+	for (let index = openAt; index < tokensCss.length; index += 1) {
+		if (tokensCss[index] === "{") depth += 1;
+		if (tokensCss[index] === "}") {
+			depth -= 1;
+			if (depth === 0) {
+				closeAt = index;
+				break;
+			}
+		}
+	}
+	if (closeAt === -1) throw new Error("selection rule has no closing brace");
+	return `${tokensCss.slice(0, selectorAt)}${tokensCss.slice(closeAt + 1)}`;
+}
+
+function absentSelectionFixture(
+	ambientSheets: Record<string, string> = SHEETS,
+	ambientDoc: ContrastPairsDocument = PAIRS,
+): SelectionFixture {
+	const sheets = { ...ambientSheets };
+	const doc = clone(ambientDoc) as HoverFixtureDocument;
+	const currentState = selectionSourcePairState(
+		sheets["tokens.css"] ?? "",
+		doc,
+	);
+	if (currentState === "legacy") {
+		sheets["tokens.css"] = removeSelectionRule(sheets["tokens.css"] ?? "");
+		doc.pairs = doc.pairs.filter((pair) => pair.id !== "selection");
+		doc.literals = (doc.literals ?? []).filter(
+			(literal) => literal.pair !== "selection",
+		);
+	}
+	const tokensCss = sheets["tokens.css"] ?? "";
+	if (selectionSourcePairState(tokensCss, doc) !== "absent") {
+		throw new Error("absent selection fixture retained source or pair data");
+	}
+	return { sheets, doc: doc as ContrastPairsDocument, tokensCss };
+}
+
+function withoutPairIds(
+	doc: ContrastPairsDocument,
+	...ids: string[]
+): ContrastPairsDocument {
+	const result = clone(doc);
+	result.pairs = result.pairs.filter((pair) => !ids.includes(pair.id));
+	return result;
+}
+
 function withoutPairs(...ids: string[]): ContrastPairsDocument {
 	const doc = clone(PAIRS);
 	doc.pairs = doc.pairs.filter((pair) => !ids.includes(pair.id));
@@ -2464,16 +2675,133 @@ describe("G2: every stylesheet colour use is classified", () => {
 		).toEqual([]);
 	});
 
-	test("route: dropping the selection and the on-track thumb pairs reds both accent backdrops", () => {
+	test("selection source and pair remain present together or absent together", () => {
+		const state = selectionSourcePairState(TOKENS_CSS, PAIRS);
+		const pair = PAIRS.pairs.find((candidate) => candidate.id === "selection");
+		const declarations = selectionDeclarations(TOKENS_CSS);
+		if (state === "legacy") {
+			expect(pair).toMatchObject(LEGACY_SELECTION_PAIR);
+			expect(declarations).toEqual([
+				{
+					selectors: ["::selection"],
+					property: "background-color",
+					value: "var(--ec-color-accent)",
+				},
+				{
+					selectors: ["::selection"],
+					property: "color",
+					value: "white",
+				},
+			]);
+		} else {
+			expect(pair).toBeUndefined();
+			expect(declarations).toEqual([]);
+		}
+	});
+
+	test("legacy selection source and pair fixture stays classified and source-bound", () => {
+		const fixture = legacySelectionFixture();
+		expect(selectionSourcePairState(fixture.tokensCss, fixture.doc)).toBe(
+			"legacy",
+		);
+		expect(pairsShapeProblems(fixture.doc)).toEqual([]);
+		expect(
+			g2Report(fixture.sheets, fixture.doc, fixture.tokensCss, TOKEN_MAP)
+				.problems,
+		).toEqual([]);
+		const missingPair = withoutPairIds(
+			fixture.doc,
+			"selection",
+			"toggle-thumb-on",
+		);
+		const found = g2Report(
+			{ "tokens.css": fixture.tokensCss },
+			missingPair,
+			fixture.tokensCss,
+			TOKEN_MAP,
+		).problems;
+		expect(found.map((problem) => problem.file)).toContain("tokens.css");
+		expect(
+			found
+				.filter((problem) => problem.file === "tokens.css")
+				.map(({ code }) => code),
+		).toEqual(["g2-unknown-surface"]);
+	});
+
+	test("absent selection fixture makes selection-pair removal an exact no-op", () => {
+		const fixture = absentSelectionFixture();
+		expect(selectionSourcePairState(fixture.tokensCss, fixture.doc)).toBe(
+			"absent",
+		);
+		expect(pairsShapeProblems(fixture.doc)).toEqual([]);
+		const afterSelectionRemoval = withoutPairIds(fixture.doc, "selection");
+		expect(afterSelectionRemoval).toEqual(fixture.doc);
+		const before = g2Report(
+			fixture.sheets,
+			fixture.doc,
+			fixture.tokensCss,
+			TOKEN_MAP,
+		);
+		const after = g2Report(
+			fixture.sheets,
+			afterSelectionRemoval,
+			fixture.tokensCss,
+			TOKEN_MAP,
+		);
+		expect(after).toEqual(before);
+		expect(
+			after.problems.some((problem) => problem.file === "tokens.css"),
+		).toBe(false);
+	});
+
+	test("route: dropping selection and on-track pairs flags only current source uses", () => {
+		const state = selectionSourcePairState(TOKENS_CSS, PAIRS);
 		const found = g2(
 			SHEETS,
 			withoutPairs("selection", "toggle-thumb-on"),
 		).problems;
-		expect(codes(found)).toEqual(["g2-unknown-surface", "g2-unknown-surface"]);
-		expect(found.map((problem) => problem.file).sort()).toEqual([
+		const expectedFiles = [
+			...(state === "legacy" ? ["tokens.css"] : []),
 			"toggle_switch.css",
-			"tokens.css",
-		]);
+		].sort();
+		expect(found.map((problem) => problem.file).sort()).toEqual(expectedFiles);
+		expect(codes(found)).toEqual(
+			expectedFiles.map(() => "g2-unknown-surface").sort(),
+		);
+		const onTrack = found.find(
+			(problem) => problem.file === "toggle_switch.css",
+		);
+		expect(onTrack?.message).toContain("--ec-color-accent");
+	});
+
+	test("route: on-track thumb coverage is strict without selection as a backdrop", () => {
+		const toggleCss = SHEETS["toggle_switch.css"] ?? "";
+		const onTrackSource = cssDeclarations(toggleCss).filter(
+			(declaration) =>
+				declaration.selectors.length === 1 &&
+				declaration.selectors[0] === ".toggle-switch__track--on" &&
+				declaration.property === "background" &&
+				declaration.value === "var(--ec-color-accent)",
+		);
+		expect(onTrackSource).toHaveLength(1);
+		const sourceScope = { "toggle_switch.css": toggleCss };
+		const noSelection = withoutPairs("selection");
+		expect(
+			g2Report(sourceScope, noSelection, TOKENS_CSS, TOKEN_MAP).problems,
+		).toEqual([]);
+		const missingOnTrack = withoutPairIds(noSelection, "toggle-thumb-on");
+		const found = g2Report(
+			sourceScope,
+			missingOnTrack,
+			TOKENS_CSS,
+			TOKEN_MAP,
+		).problems;
+		expect(found).toHaveLength(1);
+		expect(found[0]).toMatchObject({
+			code: "g2-unknown-surface",
+			file: "toggle_switch.css",
+		});
+		expect(found[0]?.message).toContain("--ec-color-accent");
 	});
 
 	test("route: dropping the off-track thumb pair reds the off track", () => {
