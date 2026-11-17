@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "phase": "77",
   "plan": "05",
-  "recordedAt": "2026-11-17T21:19:52.271Z",
+  "recordedAt": "2026-11-17T21:44:23.553Z",
   "implementation": {
     "v50Close": "b0b566be89886e75929a3da3edeed1497a09a299",
     "initialImplementationBase": "1d8f4219d3d35d401532273ea50f6250c27cb6e4",
     "effectiveImplementationBase": "b873ca53368906df34da464d97a705b634034bdc",
     "savedPaletteTip": "8f8635cbbeccd749a98b759fc5da2d4f025e7045",
-    "measurementHead": "6f186ef0f20247d57868cc43c511c07ad2e12bf8",
+    "measurementHead": "7960cbf968f2b916090daf9f53dde252970cec01",
     "originalFingerprintDenominator": 208,
     "priorEffectiveImplementationBase": "8d0e33f97823ff18c7a1d140dfee02b1868b18ac",
     "latestPaletteIntegration": "bb4e8d9bdc85a34643349bb779ba16dab992ce01"
@@ -11551,7 +11551,7 @@
       ],
       "proposedCount": 27,
       "proposedPassing": 27,
-      "indicatorGateSha256": "a2e56cb007bb7eb061559ff8d46639f7b83169110fbe11e00d25dfc1cd2b9a5e"
+      "indicatorGateSha256": "49e946f40dd75fd67f256519965b83da26801683ee8d50a0ecf526ef83c4ec7c"
     },
     "residuals": []
   },
@@ -16208,7 +16208,7 @@
       "duplicateSourceRejected": true,
       "allVisualPlantsRestored": true
     },
-    "recordSha256": "a2e56cb007bb7eb061559ff8d46639f7b83169110fbe11e00d25dfc1cd2b9a5e"
+    "recordSha256": "49e946f40dd75fd67f256519965b83da26801683ee8d50a0ecf526ef83c4ec7c"
   },
   "forcedColors": {
     "mediaActive": true,
@@ -16373,13 +16373,11 @@
   "spikeComparison": {
     "spikeCleared": 67,
     "denominator": 208,
-    "actualClearedAfterEvidence": 207,
+    "actualClearedAfterEvidence": 208,
     "actualFloorPercent": 99,
-    "actualPercent": 99.52,
+    "actualPercent": 100,
     "cutDecisionPhase": 78,
-    "residualFingerprints": [
-      "a11y-p73|file-list-filetable--arabic-batch|color-contrast"
-    ]
+    "residualFingerprints": []
   },
   "clearedFingerprints": [
     "a11y-p72|file-list-errorexpansion--cleanup|color-contrast",
@@ -16421,9 +16419,9 @@
     "a11y-p72|file-list-metadatagroup--unmapped-group|color-contrast",
     "a11y-p72|settings-languagedropdown--item-hover|color-contrast",
     "a11y-p72|settings-languagedropdown--keyboard-end|color-contrast",
-    "a11y-p72|settings-languagedropdown--open|color-contrast",
     "a11y-p72|settings-languagedropdown--open-arabic|color-contrast",
     "a11y-p72|settings-languagedropdown--open-selected|color-contrast",
+    "a11y-p72|settings-languagedropdown--open|color-contrast",
     "a11y-p72|settings-segmentedcontrol--arabic|color-contrast",
     "a11y-p72|settings-segmentedcontrol--dark-active|color-contrast",
     "a11y-p72|settings-segmentedcontrol--keyboard-focus|color-contrast",
@@ -16436,8 +16434,8 @@
     "a11y-p72|settings-toggleswitch--off|color-contrast",
     "a11y-p72|settings-toggleswitch--on|color-contrast",
     "a11y-p72|ui-errorboundary--button-hover|color-contrast",
-    "a11y-p72|ui-errorboundary--fallback|color-contrast",
     "a11y-p72|ui-errorboundary--fallback-long-message|color-contrast",
+    "a11y-p72|ui-errorboundary--fallback|color-contrast",
     "a11y-p72|ui-errorboundary--keyboard-focus|color-contrast",
     "a11y-p72|ui-statusbar--all-cleaned|color-contrast",
     "a11y-p72|ui-statusbar--arabic|color-contrast",
@@ -16453,13 +16451,13 @@
     "a11y-p72|ui-typepill--pdf|color-contrast",
     "a11y-p72|ui-typepill--png|color-contrast",
     "a11y-p72|ui-typepill--raw|color-contrast",
-    "a11y-p73|file-list-filerow--already-clean|color-contrast",
     "a11y-p73|file-list-filerow--already-clean-expanded|color-contrast",
+    "a11y-p73|file-list-filerow--already-clean|color-contrast",
     "a11y-p73|file-list-filerow--arabic-digits-name|color-contrast",
-    "a11y-p73|file-list-filerow--cleaned|color-contrast",
     "a11y-p73|file-list-filerow--cleaned-expanded|color-contrast",
-    "a11y-p73|file-list-filerow--cleanup|color-contrast",
+    "a11y-p73|file-list-filerow--cleaned|color-contrast",
     "a11y-p73|file-list-filerow--cleanup-without-residual|color-contrast",
+    "a11y-p73|file-list-filerow--cleanup|color-contrast",
     "a11y-p73|file-list-filerow--commit|color-contrast",
     "a11y-p73|file-list-filerow--copy-mode-disclosure|color-contrast",
     "a11y-p73|file-list-filerow--error-collapsed|color-contrast",
@@ -16482,13 +16480,14 @@
     "a11y-p73|file-list-filerow--row-keyboard-focus|color-contrast",
     "a11y-p73|file-list-filerow--unchanged|color-contrast",
     "a11y-p73|file-list-filerow--verification|color-contrast",
-    "a11y-p73|file-list-filerow--write|color-contrast",
     "a11y-p73|file-list-filerow--write-without-residual|color-contrast",
-    "a11y-p73|file-list-filerow--xattr|color-contrast",
+    "a11y-p73|file-list-filerow--write|color-contrast",
     "a11y-p73|file-list-filerow--xattr-without-residual|color-contrast",
+    "a11y-p73|file-list-filerow--xattr|color-contrast",
     "a11y-p73|file-list-filerow--zero-byte-error|color-contrast",
     "a11y-p73|file-list-filerow--zero-byte-no-metadata|color-contrast",
     "a11y-p73|file-list-filerow--zwj-family-name|color-contrast",
+    "a11y-p73|file-list-filetable--arabic-batch|color-contrast",
     "a11y-p73|file-list-filetable--folder-complete|color-contrast",
     "a11y-p73|file-list-filetable--folder-empty|color-contrast",
     "a11y-p73|file-list-filetable--folder-scanning|color-contrast",
@@ -16590,15 +16589,13 @@
     "contrast-gap|ui-typepill--raw|pill-dng-on-pill-dng-bg-over-bg-light",
     "contrast-gap|ui-typepill--raw|pill-dng-on-pill-dng-bg-over-surface-light"
   ],
-  "residualFingerprints": [
-    "a11y-p73|file-list-filetable--arabic-batch|color-contrast"
-  ],
+  "residualFingerprints": [],
   "evidenceSourceDigestsAtCollection": {
     "../.planning/phases/77-palette-and-tokens/77-CONTEXT.md": "4704acf7f04d4a178f03bc90c8ab93817b863ea88afed5581048b467af3d89a6",
     "../.planning/phases/77-palette-and-tokens/77-UI-SPEC.md": "ab7551a2b824eadae95906ca0fd696781c3f83c6e8d1d2bc439db7c66fa4f71f",
     ".brand-cache/unpacked/exifcleaner-brand/tokens.json": "071dadba329fa19b23b183f9a07fa138b409f13dc09c7483c83e50710f305110",
-    ".storybook/a11y_p72_recheck.test.tsx": "88a5529dc004b13e82a67733438c1b6e84a94bc53076d504da32921ffbbac69a",
-    ".storybook/catalog/FINDINGS.md": "a643c789c733df72bb8d05c1951c4816a79ff1b3165fbc196f890c2afee554e6",
+    ".storybook/a11y_p72_recheck.test.tsx": "f0af19df4f7998df03a77cb191ced12b072bcd4fec558fa841fcf4b68a3749cc",
+    ".storybook/catalog/FINDINGS.md": "55760ed5d73a98fab45d0e3be3bb7084115dd09e793d76f121d3980f9edcbfcb",
     ".storybook/catalog/TOKEN-MAP.md": "140d3af64b41ea9a7ff733654507c72b7c4740c7ba100c1f0d0c567395e721b6",
     ".storybook/catalog/brand_quote_check.test.ts": "ca7be7ba4ae3d7093e327ae91b63e4a9004cac70eca94ce7a8a7dc109b1cbb0f",
     ".storybook/catalog/css_scan.mjs": "733987946510ef716eb346262a0e308357b4ddd5c637b122c5a03755ab3be245",
@@ -16613,11 +16610,11 @@
     ".storybook/preview.tsx": "9563b1c43e25df8d23d215a4cb61ac589b3323a2829864b08b1afb28f7031e6a",
     "brand.pin.json": "b992decfbff8276c69e03b85f018b243dc0e41ea1fb0afe2cca1da914a9a3761",
     "docs/evidence/colour-literals.json": "b7dac499560ce8aa2d46d0be4d7d0a69895926362389d6e25217888dc0886825",
-    "docs/evidence/known-findings.json": "00fb23d0d79923cf910e9ea1b452f158849d8a5b340f93d975895fb574b403eb",
-    "node_modules/.cache/palette77-reconciliation.json": "33bc327c03a9f012213139c9a473bd6af8f15c9ce7f69782dfa4d1c69a194b13",
+    "docs/evidence/known-findings.json": "026917754b8b8b22a41cd1d083e19b3ae873e534811e343eb34d17abbb7e8548",
+    "node_modules/.cache/palette77-reconciliation.json": "17650d735271732f15b7be0e4994e6f1f8edee1fd92fa43b3b2e0a9ef1533597",
     "package.json": "3db378e4738c4b7b416272a0d8d56da924da1e0572a0720c6e39bff66b61ff9b",
     "scripts/colour_literal_ratchet.mjs": "13dfb7f3523b862af9ec377cae49b1499f228ce44cfdc01e3662a26648566afb",
-    "scripts/palette_77_proof.mjs": "18ee96a3719889653e46ec5c971e29a1b0967e7710366d5c4143df7f91a750c4",
+    "scripts/palette_77_proof.mjs": "ffb28ee88eab45d9ec0ccd9df530719ab4330477ef6ac8f6f4749310644dbc3a",
     "scripts/shrink_only_check.d.mts": "1b79fca975063f94c47e6357836d9f40594f65d463c0fd8d3db7f8fa4962eade",
     "scripts/shrink_only_check.mjs": "d432b2cc8592e0b5a0919397fa56d8a5b865e628e5376a9e44fc4741a9afc054",
     "src/domain/accent_color.ts": "04fcdeffb01fdda13128de3a698ed7f39df801a5e0ebedafd5202207b19a8a4b",
@@ -16669,13 +16666,13 @@
     "tests/renderer/gates/colour_literal.test.ts": "6b9b1455fc92ba55adf51276d64003202e7d5687783297b6fb57a3bf8eed9d41",
     "tests/renderer/gates/shrink_only.test.ts": "20c0877213a98808b273660c4d7af563cd1e26ae24fe48630d9d91ed641f3075",
     "tests/renderer/gates/window_background.test.ts": "adef4e497d2471ad03c4a27a09349c3a5148f488e6042cd59394f6d3d093a36c",
-    "tests/scripts/palette_77_proof.test.ts": "13fce37263bb1d636728af710e7fd170c54b8ca63d2345279d875c0b77915d4d",
+    "tests/scripts/palette_77_proof.test.ts": "79e371514bb9b1e8887f0254e3b210fd4b5d7cfa4071d30d34b2bfe66b07ffd1",
     "vitest.storybook.config.ts": "770e9bdc938d178d9fd76357cda320c8232738f4f488c5c4fe5feb3993a284ff"
   },
   "registerReconciliation": {
-    "status": "proven-color-rows-removed-with-cross-platform-residual",
-    "removedFingerprintCount": 208,
-    "removedColorFindingCount": 207,
+    "status": "proven-all-original-color-rows-removed-with-cross-platform-axe-evidence",
+    "removedFingerprintCount": 209,
+    "removedColorFindingCount": 208,
     "removedSeparateTokenMapGapCount": 1,
     "removedFingerprints": [
       "a11y-p72|file-list-errorexpansion--cleanup|color-contrast",
@@ -16717,9 +16714,9 @@
       "a11y-p72|file-list-metadatagroup--unmapped-group|color-contrast",
       "a11y-p72|settings-languagedropdown--item-hover|color-contrast",
       "a11y-p72|settings-languagedropdown--keyboard-end|color-contrast",
-      "a11y-p72|settings-languagedropdown--open|color-contrast",
       "a11y-p72|settings-languagedropdown--open-arabic|color-contrast",
       "a11y-p72|settings-languagedropdown--open-selected|color-contrast",
+      "a11y-p72|settings-languagedropdown--open|color-contrast",
       "a11y-p72|settings-segmentedcontrol--arabic|color-contrast",
       "a11y-p72|settings-segmentedcontrol--dark-active|color-contrast",
       "a11y-p72|settings-segmentedcontrol--keyboard-focus|color-contrast",
@@ -16732,8 +16729,8 @@
       "a11y-p72|settings-toggleswitch--off|color-contrast",
       "a11y-p72|settings-toggleswitch--on|color-contrast",
       "a11y-p72|ui-errorboundary--button-hover|color-contrast",
-      "a11y-p72|ui-errorboundary--fallback|color-contrast",
       "a11y-p72|ui-errorboundary--fallback-long-message|color-contrast",
+      "a11y-p72|ui-errorboundary--fallback|color-contrast",
       "a11y-p72|ui-errorboundary--keyboard-focus|color-contrast",
       "a11y-p72|ui-statusbar--all-cleaned|color-contrast",
       "a11y-p72|ui-statusbar--arabic|color-contrast",
@@ -16749,13 +16746,13 @@
       "a11y-p72|ui-typepill--pdf|color-contrast",
       "a11y-p72|ui-typepill--png|color-contrast",
       "a11y-p72|ui-typepill--raw|color-contrast",
-      "a11y-p73|file-list-filerow--already-clean|color-contrast",
       "a11y-p73|file-list-filerow--already-clean-expanded|color-contrast",
+      "a11y-p73|file-list-filerow--already-clean|color-contrast",
       "a11y-p73|file-list-filerow--arabic-digits-name|color-contrast",
-      "a11y-p73|file-list-filerow--cleaned|color-contrast",
       "a11y-p73|file-list-filerow--cleaned-expanded|color-contrast",
-      "a11y-p73|file-list-filerow--cleanup|color-contrast",
+      "a11y-p73|file-list-filerow--cleaned|color-contrast",
       "a11y-p73|file-list-filerow--cleanup-without-residual|color-contrast",
+      "a11y-p73|file-list-filerow--cleanup|color-contrast",
       "a11y-p73|file-list-filerow--commit|color-contrast",
       "a11y-p73|file-list-filerow--copy-mode-disclosure|color-contrast",
       "a11y-p73|file-list-filerow--error-collapsed|color-contrast",
@@ -16778,13 +16775,14 @@
       "a11y-p73|file-list-filerow--row-keyboard-focus|color-contrast",
       "a11y-p73|file-list-filerow--unchanged|color-contrast",
       "a11y-p73|file-list-filerow--verification|color-contrast",
-      "a11y-p73|file-list-filerow--write|color-contrast",
       "a11y-p73|file-list-filerow--write-without-residual|color-contrast",
-      "a11y-p73|file-list-filerow--xattr|color-contrast",
+      "a11y-p73|file-list-filerow--write|color-contrast",
       "a11y-p73|file-list-filerow--xattr-without-residual|color-contrast",
+      "a11y-p73|file-list-filerow--xattr|color-contrast",
       "a11y-p73|file-list-filerow--zero-byte-error|color-contrast",
       "a11y-p73|file-list-filerow--zero-byte-no-metadata|color-contrast",
       "a11y-p73|file-list-filerow--zwj-family-name|color-contrast",
+      "a11y-p73|file-list-filetable--arabic-batch|color-contrast",
       "a11y-p73|file-list-filetable--folder-complete|color-contrast",
       "a11y-p73|file-list-filetable--folder-empty|color-contrast",
       "a11y-p73|file-list-filetable--folder-scanning|color-contrast",
@@ -16887,11 +16885,9 @@
       "contrast-gap|ui-typepill--raw|pill-dng-on-pill-dng-bg-over-surface-light",
       "token-map-gap|ui-emptystate--copy-mode-on|empty-state-secondary-hardcoded"
     ],
-    "remainingFindingEntryCount": 158,
-    "remainingColorFindingCount": 1,
-    "remainingColorFingerprints": [
-      "a11y-p73|file-list-filetable--arabic-batch|color-contrast"
-    ],
+    "remainingFindingEntryCount": 157,
+    "remainingColorFindingCount": 0,
+    "remainingColorFingerprints": [],
     "remainingTokenMapGapFingerprints": [
       "token-map-gap|file-list-filerow--copy-mode-disclosure|line-height-token-undefined"
     ],
@@ -16940,10 +16936,10 @@
       "unrendered-outcome|file-list-folderrow--scanning|discovering-status-never-dispatched",
       "unrendered-outcome|screens-app--all-done|engine-evidence-not-shown"
     ],
-    "knownFindingsSha256After": "00fb23d0d79923cf910e9ea1b452f158849d8a5b340f93d975895fb574b403eb",
+    "knownFindingsSha256After": "026917754b8b8b22a41cd1d083e19b3ae873e534811e343eb34d17abbb7e8548",
     "reconciliationReport": {
       "path": "node_modules/.cache/palette77-reconciliation.json",
-      "sha256": "33bc327c03a9f012213139c9a473bd6af8f15c9ce7f69782dfa4d1c69a194b13",
+      "sha256": "17650d735271732f15b7be0e4994e6f1f8edee1fd92fa43b3b2e0a9ef1533597",
       "task2SourceDigestRefresh": [
         {
           "path": "tests/renderer/contrast/contrast_model.mjs",
@@ -16966,25 +16962,35 @@
         {
           "path": ".storybook/a11y_p72_recheck.test.tsx",
           "previousSha256": "887f96c0aef3e34ab49916586d38db32ee02397757f8044e98fbcb7561917832",
-          "currentSha256": "88a5529dc004b13e82a67733438c1b6e84a94bc53076d504da32921ffbbac69a",
-          "reason": "Phase 77 final Storybook update now asserts the corrected ToggleSwitch contrast row is clear in both themes; full Storybook and current contrast reconciliation are replayed in source proof."
+          "currentSha256": "f0af19df4f7998df03a77cb191ced12b072bcd4fec558fa841fcf4b68a3749cc",
+          "reason": "Post-reconciliation updates first captured the ToggleSwitch theme assertion, then the final Linux recheck proved the Arabic batch color-contrast row fixed; an explicit both-theme control now keeps the finding retired. Prettier then normalized the test source without behavior changes."
         },
         {
           "path": "src/renderer/styles/empty_state.css",
           "previousSha256": "88368504830d6a609547e4334cc638b2d0a884d43fb0d88147bd3534e2fa27fa",
           "currentSha256": "9cdc3a0b970b9fd31c13bd5911fa21c1ac62da806a1f069d798b8116a68ea562",
           "reason": "Final review removed an empty dark-theme selector left after its local token was retired; no rendered styles or geometry changed."
+        },
+        {
+          "path": "docs/evidence/known-findings.json",
+          "previousSha256": "00fb23d0d79923cf910e9ea1b452f158849d8a5b340f93d975895fb574b403eb",
+          "currentSha256": "026917754b8b8b22a41cd1d083e19b3ae873e534811e343eb34d17abbb7e8548",
+          "reason": "Fresh rule-enabled Mac axe observations pass in both themes, and the Linux PR Storybook recheck re-enabled color-contrast and reported the entry fixed. The final Storybook suite adds an explicit permanent both-theme regression check."
+        },
+        {
+          "path": ".storybook/catalog/FINDINGS.md",
+          "previousSha256": "a643c789c733df72bb8d05c1951c4816a79ff1b3165fbc196f890c2afee554e6",
+          "currentSha256": "55760ed5d73a98fab45d0e3be3bb7084115dd09e793d76f121d3980f9edcbfcb",
+          "reason": "Fresh rule-enabled Mac axe observations pass in both themes, and the Linux PR Storybook recheck re-enabled color-contrast and reported the entry fixed. The final Storybook suite adds an explicit permanent both-theme regression check."
         }
       ]
     }
   },
-  "remainingFingerprints": [
-    "a11y-p73|file-list-filetable--arabic-batch|color-contrast"
-  ],
+  "remainingFingerprints": [],
   "postReconciliationSourceDigests": {
-    "docs/evidence/known-findings.json": "00fb23d0d79923cf910e9ea1b452f158849d8a5b340f93d975895fb574b403eb",
+    "docs/evidence/known-findings.json": "026917754b8b8b22a41cd1d083e19b3ae873e534811e343eb34d17abbb7e8548",
     ".storybook/catalog/token_map.json": "911396d8da45774e64460819545443419245c2c4d7dcc21e655673b3db8cabf7",
-    ".storybook/catalog/FINDINGS.md": "a643c789c733df72bb8d05c1951c4816a79ff1b3165fbc196f890c2afee554e6",
+    ".storybook/catalog/FINDINGS.md": "55760ed5d73a98fab45d0e3be3bb7084115dd09e793d76f121d3980f9edcbfcb",
     "tests/renderer/contrast/contrast_pairs.json": "321ef02971332a3c95db8b3575bc83f6360333af14b4187d65f3239602d45720",
     "tests/renderer/contrast/contrast_model.mjs": "1e5a7345dcf8b19a94a9ffd19ea75e69c9c9704232119e4defa8a5bdef9fd318",
     "src/renderer/styles/tokens.css": "1b4afb2b17cbefa963bfe5cd9ba4527cca66a5ecc3a088a7fcccf35f98917758",
@@ -17272,7 +17278,7 @@
     "sealed": true,
     "base": "b873ca53368906df34da464d97a705b634034bdc",
     "v50Close": "b0b566be89886e75929a3da3edeed1497a09a299",
-    "measurementDigest": "5ec1ab7961641b19d2a099c814352bf49f151703933a84ccc8d56eefcbc2fde8",
+    "measurementDigest": "bb7673ca79c343492b4e491b63f9b4bdec58d3f03f2aaf73b455589c531df8d3",
     "literalBaselineSha256": "b7dac499560ce8aa2d46d0be4d7d0a69895926362389d6e25217888dc0886825",
     "inputs": [
       {
@@ -17289,11 +17295,11 @@
       },
       {
         "path": ".storybook/a11y_p72_recheck.test.tsx",
-        "sha256": "88a5529dc004b13e82a67733438c1b6e84a94bc53076d504da32921ffbbac69a"
+        "sha256": "f0af19df4f7998df03a77cb191ced12b072bcd4fec558fa841fcf4b68a3749cc"
       },
       {
         "path": ".storybook/catalog/FINDINGS.md",
-        "sha256": "a643c789c733df72bb8d05c1951c4816a79ff1b3165fbc196f890c2afee554e6"
+        "sha256": "55760ed5d73a98fab45d0e3be3bb7084115dd09e793d76f121d3980f9edcbfcb"
       },
       {
         "path": ".storybook/catalog/TOKEN-MAP.md",
@@ -17353,11 +17359,11 @@
       },
       {
         "path": "docs/evidence/known-findings.json",
-        "sha256": "00fb23d0d79923cf910e9ea1b452f158849d8a5b340f93d975895fb574b403eb"
+        "sha256": "026917754b8b8b22a41cd1d083e19b3ae873e534811e343eb34d17abbb7e8548"
       },
       {
         "path": "node_modules/.cache/palette77-reconciliation.json",
-        "sha256": "33bc327c03a9f012213139c9a473bd6af8f15c9ce7f69782dfa4d1c69a194b13"
+        "sha256": "17650d735271732f15b7be0e4994e6f1f8edee1fd92fa43b3b2e0a9ef1533597"
       },
       {
         "path": "package.json",
@@ -17369,7 +17375,7 @@
       },
       {
         "path": "scripts/palette_77_proof.mjs",
-        "sha256": "18ee96a3719889653e46ec5c971e29a1b0967e7710366d5c4143df7f91a750c4"
+        "sha256": "ffb28ee88eab45d9ec0ccd9df530719ab4330477ef6ac8f6f4749310644dbc3a"
       },
       {
         "path": "scripts/shrink_only_check.d.mts",
@@ -17577,7 +17583,7 @@
       },
       {
         "path": "tests/scripts/palette_77_proof.test.ts",
-        "sha256": "13fce37263bb1d636728af710e7fd170c54b8ca63d2345279d875c0b77915d4d"
+        "sha256": "79e371514bb9b1e8887f0254e3b210fd4b5d7cfa4071d30d34b2bfe66b07ffd1"
       },
       {
         "path": "vitest.storybook.config.ts",
@@ -17925,7 +17931,7 @@
     },
     "invariants": [
       {
-        "name": "original-color-fingerprints-and-exact-residuals",
+        "name": "all-original-color-fingerprints-have-source-backed-passing-dispositions",
         "passed": true
       },
       {
