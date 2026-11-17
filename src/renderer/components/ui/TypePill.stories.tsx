@@ -1,14 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect } from "storybook/test";
 import { knownA11y } from "../../story_support/known_a11y";
-import {
-	NEUTRAL,
-	TYPE_PILL_FAMILIES,
-} from "../../story_support/type_pill_families";
 import { TypePill } from "./TypePill";
 
-// These stories preserve the current family-shaped examples and accessible audit
-// bindings while checking only the visible labels and the shared badge base.
+// Keep representative extension examples while checking only visible labels and
+// the shared badge base. Every supported extension is covered by the generic twin.
 const meta = {
 	title: "UI/TypePill",
 	component: TypePill,
@@ -52,57 +48,102 @@ async function expectVisibleExtensions(
 
 export const Jpeg: Story = {
 	parameters: { a11y: knownA11y("ui-typepill--jpeg") },
-	render: () => <Pills extensions={TYPE_PILL_FAMILIES.jpeg} />,
+	render: () => <Pills extensions={["jpg", "jpeg"]} />,
 	play: async ({ canvasElement }) => {
-		await expectVisibleExtensions(canvasElement, TYPE_PILL_FAMILIES.jpeg);
+		await expectVisibleExtensions(canvasElement, ["jpg", "jpeg"]);
 	},
 };
 
 export const Heic: Story = {
 	parameters: { a11y: knownA11y("ui-typepill--heic") },
-	render: () => <Pills extensions={TYPE_PILL_FAMILIES.heic} />,
+	render: () => <Pills extensions={["heic", "heif"]} />,
 	play: async ({ canvasElement }) => {
-		await expectVisibleExtensions(canvasElement, TYPE_PILL_FAMILIES.heic);
+		await expectVisibleExtensions(canvasElement, ["heic", "heif"]);
 	},
 };
 
 export const Png: Story = {
 	parameters: { a11y: knownA11y("ui-typepill--png") },
-	render: () => <Pills extensions={TYPE_PILL_FAMILIES.png} />,
+	render: () => <Pills extensions={["png"]} />,
 	play: async ({ canvasElement }) => {
-		await expectVisibleExtensions(canvasElement, TYPE_PILL_FAMILIES.png);
+		await expectVisibleExtensions(canvasElement, ["png"]);
 	},
 };
 
 export const Pdf: Story = {
 	parameters: { a11y: knownA11y("ui-typepill--pdf") },
-	render: () => <Pills extensions={TYPE_PILL_FAMILIES.pdf} />,
+	render: () => <Pills extensions={["pdf"]} />,
 	play: async ({ canvasElement }) => {
-		await expectVisibleExtensions(canvasElement, TYPE_PILL_FAMILIES.pdf);
+		await expectVisibleExtensions(canvasElement, ["pdf"]);
 	},
 };
 
 export const Media: Story = {
 	parameters: { a11y: knownA11y("ui-typepill--media") },
-	render: () => <Pills extensions={TYPE_PILL_FAMILIES.media} />,
+	render: () => (
+		<Pills extensions={["mov", "mp4", "m4a", "m4v", "avi", "3gp", "wmv"]} />
+	),
 	play: async ({ canvasElement }) => {
-		await expectVisibleExtensions(canvasElement, TYPE_PILL_FAMILIES.media);
+		await expectVisibleExtensions(canvasElement, [
+			"mov",
+			"mp4",
+			"m4a",
+			"m4v",
+			"avi",
+			"3gp",
+			"wmv",
+		]);
 	},
 };
 
 export const Raw: Story = {
 	parameters: { a11y: knownA11y("ui-typepill--raw") },
-	render: () => <Pills extensions={TYPE_PILL_FAMILIES.raw} />,
+	render: () => (
+		<Pills
+			extensions={[
+				"dng",
+				"cr2",
+				"cr3",
+				"nef",
+				"arw",
+				"orf",
+				"rw2",
+				"raf",
+				"pef",
+				"srw",
+			]}
+		/>
+	),
 	play: async ({ canvasElement }) => {
-		await expectVisibleExtensions(canvasElement, TYPE_PILL_FAMILIES.raw);
+		await expectVisibleExtensions(canvasElement, [
+			"dng",
+			"cr2",
+			"cr3",
+			"nef",
+			"arw",
+			"orf",
+			"rw2",
+			"raf",
+			"pef",
+			"srw",
+		]);
 	},
 };
 
-// Keep the neutral example's current input and visible extension contract.
 export const Neutral: Story = {
 	parameters: { a11y: knownA11y("ui-typepill--neutral") },
-	render: () => <Pills extensions={NEUTRAL} />,
+	render: () => (
+		<Pills extensions={["gif", "tiff", "tif", "webp", "avif", "bmp", "svg"]} />
+	),
 	play: async ({ canvasElement }) => {
-		await expectVisibleExtensions(canvasElement, NEUTRAL);
+		await expectVisibleExtensions(canvasElement, [
+			"gif",
+			"tiff",
+			"tif",
+			"webp",
+			"avif",
+			"bmp",
+			"svg",
+		]);
 	},
 };
