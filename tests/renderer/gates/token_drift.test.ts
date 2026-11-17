@@ -354,21 +354,39 @@ describe("GAT-01 token drift gate (D-09, D-12)", () => {
 		]);
 	});
 
-	test("fewer than four adopt rows is vacuous", () => {
+	test("exactly MIN_ADOPT_ROWS minus one adopt rows is vacuous", () => {
+		const belowFloorAdoptNames = new Set(
+			TOKEN_MAP.entries
+				.filter((entry) => entry.disposition === "adopt")
+				.slice(0, MIN_ADOPT_ROWS - 1)
+				.map((entry) => entry.name),
+		);
 		const reduced: TokenMapDocument = {
 			entries: TOKEN_MAP.entries.filter(
 				(entry) =>
-					entry.disposition !== "adopt" ||
-					entry.name !== "--ec-color-text-secondary",
+					entry.disposition !== "adopt" || belowFloorAdoptNames.has(entry.name),
 			),
 		};
+		expect(
+			reduced.entries.filter((entry) => entry.disposition === "adopt"),
+		).toHaveLength(MIN_ADOPT_ROWS - 1);
+		expect(
+			reduced.entries.filter((entry) => entry.disposition !== "adopt"),
+		).toEqual(
+			TOKEN_MAP.entries.filter((entry) => entry.disposition !== "adopt"),
+		);
 		expect(
 			driftProblems({
 				tokensCss: matchingTokensCss(reduced),
 				tokenMap: reduced,
 				pending: { rows: [] },
 			}),
-		).toEqual([{ code: "vacuous", subject: "adopt rows seen: 3" }]);
+		).toEqual([
+			{
+				code: "vacuous",
+				subject: `adopt rows seen: ${MIN_ADOPT_ROWS - 1}`,
+			},
+		]);
 	});
 
 	test("a pending row naming no adopt token or theme is unknown", () => {
