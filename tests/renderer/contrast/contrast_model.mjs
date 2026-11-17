@@ -1346,7 +1346,11 @@ function guardContext(doc, tokens, tokenMap, stylesheets) {
 	]);
 	const sourcePairRoleTokens = new Map();
 	for (const pair of pairs) {
-		if (pair.role !== "non-text" || !isText(pair.selector) || !isToken(pair.fg)) {
+		if (
+			pair.role !== "non-text" ||
+			!isText(pair.selector) ||
+			!isToken(pair.fg)
+		) {
 			continue;
 		}
 		const themePaths = THEMES.map((theme) =>
@@ -1437,9 +1441,7 @@ function isRetiredPairForeground(name, doc) {
 	const prefix = "--ec-color-";
 	if (!name.startsWith(prefix)) return false;
 	const id = name.slice(prefix.length);
-	return (doc.pairs ?? []).some(
-		(pair) => pair.id === id && pair.fg !== name,
-	);
+	return (doc.pairs ?? []).some((pair) => pair.id === id && pair.fg !== name);
 }
 
 /**
@@ -1512,9 +1514,7 @@ function hasDocumentedBorderRole(property, exemptEntry, context) {
 		return false;
 	}
 	const mapEntry = context.retire.get(String(exemptEntry.name ?? ""));
-	return (
-		mapEntry?.disposition === "keep-platform" && isText(mapEntry.reason)
-	);
+	return mapEntry?.disposition === "keep-platform" && isText(mapEntry.reason);
 }
 
 /**
@@ -1606,8 +1606,8 @@ function classifyReference(property, name, fallback, context, source) {
 	if (kind === "background") {
 		const fill = exemptEntry !== undefined && isText(exemptEntry.fill);
 		return context.backdropTokens.has(name) ||
-			fill
-			|| hasSourceBackedNonTextForeground(name, source, context)
+			fill ||
+			hasSourceBackedNonTextForeground(name, source, context)
 			? "ok"
 			: {
 					code: "g2-unknown-surface",
@@ -1723,7 +1723,8 @@ export function g2Report(stylesheets, doc, tokensCss, tokenMap) {
 				}
 			}
 			for (const literal of colourLiterals(found.value)) {
-				const fallbackCount = unclassifiedFallbacks.get(literal.normalised) ?? 0;
+				const fallbackCount =
+					unclassifiedFallbacks.get(literal.normalised) ?? 0;
 				if (fallbackCount > 0) {
 					unclassifiedFallbacks.set(literal.normalised, fallbackCount - 1);
 					continue;

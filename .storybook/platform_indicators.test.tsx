@@ -1441,7 +1441,9 @@ test("writes only a complete current-source indicator proof", async () => {
 	const pairDoc = JSON.parse(pairsSource) as ContrastPairsDocument;
 	expect(pairsShapeProblems(pairDoc)).toEqual([]);
 	const staticResults = evaluate(pairDoc, tokenSource);
-	expect(staticResults).toHaveLength(94);
+	// The source-backed English/header and pressed-state pairs add six real
+	// evaluator rows to the 94-row pre-palette indicator contract.
+	expect(staticResults).toHaveLength(100);
 	expect(staticResults.length).toBeGreaterThan(0);
 	expect(staticResults.every((result) => result.pass)).toBe(true);
 	const proposed = proposedResults(pairDoc);
