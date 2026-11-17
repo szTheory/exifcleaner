@@ -193,7 +193,42 @@ const PALETTE_HOVER_TEST_COLORS = {
 };
 
 function paletteHoverTokensCss(tokensCss: string): string {
+	const tokens = themeTokens(tokensCss);
+	if (THEMES.every((theme) => tokens[theme].has("--ec-color-surface-hover"))) {
+		return tokensCss;
+	}
 	return `${tokensCss}\n:root { --ec-color-surface-hover: ${PALETTE_HOVER_TEST_COLORS.light}; }\n[data-theme="dark"] { --ec-color-surface-hover: ${PALETTE_HOVER_TEST_COLORS.dark}; }`;
+}
+
+function itemHoverPaintFromCss(languageCss: string): string | null {
+	const rules = [
+		...languageCss.matchAll(
+			/^[\t ]*([^{}]*\.language-dropdown__item[^{}]*)\{([^{}]*)\}/gm,
+		),
+	];
+	const hoverRules = rules.filter((rule) =>
+		/\.language-dropdown__item(?::hover|--focused)/.test(rule[1] ?? ""),
+	);
+	if (hoverRules.length !== 1) return null;
+	const selectors = (hoverRules[0]?.[1] ?? "")
+		.split(",")
+		.map((selector) => selector.trim());
+	if (
+		JSON.stringify(selectors) !==
+		JSON.stringify([
+			".language-dropdown__item:hover",
+			".language-dropdown__item--focused",
+		])
+	) {
+		return null;
+	}
+	const backgrounds = [
+		...(hoverRules[0]?.[2] ?? "").matchAll(
+			/(?:^|;)\s*background\s*:\s*([^;]+)\s*;?/g,
+		),
+	];
+	if (backgrounds.length !== 1) return null;
+	return backgrounds[0]?.[1]?.trim().replace(/\s+/g, " ") ?? null;
 }
 
 function itemHoverLayerFromCss(
@@ -201,17 +236,8 @@ function itemHoverLayerFromCss(
 	tokensCss: string,
 	doc: ContrastPairsDocument,
 ): string | null {
-	const parentRule = languageCss.match(
-		/\.language-dropdown__item:hover,\s*\.language-dropdown__item--focused\s*\{([^}]*)\}/s,
-	);
-	if (parentRule === null) return null;
-	const declarations = [
-		...(parentRule[1] ?? "").matchAll(
-			/(?:^|;)\s*background\s*:\s*([^;]+)\s*;?/g,
-		),
-	];
-	if (declarations.length !== 1) return null;
-	const value = declarations[0]?.[1]?.trim().replace(/\s+/g, " ");
+	const value = itemHoverPaintFromCss(languageCss);
+	if (value === null) return null;
 	const tokens = themeTokens(tokensCss);
 	if (value === "var(--ec-color-hover, rgba(0, 0, 0, 0.04))") {
 		const fallbackTokenResolves = THEMES.some(
@@ -360,6 +386,8 @@ function languageHoverPairFixture(hoverLayer: string): ContrastPairsDocument {
 	];
 	if (hoverLayer === "--ec-color-surface-hover") {
 		fixture.localTokens[hoverLayer] = { ...PALETTE_HOVER_TEST_COLORS };
+	} else {
+		delete fixture.localTokens["--ec-color-surface-hover"];
 	}
 	fixture.pairs = fixture.pairs.filter(
 		(pair) =>
@@ -867,8 +895,20 @@ const TOKEN_MAP = readJson<{
 		disposition: string;
 		finding?: string;
 		reason?: string;
+		from?: string[];
+		rule?: string;
 	}>;
 }>(".storybook/catalog/token_map.json");
+
+const LEGACY_HOVER_TOKEN = "--ec-color-hover";
+const SURFACE_HOVER_TOKEN = "--ec-color-surface-hover";
+const LEGACY_HOVER_FINDING =
+	"token-gap|settings-languagedropdown--item-hover|hover-token-undefined";
+const LEGACY_HOVER_PAINT = "var(--ec-color-hover, rgba(0, 0, 0, 0.04))";
+const SURFACE_HOVER_PAINT = "var(--ec-color-surface-hover)";
+const LEGACY_HOVER_FALLBACK = "rgba(0, 0, 0, 0.04)";
+const PALETTE_HOVER_SOURCES = ["color.dark.tide", "color.light.rinse"];
+
 const UI_SPEC = readJson<unknown>(".storybook/catalog/ui-spec.json");
 const PIN = readJson<{ commit: string }>("brand.pin.json").commit;
 
@@ -967,6 +1007,196 @@ function g2(
 	tokenMap: typeof TOKEN_MAP = TOKEN_MAP,
 ) {
 	return g2Report(sheets, doc, TOKENS_CSS, tokenMap);
+}
+
+type HoverContractState = "legacy" | "palette";
+
+type HoverContractFixture = {
+	state: HoverContractState;
+	languageCss: string;
+	sheets: Record<string, string>;
+	doc: ContrastPairsDocument;
+	tokenMap: typeof TOKEN_MAP;
+	tokensCss: string;
+};
+
+function sourceMapHoverState({
+	languageComponent,
+	languageCss,
+	sheets,
+	doc,
+	tokenMap,
+	tokensCss,
+}: {
+	languageComponent: string;
+	languageCss: string;
+	sheets: Record<string, string>;
+	doc: ContrastPairsDocument;
+	tokenMap: typeof TOKEN_MAP;
+	tokensCss: string;
+}): HoverContractState | null {
+	const paint = itemHoverPaintFromCss(languageCss);
+	if (paint === null) return null;
+	if (
+		languageHoverContractProblems({
+			languageComponent,
+			languageCss,
+			doc,
+			tokensCss,
+		}).length > 0
+	) {
+		return null;
+	}
+
+	const legacyEntries = tokenMap.entries.filter(
+		(entry) => entry.name === LEGACY_HOVER_TOKEN,
+	);
+	const paletteEntries = tokenMap.entries.filter(
+		(entry) => entry.name === SURFACE_HOVER_TOKEN,
+	);
+	const tokens = themeTokens(tokensCss);
+	const productionCss = [
+		...Object.entries(sheets)
+			.filter(([file]) => file !== "tokens.css")
+			.map(([, source]) => source),
+		tokensCss,
+	].join("\n");
+
+	if (paint === LEGACY_HOVER_PAINT) {
+		const legacy = legacyEntries[0];
+		const legacyReferenceCount =
+			productionCss.split(LEGACY_HOVER_TOKEN).length - 1;
+		if (
+			legacyEntries.length !== 1 ||
+			legacy?.disposition !== "retire" ||
+			legacy.finding !== LEGACY_HOVER_FINDING ||
+			legacy.reason?.trim() === undefined ||
+			legacy.reason.trim().length === 0 ||
+			paletteEntries.length !== 0 ||
+			legacyReferenceCount !== 1 ||
+			THEMES.some(
+				(theme) =>
+					tokens[theme].has(LEGACY_HOVER_TOKEN) ||
+					tokens[theme].has(SURFACE_HOVER_TOKEN),
+			)
+		) {
+			return null;
+		}
+		return "legacy";
+	}
+
+	if (paint === SURFACE_HOVER_PAINT) {
+		const surface = paletteEntries[0];
+		const legacyReferenceCount =
+			productionCss.split(LEGACY_HOVER_TOKEN).length - 1;
+		const declaredValues = Object.fromEntries(
+			THEMES.map((theme) => {
+				const resolved = resolveColour(SURFACE_HOVER_TOKEN, theme, tokens, doc);
+				return [theme, resolved === null ? null : toHex(resolved)];
+			}),
+		) as Record<(typeof THEMES)[number], string | null>;
+		if (
+			legacyEntries.length !== 0 ||
+			legacyReferenceCount !== 0 ||
+			paletteEntries.length !== 1 ||
+			surface?.disposition !== "derive" ||
+			JSON.stringify([...(surface.from ?? [])].sort()) !==
+				JSON.stringify(PALETTE_HOVER_SOURCES) ||
+			THEMES.some(
+				(theme) =>
+					!tokens[theme].has(SURFACE_HOVER_TOKEN) ||
+					declaredValues[theme] !==
+						toHex(colour(PALETTE_HOVER_TEST_COLORS[theme])),
+			)
+		) {
+			return null;
+		}
+		return "palette";
+	}
+
+	return null;
+}
+
+function withoutPaletteHoverTokenDeclarations(tokensCss: string): string {
+	return tokensCss
+		.replace(/^[\t ]*--ec-color-surface-hover\s*:[^\r\n;]+;[\t ]*\r?\n?/gm, "")
+		.replace(/:root\s*\{\s*--ec-color-surface-hover\s*:[^;}]+;\s*\}/g, "")
+		.replace(
+			/\[data-theme="dark"\]\s*\{\s*--ec-color-surface-hover\s*:[^;}]+;\s*\}/g,
+			"",
+		);
+}
+
+function hoverContractFixture(state: HoverContractState): HoverContractFixture {
+	const sourceFile = SHEETS["language_dropdown.css"] ?? "";
+	const englishRule = sourceFile.match(
+		/\.language-dropdown__english\s*\{[^}]*\}/s,
+	)?.[0];
+	if (englishRule === undefined)
+		throw new Error("source English child rule is missing for hover fixture");
+	const languageCss = `${englishRule}\n.language-dropdown__item:hover,\n.language-dropdown__item--focused { background: ${state === "legacy" ? LEGACY_HOVER_PAINT : SURFACE_HOVER_PAINT}; }`;
+	const layer =
+		state === "legacy" ? LEGACY_HOVER_FALLBACK : SURFACE_HOVER_TOKEN;
+	const doc = languageHoverPairFixture(layer);
+	const tokensCss =
+		state === "legacy"
+			? withoutPaletteHoverTokenDeclarations(TOKENS_CSS)
+			: paletteHoverTokensCss(TOKENS_CSS);
+	const tokenMap =
+		state === "legacy"
+			? {
+					entries: [
+						{
+							name: LEGACY_HOVER_TOKEN,
+							disposition: "retire",
+							finding: LEGACY_HOVER_FINDING,
+							reason:
+								"The registered legacy hover name uses its declared overlay fallback.",
+						},
+					],
+				}
+			: {
+					entries: [
+						{
+							name: SURFACE_HOVER_TOKEN,
+							disposition: "derive",
+							from: [...PALETTE_HOVER_SOURCES],
+							rule: "The semantic item-hover surface is declared in both themes.",
+						},
+					],
+				};
+	return {
+		state,
+		languageCss,
+		sheets: { "language_dropdown.css": languageCss },
+		doc,
+		tokenMap,
+		tokensCss,
+	};
+}
+
+function fixtureState(
+	fixture: HoverContractFixture,
+): HoverContractState | null {
+	return sourceMapHoverState({
+		languageComponent: readText(
+			"src/renderer/components/settings/LanguageDropdown.tsx",
+		),
+		languageCss: fixture.languageCss,
+		sheets: fixture.sheets,
+		doc: fixture.doc,
+		tokenMap: fixture.tokenMap,
+		tokensCss: fixture.tokensCss,
+	});
+}
+
+function fixtureG2Problems(fixture: HoverContractFixture) {
+	return g2Report(
+		fixture.sheets,
+		fixture.doc,
+		fixture.tokensCss,
+		fixture.tokenMap,
+	).problems;
 }
 
 function withRule(file: string, rule: string): Record<string, string> {
@@ -1411,12 +1641,6 @@ describe("G2: every stylesheet colour use is classified", () => {
 			["g2-unclassified-token"],
 		],
 		[
-			"the registered hover name whose fallback literal is no backdrop",
-			"app.css",
-			".planted { background: var(--ec-color-hover, #ffffff); }",
-			["g2-unknown-surface"],
-		],
-		[
 			"a colour literal no entry declares",
 			"app.css",
 			".planted { color: #abcdef; }",
@@ -1441,14 +1665,131 @@ describe("G2: every stylesheet colour use is classified", () => {
 		});
 	}
 
-	test("the registered hover fallback is classified against the backdrop union, not skipped", () => {
-		// The real tree uses it, and it passes only because the fallback is the
-		// hover overlay's own layer.
-		const hover = Object.entries(SHEETS).filter(([, text]) =>
-			text.includes("var(--ec-color-hover, rgba(0, 0, 0, 0.04))"),
-		);
-		expect(hover.map(([file]) => file)).toEqual(["language_dropdown.css"]);
+	test("the real hover source and token map select one coherent G2-clean state", () => {
+		const languageCss = SHEETS["language_dropdown.css"] ?? "";
+		const actualLayer = itemHoverLayerFromCss(languageCss, TOKENS_CSS, PAIRS);
+		expect(actualLayer).not.toBeNull();
+		const sourceBackedPairs = languageHoverPairFixture(actualLayer as string);
+		const state = sourceMapHoverState({
+			languageComponent: readText(
+				"src/renderer/components/settings/LanguageDropdown.tsx",
+			),
+			languageCss,
+			sheets: SHEETS,
+			doc: sourceBackedPairs,
+			tokenMap: TOKEN_MAP,
+			tokensCss: TOKENS_CSS,
+		});
+		expect(state).not.toBeNull();
 		expect(g2().problems).toEqual([]);
+	});
+
+	test.each(["legacy", "palette"] as const)(
+		"a coherent %s source and map fixture remains fully classified",
+		(state) => {
+			const fixture = hoverContractFixture(state);
+			expect(fixtureState(fixture)).toBe(state);
+			expect(pairsShapeProblems(fixture.doc)).toEqual([]);
+			expect(fixtureG2Problems(fixture)).toEqual([]);
+		},
+	);
+
+	test("palette fixtures reject retired-token restoration and incoherent states", () => {
+		const palette = hoverContractFixture("palette");
+		expect(fixtureState(palette)).toBe("palette");
+		expect(fixtureG2Problems(palette)).toEqual([]);
+		expect(
+			palette.tokenMap.entries.some(
+				(entry) => entry.name === LEGACY_HOVER_TOKEN,
+			),
+		).toBe(false);
+		expect(
+			[...Object.values(palette.sheets), palette.tokensCss].some((source) =>
+				source.includes(LEGACY_HOVER_TOKEN),
+			),
+		).toBe(false);
+
+		const restoredRetiredReference = {
+			...palette,
+			languageCss: palette.languageCss.replace(
+				SURFACE_HOVER_PAINT,
+				LEGACY_HOVER_PAINT,
+			),
+			sheets: {
+				...palette.sheets,
+				"language_dropdown.css": palette.languageCss.replace(
+					SURFACE_HOVER_PAINT,
+					LEGACY_HOVER_PAINT,
+				),
+			},
+		};
+		expect(fixtureState(restoredRetiredReference)).toBeNull();
+
+		const wrongSelector = {
+			...palette,
+			languageCss: palette.languageCss.replace(
+				".language-dropdown__item:hover,",
+				".language-dropdown__trigger:hover,",
+			),
+		};
+		wrongSelector.sheets["language_dropdown.css"] = wrongSelector.languageCss;
+		expect(fixtureState(wrongSelector)).toBeNull();
+
+		const wrongDisposition = clone(palette);
+		const surface = wrongDisposition.tokenMap.entries.find(
+			(entry) => entry.name === SURFACE_HOVER_TOKEN,
+		);
+		if (surface === undefined)
+			throw new Error("surface-hover map entry is missing");
+		surface.disposition = "retire";
+		expect(fixtureState(wrongDisposition)).toBeNull();
+
+		const missingMapRole = clone(palette);
+		missingMapRole.tokenMap.entries = missingMapRole.tokenMap.entries.filter(
+			(entry) => entry.name !== SURFACE_HOVER_TOKEN,
+		);
+		expect(fixtureState(missingMapRole)).toBeNull();
+
+		const missingRole = {
+			...palette,
+			tokensCss: withoutPaletteHoverTokenDeclarations(palette.tokensCss),
+		};
+		expect(fixtureState(missingRole)).toBeNull();
+
+		const unsupportedValue = {
+			...palette,
+			languageCss: palette.languageCss.replace(
+				SURFACE_HOVER_PAINT,
+				"var(--ec-color-surface-hover-alt)",
+			),
+		};
+		unsupportedValue.sheets["language_dropdown.css"] =
+			unsupportedValue.languageCss;
+		expect(fixtureState(unsupportedValue)).toBeNull();
+
+		const legacyMapOnPaletteSource = {
+			...palette,
+			tokenMap: hoverContractFixture("legacy").tokenMap,
+		};
+		expect(fixtureState(legacyMapOnPaletteSource)).toBeNull();
+	});
+
+	test("an invalid active legacy fallback remains a red G2 control", () => {
+		const fixture = hoverContractFixture("legacy");
+		expect(fixtureState(fixture)).toBe("legacy");
+		expect(fixtureG2Problems(fixture)).toEqual([]);
+		const invalidLanguageCss = fixture.languageCss.replace(
+			LEGACY_HOVER_PAINT,
+			"var(--ec-color-hover, #ffffff)",
+		);
+		const invalidFixture = {
+			...fixture,
+			languageCss: invalidLanguageCss,
+			sheets: { "language_dropdown.css": invalidLanguageCss },
+		};
+		expect(codes(fixtureG2Problems(invalidFixture))).toEqual([
+			"g2-unknown-surface",
+		]);
 	});
 
 	test("route: dropping the fill reason of the border exemption reds the separator", () => {
@@ -1479,16 +1820,25 @@ describe("G2: every stylesheet colour use is classified", () => {
 		]);
 	});
 
-	test("route: dropping the hover token's finding from the map reds exactly that name", () => {
-		const map = clone(TOKEN_MAP);
+	test("route: dropping the active legacy hover finding reds exactly that name", () => {
+		const fixture = hoverContractFixture("legacy");
+		expect(fixtureState(fixture)).toBe("legacy");
+		expect(fixtureG2Problems(fixture)).toEqual([]);
+		const map = clone(fixture.tokenMap);
 		const entry = map.entries.find(
-			(candidate) => candidate.name === "--ec-color-hover",
+			(candidate) => candidate.name === LEGACY_HOVER_TOKEN,
 		);
-		if (entry === undefined) throw new Error("no hover entry");
+		if (entry === undefined) throw new Error("no active legacy hover entry");
+		expect(entry.finding).toBe(LEGACY_HOVER_FINDING);
 		delete entry.finding;
-		const found = g2(SHEETS, PAIRS, map).problems;
+		const found = g2Report(
+			fixture.sheets,
+			fixture.doc,
+			fixture.tokensCss,
+			map,
+		).problems;
 		expect(codes(found)).toEqual(["g2-unclassified-token"]);
-		expect(found[0]?.message).toContain("--ec-color-hover");
+		expect(found[0]?.message).toContain(LEGACY_HOVER_TOKEN);
 	});
 
 	test("route: dropping the selection and the on-track thumb pairs reds both accent backdrops", () => {
