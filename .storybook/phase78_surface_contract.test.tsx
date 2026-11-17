@@ -1,15 +1,29 @@
-import { composeStories, setProjectAnnotations } from "@storybook/react-vite";
+import {
+	composeStories,
+	composeStory,
+	setProjectAnnotations,
+} from "@storybook/react-vite";
 import * as a11yAnnotations from "@storybook/addon-a11y/preview";
 import { afterEach, expect, test } from "vitest";
 import * as fileRowStories from "../src/renderer/components/file-list/FileRow.stories";
 import * as metadataFieldStories from "../src/renderer/components/file-list/MetadataField.stories";
+import * as emptyStateStories from "../src/renderer/components/ui/EmptyState.stories";
 import preview from "./preview";
 import pendingData from "./phase78_surface_pending.json";
 
 setProjectAnnotations([a11yAnnotations, preview]);
 
-const { Cleaned, AlreadyClean, Unchanged } = composeStories(fileRowStories);
+const { Cleaned, AlreadyClean, Unchanged, HugeSize, HugeTagCounts } =
+	composeStories(fileRowStories);
 const { Removed, Preserved } = composeStories(metadataFieldStories);
+const LocalizedUnchanged = composeStory(
+	{ ...fileRowStories.Unchanged, play: async () => {} },
+	fileRowStories.default,
+);
+const LocalizedEmptyState = composeStory(
+	{ ...emptyStateStories.CopyModeOn, play: async () => {} },
+	emptyStateStories.default,
+);
 
 type Theme = "light" | "dark";
 type RenderableStory = {
@@ -24,6 +38,7 @@ type Observation = {
 	story: string;
 	selector: string;
 	theme: Theme;
+	locale?: string;
 	actual: string;
 	expected: string;
 };
@@ -33,14 +48,55 @@ const pending = pendingData.pending as PendingObservation[];
 const mounted: HTMLElement[] = [];
 const STATUS_SELECTOR =
 	".file-table__after-done > .status-icon > .status-icon__check";
+const LOCALE_SCENES = [
+	{ locale: "de", dir: "ltr" },
+	{ locale: "hu", dir: "ltr" },
+	{ locale: "ar", dir: "rtl" },
+] as const;
+const OVERFLOW_EXPECTED = "scrollWidth <= clientWidth";
 
 afterEach(() => {
 	for (const host of mounted.splice(0)) host.remove();
 });
 
+test("pending exceptions are exact story and selector observations", () => {
+	expect(pendingData.schemaVersion).toBe(1);
+	for (const row of pending) {
+		expect(Object.keys(row).sort()).toEqual(
+			row.locale === undefined
+				? ["actual", "case", "expected", "reason", "selector", "story", "theme"]
+				: [
+						"actual",
+						"case",
+						"expected",
+						"locale",
+						"reason",
+						"selector",
+						"story",
+						"theme",
+					],
+		);
+		for (const value of [
+			row.case,
+			row.story,
+			row.selector,
+			row.actual,
+			row.expected,
+			row.reason,
+		]) {
+			expect(value).not.toContain("*");
+			expect(value.trim()).not.toBe("");
+		}
+		expect(["light", "dark"]).toContain(row.theme);
+		if (row.case !== "outcome-color")
+			expect(["de", "hu", "ar"]).toContain(row.locale);
+	}
+});
+
 async function renderStory(
 	story: RenderableStory,
 	theme: Theme,
+	locale = "en",
 ): Promise<HTMLElement> {
 	const host = document.createElement("div");
 	host.style.position = "relative";
@@ -49,7 +105,7 @@ async function renderStory(
 	mounted.push(host);
 	await story.run({
 		canvasElement: host,
-		globals: { ...story.globals, theme, locale: "en" },
+		globals: { ...story.globals, theme, locale },
 	});
 	return host;
 }
@@ -75,6 +131,7 @@ function exactPendingMatch(
 			row.story === observation.story &&
 			row.selector === observation.selector &&
 			row.theme === observation.theme &&
+			row.locale === observation.locale &&
 			row.actual === observation.actual &&
 			row.expected === observation.expected,
 	);
@@ -83,6 +140,65 @@ function exactPendingMatch(
 function outcome(observation: Observation): "pass" | "pending" | "fail" {
 	if (observation.actual === observation.expected) return "pass";
 	return exactPendingMatch(observation) === undefined ? "fail" : "pending";
+}
+
+function clipOutcome(observation: Observation): "pass" | "pending" | "fail" {
+	if (observation.actual === observation.expected) return "pass";
+	return exactPendingMatch(observation) === undefined ? "fail" : "pending";
+}
+
+function requiredTarget(host: HTMLElement, selector: string): HTMLElement {
+	const element = host.querySelector<HTMLElement>(selector);
+	if (element === null) throw new Error(`missing clipping target: ${selector}`);
+	return element;
+}
+
+function clippingMeasurement(element: HTMLElement): {
+	scrollWidth: number;
+	clientWidth: number;
+} {
+	return {
+		scrollWidth: element.scrollWidth,
+		clientWidth: element.clientWidth,
+	};
+}
+
+function clippingInput(measurement: {
+	scrollWidth: number;
+	clientWidth: number;
+}): string {
+	return `scrollWidth=${measurement.scrollWidth};clientWidth=${measurement.clientWidth}`;
+}
+
+function fits(element: HTMLElement): boolean {
+	return element.scrollWidth <= element.clientWidth;
+}
+
+function plantOverflow(
+	host: HTMLElement,
+	target: HTMLElement,
+	caseName: string,
+): HTMLElement {
+	const planted = target.cloneNode(false) as HTMLElement;
+	planted.dataset.phase78Negative = caseName;
+	planted.setAttribute("aria-hidden", "true");
+	planted.textContent = "Phase78OverflowControl".repeat(32);
+	Object.assign(planted.style, {
+		position: "absolute",
+		insetInlineStart: "-10000px",
+		display: "block",
+		boxSizing: "content-box",
+		width: "1px",
+		minWidth: "0",
+		maxWidth: "1px",
+		padding: "0",
+		border: "0",
+		overflow: "visible",
+		whiteSpace: "nowrap",
+		textOverflow: "clip",
+	});
+	host.append(planted);
+	return planted;
 }
 
 function requireStatusCheck(host: HTMLElement): SVGElement {
@@ -162,7 +278,9 @@ test("rendered checks use teal only for cleaned outcomes; planted teal stays red
 		expect(outcome(plantedObservation)).toBe("fail");
 	}
 
-	expect([...consumedPending]).toHaveLength(pending.length);
+	expect([...consumedPending]).toHaveLength(
+		pending.filter((row) => row.case === "outcome-color").length,
+	);
 });
 
 test("removed and preserved metadata retain signs and labels over neutral colors", async () => {
@@ -204,4 +322,100 @@ test("removed and preserved metadata retain signs and labels over neutral colors
 			);
 		}
 	}
+});
+
+test("the four named clipping contracts hold across locales and themes", async () => {
+	const cases = [
+		{
+			name: "size-cell",
+			story: "file-list-filerow--huge-size",
+			component: HugeSize,
+			selector: ".file-table__cell--size",
+		},
+		{
+			name: "secondary-summary",
+			story: "file-list-filerow--unchanged",
+			component: LocalizedUnchanged,
+			selector: ".file-table__error-summary",
+		},
+		{
+			name: "after-count",
+			story: "file-list-filerow--huge-tag-counts",
+			component: HugeTagCounts,
+			selector: ".file-table__row > .file-table__cell:nth-of-type(6)",
+		},
+		{
+			name: "empty-state-min-height",
+			story: "ui-emptystate--copy-mode-on",
+			component: LocalizedEmptyState,
+			selector: ".empty-state",
+		},
+	] as const;
+	const clipPending = pending.filter((row) => row.case !== "outcome-color");
+	const consumedPending = new Set<PendingObservation>();
+	const unpended: Observation[] = [];
+
+	for (const theme of ["light", "dark"] as const) {
+		for (const scene of LOCALE_SCENES) {
+			for (const current of cases) {
+				const host = await renderStory(current.component, theme, scene.locale);
+				expect(document.documentElement.lang).toBe(scene.locale);
+				expect(document.documentElement.dir).toBe(scene.dir);
+				const target = requiredTarget(host, current.selector);
+				const measured = clippingMeasurement(target);
+				const observation: Observation = {
+					case: current.name,
+					story: current.story,
+					selector: current.selector,
+					theme,
+					locale: scene.locale,
+					actual: fits(target) ? OVERFLOW_EXPECTED : clippingInput(measured),
+					expected: OVERFLOW_EXPECTED,
+				};
+				const result = clipOutcome(observation);
+				if (result === "fail") unpended.push(observation);
+				const matched = exactPendingMatch(observation);
+				if (matched !== undefined) consumedPending.add(matched);
+
+				const planted = plantOverflow(host, target, current.name);
+				const plantedMeasurement = clippingMeasurement(planted);
+				const plantedObservation: Observation = {
+					case: `planted-${current.name}`,
+					story: current.story,
+					selector: `[data-phase78-negative="${current.name}"]`,
+					theme,
+					locale: scene.locale,
+					actual: clippingInput(plantedMeasurement),
+					expected: OVERFLOW_EXPECTED,
+				};
+				expect(plantedMeasurement.scrollWidth).toBeGreaterThan(
+					plantedMeasurement.clientWidth,
+				);
+				expect(plantedMeasurement.scrollWidth).toBeGreaterThan(
+					measured.scrollWidth,
+				);
+				expect(fits(planted)).toBe(false);
+				expect(exactPendingMatch(plantedObservation)).toBeUndefined();
+				expect(clipOutcome(plantedObservation)).toBe("fail");
+
+				if (current.name === "empty-state-min-height") {
+					const frame = host.firstElementChild;
+					if (!(frame instanceof HTMLElement))
+						throw new Error("empty-state story frame missing");
+					expect(getComputedStyle(target).minBlockSize).toBe("min-content");
+					expect(frame.getBoundingClientRect().height).toBeGreaterThanOrEqual(
+						312,
+					);
+				}
+			}
+		}
+	}
+
+	if (unpended.length > 0) {
+		console.info(
+			`Phase 78 measured clipping exceptions: ${JSON.stringify(unpended)}`,
+		);
+	}
+	expect(unpended).toEqual([]);
+	expect(consumedPending.size).toBe(clipPending.length);
 });

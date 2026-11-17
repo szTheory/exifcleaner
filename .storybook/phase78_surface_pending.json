@@ -36,6 +36,66 @@
 			"actual": "rgb(94, 234, 212)",
 			"expected": "rgb(169, 201, 196)",
 			"reason": "The existing shared completion rule colors unchanged checks with the cleaned role."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "light",
+			"locale": "de",
+			"actual": "scrollWidth=120;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "The existing 88px after-count track clips the 123456 count and check glyph together."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "light",
+			"locale": "hu",
+			"actual": "scrollWidth=120;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "The existing 88px after-count track clips the 123456 count and check glyph together."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "light",
+			"locale": "ar",
+			"actual": "scrollWidth=120;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "The existing 88px after-count track clips the 123456 count and check glyph together."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "dark",
+			"locale": "de",
+			"actual": "scrollWidth=120;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "The existing 88px after-count track clips the 123456 count and check glyph together."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "dark",
+			"locale": "hu",
+			"actual": "scrollWidth=120;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "The existing 88px after-count track clips the 123456 count and check glyph together."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "dark",
+			"locale": "ar",
+			"actual": "scrollWidth=120;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "The existing 88px after-count track clips the 123456 count and check glyph together."
 		}
 	]
 }
