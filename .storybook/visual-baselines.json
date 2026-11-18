@@ -202,5 +202,107 @@
 			"height": 800,
 			"file": "screens-app--empty.light.de.580.png"
 		}
-	]
+	],
+	"baselines": {
+		"screens-app--empty.light.en.580.png": {
+			"path": "visual-baselines/screens-app--empty.light.en.580.png",
+			"sha256": "79f16c49575cc3030e07d4fa0a88a7c2bfeeaa3d990d3a2cd36648858ccadef6"
+		},
+		"screens-app--empty.dark.en.580.png": {
+			"path": "visual-baselines/screens-app--empty.dark.en.580.png",
+			"sha256": "bac349803342b6d3ab726f4cf93d1576db43052a907985088489a3fb1f7ce505"
+		},
+		"screens-app--mid-batch.light.en.580.png": {
+			"path": "visual-baselines/screens-app--mid-batch.light.en.580.png",
+			"sha256": "996652cee60a5469814103b4b9d46403a4cfe3717dca777e350e85951e753962"
+		},
+		"screens-app--mid-batch.dark.en.580.png": {
+			"path": "visual-baselines/screens-app--mid-batch.dark.en.580.png",
+			"sha256": "17fca7df297ef5d929071cbfb8fa9f03d0fdfa4f53c1d5d2a50da6ab43a2c47c"
+		},
+		"screens-app--all-done.light.en.580.png": {
+			"path": "visual-baselines/screens-app--all-done.light.en.580.png",
+			"sha256": "0dce564a53bfbd976c6b54ea3b414644f58895581d538f18cfeb8a6b92572be2"
+		},
+		"screens-app--all-done.dark.en.580.png": {
+			"path": "visual-baselines/screens-app--all-done.dark.en.580.png",
+			"sha256": "2a4b0c4494e9c097fb34ac0c12d74cdfeae5914ca28b47581cf7f6bb605c95ca"
+		},
+		"screens-app--large-batch.light.en.580.png": {
+			"path": "visual-baselines/screens-app--large-batch.light.en.580.png",
+			"sha256": "81ada880f719e43ec60445e3d7de4b92777756d1b298b5479258e815f2518718"
+		},
+		"screens-app--large-batch.dark.en.580.png": {
+			"path": "visual-baselines/screens-app--large-batch.dark.en.580.png",
+			"sha256": "28e4f576ab48e737d253e8ee1cc91b38c739debb5c1161aa65e861fc270691c6"
+		},
+		"screens-app--all-error.light.en.580.png": {
+			"path": "visual-baselines/screens-app--all-error.light.en.580.png",
+			"sha256": "c605eb447c087a35249d864fece6eeb46eaab8b2cf92448fcffbf9e39975a765"
+		},
+		"screens-app--all-error.dark.en.580.png": {
+			"path": "visual-baselines/screens-app--all-error.dark.en.580.png",
+			"sha256": "1836be792dfa2425525ed772aaf2b9222206d0cb9e9626aec85fbb3d4f219f2f"
+		},
+		"screens-app--empty-copy-mode.light.en.580.png": {
+			"path": "visual-baselines/screens-app--empty-copy-mode.light.en.580.png",
+			"sha256": "9bd8643312f6635bb0ddfa5825cb5708ee00789013f2ead0fb4780a9332e09d0"
+		},
+		"screens-app--empty-copy-mode.dark.en.580.png": {
+			"path": "visual-baselines/screens-app--empty-copy-mode.dark.en.580.png",
+			"sha256": "4fd2f2f90e5079a580db9b2113818da9528e6b57b88e4cfda9a14635f801346a"
+		},
+		"screens-app--drawer-open.light.en.580.png": {
+			"path": "visual-baselines/screens-app--drawer-open.light.en.580.png",
+			"sha256": "43417e3390491ac318563ea482cb88ad50d91907804b0c13296902fdbd8e9b86"
+		},
+		"screens-app--drawer-open.dark.en.580.png": {
+			"path": "visual-baselines/screens-app--drawer-open.dark.en.580.png",
+			"sha256": "2858ae2c818d4ab397aaeea00e0cbcde9f866b781ad07cfa27d486a660aa85d0"
+		},
+		"screens-app--error-boundary-failure.light.en.580.png": {
+			"path": "visual-baselines/screens-app--error-boundary-failure.light.en.580.png",
+			"sha256": "43483f3336cbe041a74fd316ffa035e293c723e40000727cffc4d40264b941e6"
+		},
+		"screens-app--error-boundary-failure.dark.en.580.png": {
+			"path": "visual-baselines/screens-app--error-boundary-failure.dark.en.580.png",
+			"sha256": "93fc01d4569cc51fa83884b76baa3c3072a41474afec3f7dcf5f300e00b00bc9"
+		},
+		"screens-app--empty.light.en.960.png": {
+			"path": "visual-baselines/screens-app--empty.light.en.960.png",
+			"sha256": "dd72deb0677a4cb888639d215234e239716198f41c4a1e2cba40ed322d8e5e2c"
+		},
+		"screens-app--empty.dark.en.960.png": {
+			"path": "visual-baselines/screens-app--empty.dark.en.960.png",
+			"sha256": "3febb88826831ea5262f373a747a3ac46c4503da3a6382291d88e10101f95910"
+		},
+		"screens-app--mid-batch.light.en.960.png": {
+			"path": "visual-baselines/screens-app--mid-batch.light.en.960.png",
+			"sha256": "16a45ce8801f192910cd2d3ca8861979cd229dd02236b313be68d966281796f8"
+		},
+		"screens-app--mid-batch.dark.en.960.png": {
+			"path": "visual-baselines/screens-app--mid-batch.dark.en.960.png",
+			"sha256": "cff6c7303b23757304dbc02c4073a9c5da9f6e36da19ca670d69ec2d775431cc"
+		},
+		"screens-app--all-done.light.en.960.png": {
+			"path": "visual-baselines/screens-app--all-done.light.en.960.png",
+			"sha256": "db1e1b355a2f57df4b5d28dc04cc616a16b37c22f6d525c146b7563e71abc6e0"
+		},
+		"screens-app--all-done.dark.en.960.png": {
+			"path": "visual-baselines/screens-app--all-done.dark.en.960.png",
+			"sha256": "979abc023549ee158257de578afad93613702162cb1d08f3cf64389efa9292e7"
+		},
+		"screens-app--large-batch.light.en.960.png": {
+			"path": "visual-baselines/screens-app--large-batch.light.en.960.png",
+			"sha256": "01780a324f0fa7067913e48ea31bf0c8f1413296dd1f0a7e596ca19137d5d112"
+		},
+		"screens-app--large-batch.dark.en.960.png": {
+			"path": "visual-baselines/screens-app--large-batch.dark.en.960.png",
+			"sha256": "40027bac396b88ed793b3e54b0eef9842f2fc6ee1ca81231e2091fb7b9e246ee"
+		},
+		"screens-app--empty.light.de.580.png": {
+			"path": "visual-baselines/screens-app--empty.light.de.580.png",
+			"sha256": "6bdf53b0e377a3bfcb4ca4c2e13b2dc7b97650d9bbf018cdb29423811e8edf9b"
+		}
+	}
 }

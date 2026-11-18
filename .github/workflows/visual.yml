@@ -1,22 +1,36 @@
-name: Visual capture
+name: Visual comparison
 
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/visual.yml"
+      - ".storybook/visual-baselines.json"
+      - ".storybook/visual-baselines/**"
+      - "src/renderer/**"
+      - "tests/visual/**"
+      - "tests/scripts/visual_workflow_policy.test.ts"
+      - "vitest.visual.config.ts"
+      - "scripts/validate_visual_artifact.mjs"
+      - "scripts/contact_sheet.mjs"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: visual-capture-${{ github.ref }}
+  group: visual-capture
   cancel-in-progress: false
 
 env:
   STORYBOOK_DISABLE_TELEMETRY: "true"
   EXIFCLEANER_VISUAL_IMAGE: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+  EXIFCLEANER_VISUAL_OUTPUT_DIR: /tmp/exifcleaner-visual
 
 jobs:
-  capture:
-    name: Capture visual evidence
+  compare:
+    name: Advisory visual comparison
+    if: github.event_name == 'pull_request'
+    continue-on-error: true
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     container:
@@ -34,37 +48,94 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --ignore-scripts
 
-      - name: Record capture environment
+      - name: Prepare external capture output
         shell: bash
-        env:
-          EXIFCLEANER_VISUAL_RUNNER: ${{ runner.name }} / ${{ runner.os }} ${{ runner.arch }} ${{ runner.environment }}
         run: |
           set -euo pipefail
-          directory="$(mktemp -d "$RUNNER_TEMP/exifcleaner-visual.XXXXXXXX")"
-          echo "EXIFCLEANER_VISUAL_OUTPUT_DIR=$directory" >> "$GITHUB_ENV"
-          echo "EXIFCLEANER_VISUAL_RUNNER=$EXIFCLEANER_VISUAL_RUNNER" >> "$GITHUB_ENV"
+          rm -rf "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
+          mkdir -p "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
+          echo "EXIFCLEANER_VISUAL_RUNNER=$RUNNER_NAME / $RUNNER_OS $RUNNER_ARCH" >> "$GITHUB_ENV"
 
-      - name: Capture exact Storybook cases
+      - name: Capture and compare committed baselines
         run: yarn visual:capture
 
-      - name: Validate the capture artifact
+      - name: Validate capture artifact
+        if: always()
         run: >-
           node scripts/validate_visual_artifact.mjs
           --manifest "$EXIFCLEANER_VISUAL_OUTPUT_DIR/manifest.json"
           --cases .storybook/visual-baselines.json
           --root "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
+          --expected-ref "$GITHUB_REF"
 
       - name: Build artifact-only contact sheet
+        if: always()
         run: node scripts/contact_sheet.mjs "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
 
-      - name: Upload capture artifact
+      - name: Upload comparison artifact
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: visual-comparison
+          path: /tmp/exifcleaner-visual/*
+          if-no-files-found: warn
+          retention-days: 90
+
+  refresh:
+    name: Artifact-only baseline proposal
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
+
+      - name: Require the default branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/master"
+
+      - name: Prepare external capture output
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
+          mkdir -p "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
+          echo "EXIFCLEANER_VISUAL_RUNNER=$RUNNER_NAME / $RUNNER_OS $RUNNER_ARCH" >> "$GITHUB_ENV"
+
+      - name: Capture and compare committed baselines
+        run: yarn visual:capture
+
+      - name: Validate capture artifact
+        if: always()
+        run: >-
+          node scripts/validate_visual_artifact.mjs
+          --manifest "$EXIFCLEANER_VISUAL_OUTPUT_DIR/manifest.json"
+          --cases .storybook/visual-baselines.json
+          --root "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
+          --expected-ref refs/heads/master
+
+      - name: Build artifact-only contact sheet
+        if: always()
+        run: node scripts/contact_sheet.mjs "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
+
+      - name: Upload baseline proposal artifact
+        if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: visual-capture
-          path: |
-            ${{ env.EXIFCLEANER_VISUAL_OUTPUT_DIR }}/*.png
-            ${{ env.EXIFCLEANER_VISUAL_OUTPUT_DIR }}/contact-sheet.png
-            ${{ env.EXIFCLEANER_VISUAL_OUTPUT_DIR }}/manifest.json
-            ${{ env.EXIFCLEANER_VISUAL_OUTPUT_DIR }}/contact-sheet.html
+          path: /tmp/exifcleaner-visual/*
           if-no-files-found: error
           retention-days: 90

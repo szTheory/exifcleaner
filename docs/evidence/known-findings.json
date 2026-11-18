@@ -1155,7 +1155,7 @@
 			"story": "ui-statusbar--single-file",
 			"rule": "tags-count-no-singular",
 			"reason": "StatusBar.tsx:57-61 fills the statusBar.tagsRemoved template ('{count} tags removed') with the count, so one tag reads '1 tags removed'; copy-findings already records statusBar.tagsRemoved as fix-v5.1, so the disposition matches it.",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"severity": "minor"
 		},
 		{
@@ -1173,7 +1173,7 @@
 			"story": "file-list-filerow--cleaned",
 			"rule": "size-cell-clips-size-change",
 			"reason": "The size cell for a cleaned row reads '1.0 KB to 512 B' at scrollWidth 124 in an 80 px cell (clientWidth 80), so ordinary data clips under overflow hidden at the default 580 px window and the after size is cut off.",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"severity": "minor"
 		},
 		{
@@ -1182,7 +1182,7 @@
 			"story": "file-list-filerow--commit",
 			"rule": "secondary-summary-clips-in-name-column",
 			"reason": "The secondary summary clips in the 196 px name column (unchanged scrollWidth 278, already clean 414, write failed 454, commit failed 1076), so the sentence that says the original is unchanged is cut off exactly where a person looks for it; the row also grows to 53 px for a summary and 60 px with the copy disclosure against 44 px otherwise.",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"severity": "major"
 		},
 		{
@@ -1191,7 +1191,7 @@
 			"story": "file-list-filerow--huge-tag-counts",
 			"rule": "after-count-clips-six-digits",
 			"reason": "A six-digit AFTER tag count '123456' measures scrollWidth 120 in an 88 px cell, so it clips (73-02 measurement on the huge-tag-counts story).",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"severity": "minor"
 		},
 		{
@@ -1209,7 +1209,7 @@
 			"story": "settings-settingsdrawer--german-drawer",
 			"rule": "drawer-content-grows-past-window",
 			"reason": "The drawer content height is 983 px in de (scrollHeight 983, clientHeight 312 in the story frame; 854 px in en), so the drawer scrolls and the last switches sit below the fold; they stay reachable by scrolling, so the harm is latent.",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"severity": "minor"
 		},
 		{
@@ -1218,7 +1218,7 @@
 			"story": "settings-settingsdrawer--hungarian-drawer",
 			"rule": "drawer-content-grows-past-window",
 			"reason": "The drawer content height is 965 px in hu (scrollHeight 965, clientHeight 312 in the story frame; 854 px in en), so the drawer scrolls like the German one and the last switches sit below the fold, reachable by scrolling.",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"severity": "minor"
 		},
 		{
@@ -1227,7 +1227,7 @@
 			"story": "ui-emptystate--malayalam-empty",
 			"rule": "empty-state-overflows-minimum-height",
 			"reason": "The ml EmptyState frame measures 327 px against its 312 px minimum, 15 px over (section 327 px, inner 263 px), while de measures 312 (section 298 px) and fa 312 (section 278 px).",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"severity": "minor"
 		},
 		{
@@ -1299,7 +1299,7 @@
 			"story": "settings-languagedropdown--item-hover",
 			"rule": "hover-token-undefined",
 			"reason": "language_dropdown.css:82 reads var(--ec-color-hover, rgba(0, 0, 0, 0.04)) and --ec-color-hover is defined in no stylesheet, so the hover and focused item fall back to the literal rgba in both themes (measured #dfe3e6 over the light surface and #1b1b1e over the dark one).",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"severity": "minor"
 		},
 		{
@@ -1308,7 +1308,7 @@
 			"story": "ui-errorboundary--fallback",
 			"rule": "spacing-tokens-undefined",
 			"reason": "error_boundary.css:7-28 and file_list.css:2-14 use var(--spacing-xs) to var(--spacing-xl) (7 uses) and no stylesheet or token file under src defines any --spacing-* property, so those paddings, margins and gaps resolve to nothing and the crash screen and the file list lose their spacing.",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"severity": "major"
 		},
 		{
@@ -1317,7 +1317,7 @@
 			"story": "file-list-filerow--copy-mode-disclosure",
 			"rule": "line-height-token-undefined",
 			"reason": "file_table.css:139 sets line-height: var(--ec-line-height-normal) on .file-table__copy-disclosure, and --ec-line-height-normal is declared in no stylesheet (tokens.css holds no --ec-line-height-* token), so the declaration is invalid at computed-value time; v5.1 declares the unitless --ec-line-height-* tokens of the UI-SPEC scale (D-09) and points the rule at one of them.",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"severity": "minor"
 		},
 		{

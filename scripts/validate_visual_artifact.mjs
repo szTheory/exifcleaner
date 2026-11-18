@@ -178,7 +178,12 @@ function pngDimensions(bytes, file, expected) {
 	return { width, height };
 }
 
-function validate({ manifest, contract, root }) {
+function validate({
+	manifest,
+	contract,
+	root,
+	expectedRef = "refs/heads/master",
+}) {
 	if (!isRecord(contract) || contract.schemaVersion !== 1) {
 		fail("case contract schemaVersion must be 1");
 	}
@@ -197,8 +202,10 @@ function validate({ manifest, contract, root }) {
 	}
 	if (manifest.image !== EXPECTED_IMAGE)
 		fail("manifest uses the wrong capture image");
-	if (manifest.ref !== "refs/heads/master") {
-		fail(`manifest ref must be refs/heads/master, got ${String(manifest.ref)}`);
+	if (manifest.ref !== expectedRef) {
+		fail(
+			"manifest ref must be " + expectedRef + ", got " + String(manifest.ref),
+		);
 	}
 	if (
 		typeof manifest.commit !== "string" ||
@@ -335,6 +342,7 @@ try {
 		manifest: readJson(manifestPath),
 		contract: readJson(casesPath),
 		root,
+		expectedRef: options.get("--expected-ref") ?? "refs/heads/master",
 	});
 	console.log(JSON.stringify(result, null, "\t"));
 } catch (error) {

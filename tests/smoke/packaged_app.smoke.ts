@@ -13,6 +13,7 @@ import {
 	closePackagedApp,
 	type PackagedLaunchContext,
 } from "./helpers/packaged_launcher";
+import { windowBackgroundColor } from "../../src/main/window/window_background";
 import { createFixtureDir } from "../helpers/fixture_copier";
 import { assertMetadataStripped } from "../e2e/helpers/metadata_assertions";
 import { waitForProcessing } from "../e2e/helpers/wait_for_processing";
@@ -55,9 +56,12 @@ test.describe("Packaged artifact", () => {
 	let context: PackagedLaunchContext | undefined;
 	let consoleErrors: string[];
 
-	test.beforeEach(async () => {
+	test.beforeEach(async ({}, testInfo) => {
 		consoleErrors = [];
-		const launched = await launchPackagedApp();
+		const startupArgs = testInfo.tags.includes("@forced-dark")
+			? ["--force-dark-mode"]
+			: [];
+		const launched = await launchPackagedApp({ startupArgs });
 		context = launched;
 		app = launched.app;
 		window = launched.window;
@@ -82,6 +86,84 @@ test.describe("Packaged artifact", () => {
 	test("launches and mounts the UI", async () => {
 		await expect(window.locator("[role='main']")).toBeVisible();
 		expect(await window.title()).toBe("ExifCleaner");
+	});
+
+	test("starts with matching system theme and native and renderer backgrounds", async () => {
+		const appearance = await app.evaluate(({ BrowserWindow, nativeTheme }) => ({
+			isDark: nativeTheme.shouldUseDarkColors,
+			windowBackground:
+				BrowserWindow.getAllWindows()[0]?.getBackgroundColor() ?? null,
+		}));
+
+		if (process.env["CI"] === "true") expect(appearance.isDark).toBe(false);
+		const expectedTheme = appearance.isDark ? "dark" : "light";
+		await expect(window.locator("html")).toHaveAttribute(
+			"data-theme",
+			expectedTheme,
+		);
+		const rendererBackground = await window
+			.locator(".app")
+			.evaluate((element) => getComputedStyle(element).backgroundColor);
+		expect(appearance.windowBackground?.toLowerCase()).toBe(
+			windowBackgroundColor(appearance.isDark).toLowerCase(),
+		);
+		expect(rendererBackground).toBe(
+			appearance.isDark ? "rgb(10, 46, 43)" : "rgb(255, 255, 255)",
+		);
+	});
+
+	test(
+		"starts in forced dark mode with matching native and renderer backgrounds",
+		{ tag: "@forced-dark" },
+		async () => {
+			await expect(window.locator("html")).toHaveAttribute(
+				"data-theme",
+				"dark",
+			);
+			const appearance = await app.evaluate(
+				({ BrowserWindow, nativeTheme }) => ({
+					isDark: nativeTheme.shouldUseDarkColors,
+					windowBackground:
+						BrowserWindow.getAllWindows()[0]?.getBackgroundColor() ?? null,
+				}),
+			);
+			const rendererBackground = await window
+				.locator(".app")
+				.evaluate((element) => getComputedStyle(element).backgroundColor);
+
+			expect(appearance.isDark).toBe(true);
+			expect(appearance.windowBackground?.toLowerCase()).toBe(
+				windowBackgroundColor(true).toLowerCase(),
+			);
+			expect(rendererBackground).toBe("rgb(10, 46, 43)");
+		},
+	);
+
+	test("keeps first-run content usable at 200% zoom in a compact window", async () => {
+		await app.evaluate(({ BrowserWindow }) => {
+			const win = BrowserWindow.getAllWindows()[0];
+			win?.setSize(580, 337);
+			win?.webContents.setZoomFactor(2);
+		});
+
+		await expect(window.locator(".empty-state__button--primary")).toBeVisible();
+		const layout = await window.evaluate(() => {
+			const dropZone = document.querySelector(".drop-zone");
+			const content = document.querySelector(".app__content");
+			const status = document.querySelector(".status-bar");
+			if (!dropZone || !content || !status) return null;
+			return {
+				canScroll: dropZone.scrollHeight > dropZone.clientHeight,
+				contentBottom: content.getBoundingClientRect().bottom,
+				statusTop: status.getBoundingClientRect().top,
+			};
+		});
+
+		expect(layout).not.toBeNull();
+		expect(layout?.canScroll).toBe(true);
+		expect(layout?.statusTop).toBeGreaterThanOrEqual(
+			layout?.contentBottom ?? 0,
+		);
 	});
 
 	test("reports itself as packaged and resolves resources inside the bundle", async () => {
