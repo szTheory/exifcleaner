@@ -512,13 +512,6 @@
 			"reason": "Component-scoped alias used by the existing EmptyState primary action: it selects --ec-color-action-pressed for the primary variant and --ec-color-surface-pressed for the secondary variant; both values remain mapped semantic roles."
 		},
 		{
-			"name": "--spacing-lg",
-			"disposition": "retire",
-			"reason": "Declared nowhere: error_boundary.css and file_list.css read var(--spacing-lg) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11).",
-			"spec": "spacing.legacy-names",
-			"finding": "token-gap|ui-errorboundary--fallback|spacing-tokens-undefined"
-		},
-		{
 			"name": "--spacing-md",
 			"disposition": "retire",
 			"reason": "Declared nowhere: error_boundary.css and file_list.css read var(--spacing-md) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11).",
@@ -529,13 +522,6 @@
 			"name": "--spacing-sm",
 			"disposition": "retire",
 			"reason": "Declared nowhere: error_boundary.css and file_list.css read var(--spacing-sm) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11).",
-			"spec": "spacing.legacy-names",
-			"finding": "token-gap|ui-errorboundary--fallback|spacing-tokens-undefined"
-		},
-		{
-			"name": "--spacing-xl",
-			"disposition": "retire",
-			"reason": "Declared nowhere: error_boundary.css and file_list.css read var(--spacing-xl) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11).",
 			"spec": "spacing.legacy-names",
 			"finding": "token-gap|ui-errorboundary--fallback|spacing-tokens-undefined"
 		},

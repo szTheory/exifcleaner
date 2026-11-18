@@ -314,7 +314,7 @@ const MUTANTS: Mutant[] = [
 		code: "unknown-finding",
 		doc: () => {
 			const doc = clone();
-			entryNamed(doc, "--spacing-lg")["finding"] = "token-gap|x|y";
+			entryNamed(doc, "--spacing-md")["finding"] = "token-gap|x|y";
 			return doc;
 		},
 	},
@@ -323,7 +323,7 @@ const MUTANTS: Mutant[] = [
 		code: "bad-type",
 		doc: () => {
 			const doc = clone();
-			entryNamed(doc, "--spacing-lg")["finding"] = "";
+			entryNamed(doc, "--spacing-md")["finding"] = "";
 			return doc;
 		},
 	},
@@ -452,7 +452,7 @@ const MUTANTS: Mutant[] = [
 		code: "unreferenced-finding",
 		doc: () => {
 			const doc = clone();
-			entryNamed(doc, "--spacing-lg")["finding"] = entryNamed(
+			entryNamed(doc, "--spacing-md")["finding"] = entryNamed(
 				doc,
 				"--ec-line-height-normal",
 			)["finding"];
@@ -473,8 +473,8 @@ describe("the real token map", () => {
 		expect(declared.other).toEqual([]);
 		expect(
 			usedTokens({ ...ctx.sources, [TOKENS_CSS_PATH]: ctx.tokensCss }),
-		).toHaveLength(57);
-		expect(real.entries).toHaveLength(61);
+		).toHaveLength(55);
+		expect(real.entries).toHaveLength(59);
 		expect(Object.keys(real)).toEqual(["schemaVersion", "brandPin", "entries"]);
 	});
 

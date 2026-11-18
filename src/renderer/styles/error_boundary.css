@@ -4,33 +4,33 @@
 	align-items: center;
 	justify-content: center;
 	min-height: 100vh;
-	padding: var(--spacing-xl);
+	padding: var(--ec-space-8);
 	background-color: var(--ec-color-error-bg);
 	text-align: center;
 }
 
 .error-boundary__message {
-	font-size: 1.25rem;
+	font-size: var(--ec-font-size-label);
 	font-weight: 600;
 	color: var(--ec-color-text);
-	margin-bottom: var(--spacing-sm);
+	margin-bottom: var(--ec-space-2);
 }
 
 .error-boundary__detail {
-	font-size: 0.875rem;
+	font-size: var(--ec-font-size-small);
 	color: var(--ec-color-text-secondary);
-	margin-bottom: var(--spacing-lg);
+	margin-bottom: var(--ec-space-6);
 	max-width: 480px;
 	word-break: break-word;
 }
 
 .error-boundary__button {
-	padding: var(--spacing-sm) var(--spacing-lg);
+	padding: var(--ec-space-2) var(--ec-space-6);
 	border: 1px solid var(--ec-color-action);
 	border-radius: 4px;
 	background: transparent;
 	color: var(--ec-color-action);
-	font-size: 0.875rem;
+	font-size: var(--ec-font-size-small);
 	cursor: default;
 	transition: background-color 0.15s ease;
 }

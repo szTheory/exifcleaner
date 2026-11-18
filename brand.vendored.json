@@ -1,4 +1,15 @@
 {
 	"brandPin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
-	"files": []
+	"files": [
+		{
+			"source": "assets/logo/exifcleaner-symbol-light.svg",
+			"target": "src/renderer/assets/brand/exifcleaner-symbol-light.svg",
+			"sha256": "1f9f1b9a0ebca99fa5841f8782a409f1131546d49cffa4932a5eeabc9c425def"
+		},
+		{
+			"source": "assets/logo/exifcleaner-symbol-dark.svg",
+			"target": "src/renderer/assets/brand/exifcleaner-symbol-dark.svg",
+			"sha256": "84e7e40ddb52e3c1047a2dbf3bcc777349ed3f6a403b42c4cabe96f0883f918b"
+		}
+	]
 }

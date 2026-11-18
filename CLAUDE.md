@@ -195,6 +195,8 @@ Brand files are never committed here. `brand.pin.json` pins one commit of `szThe
 
 `BRAND_FETCH=offline` never touches the network (cache must verify); `BRAND_FETCH=skip` does nothing (the packaged app then has no `brand/` resources; electron-builder only warns "file source doesn't exist"). `yarn brand:update` rewrites `brand.pin.json` so each brand change is one reviewable diff. The allowlist is intentionally licence-only until the UI adopts brand assets.
 
+Only the two files listed in `brand.vendored.json` may be committed under `src/renderer/assets/brand/`; the fetched cache and brand book remain uncommitted.
+
 ### Postinstall
 
 `electron-builder install-app-deps` runs after `yarn install` — rebuilds native modules for Electron's Node version.
