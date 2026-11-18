@@ -1348,7 +1348,7 @@ function main() {
 			base +
 			", candidate " +
 			gitText(["rev-parse", head], cwd).trim() +
-			", approved DOM, table-grid, and copy exceptions\n",
+			", approved DOM, table-grid, presentation, and copy exceptions\n",
 	);
 }
 

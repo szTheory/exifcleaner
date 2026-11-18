@@ -38,7 +38,7 @@ function replaceOnce(input: string, before: string, after: string): string {
 }
 
 describe("cumulative same-layout gate", () => {
-	test("passes the fixed v5.0 tree against the cumulative Phase 76-79 tree", () => {
+	test("passes the fixed v5.0 tree against the cumulative Phase 76-80 tree", () => {
 		expect(
 			compareSnapshots({
 				baseFiles: baselineFiles,
