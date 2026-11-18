@@ -21,90 +21,6 @@
 			]
 		},
 		{
-			"id": "pill-dng-bg-over-bg",
-			"layers": [
-				"--ec-color-bg",
-				"--ec-color-pill-bg"
-			]
-		},
-		{
-			"id": "pill-dng-bg-over-surface",
-			"layers": [
-				"--ec-color-surface",
-				"--ec-color-pill-bg"
-			]
-		},
-		{
-			"id": "pill-heic-bg-over-bg",
-			"layers": [
-				"--ec-color-bg",
-				"--ec-color-pill-bg"
-			]
-		},
-		{
-			"id": "pill-heic-bg-over-surface",
-			"layers": [
-				"--ec-color-surface",
-				"--ec-color-pill-bg"
-			]
-		},
-		{
-			"id": "pill-jpg-bg-over-bg",
-			"layers": [
-				"--ec-color-bg",
-				"--ec-color-pill-bg"
-			]
-		},
-		{
-			"id": "pill-jpg-bg-over-surface",
-			"layers": [
-				"--ec-color-surface",
-				"--ec-color-pill-bg"
-			]
-		},
-		{
-			"id": "pill-mov-bg-over-bg",
-			"layers": [
-				"--ec-color-bg",
-				"--ec-color-pill-bg"
-			]
-		},
-		{
-			"id": "pill-mov-bg-over-surface",
-			"layers": [
-				"--ec-color-surface",
-				"--ec-color-pill-bg"
-			]
-		},
-		{
-			"id": "pill-pdf-bg-over-bg",
-			"layers": [
-				"--ec-color-bg",
-				"--ec-color-pill-bg"
-			]
-		},
-		{
-			"id": "pill-pdf-bg-over-surface",
-			"layers": [
-				"--ec-color-surface",
-				"--ec-color-pill-bg"
-			]
-		},
-		{
-			"id": "pill-png-bg-over-bg",
-			"layers": [
-				"--ec-color-bg",
-				"--ec-color-pill-bg"
-			]
-		},
-		{
-			"id": "pill-png-bg-over-surface",
-			"layers": [
-				"--ec-color-surface",
-				"--ec-color-pill-bg"
-			]
-		},
-		{
 			"id": "item-hover",
 			"layers": [
 				"--ec-color-surface",
@@ -231,72 +147,6 @@
 			"story": "file-list-metadataexpansion--mixed"
 		},
 		{
-			"id": "pill-jpg",
-			"fg": "--ec-color-pill-text",
-			"on": [
-				"pill-jpg-bg-over-bg",
-				"pill-jpg-bg-over-surface"
-			],
-			"role": "text",
-			"selector": ".type-pill--jpg, .type-pill--jpeg",
-			"story": "ui-typepill--jpeg"
-		},
-		{
-			"id": "pill-heic",
-			"fg": "--ec-color-pill-text",
-			"on": [
-				"pill-heic-bg-over-bg",
-				"pill-heic-bg-over-surface"
-			],
-			"role": "text",
-			"selector": ".type-pill--heic, .type-pill--heif",
-			"story": "ui-typepill--heic"
-		},
-		{
-			"id": "pill-png",
-			"fg": "--ec-color-pill-text",
-			"on": [
-				"pill-png-bg-over-bg",
-				"pill-png-bg-over-surface"
-			],
-			"role": "text",
-			"selector": ".type-pill--png",
-			"story": "ui-typepill--png"
-		},
-		{
-			"id": "pill-pdf",
-			"fg": "--ec-color-pill-text",
-			"on": [
-				"pill-pdf-bg-over-bg",
-				"pill-pdf-bg-over-surface"
-			],
-			"role": "text",
-			"selector": ".type-pill--pdf",
-			"story": "ui-typepill--pdf"
-		},
-		{
-			"id": "pill-mov",
-			"fg": "--ec-color-pill-text",
-			"on": [
-				"pill-mov-bg-over-bg",
-				"pill-mov-bg-over-surface"
-			],
-			"role": "text",
-			"selector": ".type-pill--mov, .type-pill--mp4",
-			"story": "ui-typepill--media"
-		},
-		{
-			"id": "pill-dng",
-			"fg": "--ec-color-pill-text",
-			"on": [
-				"pill-dng-bg-over-bg",
-				"pill-dng-bg-over-surface"
-			],
-			"role": "text",
-			"selector": ".type-pill--dng, .type-pill--cr2",
-			"story": "ui-typepill--raw"
-		},
-		{
 			"id": "neutral-pill",
 			"fg": "--ec-color-pill-text",
 			"on": [
@@ -358,14 +208,24 @@
 			"story": "ui-toast--copied"
 		},
 		{
-			"id": "success-icon",
-			"fg": "--ec-color-cleaned",
+			"id": "neutral-completion-icon",
+			"fg": "--ec-color-text-secondary",
 			"on": [
 				"--ec-color-bg"
 			],
 			"role": "non-text",
 			"selector": ".status-icon__check",
 			"story": "ui-statusicon--complete"
+		},
+		{
+			"id": "success-icon",
+			"fg": "--ec-color-cleaned",
+			"on": [
+				"--ec-color-bg"
+			],
+			"role": "non-text",
+			"selector": ".status-icon__check--cleaned",
+			"story": "file-list-filerow--cleaned"
 		},
 		{
 			"id": "metadata-icon-preserved",

@@ -1,5 +1,4 @@
-// Single metadata field row with removed/preserved indicator.
-// Removed fields show red tint + minus icon, preserved show green tint + checkmark.
+// Single metadata field row with removed/preserved meaning carried by its minus or check cue.
 
 import type { MetadataDiffField } from "../../../domain";
 
