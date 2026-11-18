@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"pending": [
+		{
+			"case": "empty-symbol",
+			"story": "ui-emptystate--copy-mode-on",
+			"selector": ".empty-state__icon",
+			"theme": "light",
+			"locale": "en",
+			"platform": "any",
+			"actual": "placeholder-svg:48pxx48px",
+			"expected": "two theme-specific 64x64 images, empty alt, loaded, visible variant selected, token-matched ground",
+			"reason": "The current empty state uses the placeholder SVG; Phase 79 replaces it with the pinned theme-specific broom images."
+		},
+		{
+			"case": "empty-symbol",
+			"story": "ui-emptystate--copy-mode-on",
+			"selector": ".empty-state__icon",
+			"theme": "dark",
+			"locale": "en",
+			"platform": "any",
+			"actual": "placeholder-svg:48pxx48px",
+			"expected": "two theme-specific 64x64 images, empty alt, loaded, visible variant selected, token-matched ground",
+			"reason": "The current empty state uses the placeholder SVG; Phase 79 replaces it with the pinned theme-specific broom images."
+		}
+	]
+}
