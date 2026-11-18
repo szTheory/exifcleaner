@@ -275,7 +275,7 @@ function importPaths(): AssetPath[] {
 			)
 				continue;
 			const specifier = statement.moduleSpecifier.text;
-			if (!IMAGE_EXTENSION.test(specifier)) continue;
+			if (!isImageSpecifier(specifier)) continue;
 			const bindings = statement.importClause?.namedBindings;
 			if (statement.importClause?.name !== undefined)
 				rows.push({
@@ -312,6 +312,11 @@ function importPaths(): AssetPath[] {
 			`${right.file}\0${right.specifier}\0${right.identifier}`,
 		),
 	);
+}
+
+function isImageSpecifier(specifier: string): boolean {
+	const imagePath = specifier.split("?")[0] ?? "";
+	return IMAGE_EXTENSION.test(imagePath);
 }
 
 function sha256(value: string): string {
@@ -399,6 +404,12 @@ test("renderer image imports and the approved theme-symbol nodes match exact pat
 		const approved = approvedImagePair(emptyState);
 		expect([...approved.values()].sort()).toEqual(["dark", "light"]);
 	}
+});
+
+test("image import scanning recognizes Vite query suffixes without normalizing them", () => {
+	expect(isImageSpecifier("assets/brand/symbol.svg?no-inline")).toBe(true);
+	expect(isImageSpecifier("assets/brand/symbol.svg?inline")).toBe(true);
+	expect(isImageSpecifier("assets/brand/symbol.tsx?no-inline")).toBe(false);
 });
 
 test("the approved 90/10 mixes and toggle slide transition remain byte-stable", () => {
