@@ -50,7 +50,7 @@
 			"property": "grid-template-columns",
 			"selectors": [".file-table__header", ".file-table__row"],
 			"baseline": "24px 1fr 72px 80px 88px 88px",
-			"candidate": "28px minmax(0, 1fr) 64px 144px 72px 136px",
+			"candidate": "24px minmax(0, 1fr) 64px 128px 56px minmax(72px, max-content)",
 			"evidence": ".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md"
 		},
 		{
