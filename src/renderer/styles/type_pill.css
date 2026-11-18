@@ -1,4 +1,4 @@
-/* TypePill — Color-coded extension badges */
+/* TypePill — neutral extension badges */
 
 .type-pill {
 	display: inline-block;
@@ -9,59 +9,6 @@
 	text-transform: uppercase;
 	letter-spacing: 0.02em;
 	line-height: 1;
-	background: var(--ec-color-pill-bg);
-	color: var(--ec-color-pill-text);
-}
-
-/* Image — JPG/JPEG */
-.type-pill--jpg,
-.type-pill--jpeg {
-	background: var(--ec-color-pill-bg);
-	color: var(--ec-color-pill-text);
-}
-
-/* Image — HEIC/HEIF */
-.type-pill--heic,
-.type-pill--heif {
-	background: var(--ec-color-pill-bg);
-	color: var(--ec-color-pill-text);
-}
-
-/* Image — PNG */
-.type-pill--png {
-	background: var(--ec-color-pill-bg);
-	color: var(--ec-color-pill-text);
-}
-
-/* Document — PDF */
-.type-pill--pdf {
-	background: var(--ec-color-pill-bg);
-	color: var(--ec-color-pill-text);
-}
-
-/* Media — MOV, MP4, M4A, M4V, AVI, 3GP, WMV */
-.type-pill--mov,
-.type-pill--mp4,
-.type-pill--m4a,
-.type-pill--m4v,
-.type-pill--avi,
-.type-pill--3gp,
-.type-pill--wmv {
-	background: var(--ec-color-pill-bg);
-	color: var(--ec-color-pill-text);
-}
-
-/* RAW — DNG, CR2, CR3, NEF, ARW, ORF, RW2, RAF, PEF, SRW */
-.type-pill--dng,
-.type-pill--cr2,
-.type-pill--cr3,
-.type-pill--nef,
-.type-pill--arw,
-.type-pill--orf,
-.type-pill--rw2,
-.type-pill--raf,
-.type-pill--pef,
-.type-pill--srw {
 	background: var(--ec-color-pill-bg);
 	color: var(--ec-color-pill-text);
 }

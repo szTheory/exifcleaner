@@ -7,10 +7,12 @@ export function StatusIcon({
 	status,
 	shouldAnimate,
 	accessibleLabel,
+	isCleaned = false,
 }: {
 	status: FileProcessingStatus;
 	shouldAnimate: boolean;
 	accessibleLabel?: string;
+	isCleaned?: boolean;
 }): React.JSX.Element {
 	switch (status) {
 		case FileProcessingStatus.Pending:
@@ -43,9 +45,9 @@ export function StatusIcon({
 
 		case FileProcessingStatus.Complete:
 		case FileProcessingStatus.NoMetadataFound: {
-			const checkClass = shouldAnimate
-				? "status-icon__check status-icon__check--animate"
-				: "status-icon__check";
+			const checkClass = `status-icon__check${
+				isCleaned ? " status-icon__check--cleaned" : ""
+			}${shouldAnimate ? " status-icon__check--animate" : ""}`;
 			return (
 				<span className="status-icon">
 					<svg
