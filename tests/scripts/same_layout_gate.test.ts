@@ -134,8 +134,8 @@ describe("cumulative same-layout gate", () => {
 		const file = "src/renderer/styles/file_table.css";
 		const changed = replaceOnce(
 			source(planted, file),
-			".file-table__error-summary {\n\tdisplay: block;\n\toverflow: hidden;\n\ttext-overflow: ellipsis;\n\twhite-space: nowrap;\n\tcolor: var(--ec-color-text-secondary);",
-			".file-table__error-summary {\n\tdisplay: block;\n\toverflow: hidden;\n\ttext-overflow: ellipsis;\n\twhite-space: nowrap;\n\tcolor: var(--ec-color-error);",
+			".file-table__error-summary {\n\tcolor: var(--ec-color-text-secondary);",
+			".file-table__error-summary {\n\tcolor: var(--ec-color-error);",
 		);
 		planted.set(file, Buffer.from(changed, "utf8"));
 		expect(

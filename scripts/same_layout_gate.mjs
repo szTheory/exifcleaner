@@ -104,10 +104,6 @@ export const EXPECTED_EXCEPTIONS = {
 			baseline: [],
 			candidate: [
 				[
-					["display", "block"],
-					["overflow", "hidden"],
-					["text-overflow", "ellipsis"],
-					["white-space", "nowrap"],
 					["color", "var(--ec-color-text-secondary)"],
 					["font-size", "var(--ec-font-size-small)"],
 					["line-height", "var(--ec-line-height-normal)"],
