@@ -1,0 +1,239 @@
+{
+	"schemaVersion": 1,
+	"pending": [
+		{
+			"case": "outcome-color",
+			"story": "file-list-filerow--already-clean",
+			"selector": ".file-table__after-done > .status-icon > .status-icon__check",
+			"theme": "light",
+			"actual": "rgb(15, 118, 110)",
+			"expected": "rgb(74, 98, 95)",
+			"reason": "The existing shared completion rule colors already-clean checks with the cleaned role."
+		},
+		{
+			"case": "outcome-color",
+			"story": "file-list-filerow--unchanged",
+			"selector": ".file-table__after-done > .status-icon > .status-icon__check",
+			"theme": "light",
+			"actual": "rgb(15, 118, 110)",
+			"expected": "rgb(74, 98, 95)",
+			"reason": "The existing shared completion rule colors unchanged checks with the cleaned role."
+		},
+		{
+			"case": "outcome-color",
+			"story": "file-list-filerow--already-clean",
+			"selector": ".file-table__after-done > .status-icon > .status-icon__check",
+			"theme": "dark",
+			"actual": "rgb(94, 234, 212)",
+			"expected": "rgb(169, 201, 196)",
+			"reason": "The existing shared completion rule colors already-clean checks with the cleaned role."
+		},
+		{
+			"case": "outcome-color",
+			"story": "file-list-filerow--unchanged",
+			"selector": ".file-table__after-done > .status-icon > .status-icon__check",
+			"theme": "dark",
+			"actual": "rgb(94, 234, 212)",
+			"expected": "rgb(169, 201, 196)",
+			"reason": "The existing shared completion rule colors unchanged checks with the cleaned role."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "light",
+			"locale": "de",
+			"actual": "scrollWidth=120;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "The existing 88px after-count track clips the 123456 count and check glyph together.",
+			"platform": "MacIntel"
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "light",
+			"locale": "hu",
+			"actual": "scrollWidth=120;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "The existing 88px after-count track clips the 123456 count and check glyph together.",
+			"platform": "MacIntel"
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "light",
+			"locale": "ar",
+			"actual": "scrollWidth=120;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "The existing 88px after-count track clips the 123456 count and check glyph together.",
+			"platform": "MacIntel"
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "dark",
+			"locale": "de",
+			"actual": "scrollWidth=120;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "The existing 88px after-count track clips the 123456 count and check glyph together.",
+			"platform": "MacIntel"
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "dark",
+			"locale": "hu",
+			"actual": "scrollWidth=120;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "The existing 88px after-count track clips the 123456 count and check glyph together.",
+			"platform": "MacIntel"
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "dark",
+			"locale": "ar",
+			"actual": "scrollWidth=120;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "The existing 88px after-count track clips the 123456 count and check glyph together.",
+			"platform": "MacIntel"
+		},
+		{
+			"case": "size-cell",
+			"story": "file-list-filerow--huge-size",
+			"selector": ".file-table__cell--size",
+			"theme": "light",
+			"locale": "de",
+			"platform": "Linux x86_64",
+			"actual": "scrollWidth=85;clientWidth=80",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "Linux Chromium measures the 1TB input and output size string at 85px in the existing 80px size track."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "light",
+			"locale": "de",
+			"platform": "Linux x86_64",
+			"actual": "scrollWidth=125;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "Linux Chromium measures the 123456 count and check glyph together at 125px in the existing 88px after-count track."
+		},
+		{
+			"case": "size-cell",
+			"story": "file-list-filerow--huge-size",
+			"selector": ".file-table__cell--size",
+			"theme": "light",
+			"locale": "hu",
+			"platform": "Linux x86_64",
+			"actual": "scrollWidth=85;clientWidth=80",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "Linux Chromium measures the 1TB input and output size string at 85px in the existing 80px size track."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "light",
+			"locale": "hu",
+			"platform": "Linux x86_64",
+			"actual": "scrollWidth=125;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "Linux Chromium measures the 123456 count and check glyph together at 125px in the existing 88px after-count track."
+		},
+		{
+			"case": "size-cell",
+			"story": "file-list-filerow--huge-size",
+			"selector": ".file-table__cell--size",
+			"theme": "light",
+			"locale": "ar",
+			"platform": "Linux x86_64",
+			"actual": "scrollWidth=85;clientWidth=80",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "Linux Chromium measures the 1TB input and output size string at 85px in the existing 80px size track."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "light",
+			"locale": "ar",
+			"platform": "Linux x86_64",
+			"actual": "scrollWidth=125;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "Linux Chromium measures the 123456 count and check glyph together at 125px in the existing 88px after-count track."
+		},
+		{
+			"case": "size-cell",
+			"story": "file-list-filerow--huge-size",
+			"selector": ".file-table__cell--size",
+			"theme": "dark",
+			"locale": "de",
+			"platform": "Linux x86_64",
+			"actual": "scrollWidth=85;clientWidth=80",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "Linux Chromium measures the 1TB input and output size string at 85px in the existing 80px size track."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "dark",
+			"locale": "de",
+			"platform": "Linux x86_64",
+			"actual": "scrollWidth=125;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "Linux Chromium measures the 123456 count and check glyph together at 125px in the existing 88px after-count track."
+		},
+		{
+			"case": "size-cell",
+			"story": "file-list-filerow--huge-size",
+			"selector": ".file-table__cell--size",
+			"theme": "dark",
+			"locale": "hu",
+			"platform": "Linux x86_64",
+			"actual": "scrollWidth=85;clientWidth=80",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "Linux Chromium measures the 1TB input and output size string at 85px in the existing 80px size track."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "dark",
+			"locale": "hu",
+			"platform": "Linux x86_64",
+			"actual": "scrollWidth=125;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "Linux Chromium measures the 123456 count and check glyph together at 125px in the existing 88px after-count track."
+		},
+		{
+			"case": "size-cell",
+			"story": "file-list-filerow--huge-size",
+			"selector": ".file-table__cell--size",
+			"theme": "dark",
+			"locale": "ar",
+			"platform": "Linux x86_64",
+			"actual": "scrollWidth=85;clientWidth=80",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "Linux Chromium measures the 1TB input and output size string at 85px in the existing 80px size track."
+		},
+		{
+			"case": "after-count",
+			"story": "file-list-filerow--huge-tag-counts",
+			"selector": ".file-table__row > .file-table__cell:nth-of-type(6)",
+			"theme": "dark",
+			"locale": "ar",
+			"platform": "Linux x86_64",
+			"actual": "scrollWidth=125;clientWidth=88",
+			"expected": "scrollWidth <= clientWidth",
+			"reason": "Linux Chromium measures the 123456 count and check glyph together at 125px in the existing 88px after-count track."
+		}
+	]
+}
