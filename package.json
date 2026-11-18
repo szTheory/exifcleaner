@@ -67,6 +67,7 @@
 		"verify:native-dependency": "node scripts/exifcleaner_node_dependency_gate.mjs",
 		"verify:native-dependency:seal": "node scripts/exifcleaner_node_dependency_gate.mjs --seal",
 		"verify:release-notes": "node scripts/release_notes_gate.mjs",
+		"verify:same-layout": "node scripts/same_layout_gate.mjs --base b0b566be89886e75929a3da3edeed1497a09a299 --head HEAD",
 		"release:evidence": "node scripts/release_evidence.mjs --write",
 		"release:prepare-assets": "node scripts/release_asset_gate.mjs --write-checksums",
 		"release:finalize-notes": "node scripts/finalize_release_notes.mjs",

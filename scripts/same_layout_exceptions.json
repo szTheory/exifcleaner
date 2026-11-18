@@ -1,0 +1,48 @@
+{
+	"schemaVersion": 1,
+	"baseline": "b0b566be89886e75929a3da3edeed1497a09a299",
+	"exceptions": [
+		{
+			"id": "D-03",
+			"helper": "src/renderer/utils/escaped_name.tsx",
+			"shape": "bdi.file-table__bidi-escape[dir=\"ltr\"]",
+			"evidence": ".planning/phases/76-trust-rtl-and-gates-first/76-EVIDENCE.md",
+			"callSites": [
+				{
+					"source": "src/renderer/components/file-list/FileRow.tsx",
+					"parent": "bdi.file-table__name-text[dir=\"auto\"]",
+					"segments": "shownNameSegments"
+				},
+				{
+					"source": "src/renderer/components/file-list/FolderRow.tsx",
+					"parent": "bdi.folder-row__label[dir=\"auto\"]",
+					"segments": "displayLabelSegments"
+				},
+				{
+					"source": "src/renderer/components/file-list/ErrorExpansion.tsx",
+					"parent": "pre.file-table__error-text",
+					"segments": "displayNameSegments({ name: error })"
+				}
+			]
+		},
+		{
+			"id": "SUR-03",
+			"source": "src/renderer/components/ui/EmptyState.tsx",
+			"slot": "div.empty-state__inner > decorative-icon",
+			"baseline": "svg.empty-state__icon",
+			"evidence": ".planning/phases/79-chrome-and-intake-surfaces/79-EVIDENCE.json",
+			"assets": [
+				{
+					"path": "src/renderer/assets/brand/exifcleaner-symbol-light.svg",
+					"sha256": "1f9f1b9a0ebca99fa5841f8782a409f1131546d49cffa4932a5eeabc9c425def",
+					"variant": "light"
+				},
+				{
+					"path": "src/renderer/assets/brand/exifcleaner-symbol-dark.svg",
+					"sha256": "84e7e40ddb52e3c1047a2dbf3bcc777349ed3f6a403b42c4cabe96f0883f918b",
+					"variant": "dark"
+				}
+			]
+		}
+	]
+}
