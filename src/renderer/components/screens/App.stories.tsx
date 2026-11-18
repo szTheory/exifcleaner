@@ -481,8 +481,9 @@ export const LargeBatch: Story = {
 				getComputedStyle(cell).paddingRight,
 			);
 			await expect(pill.getBoundingClientRect().right).toBeLessThanOrEqual(
-				cell.getBoundingClientRect().right - paddingRight + 1,
+				cell.getBoundingClientRect().right - paddingRight,
 			);
+			await expect(cell.scrollWidth).toBeLessThanOrEqual(cell.clientWidth);
 		}
 	},
 };
