@@ -46,6 +46,7 @@
 		"storybook:build": "STORYBOOK_DISABLE_TELEMETRY=true CI=true NODE_OPTIONS=--import=./.storybook/network_guard.mjs storybook build -o storybook-static --quiet",
 		"storybook:dev": "STORYBOOK_DISABLE_TELEMETRY=true CI=true NODE_OPTIONS=--import=./.storybook/network_guard.mjs storybook dev -p 6006 --no-open --no-version-updates",
 		"test:storybook": "STORYBOOK_DISABLE_TELEMETRY=true CI=true NODE_OPTIONS=--import=./.storybook/network_guard.mjs vitest run --config vitest.storybook.config.ts",
+		"visual:capture": "vitest run --config vitest.visual.config.ts",
 		"test:e2e": "playwright test --project=dev",
 		"test:smoke": "playwright test --project=smoke",
 		"test:all": "vitest run && playwright test --project=dev",

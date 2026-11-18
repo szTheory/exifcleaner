@@ -1,9 +1,13 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
 	test: {
 		root: ".",
 		include: ["tests/**/*.test.{ts,tsx}"],
+		exclude: [
+			...configDefaults.exclude,
+			"tests/visual/visual_capture.test.tsx",
+		],
 		allowOnly: false,
 		// LIF-01 / D-08: fail the run if any exiftool -stay_open child outlives it.
 		globalSetup: ["tests/global/exiftool_leftovers.global_setup.ts"],

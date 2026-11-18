@@ -1,0 +1,206 @@
+{
+	"schemaVersion": 1,
+	"maxImages": 40,
+	"cases": [
+		{
+			"story": "screens-app--empty",
+			"theme": "light",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--empty.light.en.580.png"
+		},
+		{
+			"story": "screens-app--empty",
+			"theme": "dark",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--empty.dark.en.580.png"
+		},
+		{
+			"story": "screens-app--mid-batch",
+			"theme": "light",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--mid-batch.light.en.580.png"
+		},
+		{
+			"story": "screens-app--mid-batch",
+			"theme": "dark",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--mid-batch.dark.en.580.png"
+		},
+		{
+			"story": "screens-app--all-done",
+			"theme": "light",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--all-done.light.en.580.png"
+		},
+		{
+			"story": "screens-app--all-done",
+			"theme": "dark",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--all-done.dark.en.580.png"
+		},
+		{
+			"story": "screens-app--large-batch",
+			"theme": "light",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--large-batch.light.en.580.png"
+		},
+		{
+			"story": "screens-app--large-batch",
+			"theme": "dark",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--large-batch.dark.en.580.png"
+		},
+		{
+			"story": "screens-app--all-error",
+			"theme": "light",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--all-error.light.en.580.png"
+		},
+		{
+			"story": "screens-app--all-error",
+			"theme": "dark",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--all-error.dark.en.580.png"
+		},
+		{
+			"story": "screens-app--empty-copy-mode",
+			"theme": "light",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--empty-copy-mode.light.en.580.png"
+		},
+		{
+			"story": "screens-app--empty-copy-mode",
+			"theme": "dark",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--empty-copy-mode.dark.en.580.png"
+		},
+		{
+			"story": "screens-app--drawer-open",
+			"theme": "light",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--drawer-open.light.en.580.png"
+		},
+		{
+			"story": "screens-app--drawer-open",
+			"theme": "dark",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--drawer-open.dark.en.580.png"
+		},
+		{
+			"story": "screens-app--error-boundary-failure",
+			"theme": "light",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--error-boundary-failure.light.en.580.png"
+		},
+		{
+			"story": "screens-app--error-boundary-failure",
+			"theme": "dark",
+			"locale": "en",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--error-boundary-failure.dark.en.580.png"
+		},
+		{
+			"story": "screens-app--empty",
+			"theme": "light",
+			"locale": "en",
+			"width": 960,
+			"height": 800,
+			"file": "screens-app--empty.light.en.960.png"
+		},
+		{
+			"story": "screens-app--empty",
+			"theme": "dark",
+			"locale": "en",
+			"width": 960,
+			"height": 800,
+			"file": "screens-app--empty.dark.en.960.png"
+		},
+		{
+			"story": "screens-app--mid-batch",
+			"theme": "light",
+			"locale": "en",
+			"width": 960,
+			"height": 800,
+			"file": "screens-app--mid-batch.light.en.960.png"
+		},
+		{
+			"story": "screens-app--mid-batch",
+			"theme": "dark",
+			"locale": "en",
+			"width": 960,
+			"height": 800,
+			"file": "screens-app--mid-batch.dark.en.960.png"
+		},
+		{
+			"story": "screens-app--all-done",
+			"theme": "light",
+			"locale": "en",
+			"width": 960,
+			"height": 800,
+			"file": "screens-app--all-done.light.en.960.png"
+		},
+		{
+			"story": "screens-app--all-done",
+			"theme": "dark",
+			"locale": "en",
+			"width": 960,
+			"height": 800,
+			"file": "screens-app--all-done.dark.en.960.png"
+		},
+		{
+			"story": "screens-app--large-batch",
+			"theme": "light",
+			"locale": "en",
+			"width": 960,
+			"height": 800,
+			"file": "screens-app--large-batch.light.en.960.png"
+		},
+		{
+			"story": "screens-app--large-batch",
+			"theme": "dark",
+			"locale": "en",
+			"width": 960,
+			"height": 800,
+			"file": "screens-app--large-batch.dark.en.960.png"
+		},
+		{
+			"story": "screens-app--empty",
+			"theme": "light",
+			"locale": "de",
+			"width": 580,
+			"height": 800,
+			"file": "screens-app--empty.light.de.580.png"
+		}
+	]
+}

@@ -4,8 +4,8 @@ import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 import type { BrowserCommandContext } from "vitest/node";
 
-// Storybook's own vitest config (the root vitest.config.ts stays untouched so
-// `yarn test` is unchanged). Every browser project must get its browser config
+// Storybook's own vitest config. The root Vitest config owns ordinary test
+// discovery and excludes the manual visual-capture harness. Every browser project must get its browser config
 // from this factory: sharing one object across projects makes vitest fail with
 // "Cannot define a nested project for a chromium browser". Reduced motion plus
 // a fixed viewport keep scans and screenshots deterministic.
