@@ -77,8 +77,9 @@ export const Processing: Story = {
 		)) {
 			const style = getComputedStyle(spinner);
 			await expect(style.borderRadius).toBe("50%");
-			await expect(style.boxShadow).not.toBe("none");
-			await expect(style.borderTopColor).not.toBe("rgba(0, 0, 0, 0)");
+			await expect(style.borderRightColor).not.toBe("rgba(0, 0, 0, 0)");
+			await expect(style.borderTopColor).not.toBe(style.borderRightColor);
+			await expect(style.backgroundColor).toBe("rgba(0, 0, 0, 0)");
 		}
 	},
 };

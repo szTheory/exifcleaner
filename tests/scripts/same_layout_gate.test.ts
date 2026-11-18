@@ -115,8 +115,8 @@ describe("cumulative same-layout gate", () => {
 		const file = "src/renderer/styles/status_icon.css";
 		const changed = replaceOnce(
 			source(planted, file),
-			"box-shadow: inset 0 0 0 2px var(--ec-color-border);",
-			"box-shadow: inset 0 0 0 2px var(--ec-color-surface);",
+			"border: 2px solid var(--ec-color-border);",
+			"border: 2px solid var(--ec-color-surface);",
 		);
 		planted.set(file, Buffer.from(changed, "utf8"));
 		expect(
