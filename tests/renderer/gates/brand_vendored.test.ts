@@ -22,6 +22,7 @@ import {
 } from "../../../scripts/brand_vendored_check.mjs";
 import { assertDirEffect, snapshotDir } from "../../helpers/dir_effect";
 import { BRAND_FIXTURE_ENTRIES, buildZip } from "../../helpers/zip_fixture";
+import expectedManifest from "./brand_vendored_expected.json";
 
 // GAT-04 / D-17, D-18: a vendored brand asset must equal its pinned source byte for byte.
 //
@@ -449,14 +450,14 @@ describe("the real repository (3-state cache rule, no skip)", () => {
 		"utf8",
 	);
 
-	test("brand.vendored.json pins the brand.pin.json commit and starts with an empty files list", () => {
+	test("brand.vendored.json pins the brand.pin.json commit and matches its explicit expected rows", () => {
 		const manifest = JSON.parse(manifestText) as {
 			brandPin: string;
 			files: unknown[];
 		};
 		expect(Object.keys(manifest)).toEqual(["brandPin", "files"]);
 		expect(manifest.brandPin).toBe(pin.commit);
-		expect(manifest.files).toEqual([]);
+		expect(manifest.files).toEqual(expectedManifest.files);
 		expect(manifestText).toBe(`${JSON.stringify(manifest, null, "\t")}\n`);
 	});
 

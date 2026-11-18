@@ -1,0 +1,14 @@
+{
+	"schemaVersion": 1,
+	"signatures": {
+		"src/renderer/components/settings/ToggleSwitch.tsx": "db500d2bb0dc82d25d38c63ab8b51d89898de4324f4e85c4fdf1aece7c65d3a9",
+		"src/renderer/components/settings/SegmentedControl.tsx": "56c2b853c675d0e1eb2b8084f7a16930489daae1f3189606d322ee1edd14cffe",
+		"src/renderer/components/settings/LanguageDropdown.tsx": "6303c633432a656d3f17ad4795a02650282883ff50f4fbde1fbce10aa52760bf",
+		"src/renderer/components/settings/SettingsDrawer.tsx": "49b88cdab85ca09eaf6f23cceccad39112d783688e11d2098cc2dfc64ff246d6",
+		"src/renderer/components/ui/DropZone.tsx": "3256eb16a3c18c812a5b29a2b4b446498e77d4b60e2e71ccad0322ba6aefbb6c",
+		"src/renderer/components/ui/EmptyState.tsx": "c37947e956b6418030e95aae888dd1c795815e536e81d97c8fe49d41ff7fe1b4",
+		"src/renderer/components/ui/Toast.tsx": "e5233125007aed0c03afe53eff3a5175a1ef915751425a6bae15c067b9544795",
+		"src/renderer/components/ui/StatusBar.tsx": "e6fe6ce6ae46f8eea80488375fd23d25e4531d95e4ee729aa2b25bfd40e6254f",
+		"src/renderer/components/ui/ErrorBoundary.tsx": "40521107f045b30cab607b7339e889a6ce1e8e77293287dcd054f305f76cb1bd"
+	}
+}
