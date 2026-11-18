@@ -87,9 +87,10 @@ export const EXPECTED_EXCEPTIONS = {
 				[
 					["width", "16px"],
 					["height", "16px"],
-					["border", "2px solid var(--ec-color-border)"],
+					["border", "2px solid transparent"],
 					["border-top-color", "var(--ec-color-text-secondary)"],
 					["border-radius", "50%"],
+					["box-shadow", "inset 0 0 0 2px var(--ec-color-border)"],
 				],
 				[["animation", "ec-spin 1s linear infinite"]],
 			],
