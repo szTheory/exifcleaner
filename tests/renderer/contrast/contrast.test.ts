@@ -3374,6 +3374,7 @@ const EMPTY_STATE_GAP = {
 	story: "ui-emptystate--copy-mode-on",
 	rule: "empty-state-secondary-hardcoded",
 };
+const TOKEN_MAP_GAP_DISPOSITION = "fix-v5.2";
 
 function tokenMapGapFixture(
 	which: "line-height" | "empty-state",
@@ -3382,7 +3383,7 @@ function tokenMapGapFixture(
 	return {
 		...gap,
 		kind: "token-map-gap",
-		disposition: "fix-v5.1",
+		disposition: TOKEN_MAP_GAP_DISPOSITION,
 		severity: "minor",
 	};
 }
@@ -3416,7 +3417,7 @@ function tokenMapGapProblems(
 			if (
 				entry.story !== gap.story ||
 				entry.rule !== gap.rule ||
-				entry.disposition !== "fix-v5.1" ||
+				entry.disposition !== TOKEN_MAP_GAP_DISPOSITION ||
 				entry.severity !== "minor"
 			) {
 				problems.push(`gap metadata changed ${gap.fingerprint}`);

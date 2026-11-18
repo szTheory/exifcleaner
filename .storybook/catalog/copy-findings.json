@@ -7,7 +7,7 @@
 			"surface": "renderer",
 			"ref": "src:src/renderer/components/file-list/ErrorExpansion.tsx",
 			"text": "Click to copy",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Untranslated visible text on the error detail; needs an en key."
 		},
 		{
@@ -16,7 +16,7 @@
 			"surface": "renderer",
 			"ref": "src:src/renderer/components/icons/GearIcon.tsx",
 			"text": "Close settings",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Untranslated screen-reader name for the settings button."
 		},
 		{
@@ -25,7 +25,7 @@
 			"surface": "renderer",
 			"ref": "src:src/renderer/components/icons/GearIcon.tsx",
 			"text": "Open settings",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Untranslated screen-reader name; there is no settings.open key."
 		},
 		{
@@ -115,7 +115,7 @@
 			"surface": "renderer",
 			"ref": "src:src/renderer/components/ui/ErrorBoundary.tsx",
 			"text": "Something went wrong.",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Untranslated fallback message shown when the app fails to render."
 		},
 		{
@@ -124,7 +124,7 @@
 			"surface": "renderer",
 			"ref": "src:src/renderer/components/ui/ErrorBoundary.tsx",
 			"text": "Try again",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Untranslated button label on the fallback screen."
 		},
 		{
@@ -133,7 +133,7 @@
 			"surface": "renderer",
 			"ref": "src:src/renderer/components/ui/StatusIcon.tsx",
 			"text": "Complete",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Untranslated screen-reader name of the complete status icon."
 		},
 		{
@@ -142,7 +142,7 @@
 			"surface": "renderer",
 			"ref": "src:src/renderer/components/ui/StatusIcon.tsx",
 			"text": "Error",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Untranslated screen-reader name of the error status icon."
 		},
 		{
@@ -151,7 +151,7 @@
 			"surface": "renderer",
 			"ref": "src:src/renderer/components/ui/StatusIcon.tsx",
 			"text": "Pending",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Untranslated screen-reader name of the pending status icon."
 		},
 		{
@@ -160,7 +160,7 @@
 			"surface": "renderer",
 			"ref": "src:src/renderer/components/ui/StatusIcon.tsx",
 			"text": "Processing",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Untranslated screen-reader name; Processing has no en key."
 		},
 		{
@@ -322,7 +322,7 @@
 			"surface": "main",
 			"ref": "src:src/main/reveal_handlers.ts",
 			"text": "Reveal Cleaned Copy",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Title-case, hardcoded context-menu label; the app's labels are sentence case and translated (reveal.cleanedCopy)."
 		},
 		{
@@ -331,7 +331,7 @@
 			"surface": "main",
 			"ref": "src:src/main/reveal_handlers.ts",
 			"text": "Reveal Original",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Title-case, hardcoded context-menu label; the app's labels are sentence case and translated."
 		},
 		{
@@ -376,7 +376,7 @@
 			"surface": "en",
 			"ref": "en:metadata.field.preserved",
 			"text": "preserved",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Implies intent: computeMetadataDiff (metadata_groups.ts:88) marks any still-present key \"preserved\" even when it was merely not removable; a trust-core wording problem."
 		},
 		{
@@ -385,7 +385,7 @@
 			"surface": "en",
 			"ref": "en:cleanupFailedSummary",
 			"text": "Couldn’t verify cleaned output, and the incomplete output could not be removed. Your original is unchanged.",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "The brand word is \"original\" (and \"cleaned copy\"), not \"output\"; the failed-file string says \"output\"."
 		},
 		{
@@ -394,7 +394,7 @@
 			"surface": "en",
 			"ref": "en:verificationFailedSummary",
 			"text": "Couldn’t verify cleaned output. The incomplete copy was removed; your original is unchanged.",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "The brand word is \"original\" (and \"cleaned copy\"), not \"output\"; the failed-file string says \"output\"."
 		},
 		{
@@ -403,7 +403,7 @@
 			"surface": "en",
 			"ref": "en:writeFailedSummary",
 			"text": "Couldn’t write the cleaned output. Your original is unchanged.",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "The brand word is \"original\" (and \"cleaned copy\"), not \"output\"; the failed-file string says \"output\"."
 		},
 		{
@@ -412,7 +412,7 @@
 			"surface": "en",
 			"ref": "en:xattrFailedSummary",
 			"text": "Metadata was removed, but macOS extended attributes could not be cleared.",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "Says \"macOS extended attributes\"; the glossary label is \"macOS attributes\" and the brand word for a counted item is \"fields\"."
 		},
 		{
@@ -421,7 +421,7 @@
 			"surface": "en",
 			"ref": "en:statusBar.tagsRemoved",
 			"text": "{count} tags removed",
-			"disposition": "fix-v5.1",
+			"disposition": "fix-v5.2",
 			"reason": "App.tsx:42-44 sums removedFields, so the unit is fields (the brand in-app example is \"162 fields removed\"); the string has no .one form, so one field reads \"1 tags removed\"."
 		},
 		{

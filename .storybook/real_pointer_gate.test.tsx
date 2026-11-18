@@ -37,9 +37,16 @@ describe("withRealHover (D-11)", () => {
 		);
 		expect(button.matches(":hover")).toBe(false);
 		let hoveredDuringAssert: boolean | undefined;
-		await withRealHover(button, throwingSynthetic, () => {
-			hoveredDuringAssert = button.matches(":hover");
-		});
+		await withRealHover(
+			button,
+			throwingSynthetic,
+			() => {
+				hoveredDuringAssert = button.matches(":hover");
+			},
+			// Full Storybook contention starved the 20 s hover; keep this real interaction
+			// bounded below the test's 60 s timeout without weakening the :hover assertion.
+			{ timeoutMs: 40_000 },
+		);
 		expect(hoveredDuringAssert).toBe(true);
 		// This project has no testTimeout of its own, and a full parallel run on a busy host
 		// took longer than the 15 s default for the first real pointer move (Phase 72).

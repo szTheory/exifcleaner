@@ -44,6 +44,8 @@ export interface PackagedLaunchContext {
 export interface PackagedLaunchOptions {
 	/** `null` preserves the product's system-language default. */
 	readonly language?: string | null;
+	/** Extra test-only Electron switches passed before the first window is created. */
+	readonly startupArgs?: readonly string[];
 }
 
 export function packagedExiftoolPath(
@@ -393,7 +395,7 @@ export async function launchPackagedApp(
 			try {
 				app = await electron.launch({
 					executablePath,
-					args: [userDataArg],
+					args: [userDataArg, ...(options.startupArgs ?? [])],
 					cwd: neutralCwd,
 					env: { ...definedEnv, ...appImageEnv(executablePath) },
 					timeout: LAUNCH_TIMEOUT_MS,
