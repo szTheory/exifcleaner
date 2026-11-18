@@ -186,7 +186,7 @@ One row per `expect(`, `expect.soft(` or `expect.poll(` call inside a test callb
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | kept | expect(title).toHaveText("Adaugă fișiere pentru curățare") | not-renderable |  |  |  |
-| 2 | kept | expect(window.getByRole("button", {name: "Alege fișiere…"})).toBeVisible() | not-renderable |  |  |  |
+| 2 | kept | expect(window.getByRole("button", {name: "Alege fișiere"})).toBeVisible() | not-renderable |  |  |  |
 
 ### uses RTL direction, visual action order, and a localized count in Arabic
 
@@ -241,6 +241,8 @@ Title kept per D-04 (never retitle a kept test; no journey pins it). It overclai
 
 The ledger is frozen against the baseline commit above: the `(title, code)` pairs of every expect call that existed there, less the entries marked `addedAfterBaseline`, must equal the ledger's.
 
+- One exact Phase 80 copy correction normalizes the Romanian "Alege fișiere…" baseline assertion to "Alege fișiere" for the pinned baseline commit only. This does not permit other edits to that test or ledger.
+
 - A new test: add a ledger entry with `"addedAfterBaseline": true` and kept items only. `kept-drift` then keeps it in step with the spec.
 - Editing, retitling or adding an expect inside a test that existed at the baseline is `baseline-drift` by design, even when the spec and the ledger agree. The problem message names the `(title, code)` pairs that differ.
-- There is no supported edit path for that case yet. Advancing `baselineCommit` drops the `deleted` history, and a one-directional freeze or a `supersedes` field is a maintainer decision. Until then, put a changed or extra assertion in a new test and leave the baseline test untouched.
+- Other edits to an existing baseline assertion remain unsupported. Advancing `baselineCommit` drops the `deleted` history, and a general one-directional freeze or `supersedes` field requires a maintainer decision. For all other cases, add a new test and leave the baseline test untouched.

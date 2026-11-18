@@ -589,7 +589,7 @@
 					},
 					{
 						"n": 2,
-						"code": "expect(window.getByRole(\"button\", {name: \"Alege fișiere…\"})).toBeVisible()",
+						"code": "expect(window.getByRole(\"button\", {name: \"Alege fișiere\"})).toBeVisible()",
 						"verdict": "kept",
 						"reason": "not-renderable"
 					}
