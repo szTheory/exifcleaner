@@ -144,6 +144,9 @@ function workflowPolicyProblems(text: string, data: VisualContract): string[] {
 	if (!text.includes("node scripts/contact_sheet.mjs")) {
 		problems.push("workflow must generate the labeled contact sheet");
 	}
+	if (text.includes("set -euo pipefail") && !/^ {8}shell: bash$/m.test(text)) {
+		problems.push("steps using pipefail must explicitly select bash");
+	}
 	const uploadStart = text.indexOf("uses: actions/upload-artifact@");
 	const uploadBlock = uploadStart < 0 ? "" : text.slice(uploadStart);
 	for (const required of [
@@ -271,6 +274,13 @@ describe("visual workflow and case contract policy", () => {
 				item.includes("full 40-hex SHA"),
 			),
 		).toBe(true);
+	});
+
+	test("rejects a pipefail step without a Bash shell", () => {
+		const changed = workflow.replace("        shell: bash\n", "");
+		expect(workflowPolicyProblems(changed, contract)).toContain(
+			"steps using pipefail must explicitly select bash",
+		);
 	});
 
 	test("rejects an artifact that omits the contact sheet", () => {

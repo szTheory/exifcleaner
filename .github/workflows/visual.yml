@@ -35,6 +35,7 @@ jobs:
         run: yarn install --frozen-lockfile --ignore-scripts
 
       - name: Record capture environment
+        shell: bash
         env:
           EXIFCLEANER_VISUAL_RUNNER: ${{ runner.name }} / ${{ runner.os }} ${{ runner.arch }} ${{ runner.environment }}
         run: |
