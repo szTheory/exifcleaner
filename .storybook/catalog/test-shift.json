@@ -221,7 +221,7 @@
 					},
 					{
 						"n": 4,
-						"code": "expect(emptyState.locator(\".empty-state__button--primary\")).toHaveText(\"Choose files\")",
+						"code": "expect(emptyState.locator(\".empty-state__button--primary\")).toHaveText(\"Choose files…\")",
 						"verdict": "deleted",
 						"story": "screens-app--empty",
 						"subject": "App",
@@ -230,7 +230,7 @@
 					},
 					{
 						"n": 5,
-						"code": "expect(emptyState.locator(\".empty-state__button--secondary\")).toHaveText(\"Choose folder\")",
+						"code": "expect(emptyState.locator(\".empty-state__button--secondary\")).toHaveText(\"Choose folder…\")",
 						"verdict": "deleted",
 						"story": "screens-app--empty",
 						"subject": "App",
