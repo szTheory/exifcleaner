@@ -81,6 +81,7 @@ export const EXPECTED_EXCEPTIONS = {
 					["border-top-color", "var(--ec-color-muted)"],
 					["border-radius", "50%"],
 				],
+				[["animation", "ec-spin 1s linear infinite"]],
 			],
 			candidate: [
 				[
@@ -90,6 +91,7 @@ export const EXPECTED_EXCEPTIONS = {
 					["border-top-color", "var(--ec-color-text-secondary)"],
 					["border-radius", "50%"],
 				],
+				[["animation", "ec-spin 1s linear infinite"]],
 			],
 			evidence:
 				".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md",

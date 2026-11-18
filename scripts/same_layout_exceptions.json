@@ -64,7 +64,8 @@
 					["border", "2px solid transparent"],
 					["border-top-color", "var(--ec-color-muted)"],
 					["border-radius", "50%"]
-				]
+				],
+				[["animation", "ec-spin 1s linear infinite"]]
 			],
 			"candidate": [
 				[
@@ -73,7 +74,8 @@
 					["border", "2px solid var(--ec-color-border)"],
 					["border-top-color", "var(--ec-color-text-secondary)"],
 					["border-radius", "50%"]
-				]
+				],
+				[["animation", "ec-spin 1s linear infinite"]]
 			],
 			"evidence": ".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md"
 		},
