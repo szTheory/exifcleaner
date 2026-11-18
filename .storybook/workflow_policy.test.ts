@@ -126,6 +126,11 @@ export function workflowPolicyProblems(text: string): string[] {
 	if (!/^ {8}run: yarn test:storybook$/m.test(text)) {
 		problems.push("the yarn test:storybook step is missing");
 	}
+	if (text.includes("playwright install-deps")) {
+		problems.push(
+			"cached Playwright browsers must not trigger an apt dependency refresh",
+		);
+	}
 	const steps =
 		text
 			.split("    steps:\n")[1]
@@ -244,6 +249,15 @@ describe("storybook.yml policy (D-17, SBK-04)", () => {
 			"timeout removed",
 			(t) => t.replace("    timeout-minutes: 10\n", ""),
 			"timeout-minutes",
+		],
+		[
+			"cached-browser apt refresh",
+			(t) =>
+				t.replace(
+					"      - name: Disable AppArmor restriction (Ubuntu 24.04)",
+					"      - name: Install Playwright system deps\n        if: steps.playwright-cache.outputs.cache-hit == 'true'\n        run: npx playwright install-deps chromium\n\n      - name: Disable AppArmor restriction (Ubuntu 24.04)",
+				),
+			"cached Playwright browsers must not trigger an apt dependency refresh",
 		],
 		[
 			"telemetry env removed",
