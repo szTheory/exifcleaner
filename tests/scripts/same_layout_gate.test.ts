@@ -96,8 +96,8 @@ describe("cumulative same-layout gate", () => {
 		const file = "src/renderer/styles/file_table.css";
 		const changed = replaceOnce(
 			source(planted, file),
-			".file-table__header {\n\tposition: sticky;\n\ttop: 0;\n\tdisplay: grid;\n\tgrid-template-columns: 24px minmax(0, 1fr) 64px 128px 56px 72px;",
-			".file-table__header {\n\tposition: sticky;\n\ttop: 0;\n\tdisplay: grid;\n\tgrid-template-columns: 24px minmax(0, 1fr) 64px 129px 56px 72px;",
+			".file-table__header {\n\tposition: sticky;\n\ttop: 0;\n\tdisplay: grid;\n\t/* prettier-ignore */\n\tgrid-template-columns: 24px minmax(0, 1fr) 64px 128px 56px minmax(72px, max-content);",
+			".file-table__header {\n\tposition: sticky;\n\ttop: 0;\n\tdisplay: grid;\n\t/* prettier-ignore */\n\tgrid-template-columns: 24px minmax(0, 1fr) 64px 129px 56px minmax(72px, max-content);",
 		);
 		planted.set(file, Buffer.from(changed, "utf8"));
 		expect(

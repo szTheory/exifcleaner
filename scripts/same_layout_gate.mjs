@@ -64,7 +64,8 @@ export const EXPECTED_EXCEPTIONS = {
 			property: "grid-template-columns",
 			selectors: [".file-table__header", ".file-table__row"],
 			baseline: "24px 1fr 72px 80px 88px 88px",
-			candidate: "24px minmax(0, 1fr) 64px 128px 56px 72px",
+			candidate:
+				"24px minmax(0, 1fr) 64px 128px 56px minmax(72px, max-content)",
 			evidence:
 				".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md",
 		},
@@ -124,7 +125,8 @@ const LOCALE_DIRECTORY = `${LOCALE_EXCEPTION.sourceDirectory}/`;
 const FILE_TABLE_CSS = "src/renderer/styles/file_table.css";
 const CHEVRON_ICON = "src/renderer/components/icons/ChevronIcon.tsx";
 const APPROVED_TABLE_SELECTORS = [".file-table__header", ".file-table__row"];
-const APPROVED_TABLE_COLUMNS = "24px minmax(0, 1fr) 64px 128px 56px 72px";
+const APPROVED_TABLE_COLUMNS =
+	"24px minmax(0, 1fr) 64px 128px 56px minmax(72px, max-content)";
 const BASELINE_TABLE_COLUMNS = "24px 1fr 72px 80px 88px 88px";
 const BRAND_ASSETS = new Map([
 	[
