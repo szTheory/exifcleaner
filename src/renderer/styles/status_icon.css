@@ -11,7 +11,7 @@
 .status-icon__spinner {
 	width: 16px;
 	height: 16px;
-	border: 2px solid transparent;
+	border: 2px solid var(--ec-color-border);
 	border-top-color: var(--ec-color-text-secondary);
 	border-radius: 50%;
 }

@@ -65,7 +65,51 @@ export const EXPECTED_EXCEPTIONS = {
 			selectors: [".file-table__header", ".file-table__row"],
 			baseline: "24px 1fr 72px 80px 88px 88px",
 			candidate:
-				"24px minmax(0, 1fr) 64px 128px 56px minmax(72px, max-content)",
+				"24px minmax(0, 1fr) 72px 128px 56px minmax(72px, max-content)",
+			evidence:
+				".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md",
+		},
+		{
+			id: "VIS-80-SPINNER-CLARITY",
+			source: "src/renderer/styles/status_icon.css",
+			selector: ".status-icon__spinner",
+			baseline: [
+				[
+					["width", "16px"],
+					["height", "16px"],
+					["border", "2px solid transparent"],
+					["border-top-color", "var(--ec-color-muted)"],
+					["border-radius", "50%"],
+				],
+			],
+			candidate: [
+				[
+					["width", "16px"],
+					["height", "16px"],
+					["border", "2px solid var(--ec-color-border)"],
+					["border-top-color", "var(--ec-color-text-secondary)"],
+					["border-radius", "50%"],
+				],
+			],
+			evidence:
+				".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md",
+		},
+		{
+			id: "VIS-80-ERROR-SUMMARY",
+			source: "src/renderer/styles/file_table.css",
+			selector: ".file-table__error-summary",
+			baseline: [],
+			candidate: [
+				[
+					["display", "block"],
+					["overflow", "hidden"],
+					["text-overflow", "ellipsis"],
+					["white-space", "nowrap"],
+					["color", "var(--ec-color-text-secondary)"],
+					["font-size", "var(--ec-font-size-small)"],
+					["line-height", "var(--ec-line-height-normal)"],
+				],
+			],
 			evidence:
 				".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md",
 		},
@@ -126,7 +170,7 @@ const FILE_TABLE_CSS = "src/renderer/styles/file_table.css";
 const CHEVRON_ICON = "src/renderer/components/icons/ChevronIcon.tsx";
 const APPROVED_TABLE_SELECTORS = [".file-table__header", ".file-table__row"];
 const APPROVED_TABLE_COLUMNS =
-	"24px minmax(0, 1fr) 64px 128px 56px minmax(72px, max-content)";
+	"24px minmax(0, 1fr) 72px 128px 56px minmax(72px, max-content)";
 const BASELINE_TABLE_COLUMNS = "24px 1fr 72px 80px 88px 88px";
 const BRAND_ASSETS = new Map([
 	[
@@ -1081,6 +1125,55 @@ function compareTableGrid(baseFiles, candidateFiles, problems) {
 	}
 }
 
+function exactRuleDeclarations(files, file, selector) {
+	const css = decode(files, file);
+	if (css === undefined) {
+		throw new Error("approved stylesheet is missing: " + file);
+	}
+	const root = postcss.parse(css, { from: file });
+	const declarations = [];
+	root.walkRules((rule) => {
+		if (rule.selector !== selector) return;
+		declarations.push(
+			rule.nodes
+				.filter((node) => node.type === "decl")
+				.map((node) => [node.prop, node.value.trim()]),
+		);
+	});
+	return declarations;
+}
+
+function comparePresentationExceptions(baseFiles, candidateFiles, problems) {
+	const exceptions = EXPECTED_EXCEPTIONS.exceptions.filter(
+		(exception) => exception.selector !== undefined,
+	);
+	for (const exception of exceptions) {
+		let baseline;
+		let candidate;
+		try {
+			baseline = exactRuleDeclarations(
+				baseFiles,
+				exception.source,
+				exception.selector,
+			);
+			candidate = exactRuleDeclarations(
+				candidateFiles,
+				exception.source,
+				exception.selector,
+			);
+		} catch (error) {
+			problems.push(error.message);
+			continue;
+		}
+		if (JSON.stringify(baseline) !== JSON.stringify(exception.baseline)) {
+			problems.push("fixed v5.0 presentation rule changed: " + exception.id);
+		}
+		if (JSON.stringify(candidate) !== JSON.stringify(exception.candidate)) {
+			problems.push("approved presentation rule changed: " + exception.id);
+		}
+	}
+}
+
 function svgPresentation(files) {
 	const text = decode(files, CHEVRON_ICON);
 	if (text === undefined) throw new Error("chevron icon source is missing");
@@ -1205,6 +1298,7 @@ export function compareSnapshots({
 		problems,
 	);
 	compareTableGrid(baseFiles, candidateFiles, problems);
+	comparePresentationExceptions(baseFiles, candidateFiles, problems);
 	compareChevronPresentation(baseFiles, candidateFiles, problems);
 	compareJsxTrees(baseFiles, candidateFiles, problems);
 	compareMotion(baseFiles, candidateFiles, problems);

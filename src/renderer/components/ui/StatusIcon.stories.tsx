@@ -72,6 +72,14 @@ export const Processing: Story = {
 			[".status-icon__spinner"],
 			2,
 		);
+		for (const spinner of canvasElement.querySelectorAll<HTMLElement>(
+			".status-icon__spinner",
+		)) {
+			const style = getComputedStyle(spinner);
+			await expect(style.borderRadius).toBe("50%");
+			await expect(style.borderRightColor).not.toBe("rgba(0, 0, 0, 0)");
+			await expect(style.borderTopColor).not.toBe(style.borderRightColor);
+		}
 	},
 };
 
