@@ -43,6 +43,38 @@
 					"variant": "dark"
 				}
 			]
+		},
+		{
+			"id": "VIS-80-REVIEW",
+			"source": "src/renderer/styles/file_table.css",
+			"property": "grid-template-columns",
+			"selectors": [".file-table__header", ".file-table__row"],
+			"baseline": "24px 1fr 72px 80px 88px 88px",
+			"candidate": "28px minmax(0, 1fr) 64px 144px 72px 72px",
+			"evidence": ".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md"
+		},
+		{
+			"id": "VIS-80-CHEVRON",
+			"source": "src/renderer/components/icons/ChevronIcon.tsx",
+			"element": "svg",
+			"before": {
+				"width": "12",
+				"height": "12",
+				"strokeWidth": "1.5"
+			},
+			"after": {
+				"width": "expanded ? 16 : 12",
+				"height": "expanded ? 16 : 12",
+				"strokeWidth": "expanded ? 2 : 1.5"
+			},
+			"evidence": ".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md"
+		},
+		{
+			"id": "COPY-80-REVIEW",
+			"sourceDirectory": ".resources/locales",
+			"keys": ["intake.chooseFiles", "intake.chooseFolder"],
+			"removeTrailing": "…",
+			"evidence": ".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md"
 		}
 	]
 }

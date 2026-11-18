@@ -180,7 +180,7 @@ function planted(): Planted {
 			doc["steps"] = [
 				story(CHOOSE, "Clear"),
 				story(CHOOSE, "Clear"),
-				story(CHOOSE, "Choose folder…"),
+				story(CHOOSE, "Choose folder"),
 			];
 		} else {
 			doc["steps"] = [story(FALLBACK, "Try again")];
@@ -915,7 +915,7 @@ describe("renderJourneys", () => {
 			"| J-06.2",
 			"| J-06.3",
 		]);
-		expect(rows[2]).toContain("Choose folder…");
+		expect(rows[2]).toContain("Choose folder");
 		expect(text).toContain(`${REAL_SPEC} › ${REAL_TITLE}`);
 		expect(text).toContain("| story+e2e |");
 		expect(text).toContain("gesture: Drop files on the window");

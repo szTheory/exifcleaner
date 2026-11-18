@@ -58,6 +58,37 @@ export const EXPECTED_EXCEPTIONS = {
 				},
 			],
 		},
+		{
+			id: "VIS-80-REVIEW",
+			source: "src/renderer/styles/file_table.css",
+			property: "grid-template-columns",
+			selectors: [".file-table__header", ".file-table__row"],
+			baseline: "24px 1fr 72px 80px 88px 88px",
+			candidate: "28px minmax(0, 1fr) 64px 144px 72px 72px",
+			evidence:
+				".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md",
+		},
+		{
+			id: "VIS-80-CHEVRON",
+			source: "src/renderer/components/icons/ChevronIcon.tsx",
+			element: "svg",
+			before: { width: "12", height: "12", strokeWidth: "1.5" },
+			after: {
+				width: "expanded ? 16 : 12",
+				height: "expanded ? 16 : 12",
+				strokeWidth: "expanded ? 2 : 1.5",
+			},
+			evidence:
+				".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md",
+		},
+		{
+			id: "COPY-80-REVIEW",
+			sourceDirectory: ".resources/locales",
+			keys: ["intake.chooseFiles", "intake.chooseFolder"],
+			removeTrailing: "…",
+			evidence:
+				".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md",
+		},
 	],
 };
 
@@ -86,7 +117,15 @@ const D03_CALLSITES = [
 		segments: "displayNameSegments({ name: error })",
 	},
 ];
-const ENGLISH_CATALOG = ".resources/locales/en.json";
+const LOCALE_EXCEPTION = EXPECTED_EXCEPTIONS.exceptions.find(
+	(exception) => exception.id === "COPY-80-REVIEW",
+);
+const LOCALE_DIRECTORY = `${LOCALE_EXCEPTION.sourceDirectory}/`;
+const FILE_TABLE_CSS = "src/renderer/styles/file_table.css";
+const CHEVRON_ICON = "src/renderer/components/icons/ChevronIcon.tsx";
+const APPROVED_TABLE_SELECTORS = [".file-table__header", ".file-table__row"];
+const APPROVED_TABLE_COLUMNS = "28px minmax(0, 1fr) 64px 144px 72px 72px";
+const BASELINE_TABLE_COLUMNS = "24px 1fr 72px 80px 88px 88px";
 const BRAND_ASSETS = new Map([
 	[
 		"src/renderer/assets/brand/exifcleaner-symbol-light.svg",
@@ -163,14 +202,16 @@ export function readGitSnapshot(ref, cwd = process.cwd()) {
 		.split("\0")
 		.filter(Boolean)
 		.filter(
-			(file) => file.startsWith("src/renderer/") || file === ENGLISH_CATALOG,
+			(file) =>
+				file.startsWith("src/renderer/") ||
+				(file.startsWith(LOCALE_DIRECTORY) && file.endsWith(".json")),
 		);
 	const files = new Map();
 	for (const file of paths) {
 		if (
 			file.endsWith(".tsx") ||
 			file.endsWith(".css") ||
-			file === ENGLISH_CATALOG ||
+			(file.startsWith(LOCALE_DIRECTORY) && file.endsWith(".json")) ||
 			BRAND_ASSETS.has(file)
 		) {
 			files.set(file, gitBuffer(["show", ref + ":" + file], cwd));
@@ -227,8 +268,7 @@ function changedSourcePathProblems(paths) {
 			file.endsWith(".stories.tsx") ||
 			file.startsWith("src/renderer/story_support/") ||
 			APPROVED_NON_RENDERER_SOURCES.has(file) ||
-			BRAND_ASSETS.has(file) ||
-			file === ENGLISH_CATALOG
+			BRAND_ASSETS.has(file)
 		) {
 			continue;
 		}
@@ -925,12 +965,193 @@ function compareMotion(baseFiles, candidateFiles, problems) {
 }
 
 function compareLocales(baseFiles, candidateFiles, problems) {
-	const before = bytes(baseFiles, ENGLISH_CATALOG);
-	const after = bytes(candidateFiles, ENGLISH_CATALOG);
-	if (before === undefined || after === undefined) {
-		problems.push("English locale catalog missing from baseline or candidate");
-	} else if (!before.equals(after)) {
-		problems.push("English locale catalog changed byte-for-byte");
+	const baselinePaths = [...baseFiles.keys()]
+		.filter(
+			(file) => file.startsWith(LOCALE_DIRECTORY) && file.endsWith(".json"),
+		)
+		.sort();
+	const candidatePaths = [...candidateFiles.keys()]
+		.filter(
+			(file) => file.startsWith(LOCALE_DIRECTORY) && file.endsWith(".json"),
+		)
+		.sort();
+	if (baselinePaths.length === 0) {
+		problems.push("fixed v5.0 snapshot has no locale catalogs");
+		return;
+	}
+	if (JSON.stringify(baselinePaths) !== JSON.stringify(candidatePaths)) {
+		problems.push("locale catalog file set changed");
+		return;
+	}
+	const exception = LOCALE_EXCEPTION;
+	for (const file of baselinePaths) {
+		const before = bytes(baseFiles, file);
+		const after = bytes(candidateFiles, file);
+		if (before === undefined || after === undefined) {
+			problems.push(
+				"locale catalog missing from baseline or candidate: " + file,
+			);
+			continue;
+		}
+		let baselineLabels;
+		let candidateLabels;
+		try {
+			baselineLabels = JSON.parse(before.toString("utf8"));
+			candidateLabels = JSON.parse(after.toString("utf8"));
+		} catch {
+			problems.push("locale catalog is invalid JSON: " + file);
+			continue;
+		}
+		let normalized = after.toString("utf8");
+		let valid = true;
+		for (const key of exception.keys) {
+			const baselineValue = baselineLabels[key];
+			const candidateValue = candidateLabels[key];
+			if (
+				typeof baselineValue !== "string" ||
+				!baselineValue.endsWith(exception.removeTrailing) ||
+				typeof candidateValue !== "string" ||
+				candidateValue !==
+					baselineValue.slice(0, -exception.removeTrailing.length)
+			) {
+				valid = false;
+				break;
+			}
+			const baselineLine = `${JSON.stringify(key)}: ${JSON.stringify(baselineValue)},`;
+			const candidateLine = `${JSON.stringify(key)}: ${JSON.stringify(candidateValue)},`;
+			if (
+				countOccurrences(before.toString("utf8"), baselineLine) !== 1 ||
+				countOccurrences(normalized, candidateLine) !== 1
+			) {
+				valid = false;
+				break;
+			}
+			normalized = normalized.replace(candidateLine, baselineLine);
+		}
+		if (!valid || !Buffer.from(normalized, "utf8").equals(before)) {
+			problems.push(
+				"locale catalog differs outside the two approved intake labels: " +
+					file,
+			);
+		}
+	}
+}
+
+function countOccurrences(value, needle) {
+	return value.split(needle).length - 1;
+}
+
+function tableGridDeclarations(files, selector) {
+	const css = decode(files, FILE_TABLE_CSS);
+	if (css === undefined) {
+		throw new Error("file table stylesheet is missing");
+	}
+	const root = postcss.parse(css, { from: FILE_TABLE_CSS });
+	const declarations = [];
+	root.walkRules((rule) => {
+		if (rule.selector !== selector) return;
+		rule.walkDecls("grid-template-columns", (declaration) => {
+			declarations.push(declaration.value.trim());
+		});
+	});
+	return declarations;
+}
+
+function compareTableGrid(baseFiles, candidateFiles, problems) {
+	for (const selector of APPROVED_TABLE_SELECTORS) {
+		let baseline;
+		let candidate;
+		try {
+			baseline = tableGridDeclarations(baseFiles, selector);
+			candidate = tableGridDeclarations(candidateFiles, selector);
+		} catch (error) {
+			problems.push(error.message);
+			return;
+		}
+		if (baseline.length !== 1 || baseline[0] !== BASELINE_TABLE_COLUMNS) {
+			problems.push(
+				"fixed v5.0 table grid does not match the approved baseline",
+			);
+		}
+		if (candidate.length !== 1 || candidate[0] !== APPROVED_TABLE_COLUMNS) {
+			problems.push("approved table grid declaration changed");
+		}
+	}
+}
+
+function svgPresentation(files) {
+	const text = decode(files, CHEVRON_ICON);
+	if (text === undefined) throw new Error("chevron icon source is missing");
+	const source = sourceFile(CHEVRON_ICON, text);
+	const svgs = [];
+	const visit = (node) => {
+		if (
+			ts.isJsxOpeningElement(node) &&
+			node.tagName.getText(source) === "svg"
+		) {
+			const attributes = Object.fromEntries(
+				node.attributes.properties
+					.filter(ts.isJsxAttribute)
+					.map((attribute) => {
+						const initializer = attribute.initializer;
+						let value = "";
+						if (initializer !== undefined) {
+							if (ts.isStringLiteral(initializer)) {
+								value = initializer.text;
+							} else if (
+								ts.isJsxExpression(initializer) &&
+								initializer.expression !== undefined
+							) {
+								value = initializer.expression
+									.getText(source)
+									.replace(/\s+/g, " ")
+									.trim();
+							}
+						}
+						return [attribute.name.getText(source), value];
+					}),
+			);
+			svgs.push({
+				width: attributes.width,
+				height: attributes.height,
+				strokeWidth: attributes.strokeWidth,
+			});
+		}
+		ts.forEachChild(node, visit);
+	};
+	visit(source);
+	return svgs;
+}
+
+function compareChevronPresentation(baseFiles, candidateFiles, problems) {
+	let baseline;
+	let candidate;
+	try {
+		baseline = svgPresentation(baseFiles);
+		candidate = svgPresentation(candidateFiles);
+	} catch (error) {
+		problems.push(error.message);
+		return;
+	}
+	const expectedBefore = { width: "12", height: "12", strokeWidth: "1.5" };
+	const expectedAfter = {
+		width: "expanded ? 16 : 12",
+		height: "expanded ? 16 : 12",
+		strokeWidth: "expanded ? 2 : 1.5",
+	};
+	if (
+		baseline.length !== 1 ||
+		JSON.stringify(baseline[0]) !== JSON.stringify(expectedBefore)
+	) {
+		problems.push(
+			"fixed v5.0 disclosure icon does not match the approved baseline",
+		);
+	}
+	if (
+		candidate.length !== 1 ||
+		JSON.stringify(candidate[0]) !== JSON.stringify(expectedAfter)
+	) {
+		problems.push("approved chevron presentation changed");
 	}
 }
 
@@ -953,7 +1174,7 @@ function validateExceptionFile() {
 	}
 	if (JSON.stringify(parsed) !== JSON.stringify(EXPECTED_EXCEPTIONS)) {
 		return [
-			"same-layout exception file differs from the two approved source-bound records",
+			"same-layout exception file differs from the approved source-bound records",
 		];
 	}
 	return [];
@@ -981,6 +1202,8 @@ export function compareSnapshots({
 		{ baseline: baseFiles, candidate: candidateFiles },
 		problems,
 	);
+	compareTableGrid(baseFiles, candidateFiles, problems);
+	compareChevronPresentation(baseFiles, candidateFiles, problems);
 	compareJsxTrees(baseFiles, candidateFiles, problems);
 	compareMotion(baseFiles, candidateFiles, problems);
 	return problems;
@@ -1027,7 +1250,7 @@ function main() {
 			base +
 			", candidate " +
 			gitText(["rev-parse", head], cwd).trim() +
-			", two exact DOM exceptions\n",
+			", approved DOM, table-grid, and copy exceptions\n",
 	);
 }
 

@@ -7,7 +7,7 @@
 			"scenario": "empty-state.copy-mode-on",
 			"action": {
 				"role": "button",
-				"name": "Choose files…"
+				"name": "Choose files"
 			},
 			"proof": "story",
 			"note": "The native file dialog is never opened by a story or an e2e test."

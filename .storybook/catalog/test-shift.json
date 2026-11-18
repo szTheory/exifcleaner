@@ -14,7 +14,7 @@
 						"subject": "App",
 						"covers": "focus-order",
 						"evidence": "userEvent.tab()",
-						"note": "Story Tabs from a blurred start and asserts Choose files… gains focus, stronger than some non-body element; simulated Tab (D-03 residual)"
+						"note": "Story Tabs from a blurred start and asserts Choose files gains focus, stronger than some non-body element; simulated Tab (D-03 residual)"
 					},
 					{
 						"n": 2,
@@ -38,7 +38,7 @@
 						"story": "screens-app--empty",
 						"subject": "App",
 						"covers": "focus-order",
-						"evidence": "Choose files…",
+						"evidence": "Choose files",
 						"note": "First stop after a blurred start; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test"
 					},
 					{
@@ -48,7 +48,7 @@
 						"story": "screens-app--empty",
 						"subject": "App",
 						"covers": "focus-order",
-						"evidence": "Choose folder…",
+						"evidence": "Choose folder",
 						"note": "Second stop; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test"
 					},
 					{
@@ -221,21 +221,21 @@
 					},
 					{
 						"n": 4,
-						"code": "expect(emptyState.locator(\".empty-state__button--primary\")).toHaveText(\"Choose files…\")",
+						"code": "expect(emptyState.locator(\".empty-state__button--primary\")).toHaveText(\"Choose files\")",
 						"verdict": "deleted",
 						"story": "screens-app--empty",
 						"subject": "App",
 						"covers": "text",
-						"evidence": "Choose files…"
+						"evidence": "Choose files"
 					},
 					{
 						"n": 5,
-						"code": "expect(emptyState.locator(\".empty-state__button--secondary\")).toHaveText(\"Choose folder…\")",
+						"code": "expect(emptyState.locator(\".empty-state__button--secondary\")).toHaveText(\"Choose folder\")",
 						"verdict": "deleted",
 						"story": "screens-app--empty",
 						"subject": "App",
 						"covers": "text",
-						"evidence": "Choose folder…"
+						"evidence": "Choose folder"
 					},
 					{
 						"n": 6,

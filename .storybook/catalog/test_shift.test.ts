@@ -333,8 +333,8 @@ describe("walker parity", () => {
 	});
 
 	test("squash maps a wrapped expect and its one-line form to the same text", () => {
-		const oneLine = `${RUN}("t", async () => {\n\tawait expect(emptyState.locator(".x")).toHaveText("Choose files…");\n});`;
-		const wrapped = `${RUN}("t", async () => {\n\tawait expect(\n\t\temptyState.locator(".x"),\n\t).toHaveText("Choose files…");\n});`;
+		const oneLine = `${RUN}("t", async () => {\n\tawait expect(emptyState.locator(".x")).toHaveText("Choose files");\n});`;
+		const wrapped = `${RUN}("t", async () => {\n\tawait expect(\n\t\temptyState.locator(".x"),\n\t).toHaveText("Choose files");\n});`;
 		const a = e2eAssertions({ text: oneLine, file: "a.spec.ts" });
 		const b = e2eAssertions({ text: wrapped, file: "a.spec.ts" });
 		expect(a.tests).toHaveLength(1);

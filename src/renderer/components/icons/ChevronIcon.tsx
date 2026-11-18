@@ -11,12 +11,12 @@ export function ChevronIcon({
 	return (
 		<svg
 			className={`chevron-icon${expanded ? " chevron-icon--expanded" : ""}${className ? ` ${className}` : ""}`}
-			width="12"
-			height="12"
+			width={expanded ? 16 : 12}
+			height={expanded ? 16 : 12}
 			viewBox="0 0 12 12"
 			fill="none"
 			stroke="currentColor"
-			strokeWidth="1.5"
+			strokeWidth={expanded ? 2 : 1.5}
 			strokeLinecap="round"
 			strokeLinejoin="round"
 			aria-hidden="true"

@@ -420,7 +420,7 @@ describe("journey dead-end controls over planted stories (D-24)", () => {
 	);
 
 	test(
-		"action names match by exact equality: Choose files with the ellipsis resolves, three dots do not",
+		"action names match by exact equality after removing the trailing ellipsis",
 		async () => {
 			const journeyFor = (name: string): Journey => ({
 				schemaVersion: 1,
@@ -435,9 +435,10 @@ describe("journey dead-end controls over planted stories (D-24)", () => {
 				],
 			});
 			for (const [name, expected] of [
-				["Choose files…", []],
+				["Choose files", []],
 				["Choose files...", ["action-missing J-09.1"]],
-				["choose files…", ["action-missing J-09.1"]],
+				["Choose files…", ["action-missing J-09.1"]],
+				["choose files", ["action-missing J-09.1"]],
 			] as const) {
 				const journey = journeyFor(name);
 				const { probe } = makeProbe({
