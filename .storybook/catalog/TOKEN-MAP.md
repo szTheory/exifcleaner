@@ -4,7 +4,7 @@
 
 Brand pin: `7629b8fcd5794df708000e49abd9a2a9402d4c7b`
 
-Dispositions: adopt 17, derive 5, keep-platform 10, propose-upstream 16, retire 10, local 3. Each custom property declared in tokens.css or used under src/renderer has exactly one entry.
+Dispositions: adopt 17, derive 5, keep-platform 10, propose-upstream 16, retire 8, local 3. Each custom property declared in tokens.css or used under src/renderer has exactly one entry.
 
 | Name | Disposition | Brand (light / dark) or target | Spec | Reason, rule or decision | Finding |
 | --- | --- | --- | --- | --- | --- |
@@ -64,8 +64,6 @@ Dispositions: adopt 17, derive 5, keep-platform 10, propose-upstream 16, retire 
 | --ec-stagger-delay | local |  | motion.stagger | Set inline per row at FileRow.tsx:119 ("--ec-stagger-delay": staggerIndex * 30 ms) and read at file_table.css:182 (animation-delay: var(--ec-stagger-delay, 0ms)); a runtime value that tokens.css never declares. v5.2 removes the stagger. |  |
 | --ec-toggle-off-track | keep-platform |  | platform-owned.platform.toggle-off-track | Platform-owned role with no brand equivalent (D-04). Both theme blocks use exactly color-mix(in srgb, GrayText 90%, CanvasText 10%). Fresh real ToggleSwitch Off observations match independent GrayText, CanvasText and mix probes; track-to-ground, track-to-raised-surface and white-thumb ratios are all at least 3:1 in light and dark. The real opaque thumb is pinned Clean White #FFFFFF; the near-white identity mutation is rejected even when contrast still passes. |  |
 | --empty-state-button-pressed-surface | local |  |  | Component-scoped alias used by the existing EmptyState primary action: it selects --ec-color-action-pressed for the primary variant and --ec-color-surface-pressed for the secondary variant; both values remain mapped semantic roles. |  |
-| --spacing-lg | retire |  | spacing.legacy-names | Declared nowhere: error_boundary.css and file_list.css read var(--spacing-lg) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11). | token-gap\|ui-errorboundary--fallback\|spacing-tokens-undefined |
 | --spacing-md | retire |  | spacing.legacy-names | Declared nowhere: error_boundary.css and file_list.css read var(--spacing-md) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11). | token-gap\|ui-errorboundary--fallback\|spacing-tokens-undefined |
 | --spacing-sm | retire |  | spacing.legacy-names | Declared nowhere: error_boundary.css and file_list.css read var(--spacing-sm) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11). | token-gap\|ui-errorboundary--fallback\|spacing-tokens-undefined |
-| --spacing-xl | retire |  | spacing.legacy-names | Declared nowhere: error_boundary.css and file_list.css read var(--spacing-xl) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11). | token-gap\|ui-errorboundary--fallback\|spacing-tokens-undefined |
 | --spacing-xs | retire |  | spacing.legacy-names | Declared nowhere: error_boundary.css and file_list.css read var(--spacing-xs) and every use resolves to nothing; v5.1 maps each use onto a --ec-space-* step (D-11). | token-gap\|ui-errorboundary--fallback\|spacing-tokens-undefined |

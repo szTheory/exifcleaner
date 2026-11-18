@@ -32,8 +32,13 @@
 		},
 		{
 			"file": "src/renderer/components/ui/EmptyState.tsx",
-			"kind": "svg",
-			"count": 1
+			"kind": "image-import",
+			"count": 2
+		},
+		{
+			"file": "src/renderer/components/ui/EmptyState.tsx",
+			"kind": "img",
+			"count": 2
 		},
 		{
 			"file": "src/renderer/components/ui/StatusIcon.tsx",

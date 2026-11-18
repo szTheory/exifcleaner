@@ -1,5 +1,29 @@
 {
 	"schemaVersion": 1,
-	"paths": [],
-	"hooks": []
+	"paths": [
+		{
+			"file": "src/renderer/components/ui/EmptyState.tsx",
+			"specifier": "../../assets/brand/exifcleaner-symbol-light.svg?no-inline",
+			"identifier": "symbolLight"
+		},
+		{
+			"file": "src/renderer/components/ui/EmptyState.tsx",
+			"specifier": "../../assets/brand/exifcleaner-symbol-dark.svg?no-inline",
+			"identifier": "symbolDark"
+		}
+	],
+	"hooks": [
+		{
+			"name": "prestorybook:build",
+			"command": "node scripts/brand_fetch.mjs"
+		},
+		{
+			"name": "prestorybook:dev",
+			"command": "node scripts/brand_fetch.mjs"
+		},
+		{
+			"name": "pretest:storybook",
+			"command": "node scripts/brand_fetch.mjs"
+		}
+	]
 }

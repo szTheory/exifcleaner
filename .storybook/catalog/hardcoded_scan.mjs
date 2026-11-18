@@ -64,7 +64,10 @@ export function scanSource(fileName, sourceText) {
 			HARDCODED_ATTRIBUTES.includes(node.name.getText(sf)) &&
 			node.initializer !== undefined
 		) {
-			if (ts.isStringLiteral(node.initializer)) {
+			if (
+				ts.isStringLiteral(node.initializer) &&
+				node.initializer.text.length > 0
+			) {
 				add(node.initializer, node.initializer.text, "attribute");
 			} else if (
 				ts.isJsxExpression(node.initializer) &&

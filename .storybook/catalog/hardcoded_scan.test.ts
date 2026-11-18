@@ -131,6 +131,12 @@ describe("scanSource planted cases", () => {
 		expect(scanSource("planted.tsx", source)).toEqual([]);
 	});
 
+	test("empty decorative alt text is not a hardcoded-copy deviation", () => {
+		expect(
+			scanSource("planted.tsx", 'export const A = () => <img alt="" />;\n'),
+		).toEqual([]);
+	});
+
 	test("multi-line text is one literal with collapsed whitespace", () => {
 		const source =
 			"export const A = () => (\n\t<p>\n\t\tTry\n\t\tagain\n\t</p>\n);\n";

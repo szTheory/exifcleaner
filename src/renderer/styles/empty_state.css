@@ -19,10 +19,26 @@
 }
 
 .empty-state__icon {
-	width: 48px;
-	height: 48px;
+	width: 64px;
+	height: 64px;
 	color: var(--ec-color-text-secondary);
 	margin-block-end: var(--ec-space-1);
+}
+
+.empty-state__icon--light {
+	display: block;
+}
+
+.empty-state__icon--dark {
+	display: none;
+}
+
+[data-theme="dark"] .empty-state__icon--light {
+	display: none;
+}
+
+[data-theme="dark"] .empty-state__icon--dark {
+	display: block;
 }
 
 .empty-state__title {
