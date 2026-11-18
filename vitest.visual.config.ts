@@ -74,6 +74,46 @@ function commitSha(): string {
 	}).trim();
 }
 
+function visualReadBaseline(name: string): { sha256: string; base64: string } {
+	const filename = safeName(name);
+	const contractPath = path.join(
+		process.cwd(),
+		".storybook/visual-baselines.json",
+	);
+	const contract = JSON.parse(fs.readFileSync(contractPath, "utf8")) as {
+		baselines?: Record<string, { path?: string; sha256?: string }>;
+	};
+	const record = contract.baselines?.[filename];
+	const expectedPath = path.posix.join("visual-baselines", filename);
+	if (
+		record === undefined ||
+		record.path !== expectedPath ||
+		typeof record.sha256 !== "string" ||
+		!/^[a-f0-9]{64}$/u.test(record.sha256)
+	) {
+		throw new Error(
+			"no source-bound visual baseline is declared for " + filename,
+		);
+	}
+	const directory = path.join(process.cwd(), ".storybook/visual-baselines");
+	const directoryStat = fs.lstatSync(directory);
+	if (!directoryStat.isDirectory() || directoryStat.isSymbolicLink()) {
+		throw new Error("visual baseline directory must be a real directory");
+	}
+	const baselinePath = path.join(directory, filename);
+	const stat = fs.lstatSync(baselinePath);
+	if (!stat.isFile() || stat.isSymbolicLink()) {
+		throw new Error("visual baseline must be a regular PNG file: " + filename);
+	}
+	const png = fs.readFileSync(baselinePath);
+	const sha256 = createHash("sha256").update(png).digest("hex");
+	if (sha256 !== record.sha256) {
+		throw new Error("visual baseline hash mismatch: " + filename);
+	}
+	dimensions(png);
+	return { sha256, base64: png.toString("base64") };
+}
+
 const commands = {
 	visualEnv: (
 		_ctx: BrowserCommandContext,
@@ -121,6 +161,10 @@ const commands = {
 			{ flag: "wx" },
 		);
 	},
+	visualReadBaseline: (
+		_ctx: BrowserCommandContext,
+		name: string,
+	): { sha256: string; base64: string } => visualReadBaseline(name),
 };
 
 const browser = () => ({
