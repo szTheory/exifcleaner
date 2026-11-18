@@ -1947,15 +1947,18 @@ describe("the pair list is real, not a stub", () => {
 		}
 	});
 
-	test("the pill text pairs list the pill over the ground and over the surface", () => {
-		for (const family of ["jpg", "heic", "png", "pdf", "mov", "dng"]) {
-			const pair = PAIRS.pairs.find((p) => p.id === `pill-${family}`);
-			expect(pair, family).toBeDefined();
-			expect(backdrops(pair as ContrastPair, PAIRS).map((b) => b.ref)).toEqual([
-				`pill-${family}-bg-over-bg`,
-				`pill-${family}-bg-over-surface`,
-			]);
-		}
+	test("the shared neutral pill pair covers the ground and surface", () => {
+		const pair = PAIRS.pairs.find((p) => p.id === "neutral-pill");
+		expect(pair).toMatchObject({
+			fg: "--ec-color-pill-text",
+			on: ["neutral-pill-over-bg", "neutral-pill-over-surface"],
+			role: "text",
+			selector: ".type-pill",
+			story: "ui-typepill--neutral",
+		});
+		expect(
+			backdrops(pair as ContrastPair, PAIRS).map((backdrop) => backdrop.ref),
+		).toEqual(["neutral-pill-over-bg", "neutral-pill-over-surface"]);
 	});
 });
 
