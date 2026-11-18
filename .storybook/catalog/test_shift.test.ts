@@ -993,6 +993,22 @@ describe("the baseline commit is read from git and fails closed", () => {
 		expect(baselineCodes(real)).toEqual([]);
 	});
 
+	test("the Phase 80 copy normalization is exact and pinned to the Phase 75 baseline", () => {
+		const changed = clone();
+		const item = at(entryOf(changed, "i18n", "switches to Romanian").items, 1);
+		item.code = item.code.replace("Alege fișiere", "Alege imagini");
+		expect(baselineCodes(changed)).toContain("baseline-drift");
+
+		const repinned = clone();
+		const parent = spawnSync("git", ["rev-parse", "HEAD^"], {
+			cwd: repoRoot,
+			encoding: "utf8",
+		});
+		expect(parent.status, parent.stderr).toBe(0);
+		repinned.baselineCommit = parent.stdout.trim();
+		expect(baselineCodes(repinned)).toContain("baseline-drift");
+	});
+
 	test("the baseline walk holds 26 tests and 78 expects", () => {
 		const git = (args: string[]): string => {
 			const result = spawnSync("git", args, {

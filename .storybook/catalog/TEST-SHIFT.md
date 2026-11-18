@@ -12,15 +12,15 @@ One row per `expect(`, `expect.soft(` or `expect.poll(` call inside a test callb
 
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | deleted | expect(nonBodyFocused.length).toBeGreaterThan(0) | screens-app--empty | focus-order | userEvent.tab() | Story Tabs from a blurred start and asserts Choose files… gains focus, stronger than some non-body element; simulated Tab (D-03 residual) |
+| 1 | deleted | expect(nonBodyFocused.length).toBeGreaterThan(0) | screens-app--empty | focus-order | userEvent.tab() | Story Tabs from a blurred start and asserts Choose files gains focus, stronger than some non-body element; simulated Tab (D-03 residual) |
 | 2 | deleted | expect(gearFocused).toBe(true) | screens-app--empty | focus-order | Open settings | Gear is the third Tab stop in the story; simulated Tab (D-03), real-Chromium backstop is the kept drawer focus-trap test |
 
 ### uses file, folder, then settings focus order
 
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | deleted | expect(primary).toBeFocused() | screens-app--empty | focus-order | Choose files… | First stop after a blurred start; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test |
-| 2 | deleted | expect(page.locator(".empty-state__button--secondary")).toBeFocused() | screens-app--empty | focus-order | Choose folder… | Second stop; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test |
+| 1 | deleted | expect(primary).toBeFocused() | screens-app--empty | focus-order | Choose files | First stop after a blurred start; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test |
+| 2 | deleted | expect(page.locator(".empty-state__button--secondary")).toBeFocused() | screens-app--empty | focus-order | Choose folder | Second stop; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test |
 | 3 | deleted | expect(page.locator(".gear-icon")).toBeFocused() | screens-app--empty | focus-order | Open settings | Third stop; simulated Tab (D-03 residual), real-Chromium backstop is the kept drawer focus-trap test |
 
 ### shows visible focus indicator on focused elements
@@ -69,8 +69,8 @@ One row per `expect(`, `expect.soft(` or `expect.poll(` call inside a test callb
 | 1 | deleted | expect(emptyState).toBeVisible() | ui-emptystate--copy-mode-on | layout | toBeVisible | h1 toBeVisible also checks the section.empty-state ancestor, not only the heading; the e2e asserted the section itself |
 | 2 | deleted | expect(emptyState.locator("h1")).toHaveText("Add files to clean") | screens-app--empty | text | Add files to clean | Heading found by its accessible name; the e2e matched the h1 text |
 | 3 | deleted | expect(emptyState.locator('.empty-state__instruction[aria-hidden="false"]')).toHaveText("Drop images, videos, or PDFs here, or choose an option.") | ui-emptystate--copy-mode-on | text | SUBTITLE | SUBTITLE is a file-level constant reached through expectScreen, which compares the idle line's textContent to it |
-| 4 | deleted | expect(emptyState.locator(".empty-state__button--primary")).toHaveText("Choose files…") | screens-app--empty | text | Choose files… |  |
-| 5 | deleted | expect(emptyState.locator(".empty-state__button--secondary")).toHaveText("Choose folder…") | screens-app--empty | text | Choose folder… |  |
+| 4 | deleted | expect(emptyState.locator(".empty-state__button--primary")).toHaveText("Choose files…") | screens-app--empty | text | Choose files |  |
+| 5 | deleted | expect(emptyState.locator(".empty-state__button--secondary")).toHaveText("Choose folder…") | screens-app--empty | text | Choose folder |  |
 | 6 | deleted | expect(outputMode).toHaveText(/Cleaned copies will be created — originals stay untouched\.\|Files will be cleaned in place\./) | screens-app--empty-copy-mode | text | Cleaned copies will be created | Real DropZone settings.get effect via mockApi.settings (review WR-03); the in-place sentence is COPY_OFF in ui-emptystate--copy-mode-off |
 | 7 | deleted | expect(metrics.buttonHeights.every((height) => height >= 40)).toBe(true) | ui-emptystate--copy-mode-on | layout | getBoundingClientRect | Both buttons at least 40 high, measured in real Chromium (added to the story in 75-01, D-02) |
 | 8 | deleted | expect(metrics.gap).toBeGreaterThanOrEqual(8) | ui-emptystate--copy-mode-on | layout | getComputedStyle(actions).gap | Actions row computed gap at least 8 (added to the story in 75-01, D-02); evidence lengthened, a 3-character literal is rejected (review WR-01) |
@@ -186,7 +186,7 @@ One row per `expect(`, `expect.soft(` or `expect.poll(` call inside a test callb
 | n | verdict | code | story or reason | covers | evidence | note |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | kept | expect(title).toHaveText("Adaugă fișiere pentru curățare") | not-renderable |  |  |  |
-| 2 | kept | expect(window.getByRole("button", {name: "Alege fișiere…"})).toBeVisible() | not-renderable |  |  |  |
+| 2 | kept | expect(window.getByRole("button", {name: "Alege fișiere"})).toBeVisible() | not-renderable |  |  |  |
 
 ### uses RTL direction, visual action order, and a localized count in Arabic
 
@@ -241,6 +241,8 @@ Title kept per D-04 (never retitle a kept test; no journey pins it). It overclai
 
 The ledger is frozen against the baseline commit above: the `(title, code)` pairs of every expect call that existed there, less the entries marked `addedAfterBaseline`, must equal the ledger's.
 
+- One exact Phase 80 copy correction normalizes the Romanian "Alege fișiere…" baseline assertion to "Alege fișiere" for the pinned baseline commit only. This does not permit other edits to that test or ledger.
+
 - A new test: add a ledger entry with `"addedAfterBaseline": true` and kept items only. `kept-drift` then keeps it in step with the spec.
 - Editing, retitling or adding an expect inside a test that existed at the baseline is `baseline-drift` by design, even when the spec and the ledger agree. The problem message names the `(title, code)` pairs that differ.
-- There is no supported edit path for that case yet. Advancing `baselineCommit` drops the `deleted` history, and a one-directional freeze or a `supersedes` field is a maintainer decision. Until then, put a changed or extra assertion in a new test and leave the baseline test untouched.
+- Other edits to an existing baseline assertion remain unsupported. Advancing `baselineCommit` drops the `deleted` history, and a general one-directional freeze or `supersedes` field requires a maintainer decision. For all other cases, add a new test and leave the baseline test untouched.

@@ -49,10 +49,15 @@ describe("cumulative same-layout gate", () => {
 		).toEqual([]);
 	});
 
-	test("rejects any byte change to the English locale catalog", () => {
+	test("rejects locale catalog changes outside the approved intake labels", () => {
 		const planted = cloneFiles(candidateFiles);
 		const file = ".resources/locales/en.json";
-		planted.set(file, Buffer.from(source(planted, file) + "\n", "utf8"));
+		const changed = replaceOnce(
+			source(planted, file),
+			'"empty.title": "Add files to clean",',
+			'"empty.title": "Add files",',
+		);
+		planted.set(file, Buffer.from(changed, "utf8"));
 		expect(
 			compareSnapshots({
 				baseFiles: baselineFiles,
@@ -60,7 +65,68 @@ describe("cumulative same-layout gate", () => {
 				paths,
 				baseRef: BASELINE,
 			}),
-		).toContain("English locale catalog changed byte-for-byte");
+		).toContain(
+			"locale catalog differs outside the two approved intake labels: .resources/locales/en.json",
+		);
+	});
+
+	test("rejects a translated button label that is not only missing its ellipsis", () => {
+		const planted = cloneFiles(candidateFiles);
+		const file = ".resources/locales/de.json";
+		const changed = replaceOnce(
+			source(planted, file),
+			'"intake.chooseFiles": "Dateien auswählen",',
+			'"intake.chooseFiles": "Dateien wählen",',
+		);
+		planted.set(file, Buffer.from(changed, "utf8"));
+		expect(
+			compareSnapshots({
+				baseFiles: baselineFiles,
+				candidateFiles: planted,
+				paths,
+				baseRef: BASELINE,
+			}),
+		).toContain(
+			"locale catalog differs outside the two approved intake labels: .resources/locales/de.json",
+		);
+	});
+
+	test("rejects table column changes beyond the approved width rebalance", () => {
+		const planted = cloneFiles(candidateFiles);
+		const file = "src/renderer/styles/file_table.css";
+		const changed = replaceOnce(
+			source(planted, file),
+			".file-table__header {\n\tposition: sticky;\n\ttop: 0;\n\tdisplay: grid;\n\tgrid-template-columns: 28px minmax(0, 1fr) 64px 144px 72px 136px;",
+			".file-table__header {\n\tposition: sticky;\n\ttop: 0;\n\tdisplay: grid;\n\tgrid-template-columns: 28px minmax(0, 1fr) 64px 160px 72px 136px;",
+		);
+		planted.set(file, Buffer.from(changed, "utf8"));
+		expect(
+			compareSnapshots({
+				baseFiles: baselineFiles,
+				candidateFiles: planted,
+				paths,
+				baseRef: BASELINE,
+			}),
+		).toContain("approved table grid declaration changed");
+	});
+
+	test("rejects disclosure-icon changes beyond the approved expanded state", () => {
+		const planted = cloneFiles(candidateFiles);
+		const file = "src/renderer/components/icons/ChevronIcon.tsx";
+		const changed = replaceOnce(
+			source(planted, file),
+			"strokeWidth={expanded ? 2 : 1.5}",
+			"strokeWidth={expanded ? 2.25 : 1.5}",
+		);
+		planted.set(file, Buffer.from(changed, "utf8"));
+		expect(
+			compareSnapshots({
+				baseFiles: baselineFiles,
+				candidateFiles: planted,
+				paths,
+				baseRef: BASELINE,
+			}),
+		).toContain("approved chevron presentation changed");
 	});
 
 	test("rejects a non-color keyframe transform change", () => {

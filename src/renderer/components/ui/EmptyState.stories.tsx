@@ -97,10 +97,10 @@ async function expectScreen({
 		await expect(mode?.textContent).toBe(outputLine);
 	}
 	await expect(
-		canvas.getByRole("button", { name: "Choose files…" }),
+		canvas.getByRole("button", { name: "Choose files" }),
 	).toBeInTheDocument();
 	await expect(
-		canvas.getByRole("button", { name: "Choose folder…" }),
+		canvas.getByRole("button", { name: "Choose folder" }),
 	).toBeInTheDocument();
 }
 
@@ -260,7 +260,7 @@ export const ButtonKeyboardFocus: Story = {
 	parameters: { a11y: knownA11y("ui-emptystate--button-keyboard-focus") },
 	play: async ({ canvasElement }) => {
 		const button = await within(canvasElement).findByRole("button", {
-			name: "Choose files…",
+			name: "Choose files",
 		});
 		await userEvent.tab();
 		await expect(button).toHaveFocus();
@@ -278,7 +278,7 @@ export const ButtonHover: Story = {
 	parameters: { a11y: knownA11y("ui-emptystate--button-hover") },
 	play: async ({ canvasElement }) => {
 		const button = await within(canvasElement).findByRole("button", {
-			name: "Choose files…",
+			name: "Choose files",
 		});
 		const before = getComputedStyle(button).backgroundColor;
 		await withRealHover(button, userEvent, async () => {
@@ -294,7 +294,7 @@ export const SecondaryButtonHover: Story = {
 	parameters: { a11y: knownA11y("ui-emptystate--secondary-button-hover") },
 	play: async ({ canvasElement }) => {
 		const button = await within(canvasElement).findByRole("button", {
-			name: "Choose folder…",
+			name: "Choose folder",
 		});
 		const before = getComputedStyle(button).borderColor;
 		await withRealHover(button, userEvent, async () => {

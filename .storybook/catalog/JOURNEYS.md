@@ -52,7 +52,7 @@ Exempt: Sharing a cleaned file is an outcome the person judges away from the app
 
 | Step | Scenario | Action | Proof | e2e | Note |
 | --- | --- | --- | --- | --- | --- |
-| J-06.1 | empty-state.copy-mode-on | button "Choose folder…" | story |  | The native folder dialog is never opened by a story or an e2e test. |
+| J-06.1 | empty-state.copy-mode-on | button "Choose folder" | story |  | The native folder dialog is never opened by a story or an e2e test. |
 | J-06.2 | drop-zone.drag-over | gesture: drop a folder on the window | unproven |  | No story or e2e test performs a real drop; e2e sends the file-open-add-files IPC instead. |
 | J-06.3 | file-table.folder-complete | gesture: the supported files of the folder arrive as rows under one folder row | e2e | tests/e2e/folder-recursion.spec.ts › reports one skipped unsupported file and processes supported files from a nested folder |  |
 | J-06.4 | folder-row.complete-collapsed | button "Expand Trip 2026/" | story |  | Shown present and named; no e2e expands or collapses a folder row. |
@@ -77,7 +77,7 @@ Exempt: Staying on the computer is a claim the app keeps by sending nothing out,
 
 | Step | Scenario | Action | Proof | e2e | Note |
 | --- | --- | --- | --- | --- | --- |
-| J-09.1 | empty-state.copy-mode-on | button "Choose files…" | story |  | The native file dialog is never opened by a story or an e2e test. |
+| J-09.1 | empty-state.copy-mode-on | button "Choose files" | story |  | The native file dialog is never opened by a story or an e2e test. |
 | J-09.2 | drop-zone.drag-over | gesture: drop files on the window | unproven |  | No story or e2e test performs a real drop; e2e sends the file-open-add-files IPC instead. |
 | J-09.3 | app.all-done | gesture: the files are read and cleaned and a row appears for each | e2e | tests/e2e/file-processing.spec.ts › strips EXIF metadata from a single JPEG file | e2e sends the file-open-add-files IPC and never opens the native dialog. |
 | J-09.4 | status-bar.all-cleaned | gesture: read the cleaned count in the status bar | e2e | tests/e2e/file-processing.spec.ts › updates the status bar with file count |  |

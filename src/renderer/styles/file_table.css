@@ -1,5 +1,5 @@
 /* FileTable — BEM classes for table layout
-   Columns: STATUS (3ch) | NAME (1fr) | TYPE (9ch) | SIZE (11ch) | BEFORE (11ch) | AFTER (16ch) */
+   Columns: STATUS (28px) | NAME (remaining) | TYPE (64px) | SIZE (144px) | BEFORE (72px) | AFTER (136px) */
 
 .file-table {
 	display: flex;
@@ -12,7 +12,7 @@
 	position: sticky;
 	top: 0;
 	display: grid;
-	grid-template-columns: 3ch 1fr 9ch 11ch 11ch 16ch;
+	grid-template-columns: 28px minmax(0, 1fr) 64px 144px 72px 136px;
 	background: var(--ec-color-surface);
 	border-bottom: 1px solid var(--ec-color-border);
 	padding: var(--ec-space-1) var(--ec-space-4);
@@ -62,7 +62,7 @@
 
 .file-table__row {
 	display: grid;
-	grid-template-columns: 3ch 1fr 9ch 11ch 11ch 16ch;
+	grid-template-columns: 28px minmax(0, 1fr) 64px 144px 72px 136px;
 	min-height: 44px;
 	border-bottom: 1px solid var(--ec-color-border);
 	padding: 0 var(--ec-space-4);

@@ -14,7 +14,7 @@ import { screenApi } from "../../story_support/screen_api";
 // with its own ThemeProvider, I18nProvider, AppProvider and ErrorBoundary, and reaches its
 // state the way a person does: `parameters.mockApi.overrides` (built by `screenApi` from the
 // shared outcome fixtures) answers the four calls the intake path makes, and the play really
-// clicks `Choose files…`, so the real `processFileEntries` runs over the fixtures. No seam is
+// clicks `Choose files`, so the real `processFileEntries` runs over the fixtures. No seam is
 // added to the product: there is no initialState prop, no copied AppContent and no preview
 // change.
 //
@@ -75,7 +75,7 @@ function rowNames(canvasElement: HTMLElement): string[] {
 async function chooseFiles(canvasElement: HTMLElement): Promise<void> {
 	await userEvent.click(
 		await within(canvasElement).findByRole("button", {
-			name: "Choose files…",
+			name: "Choose files",
 		}),
 	);
 }
@@ -206,11 +206,11 @@ export const Empty: Story = {
 		}
 		await userEvent.tab();
 		await expect(
-			canvas.getByRole("button", { name: "Choose files…" }),
+			canvas.getByRole("button", { name: "Choose files" }),
 		).toHaveFocus();
 		await userEvent.tab();
 		await expect(
-			canvas.getByRole("button", { name: "Choose folder…" }),
+			canvas.getByRole("button", { name: "Choose folder" }),
 		).toHaveFocus();
 		await userEvent.tab();
 		await expect(

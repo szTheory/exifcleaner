@@ -103,9 +103,9 @@ jobs:
 
       - name: Install Playwright
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        # A cache miss installs the browser and its system dependencies; on a
-        # cache hit, the hosted Ubuntu image already contains those libraries.
-        run: npx playwright install --with-deps chromium
+        # The hosted Ubuntu image has the system libraries used by Chromium;
+        # install only the Playwright-versioned browser binaries on a cache miss.
+        run: npx playwright install chromium
 
       - name: Disable AppArmor restriction (Ubuntu 24.04)
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
