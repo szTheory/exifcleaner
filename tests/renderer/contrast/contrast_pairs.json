@@ -546,7 +546,7 @@
 				{
 					"file": "status_icon.css",
 					"selector": ".status-icon__spinner",
-					"property": "border"
+					"property": "background-color"
 				},
 				{
 					"file": "tokens.css",

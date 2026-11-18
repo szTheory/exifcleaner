@@ -38,7 +38,7 @@ function replaceOnce(input: string, before: string, after: string): string {
 }
 
 describe("cumulative same-layout gate", () => {
-	test("passes the fixed v5.0 tree against the cumulative Phase 76-79 tree", () => {
+	test("passes the fixed v5.0 tree against the cumulative Phase 76-80 tree", () => {
 		expect(
 			compareSnapshots({
 				baseFiles: baselineFiles,
@@ -96,8 +96,8 @@ describe("cumulative same-layout gate", () => {
 		const file = "src/renderer/styles/file_table.css";
 		const changed = replaceOnce(
 			source(planted, file),
-			".file-table__header {\n\tposition: sticky;\n\ttop: 0;\n\tdisplay: grid;\n\t/* prettier-ignore */\n\tgrid-template-columns: 24px minmax(0, 1fr) 64px 128px 56px minmax(72px, max-content);",
-			".file-table__header {\n\tposition: sticky;\n\ttop: 0;\n\tdisplay: grid;\n\t/* prettier-ignore */\n\tgrid-template-columns: 24px minmax(0, 1fr) 64px 129px 56px minmax(72px, max-content);",
+			".file-table__header {\n\tposition: sticky;\n\ttop: 0;\n\tdisplay: grid;\n\t/* prettier-ignore */\n\tgrid-template-columns: 24px minmax(0, 1fr) 76px 128px 56px minmax(72px, max-content);",
+			".file-table__header {\n\tposition: sticky;\n\ttop: 0;\n\tdisplay: grid;\n\t/* prettier-ignore */\n\tgrid-template-columns: 24px minmax(0, 1fr) 76px 129px 56px minmax(72px, max-content);",
 		);
 		planted.set(file, Buffer.from(changed, "utf8"));
 		expect(
@@ -108,6 +108,44 @@ describe("cumulative same-layout gate", () => {
 				baseRef: BASELINE,
 			}),
 		).toContain("approved table grid declaration changed");
+	});
+
+	test("rejects processing-spinner styling outside the exact visual correction", () => {
+		const planted = cloneFiles(candidateFiles);
+		const file = "src/renderer/styles/status_icon.css";
+		const changed = replaceOnce(
+			source(planted, file),
+			"border: 2px solid var(--ec-color-border);",
+			"border: 2px solid var(--ec-color-surface);",
+		);
+		planted.set(file, Buffer.from(changed, "utf8"));
+		expect(
+			compareSnapshots({
+				baseFiles: baselineFiles,
+				candidateFiles: planted,
+				paths,
+				baseRef: BASELINE,
+			}),
+		).toContain("approved presentation rule changed: VIS-80-SPINNER-CLARITY");
+	});
+
+	test("rejects error-summary styling outside the exact semantic treatment", () => {
+		const planted = cloneFiles(candidateFiles);
+		const file = "src/renderer/styles/file_table.css";
+		const changed = replaceOnce(
+			source(planted, file),
+			".file-table__error-summary {\n\tcolor: var(--ec-color-text-secondary);",
+			".file-table__error-summary {\n\tcolor: var(--ec-color-error);",
+		);
+		planted.set(file, Buffer.from(changed, "utf8"));
+		expect(
+			compareSnapshots({
+				baseFiles: baselineFiles,
+				candidateFiles: planted,
+				paths,
+				baseRef: BASELINE,
+			}),
+		).toContain("approved presentation rule changed: VIS-80-ERROR-SUMMARY");
 	});
 
 	test("rejects disclosure-icon changes beyond the approved expanded state", () => {

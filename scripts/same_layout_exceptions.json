@@ -50,7 +50,48 @@
 			"property": "grid-template-columns",
 			"selectors": [".file-table__header", ".file-table__row"],
 			"baseline": "24px 1fr 72px 80px 88px 88px",
-			"candidate": "24px minmax(0, 1fr) 64px 128px 56px minmax(72px, max-content)",
+			"candidate": "24px minmax(0, 1fr) 76px 128px 56px minmax(72px, max-content)",
+			"evidence": ".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md"
+		},
+		{
+			"id": "VIS-80-SPINNER-CLARITY",
+			"source": "src/renderer/styles/status_icon.css",
+			"selector": ".status-icon__spinner",
+			"baseline": [
+				[
+					["width", "16px"],
+					["height", "16px"],
+					["border", "2px solid transparent"],
+					["border-top-color", "var(--ec-color-muted)"],
+					["border-radius", "50%"]
+				],
+				[["animation", "ec-spin 1s linear infinite"]]
+			],
+			"candidate": [
+				[
+					["width", "16px"],
+					["height", "16px"],
+					["border", "2px solid var(--ec-color-border)"],
+					["border-top-color", "var(--ec-color-text-secondary)"],
+					["border-radius", "50%"],
+					["background-color", "transparent"]
+				],
+				[["animation", "ec-spin 1s linear infinite"]]
+			],
+			"evidence": ".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md"
+		},
+		{
+			"id": "VIS-80-ERROR-SUMMARY",
+			"source": "src/renderer/styles/file_table.css",
+			"selector": ".file-table__error-summary",
+			"baseline": [],
+			"candidate": [
+				[
+					["color", "var(--ec-color-text-secondary)"],
+					["font-size", "var(--ec-font-size-small)"],
+					["line-height", "var(--ec-line-height-normal)"]
+				]
+			],
 			"evidence": ".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md"
 		},
 		{

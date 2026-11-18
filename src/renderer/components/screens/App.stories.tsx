@@ -133,6 +133,18 @@ export const AllError: Story = {
 				"charlie.webp. Couldn’t verify cleaned output, and the incomplete output could not be removed. Your original is unchanged.",
 			]),
 		);
+		for (const summary of canvasElement.querySelectorAll<HTMLElement>(
+			".file-table__error-summary",
+		)) {
+			const row = summary.closest<HTMLElement>(".file-table__row");
+			const name = row?.querySelector<HTMLElement>(".file-table__name-text");
+			if (name === null || name === undefined)
+				throw new Error("error summary has no file name");
+			await expect(getComputedStyle(summary).fontSize).toBe("14px");
+			await expect(getComputedStyle(summary).color).not.toBe(
+				getComputedStyle(name).color,
+			);
+		}
 		await expect(statusSegment(canvasElement, "cleaned")).toBe(
 			"0 of 3 cleaned",
 		);
@@ -456,5 +468,22 @@ export const LargeBatch: Story = {
 		await expect(
 			canvas.getAllByRole("img", { name: "Processing" }),
 		).toHaveLength(1);
+		const webpPills = Array.from(
+			canvasElement.querySelectorAll<HTMLElement>(
+				".file-table__row > .file-table__cell:nth-of-type(3) .type-pill",
+			),
+		).filter((pill) => pill.textContent?.trim() === "WEBP");
+		await expect(webpPills.length).toBeGreaterThan(0);
+		for (const pill of webpPills) {
+			const cell = pill.closest<HTMLElement>(".file-table__cell");
+			if (cell === null) throw new Error("WEBP pill has no type cell");
+			const paddingRight = Number.parseFloat(
+				getComputedStyle(cell).paddingRight,
+			);
+			await expect(pill.getBoundingClientRect().right).toBeLessThanOrEqual(
+				cell.getBoundingClientRect().right - paddingRight,
+			);
+			await expect(cell.scrollWidth).toBeLessThanOrEqual(cell.clientWidth);
+		}
 	},
 };
