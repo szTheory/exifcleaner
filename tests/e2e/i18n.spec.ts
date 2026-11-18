@@ -98,7 +98,7 @@ test.describe("Internationalization", () => {
 		const title = window.locator(".empty-state__title");
 		await expect(title).toHaveText("Adaugă fișiere pentru curățare");
 		await expect(
-			window.getByRole("button", { name: "Alege fișiere…" }),
+			window.getByRole("button", { name: "Alege fișiere" }),
 		).toBeVisible();
 	});
 
