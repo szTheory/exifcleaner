@@ -1083,15 +1083,15 @@
 			"subject": "TypePill",
 			"stateClass": "many",
 			"basis": "unreachable",
-			"ref": "src/renderer/components/ui/TypePill.tsx#modifier",
+			"ref": "src/renderer/components/ui/TypePill.tsx#TypePill",
 			"reason": "Each file row draws its own pill, so a column of different pills is the file table area story; each family story already shows its members together."
 		},
 		{
 			"subject": "TypePill",
 			"stateClass": "boundary",
 			"basis": "unreachable",
-			"ref": "src/renderer/components/ui/TypePill.tsx#pillClass",
-			"reason": "pillClass is a plain lookup with no limit or threshold, so the only edge is an extension that is in no family, which the neutral story shows."
+			"ref": "src/renderer/components/ui/TypePill.tsx#TypePill",
+			"reason": "Every supported extension uses the same neutral badge class, so no extension-family boundary changes its presentation; the generic badge story shows that shared result."
 		},
 		{
 			"subject": "TypePill",
@@ -1139,7 +1139,7 @@
 			"subject": "TypePill",
 			"stateClass": "huge",
 			"basis": "unreachable",
-			"ref": "src/renderer/components/ui/TypePill.tsx#pillClass",
+			"ref": "src/renderer/components/ui/TypePill.tsx#TypePill",
 			"reason": "The pill takes one short extension, so a large quantity has nothing to feed on; the quantity stress belongs to the table that repeats it."
 		}
 	]
