@@ -5,6 +5,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
+import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 
 type VisualCase = {
 	story: string;
@@ -379,12 +380,17 @@ describe("visual workflow and case contract policy", () => {
 		const temporary = mkdtempSync(
 			path.join(os.tmpdir(), "visual-baselines-missing-"),
 		);
+		const before = snapshotDir(temporary);
 		try {
 			expect(baselineProblems(contract, temporary)).toContain(
 				"baseline directory is missing",
 			);
 		} finally {
-			rmSync(temporary, { recursive: true, force: true });
+			try {
+				assertDirEffect(before, snapshotDir(temporary), {});
+			} finally {
+				rmSync(temporary, { recursive: true, force: true });
+			}
 		}
 	});
 
