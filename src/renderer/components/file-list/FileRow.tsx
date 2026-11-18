@@ -79,6 +79,7 @@ export function FileRow({
 				: file.outcomeKind === "cleaned"
 					? t("outcome.cleaned")
 					: failureSummary;
+	const isCleaned = file.outcomeKind === "cleaned";
 	const errorDetail =
 		(file.failureKind === "cleanup" ||
 			file.failureKind === "xattr" ||
@@ -175,6 +176,7 @@ export function FileRow({
 						<StatusIcon
 							status={file.status}
 							shouldAnimate={shouldAnimateCheck}
+							isCleaned={isCleaned}
 						/>
 					)}
 				</div>
@@ -208,7 +210,7 @@ export function FileRow({
 					{renderBeforeCell(file)}
 				</div>
 				<div className="file-table__cell" role="cell">
-					{renderAfterCell(file, shouldAnimateCheck)}
+					{renderAfterCell(file, shouldAnimateCheck, isCleaned)}
 					{isComplete && (
 						<span
 							className="file-table__reveal"
@@ -296,6 +298,7 @@ function renderBeforeCell(file: FileEntry): React.JSX.Element {
 function renderAfterCell(
 	file: FileEntry,
 	shouldAnimate: boolean,
+	isCleaned: boolean,
 ): React.JSX.Element {
 	switch (file.status) {
 		case FileProcessingStatus.Pending:
@@ -307,7 +310,11 @@ function renderAfterCell(
 			return (
 				<span className="file-table__after-done">
 					{file.afterTags ?? ""}
-					<StatusIcon status={file.status} shouldAnimate={shouldAnimate} />
+					<StatusIcon
+						status={file.status}
+						shouldAnimate={shouldAnimate}
+						isCleaned={isCleaned}
+					/>
 				</span>
 			);
 		case FileProcessingStatus.Error:

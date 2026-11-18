@@ -17,6 +17,10 @@
 }
 
 .status-icon__check {
+	color: var(--ec-color-text-secondary);
+}
+
+.status-icon__check--cleaned {
 	color: var(--ec-color-cleaned);
 }
 
