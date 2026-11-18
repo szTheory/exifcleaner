@@ -88,28 +88,28 @@ test.describe("Packaged artifact", () => {
 		expect(await window.title()).toBe("ExifCleaner");
 	});
 
-	test("starts in light mode with matching native and renderer backgrounds", async () => {
+	test("starts with matching system theme and native and renderer backgrounds", async () => {
 		const appearance = await app.evaluate(({ BrowserWindow, nativeTheme }) => ({
 			isDark: nativeTheme.shouldUseDarkColors,
 			windowBackground:
 				BrowserWindow.getAllWindows()[0]?.getBackgroundColor() ?? null,
 		}));
 
-		if (appearance.isDark && process.env["CI"] !== "true") {
-			test.skip(
-				true,
-				"this host starts in dark mode; the light startup assertion runs on light CI hosts",
-			);
-		}
-		await expect(window.locator("html")).toHaveAttribute("data-theme", "light");
+		if (process.env["CI"] === "true") expect(appearance.isDark).toBe(false);
+		const expectedTheme = appearance.isDark ? "dark" : "light";
+		await expect(window.locator("html")).toHaveAttribute(
+			"data-theme",
+			expectedTheme,
+		);
 		const rendererBackground = await window
 			.locator(".app")
 			.evaluate((element) => getComputedStyle(element).backgroundColor);
-		expect(appearance.isDark).toBe(false);
 		expect(appearance.windowBackground?.toLowerCase()).toBe(
-			windowBackgroundColor(false).toLowerCase(),
+			windowBackgroundColor(appearance.isDark).toLowerCase(),
 		);
-		expect(rendererBackground).toBe("rgb(255, 255, 255)");
+		expect(rendererBackground).toBe(
+			appearance.isDark ? "rgb(10, 46, 43)" : "rgb(255, 255, 255)",
+		);
 	});
 
 	test(
