@@ -1,9 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import { describe, expect, test } from "vitest";
 import { cssDeclarations } from "../../../.storybook/catalog/css_scan.mjs";
+import { assertDirEffect, snapshotDir } from "../../helpers/dir_effect";
 
 // RTL-02 / D-11: no physical-direction declaration may enter the renderer stylesheets or a
 // TSX style prop unless it is in a reasoned allow-list. The renderer sets
@@ -57,8 +59,22 @@ function splitTopLevel(value: string): string[] {
 function hasUnequalSides(property: string, value: string): boolean {
 	if (property !== "margin" && property !== "padding") return false;
 	const tokens = splitTopLevel(value.replace(/!important\s*$/i, "").trim());
+	if (tokens.length !== 4) return false;
+	const right = tokens[1] ?? "";
+	const left = tokens[3] ?? "";
+	const customPropertyNames = (token: string): string[] =>
+		Array.from(
+			token.matchAll(/var\(\s*(--(?:[^\s,)\\]|\\.)+)/gi),
+			(match) => match[1] ?? "",
+		);
+	const rightCustomProperties = customPropertyNames(right);
+	const leftCustomProperties = customPropertyNames(left);
 	return (
-		tokens.length === 4 && tokens[1]?.toLowerCase() !== tokens[3]?.toLowerCase()
+		right.toLowerCase() !== left.toLowerCase() ||
+		rightCustomProperties.some(
+			(name, index) => name !== leftCustomProperties[index],
+		) ||
+		rightCustomProperties.length !== leftCustomProperties.length
 	);
 }
 
@@ -99,7 +115,13 @@ function propertyKey(name: ts.PropertyName): string | null {
 	) {
 		return name.text;
 	}
-	// A computed or numeric key cannot be named as a CSS property here.
+	if (
+		ts.isComputedPropertyName(name) &&
+		ts.isStringLiteralLike(name.expression)
+	) {
+		return name.expression.text;
+	}
+	// A dynamic computed or numeric key cannot be named as a CSS property here.
 	return null;
 }
 
@@ -205,30 +227,6 @@ function physicalStyleHitsInSources(sources: StyleSource[]): string[] {
 	});
 	const checker = program.getTypeChecker();
 	const keys: string[] = [];
-	const collect = (object: ts.ObjectLiteralExpression, owner: string): void => {
-		const source = object.getSourceFile();
-		const file = path.relative(REPO, source.fileName).split(path.sep).join("/");
-		for (const member of object.properties) {
-			if (ts.isSpreadAssignment(member)) continue;
-			const raw = propertyKey(member.name);
-			if (raw === null || raw.startsWith("--")) continue;
-			const property = kebab(raw);
-			let value: string;
-			if (ts.isShorthandPropertyAssignment(member)) {
-				value = member.name.text;
-			} else if (ts.isPropertyAssignment(member)) {
-				const initializer = member.initializer;
-				value = ts.isStringLiteralLike(initializer)
-					? initializer.text
-					: initializer.getText(source).replace(/\s+/g, " ");
-			} else {
-				continue;
-			}
-			if (isPhysical(property, value)) {
-				keys.push(file + "|" + owner + "|" + property + "|" + value);
-			}
-		}
-	};
 	const unwrap = (expression: ts.Expression): ts.Expression => {
 		while (
 			ts.isParenthesizedExpression(expression) ||
@@ -241,9 +239,9 @@ function physicalStyleHitsInSources(sources: StyleSource[]): string[] {
 		}
 		return expression;
 	};
-	const referencedStyleObject = (
+	const referencedStyleExpression = (
 		expression: ts.Expression,
-	): { object: ts.ObjectLiteralExpression; owner: string } | null => {
+	): { expression: ts.Expression; owner: string; symbol: ts.Symbol } | null => {
 		const target = unwrap(expression);
 		const symbolNode = ts.isPropertyAccessExpression(target)
 			? target.name
@@ -252,32 +250,194 @@ function physicalStyleHitsInSources(sources: StyleSource[]): string[] {
 		if (symbol && (symbol.flags & ts.SymbolFlags.Alias) !== 0) {
 			symbol = checker.getAliasedSymbol(symbol);
 		}
-		for (const declaration of symbol?.declarations ?? []) {
+		if (symbol === undefined) return null;
+		for (const declaration of symbol.declarations ?? []) {
 			if (
 				ts.isVariableDeclaration(declaration) &&
 				declaration.initializer !== undefined
 			) {
-				const initializer = unwrap(declaration.initializer);
-				if (ts.isObjectLiteralExpression(initializer)) {
-					return {
-						object: initializer,
-						owner:
-							"css:" + declaration.name.getText(declaration.getSourceFile()),
-					};
-				}
+				return {
+					expression: unwrap(declaration.initializer),
+					owner: "css:" + declaration.name.getText(declaration.getSourceFile()),
+					symbol,
+				};
 			}
 			if (ts.isPropertyAssignment(declaration)) {
-				const initializer = unwrap(declaration.initializer);
-				if (ts.isObjectLiteralExpression(initializer)) {
-					return {
-						object: initializer,
-						owner:
-							"css:" + declaration.name.getText(declaration.getSourceFile()),
-					};
-				}
+				return {
+					expression: unwrap(declaration.initializer),
+					owner: "css:" + declaration.name.getText(declaration.getSourceFile()),
+					symbol,
+				};
 			}
 		}
 		return null;
+	};
+	const collectStyleExpression = (
+		expression: ts.Expression,
+		owner: string,
+		source: ts.SourceFile,
+		objectAncestors = new Set<ts.ObjectLiteralExpression>(),
+		symbolAncestors = new Set<ts.Symbol>(),
+		unresolvedKind: "style-expression" | "style-spread" = "style-expression",
+	): void => {
+		const target = unwrap(expression);
+		if (ts.isObjectLiteralExpression(target)) {
+			collect(target, owner, objectAncestors);
+			return;
+		}
+		if (ts.isConditionalExpression(target)) {
+			collectStyleExpression(
+				target.whenTrue,
+				owner,
+				target.getSourceFile(),
+				objectAncestors,
+				symbolAncestors,
+				unresolvedKind,
+			);
+			collectStyleExpression(
+				target.whenFalse,
+				owner,
+				target.getSourceFile(),
+				objectAncestors,
+				symbolAncestors,
+				unresolvedKind,
+			);
+			return;
+		}
+		if (ts.isBinaryExpression(target)) {
+			const operator = target.operatorToken.kind;
+			if (operator === ts.SyntaxKind.AmpersandAmpersandToken) {
+				collectStyleExpression(
+					target.right,
+					owner,
+					target.getSourceFile(),
+					objectAncestors,
+					symbolAncestors,
+					unresolvedKind,
+				);
+				return;
+			}
+			if (
+				operator === ts.SyntaxKind.BarBarToken ||
+				operator === ts.SyntaxKind.QuestionQuestionToken
+			) {
+				collectStyleExpression(
+					target.left,
+					owner,
+					target.getSourceFile(),
+					objectAncestors,
+					symbolAncestors,
+					unresolvedKind,
+				);
+				collectStyleExpression(
+					target.right,
+					owner,
+					target.getSourceFile(),
+					objectAncestors,
+					symbolAncestors,
+					unresolvedKind,
+				);
+				return;
+			}
+		}
+		if (
+			target.kind === ts.SyntaxKind.NullKeyword ||
+			target.kind === ts.SyntaxKind.FalseKeyword ||
+			(ts.isIdentifier(target) && target.text === "undefined")
+		) {
+			return;
+		}
+		const referenced = referencedStyleExpression(target);
+		if (referenced !== null) {
+			if (symbolAncestors.has(referenced.symbol)) {
+				const file = path
+					.relative(REPO, target.getSourceFile().fileName)
+					.split(path.sep)
+					.join("/");
+				keys.push(
+					`${file}|${owner}|<cyclic-style-expression>|${target.getText(target.getSourceFile())}`,
+				);
+				return;
+			}
+			const nestedSymbols = new Set(symbolAncestors);
+			nestedSymbols.add(referenced.symbol);
+			collectStyleExpression(
+				referenced.expression,
+				referenced.owner,
+				referenced.expression.getSourceFile(),
+				objectAncestors,
+				nestedSymbols,
+				unresolvedKind,
+			);
+			return;
+		}
+		const targetSource = target.getSourceFile() ?? source;
+		const file = path
+			.relative(REPO, targetSource.fileName)
+			.split(path.sep)
+			.join("/");
+		const expressionText = target.getText(targetSource).replace(/\s+/g, " ");
+		keys.push(
+			`${file}|${owner}|<unresolved-${unresolvedKind}>|${expressionText}`,
+		);
+	};
+	const collect = (
+		object: ts.ObjectLiteralExpression,
+		owner: string,
+		ancestors = new Set<ts.ObjectLiteralExpression>(),
+	): void => {
+		const source = object.getSourceFile();
+		const file = path.relative(REPO, source.fileName).split(path.sep).join("/");
+		if (ancestors.has(object)) {
+			keys.push(
+				`${file}|${owner}|<cyclic-style-spread>|${object.getText(source)}`,
+			);
+			return;
+		}
+		const nestedAncestors = new Set(ancestors);
+		nestedAncestors.add(object);
+		for (const member of object.properties) {
+			if (ts.isSpreadAssignment(member)) {
+				collectStyleExpression(
+					member.expression,
+					owner,
+					source,
+					nestedAncestors,
+					new Set(),
+					"style-spread",
+				);
+				continue;
+			}
+			const raw = propertyKey(member.name);
+			if (raw === null) {
+				const unresolvedProperty = ts.isComputedPropertyName(member.name)
+					? member.name.expression.getText(source)
+					: member.name.getText(source);
+				keys.push(
+					`${file}|${owner}|<unresolved-style-property>|${unresolvedProperty}`,
+				);
+				continue;
+			}
+			if (raw.startsWith("--")) continue;
+			const property = kebab(raw);
+			let value: string;
+			if (ts.isShorthandPropertyAssignment(member)) {
+				value = member.name.text;
+			} else if (ts.isPropertyAssignment(member)) {
+				const initializer = member.initializer;
+				value = ts.isStringLiteralLike(initializer)
+					? initializer.text
+					: initializer.getText(source).replace(/\s+/g, " ");
+			} else {
+				keys.push(
+					`${file}|${owner}|<unresolved-style-property>|${member.name.getText(source)}`,
+				);
+				continue;
+			}
+			if (isPhysical(property, value)) {
+				keys.push(file + "|" + owner + "|" + property + "|" + value);
+			}
+		}
 	};
 
 	const visit = (node: ts.Node, source: ts.SourceFile): void => {
@@ -288,13 +448,11 @@ function physicalStyleHitsInSources(sources: StyleSource[]): string[] {
 			ts.isJsxExpression(node.initializer) &&
 			node.initializer.expression !== undefined
 		) {
-			const expression = unwrap(node.initializer.expression);
-			if (ts.isObjectLiteralExpression(expression)) {
-				collect(expression, "jsx:" + tagNameOf(node));
-			} else {
-				const referenced = referencedStyleObject(expression);
-				if (referenced !== null) collect(referenced.object, referenced.owner);
-			}
+			collectStyleExpression(
+				node.initializer.expression,
+				"jsx:" + tagNameOf(node),
+				source,
+			);
 		}
 		if (
 			ts.isVariableDeclaration(node) &&
@@ -303,9 +461,11 @@ function physicalStyleHitsInSources(sources: StyleSource[]): string[] {
 			node.initializer !== undefined
 		) {
 			const initializer = unwrap(node.initializer);
-			if (ts.isObjectLiteralExpression(initializer)) {
-				collect(initializer, "css:" + node.name.getText(source));
-			}
+			collectStyleExpression(
+				initializer,
+				"css:" + node.name.getText(source),
+				source,
+			);
 		}
 		ts.forEachChild(node, (child) => visit(child, source));
 	};
@@ -322,16 +482,28 @@ function physicalStyleHits({
 }): string[] {
 	return physicalStyleHitsInSources([{ file, text: tsx }]);
 }
-function walk(directory: string, extension: string): string[] {
+function walkFrom(
+	absoluteDirectory: string,
+	displayDirectory: string,
+	extension: string,
+): string[] {
 	const found: string[] = [];
-	for (const entry of fs.readdirSync(path.join(REPO, directory), {
+	for (const entry of fs.readdirSync(absoluteDirectory, {
 		withFileTypes: true,
 	})) {
-		const relative = `${directory}/${entry.name}`;
-		if (entry.isDirectory()) found.push(...walk(relative, extension));
-		else if (entry.name.endsWith(extension)) found.push(relative);
+		const absolute = path.join(absoluteDirectory, entry.name);
+		const relative = `${displayDirectory}/${entry.name}`;
+		if (entry.isDirectory()) {
+			found.push(...walkFrom(absolute, relative, extension));
+		} else if (entry.name.endsWith(extension)) {
+			found.push(relative);
+		}
 	}
 	return found.sort();
+}
+
+function walk(directory: string, extension: string): string[] {
+	return walkFrom(path.join(REPO, directory), directory, extension);
 }
 
 function scanTree(): {
@@ -340,11 +512,7 @@ function scanTree(): {
 	tsxFiles: string[];
 	keys: string[];
 } {
-	const cssFiles = fs
-		.readdirSync(path.join(REPO, STYLES_DIR))
-		.filter((name) => name.endsWith(".css"))
-		.map((name) => `${STYLES_DIR}/${name}`)
-		.sort();
+	const cssFiles = walk(STYLES_DIR, ".css");
 	const tsFiles = walk(RENDERER_DIR, ".ts");
 	const tsxFiles = walk(RENDERER_DIR, ".tsx");
 	const styleSources = [...tsFiles, ...tsxFiles].map((file) => ({
@@ -414,8 +582,11 @@ describe("RTL-02 physical-direction scan: the real tree", () => {
 	});
 
 	test("anti-vacuity: the scan read every stylesheet and every TS/TSX file", () => {
-		const styleListing = fs
-			.readdirSync(path.join(REPO, STYLES_DIR))
+		const styleListing = (
+			fs.readdirSync(path.join(REPO, STYLES_DIR), {
+				recursive: true,
+			}) as string[]
+		)
 			.filter((name) => name.endsWith(".css"))
 			.map((name) => `${STYLES_DIR}/${name}`)
 			.sort();
@@ -472,6 +643,7 @@ describe("RTL-02 physical-direction scan: planted controls", () => {
 		[".x { transform: TranslateX(calc(var(--i) * 100%)); }", 1],
 		[".x { margin: 0 4px 0 8px; }", 1],
 		[".x { padding: 1px var(--a, 2px) 3px var(--b, 4px); }", 1],
+		[".x { margin: 0 var(--Gap) 0 var(--gap); }", 1],
 		["@media (min-width: 1px) { .x { left: 0; } }", 1],
 	])("flags %s", (css, count) => {
 		expect(physicalHits({ file: "planted.css", css })).toHaveLength(count);
@@ -511,6 +683,63 @@ describe("RTL-02 physical-direction scan: planted controls", () => {
 		).toEqual(["planted.tsx|jsx:div|left|0"]);
 	});
 
+	test("a statically computed physical style key is a hit", () => {
+		expect(
+			physicalStyleHits({
+				file: "planted.tsx",
+				tsx: 'export const A = () => <div style={{ ["marginLeft"]: 4 }} />;',
+			}),
+		).toEqual(["planted.tsx|jsx:div|margin-left|4"]);
+	});
+
+	test("a dynamic computed style key fails closed", () => {
+		const hits = physicalStyleHits({
+			file: "planted.tsx",
+			tsx: 'const key = "marginLeft"; export const A = () => <div style={{ [key]: 4 }} />;',
+		});
+		expect(hits).toContain(
+			"planted.tsx|jsx:div|<unresolved-style-property>|key",
+		);
+	});
+
+	test("a statically resolvable style spread is scanned", () => {
+		expect(
+			physicalStyleHits({
+				file: "planted.tsx",
+				tsx: "const shared = { marginLeft: 4 }; export const A = () => <div style={{ ...shared }} />;",
+			}),
+		).toEqual(["planted.tsx|css:shared|margin-left|4"]);
+	});
+
+	test("an unresolved dynamic style spread fails closed", () => {
+		const hits = physicalStyleHits({
+			file: "planted.tsx",
+			tsx: "const dynamicStyles = makeStyles(); export const A = () => <div style={{ ...dynamicStyles }} />;",
+		});
+		expect(hits).toContain(
+			"planted.tsx|css:dynamicStyles|<unresolved-style-spread>|makeStyles()",
+		);
+	});
+
+	test("an unresolved JSX style expression fails closed", () => {
+		const hits = physicalStyleHits({
+			file: "planted.tsx",
+			tsx: "export const A = () => <div style={makeStyles()} />;",
+		});
+		expect(hits).toContain(
+			"planted.tsx|jsx:div|<unresolved-style-expression>|makeStyles()",
+		);
+	});
+
+	test("both statically known branches of a conditional JSX style are scanned", () => {
+		expect(
+			physicalStyleHits({
+				file: "planted.tsx",
+				tsx: "export const A = () => <div style={ready ? { marginLeft: 4 } : undefined} />;",
+			}),
+		).toEqual(["planted.tsx|jsx:div|margin-left|4"]);
+	});
+
 	test("an inferred shared style object referenced by JSX is scanned", () => {
 		expect(
 			physicalStyleHits({
@@ -526,6 +755,21 @@ describe("RTL-02 physical-direction scan: planted controls", () => {
 				{
 					file: "planted/Component.tsx",
 					text: 'import { styles } from "./styles"; export const A = () => <div style={styles} />;',
+				},
+				{
+					file: "planted/styles.ts",
+					text: "export const styles = { marginLeft: 4 };",
+				},
+			]),
+		).toEqual(["planted/styles.ts|css:styles|margin-left|4"]);
+	});
+
+	test("a physical declaration in an imported style spread is scanned", () => {
+		expect(
+			physicalStyleHitsInSources([
+				{
+					file: "planted/Component.tsx",
+					text: 'import { styles } from "./styles"; export const A = () => <div style={{ ...styles }} />;',
 				},
 				{
 					file: "planted/styles.ts",
@@ -592,5 +836,26 @@ describe("RTL-02 physical-direction scan: planted controls", () => {
 				css: ".x { padding: var(--ec-space-2, 8px) var(--ec-space-4, 16px); }",
 			}),
 		).toEqual([]);
+	});
+
+	test("recursive stylesheet inventory includes nested CSS files", () => {
+		const root = fs.mkdtempSync(path.join(tmpdir(), "rtl-style-inventory-"));
+		const before = snapshotDir(root);
+		const nested = path.join(root, "nested");
+		fs.mkdirSync(nested);
+		fs.writeFileSync(path.join(nested, "fixture.css"), ".x { left: 0; }");
+		try {
+			expect(walkFrom(root, "fixture-styles", ".css")).toEqual([
+				"fixture-styles/nested/fixture.css",
+			]);
+			const after = snapshotDir(root);
+			expect(() =>
+				assertDirEffect(before, after, {
+					added: ["nested", "nested/fixture.css"],
+				}),
+			).not.toThrow();
+		} finally {
+			fs.rmSync(root, { recursive: true, force: true });
+		}
 	});
 });
