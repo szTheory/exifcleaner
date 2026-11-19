@@ -4,12 +4,10 @@
 
 Brand pin: `7629b8fcd5794df708000e49abd9a2a9402d4c7b`
 
-Dispositions: adopt 17, derive 5, keep-platform 10, propose-upstream 16, retire 8, local 3. Each custom property declared in tokens.css or used under src/renderer has exactly one entry.
+Dispositions: adopt 17, derive 5, keep-platform 10, propose-upstream 16, retire 6, local 3. Each custom property declared in tokens.css or used under src/renderer has exactly one entry.
 
 | Name | Disposition | Brand (light / dark) or target | Spec | Reason, rule or decision | Finding |
 | --- | --- | --- | --- | --- | --- |
-| --color-bg | retire | alias of --ec-color-bg |  | backward-compat alias with live consumers app.css:5; v5.1 rewrites this call site to var(--ec-color-bg) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal) |  |
-| --color-text | retire | alias of --ec-color-text |  | backward-compat alias with live consumers app.css:6, empty_state.css:32, file_list.css:24; v5.1 rewrites these call sites to var(--ec-color-text) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal) |  |
 | --ec-backdrop-opacity | keep-platform |  |  | No brand equivalent (D-04): the opacity of the overlay behind the settings drawer (0.4 light, 0.6 dark) is a platform value the book does not set. The platform values are kept, and 74-04 exempts this token from the contrast test with a written reason, so it carries no sealed entry. |  |
 | --ec-border-status-bar | keep-platform |  | platform-owned.platform.border | No brand equivalent (D-04): the status bar border is transparent in light and the border colour in dark, and the book defines no hairline colour. The platform values are kept, and 74-04 exempts this token from the contrast test with a written reason, so it carries no sealed entry. |  |
 | --ec-brand-clean-white | adopt | color.light.clean-white #FFFFFF / color.dark.clean-white #FFFFFF |  |  |  |

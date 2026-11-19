@@ -1,5 +1,5 @@
 /* Design token system for ExifCleaner v4.0
-   Prefix: --ec-* for new tokens, backward-compat aliases for existing consumers */
+   Prefix: --ec-* for design tokens */
 
 :root {
 	color-scheme: light;
@@ -64,10 +64,6 @@
 	--ec-duration-fast: 150ms;
 	--ec-duration-normal: 200ms;
 	--ec-duration-slow: 300ms;
-
-	/* Backward-compat aliases still used by the Storybook harness. */
-	--color-bg: var(--ec-color-bg);
-	--color-text: var(--ec-color-text);
 }
 
 [data-theme="dark"] {
@@ -105,10 +101,6 @@
 	--ec-backdrop-opacity: 0.6;
 	--ec-toggle-off-track: color-mix(in srgb, GrayText 90%, CanvasText 10%);
 	--ec-border-status-bar: var(--ec-color-border);
-
-	/* Backward-compat aliases still used by the Storybook harness. */
-	--color-bg: var(--ec-color-bg);
-	--color-text: var(--ec-color-text);
 }
 
 /* Theme crossfade -- only applied during manual theme switch (D-22, D-23) */
