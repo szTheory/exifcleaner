@@ -1116,7 +1116,9 @@ function compareTableGrid(baseFiles, candidateFiles, problems) {
 		expectedCandidates === null ||
 		typeof expectedCandidates !== "object" ||
 		Object.keys(expectedCandidates).length !== selectors.length ||
-		selectors.some((selector) => typeof expectedCandidates[selector] !== "string")
+		selectors.some(
+			(selector) => typeof expectedCandidates[selector] !== "string",
+		)
 	) {
 		problems.push("approved table grid declaration changed");
 		return;
@@ -1136,10 +1138,7 @@ function compareTableGrid(baseFiles, candidateFiles, problems) {
 				"fixed v5.0 table grid does not match the approved baseline",
 			);
 		}
-		if (
-			actual.length !== 1 ||
-			actual[0] !== expectedCandidates[selector]
-		) {
+		if (actual.length !== 1 || actual[0] !== expectedCandidates[selector]) {
 			problems.push("approved table grid declaration changed");
 		}
 	}
