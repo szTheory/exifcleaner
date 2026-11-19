@@ -10,6 +10,7 @@ import {
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { assertDirEffect, snapshotDir } from "../helpers/dir_effect";
 
 type VisualCase = {
 	story: string;
@@ -41,6 +42,7 @@ const contract = JSON.parse(
 let artifactRoot: string;
 let manifestPath: string;
 let manifest: Record<string, unknown>;
+let beforeArtifact: ReturnType<typeof snapshotDir>;
 
 function runValidator(
 	value: Record<string, unknown>,
@@ -75,6 +77,7 @@ function runValidator(
 describe("visual artifact trusted run identity", () => {
 	beforeAll(() => {
 		artifactRoot = mkdtempSync(path.join(os.tmpdir(), "visual-artifact-"));
+		beforeArtifact = snapshotDir(artifactRoot);
 		manifestPath = path.join(artifactRoot, "manifest.json");
 		const cases = contract.cases.map((item) => {
 			const sourcePath = path.join(
@@ -111,6 +114,9 @@ describe("visual artifact trusted run identity", () => {
 	});
 
 	afterAll(() => {
+		assertDirEffect(beforeArtifact, snapshotDir(artifactRoot), {
+			added: ["manifest.json", ...contract.cases.map((item) => item.file)],
+		});
 		rmSync(artifactRoot, { recursive: true, force: true });
 	});
 
