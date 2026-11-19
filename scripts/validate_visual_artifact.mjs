@@ -28,7 +28,14 @@ function argumentsFrom(argv) {
 		options.set(key, value);
 		index += 1;
 	}
-	for (const required of ["--manifest", "--cases", "--root"]) {
+	for (const required of [
+		"--manifest",
+		"--cases",
+		"--root",
+		"--expected-commit",
+		"--expected-run-id",
+		"--expected-run-attempt",
+	]) {
 		if (!options.has(required)) throw new Error(`missing ${required}`);
 	}
 	return options;
@@ -183,6 +190,9 @@ function validate({
 	contract,
 	root,
 	expectedRef = "refs/heads/master",
+	expectedCommit,
+	expectedRunId,
+	expectedRunAttempt,
 }) {
 	if (!isRecord(contract) || contract.schemaVersion !== 1) {
 		fail("case contract schemaVersion must be 1");
@@ -200,6 +210,20 @@ function validate({
 	if (!isRecord(manifest) || manifest.schemaVersion !== 1) {
 		fail("manifest schemaVersion must be 1");
 	}
+	if (
+		typeof expectedCommit !== "string" ||
+		!/^[0-9a-f]{40}$/u.test(expectedCommit)
+	) {
+		fail("expected commit must be a full Git SHA");
+	}
+	if (
+		typeof expectedRunId !== "string" ||
+		!/^[1-9]\d*$/u.test(expectedRunId) ||
+		typeof expectedRunAttempt !== "string" ||
+		!/^[1-9]\d*$/u.test(expectedRunAttempt)
+	) {
+		fail("expected run id and attempt must be positive integers");
+	}
 	if (manifest.image !== EXPECTED_IMAGE)
 		fail("manifest uses the wrong capture image");
 	if (manifest.ref !== expectedRef) {
@@ -212,6 +236,9 @@ function validate({
 		!/^[0-9a-f]{40}$/u.test(manifest.commit)
 	) {
 		fail("manifest commit must be a full Git SHA");
+	}
+	if (manifest.commit !== expectedCommit) {
+		fail("manifest commit does not match the trusted workflow commit");
 	}
 	if (
 		!isRecord(manifest.viewport) ||
@@ -240,6 +267,12 @@ function validate({
 		!/^\d+$/u.test(String(manifest.runAttempt))
 	) {
 		fail("manifest must record the workflow run id and attempt");
+	}
+	if (
+		String(manifest.runId) !== expectedRunId ||
+		String(manifest.runAttempt) !== expectedRunAttempt
+	) {
+		fail("manifest run id or attempt does not match the trusted workflow run");
 	}
 
 	const expectedNames = new Set();
@@ -343,6 +376,9 @@ try {
 		contract: readJson(casesPath),
 		root,
 		expectedRef: options.get("--expected-ref") ?? "refs/heads/master",
+		expectedCommit: options.get("--expected-commit"),
+		expectedRunId: options.get("--expected-run-id"),
+		expectedRunAttempt: options.get("--expected-run-attempt"),
 	});
 	console.log(JSON.stringify(result, null, "\t"));
 } catch (error) {

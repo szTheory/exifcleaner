@@ -60,20 +60,23 @@ jobs:
         run: yarn visual:capture
 
       - name: Validate capture artifact
-        if: always()
+        id: validate
         run: >-
           node scripts/validate_visual_artifact.mjs
           --manifest "$EXIFCLEANER_VISUAL_OUTPUT_DIR/manifest.json"
           --cases .storybook/visual-baselines.json
           --root "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
           --expected-ref "$GITHUB_REF"
+          --expected-commit "$GITHUB_SHA"
+          --expected-run-id "$GITHUB_RUN_ID"
+          --expected-run-attempt "$GITHUB_RUN_ATTEMPT"
 
       - name: Build artifact-only contact sheet
-        if: always()
+        if: steps.validate.outcome == 'success'
         run: node scripts/contact_sheet.mjs "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
 
       - name: Upload comparison artifact
-        if: always()
+        if: steps.validate.outcome == 'success'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: visual-comparison
@@ -119,20 +122,23 @@ jobs:
         run: yarn visual:capture
 
       - name: Validate capture artifact
-        if: always()
+        id: validate
         run: >-
           node scripts/validate_visual_artifact.mjs
           --manifest "$EXIFCLEANER_VISUAL_OUTPUT_DIR/manifest.json"
           --cases .storybook/visual-baselines.json
           --root "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
           --expected-ref refs/heads/master
+          --expected-commit "$GITHUB_SHA"
+          --expected-run-id "$GITHUB_RUN_ID"
+          --expected-run-attempt "$GITHUB_RUN_ATTEMPT"
 
       - name: Build artifact-only contact sheet
-        if: always()
+        if: steps.validate.outcome == 'success'
         run: node scripts/contact_sheet.mjs "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
 
       - name: Upload baseline proposal artifact
-        if: always()
+        if: steps.validate.outcome == 'success'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: visual-capture
