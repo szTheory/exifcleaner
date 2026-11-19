@@ -150,7 +150,16 @@ describe("cumulative same-layout gate", () => {
 				throw new Error("grid declaration was not found: " + selector);
 			}
 			const beforeValue = declaration.value.trim();
-			const changedValue = replaceOnce(beforeValue, "128px", "129px");
+			const firstTrack = /^(\d+)(\.\d+)?(px|ch)(?=\s)/u.exec(beforeValue);
+			if (firstTrack === null) {
+				throw new Error("grid declaration has no supported fixed first track");
+			}
+			const changedFirstTrack = `${Number(firstTrack[1]) + 1}${firstTrack[2] ?? ""}${firstTrack[3]}`;
+			const changedValue = replaceOnce(
+				beforeValue,
+				firstTrack[0],
+				changedFirstTrack,
+			);
 			const beforeTracks = beforeValue.match(/\S+/gu) ?? [];
 			const changedTracks = changedValue.match(/\S+/gu) ?? [];
 			expect(changedTracks).toHaveLength(beforeTracks.length);

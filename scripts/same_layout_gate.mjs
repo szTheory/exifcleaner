@@ -64,8 +64,12 @@ export const EXPECTED_EXCEPTIONS = {
 			property: "grid-template-columns",
 			selectors: [".file-table__header", ".file-table__row"],
 			baseline: "24px 1fr 72px 80px 88px 88px",
-			candidate:
-				"24px minmax(0, 1fr) 76px 128px 56px minmax(72px, max-content)",
+			candidate: {
+				".file-table__header":
+					"2.50162866ch minmax(0, 1fr) 7.9218241ch 13.34201954ch 5.83713355ch minmax(7.50488599ch, max-content)",
+				".file-table__row":
+					"2.50162866ch minmax(0, 1fr) 7.9218241ch 13.34201954ch 5.83713355ch minmax(7.50488599ch, max-content)",
+			},
 			evidence:
 				".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md",
 		},
@@ -167,9 +171,9 @@ const LOCALE_EXCEPTION = EXPECTED_EXCEPTIONS.exceptions.find(
 const LOCALE_DIRECTORY = `${LOCALE_EXCEPTION.sourceDirectory}/`;
 const FILE_TABLE_CSS = "src/renderer/styles/file_table.css";
 const CHEVRON_ICON = "src/renderer/components/icons/ChevronIcon.tsx";
-const APPROVED_TABLE_SELECTORS = [".file-table__header", ".file-table__row"];
-const APPROVED_TABLE_COLUMNS =
-	"24px minmax(0, 1fr) 76px 128px 56px minmax(72px, max-content)";
+const TABLE_GRID_EXCEPTION = EXPECTED_EXCEPTIONS.exceptions.find(
+	(exception) => exception.id === "VIS-80-REVIEW",
+);
 const BASELINE_TABLE_COLUMNS = "24px 1fr 72px 80px 88px 88px";
 const BRAND_ASSETS = new Map([
 	[
@@ -1103,12 +1107,28 @@ function tableGridDeclarations(files, selector) {
 }
 
 function compareTableGrid(baseFiles, candidateFiles, problems) {
-	for (const selector of APPROVED_TABLE_SELECTORS) {
+	const { selectors, candidate: expectedCandidates } =
+		TABLE_GRID_EXCEPTION ?? {};
+	if (
+		!Array.isArray(selectors) ||
+		selectors.length === 0 ||
+		new Set(selectors).size !== selectors.length ||
+		expectedCandidates === null ||
+		typeof expectedCandidates !== "object" ||
+		Object.keys(expectedCandidates).length !== selectors.length ||
+		selectors.some(
+			(selector) => typeof expectedCandidates[selector] !== "string",
+		)
+	) {
+		problems.push("approved table grid declaration changed");
+		return;
+	}
+	for (const selector of selectors) {
 		let baseline;
-		let candidate;
+		let actual;
 		try {
 			baseline = tableGridDeclarations(baseFiles, selector);
-			candidate = tableGridDeclarations(candidateFiles, selector);
+			actual = tableGridDeclarations(candidateFiles, selector);
 		} catch (error) {
 			problems.push(error.message);
 			return;
@@ -1118,7 +1138,7 @@ function compareTableGrid(baseFiles, candidateFiles, problems) {
 				"fixed v5.0 table grid does not match the approved baseline",
 			);
 		}
-		if (candidate.length !== 1 || candidate[0] !== APPROVED_TABLE_COLUMNS) {
+		if (actual.length !== 1 || actual[0] !== expectedCandidates[selector]) {
 			problems.push("approved table grid declaration changed");
 		}
 	}

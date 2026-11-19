@@ -50,7 +50,10 @@
 			"property": "grid-template-columns",
 			"selectors": [".file-table__header", ".file-table__row"],
 			"baseline": "24px 1fr 72px 80px 88px 88px",
-			"candidate": "24px minmax(0, 1fr) 76px 128px 56px minmax(72px, max-content)",
+			"candidate": {
+				".file-table__header": "2.50162866ch minmax(0, 1fr) 7.9218241ch 13.34201954ch 5.83713355ch minmax(7.50488599ch, max-content)",
+				".file-table__row": "2.50162866ch minmax(0, 1fr) 7.9218241ch 13.34201954ch 5.83713355ch minmax(7.50488599ch, max-content)"
+			},
 			"evidence": ".planning/phases/80-evidence-and-close/80-MAINTAINER-REPLIES.md"
 		},
 		{
