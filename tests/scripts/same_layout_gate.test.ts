@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import postcss, { type Declaration } from "postcss";
 import { describe, expect, test } from "vitest";
 import {
 	BASELINE,
@@ -16,6 +17,7 @@ const head = execFileSync("git", ["rev-parse", "HEAD"], {
 const baselineFiles = readGitSnapshot(BASELINE, cwd);
 const candidateFiles = readGitSnapshot(head, cwd);
 const paths = changedPaths(BASELINE, head, cwd);
+const TABLE_GRID_SELECTORS = [".file-table__header", ".file-table__row"] as const;
 
 function cloneFiles(files: Map<string, Buffer>): Map<string, Buffer> {
 	return new Map(
@@ -35,6 +37,29 @@ function replaceOnce(input: string, before: string, after: string): string {
 		throw new Error("expected exactly one fixture occurrence: " + before);
 	}
 	return input.slice(0, index) + after + input.slice(index + before.length);
+}
+
+function selectTableGrid(css: string): {
+	root: postcss.Root;
+	selections: Map<string, { ruleCount: number; declarations: Declaration[] }>;
+} {
+	const root = postcss.parse(css, { from: "src/renderer/styles/file_table.css" });
+	const selections = new Map<
+		string,
+		{ ruleCount: number; declarations: Declaration[] }
+	>();
+	for (const selector of TABLE_GRID_SELECTORS) {
+		selections.set(selector, { ruleCount: 0, declarations: [] });
+	}
+	root.walkRules((rule) => {
+		const selected = selections.get(rule.selector);
+		if (selected === undefined) return;
+		selected.ruleCount += 1;
+		rule.walkDecls("grid-template-columns", (declaration) => {
+			selected.declarations.push(declaration);
+		});
+	});
+	return { root, selections };
 }
 
 describe("cumulative same-layout gate", () => {
@@ -91,24 +116,67 @@ describe("cumulative same-layout gate", () => {
 		);
 	});
 
-	test("rejects table column changes beyond the approved width rebalance", () => {
-		const planted = cloneFiles(candidateFiles);
-		const file = "src/renderer/styles/file_table.css";
-		const changed = replaceOnce(
-			source(planted, file),
-			".file-table__header {\n\tposition: sticky;\n\ttop: 0;\n\tdisplay: grid;\n\t/* prettier-ignore */\n\tgrid-template-columns: 24px minmax(0, 1fr) 76px 128px 56px minmax(72px, max-content);",
-			".file-table__header {\n\tposition: sticky;\n\ttop: 0;\n\tdisplay: grid;\n\t/* prettier-ignore */\n\tgrid-template-columns: 24px minmax(0, 1fr) 76px 129px 56px minmax(72px, max-content);",
-		);
-		planted.set(file, Buffer.from(changed, "utf8"));
-		expect(
-			compareSnapshots({
-				baseFiles: baselineFiles,
-				candidateFiles: planted,
-				paths,
-				baseRef: BASELINE,
-			}),
-		).toContain("approved table grid declaration changed");
-	});
+	test.each(TABLE_GRID_SELECTORS)(
+		"rejects a one-track grid drift on %s",
+		(selector) => {
+			const planted = cloneFiles(candidateFiles);
+			const file = "src/renderer/styles/file_table.css";
+			const selected = selectTableGrid(source(planted, file));
+			for (const tableSelector of TABLE_GRID_SELECTORS) {
+				const entry = selected.selections.get(tableSelector);
+				expect(entry?.ruleCount, tableSelector).toBe(1);
+				expect(entry?.declarations, tableSelector).toHaveLength(1);
+			}
+
+			const selectedBefore = selected.selections.get(selector);
+			const otherSelector = TABLE_GRID_SELECTORS.find(
+				(candidate) => candidate !== selector,
+			);
+			if (selectedBefore === undefined || otherSelector === undefined) {
+				throw new Error("selected grid selector was not found: " + selector);
+			}
+			const otherBefore = selected.selections.get(otherSelector);
+			if (otherBefore === undefined) {
+				throw new Error("other grid selector was not found: " + otherSelector);
+			}
+
+			const declaration = selectedBefore.declarations[0];
+			if (declaration === undefined) {
+				throw new Error("grid declaration was not found: " + selector);
+			}
+			const beforeValue = declaration.value.trim();
+			const changedValue = replaceOnce(beforeValue, "128px", "129px");
+			const beforeTracks = beforeValue.match(/\S+/gu) ?? [];
+			const changedTracks = changedValue.match(/\S+/gu) ?? [];
+			expect(changedTracks).toHaveLength(beforeTracks.length);
+			expect(
+				changedTracks.filter((track, index) => track !== beforeTracks[index]),
+			).toHaveLength(1);
+			declaration.value = changedValue;
+
+			const changedCss = selected.root.toString();
+			const after = selectTableGrid(changedCss).selections;
+			const selectedAfter = after.get(selector);
+			const otherAfter = after.get(otherSelector);
+			expect(selectedAfter?.ruleCount).toBe(1);
+			expect(selectedAfter?.declarations.map((item) => item.value.trim())).toEqual([
+				changedValue,
+			]);
+			expect(otherAfter?.ruleCount).toBe(1);
+			expect(otherAfter?.declarations.map((item) => item.value.trim())).toEqual(
+				otherBefore.declarations.map((item) => item.value.trim()),
+			);
+			planted.set(file, Buffer.from(changedCss, "utf8"));
+			expect(
+				compareSnapshots({
+					baseFiles: baselineFiles,
+					candidateFiles: planted,
+					paths,
+					baseRef: BASELINE,
+				}),
+			).toContain("approved table grid declaration changed");
+		},
+	);
 
 	test("rejects processing-spinner styling outside the exact visual correction", () => {
 		const planted = cloneFiles(candidateFiles);
