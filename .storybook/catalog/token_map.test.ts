@@ -12,6 +12,7 @@ import {
 	stripScriptComments,
 	usedCustomProperties,
 } from "./css_scan.mjs";
+import { readMergeBase, resolveBaseRef } from "./merge_base.mjs";
 import { makeCatalogRepo, realScript, repoRoot, runNode } from "./temp_repo";
 import {
 	TOKENS_CSS_PATH,
@@ -28,6 +29,21 @@ import {
 } from "./token_map.mjs";
 
 const CATALOG = ".storybook/catalog/catalog.mjs";
+const PALETTE_ALIAS_PENDING_PATH =
+	".storybook/catalog/palette_alias_retirement_pending.json";
+const PALETTE_ALIASES = [
+	{
+		name: "--color-bg",
+		role: "--ec-color-bg",
+		bodyProperty: "background-color",
+	},
+	{
+		name: "--color-text",
+		role: "--ec-color-text",
+		bodyProperty: "color",
+	},
+] as const;
+const PALETTE_ALIAS_NAMES = ["--color-bg", "--color-text"] as const;
 
 const ctx: TokenMapContext = loadTokenMapContext(repoRoot);
 const real = JSON.parse(
@@ -72,6 +88,208 @@ function addEntry(doc: Loose, entry: Record<string, any>): Loose {
 function without(doc: Loose, name: string): Loose {
 	doc.entries = doc.entries.filter((entry) => entry["name"] !== name);
 	return doc;
+}
+
+interface PaletteAliasInputs {
+	pending: unknown;
+	tokensCss: string;
+	sources: Record<string, string>;
+	map: unknown;
+	harnessCss: string;
+	basePending: unknown | null;
+}
+
+const paletteAliasBase = readMergeBase(PALETTE_ALIAS_PENDING_PATH, {
+	ref: resolveBaseRef(undefined, process.env),
+	cwd: repoRoot,
+});
+const paletteAliasPending = JSON.parse(
+	fs.readFileSync(path.join(repoRoot, PALETTE_ALIAS_PENDING_PATH), "utf8"),
+) as unknown;
+const paletteAliasHarness = fs.readFileSync(
+	path.join(repoRoot, ".storybook/harness.css"),
+	"utf8",
+);
+
+function paletteAliasInputs(): PaletteAliasInputs {
+	return {
+		pending: structuredClone(paletteAliasPending),
+		tokensCss: ctx.tokensCss,
+		sources: structuredClone(ctx.sources),
+		map: clone(),
+		harnessCss: paletteAliasHarness,
+		basePending: structuredClone(paletteAliasBase.base),
+	};
+}
+
+function pendingListProblem(value: unknown): boolean {
+	if (!Array.isArray(value) || !value.every((item) => typeof item === "string"))
+		return true;
+	const names = value as string[];
+	const sorted = [...names].sort(compareCodeUnits);
+	if (new Set(names).size !== names.length) return true;
+	if (JSON.stringify(names) !== JSON.stringify(sorted)) return true;
+	return (
+		JSON.stringify(names) !== JSON.stringify(PALETTE_ALIAS_NAMES) &&
+		JSON.stringify(names) !== "[]"
+	);
+}
+
+function assertPaletteAliasRetirement(inputs: PaletteAliasInputs): string[] {
+	if (pendingListProblem(inputs.pending)) return ["pending-shape"];
+	if (inputs.basePending !== null && pendingListProblem(inputs.basePending)) {
+		return ["base-pending-shape"];
+	}
+
+	const pending = inputs.pending as string[];
+	const basePending = inputs.basePending as string[] | null;
+	const failures: string[] = [];
+	if (
+		basePending !== null &&
+		pending.some((name) => !basePending.includes(name))
+	) {
+		failures.push("pending-restored");
+		return failures;
+	}
+	const retained = pending.length > 0;
+	const aliases = new Set<string>(PALETTE_ALIAS_NAMES);
+	const declared = declaredTokens(inputs.tokensCss);
+	const sourceText = inputs.sources[TOKENS_CSS_PATH];
+	if (sourceText !== inputs.tokensCss)
+		failures.push("source-token-css-mismatch");
+	if (declared.other.length > 0) failures.push("unexpected-token-block");
+
+	const tokenRows = cssDeclarations(inputs.tokensCss).filter((row) =>
+		aliases.has(row.property),
+	);
+	const used = usedTokens({
+		...inputs.sources,
+		[TOKENS_CSS_PATH]: inputs.tokensCss,
+	});
+	const map = inputs.map as { entries?: unknown } | null;
+	const entries = Array.isArray(map?.entries)
+		? (map.entries as Array<Record<string, unknown>>)
+		: [];
+	const expectedCounts = retained
+		? { root: 52, dark: 32, used: 55, entries: 59 }
+		: { root: 50, dark: 30, used: 55, entries: 57 };
+	if (
+		declared.root.size !== expectedCounts.root ||
+		declared.dark.size !== expectedCounts.dark ||
+		used.length !== expectedCounts.used ||
+		entries.length !== expectedCounts.entries ||
+		new Set(entries.map((entry) => entry["name"])).size !== entries.length
+	) {
+		failures.push("inventory-counts");
+	}
+
+	for (const alias of PALETTE_ALIASES) {
+		const declarations = tokenRows.filter((row) => row.property === alias.name);
+		const mapRows = entries.filter((entry) => entry["name"] === alias.name);
+		if (retained) {
+			const expectedDeclarations = [
+				{ selectors: [":root"], value: `var(${alias.role})` },
+				{ selectors: ['[data-theme="dark"]'], value: `var(${alias.role})` },
+			];
+			if (
+				JSON.stringify(
+					declarations.map(({ selectors, value }) => ({ selectors, value })),
+				) !== JSON.stringify(expectedDeclarations)
+			) {
+				failures.push(`declaration:${alias.name}`);
+			}
+			if (
+				mapRows.length !== 1 ||
+				mapRows[0]?.["disposition"] !== "retire" ||
+				mapRows[0]?.["aliasOf"] !== alias.role
+			) {
+				failures.push(`map-row:${alias.name}`);
+			}
+		} else {
+			if (declarations.length !== 0) failures.push(`declaration:${alias.name}`);
+			if (mapRows.length !== 0) failures.push(`map-row:${alias.name}`);
+		}
+
+		const rendererCalls = Object.entries(inputs.sources).some(([file, text]) =>
+			usedCustomProperties(file, text).includes(alias.name),
+		);
+		if (rendererCalls) failures.push(`renderer-call:${alias.name}`);
+
+		const harnessCalls = usedCustomProperties(
+			".storybook/harness.css",
+			inputs.harnessCss,
+		);
+		const callCount = [
+			...stripCssComments(inputs.harnessCss).matchAll(
+				new RegExp(`var\\(\\s*${alias.name}(?=\\s*(?:,|\\)))`, "g"),
+			),
+		].length;
+		if (retained ? callCount !== 1 : harnessCalls.includes(alias.name)) {
+			failures.push(`harness-call:${alias.name}`);
+		}
+
+		const bodyDeclarations = cssDeclarations(inputs.harnessCss).filter(
+			({ selectors, property }) =>
+				selectors.length === 1 &&
+				selectors[0] === "body" &&
+				property === alias.bodyProperty,
+		);
+		const expectedValue = retained
+			? `var(${alias.name})`
+			: `var(${alias.role})`;
+		if (
+			bodyDeclarations.length !== 1 ||
+			bodyDeclarations[0]?.value !== expectedValue
+		) {
+			failures.push(`body-role:${alias.bodyProperty}`);
+		}
+	}
+	return [...new Set(failures)].sort(compareCodeUnits);
+}
+
+function retiredPaletteAliasFixture(): PaletteAliasInputs {
+	const fixture = paletteAliasInputs();
+	fixture.pending = [];
+	fixture.tokensCss = fixture.tokensCss
+		.split("\n")
+		.filter(
+			(line) =>
+				!line.includes(
+					"Backward-compat aliases still used by the Storybook harness",
+				) &&
+				!/^\s*--color-(?:bg|text): var\(--ec-color-(?:bg|text)\);\s*$/.test(
+					line,
+				),
+		)
+		.join("\n");
+	fixture.sources[TOKENS_CSS_PATH] = fixture.tokensCss;
+	const map = fixture.map as Loose;
+	map.entries = map.entries.filter(
+		(entry) =>
+			!PALETTE_ALIAS_NAMES.some((name) => name === String(entry["name"])),
+	);
+	fixture.harnessCss = fixture.harnessCss
+		.replace("var(--color-bg)", "var(--ec-color-bg)")
+		.replace("var(--color-text)", "var(--ec-color-text)");
+	return fixture;
+}
+
+function syntheticAliasFixture(): { doc: Loose; context: TokenMapContext } {
+	const doc = addEntry(clone(), {
+		name: "--ec-catalog-test-alias",
+		disposition: "retire",
+		reason: "an isolated alias validation fixture",
+		aliasOf: "--ec-color-bg",
+	});
+	return {
+		doc,
+		context: withCss(
+			inBothBlocks(
+				ctx.tokensCss,
+				"--ec-catalog-test-alias: var(--ec-color-bg);",
+			),
+		),
+	};
 }
 
 // A planted custom property in both theme blocks of a stylesheet text.
@@ -349,19 +567,21 @@ const MUTANTS: Mutant[] = [
 		name: "an alias entry whose aliasOf is another name",
 		code: "alias-mismatch",
 		doc: () => {
-			const doc = clone();
-			entryNamed(doc, "--color-bg")["aliasOf"] = "--ec-color-text";
+			const { doc } = syntheticAliasFixture();
+			entryNamed(doc, "--ec-catalog-test-alias")["aliasOf"] = "--ec-color-text";
 			return doc;
 		},
+		context: () => syntheticAliasFixture().context,
 	},
 	{
 		name: "an alias entry without aliasOf",
 		code: "alias-mismatch",
 		doc: () => {
-			const doc = clone();
-			delete entryNamed(doc, "--color-bg")["aliasOf"];
+			const { doc } = syntheticAliasFixture();
+			delete entryNamed(doc, "--ec-catalog-test-alias")["aliasOf"];
 			return doc;
 		},
+		context: () => syntheticAliasFixture().context,
 	},
 	{
 		name: "a non-alias entry carrying aliasOf",
@@ -468,13 +688,17 @@ describe("the real token map", () => {
 
 	test("anti-vacuity: the scan sees the measured sets and the map holds one entry per name", () => {
 		const declared = declaredTokens(ctx.tokensCss);
-		expect(declared.root.size).toBe(52);
-		expect(declared.dark.size).toBe(32);
+		const expected =
+			(paletteAliasPending as string[]).length > 0
+				? { root: 52, dark: 32, used: 55, entries: 59 }
+				: { root: 50, dark: 30, used: 55, entries: 57 };
+		expect(declared.root.size).toBe(expected.root);
+		expect(declared.dark.size).toBe(expected.dark);
 		expect(declared.other).toEqual([]);
 		expect(
 			usedTokens({ ...ctx.sources, [TOKENS_CSS_PATH]: ctx.tokensCss }),
-		).toHaveLength(55);
-		expect(real.entries).toHaveLength(59);
+		).toHaveLength(expected.used);
+		expect(real.entries).toHaveLength(expected.entries);
 		expect(Object.keys(real)).toEqual(["schemaVersion", "brandPin", "entries"]);
 	});
 
@@ -495,7 +719,11 @@ describe("the real token map", () => {
 	test("entries are in code-unit order around the retained EmptyState local token", () => {
 		const names = real.entries.map((entry) => entry.name);
 		expect(names).toEqual([...names].sort(compareCodeUnits));
-		expect(names[0]?.startsWith("--color-")).toBe(true);
+		expect(names[0]).toBe(
+			(paletteAliasPending as string[]).length > 0
+				? "--color-bg"
+				: "--ec-backdrop-opacity",
+		);
 		expect(names.at(-1)?.startsWith("--spacing-")).toBe(true);
 		const emptyNames = names.filter((name) => name.startsWith("--empty-"));
 		expect(emptyNames).toEqual(["--empty-state-button-pressed-surface"]);
@@ -521,6 +749,136 @@ describe("the real token map", () => {
 		expect(
 			fs.readFileSync(path.join(repoRoot, TOKEN_MAP_MD_PATH), "utf8"),
 		).toBe(view);
+	});
+});
+
+describe("the PAL-01 Storybook alias retirement contract", () => {
+	test("the checked-in list and original product inputs are exactly the retained state", () => {
+		expect(paletteAliasPending).toEqual(PALETTE_ALIAS_NAMES);
+		expect(assertPaletteAliasRetirement(paletteAliasInputs())).toEqual([]);
+	});
+
+	test("independent retained and retired fixtures both pass the same assertion", () => {
+		const retained = paletteAliasInputs();
+		const retired = retiredPaletteAliasFixture();
+		expect(assertPaletteAliasRetirement(retained)).toEqual([]);
+		expect(assertPaletteAliasRetirement(retired)).toEqual([]);
+	});
+
+	test.each([
+		["partial", [PALETTE_ALIAS_NAMES[0]]],
+		["extra", [...PALETTE_ALIAS_NAMES, "--color-extra"]],
+		["duplicate", [PALETTE_ALIAS_NAMES[0], PALETTE_ALIAS_NAMES[0]]],
+		["unsorted", [...PALETTE_ALIAS_NAMES].reverse()],
+	] as const)("rejects a %s pending list", (_label, pending) => {
+		expect(
+			assertPaletteAliasRetirement({
+				...paletteAliasInputs(),
+				pending,
+			}),
+		).toEqual(["pending-shape"]);
+	});
+
+	test("validates a present merge-base list with the same closed shape", () => {
+		expect(
+			assertPaletteAliasRetirement({
+				...paletteAliasInputs(),
+				basePending: [PALETTE_ALIAS_NAMES[0]],
+			}),
+		).toEqual(["base-pending-shape"]);
+	});
+
+	test.each(PALETTE_ALIASES)(
+		"a restored legacy declaration for $name fails after retirement",
+		(alias) => {
+			const fixture = retiredPaletteAliasFixture();
+			fixture.tokensCss = inBothBlocks(
+				fixture.tokensCss,
+				`${alias.name}: var(${alias.role});`,
+			);
+			fixture.sources[TOKENS_CSS_PATH] = fixture.tokensCss;
+			expect(assertPaletteAliasRetirement(fixture)).toContain(
+				`declaration:${alias.name}`,
+			);
+		},
+	);
+
+	test.each(PALETTE_ALIASES)(
+		"a restored renderer reference for $name fails after retirement",
+		(alias) => {
+			const fixture = retiredPaletteAliasFixture();
+			fixture.sources["src/renderer/palette-alias-mutant.css"] =
+				`.planted { color: var(${alias.name}); }\n`;
+			expect(assertPaletteAliasRetirement(fixture)).toContain(
+				`renderer-call:${alias.name}`,
+			);
+		},
+	);
+
+	test.each(PALETTE_ALIASES)(
+		"a restored harness reference for $name fails after retirement",
+		(alias) => {
+			const fixture = retiredPaletteAliasFixture();
+			fixture.harnessCss += `\n.planted { color: var(${alias.name}); }\n`;
+			expect(assertPaletteAliasRetirement(fixture)).toContain(
+				`harness-call:${alias.name}`,
+			);
+		},
+	);
+
+	test.each(PALETTE_ALIASES)(
+		"a restored catalog row for $name fails after retirement",
+		(alias) => {
+			const fixture = retiredPaletteAliasFixture();
+			const restored = entryNamed(clone(), alias.name);
+			addEntry(fixture.map as Loose, structuredClone(restored));
+			expect(assertPaletteAliasRetirement(fixture)).toContain(
+				`map-row:${alias.name}`,
+			);
+		},
+	);
+
+	test("rejects switched direct body roles even when both aliases are retired", () => {
+		const fixture = retiredPaletteAliasFixture();
+		fixture.harnessCss = fixture.harnessCss
+			.replace(
+				"\n\tbackground-color: var(--ec-color-bg);",
+				"\n\tbackground-color: var(--ec-color-text);",
+			)
+			.replace(
+				"\n\tcolor: var(--ec-color-text);",
+				"\n\tcolor: var(--ec-color-bg);",
+			);
+		expect(assertPaletteAliasRetirement(fixture)).toEqual([
+			"body-role:background-color",
+			"body-role:color",
+		]);
+	});
+
+	test("rejects a completed source with stale pending data", () => {
+		const fixture = retiredPaletteAliasFixture();
+		fixture.pending = [...PALETTE_ALIAS_NAMES];
+		expect(assertPaletteAliasRetirement(fixture)).toContain(
+			"declaration:--color-bg",
+		);
+		expect(assertPaletteAliasRetirement(fixture)).toContain(
+			"map-row:--color-text",
+		);
+	});
+
+	test("an empty merge base rejects fully restored legacy data", () => {
+		const restored = paletteAliasInputs();
+		restored.basePending = [];
+		expect(assertPaletteAliasRetirement(restored)).toEqual([
+			"pending-restored",
+		]);
+	});
+});
+
+describe("isolated alias validation controls", () => {
+	test("a matching synthetic alias declaration and map row pass", () => {
+		const fixture = syntheticAliasFixture();
+		expect(codes(fixture.doc, fixture.context)).toEqual([]);
 	});
 });
 
