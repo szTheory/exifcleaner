@@ -688,13 +688,17 @@ describe("the real token map", () => {
 
 	test("anti-vacuity: the scan sees the measured sets and the map holds one entry per name", () => {
 		const declared = declaredTokens(ctx.tokensCss);
-		expect(declared.root.size).toBe(52);
-		expect(declared.dark.size).toBe(32);
+		const expected =
+			(paletteAliasPending as string[]).length > 0
+				? { root: 52, dark: 32, used: 55, entries: 59 }
+				: { root: 50, dark: 30, used: 55, entries: 57 };
+		expect(declared.root.size).toBe(expected.root);
+		expect(declared.dark.size).toBe(expected.dark);
 		expect(declared.other).toEqual([]);
 		expect(
 			usedTokens({ ...ctx.sources, [TOKENS_CSS_PATH]: ctx.tokensCss }),
-		).toHaveLength(55);
-		expect(real.entries).toHaveLength(59);
+		).toHaveLength(expected.used);
+		expect(real.entries).toHaveLength(expected.entries);
 		expect(Object.keys(real)).toEqual(["schemaVersion", "brandPin", "entries"]);
 	});
 
@@ -715,7 +719,11 @@ describe("the real token map", () => {
 	test("entries are in code-unit order around the retained EmptyState local token", () => {
 		const names = real.entries.map((entry) => entry.name);
 		expect(names).toEqual([...names].sort(compareCodeUnits));
-		expect(names[0]?.startsWith("--color-")).toBe(true);
+		expect(names[0]).toBe(
+			(paletteAliasPending as string[]).length > 0
+				? "--color-bg"
+				: "--ec-backdrop-opacity",
+		);
 		expect(names.at(-1)?.startsWith("--spacing-")).toBe(true);
 		const emptyNames = names.filter((name) => name.startsWith("--empty-"));
 		expect(emptyNames).toEqual(["--empty-state-button-pressed-surface"]);
