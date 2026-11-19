@@ -17,7 +17,10 @@ const head = execFileSync("git", ["rev-parse", "HEAD"], {
 const baselineFiles = readGitSnapshot(BASELINE, cwd);
 const candidateFiles = readGitSnapshot(head, cwd);
 const paths = changedPaths(BASELINE, head, cwd);
-const TABLE_GRID_SELECTORS = [".file-table__header", ".file-table__row"] as const;
+const TABLE_GRID_SELECTORS = [
+	".file-table__header",
+	".file-table__row",
+] as const;
 
 function cloneFiles(files: Map<string, Buffer>): Map<string, Buffer> {
 	return new Map(
@@ -43,7 +46,9 @@ function selectTableGrid(css: string): {
 	root: postcss.Root;
 	selections: Map<string, { ruleCount: number; declarations: Declaration[] }>;
 } {
-	const root = postcss.parse(css, { from: "src/renderer/styles/file_table.css" });
+	const root = postcss.parse(css, {
+		from: "src/renderer/styles/file_table.css",
+	});
 	const selections = new Map<
 		string,
 		{ ruleCount: number; declarations: Declaration[] }
@@ -159,9 +164,9 @@ describe("cumulative same-layout gate", () => {
 			const selectedAfter = after.get(selector);
 			const otherAfter = after.get(otherSelector);
 			expect(selectedAfter?.ruleCount).toBe(1);
-			expect(selectedAfter?.declarations.map((item) => item.value.trim())).toEqual([
-				changedValue,
-			]);
+			expect(
+				selectedAfter?.declarations.map((item) => item.value.trim()),
+			).toEqual([changedValue]);
 			expect(otherAfter?.ruleCount).toBe(1);
 			expect(otherAfter?.declarations.map((item) => item.value.trim())).toEqual(
 				otherBefore.declarations.map((item) => item.value.trim()),
