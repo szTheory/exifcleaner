@@ -44,6 +44,22 @@ const PALETTE_ALIASES = [
 	},
 ] as const;
 const PALETTE_ALIAS_NAMES = ["--color-bg", "--color-text"] as const;
+const PALETTE_ALIAS_ROWS = [
+	{
+		name: "--color-bg",
+		disposition: "retire",
+		reason:
+			"backward-compat alias with live consumers app.css:5; v5.1 rewrites this call site to var(--ec-color-bg) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
+		aliasOf: "--ec-color-bg",
+	},
+	{
+		name: "--color-text",
+		disposition: "retire",
+		reason:
+			"backward-compat alias with live consumers app.css:6, empty_state.css:32, file_list.css:24; v5.1 rewrites these call sites to var(--ec-color-text) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
+		aliasOf: "--ec-color-text",
+	},
+] as const;
 
 const ctx: TokenMapContext = loadTokenMapContext(repoRoot);
 const real = JSON.parse(
@@ -250,6 +266,7 @@ function assertPaletteAliasRetirement(inputs: PaletteAliasInputs): string[] {
 function retiredPaletteAliasFixture(): PaletteAliasInputs {
 	const fixture = paletteAliasInputs();
 	fixture.pending = [];
+	fixture.basePending = [...PALETTE_ALIAS_NAMES];
 	fixture.tokensCss = fixture.tokensCss
 		.split("\n")
 		.filter(
@@ -272,6 +289,42 @@ function retiredPaletteAliasFixture(): PaletteAliasInputs {
 		.replace("var(--color-bg)", "var(--ec-color-bg)")
 		.replace("var(--color-text)", "var(--ec-color-text)");
 	return fixture;
+}
+
+function aliasRowNamed(name: string): Record<string, any> {
+	const row = PALETTE_ALIAS_ROWS.find((entry) => entry.name === name);
+	if (row === undefined) throw new Error(`no palette alias row ${name}`);
+	return structuredClone(row);
+}
+
+function retainedPaletteAliasFixture(): PaletteAliasInputs {
+	const fixture = retiredPaletteAliasFixture();
+	fixture.pending = [...PALETTE_ALIAS_NAMES];
+	fixture.tokensCss = inBothBlocks(
+		fixture.tokensCss,
+		"--color-bg: var(--ec-color-bg);",
+	);
+	fixture.tokensCss = inBothBlocks(
+		fixture.tokensCss,
+		"--color-text: var(--ec-color-text);",
+	);
+	fixture.sources[TOKENS_CSS_PATH] = fixture.tokensCss;
+	const map = fixture.map as Loose;
+	for (const alias of PALETTE_ALIAS_NAMES) {
+		addEntry(map, aliasRowNamed(alias));
+	}
+	fixture.harnessCss = fixture.harnessCss
+		.replace("var(--ec-color-bg)", "var(--color-bg)")
+		.replace("var(--ec-color-text)", "var(--color-text)");
+	return fixture;
+}
+
+function paletteAliasContext(inputs: PaletteAliasInputs): TokenMapContext {
+	return {
+		...ctx,
+		tokensCss: inputs.tokensCss,
+		sources: structuredClone(inputs.sources),
+	};
 }
 
 function syntheticAliasFixture(): { doc: Loose; context: TokenMapContext } {
@@ -753,16 +806,24 @@ describe("the real token map", () => {
 });
 
 describe("the PAL-01 Storybook alias retirement contract", () => {
-	test("the checked-in list and original product inputs are exactly the retained state", () => {
-		expect(paletteAliasPending).toEqual(PALETTE_ALIAS_NAMES);
+	test("the live source, map, harness and pending file satisfy the retirement contract", () => {
 		expect(assertPaletteAliasRetirement(paletteAliasInputs())).toEqual([]);
 	});
 
-	test("independent retained and retired fixtures both pass the same assertion", () => {
-		const retained = paletteAliasInputs();
+	test("independent retained and retired fixtures validate against either live state", () => {
+		const retained = retainedPaletteAliasFixture();
 		const retired = retiredPaletteAliasFixture();
-		expect(assertPaletteAliasRetirement(retained)).toEqual([]);
-		expect(assertPaletteAliasRetirement(retired)).toEqual([]);
+		for (const fixture of [retained, retired]) {
+			expect(assertPaletteAliasRetirement(fixture)).toEqual([]);
+			expect(
+				validateTokenMap(fixture.map, paletteAliasContext(fixture)),
+			).toEqual([]);
+			const names = (fixture.map as Loose).entries.map(
+				(entry) => entry["name"],
+			);
+			expect(names).toEqual([...names].sort(compareCodeUnits));
+			expect(new Set(names).size).toBe(names.length);
+		}
 	});
 
 	test.each([
@@ -830,8 +891,7 @@ describe("the PAL-01 Storybook alias retirement contract", () => {
 		"a restored catalog row for $name fails after retirement",
 		(alias) => {
 			const fixture = retiredPaletteAliasFixture();
-			const restored = entryNamed(clone(), alias.name);
-			addEntry(fixture.map as Loose, structuredClone(restored));
+			addEntry(fixture.map as Loose, aliasRowNamed(alias.name));
 			expect(assertPaletteAliasRetirement(fixture)).toContain(
 				`map-row:${alias.name}`,
 			);
@@ -867,7 +927,7 @@ describe("the PAL-01 Storybook alias retirement contract", () => {
 	});
 
 	test("an empty merge base rejects fully restored legacy data", () => {
-		const restored = paletteAliasInputs();
+		const restored = retainedPaletteAliasFixture();
 		restored.basePending = [];
 		expect(assertPaletteAliasRetirement(restored)).toEqual([
 			"pending-restored",
