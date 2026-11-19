@@ -28,6 +28,7 @@ type WorkflowStep = {
 	if?: string;
 	run?: string;
 	uses?: string;
+	"continue-on-error"?: boolean;
 	with?: Record<string, unknown>;
 };
 type WorkflowDocument = {
@@ -194,6 +195,9 @@ function workflowPolicyProblems(text: string, data: VisualContract): string[] {
 		stepName: string,
 	): WorkflowStep | undefined =>
 		jobs[jobName]?.steps?.find((step) => step.name === stepName);
+	const normalizeCondition = (
+		condition: string | undefined,
+	): string | undefined => condition?.replace(/\s+/gu, " ").trim();
 	if (data.schemaVersion !== 1) problems.push("schemaVersion must be 1");
 	if (
 		!Number.isInteger(data.maxImages) ||
@@ -328,7 +332,7 @@ function workflowPolicyProblems(text: string, data: VisualContract): string[] {
 		const validate = findStep(name, "Validate capture artifact");
 		if (
 			validate?.id !== "validate" ||
-			validate.if !== undefined ||
+			normalizeCondition(validate.if) !== "${{ !cancelled() }}" ||
 			!validate.run?.includes('--expected-commit "$GITHUB_SHA"') ||
 			!validate.run?.includes('--expected-run-id "$GITHUB_RUN_ID"') ||
 			!validate.run?.includes('--expected-run-attempt "$GITHUB_RUN_ATTEMPT"')
@@ -345,12 +349,31 @@ function workflowPolicyProblems(text: string, data: VisualContract): string[] {
 				: "Upload baseline proposal artifact",
 		]) {
 			const step = findStep(name, stepName);
-			if (step?.if !== "steps.validate.outcome == 'success'") {
+			const expectedCondition =
+				stepName === "Build artifact-only contact sheet"
+					? "${{ !cancelled() && steps.validate.outcome == 'success' }}"
+					: "${{ !cancelled() && steps.validate.outcome == 'success' && steps.contact_sheet.outcome == 'success' }}";
+			if (normalizeCondition(step?.if) !== expectedCondition) {
 				problems.push(
 					name + " " + stepName + " must require successful validation",
 				);
 			}
 		}
+		if (
+			findStep(name, "Build artifact-only contact sheet")?.id !==
+			"contact_sheet"
+		) {
+			problems.push(name + " contact sheet step must have a stable id");
+		}
+	}
+	if (
+		findStep("refresh", "Capture and compare committed baselines")?.[
+			"continue-on-error"
+		] !== true
+	) {
+		problems.push(
+			"manual baseline capture must continue to validation after visual diffs",
+		);
 	}
 	const steps = text.split(/^      - name: /m).slice(1);
 	for (const step of steps) {
@@ -396,8 +419,8 @@ describe("visual workflow and case contract policy", () => {
 
 	test("rejects success gates that appear only in YAML comments", () => {
 		const weakened = workflow.replace(
-			"      - name: Upload comparison artifact\n        if: steps.validate.outcome == 'success'",
-			"      - name: Upload comparison artifact\n        if: failure()\n        # if: steps.validate.outcome == 'success'",
+			"      - name: Upload comparison artifact\n        if: >-\n          ${{ !cancelled() && steps.validate.outcome == 'success' &&\n          steps.contact_sheet.outcome == 'success' }}",
+			"      - name: Upload comparison artifact\n        if: failure()\n        # ${{ !cancelled() && steps.validate.outcome == 'success' && steps.contact_sheet.outcome == 'success' }}",
 		);
 		expect(weakened).not.toBe(workflow);
 		expect(workflowPolicyProblems(weakened, contract)).toContain(

@@ -61,6 +61,7 @@ jobs:
 
       - name: Validate capture artifact
         id: validate
+        if: ${{ !cancelled() }}
         run: >-
           node scripts/validate_visual_artifact.mjs
           --manifest "$EXIFCLEANER_VISUAL_OUTPUT_DIR/manifest.json"
@@ -72,11 +73,14 @@ jobs:
           --expected-run-attempt "$GITHUB_RUN_ATTEMPT"
 
       - name: Build artifact-only contact sheet
-        if: steps.validate.outcome == 'success'
+        id: contact_sheet
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: node scripts/contact_sheet.mjs "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
 
       - name: Upload comparison artifact
-        if: steps.validate.outcome == 'success'
+        if: >-
+          ${{ !cancelled() && steps.validate.outcome == 'success' &&
+          steps.contact_sheet.outcome == 'success' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: visual-comparison
@@ -120,9 +124,11 @@ jobs:
 
       - name: Capture and compare committed baselines
         run: yarn visual:capture
+        continue-on-error: true
 
       - name: Validate capture artifact
         id: validate
+        if: ${{ !cancelled() }}
         run: >-
           node scripts/validate_visual_artifact.mjs
           --manifest "$EXIFCLEANER_VISUAL_OUTPUT_DIR/manifest.json"
@@ -134,11 +140,14 @@ jobs:
           --expected-run-attempt "$GITHUB_RUN_ATTEMPT"
 
       - name: Build artifact-only contact sheet
-        if: steps.validate.outcome == 'success'
+        id: contact_sheet
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: node scripts/contact_sheet.mjs "$EXIFCLEANER_VISUAL_OUTPUT_DIR"
 
       - name: Upload baseline proposal artifact
-        if: steps.validate.outcome == 'success'
+        if: >-
+          ${{ !cancelled() && steps.validate.outcome == 'success' &&
+          steps.contact_sheet.outcome == 'success' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: visual-capture
