@@ -3,18 +3,6 @@
 	"brandPin": "7629b8fcd5794df708000e49abd9a2a9402d4c7b",
 	"entries": [
 		{
-			"name": "--color-bg",
-			"disposition": "retire",
-			"reason": "backward-compat alias with live consumers app.css:5; v5.1 rewrites this call site to var(--ec-color-bg) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
-			"aliasOf": "--ec-color-bg"
-		},
-		{
-			"name": "--color-text",
-			"disposition": "retire",
-			"reason": "backward-compat alias with live consumers app.css:6, empty_state.css:32, file_list.css:24; v5.1 rewrites these call sites to var(--ec-color-text) before deleting the alias (deletion prerequisite; the orphan-entry rule then forces this entry's removal)",
-			"aliasOf": "--ec-color-text"
-		},
-		{
 			"name": "--ec-backdrop-opacity",
 			"disposition": "keep-platform",
 			"reason": "No brand equivalent (D-04): the opacity of the overlay behind the settings drawer (0.4 light, 0.6 dark) is a platform value the book does not set. The platform values are kept, and 74-04 exempts this token from the contrast test with a written reason, so it carries no sealed entry."
