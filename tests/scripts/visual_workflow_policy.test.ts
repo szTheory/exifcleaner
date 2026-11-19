@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { createRequire } from "node:module";
 import { lstatSync, readFileSync, readdirSync } from "node:fs";
 import type { Dirent } from "node:fs";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -21,6 +22,27 @@ type VisualContract = {
 	cases: VisualCase[];
 	baselines: Record<string, { path: string; sha256: string }>;
 };
+type WorkflowStep = {
+	name?: string;
+	id?: string;
+	if?: string;
+	run?: string;
+	uses?: string;
+	"continue-on-error"?: boolean;
+	with?: Record<string, unknown>;
+};
+type WorkflowDocument = {
+	permissions?: Record<string, string>;
+	jobs?: Record<
+		string,
+		{
+			if?: string;
+			"continue-on-error"?: boolean;
+			permissions?: Record<string, string>;
+			steps?: WorkflowStep[];
+		}
+	>;
+};
 
 const ROOT = process.cwd();
 const CONTRACT_PATH = path.join(ROOT, ".storybook/visual-baselines.json");
@@ -31,6 +53,9 @@ const contract = JSON.parse(
 	readFileSync(CONTRACT_PATH, "utf8"),
 ) as VisualContract;
 const workflow = readFileSync(WORKFLOW_PATH, "utf8");
+const parseYaml = createRequire(import.meta.url)("js-yaml").load as (
+	text: string,
+) => unknown;
 
 function expectedCases(): VisualCase[] {
 	const compactStories = [
@@ -81,17 +106,6 @@ function eventNames(text: string): string[] {
 	return [...text.slice(start, end).matchAll(/^ {2}([A-Za-z0-9_-]+):/gm)].map(
 		(match) => match[1] ?? "",
 	);
-}
-
-function jobBlock(text: string, name: string): string {
-	const lines = text.split(/\r?\n/u);
-	const start = lines.findIndex((line) => line === "  " + name + ":");
-	if (start < 0) return "";
-	let end = start + 1;
-	while (end < lines.length && !/^  [A-Za-z0-9_-]+:/u.test(lines[end] ?? "")) {
-		end += 1;
-	}
-	return lines.slice(start, end).join("\n");
 }
 
 function baselineProblems(
@@ -174,6 +188,16 @@ function baselineProblems(
 
 function workflowPolicyProblems(text: string, data: VisualContract): string[] {
 	const problems: string[] = [];
+	const parsed = parseYaml(text) as WorkflowDocument;
+	const jobs = parsed.jobs ?? {};
+	const findStep = (
+		jobName: string,
+		stepName: string,
+	): WorkflowStep | undefined =>
+		jobs[jobName]?.steps?.find((step) => step.name === stepName);
+	const normalizeCondition = (
+		condition: string | undefined,
+	): string | undefined => condition?.replace(/\s+/gu, " ").trim();
 	if (data.schemaVersion !== 1) problems.push("schemaVersion must be 1");
 	if (
 		!Number.isInteger(data.maxImages) ||
@@ -230,8 +254,15 @@ function workflowPolicyProblems(text: string, data: VisualContract): string[] {
 			"workflow events must be pull_request and workflow_dispatch only",
 		);
 	}
-	if (!/^permissions:\n {2}contents: read$/m.test(text)) {
+	const permissionEntries = Object.entries(parsed.permissions ?? {});
+	if (
+		permissionEntries.length !== 1 ||
+		parsed.permissions?.contents !== "read"
+	) {
 		problems.push("workflow permissions must be contents: read");
+	}
+	if (Object.values(jobs).some((job) => job.permissions !== undefined)) {
+		problems.push("job-level permission overrides are not allowed");
 	}
 	if (!text.includes(`EXIFCLEANER_VISUAL_IMAGE: ${IMAGE}`)) {
 		problems.push("manifest image identity must use the approved full digest");
@@ -271,25 +302,77 @@ function workflowPolicyProblems(text: string, data: VisualContract): string[] {
 	if (!text.includes("node scripts/contact_sheet.mjs")) {
 		problems.push("workflow must generate the labeled contact sheet");
 	}
-	const comparison = jobBlock(text, "compare");
+	const comparisonJob = jobs.compare;
 	if (
-		!comparison.includes("if: github.event_name == 'pull_request'") ||
-		!comparison.includes("continue-on-error: true") ||
-		!comparison.includes('--expected-ref "$GITHUB_REF"') ||
-		!comparison.includes("if: always()")
+		comparisonJob?.if !== "github.event_name == 'pull_request'" ||
+		comparisonJob["continue-on-error"] !== true ||
+		!findStep("compare", "Validate capture artifact")?.run?.includes(
+			'--expected-ref "$GITHUB_REF"',
+		)
 	) {
 		problems.push(
 			"pull-request comparison must be advisory and upload its artifact",
 		);
 	}
-	const refresh = jobBlock(text, "refresh");
+	const refreshJob = jobs.refresh;
 	if (
-		!refresh.includes("if: github.event_name == 'workflow_dispatch'") ||
-		!refresh.includes('test "$GITHUB_REF" = "refs/heads/master"') ||
-		!refresh.includes("if: always()")
+		refreshJob?.if !== "github.event_name == 'workflow_dispatch'" ||
+		!findStep("refresh", "Require the default branch")?.run?.includes(
+			'test "$GITHUB_REF" = "refs/heads/master"',
+		)
 	) {
 		problems.push(
 			"manual refresh must be dispatch-only, master-bound, and artifact-only",
+		);
+	}
+	for (const [name, job] of [
+		["compare", comparisonJob],
+		["refresh", refreshJob],
+	] as const) {
+		const validate = findStep(name, "Validate capture artifact");
+		if (
+			validate?.id !== "validate" ||
+			normalizeCondition(validate.if) !== "${{ !cancelled() }}" ||
+			!validate.run?.includes('--expected-commit "$GITHUB_SHA"') ||
+			!validate.run?.includes('--expected-run-id "$GITHUB_RUN_ID"') ||
+			!validate.run?.includes('--expected-run-attempt "$GITHUB_RUN_ATTEMPT"')
+		) {
+			problems.push(
+				name +
+					" validator must bind capture metadata to the trusted workflow run",
+			);
+		}
+		for (const stepName of [
+			"Build artifact-only contact sheet",
+			name === "compare"
+				? "Upload comparison artifact"
+				: "Upload baseline proposal artifact",
+		]) {
+			const step = findStep(name, stepName);
+			const expectedCondition =
+				stepName === "Build artifact-only contact sheet"
+					? "${{ !cancelled() && steps.validate.outcome == 'success' }}"
+					: "${{ !cancelled() && steps.validate.outcome == 'success' && steps.contact_sheet.outcome == 'success' }}";
+			if (normalizeCondition(step?.if) !== expectedCondition) {
+				problems.push(
+					name + " " + stepName + " must require successful validation",
+				);
+			}
+		}
+		if (
+			findStep(name, "Build artifact-only contact sheet")?.id !==
+			"contact_sheet"
+		) {
+			problems.push(name + " contact sheet step must have a stable id");
+		}
+	}
+	if (
+		findStep("refresh", "Capture and compare committed baselines")?.[
+			"continue-on-error"
+		] !== true
+	) {
+		problems.push(
+			"manual baseline capture must continue to validation after visual diffs",
 		);
 	}
 	const steps = text.split(/^      - name: /m).slice(1);
@@ -302,13 +385,14 @@ function workflowPolicyProblems(text: string, data: VisualContract): string[] {
 			break;
 		}
 	}
-	for (const [name, job] of [
-		["compare", comparison],
-		["refresh", refresh],
+	for (const [name, jobName] of [
+		["compare", "compare"],
+		["refresh", "refresh"],
 	] as const) {
-		const uploadStart = job.indexOf("uses: actions/upload-artifact@");
-		const upload = uploadStart < 0 ? "" : job.slice(uploadStart);
-		if (!upload.includes("path: /tmp/exifcleaner-visual/*")) {
+		const upload = (jobs[jobName]?.steps ?? []).find((step) =>
+			step.uses?.startsWith("actions/upload-artifact@"),
+		);
+		if (upload?.with?.path !== "/tmp/exifcleaner-visual/*") {
 			problems.push(
 				name + " artifact upload must include all external capture outputs",
 			);
@@ -331,6 +415,39 @@ describe("visual workflow and case contract policy", () => {
 	test("the advisory pull-request job and manual refresh meet the read-only artifact policy", () => {
 		expect(workflowPolicyProblems(workflow, contract)).toEqual([]);
 		expect(baselineProblems(contract)).toEqual([]);
+	});
+
+	test("rejects success gates that appear only in YAML comments", () => {
+		const weakened = workflow.replace(
+			"      - name: Upload comparison artifact\n        if: >-\n          ${{ !cancelled() && steps.validate.outcome == 'success' &&\n          steps.contact_sheet.outcome == 'success' }}",
+			"      - name: Upload comparison artifact\n        if: failure()\n        # ${{ !cancelled() && steps.validate.outcome == 'success' && steps.contact_sheet.outcome == 'success' }}",
+		);
+		expect(weakened).not.toBe(workflow);
+		expect(workflowPolicyProblems(weakened, contract)).toContain(
+			"compare Upload comparison artifact must require successful validation",
+		);
+	});
+
+	test("rejects extra workflow write permissions", () => {
+		const expanded = workflow.replace(
+			"permissions:\n  contents: read",
+			"permissions:\n  contents: read\n  pull-requests: write",
+		);
+		expect(expanded).not.toBe(workflow);
+		expect(workflowPolicyProblems(expanded, contract)).toContain(
+			"workflow permissions must be contents: read",
+		);
+	});
+
+	test("rejects job-level permission overrides", () => {
+		const expanded = workflow.replace(
+			"  compare:\n    name: Advisory visual comparison",
+			"  compare:\n    permissions:\n      pull-requests: write\n    name: Advisory visual comparison",
+		);
+		expect(expanded).not.toBe(workflow);
+		expect(workflowPolicyProblems(expanded, contract)).toContain(
+			"job-level permission overrides are not allowed",
+		);
 	});
 
 	test("rejects an added case even when the cap would allow it", () => {

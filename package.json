@@ -107,6 +107,7 @@
 		"electron": "44.9.3",
 		"electron-builder": "26.15.3",
 		"electron-vite": "^5.0.0",
+		"js-yaml": "^4.1.0",
 		"madge": "^8.0.0",
 		"playwright": "1.64.1",
 		"prettier": "3.9.10",
