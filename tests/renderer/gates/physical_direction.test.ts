@@ -731,6 +731,28 @@ describe("RTL-02 physical-direction scan: planted controls", () => {
 		);
 	});
 
+	test("a cyclic style reference fails closed", () => {
+		const hits = physicalStyleHits({
+			file: "planted.tsx",
+			tsx: "const first = second; const second = first; export const A = () => <div style={first} />;",
+		});
+		expect(hits.some((hit) => hit.includes("<cyclic-style-expression>"))).toBe(
+			true,
+		);
+		expect(unlisted(hits, new Set())).toEqual(hits);
+	});
+
+	test("a cyclic style spread fails closed", () => {
+		const hits = physicalStyleHits({
+			file: "planted.tsx",
+			tsx: "const first = { ...second }; const second = { ...first }; export const A = () => <div style={first} />;",
+		});
+		expect(hits.some((hit) => hit.includes("<cyclic-style-spread>"))).toBe(
+			true,
+		);
+		expect(unlisted(hits, new Set())).toEqual(hits);
+	});
+
 	test("both statically known branches of a conditional JSX style are scanned", () => {
 		expect(
 			physicalStyleHits({
